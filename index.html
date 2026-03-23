@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -13,526 +14,535 @@
 </head>
 <body>
     <div id="root"></div>
-    
-    <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
 
-        const LVL = {bold:"#FF7A00",base:"#FF7F09",soft:"#F69C49",mist:"#FFA34E",light:"#FFCFA2",ultra:"rgba(255,122,0,0.08)"};
-        const BRAND = "#01BBE1";
-        const GREEN = "#00C853";
-        const LIGHT = {bg:"#E6DED3",card:"#FFFCF7",border:"#D9D1C7",text:"#2B2622",textSoft:"#6B6259",textDim:"#9B9389",disabled:"#CFCFCF",inputBg:"#FFFCF7",secBg:"#F5F0E8"};
-        const DARK = {bg:"#1A1714",card:"#252119",border:"#3A3530",text:"#E6DED3",textSoft:"#B8A898",textDim:"#786858",disabled:"#4A4540",inputBg:"#2A2520",secBg:"#1E1B16"};
+```
+<script type="text/babel">
+    const { useState, useEffect, useRef } = React;
 
-        const ORDS = ["Primer","Segundo","Tercer","Cuarto","Quinto"];
-        const MLABELS = ["Por María hacia Jesús","Desde el Hijo hacia el Padre","Hijos y hermanos en el Espíritu"];
-        const MCOLORS = ["#FF7A00","#C0392B","#27AE60"];
+    const LVL = {bold:"#FF7A00",base:"#FF7F09",soft:"#F69C49",mist:"#FFA34E",light:"#FFCFA2",ultra:"rgba(255,122,0,0.08)"};
+    const BRAND = "#01BBE1";
+    const GREEN = "#00C853";
+    const LIGHT = {bg:"#E6DED3",card:"#FFFCF7",border:"#D9D1C7",text:"#2B2622",textSoft:"#6B6259",textDim:"#9B9389",disabled:"#CFCFCF",inputBg:"#FFFCF7",secBg:"#F5F0E8"};
+    const DARK = {bg:"#1A1714",card:"#252119",border:"#3A3530",text:"#E6DED3",textSoft:"#B8A898",textDim:"#786858",disabled:"#4A4540",inputBg:"#2A2520",secBg:"#1E1B16"};
 
-        function playNotes(freqs) {
-          try {
-            const ac = new (window.AudioContext || window.webkitAudioContext)();
-            freqs.forEach((f, i) => {
-              setTimeout(() => {
-                const o = ac.createOscillator();
-                const g = ac.createGain();
-                o.type = "sine";
-                o.frequency.value = f;
-                g.gain.setValueAtTime(0.07, ac.currentTime);
-                g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.3);
-                o.connect(g);
-                g.connect(ac.destination);
-                o.start();
-                o.stop(ac.currentTime + 0.3);
-              }, i * 180);
-            });
-          } catch (e) {}
-        }
+    const ORDS = ["Primer","Segundo","Tercer","Cuarto","Quinto"];
+    const MLABELS = ["Por María hacia Jesús","Desde el Hijo hacia el Padre","Hijos y hermanos en el Espíritu"];
+    const MCOLORS = ["#FF7A00","#C0392B","#27AE60"];
 
-        const CELEBS = [[440,554,659],[523,659,784],[392,494,587,784],[349,440,523,659]];
+    function playNotes(freqs) {
+      try {
+        const ac = new (window.AudioContext || window.webkitAudioContext)();
+        freqs.forEach((f, i) => {
+          setTimeout(() => {
+            const o = ac.createOscillator();
+            const g = ac.createGain();
+            o.type = "sine";
+            o.frequency.value = f;
+            g.gain.setValueAtTime(0.07, ac.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.3);
+            o.connect(g);
+            g.connect(ac.destination);
+            o.start();
+            o.stop(ac.currentTime + 0.3);
+          }, i * 180);
+        });
+      } catch (e) {}
+    }
 
-        function CelebOverlay({ variant, onDone }) {
-          useEffect(() => {
-            playNotes(CELEBS[variant % 4]);
-            const t = setTimeout(onDone, 2200);
-            return () => clearTimeout(t);
-          }, []);
+    const CELEBS = [[440,554,659],[523,659,784],[392,494,587,784],[349,440,523,659]];
 
-          const particles = Array.from({ length: 12 }, (_, i) => i);
-          const v = variant % 4;
+    function CelebOverlay({ variant, onDone }) {
+      useEffect(() => {
+        playNotes(CELEBS[variant % 4]);
+        const t = setTimeout(onDone, 2200);
+        return () => clearTimeout(t);
+      }, []);
 
-          if (v === 0) return (
-            <div style={overlayStyle}>
-              <div style={{width:120,height:120,borderRadius:"50%",border:"3px solid "+LVL.bold,animation:"haloX 1.8s ease-out forwards",opacity:0}} />
-            </div>
-          );
-          if (v === 1) return (
-            <div style={overlayStyle}>
-              {particles.map(i => (
-                <div key={i} style={{position:"absolute",width:3,height:20+Math.random()*30,background:LVL.soft,borderRadius:2,left:(15+i*6)+"%",bottom:0,opacity:0,animation:"riseL 1.6s "+i*0.1+"s ease-out forwards"}} />
-              ))}
-            </div>
-          );
-          if (v === 2) return (
-            <div style={overlayStyle}>
-              <svg width="100" height="130" viewBox="0 0 100 130" style={{animation:"crossG 2s ease-out forwards"}}>
-                <line x1="50" y1="5" x2="50" y2="125" stroke={LVL.light} strokeWidth="4" strokeLinecap="round"/>
-                <line x1="20" y1="40" x2="80" y2="40" stroke={LVL.light} strokeWidth="4" strokeLinecap="round"/>
-              </svg>
-            </div>
-          );
-          return (
-            <div style={overlayStyle}>
-              {particles.map(i => (
-                <div key={i} style={{position:"absolute",width:6+Math.random()*6,height:6+Math.random()*6,borderRadius:"50%",background:[LVL.bold,LVL.soft,LVL.light,GREEN][i%4],left:(10+Math.random()*80)+"%",top:(20+Math.random()*60)+"%",opacity:0,animation:"fDot 1.8s "+i*0.12+"s ease-out forwards"}} />
-              ))}
-            </div>
-          );
-        }
+      const particles = Array.from({ length: 12 }, (_, i) => i);
+      const v = variant % 4;
 
-        const overlayStyle = {position:"fixed",inset:0,display:"flex",alignItems:"center",justifyContent:"center",pointerEvents:"none",zIndex:100};
+      if (v === 0) return (
+        <div style={overlayStyle}>
+          <div style={{width:120,height:120,borderRadius:"50%",border:"3px solid "+LVL.bold,animation:"haloX 1.8s ease-out forwards",opacity:0}} />
+        </div>
+      );
+      if (v === 1) return (
+        <div style={overlayStyle}>
+          {particles.map(i => (
+            <div key={i} style={{position:"absolute",width:3,height:20+Math.random()*30,background:LVL.soft,borderRadius:2,left:(15+i*6)+"%",bottom:0,opacity:0,animation:"riseL 1.6s "+i*0.1+"s ease-out forwards"}} />
+          ))}
+        </div>
+      );
+      if (v === 2) return (
+        <div style={overlayStyle}>
+          <svg width="100" height="130" viewBox="0 0 100 130" style={{animation:"crossG 2s ease-out forwards"}}>
+            <line x1="50" y1="5" x2="50" y2="125" stroke={LVL.light} strokeWidth="4" strokeLinecap="round"/>
+            <line x1="20" y1="40" x2="80" y2="40" stroke={LVL.light} strokeWidth="4" strokeLinecap="round"/>
+          </svg>
+        </div>
+      );
+      return (
+        <div style={overlayStyle}>
+          {particles.map(i => (
+            <div key={i} style={{position:"absolute",width:6+Math.random()*6,height:6+Math.random()*6,borderRadius:"50%",background:[LVL.bold,LVL.soft,LVL.light,GREEN][i%4],left:(10+Math.random()*80)+"%",top:(20+Math.random()*60)+"%",opacity:0,animation:"fDot 1.8s "+i*0.12+"s ease-out forwards"}} />
+          ))}
+        </div>
+      );
+    }
 
-        function GrandCeleb({ onDone }) {
-          useEffect(() => {
-            playNotes([440,554,659]);
-            setTimeout(() => playNotes([523,659,784]), 600);
-            setTimeout(() => playNotes([392,494,587,784]), 1200);
-            const t = setTimeout(onDone, 3500);
-            return () => clearTimeout(t);
-          }, []);
+    const overlayStyle = {position:"fixed",inset:0,display:"flex",alignItems:"center",justifyContent:"center",pointerEvents:"none",zIndex:100};
 
-          const rays = Array.from({ length: 20 }, (_, i) => i);
-          return (
-            <div style={{...overlayStyle, background:"rgba(0,0,0,0.4)"}}>
-              <div style={{position:"relative",width:200,height:200,animation:"gPulse 3s ease-out forwards"}}>
-                {rays.map(i => (
-                  <div key={i} style={{position:"absolute",left:"50%",top:"50%",width:2,height:60+Math.random()*40,background:LVL.soft,borderRadius:2,transformOrigin:"center top",transform:"rotate("+i*18+"deg)",opacity:0,animation:"rayB 2s "+i*0.08+"s ease-out forwards"}} />
-                ))}
-                <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center"}}>
-                  <div style={{width:80,height:80,borderRadius:"50%",background:LVL.bold,display:"flex",alignItems:"center",justifyContent:"center",animation:"gScale 2s ease-out forwards",boxShadow:"0 0 60px "+LVL.bold+"80"}}>
-                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="4,12 10,18 20,6"/></svg>
-                  </div>
-                </div>
+    function GrandCeleb({ onDone }) {
+      useEffect(() => {
+        playNotes([440,554,659]);
+        setTimeout(() => playNotes([523,659,784]), 600);
+        setTimeout(() => playNotes([392,494,587,784]), 1200);
+        const t = setTimeout(onDone, 3500);
+        return () => clearTimeout(t);
+      }, []);
+
+      const rays = Array.from({ length: 20 }, (_, i) => i);
+      return (
+        <div style={{...overlayStyle, background:"rgba(0,0,0,0.4)"}}>
+          <div style={{position:"relative",width:200,height:200,animation:"gPulse 3s ease-out forwards"}}>
+            {rays.map(i => (
+              <div key={i} style={{position:"absolute",left:"50%",top:"50%",width:2,height:60+Math.random()*40,background:LVL.soft,borderRadius:2,transformOrigin:"center top",transform:"rotate("+i*18+"deg)",opacity:0,animation:"rayB 2s "+i*0.08+"s ease-out forwards"}} />
+            ))}
+            <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center"}}>
+              <div style={{width:80,height:80,borderRadius:"50%",background:LVL.bold,display:"flex",alignItems:"center",justifyContent:"center",animation:"gScale 2s ease-out forwards",boxShadow:"0 0 60px "+LVL.bold+"80"}}>
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="4,12 10,18 20,6"/></svg>
               </div>
             </div>
-          );
-        }
+          </div>
+        </div>
+      );
+    }
 
-        function AudioPlayer({ src, label, T }) {
-          const ref = useRef(null);
-          const [playing, setPlaying] = useState(false);
-          const [time, setTime] = useState(0);
-          const [dur, setDur] = useState(0);
-          const [error, setError] = useState(null);
+    function AudioPlayer({ src, label, T }) {
+      const ref = useRef(null);
+      const [playing, setPlaying] = useState(false);
+      const [time, setTime] = useState(0);
+      const [dur, setDur] = useState(0);
+      const [error, setError] = useState(null);
 
-          useEffect(() => {
-            if (!ref.current) return;
-            playing ? ref.current.play().catch(err => {
-              console.error('Error reproduciendo:', err);
-              setError('No se pudo reproducir');
+      useEffect(() => {
+        if (!ref.current) return;
+        playing ? ref.current.play().catch(err => {
+          console.error('Error reproduciendo:', err);
+          setError('No se pudo reproducir');
+          setPlaying(false);
+        }) : ref.current.pause();
+      }, [playing]);
+
+      const fmt = s => Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
+
+      if (!src) return (
+        <div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",background:T.secBg,borderRadius:12}}>
+          <div style={{width:42,height:42,borderRadius:"50%",background:T.disabled,display:"flex",alignItems:"center",justifyContent:"center",opacity:0.5}}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill={T.textDim}><polygon points="6,3 20,12 6,21"/></svg>
+          </div>
+          <div>
+            <div style={{fontSize:16,fontWeight:500,color:T.textSoft}}>{label}</div>
+            <div style={{fontSize:14,color:T.textDim,marginTop:2}}>Audio próximamente</div>
+          </div>
+        </div>
+      );
+
+      return (
+        <div style={{padding:"12px 16px",background:T.secBg,borderRadius:12}}>
+          <audio ref={ref} src={src}
+            onTimeUpdate={() => setTime(ref.current.currentTime)}
+            onLoadedMetadata={() => {
+              setDur(ref.current.duration);
+              setError(null);
+            }}
+            onEnded={() => setPlaying(false)}
+            onError={(e) => {
+              console.error('Error cargando audio:', src, e);
+              setError('Error al cargar el archivo');
               setPlaying(false);
-            }) : ref.current.pause();
-          }, [playing]);
-
-          const fmt = s => Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
-
-          if (!src) return (
-            <div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",background:T.secBg,borderRadius:12}}>
-              <div style={{width:42,height:42,borderRadius:"50%",background:T.disabled,display:"flex",alignItems:"center",justifyContent:"center",opacity:0.5}}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill={T.textDim}><polygon points="6,3 20,12 6,21"/></svg>
-              </div>
-              <div>
-                <div style={{fontSize:16,fontWeight:500,color:T.textSoft}}>{label}</div>
-                <div style={{fontSize:14,color:T.textDim,marginTop:2}}>Audio próximamente</div>
+            }}
+          />
+          <div style={{display:"flex",alignItems:"center",gap:12}}>
+            <button onClick={() => setPlaying(!playing)} style={{width:42,height:42,borderRadius:"50%",background:error?"#999":LVL.bold,border:"none",cursor:error?"not-allowed":"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+              {playing ? (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg>
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><polygon points="6,3 20,12 6,21"/></svg>
+              )}
+            </button>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{fontSize:15,fontWeight:500,color:T.text,marginBottom:4}}>{label}</div>
+              {error ? (
+                <div style={{fontSize:13,color:"#C00",marginBottom:4}}>{error} - Verifica el nombre del archivo en R2</div>
+              ) : (
+                <div style={{fontSize:13,color:T.textDim,marginBottom:6}}>{fmt(time)} / {fmt(dur)}</div>
+              )}
+              <div onClick={e => {
+                if (error) return;
+                const rect = e.currentTarget.getBoundingClientRect();
+                const pct = (e.clientX - rect.left) / rect.width;
+                ref.current.currentTime = pct * dur;
+              }} style={{width:"100%",height:4,background:T.border,borderRadius:2,cursor:error?"not-allowed":"pointer",position:"relative"}}>
+                <div style={{height:"100%",background:error?"#999":LVL.bold,borderRadius:2,width:(dur > 0 ? time / dur * 100 : 0)+"%",transition:"width 0.1s"}} />
               </div>
             </div>
-          );
+          </div>
+        </div>
+      );
+    }
 
-          return (
-            <div style={{padding:"12px 16px",background:T.secBg,borderRadius:12}}>
-              <audio ref={ref} src={src}
-                onTimeUpdate={() => setTime(ref.current.currentTime)}
-                onLoadedMetadata={() => {
-                  setDur(ref.current.duration);
-                  setError(null);
-                }}
-                onEnded={() => setPlaying(false)}
-                onError={(e) => {
-                  console.error('Error cargando audio:', src, e);
-                  setError('Error al cargar el archivo');
-                  setPlaying(false);
-                }}
-              />
-              <div style={{display:"flex",alignItems:"center",gap:12}}>
-                <button onClick={() => setPlaying(!playing)} style={{width:42,height:42,borderRadius:"50%",background:error?"#999":LVL.bold,border:"none",cursor:error?"not-allowed":"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                  {playing ? (
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg>
+    function Sec({ icon, title, children, T, open, onToggle }) {
+      return (
+        <div style={{marginTop:10,background:T.card,borderRadius:16,border:"1.5px solid "+T.border,overflow:"hidden"}}>
+          <div onClick={onToggle} style={{padding:"14px 18px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between",background:open?LVL.ultra:"transparent",transition:"background 0.2s"}}>
+            <div style={{display:"flex",alignItems:"center",gap:10}}>
+              <span style={{fontSize:20}}>{icon}</span>
+              <span style={{fontSize:17,fontWeight:600,color:open?LVL.bold:T.text}}>{title}</span>
+            </div>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={open?LVL.bold:T.textDim} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{transform:open?"rotate(180deg)":"rotate(0)",transition:"transform 0.3s"}}><polyline points="6,9 12,15 18,9"/></svg>
+          </div>
+          {open && (
+            <div style={{padding:"0 18px 18px",animation:"sU 0.3s ease"}}>
+              {children}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    const ICON_ROSARY = "🙏";
+    const ICON_MUSIC = "🎵";
+    const ICON_EYE = "👁️";
+    const ICON_PEN = "✍️";
+
+    function App() {
+      const [darkMode, setDarkMode] = useState(false);
+      const T = darkMode ? DARK : LIGHT;
+      
+      // Ahora openSections es un objeto: {rezar: true, canto: false, ...}
+      const [openSections, setOpenSections] = useState({});
+      
+      const toggleSection = (section) => {
+        setOpenSections(prev => ({...prev, [section]: !prev[section]}));
+      };
+      
+      const cuaderno = {
+        nivel: "CruzAndo la Cruz",
+        nombre: "Males",
+        numero: 1,
+        subtitulo: "La vulnerabilidad gozosa",
+        audioRezo: "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/rezo.mp3",
+        audioCanto: "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/AveMaria_Jacob_Arcadelt_coro_Laus%20Deo_Aguascalientes_2026.mp3",
+        misterios: [
+          {
+            numero: 1,
+            nombre: "La Anunciación",
+            subtitulo: "Ser humano es ser vulnerable",
+            evangelio: {
+              ref: "Lucas 1:26-31 (DHH)",
+              text: "En el sexto mes, el ángel Gabriel fue enviado por Dios a una ciudad de Galilea llamada Nazaret, a una joven virgen llamada María, comprometida para casarse con un hombre llamado José, descendiente del rey David. El ángel entró en el lugar donde ella estaba, y le dijo: «¡Te saludo, favorecida de Dios! El Señor está contigo.» María quedó muy conmovida al oír estas palabras, y se preguntaba qué significaría aquel saludo. El ángel le dijo: «No tengas miedo, María, pues tú gozas del favor de Dios. Ahora vas a quedar encinta: tendrás un hijo, y le pondrás por nombre Jesús.»"
+            },
+            contemplacion: "Desde la concepción, ser humano es ser vulnerable\nDios eligió hacerse humano comenzando por donde todos comenzamos: siendo frágil.\nJesús no apareció en el mundo como un adulto poderoso. Se hizo embrión en el vientre de María. Diminuto, silencioso, expuesto. Su vida, durante nueve meses, estuvo sostenida por lo más delicado que existe: la carne de una mujer joven, en un pueblo pequeño, en tiempos difíciles.\nMaría recibió esa noticia sin garantías. No sabía lo que vendría. Solo supo que algo estaba comenzando en ella, algo más grande que ella, y que ese algo era absolutamente frágil.\nAsí empieza la vida humana. Así empieza toda vida humana: pequeña, expuesta, sin defensa propia. La fragilidad no es un accidente del camino; es el punto de partida. Dios mismo la eligió. Y al elegirla, nos revela algo que cuesta aceptar: la vulnerabilidad no es lo que hay que superar para vivir bien. Es la condición desde la que la vida comienza, y desde la que Dios actúa.",
+            meditacion: [
+              "¿Qué siente el Corazón Inmaculado de María al descubrir que Dios mismo eligió comenzar siendo pequeño, frágil, expuesto?",
+              "¿Qué nos revela el Corazón de Jesús al hacerse embrión, al hacerse vida que aún no puede nada, que solo puede ser recibida?",
+              "¿Cuáles son los males —las fragilidades, los límites, las exposiciones— que reconoces como parte inevitable de tu vida desde el principio? ¿Cuál de ellos te cuesta más aceptar como punto de partida y no como fracaso?"
+            ],
+            intercesion: "Jesús, tú que elegiste ser vulnerable desde la concepción, ayúdame a aceptar mi propia fragilidad sin vergüenza. Enséñame que necesitar a otros no es debilidad, sino el camino del amor que tú mismo recorriste.\nAmén.",
+            audioContemplacion: "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_1.mp3"
+          },
+          {
+            numero: 2,
+            nombre: "La Visitación",
+            subtitulo: "La fragilidad que une",
+            evangelio: {
+              ref: "Lucas 1:39-43 (DHH)",
+              text: "Por aquellos días, María se fue de prisa a un pueblo de la región montañosa de Judea, y entró en la casa de Zacarías y saludó a Isabel. Cuando Isabel oyó el saludo de María, la criatura se le estremeció en el vientre, y ella quedó llena del Espíritu Santo. Entonces, con voz muy fuerte, dijo: «¡Dios te ha bendecido más que a todas las mujeres, y ha bendecido a tu hijo! ¿Quién soy yo, para que venga a visitarme la madre de mi Señor?»"
+            },
+            contemplacion: "Los primeros ante los ojos de Dios\nMaría, embarazada y joven, camina varios días por terreno montañoso para visitar a Isabel, su prima anciana que también está esperando un hijo. Ambas viven embarazos extraordinarios, pero también ambas están en situación de vulnerabilidad: María es soltera y embarazada (escándalo social), Isabel es anciana y gestante (riesgo físico).\nY sin embargo, en esa fragilidad compartida nace la comunión más hermosa del Evangelio.\nMaría no va a presumir su privilegio de ser la Madre del Mesías. Va a servir. Isabel no siente envidia de la joven favorecida. Siente gratitud por su visita. Ambas reconocen la gracia de Dios en la otra, y se sostienen mutuamente.\nLos primeros ante los ojos de Dios son los frágiles que se acompañan: las mujeres embarazadas, los bebés gestándose, los ancianos, los pobres, los que no tienen voz. Todos ellos son visitados por María y el Mesías en su seno.\nLa fragilidad no separa. Une.",
+            meditacion: [
+              "¿Qué siente el Corazón de María al caminar días enteros, embarazada, para servir a su prima anciana?",
+              "¿Qué vive el Corazón de Jesús, aún en el vientre, al encontrarse con Juan Bautista también en gestación?",
+              "¿Cuántas veces te has acercado a personas en situación vulnerable? ¿Qué sientes y qué haces al respecto? ¿Cómo estás cruzando tu propia necesidad de ayuda?"
+            ],
+            intercesion: "María, tú que caminaste días enteros para servir a quien te necesitaba, enséñame que la fragilidad no me aísla, sino que me une a otros. Ayúdame a reconocer la gracia de Dios en los vulnerables, y a ofrecerles mi presencia sin condescendencia.\nAmén.",
+            audioContemplacion: "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_2.mp3"
+          },
+          {
+            numero: 3,
+            nombre: "El Nacimiento de Jesús",
+            subtitulo: "Pobreza y refugio",
+            evangelio: {
+              ref: "Lucas 2:1, 4-7 (DHH)",
+              text: "Por aquel tiempo, el emperador Augusto ordenó que se hiciera un censo de todo el mundo. José salió del pueblo de Nazaret, de la región de Galilea, y se fue a Belén. Fue allá a inscribirse, junto con María, su esposa, que se encontraba encinta. Y mientras estaban en Belén, le llegó a María el tiempo de dar a luz. Y allí nació su hijo primogénito, y lo envolvió en pañales y lo acostó en el establo, porque no había alojamiento para ellos en el mesón."
+            },
+            contemplacion: "Lejos del hogar, sin posada, sin hospitalidad\nMaría y José no eligieron dar a luz en un establo. Fueron forzados por las circunstancias: un decreto imperial los desplazó de su hogar, ningún mesón los recibió, y la pobreza les cerró todas las puertas.\nEl Hijo de Dios nació refugiado en una cueva de animales. Sin médico, sin comadrona, sin agua caliente, sin cama digna. María dio a luz en condiciones de extrema precariedad. José hizo lo que pudo con lo poco que tenía.\nY aun así, le dieron la bienvenida al Niño.\nSan José mantuvo la actitud a pesar de todo: Bienvenido a este mundo, Niño Jesús. María lo envolvió en pañales con ternura, lo acostó en el pesebre como si fuera la cuna más preciosa del mundo.\nLa pobreza material no les robó la dignidad. La falta de recursos no les impidió amar. La injusticia del mundo no venció su esperanza.\nPorque Dios no necesita abundancia para nacer. Solo necesita un corazón que lo reciba.",
+            meditacion: [
+              "¿Qué siente el Corazón de María al dar a luz en un refugio de animales, lejos de su hogar?",
+              "¿Qué acepta el Corazón de Jesús al nacer en la pobreza extrema, sin las comodidades básicas?",
+              "¿Qué actitud tienes en los momentos de escasez (falta de agua, dinero, luz eléctrica, salud…)? ¿Cómo estás cruzando la falta de recursos que limita tu vida?"
+            ],
+            intercesion: "Jesús, tú que naciste en un establo porque no había lugar para ti, acompáñame en mi propia pobreza y precariedad. Enséñame que la escasez no me roba la dignidad, y que puedo dar la bienvenida a la vida incluso cuando falta todo.\nAmén.",
+            audioContemplacion: "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_3.mp3"
+          },
+          {
+            numero: 4,
+            nombre: "La Presentación en el Templo",
+            subtitulo: "La espada anunciada",
+            evangelio: {
+              ref: "Lucas 2:22, 25, 28, 34-35 (DHH)",
+              text: "Cuando se cumplieron los días de la purificación de ellos, según la ley de Moisés, llevaron al niño a Jerusalén para presentarlo al Señor. Había en Jerusalén un hombre llamado Simeón, justo y piadoso. Tomó al niño en sus brazos y bendijo a Dios. Luego dijo a María, su madre: «Este niño será causa de caída y de elevación para muchos en Israel; será signo de contradicción, y a ti misma una espada te atravesará el corazón.»"
+            },
+            contemplacion: "El más santo del mundo molestará a muchos\nMaría sostiene a su hijo recién nacido en el Templo. Todo es alegría, gratitud, cumplimiento de la Ley. Pero Simeón, movido por el Espíritu, pronuncia palabras que rompen la paz: Una espada atravesará tu corazón.\nMaría no entiende del todo. Pero presiente que amar a este Niño le costará todo. Hay pérdidas que se anuncian mucho antes de ocurrir. Hay despedidas que empiezan a gestarse en el primer abrazo.\nY aun así, María no huye. No dice: Si este hijo me traerá tanto dolor, prefiero no amarlo tanto. Al contrario: guarda estas palabras en su corazón junto con el amor. Acepta amar sabiendo que amará hasta el dolor.\nSimeón también anuncia algo desconcertante: el más santo del mundo (el Mesías) molestará a muchos. Porque su bondad revelará la falsedad de los hipócritas. Su justicia incomodará a los injustos. Su verdad será intolerable para quienes viven en la mentira.\nA veces, lo verdaderamente bueno es insoportable para quienes no quieren cambiar.",
+            meditacion: [
+              "¿Qué siente el Corazón de María al escuchar que una espada lo atravesará?",
+              "¿Qué sabe el Corazón de Jesús sobre su propio destino, siendo aún un niño en brazos de Simeón?",
+              "¿Alguna vez te ha resultado molesto o insoportable alguien bueno, justo o recto? ¿Qué dolor anticipas que tu corazón resiste nombrar? ¿Cómo estás cruzando la espada anunciada en tu vida?"
+            ],
+            intercesion: "María, tú que aceptaste la espada profetizada sin huir del amor, enséñame a no temer el dolor que viene con amar de verdad. Ayúdame a guardar en mi corazón las palabras difíciles, confiando que Dios me dará fuerza cuando llegue el momento.\nAmén.",
+            audioContemplacion: "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_4.mp3"
+          },
+          {
+            numero: 5,
+            nombre: "El Niño perdido y hallado en el Templo",
+            subtitulo: "Crecer duele",
+            evangelio: {
+              ref: "Lucas 2:41-46 (DHH)",
+              text: "Los padres de Jesús iban todos los años a Jerusalén para la fiesta de la Pascua. Cuando Jesús cumplió doce años, fueron allá todos ellos, como era costumbre. Pero pasados aquellos días, cuando volvían a casa, el niño Jesús se quedó en Jerusalén, sin que sus padres se dieran cuenta. Pensando que Jesús iba entre la gente, hicieron un día de camino; pero luego, al buscarlo entre los parientes y conocidos, no lo encontraron. Así que regresaron a Jerusalén para buscarlo allí. Al cabo de tres días lo encontraron en el templo, sentado entre los maestros, escuchándolos y haciéndoles preguntas."
+            },
+            contemplacion: "El dolor del crecimiento\nMaría y José vivieron tres días de angustia. Habían perdido a su hijo. O más bien: su hijo los había dejado atrás, ocupándose de las cosas de su Padre Dios.\nJesús no se escondió por desobediencia. No los abandonó por rebeldía. Simplemente, estaba creciendo. Y crecer duele. No solo al que crece, sino también a quienes lo aman.\nA los doce años, Jesús comenzó a descubrir su identidad como Hijo de Dios. Necesitaba ese tiempo en el Templo, dialogando con los maestros, escuchando, preguntando, madurando. Sus padres aún no entendían del todo quién era Él, ni hacia dónde lo llevaba su vocación. Pero ese misterio ya comenzaba a revelarse.\nMaría y José sufrieron esa separación sin culpa: no fueron malos padres. Jesús vivió ese \"estirón\" sin malicia: no fue un mal hijo. Simplemente, hay momentos en que los hijos toman su propio camino, y eso es voluntad de Dios.",
+            meditacion: [
+              "¿Qué vive el Corazón de María al comprender que su hijo ya no es solo suyo, sino también del Padre?",
+              "¿Qué descubre el Corazón de Jesús sobre sí mismo cuando se ocupa de las cosas de su Padre Dios?",
+              "¿Qué dolor has sentido al dejar atrás la infancia, la casa paterna, las costumbres de otra época? ¿Cómo estás cruzando el duelo de crecer, de madurar, de tomar tus propias decisiones?"
+            ],
+            intercesion: "Jesús, tú que creciste ocupándote de las cosas de tu Padre, ayúdame a aceptar que crecer duele, pero es voluntad de Dios. Enséñame a soltar lo que ya no me corresponde cargar, y a confiar que mi camino, aunque duela, es el que Tú preparaste para mí.\nAmén.",
+            audioContemplacion: "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_5.mp3"
+          }
+        ]
+      };
+
+      const [ci, setCi] = useState(0);
+      const [done, setDone] = useState({});
+      const [journal, setJournal] = useState({});
+      const [showPray, setShowPray] = useState(false);
+      const [celeb, setCeleb] = useState(null);
+      const [trans, setTrans] = useState(false);
+
+      const m = cuaderno.misterios[ci];
+      const isDone = ci in done;
+      const total = cuaderno.misterios.length;
+      const doneCount = Object.keys(done).length;
+
+      const goTo = i => {
+        if (i < 0 || i >= total) return;
+        setTrans(true);
+        setTimeout(() => {
+          setCi(i);
+          setOpenSections({}); // Cierra todas las secciones al cambiar de misterio
+          setShowPray(false);
+          setTrans(false);
+          window.scrollTo(0,0);
+        }, 250);
+      };
+
+      const complete = () => {
+        setDone(p => ({...p, [ci]: Date.now()}));
+        setCeleb(ci);
+        setShowPray(false);
+        if (ci === total - 1) {
+          setTimeout(() => setCeleb("grand"), 2500);
+        } else {
+          setTimeout(() => goTo(ci + 1), 2500);
+        }
+      };
+
+      return (
+        <>
+          <style>{CSS(T)}</style>
+          {celeb === "grand" && <GrandCeleb onDone={() => setCeleb(null)} />}
+          {celeb !== null && celeb !== "grand" && <CelebOverlay variant={celeb} onDone={() => setCeleb(null)} />}
+
+          <div style={{minHeight:"100vh",background:T.bg,paddingBottom:40}}>
+            <div style={{padding:"20px 18px 16px",background:T.card,borderBottom:"1.5px solid "+T.border}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+                <div style={{flex:1}}>
+                  <div style={{display:"inline-block",background:LVL.bold,color:"#fff",padding:"4px 12px",borderRadius:16,fontSize:12,fontWeight:600,letterSpacing:0.8,textTransform:"uppercase",marginBottom:8}}>
+                    Nivel Cruz
+                  </div>
+                  <h1 style={{fontSize:26,fontWeight:700,color:T.text,marginBottom:4}}>{cuaderno.nombre}</h1>
+                  <div style={{fontSize:16,color:T.textSoft,fontStyle:"italic"}}>{cuaderno.subtitulo}</div>
+                </div>
+                <button 
+                  onClick={() => setDarkMode(!darkMode)} 
+                  style={{
+                    width:40,
+                    height:40,
+                    borderRadius:"50%",
+                    background:T.secBg,
+                    border:"1.5px solid "+T.border,
+                    cursor:"pointer",
+                    display:"flex",
+                    alignItems:"center",
+                    justifyContent:"center",
+                    flexShrink:0,
+                    transition:"all 0.2s"
+                  }}
+                  title={darkMode ? "Modo claro" : "Modo oscuro"}
+                >
+                  {darkMode ? (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={T.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                    </svg>
                   ) : (
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><polygon points="6,3 20,12 6,21"/></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={T.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                    </svg>
                   )}
                 </button>
-                <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontSize:15,fontWeight:500,color:T.text,marginBottom:4}}>{label}</div>
-                  {error ? (
-                    <div style={{fontSize:13,color:"#C00",marginBottom:4}}>{error} - Verifica el nombre del archivo en R2</div>
-                  ) : (
-                    <div style={{fontSize:13,color:T.textDim,marginBottom:6}}>{fmt(time)} / {fmt(dur)}</div>
-                  )}
-                  <div onClick={e => {
-                    if (error) return;
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    const pct = (e.clientX - rect.left) / rect.width;
-                    ref.current.currentTime = pct * dur;
-                  }} style={{width:"100%",height:4,background:T.border,borderRadius:2,cursor:error?"not-allowed":"pointer",position:"relative"}}>
-                    <div style={{height:"100%",background:error?"#999":LVL.bold,borderRadius:2,width:(dur > 0 ? time / dur * 100 : 0)+"%",transition:"width 0.1s"}} />
-                  </div>
-                </div>
               </div>
             </div>
-          );
-        }
 
-        function Sec({ icon, title, children, T, open, onToggle }) {
-          return (
-            <div style={{marginTop:10,background:T.card,borderRadius:16,border:"1.5px solid "+T.border,overflow:"hidden"}}>
-              <div onClick={onToggle} style={{padding:"14px 18px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between",background:open?LVL.ultra:"transparent",transition:"background 0.2s"}}>
-                <div style={{display:"flex",alignItems:"center",gap:10}}>
-                  <span style={{fontSize:20}}>{icon}</span>
-                  <span style={{fontSize:17,fontWeight:600,color:open?LVL.bold:T.text}}>{title}</span>
-                </div>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={open?LVL.bold:T.textDim} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{transform:open?"rotate(180deg)":"rotate(0)",transition:"transform 0.3s"}}><polyline points="6,9 12,15 18,9"/></svg>
+            <div style={{padding:"16px 18px",background:T.card,borderBottom:"1px solid "+T.border}}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+                {cuaderno.misterios.map((_, i) => {
+                  const isA = i === ci;
+                  const isD = i in done;
+                  const gap = i % 5 === 0 && i !== 0;
+                  return (
+                    <div key={i} style={{display:"flex",alignItems:"center"}}>
+                      {gap && <div style={{width:8}} />}
+                      <div onClick={() => goTo(i)} style={{width:isA?24:11,height:11,borderRadius:6,background:isD?GREEN:isA?LVL.bold:T.border,cursor:"pointer",transition:"all 0.3s",boxShadow:isA?"0 0 0 3px "+LVL.light:isD?"0 0 6px "+GREEN+"60":"none"}} />
+                    </div>
+                  );
+                })}
               </div>
-              {open && (
-                <div style={{padding:"0 18px 18px",animation:"sU 0.3s ease"}}>
-                  {children}
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <span style={{fontSize:13,color:T.textDim}}>Misterios Gozosos {"·"} <em style={{color:LVL.soft}}>{cuaderno.subtitulo}</em></span>
+                <span style={{fontSize:13,fontWeight:700,color:doneCount===total?GREEN:LVL.bold}}>{doneCount}/{total}</span>
+              </div>
+            </div>
+
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"0 18px 8px"}}>
+              <button onClick={() => goTo(ci-1)} disabled={ci===0} style={{display:"flex",alignItems:"center",gap:4,background:"none",border:"none",cursor:ci===0?"default":"pointer",opacity:ci===0?0.3:1,color:T.textSoft,fontSize:13,fontFamily:"Inter,sans-serif"}}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={T.textSoft} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15,18 9,12 15,6"/></svg> Anterior
+              </button>
+              <span style={{fontSize:13,fontWeight:600,color:T.textDim}}>{ci+1} de {total}</span>
+              <button onClick={() => goTo(ci+1)} disabled={ci===total-1} style={{display:"flex",alignItems:"center",gap:4,background:"none",border:"none",cursor:ci===total-1?"default":"pointer",opacity:ci===total-1?0.3:1,color:T.textSoft,fontSize:13,fontFamily:"Inter,sans-serif"}}>
+                Siguiente <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={T.textSoft} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9,6 15,12 9,18"/></svg>
+              </button>
+            </div>
+
+            <div style={{padding:"4px 14px 120px",opacity:trans?0:1,transform:trans?"translateY(6px)":"none",transition:"all 0.25s"}}>
+              <div style={{borderRadius:18,overflow:"hidden",marginBottom:14,position:"relative",background:"linear-gradient(135deg,"+LVL.light+","+LVL.mist+","+LVL.soft+")",height:170}}>
+                <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",justifyContent:"flex-end",padding:"18px 20px",background:"linear-gradient(to top,rgba(43,38,34,0.75) 0%,rgba(43,38,34,0.15) 60%,transparent 100%)"}}>
+                  <div style={{fontSize:13,fontWeight:600,letterSpacing:1,color:LVL.light,textTransform:"uppercase"}}>{ORDS[ci%5]} Misterio Gozoso</div>
+                  <h2 style={{margin:"3px 0 0",fontSize:24,fontWeight:700,color:"#fff",lineHeight:1.2}}>{m.nombre}</h2>
+                  <div style={{fontSize:16,color:"rgba(255,255,255,0.85)",fontStyle:"italic",marginTop:4}}>{m.subtitulo}</div>
+                </div>
+              </div>
+
+              <div style={{padding:"16px 18px",background:T.card,borderRadius:16,border:"1.5px solid "+T.border,marginBottom:10}}>
+                <div style={{fontSize:13,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:LVL.bold,marginBottom:10}}>{"📖"} Evangelio</div>
+                <div style={{fontSize:18,color:T.text,lineHeight:1.8,whiteSpace:"pre-line"}}>{m.evangelio.text}</div>
+                <div style={{fontSize:14,color:T.textDim,marginTop:12,textAlign:"right",fontStyle:"italic"}}>{"—"} {m.evangelio.ref}</div>
+              </div>
+
+              <Sec icon={ICON_ROSARY} title="Rezar este Misterio" T={T} open={openSections.rezar} onToggle={() => toggleSection('rezar')}>
+                <AudioPlayer src={cuaderno.audioRezo} label="Padrenuestro + 10 Avemarías + Gloria" T={T} />
+              </Sec>
+
+              <Sec icon={ICON_MUSIC} title="Canto" T={T} open={openSections.canto} onToggle={() => toggleSection('canto')}>
+                <AudioPlayer src={cuaderno.audioCanto} label="Ave María — Jacob Arcadelt — Coro Laus Deo (Aguascalientes, 2026)" T={T} />
+              </Sec>
+
+              <Sec icon={ICON_EYE} title="Contemplar" T={T} open={openSections.contemplar} onToggle={() => toggleSection('contemplar')}>
+                <AudioPlayer src={m.audioContemplacion} label="Audio de la contemplación" T={T} />
+                <div style={{marginTop:14,padding:"16px 18px",background:T.secBg,borderRadius:14,borderLeft:"3px solid "+LVL.soft}}>
+                  <div style={{fontSize:18,color:T.text,lineHeight:1.85,whiteSpace:"pre-line"}}>{m.contemplacion}</div>
+                </div>
+              </Sec>
+
+              <Sec icon={ICON_PEN} title="Meditar y escribir" T={T} open={openSections.meditar} onToggle={() => toggleSection('meditar')}>
+                <div style={{display:"flex",flexDirection:"column",gap:20}}>
+                  {m.meditacion.map((q, qi) => (
+                    <div key={qi}>
+                      <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:6}}>
+                        <div style={{width:7,height:7,borderRadius:4,background:MCOLORS[qi]}} />
+                        <span style={{fontSize:13,fontWeight:600,letterSpacing:1,textTransform:"uppercase",color:MCOLORS[qi]}}>{MLABELS[qi]}</span>
+                      </div>
+                      <p style={{fontSize:18,color:T.text,lineHeight:1.7,marginBottom:10}}>{q}</p>
+                      <textarea
+                        value={journal[ci]?.[qi] || ""}
+                        onChange={e => setJournal(p => ({...p, [ci]: {...(p[ci]||{}), [qi]: e.target.value}}))}
+                        placeholder="Escribe aquí tu reflexión..."
+                        rows={3}
+                        style={{width:"100%",padding:"12px 16px",background:T.inputBg,border:"1.5px solid "+T.border,borderRadius:12,color:T.text,fontSize:17,lineHeight:1.7,resize:"vertical",outline:"none",transition:"border 0.2s"}}
+                        onFocus={e => e.target.style.borderColor = LVL.soft}
+                        onBlur={e => e.target.style.borderColor = T.border}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </Sec>
+
+              {!showPray && !isDone && (
+                <button onClick={() => setShowPray(true)} style={{width:"100%",padding:"16px",marginTop:8,background:T.card,border:"1.5px solid "+LVL.light,borderRadius:16,cursor:"pointer",fontSize:17,fontWeight:600,fontFamily:"Inter,sans-serif",color:LVL.bold,display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
+                  {"🙏"} Oración de intercesión
+                </button>
+              )}
+
+              {showPray && !isDone && (
+                <div style={{marginTop:10,padding:"22px",background:T.card,borderRadius:18,border:"1.5px solid "+LVL.soft,boxShadow:"0 4px 24px rgba(255,122,0,0.1)",animation:"sU 0.4s ease"}}>
+                  <div style={{fontSize:13,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:LVL.bold,marginBottom:12}}>{"🙏"} Intercesión</div>
+                  <p style={{fontSize:19,color:T.text,lineHeight:1.85,fontStyle:"italic",whiteSpace:"pre-line"}}>{m.intercesion}</p>
+                  <button onClick={complete} style={{width:"100%",marginTop:20,padding:"16px",background:LVL.bold,border:"none",borderRadius:14,cursor:"pointer",color:"#fff",fontSize:18,fontWeight:700,fontFamily:"Inter,sans-serif",boxShadow:"0 4px 16px rgba(255,122,0,0.3)"}}>
+                    {ci < total - 1 ? "Siguiente Misterio →" : "Completar Cuaderno ✦"}
+                  </button>
+                </div>
+              )}
+
+              {isDone && (
+                <div style={{marginTop:10,padding:"16px 20px",background:GREEN+"15",borderRadius:16,border:"1.5px solid "+GREEN+"30",display:"flex",alignItems:"center",gap:12,animation:"sU 0.4s ease"}}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={GREEN} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="4,12 10,18 20,6"/></svg>
+                  <div>
+                    <div style={{fontSize:17,fontWeight:600,color:GREEN}}>Misterio completado</div>
+                    <div style={{fontSize:14,color:T.textDim,marginTop:2}}>{new Date(done[ci]).toLocaleDateString("es-MX",{day:"numeric",month:"long"})}</div>
+                  </div>
                 </div>
               )}
             </div>
-          );
-        }
+          </div>
+        </>
+      );
+    }
 
-        const ICON_ROSARY = "🙏";
-        const ICON_MUSIC = "🎵";
-        const ICON_EYE = "👁️";
-        const ICON_PEN = "✍️";
+    function CSS(T) {
+      return `
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        *{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif}
+        body{margin:0;background:${T.bg};font-family:'Inter',sans-serif}
+        textarea{font-family:'Inter',sans-serif}
+        button{font-family:'Inter',sans-serif}
+        ::placeholder{color:${T.textDim}}
+        ::-webkit-scrollbar{width:3px}
+        ::-webkit-scrollbar-thumb{background:${T.border};border-radius:2px}
+        @keyframes sU{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes haloX{0%{transform:scale(0.3);opacity:0}30%{opacity:1}100%{transform:scale(2.5);opacity:0}}
+        @keyframes riseL{0%{transform:translateY(0);opacity:0}20%{opacity:0.8}100%{transform:translateY(-200px);opacity:0}}
+        @keyframes crossG{0%{opacity:0;transform:scale(0.5)}40%{opacity:1;transform:scale(1.1)}100%{opacity:0;transform:scale(1.3)}}
+        @keyframes fDot{0%{transform:scale(0) translateY(20px);opacity:0}30%{opacity:0.9;transform:scale(1.2) translateY(0)}100%{transform:scale(0) translateY(-40px);opacity:0}}
+        @keyframes gPulse{0%{transform:scale(0)}30%{transform:scale(1.1)}50%{transform:scale(0.95)}100%{transform:scale(1);opacity:0}}
+        @keyframes rayB{0%{height:0;opacity:0}30%{opacity:0.7}100%{height:100px;opacity:0}}
+        @keyframes gScale{0%{transform:scale(0)}40%{transform:scale(1.2)}60%{transform:scale(0.9)}100%{transform:scale(1)}}
+      `;
+    }
 
-        function App() {
-          const [darkMode, setDarkMode] = useState(false);
-          const T = darkMode ? DARK : LIGHT;
-          
-          const cuaderno = {
-            nivel: "CruzAndo la Cruz",
-            nombre: "Males",
-            numero: 1,
-            subtitulo: "La vulnerabilidad gozosa",
-            audioRezo: "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/rezo.mp3",
-            audioCanto: "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/AveMaria_Jacob_Arcadelt_coro_Laus%20Deo_Aguascalientes_2026.mp3",
-            misterios: [
-              {
-                numero: 1,
-                nombre: "La Anunciación",
-                subtitulo: "Ser humano es ser vulnerable",
-                evangelio: {
-                  ref: "Lucas 1:26-31 (DHH)",
-                  text: "En el sexto mes, el ángel Gabriel fue enviado por Dios a una ciudad de Galilea llamada Nazaret, a una joven virgen llamada María, comprometida para casarse con un hombre llamado José, descendiente del rey David. El ángel entró en el lugar donde ella estaba, y le dijo: «¡Te saludo, favorecida de Dios! El Señor está contigo.» María quedó muy conmovida al oír estas palabras, y se preguntaba qué significaría aquel saludo. El ángel le dijo: «No tengas miedo, María, pues tú gozas del favor de Dios. Ahora vas a quedar encinta: tendrás un hijo, y le pondrás por nombre Jesús.»"
-                },
-                contemplacion: "Desde la concepción, ser humano es ser vulnerable\nDios eligió hacerse humano comenzando por donde todos comenzamos: siendo frágil.\nJesús no apareció en el mundo como un adulto poderoso. Se hizo embrión en el vientre de María. Diminuto, silencioso, expuesto. Su vida, durante nueve meses, estuvo sostenida por lo más delicado que existe: la carne de una mujer joven, en un pueblo pequeño, en tiempos difíciles.\nMaría recibió esa noticia sin garantías. No sabía lo que vendría. Solo supo que algo estaba comenzando en ella, algo más grande que ella, y que ese algo era absolutamente frágil.\nAsí empieza la vida humana. Así empieza toda vida humana: pequeña, expuesta, sin defensa propia. La fragilidad no es un accidente del camino; es el punto de partida. Dios mismo la eligió. Y al elegirla, nos revela algo que cuesta aceptar: la vulnerabilidad no es lo que hay que superar para vivir bien. Es la condición desde la que la vida comienza, y desde la que Dios actúa.",
-                meditacion: [
-                  "¿Qué siente el Corazón Inmaculado de María al descubrir que Dios mismo eligió comenzar siendo pequeño, frágil, expuesto?",
-                  "¿Qué nos revela el Corazón de Jesús al hacerse embrión, al hacerse vida que aún no puede nada, que solo puede ser recibida?",
-                  "¿Cuáles son los males —las fragilidades, los límites, las exposiciones— que reconoces como parte inevitable de tu vida desde el principio? ¿Cuál de ellos te cuesta más aceptar como punto de partida y no como fracaso?"
-                ],
-                intercesion: "Jesús, tú que elegiste ser vulnerable desde la concepción, ayúdame a aceptar mi propia fragilidad sin vergüenza. Enséñame que necesitar a otros no es debilidad, sino el camino del amor que tú mismo recorriste.\nAmén.",
-                audioContemplacion: "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_1.mp3"
-              },
-              {
-                numero: 2,
-                nombre: "La Visitación",
-                subtitulo: "La fragilidad que une",
-                evangelio: {
-                  ref: "Lucas 1:39-43 (DHH)",
-                  text: "Por aquellos días, María se fue de prisa a un pueblo de la región montañosa de Judea, y entró en la casa de Zacarías y saludó a Isabel. Cuando Isabel oyó el saludo de María, la criatura se le estremeció en el vientre, y ella quedó llena del Espíritu Santo. Entonces, con voz muy fuerte, dijo: «¡Dios te ha bendecido más que a todas las mujeres, y ha bendecido a tu hijo! ¿Quién soy yo, para que venga a visitarme la madre de mi Señor?»"
-                },
-                contemplacion: "Los primeros ante los ojos de Dios\nMaría, embarazada y joven, camina varios días por terreno montañoso para visitar a Isabel, su prima anciana que también está esperando un hijo. Ambas viven embarazos extraordinarios, pero también ambas están en situación de vulnerabilidad: María es soltera y embarazada (escándalo social), Isabel es anciana y gestante (riesgo físico).\nY sin embargo, en esa fragilidad compartida nace la comunión más hermosa del Evangelio.\nMaría no va a presumir su privilegio de ser la Madre del Mesías. Va a servir. Isabel no siente envidia de la joven favorecida. Siente gratitud por su visita. Ambas reconocen la gracia de Dios en la otra, y se sostienen mutuamente.\nLos primeros ante los ojos de Dios son los frágiles que se acompañan: las mujeres embarazadas, los bebés gestándose, los ancianos, los pobres, los que no tienen voz. Todos ellos son visitados por María y el Mesías en su seno.\nLa fragilidad no separa. Une.",
-                meditacion: [
-                  "¿Qué siente el Corazón de María al caminar días enteros, embarazada, para servir a su prima anciana?",
-                  "¿Qué vive el Corazón de Jesús, aún en el vientre, al encontrarse con Juan Bautista también en gestación?",
-                  "¿Cuántas veces te has acercado a personas en situación vulnerable? ¿Qué sientes y qué haces al respecto? ¿Cómo estás cruzando tu propia necesidad de ayuda?"
-                ],
-                intercesion: "María, tú que caminaste días enteros para servir a quien te necesitaba, enséñame que la fragilidad no me aísla, sino que me une a otros. Ayúdame a reconocer la gracia de Dios en los vulnerables, y a ofrecerles mi presencia sin condescendencia.\nAmén.",
-                audioContemplacion: "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_2.mp3"
-              },
-              {
-                numero: 3,
-                nombre: "El Nacimiento de Jesús",
-                subtitulo: "Pobreza y refugio",
-                evangelio: {
-                  ref: "Lucas 2:1, 4-7 (DHH)",
-                  text: "Por aquel tiempo, el emperador Augusto ordenó que se hiciera un censo de todo el mundo. José salió del pueblo de Nazaret, de la región de Galilea, y se fue a Belén. Fue allá a inscribirse, junto con María, su esposa, que se encontraba encinta. Y mientras estaban en Belén, le llegó a María el tiempo de dar a luz. Y allí nació su hijo primogénito, y lo envolvió en pañales y lo acostó en el establo, porque no había alojamiento para ellos en el mesón."
-                },
-                contemplacion: "Lejos del hogar, sin posada, sin hospitalidad\nMaría y José no eligieron dar a luz en un establo. Fueron forzados por las circunstancias: un decreto imperial los desplazó de su hogar, ningún mesón los recibió, y la pobreza les cerró todas las puertas.\nEl Hijo de Dios nació refugiado en una cueva de animales. Sin médico, sin comadrona, sin agua caliente, sin cama digna. María dio a luz en condiciones de extrema precariedad. José hizo lo que pudo con lo poco que tenía.\nY aun así, le dieron la bienvenida al Niño.\nSan José mantuvo la actitud a pesar de todo: Bienvenido a este mundo, Niño Jesús. María lo envolvió en pañales con ternura, lo acostó en el pesebre como si fuera la cuna más preciosa del mundo.\nLa pobreza material no les robó la dignidad. La falta de recursos no les impidió amar. La injusticia del mundo no venció su esperanza.\nPorque Dios no necesita abundancia para nacer. Solo necesita un corazón que lo reciba.",
-                meditacion: [
-                  "¿Qué siente el Corazón de María al dar a luz en un refugio de animales, lejos de su hogar?",
-                  "¿Qué acepta el Corazón de Jesús al nacer en la pobreza extrema, sin las comodidades básicas?",
-                  "¿Qué actitud tienes en los momentos de escasez (falta de agua, dinero, luz eléctrica, salud…)? ¿Cómo estás cruzando la falta de recursos que limita tu vida?"
-                ],
-                intercesion: "Jesús, tú que naciste en un establo porque no había lugar para ti, acompáñame en mi propia pobreza y precariedad. Enséñame que la escasez no me roba la dignidad, y que puedo dar la bienvenida a la vida incluso cuando falta todo.\nAmén.",
-                audioContemplacion: "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_3.mp3"
-              },
-              {
-                numero: 4,
-                nombre: "La Presentación en el Templo",
-                subtitulo: "La espada anunciada",
-                evangelio: {
-                  ref: "Lucas 2:22, 25, 28, 34-35 (DHH)",
-                  text: "Cuando se cumplieron los días de la purificación de ellos, según la ley de Moisés, llevaron al niño a Jerusalén para presentarlo al Señor. Había en Jerusalén un hombre llamado Simeón, justo y piadoso. Tomó al niño en sus brazos y bendijo a Dios. Luego dijo a María, su madre: «Este niño será causa de caída y de elevación para muchos en Israel; será signo de contradicción, y a ti misma una espada te atravesará el corazón.»"
-                },
-                contemplacion: "El más santo del mundo molestará a muchos\nMaría sostiene a su hijo recién nacido en el Templo. Todo es alegría, gratitud, cumplimiento de la Ley. Pero Simeón, movido por el Espíritu, pronuncia palabras que rompen la paz: Una espada atravesará tu corazón.\nMaría no entiende del todo. Pero presiente que amar a este Niño le costará todo. Hay pérdidas que se anuncian mucho antes de ocurrir. Hay despedidas que empiezan a gestarse en el primer abrazo.\nY aun así, María no huye. No dice: Si este hijo me traerá tanto dolor, prefiero no amarlo tanto. Al contrario: guarda estas palabras en su corazón junto con el amor. Acepta amar sabiendo que amará hasta el dolor.\nSimeón también anuncia algo desconcertante: el más santo del mundo (el Mesías) molestará a muchos. Porque su bondad revelará la falsedad de los hipócritas. Su justicia incomodará a los injustos. Su verdad será intolerable para quienes viven en la mentira.\nA veces, lo verdaderamente bueno es insoportable para quienes no quieren cambiar.",
-                meditacion: [
-                  "¿Qué siente el Corazón de María al escuchar que una espada lo atravesará?",
-                  "¿Qué sabe el Corazón de Jesús sobre su propio destino, siendo aún un niño en brazos de Simeón?",
-                  "¿Alguna vez te ha resultado molesto o insoportable alguien bueno, justo o recto? ¿Qué dolor anticipas que tu corazón resiste nombrar? ¿Cómo estás cruzando la espada anunciada en tu vida?"
-                ],
-                intercesion: "María, tú que aceptaste la espada profetizada sin huir del amor, enséñame a no temer el dolor que viene con amar de verdad. Ayúdame a guardar en mi corazón las palabras difíciles, confiando que Dios me dará fuerza cuando llegue el momento.\nAmén.",
-                audioContemplacion: "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_4.mp3"
-              },
-              {
-                numero: 5,
-                nombre: "El Niño perdido y hallado en el Templo",
-                subtitulo: "Crecer duele",
-                evangelio: {
-                  ref: "Lucas 2:41-46 (DHH)",
-                  text: "Los padres de Jesús iban todos los años a Jerusalén para la fiesta de la Pascua. Cuando Jesús cumplió doce años, fueron allá todos ellos, como era costumbre. Pero pasados aquellos días, cuando volvían a casa, el niño Jesús se quedó en Jerusalén, sin que sus padres se dieran cuenta. Pensando que Jesús iba entre la gente, hicieron un día de camino; pero luego, al buscarlo entre los parientes y conocidos, no lo encontraron. Así que regresaron a Jerusalén para buscarlo allí. Al cabo de tres días lo encontraron en el templo, sentado entre los maestros, escuchándolos y haciéndoles preguntas."
-                },
-                contemplacion: "El dolor del crecimiento\nMaría y José vivieron tres días de angustia. Habían perdido a su hijo. O más bien: su hijo los había dejado atrás, ocupándose de las cosas de su Padre Dios.\nJesús no se escondió por desobediencia. No los abandonó por rebeldía. Simplemente, estaba creciendo. Y crecer duele. No solo al que crece, sino también a quienes lo aman.\nA los doce años, Jesús comenzó a descubrir su identidad como Hijo de Dios. Necesitaba ese tiempo en el Templo, dialogando con los maestros, escuchando, preguntando, madurando. Sus padres aún no entendían del todo quién era Él, ni hacia dónde lo llevaba su vocación. Pero ese misterio ya comenzaba a revelarse.\nMaría y José sufrieron esa separación sin culpa: no fueron malos padres. Jesús vivió ese \"estirón\" sin malicia: no fue un mal hijo. Simplemente, hay momentos en que los hijos toman su propio camino, y eso es voluntad de Dios.",
-                meditacion: [
-                  "¿Qué vive el Corazón de María al comprender que su hijo ya no es solo suyo, sino también del Padre?",
-                  "¿Qué descubre el Corazón de Jesús sobre sí mismo cuando se ocupa de las cosas de su Padre Dios?",
-                  "¿Qué dolor has sentido al dejar atrás la infancia, la casa paterna, las costumbres de otra época? ¿Cómo estás cruzando el duelo de crecer, de madurar, de tomar tus propias decisiones?"
-                ],
-                intercesion: "Jesús, tú que creciste ocupándote de las cosas de tu Padre, ayúdame a aceptar que crecer duele, pero es voluntad de Dios. Enséñame a soltar lo que ya no me corresponde cargar, y a confiar que mi camino, aunque duela, es el que Tú preparaste para mí.\nAmén.",
-                audioContemplacion: "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_5.mp3"
-              }
-            ]
-          };
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+</script>
+```
 
-          const [ci, setCi] = useState(0);
-          const [done, setDone] = useState({});
-          const [journal, setJournal] = useState({});
-          const [openSec, setOpenSec] = useState(null);
-          const [showPray, setShowPray] = useState(false);
-          const [celeb, setCeleb] = useState(null);
-          const [trans, setTrans] = useState(false);
-
-          const m = cuaderno.misterios[ci];
-          const isDone = ci in done;
-          const total = cuaderno.misterios.length;
-          const doneCount = Object.keys(done).length;
-
-          const goTo = i => {
-            if (i < 0 || i >= total) return;
-            setTrans(true);
-            setTimeout(() => {
-              setCi(i);
-              setOpenSec(null);
-              setShowPray(false);
-              setTrans(false);
-              window.scrollTo(0,0);
-            }, 250);
-          };
-
-          const complete = () => {
-            setDone(p => ({...p, [ci]: Date.now()}));
-            setCeleb(ci);
-            setShowPray(false);
-            if (ci === total - 1) {
-              setTimeout(() => setCeleb("grand"), 2500);
-            } else {
-              setTimeout(() => goTo(ci + 1), 2500);
-            }
-          };
-
-          return (
-            <>
-              <style>{CSS(T)}</style>
-              {celeb === "grand" && <GrandCeleb onDone={() => setCeleb(null)} />}
-              {celeb !== null && celeb !== "grand" && <CelebOverlay variant={celeb} onDone={() => setCeleb(null)} />}
-
-              <div style={{minHeight:"100vh",background:T.bg,paddingBottom:40}}>
-                <div style={{padding:"20px 18px 16px",background:T.card,borderBottom:"1.5px solid "+T.border}}>
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
-                    <div style={{flex:1}}>
-                      <div style={{display:"inline-block",background:LVL.bold,color:"#fff",padding:"4px 12px",borderRadius:16,fontSize:12,fontWeight:600,letterSpacing:0.8,textTransform:"uppercase",marginBottom:8}}>
-                        Nivel Cruz
-                      </div>
-                      <h1 style={{fontSize:26,fontWeight:700,color:T.text,marginBottom:4}}>{cuaderno.nombre}</h1>
-                      <div style={{fontSize:16,color:T.textSoft,fontStyle:"italic"}}>{cuaderno.subtitulo}</div>
-                    </div>
-                    <button 
-                      onClick={() => setDarkMode(!darkMode)} 
-                      style={{
-                        width:40,
-                        height:40,
-                        borderRadius:"50%",
-                        background:T.secBg,
-                        border:"1.5px solid "+T.border,
-                        cursor:"pointer",
-                        display:"flex",
-                        alignItems:"center",
-                        justifyContent:"center",
-                        flexShrink:0,
-                        transition:"all 0.2s"
-                      }}
-                      title={darkMode ? "Modo claro" : "Modo oscuro"}
-                    >
-                      {darkMode ? (
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={T.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-                        </svg>
-                      ) : (
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={T.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                        </svg>
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                <div style={{padding:"16px 18px",background:T.card,borderBottom:"1px solid "+T.border}}>
-                  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-                    {cuaderno.misterios.map((_, i) => {
-                      const isA = i === ci;
-                      const isD = i in done;
-                      const gap = i % 5 === 0 && i !== 0;
-                      return (
-                        <div key={i} style={{display:"flex",alignItems:"center"}}>
-                          {gap && <div style={{width:8}} />}
-                          <div onClick={() => goTo(i)} style={{width:isA?24:11,height:11,borderRadius:6,background:isD?GREEN:isA?LVL.bold:T.border,cursor:"pointer",transition:"all 0.3s",boxShadow:isA?"0 0 0 3px "+LVL.light:isD?"0 0 6px "+GREEN+"60":"none"}} />
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                    <span style={{fontSize:13,color:T.textDim}}>Misterios Gozosos {"·"} <em style={{color:LVL.soft}}>{cuaderno.subtitulo}</em></span>
-                    <span style={{fontSize:13,fontWeight:700,color:doneCount===total?GREEN:LVL.bold}}>{doneCount}/{total}</span>
-                  </div>
-                </div>
-
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"0 18px 8px"}}>
-                  <button onClick={() => goTo(ci-1)} disabled={ci===0} style={{display:"flex",alignItems:"center",gap:4,background:"none",border:"none",cursor:ci===0?"default":"pointer",opacity:ci===0?0.3:1,color:T.textSoft,fontSize:13,fontFamily:"Inter,sans-serif"}}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={T.textSoft} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15,18 9,12 15,6"/></svg> Anterior
-                  </button>
-                  <span style={{fontSize:13,fontWeight:600,color:T.textDim}}>{ci+1} de {total}</span>
-                  <button onClick={() => goTo(ci+1)} disabled={ci===total-1} style={{display:"flex",alignItems:"center",gap:4,background:"none",border:"none",cursor:ci===total-1?"default":"pointer",opacity:ci===total-1?0.3:1,color:T.textSoft,fontSize:13,fontFamily:"Inter,sans-serif"}}>
-                    Siguiente <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={T.textSoft} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9,6 15,12 9,18"/></svg>
-                  </button>
-                </div>
-
-                <div style={{padding:"4px 14px 120px",opacity:trans?0:1,transform:trans?"translateY(6px)":"none",transition:"all 0.25s"}}>
-                  <div style={{borderRadius:18,overflow:"hidden",marginBottom:14,position:"relative",background:"linear-gradient(135deg,"+LVL.light+","+LVL.mist+","+LVL.soft+")",height:170}}>
-                    <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",justifyContent:"flex-end",padding:"18px 20px",background:"linear-gradient(to top,rgba(43,38,34,0.75) 0%,rgba(43,38,34,0.15) 60%,transparent 100%)"}}>
-                      <div style={{fontSize:13,fontWeight:600,letterSpacing:1,color:LVL.light,textTransform:"uppercase"}}>{ORDS[ci%5]} Misterio Gozoso</div>
-                      <h2 style={{margin:"3px 0 0",fontSize:24,fontWeight:700,color:"#fff",lineHeight:1.2}}>{m.nombre}</h2>
-                      <div style={{fontSize:16,color:"rgba(255,255,255,0.85)",fontStyle:"italic",marginTop:4}}>{m.subtitulo}</div>
-                    </div>
-                  </div>
-
-                  <div style={{padding:"16px 18px",background:T.card,borderRadius:16,border:"1.5px solid "+T.border,marginBottom:10}}>
-                    <div style={{fontSize:13,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:LVL.bold,marginBottom:10}}>{"📖"} Evangelio</div>
-                    <div style={{fontSize:18,color:T.text,lineHeight:1.8,whiteSpace:"pre-line"}}>{m.evangelio.text}</div>
-                    <div style={{fontSize:14,color:T.textDim,marginTop:12,textAlign:"right",fontStyle:"italic"}}>{"—"} {m.evangelio.ref}</div>
-                  </div>
-
-                  <Sec icon={ICON_ROSARY} title="Rezar este Misterio" T={T} open={openSec==="rezar"} onToggle={() => setOpenSec(openSec==="rezar"?null:"rezar")}>
-                    <AudioPlayer src={cuaderno.audioRezo} label="Padrenuestro + 10 Avemarías + Gloria" T={T} />
-                  </Sec>
-
-                  <Sec icon={ICON_MUSIC} title="Canto" T={T} open={openSec==="canto"} onToggle={() => setOpenSec(openSec==="canto"?null:"canto")}>
-                    <AudioPlayer src={cuaderno.audioCanto} label="Ave María — Jacob Arcadelt — Coro Laus Deo (Aguascalientes, 2026)" T={T} />
-                  </Sec>
-
-                  <Sec icon={ICON_EYE} title="Contemplar" T={T} open={openSec==="contemplar"} onToggle={() => setOpenSec(openSec==="contemplar"?null:"contemplar")}>
-                    <AudioPlayer src={m.audioContemplacion} label="Audio de la contemplación" T={T} />
-                    <div style={{marginTop:14,padding:"16px 18px",background:T.secBg,borderRadius:14,borderLeft:"3px solid "+LVL.soft}}>
-                      <div style={{fontSize:18,color:T.text,lineHeight:1.85,whiteSpace:"pre-line"}}>{m.contemplacion}</div>
-                    </div>
-                  </Sec>
-
-                  <Sec icon={ICON_PEN} title="Meditar y escribir" T={T} open={openSec==="meditar"} onToggle={() => setOpenSec(openSec==="meditar"?null:"meditar")}>
-                    <div style={{display:"flex",flexDirection:"column",gap:20}}>
-                      {m.meditacion.map((q, qi) => (
-                        <div key={qi}>
-                          <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:6}}>
-                            <div style={{width:7,height:7,borderRadius:4,background:MCOLORS[qi]}} />
-                            <span style={{fontSize:13,fontWeight:600,letterSpacing:1,textTransform:"uppercase",color:MCOLORS[qi]}}>{MLABELS[qi]}</span>
-                          </div>
-                          <p style={{fontSize:18,color:T.text,lineHeight:1.7,marginBottom:10}}>{q}</p>
-                          <textarea
-                            value={journal[ci]?.[qi] || ""}
-                            onChange={e => setJournal(p => ({...p, [ci]: {...(p[ci]||{}), [qi]: e.target.value}}))}
-                            placeholder="Escribe aquí tu reflexión..."
-                            rows={3}
-                            style={{width:"100%",padding:"12px 16px",background:T.inputBg,border:"1.5px solid "+T.border,borderRadius:12,color:T.text,fontSize:17,lineHeight:1.7,resize:"vertical",outline:"none",transition:"border 0.2s"}}
-                            onFocus={e => e.target.style.borderColor = LVL.soft}
-                            onBlur={e => e.target.style.borderColor = T.border}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </Sec>
-
-                  {!showPray && !isDone && (
-                    <button onClick={() => setShowPray(true)} style={{width:"100%",padding:"16px",marginTop:8,background:T.card,border:"1.5px solid "+LVL.light,borderRadius:16,cursor:"pointer",fontSize:17,fontWeight:600,fontFamily:"Inter,sans-serif",color:LVL.bold,display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
-                      {"🙏"} Oración de intercesión
-                    </button>
-                  )}
-
-                  {showPray && !isDone && (
-                    <div style={{marginTop:10,padding:"22px",background:T.card,borderRadius:18,border:"1.5px solid "+LVL.soft,boxShadow:"0 4px 24px rgba(255,122,0,0.1)",animation:"sU 0.4s ease"}}>
-                      <div style={{fontSize:13,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:LVL.bold,marginBottom:12}}>{"🙏"} Intercesión</div>
-                      <p style={{fontSize:19,color:T.text,lineHeight:1.85,fontStyle:"italic",whiteSpace:"pre-line"}}>{m.intercesion}</p>
-                      <button onClick={complete} style={{width:"100%",marginTop:20,padding:"16px",background:LVL.bold,border:"none",borderRadius:14,cursor:"pointer",color:"#fff",fontSize:18,fontWeight:700,fontFamily:"Inter,sans-serif",boxShadow:"0 4px 16px rgba(255,122,0,0.3)"}}>
-                        {ci < total - 1 ? "Siguiente Misterio →" : "Completar Cuaderno ✦"}
-                      </button>
-                    </div>
-                  )}
-
-                  {isDone && (
-                    <div style={{marginTop:10,padding:"16px 20px",background:GREEN+"15",borderRadius:16,border:"1.5px solid "+GREEN+"30",display:"flex",alignItems:"center",gap:12,animation:"sU 0.4s ease"}}>
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={GREEN} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="4,12 10,18 20,6"/></svg>
-                      <div>
-                        <div style={{fontSize:17,fontWeight:600,color:GREEN}}>Misterio completado</div>
-                        <div style={{fontSize:14,color:T.textDim,marginTop:2}}>{new Date(done[ci]).toLocaleDateString("es-MX",{day:"numeric",month:"long"})}</div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </>
-          );
-        }
-
-        function CSS(T) {
-          return `
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-            *{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif}
-            body{margin:0;background:${T.bg};font-family:'Inter',sans-serif}
-            textarea{font-family:'Inter',sans-serif}
-            button{font-family:'Inter',sans-serif}
-            ::placeholder{color:${T.textDim}}
-            ::-webkit-scrollbar{width:3px}
-            ::-webkit-scrollbar-thumb{background:${T.border};border-radius:2px}
-            @keyframes sU{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-            @keyframes haloX{0%{transform:scale(0.3);opacity:0}30%{opacity:1}100%{transform:scale(2.5);opacity:0}}
-            @keyframes riseL{0%{transform:translateY(0);opacity:0}20%{opacity:0.8}100%{transform:translateY(-200px);opacity:0}}
-            @keyframes crossG{0%{opacity:0;transform:scale(0.5)}40%{opacity:1;transform:scale(1.1)}100%{opacity:0;transform:scale(1.3)}}
-            @keyframes fDot{0%{transform:scale(0) translateY(20px);opacity:0}30%{opacity:0.9;transform:scale(1.2) translateY(0)}100%{transform:scale(0) translateY(-40px);opacity:0}}
-            @keyframes gPulse{0%{transform:scale(0)}30%{transform:scale(1.1)}50%{transform:scale(0.95)}100%{transform:scale(1);opacity:0}}
-            @keyframes rayB{0%{height:0;opacity:0}30%{opacity:0.7}100%{height:100px;opacity:0}}
-            @keyframes gScale{0%{transform:scale(0)}40%{transform:scale(1.2)}60%{transform:scale(0.9)}100%{transform:scale(1)}}
-          `;
-        }
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
 </body>
 </html>
