@@ -21,7 +21,7 @@ Cada cuaderno contiene 20 misterios (5 Gozosos, 5 Luminosos, 5 Dolorosos, 5 Glor
 
 ## 🌐 Demo
 
-**Webapp en vivo**: [https://padremonti.github.io/cruzando-app/](https://tu-usuario.github.io/cruzando-app/)
+**Webapp en vivo**: [https://padremonti.github.io/cruzando-app/](https://padremonti.github.io/cruzando-app/)
 
 ## 📱 Uso
 
