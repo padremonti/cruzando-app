@@ -2,709 +2,187 @@
 
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CruzAndo - Males</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CruzAndo - Males</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body,button,textarea,input{font-family:'Inter',system-ui,sans-serif}
+body{margin:0;overflow-x:hidden}
+::placeholder{color:var(--textDim)}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{border-radius:2px}
+textarea{resize:vertical}
+:root{--bg:#E6DED3;--card:#FFFCF7;--border:#D9D1C7;--text:#2B2622;--textSoft:#6B6259;--textDim:#9B9389;--disabled:#CFCFCF;--inputBg:#FFFCF7;--secBg:#F5F0E8}
+body.dark{--bg:#1A1714;--card:#252119;--border:#3A3530;--text:#E6DED3;--textSoft:#B8A898;--textDim:#786858;--disabled:#4A4540;--inputBg:#2A2520;--secBg:#1E1B16}
+body{background:var(--bg);color:var(--text)}
+@keyframes sU{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+</style>
 </head>
 <body>
-    <div id="root"></div>
+<div id="app"></div>
+<script>
+var DATA = {"nivel": "CruzAndo la Cruz", "cuaderno": "Males", "numero": "1", "subtitulos_bloque": {"gozosos": "La vulnerabilidad gozosa", "luminosos": "L\u00edmites que dan luz", "dolorosos": "L\u00edmites que salvan", "gloriosos": "El mal no es el final"}, "misterios": {"gozosos": [{"numero": 1, "titulo": "Primer Misterio Gozoso: La Anunciaci\u00f3n", "subtitulo": "Ser humano es ser vulnerable", "referencia": "Lucas 1:26-31 (DHH)", "evangelio": "En el sexto mes, el \u00e1ngel Gabriel fue enviado por Dios a una ciudad de Galilea llamada Nazaret, a una joven virgen llamada Mar\u00eda, comprometida para casarse con un hombre llamado Jos\u00e9, descendiente del rey David. El \u00e1ngel entr\u00f3 en el lugar donde ella estaba, y le dijo: \u00ab\u00a1Te saludo, favorecida de Dios! El Se\u00f1or est\u00e1 contigo.\u00bb Mar\u00eda qued\u00f3 muy conmovida al o\u00edr estas palabras, y se preguntaba qu\u00e9 significar\u00eda aquel saludo. El \u00e1ngel le dijo: \u00abNo tengas miedo, Mar\u00eda, pues t\u00fa gozas del favor de Dios. Ahora vas a quedar encinta: tendr\u00e1s un hijo, y le pondr\u00e1s por nombre Jes\u00fas.\u00bb", "contemplacion": "Desde la concepci\u00f3n, ser humano es ser vulnerable\nDios eligi\u00f3 hacerse humano comenzando por donde todos comenzamos: siendo fr\u00e1gil.\nJes\u00fas no apareci\u00f3 en el mundo como un adulto poderoso. Se hizo embri\u00f3n en el vientre de Mar\u00eda. Diminuto, silencioso, expuesto. Su vida, durante nueve meses, estuvo sostenida por lo m\u00e1s delicado que existe: la carne de una mujer joven, en un pueblo peque\u00f1o, en tiempos dif\u00edciles.\nMar\u00eda recibi\u00f3 esa noticia sin garant\u00edas. No sab\u00eda lo que vendr\u00eda. Solo supo que algo estaba comenzando en ella, algo m\u00e1s grande que ella, y que ese algo era absolutamente fr\u00e1gil.\nAs\u00ed empieza la vida humana. As\u00ed empieza toda vida humana: peque\u00f1a, expuesta, sin defensa propia. La fragilidad no es un accidente del camino; es el punto de partida. Dios mismo la eligi\u00f3. Y al elegirla, nos revela algo que cuesta aceptar: la vulnerabilidad no es lo que hay que superar para vivir bien. Es la condici\u00f3n desde la que la vida comienza, y desde la que Dios act\u00faa.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 siente el Coraz\u00f3n Inmaculado de Mar\u00eda al descubrir que Dios mismo eligi\u00f3 comenzar siendo peque\u00f1o, fr\u00e1gil, expuesto?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 nos revela el Coraz\u00f3n de Jes\u00fas al hacerse embri\u00f3n, al hacerse vida que a\u00fan no puede nada, que solo puede ser recibida?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfCu\u00e1les son los males \u2014las fragilidades, los l\u00edmites, las exposiciones\u2014 que reconoces como parte inevitable de tu vida desde el principio? \u00bfCu\u00e1l de ellos te cuesta m\u00e1s aceptar como punto de partida y no como fracaso?", "intercesion": "Jes\u00fas, t\u00fa que elegiste ser vulnerable desde la concepci\u00f3n, ay\u00fadame a aceptar mi propia fragilidad sin verg\u00fcenza. Ens\u00e9\u00f1ame que necesitar a otros no es debilidad, sino el camino del amor que t\u00fa mismo recorriste.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_1.mp3"}, {"numero": 2, "titulo": "Segundo Misterio Gozoso: La Visitaci\u00f3n", "subtitulo": "La fragilidad que une", "referencia": "Lucas 1:39-43 (DHH)", "evangelio": "Por aquellos d\u00edas, Mar\u00eda se fue de prisa a un pueblo de la regi\u00f3n monta\u00f1osa de Judea, y entr\u00f3 en la casa de Zacar\u00edas y salud\u00f3 a Isabel. Cuando Isabel oy\u00f3 el saludo de Mar\u00eda, la criatura se le estremeci\u00f3 en el vientre, y ella qued\u00f3 llena del Esp\u00edritu Santo. Entonces, con voz muy fuerte, dijo: \u00ab\u00a1Dios te ha bendecido m\u00e1s que a todas las mujeres, y ha bendecido a tu hijo! \u00bfQui\u00e9n soy yo, para que venga a visitarme la madre de mi Se\u00f1or?\u00bb", "contemplacion": "Los primeros ante los ojos de Dios\nMar\u00eda, embarazada y joven, camina varios d\u00edas por terreno monta\u00f1oso para visitar a Isabel, su prima anciana que tambi\u00e9n est\u00e1 esperando un hijo. Ambas viven embarazos extraordinarios, pero tambi\u00e9n ambas est\u00e1n en situaci\u00f3n de vulnerabilidad: Mar\u00eda es soltera y embarazada (esc\u00e1ndalo social), Isabel es anciana y gestante (riesgo f\u00edsico).\nY sin embargo, en esa fragilidad compartida nace la comuni\u00f3n m\u00e1s hermosa del Evangelio.\nMar\u00eda no va a presumir su privilegio de ser la Madre del Mes\u00edas. Va a servir. Isabel no siente envidia de la joven favorecida. Siente gratitud por su visita. Ambas reconocen la gracia de Dios en la otra, y se sostienen mutuamente.\nLos primeros ante los ojos de Dios son los fr\u00e1giles que se acompa\u00f1an: las mujeres embarazadas, los beb\u00e9s gest\u00e1ndose, los ancianos, los pobres, los que no tienen voz. Todos ellos son visitados por Mar\u00eda y el Mes\u00edas en su seno.\nLa fragilidad no separa. Une.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 siente el Coraz\u00f3n de Mar\u00eda al caminar d\u00edas enteros, embarazada, para servir a su prima anciana?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 vive el Coraz\u00f3n de Jes\u00fas, a\u00fan en el vientre, al encontrarse con Juan Bautista tambi\u00e9n en gestaci\u00f3n?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfCu\u00e1ntas veces te has acercado a personas en situaci\u00f3n vulnerable? \u00bfQu\u00e9 sientes y qu\u00e9 haces al respecto? \u00bfC\u00f3mo est\u00e1s cruzando tu propia necesidad de ayuda?", "intercesion": "Mar\u00eda, t\u00fa que caminaste d\u00edas enteros para servir a quien te necesitaba, ens\u00e9\u00f1ame que la fragilidad no me a\u00edsla, sino que me une a otros. Ay\u00fadame a reconocer la gracia de Dios en los vulnerables, y a ofrecerles mi presencia sin condescendencia.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_2.mp3"}, {"numero": 3, "titulo": "Tercer Misterio Gozoso: El Nacimiento de Jes\u00fas", "subtitulo": "Pobreza y refugio", "referencia": "Lucas 2:1, 4-7 (DHH)", "evangelio": "Por aquel tiempo, el emperador Augusto orden\u00f3 que se hiciera un censo de todo el mundo. Jos\u00e9 sali\u00f3 del pueblo de Nazaret, de la regi\u00f3n de Galilea, y se fue a Bel\u00e9n. Fue all\u00e1 a inscribirse, junto con Mar\u00eda, su esposa, que se encontraba encinta. Y mientras estaban en Bel\u00e9n, le lleg\u00f3 a Mar\u00eda el tiempo de dar a luz. Y all\u00ed naci\u00f3 su hijo primog\u00e9nito, y lo envolvi\u00f3 en pa\u00f1ales y lo acost\u00f3 en el establo, porque no hab\u00eda alojamiento para ellos en el mes\u00f3n.", "contemplacion": "Lejos del hogar, sin posada, sin hospitalidad\nMar\u00eda y Jos\u00e9 no eligieron dar a luz en un establo. Fueron forzados por las circunstancias: un decreto imperial los desplaz\u00f3 de su hogar, ning\u00fan mes\u00f3n los recibi\u00f3, y la pobreza les cerr\u00f3 todas las puertas.\nEl Hijo de Dios naci\u00f3 refugiado en una cueva de animales. Sin m\u00e9dico, sin comadrona, sin agua caliente, sin cama digna. Mar\u00eda dio a luz en condiciones de extrema precariedad. Jos\u00e9 hizo lo que pudo con lo poco que ten\u00eda.\nY aun as\u00ed, le dieron la bienvenida al Ni\u00f1o.\nSan Jos\u00e9 mantuvo la actitud a pesar de todo: Bienvenido a este mundo, Ni\u00f1o Jes\u00fas. Mar\u00eda lo envolvi\u00f3 en pa\u00f1ales con ternura, lo acost\u00f3 en el pesebre como si fuera la cuna m\u00e1s preciosa del mundo.\nLa pobreza material no les rob\u00f3 la dignidad. La falta de recursos no les impidi\u00f3 amar. La injusticia del mundo no venci\u00f3 su esperanza.\nPorque Dios no necesita abundancia para nacer. Solo necesita un coraz\u00f3n que lo reciba.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 siente el Coraz\u00f3n de Mar\u00eda al dar a luz en un refugio de animales, lejos de su hogar?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 acepta el Coraz\u00f3n de Jes\u00fas al nacer en la pobreza extrema, sin las comodidades b\u00e1sicas?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfQu\u00e9 actitud tienes en los momentos de escasez (falta de agua, dinero, luz el\u00e9ctrica, salud\u2026)? \u00bfC\u00f3mo est\u00e1s cruzando la falta de recursos que limita tu vida?", "intercesion": "Jes\u00fas, t\u00fa que naciste en un establo porque no hab\u00eda lugar para ti, acomp\u00e1\u00f1ame en mi propia pobreza y precariedad. Ens\u00e9\u00f1ame que la escasez no me roba la dignidad, y que puedo dar la bienvenida a la vida incluso cuando falta todo.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_3.mp3"}, {"numero": 4, "titulo": "Cuarto Misterio Gozoso: La Presentaci\u00f3n en el Templo", "subtitulo": "La espada anunciada", "referencia": "Lucas 2:22, 25, 28, 34-35 (DHH)", "evangelio": "Cuando se cumplieron los d\u00edas de la purificaci\u00f3n de ellos, seg\u00fan la ley de Mois\u00e9s, llevaron al ni\u00f1o a Jerusal\u00e9n para presentarlo al Se\u00f1or. Hab\u00eda en Jerusal\u00e9n un hombre llamado Sime\u00f3n, justo y piadoso. Tom\u00f3 al ni\u00f1o en sus brazos y bendijo a Dios. Luego dijo a Mar\u00eda, su madre: \u00abEste ni\u00f1o ser\u00e1 causa de ca\u00edda y de elevaci\u00f3n para muchos en Israel; ser\u00e1 signo de contradicci\u00f3n, y a ti misma una espada te atravesar\u00e1 el coraz\u00f3n.\u00bb", "contemplacion": "El m\u00e1s santo del mundo molestar\u00e1 a muchos\nMar\u00eda sostiene a su hijo reci\u00e9n nacido en el Templo. Todo es alegr\u00eda, gratitud, cumplimiento de la Ley. Pero Sime\u00f3n, movido por el Esp\u00edritu, pronuncia palabras que rompen la paz: Una espada atravesar\u00e1 tu coraz\u00f3n.\nMar\u00eda no entiende del todo. Pero presiente que amar a este Ni\u00f1o le costar\u00e1 todo. Hay p\u00e9rdidas que se anuncian mucho antes de ocurrir. Hay despedidas que empiezan a gestarse en el primer abrazo.\nY aun as\u00ed, Mar\u00eda no huye. No dice: Si este hijo me traer\u00e1 tanto dolor, prefiero no amarlo tanto. Al contrario: guarda estas palabras en su coraz\u00f3n junto con el amor. Acepta amar sabiendo que amar\u00e1 hasta el dolor.\nSime\u00f3n tambi\u00e9n anuncia algo desconcertante: el m\u00e1s santo del mundo (el Mes\u00edas) molestar\u00e1 a muchos. Porque su bondad revelar\u00e1 la falsedad de los hip\u00f3critas. Su justicia incomodar\u00e1 a los injustos. Su verdad ser\u00e1 intolerable para quienes viven en la mentira.\nA veces, lo verdaderamente bueno es insoportable para quienes no quieren cambiar.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 siente el Coraz\u00f3n de Mar\u00eda al escuchar que una espada lo atravesar\u00e1?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 sabe el Coraz\u00f3n de Jes\u00fas sobre su propio destino, siendo a\u00fan un ni\u00f1o en brazos de Sime\u00f3n?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfAlguna vez te ha resultado molesto o insoportable alguien bueno, justo o recto? \u00bfQu\u00e9 dolor anticipas que tu coraz\u00f3n resiste nombrar? \u00bfC\u00f3mo est\u00e1s cruzando la espada anunciada en tu vida?", "intercesion": "Mar\u00eda, t\u00fa que aceptaste la espada profetizada sin huir del amor, ens\u00e9\u00f1ame a no temer el dolor que viene con amar de verdad. Ay\u00fadame a guardar en mi coraz\u00f3n las palabras dif\u00edciles, confiando que Dios me dar\u00e1 fuerza cuando llegue el momento.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_4.mp3"}, {"numero": 5, "titulo": "Quinto Misterio Gozoso: El Ni\u00f1o perdido y hallado en el Templo", "subtitulo": "Crecer duele", "referencia": "Lucas 2:41-46 (DHH)", "evangelio": "Los padres de Jes\u00fas iban todos los a\u00f1os a Jerusal\u00e9n para la fiesta de la Pascua. Cuando Jes\u00fas cumpli\u00f3 doce a\u00f1os, fueron all\u00e1 todos ellos, como era costumbre. Pero pasados aquellos d\u00edas, cuando volv\u00edan a casa, el ni\u00f1o Jes\u00fas se qued\u00f3 en Jerusal\u00e9n, sin que sus padres se dieran cuenta. Pensando que Jes\u00fas iba entre la gente, hicieron un d\u00eda de camino; pero luego, al buscarlo entre los parientes y conocidos, no lo encontraron. As\u00ed que regresaron a Jerusal\u00e9n para buscarlo all\u00ed. Al cabo de tres d\u00edas lo encontraron en el templo, sentado entre los maestros, escuch\u00e1ndolos y haci\u00e9ndoles preguntas.", "contemplacion": "El dolor del crecimiento\nMar\u00eda y Jos\u00e9 vivieron tres d\u00edas de angustia. Hab\u00edan perdido a su hijo. O m\u00e1s bien: su hijo los hab\u00eda dejado atr\u00e1s, ocup\u00e1ndose de las cosas de su Padre Dios.\nJes\u00fas no se escondi\u00f3 por desobediencia. No los abandon\u00f3 por rebeld\u00eda. Simplemente, estaba creciendo. Y crecer duele. No solo al que crece, sino tambi\u00e9n a quienes lo aman.\nA los doce a\u00f1os, Jes\u00fas comenz\u00f3 a descubrir su identidad como Hijo de Dios. Necesitaba ese tiempo en el Templo, dialogando con los maestros, escuchando, preguntando, madurando. Sus padres a\u00fan no entend\u00edan del todo qui\u00e9n era \u00c9l, ni hacia d\u00f3nde lo llevaba su vocaci\u00f3n. Pero ese misterio ya comenzaba a revelarse.\nMar\u00eda y Jos\u00e9 sufrieron esa separaci\u00f3n sin culpa: no fueron malos padres. Jes\u00fas vivi\u00f3 ese \"estir\u00f3n\" sin malicia: no fue un mal hijo. Simplemente, hay momentos en que los hijos toman su propio camino, y eso es voluntad de Dios.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 vive el Coraz\u00f3n de Mar\u00eda al comprender que su hijo ya no es solo suyo, sino tambi\u00e9n del Padre?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 descubre el Coraz\u00f3n de Jes\u00fas sobre s\u00ed mismo cuando se ocupa de las cosas de su Padre Dios?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfQu\u00e9 dolor has sentido al dejar atr\u00e1s la infancia, la casa paterna, las costumbres de otra \u00e9poca? \u00bfC\u00f3mo est\u00e1s cruzando el duelo de crecer, de madurar, de tomar tus propias decisiones?", "intercesion": "Jes\u00fas, t\u00fa que creciste ocup\u00e1ndote de las cosas de tu Padre, ay\u00fadame a aceptar que crecer duele, pero es voluntad de Dios. Ens\u00e9\u00f1ame a soltar lo que ya no me corresponde cargar, y a confiar que mi camino, aunque duela, es el que T\u00fa preparaste para m\u00ed.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_5.mp3"}], "luminosos": [{"numero": 6, "titulo": "Primer Misterio Luminoso: El Bautismo de Jes\u00fas", "subtitulo": "Desgaste y renovaci\u00f3n", "referencia": "Marcos 1:9-11 (DHH)", "evangelio": "Por aquellos d\u00edas, Jes\u00fas sali\u00f3 de Nazaret, que est\u00e1 en la regi\u00f3n de Galilea, y Juan lo bautiz\u00f3 en el r\u00edo Jord\u00e1n. En el momento de salir Jes\u00fas del agua, vio que el cielo se abr\u00eda y que el Esp\u00edritu Santo bajaba sobre \u00e9l como una paloma. Y se oy\u00f3 una voz del cielo, que dec\u00eda: \u00abT\u00fa eres mi Hijo amado, a quien he elegido.\u00bb", "contemplacion": "La vida necesita ser renovada, siempre\nEl agua lava. Restaura. Devuelve al cuerpo lo que el tiempo y el desgaste van quitando. Nadie escapa a esa necesidad. Por m\u00e1s sano que est\u00e9s, por m\u00e1s que cuides tu vida, el cuerpo pide ser lavado, alimentado, descansado, repuesto. Eso no es se\u00f1al de que algo sali\u00f3 mal. Es la condici\u00f3n ordinaria de todo lo que vive.\nJes\u00fas se meti\u00f3 en el Jord\u00e1n. El Verbo eterno, que no envejece ni se desgasta, asumi\u00f3 un cuerpo que s\u00ed lo hace. Un cuerpo que suda, que se cansa, que se ensucia, que necesita agua. Al sumergirse en el r\u00edo, el Hijo de Dios hizo suya esa condici\u00f3n: la de una vida que requiere mantenimiento, renovaci\u00f3n, cuidado constante.\nNo vino a librarse de esa necesidad. Vino a habitarla. Y al habitarla, la santific\u00f3.\nLos males de la vida no son solo las grandes crisis o los golpes inesperados. Son tambi\u00e9n esto: cuidar lo cotidiano, componer el desorden que vuelve cada d\u00eda, realizar esa labor de limpieza que nunca termina de satisfacerse de una vez para siempre. Eso tambi\u00e9n es parte de cargar la cruz. Y Jes\u00fas lo conoce desde adentro, desde el agua del Jord\u00e1n.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 sinti\u00f3 el Coraz\u00f3n Inmaculado de Mar\u00eda cuando educ\u00f3 a su hijo en los h\u00e1bitos de la higiene y el orden?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 sinti\u00f3 Jes\u00fas al estar esperando, en la fila, como uno m\u00e1s, necesitado de purificaci\u00f3n?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfQu\u00e9 \u00e1reas de mi vida requieren de un cuidado constante, con ayuda de Dios?", "intercesion": "Jes\u00fas, t\u00fa que descendiste al Jord\u00e1n y muchas veces lavaste tu cuerpo, cuidaste tu espacio, tus herramientas y tu trabajo, ens\u00e9\u00f1ame a hacer lo mismo. Que yo tambi\u00e9n aprenda a honrar con dignidad el lugar que habito, el cuerpo que me diste, las cosas que pusiste en mis manos. Que el cuidado de lo cotidiano no me pese como una carga, sino que lo viva como t\u00fa lo viviste: con sencillez, con atenci\u00f3n, con amor.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_6.mp3"}, {"numero": 7, "titulo": "Segundo Misterio Luminoso: Las Bodas de Can\u00e1", "subtitulo": "Todo se gasta y consume", "referencia": "Juan 2:1-5 (DHH)", "evangelio": "Dos d\u00edas despu\u00e9s hubo una boda en Can\u00e1, un pueblo de Galilea. La madre de Jes\u00fas estaba all\u00ed, y Jes\u00fas y sus disc\u00edpulos fueron tambi\u00e9n invitados a la boda. Se acab\u00f3 el vino, y la madre de Jes\u00fas le dijo: \u00abYa no tienen vino.\u00bb Jes\u00fas le contest\u00f3: \u00abMujer, \u00bfpor qu\u00e9 me dices esto? Mi hora no ha llegado todav\u00eda.\u00bb Pero ella dijo a los que estaban sirviendo: \u00abHagan todo lo que \u00e9l les diga.\u00bb", "contemplacion": "Todas las cosas materiales se acaban\nEn medio de la fiesta, el vino se termin\u00f3. No por negligencia, sino porque todo lo material se usa, se gasta, se consume, se acaba. Ese es un mal inevitable de la vida finita: nada dura para siempre en este mundo.\nMar\u00eda detect\u00f3 la necesidad antes que nadie. No se qued\u00f3 paralizada ante la escasez. No culp\u00f3 a los organizadores. Simplemente acudi\u00f3 a Jes\u00fas con confianza: Ya no tienen vino.\nJes\u00fas, en un primer momento, parece reacio: Mi hora no ha llegado. Pero Mar\u00eda conoce el coraz\u00f3n de su Hijo. Sabe que \u00c9l es sensible al sufrimiento humano, incluso al peque\u00f1o sufrimiento de una familia humillada por quedarse sin vino en su propia boda.\nY Jes\u00fas responde. No con un serm\u00f3n sobre la austeridad, sino con abundancia creativa. Transforma 600 litros de agua en el mejor vino de la fiesta.\nLa buena noticia es que Mar\u00eda nos ayuda a creer en Jes\u00fas, y \u00c9l abre la puerta de la creatividad productiva para que recibas abundancia incluso cuando todo se est\u00e1 acabando.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 siente el Coraz\u00f3n de Mar\u00eda al percibir la necesidad de los novios?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 mueve el Coraz\u00f3n de Jes\u00fas a realizar su primer milagro ante una necesidad tan \"peque\u00f1a\" como la falta de vino?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfCon qu\u00e9 actitud cuidas y obtienes las cosas que te faltan? \u00bfC\u00f3mo est\u00e1s cruzando la escasez que experimentas hoy?", "intercesion": "Mar\u00eda, t\u00fa que detectaste la necesidad y la llevaste a Jes\u00fas, ens\u00e9\u00f1ame a no quedarme paralizado ante la escasez. Jes\u00fas, t\u00fa que transformaste el agua en vino abundante, abre mi coraz\u00f3n a la creatividad que nace de la confianza en ti.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_7.mp3"}, {"numero": 8, "titulo": "Tercer Misterio Luminoso: El Anuncio del Reino de Dios", "subtitulo": "No preguntes \"por qu\u00e9 sufre\", ayuda", "referencia": "Juan 9:1-4 (DHH)", "evangelio": "Al pasar Jes\u00fas, vio a un hombre que hab\u00eda nacido ciego. Sus disc\u00edpulos le preguntaron: \u00abMaestro, \u00bfpor qu\u00e9 naci\u00f3 ciego este hombre? \u00bfPor el pecado de sus padres, o por su propio pecado?\u00bb Jes\u00fas les contest\u00f3: \u00abNi por su propio pecado ni por el de sus padres; fue m\u00e1s bien para que en \u00e9l se demuestre lo que Dios puede hacer. Mientras sea de d\u00eda, tenemos que hacer el trabajo del que me envi\u00f3.\u00bb", "contemplacion": "No busques culpables, s\u00e9 instrumento de sanaci\u00f3n\nAnte el ciego de nacimiento, los disc\u00edpulos hicieron la pregunta equivocada: Maestro, \u00bfqui\u00e9n pec\u00f3, \u00e9l o sus padres, para que naciera ciego?\nBuscaban una explicaci\u00f3n. Una raz\u00f3n. Un culpable. Quer\u00edan que el sufrimiento tuviera sentido.\nJes\u00fas cort\u00f3 en seco esa l\u00f3gica: \u00abNi \u00e9l pec\u00f3, ni sus padres.\u00bb El mal f\u00edsico de la ceguera no era castigo por pecado. Era simplemente un mal inevitable de la vida finita, una limitaci\u00f3n que este hombre llevaba desde su nacimiento.\nY luego Jes\u00fas a\u00f1ade algo revolucionario: \u00abFue para que en esta oscuridad brille la luz de Dios.\u00bb\nNo dijo que Dios caus\u00f3 la ceguera para tener una oportunidad de sanar. Dijo que en medio de ese mal inevitable, Dios puede actuar. La oscuridad se convierte en escenario para la luz.\nY entonces Jes\u00fas no sigui\u00f3 filosofando. Actu\u00f3. Hizo lodo con saliva, lo unt\u00f3 en los ojos del ciego, y le mand\u00f3 lavarse. El hombre obedeci\u00f3, y vio por primera vez en su vida.\nNo te preguntes \"por qu\u00e9\" alguien sufre. Si puedes, ay\u00fadale.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 siente el Coraz\u00f3n de Mar\u00eda al ver a su Hijo actuar con compasi\u00f3n inmediata?\n2. Desde el Hijo hacia el Padre:\nAl darle vista al ciego, devolver el habla a los mudos, sanar a los paral\u00edticos, etc. \u00bfQu\u00e9 nos revela el Coraz\u00f3n de Jes\u00fas, acerca del papel de Dios ante nuestros sufrimientos?\n3. Hijos y hermanos en el Esp\u00edritu:\nAparte de orar, \u00bfqu\u00e9 haces para aliviar el dolor que hay en el mundo? \u00bfC\u00f3mo est\u00e1s cruzando tu tentaci\u00f3n de buscar culpables, en lugar de ser instrumento de sanaci\u00f3n?", "intercesion": "Jes\u00fas, t\u00fa que sanaste al ciego sin buscar culpables, lib\u00e9rame de la obsesi\u00f3n por encontrar razones al sufrimiento. Ens\u00e9\u00f1ame a actuar con compasi\u00f3n donde puedo remediar el mal, y a confiar en tu luz donde no puedo hacer nada m\u00e1s que acompa\u00f1ar.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_8.mp3"}, {"numero": 9, "titulo": "Cuarto Misterio Luminoso: La Transfiguraci\u00f3n", "subtitulo": "Lo inexplicable nos desconcierta", "referencia": "Marcos 9:2-6 (DHH)", "evangelio": "Seis d\u00edas despu\u00e9s, Jes\u00fas tom\u00f3 aparte a Pedro, a Santiago y a Juan, y los llev\u00f3 a una monta\u00f1a muy alta. All\u00ed, delante de ellos, cambi\u00f3 la apariencia de Jes\u00fas. Su ropa se volvi\u00f3 brillante y m\u00e1s blanca que la nieve. Luego vieron a El\u00edas y a Mois\u00e9s, que estaban conversando con Jes\u00fas. Pedro le dijo a Jes\u00fas: \u00abMaestro, \u00a1qu\u00e9 bien que estemos aqu\u00ed! Vamos a hacer tres chozas: una para ti, otra para Mois\u00e9s y otra para El\u00edas.\u00bb Pero Pedro no sab\u00eda qu\u00e9 decir, porque todos estaban asustados.", "contemplacion": "Temor, desconcierto, confusi\u00f3n\nAnte la Transfiguraci\u00f3n, los ap\u00f3stoles no sab\u00edan qu\u00e9 hacer. Vieron a Jes\u00fas resplandeciente, conversando con Mois\u00e9s y El\u00edas. Escucharon la voz del Padre desde la nube. Y no entendieron nada.\nPedro, nervioso, propuso construir tres chozas. Una idea absurda. \u00bfPara qu\u00e9 chozas si Mois\u00e9s y El\u00edas eran apariciones? Pero no sab\u00eda qu\u00e9 m\u00e1s decir. El Evangelio es honesto: Pedro no sab\u00eda qu\u00e9 decir, porque todos estaban asustados.\nHay experiencias que desbordan nuestra capacidad de comprensi\u00f3n. Momentos en los que la realidad es m\u00e1s grande que nuestras categor\u00edas mentales. Y eso nos desconcierta, nos asusta, nos paraliza.\nEs un mal inevitable de nuestra finitud: no podemos entender todo. Nuestra mente tiene l\u00edmites. Hay misterios que no caben en palabras. Hay experiencias que solo se pueden vivir, no explicar.\nY est\u00e1 bien. No siempre tienes que entender. A veces solo tienes que estar ah\u00ed, asombrado, temblando, sin palabras, dejando que Dios sea m\u00e1s grande que tu comprensi\u00f3n.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 sinti\u00f3 el Coraz\u00f3n de Mar\u00eda cuando sus disc\u00edpulos le contaron lo que vieron en la monta\u00f1a, sin poder explicarlo del todo?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 nos revela el Coraz\u00f3n de Jes\u00fas sobre la gloria divina, m\u00e1s all\u00e1 de lo que podemos comprender?\n3. Hijos y hermanos en el Esp\u00edritu:\nRecuerda una experiencia tuya o ajena, dif\u00edcil de explicar o entender. \u00bfC\u00f3mo est\u00e1s cruzando tu necesidad de entenderlo todo antes de aceptarlo?", "intercesion": "Jes\u00fas, t\u00fa que te transfiguraste ante ap\u00f3stoles desconcertados, ay\u00fadame a aceptar que no siempre entender\u00e9 lo que vivo. Ens\u00e9\u00f1ame que el misterio no es enemigo de la fe, sino el espacio donde tu gloria se manifiesta m\u00e1s all\u00e1 de mi comprensi\u00f3n.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_9.mp3"}, {"numero": 10, "titulo": "Quinto Misterio Luminoso: La Instituci\u00f3n de la Eucarist\u00eda", "subtitulo": "Solo puedes estar en un lugar", "referencia": "Lucas 22:19-20 (DHH)", "evangelio": "Mientras com\u00edan, Jes\u00fas tom\u00f3 en sus manos el pan y, habiendo dado gracias a Dios, lo parti\u00f3 y se lo dio a ellos, diciendo: \u00abEsto es mi cuerpo, que es entregado en favor de ustedes. Hagan esto en memoria de m\u00ed.\u00bb Lo mismo hizo con la copa despu\u00e9s de la cena, diciendo: \u00abEsta copa es la nueva alianza confirmada con mi sangre, la cual es derramada en favor de ustedes.\u00bb", "contemplacion": "La limitaci\u00f3n del cuerpo, resuelta en el Sacramento\nLos humanos solo podemos estar en un lugar a la vez. Esa es una limitaci\u00f3n inevitable de nuestra corporeidad finita. No puedes abrazar a tu madre en M\u00e9xico y a un amigo en Espa\u00f1a al mismo tiempo. No puedes estar en dos sitios simult\u00e1neamente.\nJes\u00fas, en su humanidad, tambi\u00e9n vivi\u00f3 esa limitaci\u00f3n. Cuando estaba en Galilea, no pod\u00eda estar en Jerusal\u00e9n. Cuando visitaba a unos disc\u00edpulos, otros quedaban lejos. Y sab\u00eda que pronto subir\u00eda al Padre, dejando a sus amigos solos en la tierra.\nPor eso, en la \u00daltima Cena, Jes\u00fas consagr\u00f3 el pan y el vino. No como un mero s\u00edmbolo, sino como su presencia real, viva, permanente. Para quedarse contigo a donde vayas. Para multiplicar su presencia en cada sagrario del mundo, rompiendo la limitaci\u00f3n del espacio.\nJes\u00fas no se conform\u00f3 con la distancia inevitable. Cre\u00f3 un camino para estar contigo siempre, en cada Eucarist\u00eda, en cada tabern\u00e1culo, hasta el fin de los tiempos.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 siente el Coraz\u00f3n de Mar\u00eda al saber que su Hijo encontr\u00f3 el modo de quedarse presente en cada Eucarist\u00eda?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 amor mueve el Coraz\u00f3n de Jes\u00fas a inventar la Eucarist\u00eda, para vencer la limitaci\u00f3n de la distancia?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfQu\u00e9 pretextos pones para dejar de acercarte m\u00e1s a la Eucarist\u00eda? \u00bfC\u00f3mo est\u00e1s cruzando tu limitaci\u00f3n de no poder estar cerca de todos los que amas?", "intercesion": "Jes\u00fas, t\u00fa que te quedaste en la Eucarist\u00eda para vencer la distancia, ay\u00fadame a valorar tu presencia real en cada sagrario. Ens\u00e9\u00f1ame que aunque yo no pueda estar en todas partes, t\u00fa s\u00ed puedes estar conmigo siempre, en cada Comuni\u00f3n.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_10.mp3"}], "dolorosos": [{"numero": 11, "titulo": "Primer Misterio Doloroso: La Oraci\u00f3n en el Huerto", "subtitulo": "El coraz\u00f3n que se estremece", "referencia": "Mateo 26:36-39 (DHH)", "evangelio": "Jes\u00fas fue con sus disc\u00edpulos a un lugar llamado Getseman\u00ed, y les dijo: \u00abSi\u00e9ntense aqu\u00ed mientras voy m\u00e1s all\u00e1 a orar.\u00bb Se llev\u00f3 a Pedro y a los dos hijos de Zebedeo, y comenz\u00f3 a sentirse muy triste y angustiado. Les dijo: \u00abSiento en mi alma una tristeza de muerte. Qu\u00e9dense aqu\u00ed y permanezcan despiertos conmigo.\u00bb Yendo un poco m\u00e1s adelante, se inclin\u00f3 hasta tocar el suelo con su frente, y or\u00f3 as\u00ed: \u00abPadre m\u00edo, si es posible, l\u00edbrame de este trago amargo.\u00bb", "contemplacion": "Jes\u00fas acept\u00f3 tener un coraz\u00f3n humano como el tuyo\nJes\u00fas, el Hijo de Dios, no vino blindado contra las emociones. Acept\u00f3 tener un coraz\u00f3n humano, capaz de sentir tristeza, angustia, ansiedad, miedo.\nEn Getseman\u00ed, su coraz\u00f3n se estremece. Suda sangre. Tiembla ante lo que viene. No quiere la Cruz. No quiere el abandono. No quiere morir. Y no lo oculta. No finge fortaleza. Comparte su dolor con Pedro, Santiago y Juan: Siento en mi alma una tristeza de muerte.\nAlgunos piensan que la vida espiritual avanzada significa \"no sentir emociones dif\u00edciles\". Que la santidad es estar siempre en paz, siempre sereno, siempre fuerte.\nPero Jes\u00fas nos ense\u00f1a lo contrario: ser santo es sentir plenamente, incluso el dolor, y aun as\u00ed elegir el amor. Ser santo no es no tener miedo. Es tener miedo y seguir avanzando. Es sentir la angustia y no huir de la voluntad del Padre.\nTus sentimientos dif\u00edciles no son pecado. Son parte de tu humanidad, como lo fueron de la humanidad de Cristo.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 siente el Coraz\u00f3n de Mar\u00eda al saber que su Hijo est\u00e1 agonizando solo en la noche?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 batalla libra el Coraz\u00f3n de Jes\u00fas entre el miedo humano y la confianza en el Padre?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfQu\u00e9 sentimientos tienes que no aceptas o rechazas? \u00bfC\u00f3mo est\u00e1s cruzando las emociones dif\u00edciles que habitan en ti?", "intercesion": "Jes\u00fas, t\u00fa que sentiste tristeza de muerte en Getseman\u00ed, ay\u00fadame a no rechazar mis propias emociones dif\u00edciles. Ens\u00e9\u00f1ame que sentir angustia no me aleja de ti, sino que me hace m\u00e1s humano, m\u00e1s parecido a tu coraz\u00f3n.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_11.mp3"}, {"numero": 12, "titulo": "Segundo Misterio Doloroso: La Flagelaci\u00f3n", "subtitulo": "El cuerpo vulnerable", "referencia": "Juan 19:1-3 (DHH)", "evangelio": "Pilato tom\u00f3 entonces a Jes\u00fas y mand\u00f3 azotarlo. Los soldados trenzaron una corona de espinas, la pusieron en la cabeza de Jes\u00fas y lo vistieron con una capa de color rojo oscuro. Luego se acercaron a \u00e9l, dici\u00e9ndole: \u00ab\u00a1Viva el Rey de los jud\u00edos!\u00bb Y le pegaban en la cara.", "contemplacion": "Todo cuerpo sensible es un cuerpo vulnerable\nJes\u00fas acept\u00f3 su cuerpo, capaz de sentir la suavidad, pero tambi\u00e9n la dureza. El fr\u00edo, y tambi\u00e9n el calor. El placer, y el dolor.\nEn la flagelaci\u00f3n, su cuerpo experimenta el l\u00edmite extremo de la sensibilidad: el l\u00e1tigo desgarra su piel, la sangre brota, los nervios gritan. Cada golpe es una prueba brutal de que todo cuerpo sensible es un cuerpo vulnerable.\nNo puedes tener un cuerpo capaz de sentir el abrazo de tu madre sin que ese mismo cuerpo pueda sentir el golpe del verdugo. No puedes tener terminaciones nerviosas que perciban la caricia sin que esas mismas terminaciones perciban el dolor.\nLa sensibilidad es un don y una cruz. Nos permite experimentar la belleza, pero tambi\u00e9n nos expone al sufrimiento. Jes\u00fas no rechaz\u00f3 esa condici\u00f3n. La asumi\u00f3 hasta las \u00faltimas consecuencias.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 siente el Coraz\u00f3n de Mar\u00eda al imaginar el cuerpo de su Hijo destrozado por los azotes?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 acepta el Coraz\u00f3n de Jes\u00fas al soportar el dolor extremo en su cuerpo vulnerable?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfQu\u00e9 sensaciones f\u00edsicas (olores, ruidos, temperatura, dolor) te resultan insoportables o dif\u00edciles de sobrellevar? \u00bfC\u00f3mo est\u00e1s cruzando la vulnerabilidad de tu propio cuerpo?", "intercesion": "Jes\u00fas, t\u00fa que aceptaste un cuerpo vulnerable y sensible, ay\u00fadame a no despreciar mi propia corporeidad. Ens\u00e9\u00f1ame que sentir dolor no es debilidad, sino prueba de que estoy vivo, de que soy humano como t\u00fa.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_12.mp3"}, {"numero": 13, "titulo": "Tercer Misterio Doloroso: La Coronaci\u00f3n de Espinas", "subtitulo": "Como te ven, te tratan", "referencia": "Mateo 27:27-30 (DHH)", "evangelio": "Los soldados del gobernador llevaron a Jes\u00fas al palacio y reunieron toda la tropa alrededor de \u00e9l. Le quitaron su ropa, lo vistieron con una capa roja, trenzaron una corona de espinas y se la pusieron en la cabeza, y en la mano derecha le pusieron una vara. Luego se arrodillaron delante de \u00e9l, y burl\u00e1ndose le dec\u00edan: \u00ab\u00a1Viva el Rey de los jud\u00edos!\u00bb Tambi\u00e9n lo escup\u00edan, y con la misma vara le golpeaban la cabeza.", "contemplacion": "La gente te trata seg\u00fan la idea que tiene de ti\nAun siendo el Rey de Reyes, Jes\u00fas fue maltratado, coronado de espinas, vestido de burla. \u00bfPor qu\u00e9? Porque los soldados no lo ve\u00edan como \u00c9l era. Lo ve\u00edan como un preso, un fracasado, un loco que dec\u00eda ser rey.\nY lo trataron seg\u00fan esa percepci\u00f3n distorsionada.\nDice el refr\u00e1n: \u00abComo te ven, te tratan.\u00bb Es decir, la gente te trata seg\u00fan la idea que tiene de ti, no como t\u00fa eres.\nEso es un mal inevitable de vivir en comunidad: no siempre ser\u00e1s comprendido. No siempre ser\u00e1s visto con justicia. Habr\u00e1 quienes te juzguen sin conocerte, te malinterpreten, te traten peor de lo que mereces.\nY no hay mucho que puedas hacer al respecto. No puedes controlar la percepci\u00f3n ajena. No puedes obligar a nadie a verte como realmente eres.\nJes\u00fas no perdi\u00f3 energ\u00eda defendi\u00e9ndose de los soldados. No intent\u00f3 convencerlos de su dignidad. Guard\u00f3 silencio. Y en ese silencio, preserv\u00f3 su paz interior.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 siente el Coraz\u00f3n de Mar\u00eda al saber que su Hijo, el Rey verdadero, es coronado de espinas en burla?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 guarda el Coraz\u00f3n de Jes\u00fas en el silencio ante quienes lo maltratan por ignorancia?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfQu\u00e9 haces al saber que alguien tiene una idea equivocada sobre ti? \u00bfC\u00f3mo est\u00e1s cruzando el dolor de ser malinterpretado o maltratado injustamente?", "intercesion": "Jes\u00fas, t\u00fa que fuiste coronado de espinas por quienes no te conoc\u00edan, ay\u00fadame a no desgastarme intentando controlar lo que otros piensan de m\u00ed. Ens\u00e9\u00f1ame que mi dignidad no depende de la percepci\u00f3n ajena, sino de la verdad de qui\u00e9n soy ante Dios.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_13.mp3"}, {"numero": 14, "titulo": "Cuarto Misterio Doloroso: Jes\u00fas carga la Cruz", "subtitulo": "Todo requiere esfuerzo", "referencia": "Lucas 23:26-28 (DHH)", "evangelio": "Llevaron a Jes\u00fas para crucificarlo. En el camino encontraron a un hombre llamado Sim\u00f3n, natural de Cirene, y lo obligaron a cargar con la cruz de Jes\u00fas. Muchas personas lo segu\u00edan; entre ellas hab\u00eda mujeres que lloraban de tristeza por \u00e9l. Jes\u00fas las mir\u00f3, y les dijo: \u00abMujeres de Jerusal\u00e9n, no lloren por m\u00ed; lloren m\u00e1s bien por ustedes mismas y por sus hijos.\u00bb", "contemplacion": "En esta tierra, todo requiere superar obst\u00e1culos\nJes\u00fas camina hacia el Calvario cargando la cruz. Cada paso es un esfuerzo. El peso del madero aplasta sus hombros. El cansancio extremo. Las ca\u00eddas. El cuerpo destrozado que apenas puede sostenerse.\nY aun as\u00ed, sigue caminando.\nEn esta tierra, todo lo que hagas requiere superar obst\u00e1culos, esforzarte y ser paciente. Levantarte de la cama, higiene, alimentaci\u00f3n, convivencia, estudio, trabajo, traslado... todo demanda energ\u00eda. Todo implica vencer la inercia, la gravedad, el cansancio.\nEso no es castigo. Es la condici\u00f3n de la vida finita. Vivir es moverse contra resistencias.\nJes\u00fas no se quej\u00f3 del esfuerzo. Tampoco lo glorific\u00f3. Simplemente lo acept\u00f3 como parte del camino. Y cuando su cuerpo ya no pudo m\u00e1s, acept\u00f3 la ayuda de Sim\u00f3n de Cirene. No fue debilidad. Fue humildad.\nEl esfuerzo es inevitable. Pero no tienes que cargarlo solo.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 siente el Coraz\u00f3n de Mar\u00eda al ver a su Hijo caer una y otra vez bajo el peso de la cruz?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 sostiene el Coraz\u00f3n de Jes\u00fas para seguir avanzando cuando el cuerpo ya no puede m\u00e1s?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfC\u00f3mo est\u00e1s aceptando el trabajo y los esfuerzos de cada d\u00eda? \u00bfC\u00f3mo est\u00e1s cruzando el cansancio que te pesa?", "intercesion": "Jes\u00fas, t\u00fa que caminaste al Calvario cargando la cruz, ay\u00fadame a aceptar que vivir requiere esfuerzo constante. Ens\u00e9\u00f1ame que el cansancio no es fracaso, y que pedir ayuda cuando no puedo m\u00e1s es sabidur\u00eda, no debilidad.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_14.mp3"}, {"numero": 15, "titulo": "Quinto Misterio Doloroso: La Crucifixi\u00f3n y Muerte de Jes\u00fas", "subtitulo": "Somos mortales", "referencia": "Lucas 23:33-34, 44-46 (DHH)", "evangelio": "Cuando llegaron al lugar llamado \u00abLa Calavera\u00bb, crucificaron a Jes\u00fas y a los dos criminales, uno a su derecha y otro a su izquierda. Jes\u00fas dijo: \u00abPadre, perd\u00f3nalos, porque no saben lo que hacen.\u00bb Era como al mediod\u00eda, cuando el sol dej\u00f3 de brillar, y todo el pa\u00eds qued\u00f3 en oscuridad hasta las tres de la tarde. La cortina del templo se rasg\u00f3 por la mitad. Jes\u00fas grit\u00f3 con fuerza: \u00ab\u00a1Padre, en tus manos encomiendo mi esp\u00edritu!\u00bb Y al decir esto, muri\u00f3.", "contemplacion": "Morir es el trauma inevitable para avanzar\nDesde el \u00fatero, como todo ser humano, Jes\u00fas, t\u00fa y yo somos mortales. Nacer es comenzar a morir. Cada d\u00eda que vives es un d\u00eda menos que te queda. No hay escape.\nMorir es el trauma inevitable para avanzar hacia la siguiente etapa, definitiva: el para\u00edso, donde Cristo nos espera para estar con \u00c9l.\nJes\u00fas no evit\u00f3 la muerte. La atraves\u00f3. Sinti\u00f3 el dolor extremo. El abandono. La oscuridad. El \u00faltimo aliento. Y entonces, entreg\u00f3 su esp\u00edritu al Padre.\nNo muri\u00f3 derrotado. Muri\u00f3 confiando. No muri\u00f3 maldiciendo. Muri\u00f3 perdonando. No muri\u00f3 solo. Muri\u00f3 encomend\u00e1ndose al amor del Padre.\nY al tercer d\u00eda, resucit\u00f3.\nLa muerte no tiene la \u00faltima palabra. Es solo el portal hacia la vida plena. Pero para atravesar ese portal, hay que soltar. Hay que exhalar el \u00faltimo aliento. Hay que confiar que del otro lado, Dios espera.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 siente el Coraz\u00f3n de Mar\u00eda al recibir el cuerpo muerto de su Hijo en sus brazos?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 entrega el Coraz\u00f3n de Jes\u00fas al Padre, en el momento de morir en la cruz?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfQu\u00e9 sientes y piensas al saber que eres mortal? \u00bfC\u00f3mo est\u00e1s cruzando tu propio miedo a la muerte?", "intercesion": "Jes\u00fas, t\u00fa que moriste confiando en el Padre, ay\u00fadame a no huir de mi propia mortalidad. Ens\u00e9\u00f1ame que morir es atravesar un portal, y que del otro lado t\u00fa me esperas con los brazos abiertos.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_15.mp3"}], "gloriosos": [{"numero": 16, "titulo": "Primer Misterio Glorioso: La Resurrecci\u00f3n", "subtitulo": "El dolor que impide ver a Dios", "referencia": "Lucas 24:13-18 (DHH)", "evangelio": "Aquel mismo d\u00eda, dos de los disc\u00edpulos iban a un pueblo llamado Ema\u00fas. Iban hablando de todo lo que hab\u00eda pasado. Mientras conversaban y discut\u00edan, Jes\u00fas mismo se acerc\u00f3 y comenz\u00f3 a caminar con ellos. Pero aunque lo ve\u00edan, algo les imped\u00eda darse cuenta de qui\u00e9n era. Jes\u00fas les pregunt\u00f3: \u00ab\u00bfDe qu\u00e9 van hablando ustedes por el camino?\u00bb Se detuvieron tristes, y uno de ellos, que se llamaba Cleof\u00e1s, contest\u00f3: \u00ab\u00bfEres t\u00fa el \u00fanico que ha estado en Jerusal\u00e9n y no sabe lo que all\u00ed ha pasado en estos d\u00edas?\u00bb", "contemplacion": "La tristeza imped\u00eda que reconocieran a Jes\u00fas\nLos disc\u00edpulos de Ema\u00fas caminaban con el coraz\u00f3n roto. Jes\u00fas hab\u00eda muerto. Todo hab\u00eda terminado. Sus esperanzas estaban sepultadas.\nY entonces, Jes\u00fas mismo se acerc\u00f3 y camin\u00f3 con ellos. Pero no lo reconocieron. \u00bfPor qu\u00e9? Porque la tristeza y las l\u00e1grimas les imped\u00edan ver.\nEl dolor los hab\u00eda cegado. La indignaci\u00f3n del duelo no les permit\u00eda aceptar los testimonios de la resurrecci\u00f3n. Estaban tan enfocados en la p\u00e9rdida que no pod\u00edan percibir la presencia viva de Cristo junto a ellos.\nA veces, el dolor nos impide ver a Dios caminando con nosotros. No porque Dios est\u00e9 ausente, sino porque nuestras l\u00e1grimas nublan la mirada. No porque Dios no act\u00fae, sino porque nuestra tristeza nos cierra a la esperanza.\nJes\u00fas no se ofendi\u00f3 por su ceguera. No los abandon\u00f3. Sigui\u00f3 caminando con ellos, con paciencia, explic\u00e1ndoles las Escrituras, hasta que por fin, al partir el pan, se les abrieron los ojos.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 siente el Coraz\u00f3n de Mar\u00eda al saber que su Hijo resucit\u00f3, venciendo la muerte para siempre?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 experimenta el Coraz\u00f3n de Jes\u00fas resucitado al caminar con disc\u00edpulos que no lo reconocen por la tristeza?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfQu\u00e9 dolor te impide ver a Dios contigo? \u00bfC\u00f3mo est\u00e1s cruzando la ceguera espiritual que nace del sufrimiento?", "intercesion": "Jes\u00fas resucitado, t\u00fa que caminaste con disc\u00edpulos ciegos de dolor, abre mis ojos para reconocerte presente en mi vida. Ay\u00fadame a no dejar que la tristeza me ciegue, y ens\u00e9\u00f1ame que aun cuando no te veo, t\u00fa caminas conmigo.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_16.mp3"}, {"numero": 17, "titulo": "Segundo Misterio Glorioso: La Ascensi\u00f3n", "subtitulo": "Lo demasiado bueno cuesta creerlo", "referencia": "Mateo 28:16-19 (DHH)", "evangelio": "Los once disc\u00edpulos fueron a Galilea, al monte que Jes\u00fas les hab\u00eda indicado. Y cuando vieron a Jes\u00fas, lo adoraron, aunque algunos dudaban. Jes\u00fas se acerc\u00f3 y les dijo: \u00abSe me ha dado toda autoridad en el cielo y en la tierra. Vayan, pues, a las gentes de todas las naciones, y h\u00e1ganlas mis disc\u00edpulos; baut\u00edcenlas en el nombre del Padre, del Hijo y del Esp\u00edritu Santo.\u00bb", "contemplacion": "Algunos adoraban, otros dudaban\nEn el monte de la Ascensi\u00f3n, algunos disc\u00edpulos se postraban ante el Resucitado. Otros dudaban. No por malicia, sino por incapacidad de aceptar algo \"demasiado bueno\".\nHab\u00edan visto a Jes\u00fas morir. Lo hab\u00edan llorado. Y ahora estaba ah\u00ed, vivo, glorioso, a punto de subir al Padre. Era demasiado hermoso para ser verdad.\nA veces somos incapaces de reconocer y aceptar las cosas buenas que nos pasan. Nos acostumbramos tanto al dolor que la alegr\u00eda nos desconcierta. Nos adaptamos tanto a la p\u00e9rdida que el reencuentro nos parece imposible.\nEs un mal inevitable de nuestra herida interior: desconfiar de la bondad, esperar siempre lo peor, no atrevernos a creer en la resurrecci\u00f3n.\nPero Jes\u00fas no rechaz\u00f3 a los que dudaban. No los expuls\u00f3 del monte. Los envi\u00f3 de todas formas: Vayan y hagan disc\u00edpulos. Porque la misi\u00f3n no es solo para los que tienen fe perfecta. Es tambi\u00e9n para los que dudan, pero siguen caminando.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 siente el Coraz\u00f3n de Mar\u00eda al ver a su Hijo glorioso subir al Padre, dej\u00e1ndola una vez m\u00e1s?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 nos revela el Coraz\u00f3n de Jes\u00fas al enviar en misi\u00f3n incluso a quienes todav\u00eda dudan?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfQu\u00e9 cosas buenas te resultan dif\u00edciles de reconocer y aceptar? \u00bfC\u00f3mo est\u00e1s cruzando tu desconfianza ante la bondad de Dios?", "intercesion": "Jes\u00fas, t\u00fa que ascendiste al Padre enviando incluso a los que dudaban, ay\u00fadame a atreverme a creer en lo bueno. Ens\u00e9\u00f1ame que la resurrecci\u00f3n no es demasiado hermosa para ser verdad, sino la verdad m\u00e1s hermosa que existe.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_17.mp3"}, {"numero": 18, "titulo": "Tercer Misterio Glorioso: La Venida del Esp\u00edritu Santo", "subtitulo": "La plenitud que otros ridiculizan", "referencia": "Hechos 1:14; 2:1-4, 13 (DHH)", "evangelio": "Todos ellos se reun\u00edan siempre para orar con algunas mujeres, con Mar\u00eda la madre de Jes\u00fas, y con sus hermanos. Cuando lleg\u00f3 la fiesta de Pentecost\u00e9s, estaban todos juntos en el mismo lugar. De repente, un gran ruido que ven\u00eda del cielo, como de un viento fuerte, reson\u00f3 en toda la casa donde ellos estaban. Y se les aparecieron lenguas como de fuego que se repartieron, y sobre cada uno de ellos se asent\u00f3 una. Y todos quedaron llenos del Esp\u00edritu Santo. Algunos se burlaban y dec\u00edan: \u00abEstos est\u00e1n borrachos.\u00bb", "contemplacion": "La plenitud espiritual confundida con embriaguez\nPersonas llenas del Esp\u00edritu Santo, repletas de Dios, hablan con ardor y luz en su mirada, con valent\u00eda, compasi\u00f3n y alegr\u00eda desbordante.\nY la gente se burlaba de ellos diciendo: \u00abEst\u00e1n borrachos.\u00bb\nEs un mal inevitable de vivir en un mundo esc\u00e9ptico: cuando experimentas la plenitud del Esp\u00edritu, habr\u00e1 quienes te ridiculicen. Cuando vives con gozo profundo, habr\u00e1 quienes te malinterpreten. Cuando tu coraz\u00f3n arda con el fuego de Pentecost\u00e9s, habr\u00e1 quienes te acusen de estar fuera de ti.\nNo porque sean malos, sino porque no han experimentado lo que t\u00fa vives. Y lo que no se entiende, se ridiculiza.\nMar\u00eda estaba ah\u00ed, en medio de los disc\u00edpulos llenos del Esp\u00edritu. Ella, que guard\u00f3 todo en su coraz\u00f3n, que vivi\u00f3 Pentecost\u00e9s sin aspavientos pero con hondura infinita. No les import\u00f3 la burla. Siguieron proclamando la Buena Noticia.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 siente el Coraz\u00f3n de Mar\u00eda al ver cumplida la promesa de Jes\u00fas: el Esp\u00edritu Santo descendiendo sobre la comunidad?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 dones env\u00eda el Coraz\u00f3n de Jes\u00fas desde el Padre, para que sus disc\u00edpulos no se queden paralizados ante el mal?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfQu\u00e9 haces cuando alguien ridiculiza a una buena persona? \u00bfC\u00f3mo est\u00e1s cruzando el miedo a ser malinterpretado cuando vives con plenitud espiritual?", "intercesion": "Esp\u00edritu Santo, t\u00fa que llenaste a los disc\u00edpulos con fuego en Pentecost\u00e9s, llena tambi\u00e9n mi coraz\u00f3n con tu ardor. Lib\u00e9rame del miedo al rid\u00edculo, y ay\u00fadame a vivir con la plenitud que viene de ti, sin importar lo que otros digan.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_18.mp3"}, {"numero": 19, "titulo": "Cuarto Misterio Glorioso: La Asunci\u00f3n de Mar\u00eda", "subtitulo": "Todo cuerpo vuelve al polvo", "referencia": "Lucas 1:46-49 (DHH)", "evangelio": "Mar\u00eda dijo: \u00abMi alma alaba la grandeza del Se\u00f1or; mi esp\u00edritu se alegra en Dios mi Salvador. Porque Dios ha puesto sus ojos en m\u00ed, su humilde esclava, y desde ahora siempre me llamar\u00e1n dichosa; porque el Todopoderoso ha hecho en m\u00ed grandes cosas. \u00a1Santo es su nombre!\u00bb", "contemplacion": "Dios liber\u00f3 a Mar\u00eda de la humillaci\u00f3n final\nAunque cuides tu salud y belleza, lamentablemente en el sepulcro o crematorio, el cuerpo se descompondr\u00e1 hasta volver al polvo del que fue creado.\nEs el mal inevitable m\u00e1s humillante: la corrupci\u00f3n de la carne. El cuerpo que fue templo del Esp\u00edritu, que am\u00f3, que abraz\u00f3, que dio vida, terminar\u00e1 deshecho, irreconocible, polvo.\nPero Cristo liber\u00f3 de esa humillaci\u00f3n a su Madre.\nMar\u00eda muri\u00f3, s\u00ed. Pero su cuerpo no conoci\u00f3 la corrupci\u00f3n. Fue asunta al cielo, cuerpo y alma, anticipando la resurrecci\u00f3n final que todos esperamos.\n\u00bfPor qu\u00e9 Dios hizo esto con Mar\u00eda? Porque su cuerpo fue el primer sagrario. Porque en su vientre habit\u00f3 el Verbo encarnado. Porque ella dio su carne para que el Hijo de Dios tuviera carne.\nY Dios no permiti\u00f3 que ese cuerpo sagrado se deshiciera en la tumba.\nNos recuerda que nuestro cuerpo tambi\u00e9n resucitar\u00e1. Que la corrupci\u00f3n del sepulcro no es el final. Que Dios valora tanto tu cuerpo que lo restaurar\u00e1 glorioso en la resurrecci\u00f3n final.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 siente el Coraz\u00f3n de Mar\u00eda al ser asunta al cielo, anticipando la gloria que todos esperamos?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 mueve al Coraz\u00f3n de Jes\u00fas a preservar el cuerpo de su Madre de la corrupci\u00f3n del sepulcro?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfQu\u00e9 tanto valoras tu salud y belleza? \u00bfC\u00f3mo est\u00e1s cruzando tu miedo a la corrupci\u00f3n del cuerpo en la muerte?", "intercesion": "Mar\u00eda, t\u00fa que fuiste asunta al cielo en cuerpo y alma, ens\u00e9\u00f1ame a valorar mi cuerpo como templo del Esp\u00edritu. Ay\u00fadame a no temer la muerte, confiando que Dios tambi\u00e9n restaurar\u00e1 mi cuerpo en la resurrecci\u00f3n final.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_19.mp3"}, {"numero": 20, "titulo": "Quinto Misterio Glorioso: La Coronaci\u00f3n de Mar\u00eda", "subtitulo": "Los humildes reciben la gloria", "referencia": "Lucas 1:51-53 (DHH)", "evangelio": "Mar\u00eda dijo: \u00abDios ha mostrado el poder de su brazo, deshizo los planes de los orgullosos, quit\u00f3 del trono a los poderosos y puso en alto a los humildes. Llen\u00f3 de bienes a los hambrientos y despidi\u00f3 a los ricos con las manos vac\u00edas.\u00bb", "contemplacion": "El \u00fanico reino que no tendr\u00e1 fin\nEl Reino de Dios es el \u00fanico reino que no tendr\u00e1 fin. Ning\u00fan rey, emperador o gobernante de la historia recibi\u00f3 la m\u00e1xima corona de gloria.\n\u00bfQui\u00e9n la recibi\u00f3? La Mujer humilde y creyente que nos dio al Mes\u00edas.\nMar\u00eda, la joven de Nazaret. La refugiada en Egipto. La madre dolorosa al pie de la Cruz. La orante silenciosa en Pentecost\u00e9s. Ella es coronada Reina del cielo y de la tierra.\nNo por sus logros pol\u00edticos. No por su poder militar. No por su riqueza. Por su fe. Por su s\u00ed. Por su humildad.\nDios invierte todas las l\u00f3gicas del mundo. Los \u00faltimos son primeros. Los humildes son exaltados. Los peque\u00f1os son grandes en el Reino.\nY Mar\u00eda, coronada Reina, nos ense\u00f1a que la gloria definitiva no es para quienes acumulan poder terrenal, sino para quienes le dan la bienvenida al amor de Dios con coraz\u00f3n sencillo.\n\u00bfQu\u00e9 personas merecen homenaje y honor, pero nadie se los da? Dios los ve. Y en el Reino, ellos brillar\u00e1n m\u00e1s que todos los poderosos de la tierra.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 siente el Coraz\u00f3n de Mar\u00eda al ser coronada Reina del cielo por su Hijo?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 vive el Coraz\u00f3n de Jes\u00fas al coronar a su Madre con la gloria eterna?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfQu\u00e9 personas merecen homenaje y honor, pero nadie se los da? \u00bfC\u00f3mo est\u00e1s cruzando tu tentaci\u00f3n de buscar gloria terrenal en lugar de humildad que lleva a la gloria eterna?", "intercesion": "Mar\u00eda, Reina humilde coronada de gloria, ens\u00e9\u00f1ame que la grandeza verdadera est\u00e1 en la peque\u00f1ez. Ay\u00fadame a valorar a quienes el mundo desprecia, y a vivir con la humildad que conduce a la gloria eterna.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_20.mp3"}]}, "audio_rezo": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/rezo.mp3", "audio_canto": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/AveMaria_Jacob_Arcadelt_coro_Laus%20Deo_Aguascalientes_2026.mp3"};
 
-```
-<script id="cuaderno-data" type="application/json">
-```
+var BLOQUE_META = {
+gozosos:   {label:“Misterios Gozosos”,  emoji:”\ud83d\ude0a”,color:”#F6A623”,days:[1,6]},
+luminosos: {label:“Misterios Luminosos”, emoji:”\u2728”,      color:”#F5C518”,days:[4]},
+dolorosos: {label:“Misterios Dolorosos”, emoji:”\u271d\ufe0f”,color:”#C0392B”,days:[2,5]},
+gloriosos: {label:“Misterios Gloriosos”, emoji:”\ud83d\udc51”,color:”#8E44AD”,days:[0,3]}
+};
+var DAY_NAMES=[“Domingo”,“Lunes”,“Martes”,“Mi\u00e9rcoles”,“Jueves”,“Viernes”,“S\u00e1bado”];
+var ORDS=[“Primer”,“Segundo”,“Tercer”,“Cuarto”,“Quinto”];
+var MLABELS=[“Por Mar\u00eda hacia Jes\u00fas”,“Desde el Hijo hacia el Padre”,“Hijos y hermanos en el Esp\u00edritu”];
+var MCOLORS=[”#FF7A00”,”#C0392B”,”#27AE60”];
 
-{
-“nivel”: “CruzAndo la Cruz”,
-“cuaderno”: “Males”,
-“numero”: “1”,
-“subtitulos_bloque”: {
-“gozosos”: “La vulnerabilidad gozosa”,
-“luminosos”: “Límites que dan luz”,
-“dolorosos”: “Límites que salvan”,
-“gloriosos”: “El mal no es el final”
-},
-“misterios”: {
-“gozosos”: [
-{
-“numero”: 1,
-“titulo”: “Primer Misterio Gozoso: La Anunciación”,
-“subtitulo”: “Ser humano es ser vulnerable”,
-“referencia”: “Lucas 1:26-31 (DHH)”,
-“evangelio”: “En el sexto mes, el ángel Gabriel fue enviado por Dios a una ciudad de Galilea llamada Nazaret, a una joven virgen llamada María, comprometida para casarse con un hombre llamado José, descendiente del rey David. El ángel entró en el lugar donde ella estaba, y le dijo: «¡Te saludo, favorecida de Dios! El Señor está contigo.» María quedó muy conmovida al oír estas palabras, y se preguntaba qué significaría aquel saludo. El ángel le dijo: «No tengas miedo, María, pues tú gozas del favor de Dios. Ahora vas a quedar encinta: tendrás un hijo, y le pondrás por nombre Jesús.»”,
-“contemplacion”: “Desde la concepción, ser humano es ser vulnerable\nDios eligió hacerse humano comenzando por donde todos comenzamos: siendo frágil.\nJesús no apareció en el mundo como un adulto poderoso. Se hizo embrión en el vientre de María. Diminuto, silencioso, expuesto. Su vida, durante nueve meses, estuvo sostenida por lo más delicado que existe: la carne de una mujer joven, en un pueblo pequeño, en tiempos difíciles.\nMaría recibió esa noticia sin garantías. No sabía lo que vendría. Solo supo que algo estaba comenzando en ella, algo más grande que ella, y que ese algo era absolutamente frágil.\nAsí empieza la vida humana. Así empieza toda vida humana: pequeña, expuesta, sin defensa propia. La fragilidad no es un accidente del camino; es el punto de partida. Dios mismo la eligió. Y al elegirla, nos revela algo que cuesta aceptar: la vulnerabilidad no es lo que hay que superar para vivir bien. Es la condición desde la que la vida comienza, y desde la que Dios actúa.”,
-“meditacion”: “1. Por María hacia Jesús:\n¿Qué siente el Corazón Inmaculado de María al descubrir que Dios mismo eligió comenzar siendo pequeño, frágil, expuesto?\n2. Desde el Hijo hacia el Padre:\n¿Qué nos revela el Corazón de Jesús al hacerse embrión, al hacerse vida que aún no puede nada, que solo puede ser recibida?\n3. Hijos y hermanos en el Espíritu:\n¿Cuáles son los males —las fragilidades, los límites, las exposiciones— que reconoces como parte inevitable de tu vida desde el principio? ¿Cuál de ellos te cuesta más aceptar como punto de partida y no como fracaso?”,
-“intercesion”: “Jesús, tú que elegiste ser vulnerable desde la concepción, ayúdame a aceptar mi propia fragilidad sin vergüenza. Enséñame que necesitar a otros no es debilidad, sino el camino del amor que tú mismo recorriste.\nAmén.”,
-“audio_contemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_1.mp3”
-},
-{
-“numero”: 2,
-“titulo”: “Segundo Misterio Gozoso: La Visitación”,
-“subtitulo”: “La fragilidad que une”,
-“referencia”: “Lucas 1:39-43 (DHH)”,
-“evangelio”: “Por aquellos días, María se fue de prisa a un pueblo de la región montañosa de Judea, y entró en la casa de Zacarías y saludó a Isabel. Cuando Isabel oyó el saludo de María, la criatura se le estremeció en el vientre, y ella quedó llena del Espíritu Santo. Entonces, con voz muy fuerte, dijo: «¡Dios te ha bendecido más que a todas las mujeres, y ha bendecido a tu hijo! ¿Quién soy yo, para que venga a visitarme la madre de mi Señor?»”,
-“contemplacion”: “Los primeros ante los ojos de Dios\nMaría, embarazada y joven, camina varios días por terreno montañoso para visitar a Isabel, su prima anciana que también está esperando un hijo. Ambas viven embarazos extraordinarios, pero también ambas están en situación de vulnerabilidad: María es soltera y embarazada (escándalo social), Isabel es anciana y gestante (riesgo físico).\nY sin embargo, en esa fragilidad compartida nace la comunión más hermosa del Evangelio.\nMaría no va a presumir su privilegio de ser la Madre del Mesías. Va a servir. Isabel no siente envidia de la joven favorecida. Siente gratitud por su visita. Ambas reconocen la gracia de Dios en la otra, y se sostienen mutuamente.\nLos primeros ante los ojos de Dios son los frágiles que se acompañan: las mujeres embarazadas, los bebés gestándose, los ancianos, los pobres, los que no tienen voz. Todos ellos son visitados por María y el Mesías en su seno.\nLa fragilidad no separa. Une.”,
-“contemplacion”: “Los primeros ante los ojos de Dios\nMaría, embarazada y joven, camina varios días por terreno montañoso para visitar a Isabel, su prima anciana que también está esperando un hijo. Ambas viven embarazos extraordinarios, pero también ambas están en situación de vulnerabilidad: María es soltera y embarazada (escándalo social), Isabel es anciana y gestante (riesgo físico).\nY sin embargo, en esa fragilidad compartida nace la comunión más hermosa del Evangelio.\nMaría no va a presumir su privilegio de ser la Madre del Mesías. Va a servir. Isabel no siente envidia de la joven favorecida. Siente gratitud por su visita. Ambas reconocen la gracia de Dios en la otra, y se sostienen mutuamente.\nLos primeros ante los ojos de Dios son los frágiles que se acompañan: las mujeres embarazadas, los bebés gestándose, los ancianos, los pobres, los que no tienen voz. Todos ellos son visitados por María y el Mesías en su seno.\nLa fragilidad no separa. Une.”,
-“meditacion”: “1. Por María hacia Jesús:\n¿Qué siente el Corazón de María al caminar días enteros, embarazada, para servir a su prima anciana?\n2. Desde el Hijo hacia el Padre:\n¿Qué vive el Corazón de Jesús, aún en el vientre, al encontrarse con Juan Bautista también en gestación?\n3. Hijos y hermanos en el Espíritu:\n¿Cuántas veces te has acercado a personas en situación vulnerable? ¿Qué sientes y qué haces al respecto? ¿Cómo estás cruzando tu propia necesidad de ayuda?”,
-“intercesion”: “María, tú que caminaste días enteros para servir a quien te necesitaba, enséñame que la fragilidad no me aísla, sino que me une a otros. Ayúdame a reconocer la gracia de Dios en los vulnerables, y a ofrecerles mi presencia sin condescendencia.\nAmén.”,
-“audio_contemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_2.mp3”
-},
-{
-“numero”: 3,
-“titulo”: “Tercer Misterio Gozoso: El Nacimiento de Jesús”,
-“subtitulo”: “Pobreza y refugio”,
-“referencia”: “Lucas 2:1, 4-7 (DHH)”,
-“evangelio”: “Por aquel tiempo, el emperador Augusto ordenó que se hiciera un censo de todo el mundo. José salió del pueblo de Nazaret, de la región de Galilea, y se fue a Belén. Fue allá a inscribirse, junto con María, su esposa, que se encontraba encinta. Y mientras estaban en Belén, le llegó a María el tiempo de dar a luz. Y allí nació su hijo primogénito, y lo envolvió en pañales y lo acostó en el establo, porque no había alojamiento para ellos en el mesón.”,
-“contemplacion”: “Lejos del hogar, sin posada, sin hospitalidad\nMaría y José no eligieron dar a luz en un establo. Fueron forzados por las circunstancias: un decreto imperial los desplazó de su hogar, ningún mesón los recibió, y la pobreza les cerró todas las puertas.\nEl Hijo de Dios nació refugiado en una cueva de animales. Sin médico, sin comadrona, sin agua caliente, sin cama digna. María dio a luz en condiciones de extrema precariedad. José hizo lo que pudo con lo poco que tenía.\nY aun así, le dieron la bienvenida al Niño.\nSan José mantuvo la actitud a pesar de todo: Bienvenido a este mundo, Niño Jesús. María lo envolvió en pañales con ternura, lo acostó en el pesebre como si fuera la cuna más preciosa del mundo.\nLa pobreza material no les robó la dignidad. La falta de recursos no les impidió amar. La injusticia del mundo no venció su esperanza.\nPorque Dios no necesita abundancia para nacer. Solo necesita un corazón que lo reciba.”,
-“meditacion”: “1. Por María hacia Jesús:\n¿Qué siente el Corazón de María al dar a luz en un refugio de animales, lejos de su hogar?\n2. Desde el Hijo hacia el Padre:\n¿Qué acepta el Corazón de Jesús al nacer en la pobreza extrema, sin las comodidades básicas?\n3. Hijos y hermanos en el Espíritu:\n¿Qué actitud tienes en los momentos de escasez (falta de agua, dinero, luz eléctrica, salud…)? ¿Cómo estás cruzando la falta de recursos que limita tu vida?”,
-“intercesion”: “Jesús, tú que naciste en un establo porque no había lugar para ti, acompáñame en mi propia pobreza y precariedad. Enséñame que la escasez no me roba la dignidad, y que puedo dar la bienvenida a la vida incluso cuando falta todo.\nAmén.”,
-“audio_contemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_3.mp3”
-},
-{
-“numero”: 4,
-“titulo”: “Cuarto Misterio Gozoso: La Presentación en el Templo”,
-“subtitulo”: “La espada anunciada”,
-“referencia”: “Lucas 2:22, 25, 28, 34-35 (DHH)”,
-“evangelio”: “Cuando se cumplieron los días de la purificación de ellos, según la ley de Moisés, llevaron al niño a Jerusalén para presentarlo al Señor. Había en Jerusalén un hombre llamado Simeón, justo y piadoso. Tomó al niño en sus brazos y bendijo a Dios. Luego dijo a María, su madre: «Este niño será causa de caída y de elevación para muchos en Israel; será signo de contradicción, y a ti misma una espada te atravesará el corazón.»”,
-“contemplacion”: “El más santo del mundo molestará a muchos\nMaría sostiene a su hijo recién nacido en el Templo. Todo es alegría, gratitud, cumplimiento de la Ley. Pero Simeón, movido por el Espíritu, pronuncia palabras que rompen la paz: Una espada atravesará tu corazón.\nMaría no entiende del todo. Pero presiente que amar a este Niño le costará todo. Hay pérdidas que se anuncian mucho antes de ocurrir. Hay despedidas que empiezan a gestarse en el primer abrazo.\nY aun así, María no huye. No dice: Si este hijo me traerá tanto dolor, prefiero no amarlo tanto. Al contrario: guarda estas palabras en su corazón junto con el amor. Acepta amar sabiendo que amará hasta el dolor.\nSimeón también anuncia algo desconcertante: el más santo del mundo (el Mesías) molestará a muchos. Porque su bondad revelará la falsedad de los hipócritas. Su justicia incomodará a los injustos. Su verdad será intolerable para quienes viven en la mentira.\nA veces, lo verdaderamente bueno es insoportable para quienes no quieren cambiar.”,
-“meditacion”: “1. Por María hacia Jesús:\n¿Qué siente el Corazón de María al escuchar que una espada lo atravesará?\n2. Desde el Hijo hacia el Padre:\n¿Qué sabe el Corazón de Jesús sobre su propio destino, siendo aún un niño en brazos de Simeón?\n3. Hijos y hermanos en el Espíritu:\n¿Alguna vez te ha resultado molesto o insoportable alguien bueno, justo o recto? ¿Qué dolor anticipas que tu corazón resiste nombrar? ¿Cómo estás cruzando la espada anunciada en tu vida?”,
-“intercesion”: “María, tú que aceptaste la espada profetizada sin huir del amor, enséñame a no temer el dolor que viene con amar de verdad. Ayúdame a guardar en mi corazón las palabras difíciles, confiando que Dios me dará fuerza cuando llegue el momento.\nAmén.”,
-“audio_contemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_4.mp3”
-},
-{
-“numero”: 5,
-“titulo”: “Quinto Misterio Gozoso: El Niño perdido y hallado en el Templo”,
-“subtitulo”: “Crecer duele”,
-“referencia”: “Lucas 2:41-46 (DHH)”,
-“evangelio”: “Los padres de Jesús iban todos los años a Jerusalén para la fiesta de la Pascua. Cuando Jesús cumplió doce años, fueron allá todos ellos, como era costumbre. Pero pasados aquellos días, cuando volvían a casa, el niño Jesús se quedó en Jerusalén, sin que sus padres se dieran cuenta. Pensando que Jesús iba entre la gente, hicieron un día de camino; pero luego, al buscarlo entre los parientes y conocidos, no lo encontraron. Así que regresaron a Jerusalén para buscarlo allí. Al cabo de tres días lo encontraron en el templo, sentado entre los maestros, escuchándolos y haciéndoles preguntas.”,
-“contemplacion”: “El dolor del crecimiento\nMaría y José vivieron tres días de angustia. Habían perdido a su hijo. O más bien: su hijo los había dejado atrás, ocupándose de las cosas de su Padre Dios.\nJesús no se escondió por desobediencia. No los abandonó por rebeldía. Simplemente, estaba creciendo. Y crecer duele. No solo al que crece, sino también a quienes lo aman.\nA los doce años, Jesús comenzó a descubrir su identidad como Hijo de Dios. Necesitaba ese tiempo en el Templo, dialogando con los maestros, escuchando, preguntando, madurando. Sus padres aún no entendían del todo quién era Él, ni hacia dónde lo llevaba su vocación. Pero ese misterio ya comenzaba a revelarse.\nMaría y José sufrieron esa separación sin culpa: no fueron malos padres. Jesús vivió ese "estirón" sin malicia: no fue un mal hijo. Simplemente, hay momentos en que los hijos toman su propio camino, y eso es voluntad de Dios.”,
-“meditacion”: “1. Por María hacia Jesús:\n¿Qué vive el Corazón de María al comprender que su hijo ya no es solo suyo, sino también del Padre?\n2. Desde el Hijo hacia el Padre:\n¿Qué descubre el Corazón de Jesús sobre sí mismo cuando se ocupa de las cosas de su Padre Dios?\n3. Hijos y hermanos en el Espíritu:\n¿Qué dolor has sentido al dejar atrás la infancia, la casa paterna, las costumbres de otra época? ¿Cómo estás cruzando el duelo de crecer, de madurar, de tomar tus propias decisiones?”,
-“intercesion”: “Jesús, tú que creciste ocupándote de las cosas de tu Padre, ayúdame a aceptar que crecer duele, pero es voluntad de Dios. Enséñame a soltar lo que ya no me corresponde cargar, y a confiar que mi camino, aunque duela, es el que Tú preparaste para mí.\nAmén.”,
-“audio_contemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_5.mp3”
+var state={screen:“home”,darkMode:false,ci:0,done:{},journal:{},openSections:{},showPray:false};
+
+function getBloqueForDay(d){for(var k in BLOQUE_META)if(BLOQUE_META[k].days.indexOf(d)!==-1)return k;return”gozosos”;}
+function parseMed(raw){return raw.split(/\n(?=\d.)/).map(function(l){return l.replace(/^\d+.\s*(Por Mar\u00eda hacia Jes\u00fas|Desde el Hijo hacia el Padre|Hijos y hermanos en el Esp\u00edritu):\s*\n?/,””).trim();});}
+function buildM(key){return DATA.misterios[key].map(function(m){return{numero:m.numero,nombre:m.titulo.replace(/^(Primer|Segundo|Tercer|Cuarto|Quinto)\s+Misterio\s+(Gozoso|Luminoso|Doloroso|Glorioso):\s*/i,””),subtitulo:m.subtitulo,evangelio:{ref:m.referencia,text:m.evangelio},contemplacion:m.contemplacion,meditacion:parseMed(m.meditacion),intercesion:m.intercesion,audio:m.audio_contemplacion};});}
+function esc(s){var d=document.createElement(“div”);d.textContent=s;return d.innerHTML;}
+function playNotes(f){try{var ac=new(window.AudioContext||window.webkitAudioContext)();f.forEach(function(fr,i){setTimeout(function(){var o=ac.createOscillator(),g=ac.createGain();o.type=“sine”;o.frequency.value=fr;g.gain.setValueAtTime(0.07,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+0.3);o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+0.3);},i*180);});}catch(e){}}
+function fmt(s){return Math.floor(s/60)+”:”+String(Math.floor(s%60)).padStart(2,“0”);}
+
+var app=document.getElementById(“app”);
+
+function render(){
+if(state.darkMode)document.body.classList.add(“dark”);else document.body.classList.remove(“dark”);
+app.innerHTML=””;
+if(state.screen===“home”)renderHome();else renderMystery();
 }
-],
-“luminosos”: [
-{
-“numero”: 6,
-“titulo”: “Primer Misterio Luminoso: El Bautismo de Jesús”,
-“subtitulo”: “Desgaste y renovación”,
-“referencia”: “Marcos 1:9-11 (DHH)”,
-“evangelio”: “Por aquellos días, Jesús salió de Nazaret, que está en la región de Galilea, y Juan lo bautizó en el río Jordán. En el momento de salir Jesús del agua, vio que el cielo se abría y que el Espíritu Santo bajaba sobre él como una paloma. Y se oyó una voz del cielo, que decía: «Tú eres mi Hijo amado, a quien he elegido.»”,
-“contemplacion”: “La vida necesita ser renovada, siempre\nEl agua lava. Restaura. Devuelve al cuerpo lo que el tiempo y el desgaste van quitando. Nadie escapa a esa necesidad. Por más sano que estés, por más que cuides tu vida, el cuerpo pide ser lavado, alimentado, descansado, repuesto. Eso no es señal de que algo salió mal. Es la condición ordinaria de todo lo que vive.\nJesús se metió en el Jordán. El Verbo eterno, que no envejece ni se desgasta, asumió un cuerpo que sí lo hace. Un cuerpo que suda, que se cansa, que se ensucia, que necesita agua. Al sumergirse en el río, el Hijo de Dios hizo suya esa condición: la de una vida que requiere mantenimiento, renovación, cuidado constante.\nNo vino a librarse de esa necesidad. Vino a habitarla. Y al habitarla, la santificó.\nLos males de la vida no son solo las grandes crisis o los golpes inesperados. Son también esto: cuidar lo cotidiano, componer el desorden que vuelve cada día, realizar esa labor de limpieza que nunca termina de satisfacerse de una vez para siempre. Eso también es parte de cargar la cruz. Y Jesús lo conoce desde adentro, desde el agua del Jordán.”,
-“meditacion”: “1. Por María hacia Jesús:\n¿Qué sintió el Corazón Inmaculado de María cuando educó a su hijo en los hábitos de la higiene y el orden?\n2. Desde el Hijo hacia el Padre:\n¿Qué sintió Jesús al estar esperando, en la fila, como uno más, necesitado de purificación?\n3. Hijos y hermanos en el Espíritu:\n¿Qué áreas de mi vida requieren de un cuidado constante, con ayuda de Dios?”,
-“intercesion”: “Jesús, tú que descendiste al Jordán y muchas veces lavaste tu cuerpo, cuidaste tu espacio, tus herramientas y tu trabajo, enséñame a hacer lo mismo. Que yo también aprenda a honrar con dignidad el lugar que habito, el cuerpo que me diste, las cosas que pusiste en mis manos. Que el cuidado de lo cotidiano no me pese como una carga, sino que lo viva como tú lo viviste: con sencillez, con atención, con amor.\nAmén.”,
-“audio_contemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_6.mp3”
-},
-{
-“numero”: 7,
-“titulo”: “Segundo Misterio Luminoso: Las Bodas de Caná”,
-“subtitulo”: “Todo se gasta y consume”,
-“referencia”: “Juan 2:1-5 (DHH)”,
-“evangelio”: “Dos días después hubo una boda en Caná, un pueblo de Galilea. La madre de Jesús estaba allí, y Jesús y sus discípulos fueron también invitados a la boda. Se acabó el vino, y la madre de Jesús le dijo: «Ya no tienen vino.» Jesús le contestó: «Mujer, ¿por qué me dices esto? Mi hora no ha llegado todavía.» Pero ella dijo a los que estaban sirviendo: «Hagan todo lo que él les diga.»”,
-“contemplacion”: “Todas las cosas materiales se acaban\nEn medio de la fiesta, el vino se terminó. No por negligencia, sino porque todo lo material se usa, se gasta, se consume, se acaba. Ese es un mal inevitable de la vida finita: nada dura para siempre en este mundo.\nMaría detectó la necesidad antes que nadie. No se quedó paralizada ante la escasez. No culpó a los organizadores. Simplemente acudió a Jesús con confianza: Ya no tienen vino.\nJesús, en un primer momento, parece reacio: Mi hora no ha llegado. Pero María conoce el corazón de su Hijo. Sabe que Él es sensible al sufrimiento humano, incluso al pequeño sufrimiento de una familia humillada por quedarse sin vino en su propia boda.\nY Jesús responde. No con un sermón sobre la austeridad, sino con abundancia creativa. Transforma 600 litros de agua en el mejor vino de la fiesta.\nLa buena noticia es que María nos ayuda a creer en Jesús, y Él abre la puerta de la creatividad productiva para que recibas abundancia incluso cuando todo se está acabando.”,
-“meditacion”: “1. Por María hacia Jesús:\n¿Qué siente el Corazón de María al percibir la necesidad de los novios?\n2. Desde el Hijo hacia el Padre:\n¿Qué mueve el Corazón de Jesús a realizar su primer milagro ante una necesidad tan "pequeña" como la falta de vino?\n3. Hijos y hermanos en el Espíritu:\n¿Con qué actitud cuidas y obtienes las cosas que te faltan? ¿Cómo estás cruzando la escasez que experimentas hoy?”,
-“intercesion”: “María, tú que detectaste la necesidad y la llevaste a Jesús, enséñame a no quedarme paralizado ante la escasez. Jesús, tú que transformaste el agua en vino abundante, abre mi corazón a la creatividad que nace de la confianza en ti.\nAmén.”,
-“audio_contemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_7.mp3”
-},
-{
-“numero”: 8,
-“titulo”: “Tercer Misterio Luminoso: El Anuncio del Reino de Dios”,
-“subtitulo”: “No preguntes "por qué sufre", ayuda”,
-“referencia”: “Juan 9:1-4 (DHH)”,
-“evangelio”: “Al pasar Jesús, vio a un hombre que había nacido ciego. Sus discípulos le preguntaron: «Maestro, ¿por qué nació ciego este hombre? ¿Por el pecado de sus padres, o por su propio pecado?» Jesús les contestó: «Ni por su propio pecado ni por el de sus padres; fue más bien para que en él se demuestre lo que Dios puede hacer. Mientras sea de día, tenemos que hacer el trabajo del que me envió.»”,
-“contemplacion”: “No busques culpables, sé instrumento de sanación\nAnte el ciego de nacimiento, los discípulos hicieron la pregunta equivocada: Maestro, ¿quién pecó, él o sus padres, para que naciera ciego?\nBuscaban una explicación. Una razón. Un culpable. Querían que el sufrimiento tuviera sentido.\nJesús cortó en seco esa lógica: «Ni él pecó, ni sus padres.» El mal físico de la ceguera no era castigo por pecado. Era simplemente un mal inevitable de la vida finita, una limitación que este hombre llevaba desde su nacimiento.\nY luego Jesús añade algo revolucionario: «Fue para que en esta oscuridad brille la luz de Dios.»\nNo dijo que Dios causó la ceguera para tener una oportunidad de sanar. Dijo que en medio de ese mal inevitable, Dios puede actuar. La oscuridad se convierte en escenario para la luz.\nY entonces Jesús no siguió filosofando. Actuó. Hizo lodo con saliva, lo untó en los ojos del ciego, y le mandó lavarse. El hombre obedeció, y vio por primera vez en su vida.\nNo te preguntes "por qué" alguien sufre. Si puedes, ayúdale.”,
-“meditacion”: “1. Por María hacia Jesús:\n¿Qué siente el Corazón de María al ver a su Hijo actuar con compasión inmediata?\n2. Desde el Hijo hacia el Padre:\nAl darle vista al ciego, devolver el habla a los mudos, sanar a los paralíticos, etc. ¿Qué nos revela el Corazón de Jesús, acerca del papel de Dios ante nuestros sufrimientos?\n3. Hijos y hermanos en el Espíritu:\nAparte de orar, ¿qué haces para aliviar el dolor que hay en el mundo? ¿Cómo estás cruzando tu tentación de buscar culpables, en lugar de ser instrumento de sanación?”,
-“intercesion”: “Jesús, tú que sanaste al ciego sin buscar culpables, libérame de la obsesión por encontrar razones al sufrimiento. Enséñame a actuar con compasión donde puedo remediar el mal, y a confiar en tu luz donde no puedo hacer nada más que acompañar.\nAmén.”,
-“audio_contemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_8.mp3”
-},
-{
-“numero”: 9,
-“titulo”: “Cuarto Misterio Luminoso: La Transfiguración”,
-“subtitulo”: “Lo inexplicable nos desconcierta”,
-“referencia”: “Marcos 9:2-6 (DHH)”,
-“evangelio”: “Seis días después, Jesús tomó aparte a Pedro, a Santiago y a Juan, y los llevó a una montaña muy alta. Allí, delante de ellos, cambió la apariencia de Jesús. Su ropa se volvió brillante y más blanca que la nieve. Luego vieron a Elías y a Moisés, que estaban conversando con Jesús. Pedro le dijo a Jesús: «Maestro, ¡qué bien que estemos aquí! Vamos a hacer tres chozas: una para ti, otra para Moisés y otra para Elías.» Pero Pedro no sabía qué decir, porque todos estaban asustados.”,
-“contemplacion”: “Temor, desconcierto, confusión\nAnte la Transfiguración, los apóstoles no sabían qué hacer. Vieron a Jesús resplandeciente, conversando con Moisés y Elías. Escucharon la voz del Padre desde la nube. Y no entendieron nada.\nPedro, nervioso, propuso construir tres chozas. Una idea absurda. ¿Para qué chozas si Moisés y Elías eran apariciones? Pero no sabía qué más decir. El Evangelio es honesto: Pedro no sabía qué decir, porque todos estaban asustados.\nHay experiencias que desbordan nuestra capacidad de comprensión. Momentos en los que la realidad es más grande que nuestras categorías mentales. Y eso nos desconcierta, nos asusta, nos paraliza.\nEs un mal inevitable de nuestra finitud: no podemos entender todo. Nuestra mente tiene límites. Hay misterios que no caben en palabras. Hay experiencias que solo se pueden vivir, no explicar.\nY está bien. No siempre tienes que entender. A veces solo tienes que estar ahí, asombrado, temblando, sin palabras, dejando que Dios sea más grande que tu comprensión.”,
-“meditacion”: “1. Por María hacia Jesús:\n¿Qué sintió el Corazón de María cuando sus discípulos le contaron lo que vieron en la montaña, sin poder explicarlo del todo?\n2. Desde el Hijo hacia el Padre:\n¿Qué nos revela el Corazón de Jesús sobre la gloria divina, más allá de lo que podemos comprender?\n3. Hijos y hermanos en el Espíritu:\nRecuerda una experiencia tuya o ajena, difícil de explicar o entender. ¿Cómo estás cruzando tu necesidad de entenderlo todo antes de aceptarlo?”,
-“intercesion”: “Jesús, tú que te transfiguraste ante apóstoles desconcertados, ayúdame a aceptar que no siempre entenderé lo que vivo. Enséñame que el misterio no es enemigo de la fe, sino el espacio donde tu gloria se manifiesta más allá de mi comprensión.\nAmén.”,
-“audio_contemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_9.mp3”
-},
-{
-“numero”: 10,
-“titulo”: “Quinto Misterio Luminoso: La Institución de la Eucaristía”,
-“subtitulo”: “Solo puedes estar en un lugar”,
-“referencia”: “Lucas 22:19-20 (DHH)”,
-“evangelio”: “Mientras comían, Jesús tomó en sus manos el pan y, habiendo dado gracias a Dios, lo partió y se lo dio a ellos, diciendo: «Esto es mi cuerpo, que es entregado en favor de ustedes. Hagan esto en memoria de mí.» Lo mismo hizo con la copa después de la cena, diciendo: «Esta copa es la nueva alianza confirmada con mi sangre, la cual es derramada en favor de ustedes.»”,
-“contemplacion”: “La limitación del cuerpo, resuelta en el Sacramento\nLos humanos solo podemos estar en un lugar a la vez. Esa es una limitación inevitable de nuestra corporeidad finita. No puedes abrazar a tu madre en México y a un amigo en España al mismo tiempo. No puedes estar en dos sitios simultáneamente.\nJesús, en su humanidad, también vivió esa limitación. Cuando estaba en Galilea, no podía estar en Jerusalén. Cuando visitaba a unos discípulos, otros quedaban lejos. Y sabía que pronto subiría al Padre, dejando a sus amigos solos en la tierra.\nPor eso, en la Última Cena, Jesús consagró el pan y el vino. No como un mero símbolo, sino como su presencia real, viva, permanente. Para quedarse contigo a donde vayas. Para multiplicar su presencia en cada sagrario del mundo, rompiendo la limitación del espacio.\nJesús no se conformó con la distancia inevitable. Creó un camino para estar contigo siempre, en cada Eucaristía, en cada tabernáculo, hasta el fin de los tiempos.”,
-“meditacion”: “1. Por María hacia Jesús:\n¿Qué siente el Corazón de María al saber que su Hijo encontró el modo de quedarse presente en cada Eucaristía?\n2. Desde el Hijo hacia el Padre:\n¿Qué amor mueve el Corazón de Jesús a inventar la Eucaristía, para vencer la limitación de la distancia?\n3. Hijos y hermanos en el Espíritu:\n¿Qué pretextos pones para dejar de acercarte más a la Eucaristía? ¿Cómo estás cruzando tu limitación de no poder estar cerca de todos los que amas?”,
-“intercesion”: “Jesús, tú que te quedaste en la Eucaristía para vencer la distancia, ayúdame a valorar tu presencia real en cada sagrario. Enséñame que aunque yo no pueda estar en todas partes, tú sí puedes estar conmigo siempre, en cada Comunión.\nAmén.”,
-“audio_contemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_10.mp3”
+
+function renderHome(){
+var dow=new Date().getDay(),tk=getBloqueForDay(dow),tm=BLOQUE_META[tk];
+var h=’<div style="padding:28px 20px 20px;background:var(--card);border-bottom:1.5px solid var(--border);text-align:center;position:relative">’;
+h+=’<button id="dmh" style="position:absolute;top:20px;right:16px;width:38px;height:38px;border-radius:50%;background:var(--secBg);border:1.5px solid var(--border);cursor:pointer">’+(state.darkMode?”\u2600\ufe0f”:”\ud83c\udf19”)+’</button>’;
+h+=’<div style="display:inline-block;background:#FF7A00;color:#fff;padding:4px 14px;border-radius:16px;font-size:12px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:10px">Nivel Cruz</div>’;
+h+=’<h1 style="font-size:30px;font-weight:700;color:var(--text);margin:4px 0 2px">CruzAndo</h1>’;
+h+=’<div style="font-size:17px;color:var(--textSoft)">Males</div>’;
+h+=’<div style="font-size:14px;color:var(--textDim);margin-top:6px;font-style:italic">Cuaderno 1 \u2014 La Cruz</div></div>’;
+h+=’<div style="padding:20px 16px 40px">’;
+h+=’<button id="tbtn" style="width:100%;padding:22px 20px;background:linear-gradient(135deg,#FF7A00,#F69C49);border:none;border-radius:20px;cursor:pointer;text-align:left;color:#fff;margin-bottom:20px;box-shadow:0 6px 24px rgba(255,122,0,0.25);position:relative;overflow:hidden;font-family:Inter,system-ui,sans-serif">’;
+h+=’<div style="position:absolute;top:-30px;right:-20px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.1)"></div>’;
+h+=’<div style="font-size:13px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;opacity:0.85;margin-bottom:6px">Hoy ‘+DAY_NAMES[dow]+’</div>’;
+h+=’<div style="font-size:24px;font-weight:700;margin-bottom:4px">’+tm.emoji+’ ‘+tm.label+’</div>’;
+h+=’<div style="font-size:15px;opacity:0.9;font-style:italic">’+DATA.subtitulos_bloque[tk]+’</div>’;
+h+=’<div style="margin-top:14px;display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.2);padding:8px 16px;border-radius:12px;font-size:15px;font-weight:600">Orar los misterios del d\u00eda \u203a</div>’;
+h+=’</button>’;
+h+=’<div style="font-size:13px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--textDim);margin-bottom:12px;padding-left:4px">O elige otro set de misterios</div>’;
+[“gozosos”,“luminosos”,“dolorosos”,“gloriosos”].forEach(function(k){
+var m=BLOQUE_META[k],it=k===tk,dl=m.days.map(function(d){return DAY_NAMES[d]}).join(” y “);
+h+=’<button class="bk" data-k="'+k+'" style="width:100%;padding:16px 18px;background:var(--card);border:1.5px solid '+(it?'#FFCFA2':'var(--border)')+';border-radius:16px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:14px;margin-bottom:10px;position:relative;font-family:Inter,system-ui,sans-serif">’;
+if(it)h+=’<div style="position:absolute;top:10px;right:12px;font-size:10px;font-weight:700;background:#FF7A00;color:#fff;padding:2px 8px;border-radius:8px">HOY</div>’;
+h+=’<div style="width:46px;height:46px;border-radius:14px;background:'+m.color+'18;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">’+m.emoji+’</div>’;
+h+=’<div style="flex:1"><div style="font-size:16px;font-weight:600;color:var(--text)">’+m.label+’</div>’;
+h+=’<div style="font-size:14px;color:var(--textSoft);font-style:italic;margin-top:2px">’+DATA.subtitulos_bloque[k]+’</div>’;
+h+=’<div style="font-size:12px;color:var(--textDim);margin-top:3px">’+dl+’</div></div>’;
+h+=’<span style="color:var(--textDim)">\u203a</span></button>’;
+});
+h+=’</div>’;
+app.innerHTML=h;
+document.getElementById(“dmh”).onclick=function(){state.darkMode=!state.darkMode;render();};
+document.getElementById(“tbtn”).onclick=function(){goB(tk);};
+document.querySelectorAll(”.bk”).forEach(function(b){b.onclick=function(){goB(b.dataset.k);};});
 }
-],
-“dolorosos”: [
-{
-“numero”: 11,
-“titulo”: “Primer Misterio Doloroso: La Oración en el Huerto”,
-“subtitulo”: “El corazón que se estremece”,
-“referencia”: “Mateo 26:36-39 (DHH)”,
-“evangelio”: “Jesús fue con sus discípulos a un lugar llamado Getsemaní, y les dijo: «Siéntense aquí mientras voy más allá a orar.» Se llevó a Pedro y a los dos hijos de Zebedeo, y comenzó a sentirse muy triste y angustiado. Les dijo: «Siento en mi alma una tristeza de muerte. Quédense aquí y permanezcan despiertos conmigo.» Yendo un poco más adelante, se inclinó hasta tocar el suelo con su frente, y oró así: «Padre mío, si es posible, líbrame de este trago amargo.»”,
-“contemplacion”: “Jesús aceptó tener un corazón humano como el tuyo\nJesús, el Hijo de Dios, no vino blindado contra las emociones. Aceptó tener un corazón humano, capaz de sentir tristeza, angustia, ansiedad, miedo.\nEn Getsemaní, su corazón se estremece. Suda sangre. Tiembla ante lo que viene. No quiere la Cruz. No quiere el abandono. No quiere morir. Y no lo oculta. No finge fortaleza. Comparte su dolor con Pedro, Santiago y Juan: Siento en mi alma una tristeza de muerte.\nAlgunos piensan que la vida espiritual avanzada significa "no sentir emociones difíciles". Que la santidad es estar siempre en paz, siempre sereno, siempre fuerte.\nPero Jesús nos enseña lo contrario: ser santo es sentir plenamente, incluso el dolor, y aun así elegir el amor. Ser santo no es no tener miedo. Es tener miedo y seguir avanzando. Es sentir la angustia y no huir de la voluntad del Padre.\nTus sentimientos difíciles no son pecado. Son parte de tu humanidad, como lo fueron de la humanidad de Cristo.”,
-“meditacion”: “1. Por María hacia Jesús:\n¿Qué siente el Corazón de María al saber que su Hijo está agonizando solo en la noche?\n2. Desde el Hijo hacia el Padre:\n¿Qué batalla libra el Corazón de Jesús entre el miedo humano y la confianza en el Padre?\n3. Hijos y hermanos en el Espíritu:\n¿Qué sentimientos tienes que no aceptas o rechazas? ¿Cómo estás cruzando las emociones difíciles que habitan en ti?”,
-“intercesion”: “Jesús, tú que sentiste tristeza de muerte en Getsemaní, ayúdame a no rechazar mis propias emociones difíciles. Enséñame que sentir angustia no me aleja de ti, sino que me hace más humano, más parecido a tu corazón.\nAmén.”,
-“audio_contemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_11.mp3”
-},
-{
-“numero”: 12,
-“titulo”: “Segundo Misterio Doloroso: La Flagelación”,
-“subtitulo”: “El cuerpo vulnerable”,
-“referencia”: “Juan 19:1-3 (DHH)”,
-“evangelio”: “Pilato tomó entonces a Jesús y mandó azotarlo. Los soldados trenzaron una corona de espinas, la pusieron en la cabeza de Jesús y lo vistieron con una capa de color rojo oscuro. Luego se acercaron a él, diciéndole: «¡Viva el Rey de los judíos!» Y le pegaban en la cara.”,
-“contemplacion”: “Todo cuerpo sensible es un cuerpo vulnerable\nJesús aceptó su cuerpo, capaz de sentir la suavidad, pero también la dureza. El frío, y también el calor. El placer, y el dolor.\nEn la flagelación, su cuerpo experimenta el límite extremo de la sensibilidad: el látigo desgarra su piel, la sangre brota, los nervios gritan. Cada golpe es una prueba brutal de que todo cuerpo sensible es un cuerpo vulnerable.\nNo puedes tener un cuerpo capaz de sentir el abrazo de tu madre sin que ese mismo cuerpo pueda sentir el golpe del verdugo. No puedes tener terminaciones nerviosas que perciban la caricia sin que esas mismas terminaciones perciban el dolor.\nLa sensibilidad es un don y una cruz. Nos permite experimentar la belleza, pero también nos expone al sufrimiento. Jesús no rechazó esa condición. La asumió hasta las últimas consecuencias.”,
-“meditacion”: “1. Por María hacia Jesús:\n¿Qué siente el Corazón de María al imaginar el cuerpo de su Hijo destrozado por los azotes?\n2. Desde el Hijo hacia el Padre:\n¿Qué acepta el Corazón de Jesús al soportar el dolor extremo en su cuerpo vulnerable?\n3. Hijos y hermanos en el Espíritu:\n¿Qué sensaciones físicas (olores, ruidos, temperatura, dolor) te resultan insoportables o difíciles de sobrellevar? ¿Cómo estás cruzando la vulnerabilidad de tu propio cuerpo?”,
-“intercesion”: “Jesús, tú que aceptaste un cuerpo vulnerable y sensible, ayúdame a no despreciar mi propia corporeidad. Enséñame que sentir dolor no es debilidad, sino prueba de que estoy vivo, de que soy humano como tú.\nAmén.”,
-“audio_contemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_12.mp3”
-},
-{
-“numero”: 13,
-“titulo”: “Tercer Misterio Doloroso: La Coronación de Espinas”,
-“subtitulo”: “Como te ven, te tratan”,
-“referencia”: “Mateo 27:27-30 (DHH)”,
-“evangelio”: “Los soldados del gobernador llevaron a Jesús al palacio y reunieron toda la tropa alrededor de él. Le quitaron su ropa, lo vistieron con una capa roja, trenzaron una corona de espinas y se la pusieron en la cabeza, y en la mano derecha le pusieron una vara. Luego se arrodillaron delante de él, y burlándose le decían: «¡Viva el Rey de los judíos!» También lo escupían, y con la misma vara le golpeaban la cabeza.”,
-“contemplacion”: “La gente te trata según la idea que tiene de ti\nAun siendo el Rey de Reyes, Jesús fue maltratado, coronado de espinas, vestido de burla. ¿Por qué? Porque los soldados no lo veían como Él era. Lo veían como un preso, un fracasado, un loco que decía ser rey.\nY lo trataron según esa percepción distorsionada.\nDice el refrán: «Como te ven, te tratan.» Es decir, la gente te trata según la idea que tiene de ti, no como tú eres.\nEso es un mal inevitable de vivir en comunidad: no siempre serás comprendido. No siempre serás visto con justicia. Habrá quienes te juzguen sin conocerte, te malinterpreten, te traten peor de lo que mereces.\nY no hay mucho que puedas hacer al respecto. No puedes controlar la percepción ajena. No puedes obligar a nadie a verte como realmente eres.\nJesús no perdió energía defendiéndose de los soldados. No intentó convencerlos de su dignidad. Guardó silencio. Y en ese silencio, preservó su paz interior.”,
-“meditacion”: “1. Por María hacia Jesús:\n¿Qué siente el Corazón de María al saber que su Hijo, el Rey verdadero, es coronado de espinas en burla?\n2. Desde el Hijo hacia el Padre:\n¿Qué guarda el Corazón de Jesús en el silencio ante quienes lo maltratan por ignorancia?\n3. Hijos y hermanos en el Espíritu:\n¿Qué haces al saber que alguien tiene una idea equivocada sobre ti? ¿Cómo estás cruzando el dolor de ser malinterpretado o maltratado injustamente?”,
-“intercesion”: “Jesús, tú que fuiste coronado de espinas por quienes no te conocían, ayúdame a no desgastarme intentando controlar lo que otros piensan de mí. Enséñame que mi dignidad no depende de la percepción ajena, sino de la verdad de quién soy ante Dios.\nAmén.”,
-“audio_contemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_13.mp3”
-},
-{
-“numero”: 14,
-“titulo”: “Cuarto Misterio Doloroso: Jesús carga la Cruz”,
-“subtitulo”: “Todo requiere esfuerzo”,
-“referencia”: “Lucas 23:26-28 (DHH)”,
-“evangelio”: “Llevaron a Jesús para crucificarlo. En el camino encontraron a un hombre llamado Simón, natural de Cirene, y lo obligaron a cargar con la cruz de Jesús. Muchas personas lo seguían; entre ellas había mujeres que lloraban de tristeza por él. Jesús las miró, y les dijo: «Mujeres de Jerusalén, no lloren por mí; lloren más bien por ustedes mismas y por sus hijos.»”,
-“contemplacion”: “En esta tierra, todo requiere superar obstáculos\nJesús camina hacia el Calvario cargando la cruz. Cada paso es un esfuerzo. El peso del madero aplasta sus hombros. El cansancio extremo. Las caídas. El cuerpo destrozado que apenas puede sostenerse.\nY aun así, sigue caminando.\nEn esta tierra, todo lo que hagas requiere superar obstáculos, esforzarte y ser paciente. Levantarte de la cama, higiene, alimentación, convivencia, estudio, trabajo, traslado… todo demanda energía. Todo implica vencer la inercia, la gravedad, el cansancio.\nEso no es castigo. Es la condición de la vida finita. Vivir es moverse contra resistencias.\nJesús no se quejó del esfuerzo. Tampoco lo glorificó. Simplemente lo aceptó como parte del camino. Y cuando su cuerpo ya no pudo más, aceptó la ayuda de Simón de Cirene. No fue debilidad. Fue humildad.\nEl esfuerzo es inevitable. Pero no tienes que cargarlo solo.”,
-“meditacion”: “1. Por María hacia Jesús:\n¿Qué siente el Corazón de María al ver a su Hijo caer una y otra vez bajo el peso de la cruz?\n2. Desde el Hijo hacia el Padre:\n¿Qué sostiene el Corazón de Jesús para seguir avanzando cuando el cuerpo ya no puede más?\n3. Hijos y hermanos en el Espíritu:\n¿Cómo estás aceptando el trabajo y los esfuerzos de cada día? ¿Cómo estás cruzando el cansancio que te pesa?”,
-“intercesion”: “Jesús, tú que caminaste al Calvario cargando la cruz, ayúdame a aceptar que vivir requiere esfuerzo constante. Enséñame que el cansancio no es fracaso, y que pedir ayuda cuando no puedo más es sabiduría, no debilidad.\nAmén.”,
-“audio_contemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_14.mp3”
-},
-{
-“numero”: 15,
-“titulo”: “Quinto Misterio Doloroso: La Crucifixión y Muerte de Jesús”,
-“subtitulo”: “Somos mortales”,
-“referencia”: “Lucas 23:33-34, 44-46 (DHH)”,
-“evangelio”: “Cuando llegaron al lugar llamado «La Calavera», crucificaron a Jesús y a los dos criminales, uno a su derecha y otro a su izquierda. Jesús dijo: «Padre, perdónalos, porque no saben lo que hacen.» Era como al mediodía, cuando el sol dejó de brillar, y todo el país quedó en oscuridad hasta las tres de la tarde. La cortina del templo se rasgó por la mitad. Jesús gritó con fuerza: «¡Padre, en tus manos encomiendo mi espíritu!» Y al decir esto, murió.”,
-“contemplacion”: “Morir es el trauma inevitable para avanzar\nDesde el útero, como todo ser humano, Jesús, tú y yo somos mortales. Nacer es comenzar a morir. Cada día que vives es un día menos que te queda. No hay escape.\nMorir es el trauma inevitable para avanzar hacia la siguiente etapa, definitiva: el paraíso, donde Cristo nos espera para estar con Él.\nJesús no evitó la muerte. La atravesó. Sintió el dolor extremo. El abandono. La oscuridad. El último aliento. Y entonces, entregó su espíritu al Padre.\nNo murió derrotado. Murió confiando. No murió maldiciendo. Murió perdonando. No murió solo. Murió encomendándose al amor del Padre.\nY al tercer día, resucitó.\nLa muerte no tiene la última palabra. Es solo el portal hacia la vida plena. Pero para atravesar ese portal, hay que soltar. Hay que exhalar el último aliento. Hay que confiar que del otro lado, Dios espera.”,
-“meditacion”: “1. Por María hacia Jesús:\n¿Qué siente el Corazón de María al recibir el cuerpo muerto de su Hijo en sus brazos?\n2. Desde el Hijo hacia el Padre:\n¿Qué entrega el Corazón de Jesús al Padre, en el momento de morir en la cruz?\n3. Hijos y hermanos en el Espíritu:\n¿Qué sientes y piensas al saber que eres mortal? ¿Cómo estás cruzando tu propio miedo a la muerte?”,
-“intercesion”: “Jesús, tú que moriste confiando en el Padre, ayúdame a no huir de mi propia mortalidad. Enséñame que morir es atravesar un portal, y que del otro lado tú me esperas con los brazos abiertos.\nAmén.”,
-“audio_contemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_15.mp3”
+
+function goB(k){state.screen=k;state.ci=0;state.done={};state.openSections={};state.showPray=false;render();window.scrollTo(0,0);}
+
+function renderMystery(){
+var key=state.screen,meta=BLOQUE_META[key],ms=buildM(key),sub=DATA.subtitulos_bloque[key],tot=ms.length,ci=state.ci,m=ms[ci],iD=state.done[ci]!=null,dc=Object.keys(state.done).length,bl=meta.label.replace(“Misterios “,””);
+var h=’<div style="padding:14px 18px;background:var(--card);border-bottom:1.5px solid var(--border)">’;
+h+=’<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">’;
+h+=’<button id="bk" style="background:none;border:none;cursor:pointer;color:#FF7A00;font-size:14px;font-weight:600;font-family:Inter,system-ui,sans-serif;padding:0">\u2039 Inicio</button>’;
+h+=’<button id="dmm" style="width:36px;height:36px;border-radius:50%;background:var(--secBg);border:1.5px solid var(--border);cursor:pointer">’+(state.darkMode?”\u2600\ufe0f”:”\ud83c\udf19”)+’</button></div>’;
+h+=’<div style="display:inline-block;background:#FF7A00;color:#fff;padding:3px 10px;border-radius:14px;font-size:11px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:6px">Nivel Cruz \u2014 Males</div>’;
+h+=’<h1 style="font-size:22px;font-weight:700;color:var(--text);margin:2px 0">’+meta.emoji+’ ‘+meta.label+’</h1>’;
+h+=’<div style="font-size:15px;color:var(--textSoft);font-style:italic">’+sub+’</div></div>’;
+// Dots
+h+=’<div style="padding:14px 18px;background:var(--card);border-bottom:1px solid var(--border)"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">’;
+for(var i=0;i<tot;i++){var iA=i===ci,iDD=state.done[i]!=null;h+=’<div class="dt" data-i="'+i+'" style="width:'+(iA?24:11)+'px;height:11px;border-radius:6px;background:'+(iDD?'#00C853':iA?'#FF7A00':'var(--border)')+';cursor:pointer;box-shadow:'+(iA?'0 0 0 3px #FFCFA2':iDD?'0 0 6px rgba(0,200,83,0.4)':'none')+'"></div>’;}
+h+=’</div><div style="display:flex;justify-content:space-between"><span style="font-size:13px;color:var(--textDim)">’+meta.label+’</span><span style="font-size:13px;font-weight:700;color:'+(dc===tot?'#00C853':'#FF7A00')+'">’+dc+’/’+tot+’</span></div></div>’;
+// Nav
+h+=’<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 18px">’;
+h+=’<button id="pv" style="background:none;border:none;cursor:'+(ci===0?'default':'pointer')+';opacity:'+(ci===0?'0.3':'1')+';color:var(--textSoft);font-size:13px;font-family:Inter,system-ui,sans-serif">\u2039 Anterior</button>’;
+h+=’<span style="font-size:13px;font-weight:600;color:var(--textDim)">’+(ci+1)+’ de ‘+tot+’</span>’;
+h+=’<button id="nx" style="background:none;border:none;cursor:'+(ci===tot-1?'default':'pointer')+';opacity:'+(ci===tot-1?'0.3':'1')+';color:var(--textSoft);font-size:13px;font-family:Inter,system-ui,sans-serif">Siguiente \u203a</button></div>’;
+// Content
+h+=’<div style="padding:4px 14px 120px">’;
+// Hero
+h+=’<div style="border-radius:18px;overflow:hidden;margin-bottom:14px;position:relative;background:linear-gradient(135deg,#FFCFA2,#FFA34E,#F69C49);height:160px"><div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:18px 20px;background:linear-gradient(to top,rgba(43,38,34,0.75) 0%,rgba(43,38,34,0.15) 60%,transparent 100%)">’;
+h+=’<div style="font-size:13px;font-weight:600;letter-spacing:1px;color:#FFCFA2;text-transform:uppercase">’+ORDS[ci]+’ Misterio ‘+bl.slice(0,-1)+’</div>’;
+h+=’<h2 style="margin:3px 0 0;font-size:22px;font-weight:700;color:#fff;line-height:1.2">’+esc(m.nombre)+’</h2>’;
+h+=’<div style="font-size:15px;color:rgba(255,255,255,0.85);font-style:italic;margin-top:4px">’+esc(m.subtitulo)+’</div></div></div>’;
+// Evangelio
+h+=’<div style="padding:16px 18px;background:var(--card);border-radius:16px;border:1.5px solid var(--border);margin-bottom:10px">’;
+h+=’<div style="font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#FF7A00;margin-bottom:10px">\ud83d\udcd6 Evangelio</div>’;
+h+=’<div style="font-size:18px;color:var(--text);line-height:1.8;white-space:pre-line">’+esc(m.evangelio.text)+’</div>’;
+h+=’<div style="font-size:14px;color:var(--textDim);margin-top:12px;text-align:right;font-style:italic">\u2014 ‘+esc(m.evangelio.ref)+’</div></div>’;
+// Accordions
+h+=acc(“rezar”,”\ud83d\ude4f”,“Rezar este Misterio”,aud(DATA.audio_rezo,“Padrenuestro + 10 Avemar\u00edas + Gloria”));
+h+=acc(“canto”,”\ud83c\udfb5”,“Canto”,aud(DATA.audio_canto,“Ave Mar\u00eda \u2014 Arcadelt \u2014 Coro Laus Deo”));
+h+=acc(“contemplar”,”\ud83d\udc41\ufe0f”,“Contemplar”,aud(m.audio,“Audio de la contemplaci\u00f3n”)+’<div style="margin-top:14px;padding:16px 18px;background:var(--secBg);border-radius:14px;border-left:3px solid #F69C49"><div style="font-size:18px;color:var(--text);line-height:1.85;white-space:pre-line">’+esc(m.contemplacion)+’</div></div>’);
+// Meditar
+var mh=’<div style="display:flex;flex-direction:column;gap:20px">’;
+for(var qi=0;qi<m.meditacion.length;qi++){var jk=ci+’*’+key,jv=(state.journal[jk]&&state.journal[jk][qi])||””;
+mh+=’<div><div style="display:flex;align-items:center;gap:7px;margin-bottom:6px"><div style="width:7px;height:7px;border-radius:4px;background:'+MCOLORS[qi]+'"></div><span style="font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:'+MCOLORS[qi]+'">’+MLABELS[qi]+’</span></div>’;
+mh+=’<p style="font-size:18px;color:var(--text);line-height:1.7;margin-bottom:10px">’+esc(m.meditacion[qi])+’</p>’;
+mh+=’<textarea class="jt" data-qi="'+qi+'" rows="3" placeholder="Escribe aqu\u00ed tu reflexi\u00f3n..." style="width:100%;padding:12px 16px;background:var(--inputBg);border:1.5px solid var(--border);border-radius:12px;color:var(--text);font-size:17px;line-height:1.7;outline:none;font-family:Inter,system-ui,sans-serif">’+esc(jv)+’</textarea></div>’;}
+mh+=’</div>’;
+h+=acc(“meditar”,”\u270d\ufe0f”,“Meditar y escribir”,mh);
+// Prayer
+if(!state.showPray&&!iD)h+=’<button id="sp" style="width:100%;padding:16px;margin-top:8px;background:var(--card);border:1.5px solid #FFCFA2;border-radius:16px;cursor:pointer;font-size:17px;font-weight:600;font-family:Inter,system-ui,sans-serif;color:#FF7A00">\ud83d\ude4f Oraci\u00f3n de intercesi\u00f3n</button>’;
+if(state.showPray&&!iD){
+h+=’<div style="margin-top:10px;padding:22px;background:var(--card);border-radius:18px;border:1.5px solid #F69C49;box-shadow:0 4px 24px rgba(255,122,0,0.1);animation:sU 0.4s ease">’;
+h+=’<div style="font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#FF7A00;margin-bottom:12px">\ud83d\ude4f Intercesi\u00f3n</div>’;
+h+=’<p style="font-size:19px;color:var(--text);line-height:1.85;font-style:italic;white-space:pre-line">’+esc(m.intercesion)+’</p>’;
+h+=’<button id="cb" style="width:100%;margin-top:20px;padding:16px;background:#FF7A00;border:none;border-radius:14px;cursor:pointer;color:#fff;font-size:18px;font-weight:700;font-family:Inter,system-ui,sans-serif;box-shadow:0 4px 16px rgba(255,122,0,0.3)">’+(ci<tot-1?‘Siguiente Misterio \u2192’:‘Completar bloque \u2726’)+’</button></div>’;}
+if(iD){var dd=new Date(state.done[ci]);h+=’<div style="margin-top:10px;padding:16px 20px;background:rgba(0,200,83,0.08);border-radius:16px;border:1.5px solid rgba(0,200,83,0.2);display:flex;align-items:center;gap:12px;animation:sU 0.4s ease"><span style="font-size:22px;color:#00C853">\u2713</span><div><div style="font-size:17px;font-weight:600;color:#00C853">Misterio completado</div><div style="font-size:14px;color:var(--textDim);margin-top:2px">’+dd.toLocaleDateString(“es-MX”,{day:“numeric”,month:“long”})+’</div></div></div>’;}
+h+=’</div>’;
+app.innerHTML=h;
+// Events
+document.getElementById(“bk”).onclick=function(){state.screen=“home”;render();window.scrollTo(0,0);};
+document.getElementById(“dmm”).onclick=function(){state.darkMode=!state.darkMode;render();};
+if(ci>0)document.getElementById(“pv”).onclick=function(){goM(ci-1);};
+if(ci<tot-1)document.getElementById(“nx”).onclick=function(){goM(ci+1);};
+document.querySelectorAll(”.dt”).forEach(function(d){d.onclick=function(){goM(parseInt(d.dataset.i));};});
+document.querySelectorAll(”.ah”).forEach(function(hd){hd.onclick=function(){state.openSections[hd.dataset.s]=!state.openSections[hd.dataset.s];render();};});
+document.querySelectorAll(”.jt”).forEach(function(t){t.oninput=function(){var q=parseInt(t.dataset.qi),jk=ci+’*’+key;if(!state.journal[jk])state.journal[jk]={};state.journal[jk][q]=t.value;};});
+var sp=document.getElementById(“sp”);if(sp)sp.onclick=function(){state.showPray=true;render();};
+var cb=document.getElementById(“cb”);if(cb)cb.onclick=function(){state.done[ci]=Date.now();state.showPray=false;playNotes([440,554,659]);if(ci<tot-1)setTimeout(function(){goM(ci+1);},1200);else{setTimeout(function(){playNotes([523,659,784]);},600);render();}};
+document.querySelectorAll(”.aw”).forEach(initAP);
 }
-],
-“gloriosos”: [
-{
-“numero”: 16,
-“titulo”: “Primer Misterio Glorioso: La Resurrección”,
-“subtitulo”: “El dolor que impide ver a Dios”,
-“referencia”: “Lucas 24:13-18 (DHH)”,
-“evangelio”: “Aquel mismo día, dos de los discípulos iban a un pueblo llamado Emaús. Iban hablando de todo lo que había pasado. Mientras conversaban y discutían, Jesús mismo se acercó y comenzó a caminar con ellos. Pero aunque lo veían, algo les impedía darse cuenta de quién era. Jesús les preguntó: «¿De qué van hablando ustedes por el camino?» Se detuvieron tristes, y uno de ellos, que se llamaba Cleofás, contestó: «¿Eres tú el único que ha estado en Jerusalén y no sabe lo que allí ha pasado en estos días?»”,
-“contemplacion”: “La tristeza impedía que reconocieran a Jesús\nLos discípulos de Emaús caminaban con el corazón roto. Jesús había muerto. Todo había terminado. Sus esperanzas estaban sepultadas.\nY entonces, Jesús mismo se acercó y caminó con ellos. Pero no lo reconocieron. ¿Por qué? Porque la tristeza y las lágrimas les impedían ver.\nEl dolor los había cegado. La indignación del duelo no les permitía aceptar los testimonios de la resurrección. Estaban tan enfocados en la pérdida que no podían percibir la presencia viva de Cristo junto a ellos.\nA veces, el dolor nos impide ver a Dios caminando con nosotros. No porque Dios esté ausente, sino porque nuestras lágrimas nublan la mirada. No porque Dios no actúe, sino porque nuestra tristeza nos cierra a la esperanza.\nJesús no se ofendió por su ceguera. No los abandonó. Siguió caminando con ellos, con paciencia, explicándoles las Escrituras, hasta que por fin, al partir el pan, se les abrieron los ojos.”,
-“meditacion”: “1. Por María hacia Jesús:\n¿Qué siente el Corazón de María al saber que su Hijo resucitó, venciendo la muerte para siempre?\n2. Desde el Hijo hacia el Padre:\n¿Qué experimenta el Corazón de Jesús resucitado al caminar con discípulos que no lo reconocen por la tristeza?\n3. Hijos y hermanos en el Espíritu:\n¿Qué dolor te impide ver a Dios contigo? ¿Cómo estás cruzando la ceguera espiritual que nace del sufrimiento?”,
-“intercesion”: “Jesús resucitado, tú que caminaste con discípulos ciegos de dolor, abre mis ojos para reconocerte presente en mi vida. Ayúdame a no dejar que la tristeza me ciegue, y enséñame que aun cuando no te veo, tú caminas conmigo.\nAmén.”,
-“audio_contemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_16.mp3”
-},
-{
-“numero”: 17,
-“titulo”: “Segundo Misterio Glorioso: La Ascensión”,
-“subtitulo”: “Lo demasiado bueno cuesta creerlo”,
-“referencia”: “Mateo 28:16-19 (DHH)”,
-“evangelio”: “Los once discípulos fueron a Galilea, al monte que Jesús les había indicado. Y cuando vieron a Jesús, lo adoraron, aunque algunos dudaban. Jesús se acercó y les dijo: «Se me ha dado toda autoridad en el cielo y en la tierra. Vayan, pues, a las gentes de todas las naciones, y háganlas mis discípulos; bautícenlas en el nombre del Padre, del Hijo y del Espíritu Santo.»”,
-“contemplacion”: “Algunos adoraban, otros dudaban\nEn el monte de la Ascensión, algunos discípulos se postraban ante el Resucitado. Otros dudaban. No por malicia, sino por incapacidad de aceptar algo "demasiado bueno".\nHabían visto a Jesús morir. Lo habían llorado. Y ahora estaba ahí, vivo, glorioso, a punto de subir al Padre. Era demasiado hermoso para ser verdad.\nA veces somos incapaces de reconocer y aceptar las cosas buenas que nos pasan. Nos acostumbramos tanto al dolor que la alegría nos desconcierta. Nos adaptamos tanto a la pérdida que el reencuentro nos parece imposible.\nEs un mal inevitable de nuestra herida interior: desconfiar de la bondad, esperar siempre lo peor, no atrevernos a creer en la resurrección.\nPero Jesús no rechazó a los que dudaban. No los expulsó del monte. Los envió de todas formas: Vayan y hagan discípulos. Porque la misión no es solo para los que tienen fe perfecta. Es también para los que dudan, pero siguen caminando.”,
-“meditacion”: “1. Por María hacia Jesús:\n¿Qué siente el Corazón de María al ver a su Hijo glorioso subir al Padre, dejándola una vez más?\n2. Desde el Hijo hacia el Padre:\n¿Qué nos revela el Corazón de Jesús al enviar en misión incluso a quienes todavía dudan?\n3. Hijos y hermanos en el Espíritu:\n¿Qué cosas buenas te resultan difíciles de reconocer y aceptar? ¿Cómo estás cruzando tu desconfianza ante la bondad de Dios?”,
-“intercesion”: “Jesús, tú que ascendiste al Padre enviando incluso a los que dudaban, ayúdame a atreverme a creer en lo bueno. Enséñame que la resurrección no es demasiado hermosa para ser verdad, sino la verdad más hermosa que existe.\nAmén.”,
-“audio_contemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_17.mp3”
-},
-{
-“numero”: 18,
-“titulo”: “Tercer Misterio Glorioso: La Venida del Espíritu Santo”,
-“subtitulo”: “La plenitud que otros ridiculizan”,
-“referencia”: “Hechos 1:14; 2:1-4, 13 (DHH)”,
-“evangelio”: “Todos ellos se reunían siempre para orar con algunas mujeres, con María la madre de Jesús, y con sus hermanos. Cuando llegó la fiesta de Pentecostés, estaban todos juntos en el mismo lugar. De repente, un gran ruido que venía del cielo, como de un viento fuerte, resonó en toda la casa donde ellos estaban. Y se les aparecieron lenguas como de fuego que se repartieron, y sobre cada uno de ellos se asentó una. Y todos quedaron llenos del Espíritu Santo. Algunos se burlaban y decían: «Estos están borrachos.»”,
-“contemplacion”: “La plenitud espiritual confundida con embriaguez\nPersonas llenas del Espíritu Santo, repletas de Dios, hablan con ardor y luz en su mirada, con valentía, compasión y alegría desbordante.\nY la gente se burlaba de ellos diciendo: «Están borrachos.»\nEs un mal inevitable de vivir en un mundo escéptico: cuando experimentas la plenitud del Espíritu, habrá quienes te ridiculicen. Cuando vives con gozo profundo, habrá quienes te malinterpreten. Cuando tu corazón arda con el fuego de Pentecostés, habrá quienes te acusen de estar fuera de ti.\nNo porque sean malos, sino porque no han experimentado lo que tú vives. Y lo que no se entiende, se ridiculiza.\nMaría estaba ahí, en medio de los discípulos llenos del Espíritu. Ella, que guardó todo en su corazón, que vivió Pentecostés sin aspavientos pero con hondura infinita. No les importó la burla. Siguieron proclamando la Buena Noticia.”,
-“meditacion”: “1. Por María hacia Jesús:\n¿Qué siente el Corazón de María al ver cumplida la promesa de Jesús: el Espíritu Santo descendiendo sobre la comunidad?\n2. Desde el Hijo hacia el Padre:\n¿Qué dones envía el Corazón de Jesús desde el Padre, para que sus discípulos no se queden paralizados ante el mal?\n3. Hijos y hermanos en el Espíritu:\n¿Qué haces cuando alguien ridiculiza a una buena persona? ¿Cómo estás cruzando el miedo a ser malinterpretado cuando vives con plenitud espiritual?”,
-“intercesion”: “Espíritu Santo, tú que llenaste a los discípulos con fuego en Pentecostés, llena también mi corazón con tu ardor. Libérame del miedo al ridículo, y ayúdame a vivir con la plenitud que viene de ti, sin importar lo que otros digan.\nAmén.”,
-“audio_contemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_18.mp3”
-},
-{
-“numero”: 19,
-“titulo”: “Cuarto Misterio Glorioso: La Asunción de María”,
-“subtitulo”: “Todo cuerpo vuelve al polvo”,
-“referencia”: “Lucas 1:46-49 (DHH)”,
-“evangelio”: “María dijo: «Mi alma alaba la grandeza del Señor; mi espíritu se alegra en Dios mi Salvador. Porque Dios ha puesto sus ojos en mí, su humilde esclava, y desde ahora siempre me llamarán dichosa; porque el Todopoderoso ha hecho en mí grandes cosas. ¡Santo es su nombre!»”,
-“contemplacion”: “Dios liberó a María de la humillación final\nAunque cuides tu salud y belleza, lamentablemente en el sepulcro o crematorio, el cuerpo se descompondrá hasta volver al polvo del que fue creado.\nEs el mal inevitable más humillante: la corrupción de la carne. El cuerpo que fue templo del Espíritu, que amó, que abrazó, que dio vida, terminará deshecho, irreconocible, polvo.\nPero Cristo liberó de esa humillación a su Madre.\nMaría murió, sí. Pero su cuerpo no conoció la corrupción. Fue asunta al cielo, cuerpo y alma, anticipando la resurrección final que todos esperamos.\n¿Por qué Dios hizo esto con María? Porque su cuerpo fue el primer sagrario. Porque en su vientre habitó el Verbo encarnado. Porque ella dio su carne para que el Hijo de Dios tuviera carne.\nY Dios no permitió que ese cuerpo sagrado se deshiciera en la tumba.\nNos recuerda que nuestro cuerpo también resucitará. Que la corrupción del sepulcro no es el final. Que Dios valora tanto tu cuerpo que lo restaurará glorioso en la resurrección final.”,
-“meditacion”: “1. Por María hacia Jesús:\n¿Qué siente el Corazón de María al ser asunta al cielo, anticipando la gloria que todos esperamos?\n2. Desde el Hijo hacia el Padre:\n¿Qué mueve al Corazón de Jesús a preservar el cuerpo de su Madre de la corrupción del sepulcro?\n3. Hijos y hermanos en el Espíritu:\n¿Qué tanto valoras tu salud y belleza? ¿Cómo estás cruzando tu miedo a la corrupción del cuerpo en la muerte?”,
-“intercesion”: “María, tú que fuiste asunta al cielo en cuerpo y alma, enséñame a valorar mi cuerpo como templo del Espíritu. Ayúdame a no temer la muerte, confiando que Dios también restaurará mi cuerpo en la resurrección final.\nAmén.”,
-“audio_contemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_19.mp3”
-},
-{
-“numero”: 20,
-“titulo”: “Quinto Misterio Glorioso: La Coronación de María”,
-“subtitulo”: “Los humildes reciben la gloria”,
-“referencia”: “Lucas 1:51-53 (DHH)”,
-“evangelio”: “María dijo: «Dios ha mostrado el poder de su brazo, deshizo los planes de los orgullosos, quitó del trono a los poderosos y puso en alto a los humildes. Llenó de bienes a los hambrientos y despidió a los ricos con las manos vacías.»”,
-“contemplacion”: “El único reino que no tendrá fin\nEl Reino de Dios es el único reino que no tendrá fin. Ningún rey, emperador o gobernante de la historia recibió la máxima corona de gloria.\n¿Quién la recibió? La Mujer humilde y creyente que nos dio al Mesías.\nMaría, la joven de Nazaret. La refugiada en Egipto. La madre dolorosa al pie de la Cruz. La orante silenciosa en Pentecostés. Ella es coronada Reina del cielo y de la tierra.\nNo por sus logros políticos. No por su poder militar. No por su riqueza. Por su fe. Por su sí. Por su humildad.\nDios invierte todas las lógicas del mundo. Los últimos son primeros. Los humildes son exaltados. Los pequeños son grandes en el Reino.\nY María, coronada Reina, nos enseña que la gloria definitiva no es para quienes acumulan poder terrenal, sino para quienes le dan la bienvenida al amor de Dios con corazón sencillo.\n¿Qué personas merecen homenaje y honor, pero nadie se los da? Dios los ve. Y en el Reino, ellos brillarán más que todos los poderosos de la tierra.”,
-“meditacion”: “1. Por María hacia Jesús:\n¿Qué siente el Corazón de María al ser coronada Reina del cielo por su Hijo?\n2. Desde el Hijo hacia el Padre:\n¿Qué vive el Corazón de Jesús al coronar a su Madre con la gloria eterna?\n3. Hijos y hermanos en el Espíritu:\n¿Qué personas merecen homenaje y honor, pero nadie se los da? ¿Cómo estás cruzando tu tentación de buscar gloria terrenal en lugar de humildad que lleva a la gloria eterna?”,
-“intercesion”: “María, Reina humilde coronada de gloria, enséñame que la grandeza verdadera está en la pequeñez. Ayúdame a valorar a quienes el mundo desprecia, y a vivir con la humildad que conduce a la gloria eterna.\nAmén.”,
-“audio_contemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_20.mp3”
+
+function goM(i){state.ci=i;state.openSections={};state.showPray=false;render();window.scrollTo(0,0);}
+
+function acc(sec,icon,title,content){
+var o=state.openSections[sec];
+var h=’<div style="margin-top:10px;background:var(--card);border-radius:16px;border:1.5px solid var(--border);overflow:hidden">’;
+h+=’<div class="ah" data-s="'+sec+'" style="padding:14px 18px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;background:'+(o?'rgba(255,122,0,0.08)':'transparent')+'">’;
+h+=’<div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">’+icon+’</span><span style="font-size:17px;font-weight:600;color:'+(o?'#FF7A00':'var(--text)')+'">’+title+’</span></div>’;
+h+=’<span style="color:'+(o?'#FF7A00':'var(--textDim)')+';display:inline-block;transform:rotate('+(o?'180':'0')+'deg);transition:transform 0.3s">\u25bc</span></div>’;
+if(o)h+=’<div style="padding:0 18px 18px;animation:sU 0.3s ease">’+content+’</div>’;
+h+=’</div>’;return h;
 }
-]
-},
-“audio_rezo”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/rezo.mp3”,
-“audio_canto”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/AveMaria_Jacob_Arcadelt_coro_Laus%20Deo_Aguascalientes_2026.mp3”
+
+function aud(src,label){
+if(!src)return’<div style="padding:12px 16px;background:var(--secBg);border-radius:12px;color:var(--textDim)">Audio pr\u00f3ximamente</div>’;
+return’<div class="aw" data-src="'+esc(src)+'" data-label="'+esc(label)+'" style="padding:12px 16px;background:var(--secBg);border-radius:12px"><div style="display:flex;align-items:center;gap:12px"><button class="ap" style="width:42px;height:42px;border-radius:50%;background:#FF7A00;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-size:18px">\u25b6</button><div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:500;color:var(--text);margin-bottom:4px">’+esc(label)+’</div><div class="at" style="font-size:13px;color:var(--textDim);margin-bottom:6px">0:00 / 0:00</div><div class="ab" style="width:100%;height:4px;background:var(--border);border-radius:2px;cursor:pointer;position:relative"><div class="ag" style="height:100%;background:#FF7A00;border-radius:2px;width:0%"></div></div></div></div></div>’;
 }
+
+function initAP(w){
+var src=w.dataset.src,a=new Audio(src),pb=w.querySelector(”.ap”),te=w.querySelector(”.at”),bar=w.querySelector(”.ab”),prog=w.querySelector(”.ag”),pl=false;
+a.addEventListener(“loadedmetadata”,function(){te.textContent=“0:00 / “+fmt(a.duration);});
+a.addEventListener(“timeupdate”,function(){te.textContent=fmt(a.currentTime)+” / “+fmt(a.duration||0);if(a.duration)prog.style.width=(a.currentTime/a.duration*100)+”%”;});
+a.addEventListener(“ended”,function(){pl=false;pb.textContent=”\u25b6”;});
+a.addEventListener(“error”,function(){te.textContent=“Error al cargar”;pb.style.background=”#999”;});
+pb.onclick=function(){if(pl){a.pause();pl=false;pb.textContent=”\u25b6”;}else{a.play().catch(function(){});pl=true;pb.textContent=”\u23f8”;}};
+bar.onclick=function(e){if(!a.duration)return;var r=bar.getBoundingClientRect();a.currentTime=((e.clientX-r.left)/r.width)*a.duration;};
+}
+
+render();
 </script>
-
-```
-<script type="text/babel">
-    const { useState, useEffect, useRef, useMemo } = React;
-
-    /* ─── DESIGN TOKENS ─── */
-    const LVL = {bold:"#FF7A00",base:"#FF7F09",soft:"#F69C49",mist:"#FFA34E",light:"#FFCFA2",ultra:"rgba(255,122,0,0.08)"};
-    const BRAND = "#01BBE1";
-    const GREEN = "#00C853";
-    const LIGHT = {bg:"#E6DED3",card:"#FFFCF7",border:"#D9D1C7",text:"#2B2622",textSoft:"#6B6259",textDim:"#9B9389",disabled:"#CFCFCF",inputBg:"#FFFCF7",secBg:"#F5F0E8"};
-    const DARK = {bg:"#1A1714",card:"#252119",border:"#3A3530",text:"#E6DED3",textSoft:"#B8A898",textDim:"#786858",disabled:"#4A4540",inputBg:"#2A2520",secBg:"#1E1B16"};
-
-    const BLOQUE_META = {
-      gozosos:   { label:"Misterios Gozosos",   emoji:"😊", color:"#F6A623", days:[1,6] },
-      luminosos: { label:"Misterios Luminosos",  emoji:"✨", color:"#F5C518", days:[4] },
-      dolorosos: { label:"Misterios Dolorosos",  emoji:"✝️", color:"#C0392B", days:[2,5] },
-      gloriosos: { label:"Misterios Gloriosos",  emoji:"👑", color:"#8E44AD", days:[0,3] }
-    };
-    const DAY_NAMES = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
-    const ORDS = ["Primer","Segundo","Tercer","Cuarto","Quinto"];
-    const MLABELS = ["Por María hacia Jesús","Desde el Hijo hacia el Padre","Hijos y hermanos en el Espíritu"];
-    const MCOLORS = ["#FF7A00","#C0392B","#27AE60"];
-
-    /* ─── LOAD JSON ─── */
-    const RAW = JSON.parse(document.getElementById("cuaderno-data").textContent);
-
-    function getBloqueForDay(dayOfWeek) {
-      for (const [key, meta] of Object.entries(BLOQUE_META)) {
-        if (meta.days.includes(dayOfWeek)) return key;
-      }
-      return "gozosos";
-    }
-
-    function parseMeditacion(raw) {
-      const lines = raw.split(/\n(?=\d\.)/);
-      return lines.map(l => l.replace(/^\d+\.\s*(Por María hacia Jesús|Desde el Hijo hacia el Padre|Hijos y hermanos en el Espíritu):\s*\n?/,"").trim());
-    }
-
-    function buildMisterios(bloqueKey) {
-      const arr = RAW.misterios[bloqueKey];
-      return arr.map(m => ({
-        numero: m.numero,
-        nombre: m.titulo.replace(/^(Primer|Segundo|Tercer|Cuarto|Quinto)\s+Misterio\s+(Gozoso|Luminoso|Doloroso|Glorioso):\s*/i,""),
-        subtitulo: m.subtitulo,
-        evangelio: { ref: m.referencia, text: m.evangelio },
-        contemplacion: m.contemplacion,
-        meditacion: parseMeditacion(m.meditacion),
-        intercesion: m.intercesion,
-        audioContemplacion: m.audio_contemplacion
-      }));
-    }
-
-    /* ─── SOUNDS ─── */
-    function playNotes(freqs) {
-      try {
-        const ac = new (window.AudioContext || window.webkitAudioContext)();
-        freqs.forEach((f, i) => {
-          setTimeout(() => {
-            const o = ac.createOscillator();
-            const g = ac.createGain();
-            o.type = "sine"; o.frequency.value = f;
-            g.gain.setValueAtTime(0.07, ac.currentTime);
-            g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.3);
-            o.connect(g); g.connect(ac.destination);
-            o.start(); o.stop(ac.currentTime + 0.3);
-          }, i * 180);
-        });
-      } catch (e) {}
-    }
-    const CELEBS = [[440,554,659],[523,659,784],[392,494,587,784],[349,440,523,659]];
-
-    /* ─── CELEBRATION OVERLAYS ─── */
-    function CelebOverlay({ variant, onDone }) {
-      useEffect(() => { playNotes(CELEBS[variant % 4]); const t = setTimeout(onDone, 2200); return () => clearTimeout(t); }, []);
-      const particles = Array.from({ length: 12 }, (_, i) => i);
-      const v = variant % 4;
-      if (v === 0) return <div style={overlayStyle}><div style={{width:120,height:120,borderRadius:"50%",border:"3px solid "+LVL.bold,animation:"haloX 1.8s ease-out forwards",opacity:0}} /></div>;
-      if (v === 1) return <div style={overlayStyle}>{particles.map(i => <div key={i} style={{position:"absolute",width:3,height:20+Math.random()*30,background:LVL.soft,borderRadius:2,left:(15+i*6)+"%",bottom:0,opacity:0,animation:"riseL 1.6s "+i*0.1+"s ease-out forwards"}} />)}</div>;
-      if (v === 2) return <div style={overlayStyle}><svg width="100" height="130" viewBox="0 0 100 130" style={{animation:"crossG 2s ease-out forwards"}}><line x1="50" y1="5" x2="50" y2="125" stroke={LVL.light} strokeWidth="4" strokeLinecap="round"/><line x1="20" y1="40" x2="80" y2="40" stroke={LVL.light} strokeWidth="4" strokeLinecap="round"/></svg></div>;
-      return <div style={overlayStyle}>{particles.map(i => <div key={i} style={{position:"absolute",width:6+Math.random()*6,height:6+Math.random()*6,borderRadius:"50%",background:[LVL.bold,LVL.soft,LVL.light,GREEN][i%4],left:(10+Math.random()*80)+"%",top:(20+Math.random()*60)+"%",opacity:0,animation:"fDot 1.8s "+i*0.12+"s ease-out forwards"}} />)}</div>;
-    }
-    const overlayStyle = {position:"fixed",inset:0,display:"flex",alignItems:"center",justifyContent:"center",pointerEvents:"none",zIndex:100};
-
-    function GrandCeleb({ onDone }) {
-      useEffect(() => { playNotes([440,554,659]); setTimeout(() => playNotes([523,659,784]), 600); setTimeout(() => playNotes([392,494,587,784]), 1200); const t = setTimeout(onDone, 3500); return () => clearTimeout(t); }, []);
-      const rays = Array.from({ length: 20 }, (_, i) => i);
-      return (
-        <div style={{...overlayStyle, background:"rgba(0,0,0,0.4)"}}>
-          <div style={{position:"relative",width:200,height:200,animation:"gPulse 3s ease-out forwards"}}>
-            {rays.map(i => <div key={i} style={{position:"absolute",left:"50%",top:"50%",width:2,height:60+Math.random()*40,background:LVL.soft,borderRadius:2,transformOrigin:"center top",transform:"rotate("+i*18+"deg)",opacity:0,animation:"rayB 2s "+i*0.08+"s ease-out forwards"}} />)}
-            <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center"}}>
-              <div style={{width:80,height:80,borderRadius:"50%",background:LVL.bold,display:"flex",alignItems:"center",justifyContent:"center",animation:"gScale 2s ease-out forwards",boxShadow:"0 0 60px "+LVL.bold+"80"}}>
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="4,12 10,18 20,6"/></svg>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    /* ─── AUDIO PLAYER ─── */
-    function AudioPlayer({ src, label, T }) {
-      const ref = useRef(null);
-      const [playing, setPlaying] = useState(false);
-      const [time, setTime] = useState(0);
-      const [dur, setDur] = useState(0);
-      const [error, setError] = useState(null);
-      useEffect(() => { if (!ref.current) return; playing ? ref.current.play().catch(err => { setError("No se pudo reproducir"); setPlaying(false); }) : ref.current.pause(); }, [playing]);
-      const fmt = s => Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
-      if (!src) return (
-        <div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",background:T.secBg,borderRadius:12}}>
-          <div style={{width:42,height:42,borderRadius:"50%",background:T.disabled,display:"flex",alignItems:"center",justifyContent:"center",opacity:0.5}}><svg width="16" height="16" viewBox="0 0 24 24" fill={T.textDim}><polygon points="6,3 20,12 6,21"/></svg></div>
-          <div><div style={{fontSize:16,fontWeight:500,color:T.textSoft}}>{label}</div><div style={{fontSize:14,color:T.textDim,marginTop:2}}>Audio próximamente</div></div>
-        </div>
-      );
-      return (
-        <div style={{padding:"12px 16px",background:T.secBg,borderRadius:12}}>
-          <audio ref={ref} src={src} onTimeUpdate={() => setTime(ref.current.currentTime)} onLoadedMetadata={() => { setDur(ref.current.duration); setError(null); }} onEnded={() => setPlaying(false)} onError={() => { setError("Error al cargar"); setPlaying(false); }} />
-          <div style={{display:"flex",alignItems:"center",gap:12}}>
-            <button onClick={() => setPlaying(!playing)} style={{width:42,height:42,borderRadius:"50%",background:error?"#999":LVL.bold,border:"none",cursor:error?"not-allowed":"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-              {playing ? <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg> : <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><polygon points="6,3 20,12 6,21"/></svg>}
-            </button>
-            <div style={{flex:1,minWidth:0}}>
-              <div style={{fontSize:15,fontWeight:500,color:T.text,marginBottom:4}}>{label}</div>
-              {error ? <div style={{fontSize:13,color:"#C00",marginBottom:4}}>{error}</div> : <div style={{fontSize:13,color:T.textDim,marginBottom:6}}>{fmt(time)} / {fmt(dur)}</div>}
-              <div onClick={e => { if (error) return; const rect = e.currentTarget.getBoundingClientRect(); ref.current.currentTime = ((e.clientX - rect.left) / rect.width) * dur; }} style={{width:"100%",height:4,background:T.border,borderRadius:2,cursor:error?"not-allowed":"pointer",position:"relative"}}>
-                <div style={{height:"100%",background:error?"#999":LVL.bold,borderRadius:2,width:(dur>0?time/dur*100:0)+"%",transition:"width 0.1s"}} />
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    /* ─── ACCORDION SECTION ─── */
-    function Sec({ icon, title, children, T, open, onToggle }) {
-      return (
-        <div style={{marginTop:10,background:T.card,borderRadius:16,border:"1.5px solid "+T.border,overflow:"hidden"}}>
-          <div onClick={onToggle} style={{padding:"14px 18px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between",background:open?LVL.ultra:"transparent",transition:"background 0.2s"}}>
-            <div style={{display:"flex",alignItems:"center",gap:10}}>
-              <span style={{fontSize:20}}>{icon}</span>
-              <span style={{fontSize:17,fontWeight:600,color:open?LVL.bold:T.text}}>{title}</span>
-            </div>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={open?LVL.bold:T.textDim} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{transform:open?"rotate(180deg)":"rotate(0)",transition:"transform 0.3s"}}><polyline points="6,9 12,15 18,9"/></svg>
-          </div>
-          {open && <div style={{padding:"0 18px 18px",animation:"sU 0.3s ease"}}>{children}</div>}
-        </div>
-      );
-    }
-
-    /* ═══════════════════════════════════════════
-       HOME SCREEN
-    ═══════════════════════════════════════════ */
-    function HomeScreen({ onSelect, T, darkMode, setDarkMode }) {
-      const today = new Date();
-      const dayOfWeek = today.getDay();
-      const todayBloque = getBloqueForDay(dayOfWeek);
-      const todayMeta = BLOQUE_META[todayBloque];
-
-      return (
-        <div style={{minHeight:"100vh",background:T.bg}}>
-          {/* Header */}
-          <div style={{padding:"28px 20px 20px",background:T.card,borderBottom:"1.5px solid "+T.border,textAlign:"center",position:"relative"}}>
-            <button onClick={() => setDarkMode(!darkMode)} style={{position:"absolute",top:20,right:16,width:38,height:38,borderRadius:"50%",background:T.secBg,border:"1.5px solid "+T.border,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>
-              {darkMode ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={T.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg> : <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={T.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>}
-            </button>
-            <div style={{display:"inline-block",background:LVL.bold,color:"#fff",padding:"4px 14px",borderRadius:16,fontSize:12,fontWeight:600,letterSpacing:0.8,textTransform:"uppercase",marginBottom:10}}>Nivel Cruz</div>
-            <h1 style={{fontSize:30,fontWeight:700,color:T.text,margin:"4px 0 2px"}}>CruzAndo</h1>
-            <div style={{fontSize:17,color:T.textSoft}}>Males</div>
-            <div style={{fontSize:14,color:T.textDim,marginTop:6,fontStyle:"italic"}}>Cuaderno 1 — La Cruz</div>
-          </div>
-
-          <div style={{padding:"20px 16px 40px"}}>
-            {/* TODAY CARD */}
-            <button onClick={() => onSelect(todayBloque)} style={{width:"100%",padding:"22px 20px",background:"linear-gradient(135deg,"+LVL.bold+","+LVL.soft+")",border:"none",borderRadius:20,cursor:"pointer",textAlign:"left",color:"#fff",marginBottom:20,boxShadow:"0 6px 24px rgba(255,122,0,0.25)",position:"relative",overflow:"hidden"}}>
-              <div style={{position:"absolute",top:-30,right:-20,width:120,height:120,borderRadius:"50%",background:"rgba(255,255,255,0.1)"}} />
-              <div style={{position:"absolute",bottom:-40,right:30,width:80,height:80,borderRadius:"50%",background:"rgba(255,255,255,0.07)"}} />
-              <div style={{fontSize:13,fontWeight:600,letterSpacing:1.2,textTransform:"uppercase",opacity:0.85,marginBottom:6}}>Hoy {DAY_NAMES[dayOfWeek]}</div>
-              <div style={{fontSize:24,fontWeight:700,marginBottom:4}}>{todayMeta.emoji} {todayMeta.label}</div>
-              <div style={{fontSize:15,opacity:0.9,fontStyle:"italic"}}>{RAW.subtitulos_bloque[todayBloque]}</div>
-              <div style={{marginTop:14,display:"inline-flex",alignItems:"center",gap:6,background:"rgba(255,255,255,0.2)",padding:"8px 16px",borderRadius:12,fontSize:15,fontWeight:600}}>
-                Orar los misterios del día
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9,6 15,12 9,18"/></svg>
-              </div>
-            </button>
-
-            {/* BLOQUE CARDS */}
-            <div style={{fontSize:13,fontWeight:600,letterSpacing:1.5,textTransform:"uppercase",color:T.textDim,marginBottom:12,paddingLeft:4}}>O elige otro set de misterios</div>
-            <div style={{display:"flex",flexDirection:"column",gap:10}}>
-              {Object.entries(BLOQUE_META).map(([key, meta]) => {
-                const isToday = key === todayBloque;
-                const sub = RAW.subtitulos_bloque[key];
-                const dayLabels = meta.days.map(d => DAY_NAMES[d]).join(" y ");
-                return (
-                  <button key={key} onClick={() => onSelect(key)} style={{width:"100%",padding:"16px 18px",background:T.card,border:"1.5px solid "+(isToday ? LVL.soft : T.border),borderRadius:16,cursor:"pointer",textAlign:"left",display:"flex",alignItems:"center",gap:14,transition:"all 0.2s",position:"relative"}}>
-                    {isToday && <div style={{position:"absolute",top:10,right:12,fontSize:10,fontWeight:700,background:LVL.bold,color:"#fff",padding:"2px 8px",borderRadius:8,letterSpacing:0.5}}>HOY</div>}
-                    <div style={{width:46,height:46,borderRadius:14,background:meta.color+"18",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0}}>
-                      {meta.emoji}
-                    </div>
-                    <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontSize:16,fontWeight:600,color:T.text}}>{meta.label}</div>
-                      <div style={{fontSize:14,color:T.textSoft,fontStyle:"italic",marginTop:2}}>{sub}</div>
-                      <div style={{fontSize:12,color:T.textDim,marginTop:3}}>{dayLabels}</div>
-                    </div>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={T.textDim} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9,6 15,12 9,18"/></svg>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    /* ═══════════════════════════════════════════
-       MYSTERY VIEW (the existing prayer experience)
-    ═══════════════════════════════════════════ */
-    function MysteryView({ bloqueKey, onBack, T, darkMode, setDarkMode }) {
-      const meta = BLOQUE_META[bloqueKey];
-      const misterios = useMemo(() => buildMisterios(bloqueKey), [bloqueKey]);
-      const subtitulo = RAW.subtitulos_bloque[bloqueKey];
-      const total = misterios.length;
-
-      const [ci, setCi] = useState(0);
-      const [done, setDone] = useState({});
-      const [journal, setJournal] = useState({});
-      const [openSections, setOpenSections] = useState({});
-      const [showPray, setShowPray] = useState(false);
-      const [celeb, setCeleb] = useState(null);
-      const [trans, setTrans] = useState(false);
-
-      const m = misterios[ci];
-      const isDone = ci in done;
-      const doneCount = Object.keys(done).length;
-
-      const toggleSection = (s) => setOpenSections(p => ({...p, [s]: !p[s]}));
-
-      const goTo = i => {
-        if (i < 0 || i >= total) return;
-        setTrans(true);
-        setTimeout(() => { setCi(i); setOpenSections({}); setShowPray(false); setTrans(false); window.scrollTo(0,0); }, 250);
-      };
-
-      const complete = () => {
-        setDone(p => ({...p, [ci]: Date.now()}));
-        setCeleb(ci);
-        setShowPray(false);
-        if (ci === total - 1) {
-          setTimeout(() => setCeleb("grand"), 2500);
-        } else {
-          setTimeout(() => goTo(ci + 1), 2500);
-        }
-      };
-
-      const bloqueLabel = meta.label.replace("Misterios ","");
-
-      return (
-        <>
-          {celeb === "grand" && <GrandCeleb onDone={() => setCeleb(null)} />}
-          {celeb !== null && celeb !== "grand" && <CelebOverlay variant={celeb} onDone={() => setCeleb(null)} />}
-
-          <div style={{minHeight:"100vh",background:T.bg,paddingBottom:40}}>
-            {/* HEADER */}
-            <div style={{padding:"14px 18px 14px",background:T.card,borderBottom:"1.5px solid "+T.border}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
-                <button onClick={onBack} style={{display:"flex",alignItems:"center",gap:4,background:"none",border:"none",cursor:"pointer",color:LVL.bold,fontSize:14,fontWeight:600,fontFamily:"Inter,sans-serif",padding:0}}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={LVL.bold} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15,18 9,12 15,6"/></svg> Inicio
-                </button>
-                <button onClick={() => setDarkMode(!darkMode)} style={{width:36,height:36,borderRadius:"50%",background:T.secBg,border:"1.5px solid "+T.border,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>
-                  {darkMode ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={T.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg> : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={T.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>}
-                </button>
-              </div>
-              <div>
-                <div style={{display:"inline-block",background:LVL.bold,color:"#fff",padding:"3px 10px",borderRadius:14,fontSize:11,fontWeight:600,letterSpacing:0.8,textTransform:"uppercase",marginBottom:6}}>Nivel Cruz — Males</div>
-                <h1 style={{fontSize:22,fontWeight:700,color:T.text,margin:"2px 0"}}>{meta.emoji} {meta.label}</h1>
-                <div style={{fontSize:15,color:T.textSoft,fontStyle:"italic"}}>{subtitulo}</div>
-              </div>
-            </div>
-
-            {/* PROGRESS DOTS */}
-            <div style={{padding:"14px 18px",background:T.card,borderBottom:"1px solid "+T.border}}>
-              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
-                {misterios.map((_, i) => {
-                  const isA = i === ci; const isD = i in done;
-                  return <div key={i} onClick={() => goTo(i)} style={{width:isA?24:11,height:11,borderRadius:6,background:isD?GREEN:isA?LVL.bold:T.border,cursor:"pointer",transition:"all 0.3s",boxShadow:isA?"0 0 0 3px "+LVL.light:isD?"0 0 6px "+GREEN+"60":"none"}} />;
-                })}
-              </div>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                <span style={{fontSize:13,color:T.textDim}}>{meta.label} · <em style={{color:LVL.soft}}>{subtitulo}</em></span>
-                <span style={{fontSize:13,fontWeight:700,color:doneCount===total?GREEN:LVL.bold}}>{doneCount}/{total}</span>
-              </div>
-            </div>
-
-            {/* NAV */}
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"0 18px 8px"}}>
-              <button onClick={() => goTo(ci-1)} disabled={ci===0} style={{display:"flex",alignItems:"center",gap:4,background:"none",border:"none",cursor:ci===0?"default":"pointer",opacity:ci===0?0.3:1,color:T.textSoft,fontSize:13,fontFamily:"Inter,sans-serif"}}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={T.textSoft} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15,18 9,12 15,6"/></svg> Anterior
-              </button>
-              <span style={{fontSize:13,fontWeight:600,color:T.textDim}}>{ci+1} de {total}</span>
-              <button onClick={() => goTo(ci+1)} disabled={ci===total-1} style={{display:"flex",alignItems:"center",gap:4,background:"none",border:"none",cursor:ci===total-1?"default":"pointer",opacity:ci===total-1?0.3:1,color:T.textSoft,fontSize:13,fontFamily:"Inter,sans-serif"}}>
-                Siguiente <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={T.textSoft} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9,6 15,12 9,18"/></svg>
-              </button>
-            </div>
-
-            {/* MYSTERY CONTENT */}
-            <div style={{padding:"4px 14px 120px",opacity:trans?0:1,transform:trans?"translateY(6px)":"none",transition:"all 0.25s"}}>
-              <div style={{borderRadius:18,overflow:"hidden",marginBottom:14,position:"relative",background:"linear-gradient(135deg,"+LVL.light+","+LVL.mist+","+LVL.soft+")",height:160}}>
-                <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",justifyContent:"flex-end",padding:"18px 20px",background:"linear-gradient(to top,rgba(43,38,34,0.75) 0%,rgba(43,38,34,0.15) 60%,transparent 100%)"}}>
-                  <div style={{fontSize:13,fontWeight:600,letterSpacing:1,color:LVL.light,textTransform:"uppercase"}}>{ORDS[ci]} Misterio {bloqueLabel.slice(0,-1)}</div>
-                  <h2 style={{margin:"3px 0 0",fontSize:22,fontWeight:700,color:"#fff",lineHeight:1.2}}>{m.nombre}</h2>
-                  <div style={{fontSize:15,color:"rgba(255,255,255,0.85)",fontStyle:"italic",marginTop:4}}>{m.subtitulo}</div>
-                </div>
-              </div>
-
-              {/* EVANGELIO */}
-              <div style={{padding:"16px 18px",background:T.card,borderRadius:16,border:"1.5px solid "+T.border,marginBottom:10}}>
-                <div style={{fontSize:13,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:LVL.bold,marginBottom:10}}>📖 Evangelio</div>
-                <div style={{fontSize:18,color:T.text,lineHeight:1.8,whiteSpace:"pre-line"}}>{m.evangelio.text}</div>
-                <div style={{fontSize:14,color:T.textDim,marginTop:12,textAlign:"right",fontStyle:"italic"}}>— {m.evangelio.ref}</div>
-              </div>
-
-              <Sec icon="🙏" title="Rezar este Misterio" T={T} open={openSections.rezar} onToggle={() => toggleSection('rezar')}>
-                <AudioPlayer src={RAW.audio_rezo} label="Padrenuestro + 10 Avemarías + Gloria" T={T} />
-              </Sec>
-
-              <Sec icon="🎵" title="Canto" T={T} open={openSections.canto} onToggle={() => toggleSection('canto')}>
-                <AudioPlayer src={RAW.audio_canto} label="Ave María — Arcadelt — Coro Laus Deo" T={T} />
-              </Sec>
-
-              <Sec icon="👁️" title="Contemplar" T={T} open={openSections.contemplar} onToggle={() => toggleSection('contemplar')}>
-                <AudioPlayer src={m.audioContemplacion} label="Audio de la contemplación" T={T} />
-                <div style={{marginTop:14,padding:"16px 18px",background:T.secBg,borderRadius:14,borderLeft:"3px solid "+LVL.soft}}>
-                  <div style={{fontSize:18,color:T.text,lineHeight:1.85,whiteSpace:"pre-line"}}>{m.contemplacion}</div>
-                </div>
-              </Sec>
-
-              <Sec icon="✍️" title="Meditar y escribir" T={T} open={openSections.meditar} onToggle={() => toggleSection('meditar')}>
-                <div style={{display:"flex",flexDirection:"column",gap:20}}>
-                  {m.meditacion.map((q, qi) => (
-                    <div key={qi}>
-                      <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:6}}>
-                        <div style={{width:7,height:7,borderRadius:4,background:MCOLORS[qi]}} />
-                        <span style={{fontSize:13,fontWeight:600,letterSpacing:1,textTransform:"uppercase",color:MCOLORS[qi]}}>{MLABELS[qi]}</span>
-                      </div>
-                      <p style={{fontSize:18,color:T.text,lineHeight:1.7,marginBottom:10}}>{q}</p>
-                      <textarea
-                        value={journal[ci+"_"+bloqueKey]?.[qi] || ""}
-                        onChange={e => { const k = ci+"_"+bloqueKey; setJournal(p => ({...p, [k]: {...(p[k]||{}), [qi]: e.target.value}})); }}
-                        placeholder="Escribe aquí tu reflexión..."
-                        rows={3}
-                        style={{width:"100%",padding:"12px 16px",background:T.inputBg,border:"1.5px solid "+T.border,borderRadius:12,color:T.text,fontSize:17,lineHeight:1.7,resize:"vertical",outline:"none",transition:"border 0.2s"}}
-                        onFocus={e => e.target.style.borderColor = LVL.soft}
-                        onBlur={e => e.target.style.borderColor = T.border}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </Sec>
-
-              {!showPray && !isDone && (
-                <button onClick={() => setShowPray(true)} style={{width:"100%",padding:"16px",marginTop:8,background:T.card,border:"1.5px solid "+LVL.light,borderRadius:16,cursor:"pointer",fontSize:17,fontWeight:600,fontFamily:"Inter,sans-serif",color:LVL.bold,display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
-                  🙏 Oración de intercesión
-                </button>
-              )}
-
-              {showPray && !isDone && (
-                <div style={{marginTop:10,padding:"22px",background:T.card,borderRadius:18,border:"1.5px solid "+LVL.soft,boxShadow:"0 4px 24px rgba(255,122,0,0.1)",animation:"sU 0.4s ease"}}>
-                  <div style={{fontSize:13,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:LVL.bold,marginBottom:12}}>🙏 Intercesión</div>
-                  <p style={{fontSize:19,color:T.text,lineHeight:1.85,fontStyle:"italic",whiteSpace:"pre-line"}}>{m.intercesion}</p>
-                  <button onClick={complete} style={{width:"100%",marginTop:20,padding:"16px",background:LVL.bold,border:"none",borderRadius:14,cursor:"pointer",color:"#fff",fontSize:18,fontWeight:700,fontFamily:"Inter,sans-serif",boxShadow:"0 4px 16px rgba(255,122,0,0.3)"}}>
-                    {ci < total - 1 ? "Siguiente Misterio →" : "Completar bloque ✦"}
-                  </button>
-                </div>
-              )}
-
-              {isDone && (
-                <div style={{marginTop:10,padding:"16px 20px",background:GREEN+"15",borderRadius:16,border:"1.5px solid "+GREEN+"30",display:"flex",alignItems:"center",gap:12,animation:"sU 0.4s ease"}}>
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={GREEN} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="4,12 10,18 20,6"/></svg>
-                  <div>
-                    <div style={{fontSize:17,fontWeight:600,color:GREEN}}>Misterio completado</div>
-                    <div style={{fontSize:14,color:T.textDim,marginTop:2}}>{new Date(done[ci]).toLocaleDateString("es-MX",{day:"numeric",month:"long"})}</div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </>
-      );
-    }
-
-    /* ═══════════════════════════════════════════
-       APP ROOT
-    ═══════════════════════════════════════════ */
-    function App() {
-      const [darkMode, setDarkMode] = useState(false);
-      const T = darkMode ? DARK : LIGHT;
-      const [screen, setScreen] = useState("home"); // "home" | bloqueKey
-      const [fadeOut, setFadeOut] = useState(false);
-
-      const navigate = (target) => {
-        setFadeOut(true);
-        setTimeout(() => { setScreen(target); setFadeOut(false); window.scrollTo(0,0); }, 200);
-      };
-
-      return (
-        <>
-          <style>{CSS(T)}</style>
-          <div style={{opacity:fadeOut?0:1,transition:"opacity 0.2s"}}>
-            {screen === "home" ? (
-              <HomeScreen onSelect={(key) => navigate(key)} T={T} darkMode={darkMode} setDarkMode={setDarkMode} />
-            ) : (
-              <MysteryView bloqueKey={screen} onBack={() => navigate("home")} T={T} darkMode={darkMode} setDarkMode={setDarkMode} />
-            )}
-          </div>
-        </>
-      );
-    }
-
-    function CSS(T) {
-      return `
-        *{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif}
-        body{margin:0;background:${T.bg};font-family:'Inter',sans-serif}
-        textarea,button{font-family:'Inter',sans-serif}
-        ::placeholder{color:${T.textDim}}
-        ::-webkit-scrollbar{width:3px}
-        ::-webkit-scrollbar-thumb{background:${T.border};border-radius:2px}
-        @keyframes sU{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes haloX{0%{transform:scale(0.3);opacity:0}30%{opacity:1}100%{transform:scale(2.5);opacity:0}}
-        @keyframes riseL{0%{transform:translateY(0);opacity:0}20%{opacity:0.8}100%{transform:translateY(-200px);opacity:0}}
-        @keyframes crossG{0%{opacity:0;transform:scale(0.5)}40%{opacity:1;transform:scale(1.1)}100%{opacity:0;transform:scale(1.3)}}
-        @keyframes fDot{0%{transform:scale(0) translateY(20px);opacity:0}30%{opacity:0.9;transform:scale(1.2) translateY(0)}100%{transform:scale(0) translateY(-40px);opacity:0}}
-        @keyframes gPulse{0%{transform:scale(0)}30%{transform:scale(1.1)}50%{transform:scale(0.95)}100%{transform:scale(1);opacity:0}}
-        @keyframes rayB{0%{height:0;opacity:0}30%{opacity:0.7}100%{height:100px;opacity:0}}
-        @keyframes gScale{0%{transform:scale(0)}40%{transform:scale(1.2)}60%{transform:scale(0.9)}100%{transform:scale(1)}}
-      `;
-    }
-
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
-</script>
-```
 
 </body>
 </html>
