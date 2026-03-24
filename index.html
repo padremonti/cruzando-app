@@ -29,6 +29,44 @@
     const MLABELS = ["Por María hacia Jesús","Desde el Hijo hacia el Padre","Hijos y hermanos en el Espíritu"];
     const MCOLORS = ["#FF7A00","#C0392B","#27AE60"];
 
+    // Misterios del día según tradición católica
+    const MISTERIOS_DIA = {
+      0: 'gloriosos',  // Domingo
+      1: 'gozosos',    // Lunes
+      2: 'dolorosos',  // Martes
+      3: 'gloriosos',  // Miércoles
+      4: 'luminosos',  // Jueves
+      5: 'dolorosos',  // Viernes
+      6: 'gozosos'     // Sábado
+    };
+
+    const TIPO_INFO = {
+      gozosos: {
+        emoji: '🌟',
+        color: '#FFB74D',
+        gradient: 'linear-gradient(135deg, #FFE082, #FFB74D)',
+        dias: 'Lunes y Sábado'
+      },
+      luminosos: {
+        emoji: '✨',
+        color: '#64B5F6',
+        gradient: 'linear-gradient(135deg, #90CAF9, #64B5F6)',
+        dias: 'Jueves'
+      },
+      dolorosos: {
+        emoji: '✝️',
+        color: '#9575CD',
+        gradient: 'linear-gradient(135deg, #B39DDB, #9575CD)',
+        dias: 'Martes y Viernes'
+      },
+      gloriosos: {
+        emoji: '👑',
+        color: '#4DB6AC',
+        gradient: 'linear-gradient(135deg, #80CBC4, #4DB6AC)',
+        dias: 'Miércoles y Domingo'
+      }
+    };
+
     function playNotes(freqs) {
       try {
         const ac = new (window.AudioContext || window.webkitAudioContext)();
@@ -174,7 +212,7 @@
             <div style={{flex:1,minWidth:0}}>
               <div style={{fontSize:15,fontWeight:500,color:T.text,marginBottom:4}}>{label}</div>
               {error ? (
-                <div style={{fontSize:13,color:"#C00",marginBottom:4}}>{error} - Verifica el nombre del archivo en R2</div>
+                <div style={{fontSize:13,color:"#C00",marginBottom:4}}>{error}</div>
               ) : (
                 <div style={{fontSize:13,color:T.textDim,marginBottom:6}}>{fmt(time)} / {fmt(dur)}</div>
               )}
@@ -216,9 +254,133 @@
     const ICON_EYE = "👁️";
     const ICON_PEN = "✍️";
 
+    // Pantalla de selección de misterios
+    function SelectScreen({ onSelect, T, darkMode, setDarkMode }) {
+      const today = new Date().getDay();
+      const misteriosHoy = MISTERIOS_DIA[today];
+
+      return (
+        <div style={{minHeight:"100vh",background:T.bg,padding:"20px"}}>
+          <style>{CSS(T)}</style>
+          
+          {/* Header */}
+          <div style={{background:T.card,borderRadius:20,padding:"24px 20px",marginBottom:20,border:"1.5px solid "+T.border}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:16}}>
+              <div style={{flex:1}}>
+                <div style={{display:"inline-block",background:LVL.bold,color:"#fff",padding:"4px 12px",borderRadius:16,fontSize:12,fontWeight:600,letterSpacing:0.8,textTransform:"uppercase",marginBottom:10}}>
+                  Nivel Cruz
+                </div>
+                <h1 style={{fontSize:28,fontWeight:700,color:T.text,marginBottom:4}}>Males</h1>
+                <p style={{fontSize:16,color:T.textSoft,lineHeight:1.6}}>Elige qué misterios del Rosario deseas contemplar hoy</p>
+              </div>
+              <button 
+                onClick={() => setDarkMode(!darkMode)} 
+                style={{
+                  width:40,
+                  height:40,
+                  borderRadius:"50%",
+                  background:T.secBg,
+                  border:"1.5px solid "+T.border,
+                  cursor:"pointer",
+                  display:"flex",
+                  alignItems:"center",
+                  justifyContent:"center",
+                  flexShrink:0,
+                  transition:"all 0.2s"
+                }}
+                title={darkMode ? "Modo claro" : "Modo oscuro"}
+              >
+                {darkMode ? (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={T.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                  </svg>
+                ) : (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={T.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                  </svg>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Misterios del día */}
+          <button 
+            onClick={() => onSelect(misteriosHoy)}
+            style={{
+              width:"100%",
+              background:TIPO_INFO[misteriosHoy].gradient,
+              border:"none",
+              borderRadius:18,
+              padding:"24px 20px",
+              marginBottom:16,
+              cursor:"pointer",
+              boxShadow:"0 4px 20px rgba(0,0,0,0.12)",
+              transition:"transform 0.2s",
+            }}
+            onMouseDown={e => e.currentTarget.style.transform = "scale(0.98)"}
+            onMouseUp={e => e.currentTarget.style.transform = "scale(1)"}
+            onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+          >
+            <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:12}}>
+              <span style={{fontSize:32}}>{TIPO_INFO[misteriosHoy].emoji}</span>
+              <div style={{textAlign:"left",flex:1}}>
+                <div style={{fontSize:13,fontWeight:600,color:"rgba(255,255,255,0.9)",letterSpacing:1,textTransform:"uppercase",marginBottom:4}}>Recomendado hoy</div>
+                <h2 style={{fontSize:22,fontWeight:700,color:"#fff",margin:0}}>Misterios {misteriosHoy.charAt(0).toUpperCase() + misteriosHoy.slice(1)}</h2>
+              </div>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="9,18 15,12 9,6"/>
+              </svg>
+            </div>
+          </button>
+
+          {/* Opciones de misterios */}
+          <div style={{display:"grid",gap:12}}>
+            {['gozosos', 'luminosos', 'dolorosos', 'gloriosos'].map(tipo => (
+              <button
+                key={tipo}
+                onClick={() => onSelect(tipo)}
+                style={{
+                  background:T.card,
+                  border:"1.5px solid "+T.border,
+                  borderRadius:16,
+                  padding:"18px 20px",
+                  cursor:"pointer",
+                  transition:"all 0.2s",
+                  textAlign:"left"
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.borderColor = TIPO_INFO[tipo].color;
+                  e.currentTarget.style.transform = "translateX(4px)";
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.borderColor = T.border;
+                  e.currentTarget.style.transform = "translateX(0)";
+                }}
+              >
+                <div style={{display:"flex",alignItems:"center",gap:12}}>
+                  <span style={{fontSize:28}}>{TIPO_INFO[tipo].emoji}</span>
+                  <div style={{flex:1}}>
+                    <h3 style={{fontSize:18,fontWeight:600,color:T.text,margin:"0 0 4px 0"}}>
+                      Misterios {tipo.charAt(0).toUpperCase() + tipo.slice(1)}
+                    </h3>
+                    <div style={{fontSize:14,color:T.textDim}}>{TIPO_INFO[tipo].dias}</div>
+                  </div>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={T.textDim} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="9,18 15,12 9,6"/>
+                  </svg>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
     function App() {
       const [darkMode, setDarkMode] = useState(false);
       const T = darkMode ? DARK : LIGHT;
+      
+      const [selectedTipo, setSelectedTipo] = useState(null);
       
       // Ahora openSections es un objeto: {rezar: true, canto: false, ...}
       const [openSections, setOpenSections] = useState({});
@@ -226,102 +388,379 @@
       const toggleSection = (section) => {
         setOpenSections(prev => ({...prev, [section]: !prev[section]}));
       };
-      
-      const cuaderno = {
-        nivel: "CruzAndo la Cruz",
-        nombre: "Males",
-        numero: 1,
-        subtitulo: "La vulnerabilidad gozosa",
-        audioRezo: "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/rezo.mp3",
-        audioCanto: "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/AveMaria_Jacob_Arcadelt_coro_Laus%20Deo_Aguascalientes_2026.mp3",
-        misterios: [
-          {
-            numero: 1,
-            nombre: "La Anunciación",
-            subtitulo: "Ser humano es ser vulnerable",
-            evangelio: {
-              ref: "Lucas 1:26-31 (DHH)",
-              text: "En el sexto mes, el ángel Gabriel fue enviado por Dios a una ciudad de Galilea llamada Nazaret, a una joven virgen llamada María, comprometida para casarse con un hombre llamado José, descendiente del rey David. El ángel entró en el lugar donde ella estaba, y le dijo: «¡Te saludo, favorecida de Dios! El Señor está contigo.» María quedó muy conmovida al oír estas palabras, y se preguntaba qué significaría aquel saludo. El ángel le dijo: «No tengas miedo, María, pues tú gozas del favor de Dios. Ahora vas a quedar encinta: tendrás un hijo, y le pondrás por nombre Jesús.»"
-            },
-            contemplacion: "Desde la concepción, ser humano es ser vulnerable\nDios eligió hacerse humano comenzando por donde todos comenzamos: siendo frágil.\nJesús no apareció en el mundo como un adulto poderoso. Se hizo embrión en el vientre de María. Diminuto, silencioso, expuesto. Su vida, durante nueve meses, estuvo sostenida por lo más delicado que existe: la carne de una mujer joven, en un pueblo pequeño, en tiempos difíciles.\nMaría recibió esa noticia sin garantías. No sabía lo que vendría. Solo supo que algo estaba comenzando en ella, algo más grande que ella, y que ese algo era absolutamente frágil.\nAsí empieza la vida humana. Así empieza toda vida humana: pequeña, expuesta, sin defensa propia. La fragilidad no es un accidente del camino; es el punto de partida. Dios mismo la eligió. Y al elegirla, nos revela algo que cuesta aceptar: la vulnerabilidad no es lo que hay que superar para vivir bien. Es la condición desde la que la vida comienza, y desde la que Dios actúa.",
-            meditacion: [
-              "¿Qué siente el Corazón Inmaculado de María al descubrir que Dios mismo eligió comenzar siendo pequeño, frágil, expuesto?",
-              "¿Qué nos revela el Corazón de Jesús al hacerse embrión, al hacerse vida que aún no puede nada, que solo puede ser recibida?",
-              "¿Cuáles son los males —las fragilidades, los límites, las exposiciones— que reconoces como parte inevitable de tu vida desde el principio? ¿Cuál de ellos te cuesta más aceptar como punto de partida y no como fracaso?"
-            ],
-            intercesion: "Jesús, tú que elegiste ser vulnerable desde la concepción, ayúdame a aceptar mi propia fragilidad sin vergüenza. Enséñame que necesitar a otros no es debilidad, sino el camino del amor que tú mismo recorriste.\nAmén.",
-            audioContemplacion: "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_1.mp3"
-          },
-          {
-            numero: 2,
-            nombre: "La Visitación",
-            subtitulo: "La fragilidad que une",
-            evangelio: {
-              ref: "Lucas 1:39-43 (DHH)",
-              text: "Por aquellos días, María se fue de prisa a un pueblo de la región montañosa de Judea, y entró en la casa de Zacarías y saludó a Isabel. Cuando Isabel oyó el saludo de María, la criatura se le estremeció en el vientre, y ella quedó llena del Espíritu Santo. Entonces, con voz muy fuerte, dijo: «¡Dios te ha bendecido más que a todas las mujeres, y ha bendecido a tu hijo! ¿Quién soy yo, para que venga a visitarme la madre de mi Señor?»"
-            },
-            contemplacion: "Los primeros ante los ojos de Dios\nMaría, embarazada y joven, camina varios días por terreno montañoso para visitar a Isabel, su prima anciana que también está esperando un hijo. Ambas viven embarazos extraordinarios, pero también ambas están en situación de vulnerabilidad: María es soltera y embarazada (escándalo social), Isabel es anciana y gestante (riesgo físico).\nY sin embargo, en esa fragilidad compartida nace la comunión más hermosa del Evangelio.\nMaría no va a presumir su privilegio de ser la Madre del Mesías. Va a servir. Isabel no siente envidia de la joven favorecida. Siente gratitud por su visita. Ambas reconocen la gracia de Dios en la otra, y se sostienen mutuamente.\nLos primeros ante los ojos de Dios son los frágiles que se acompañan: las mujeres embarazadas, los bebés gestándose, los ancianos, los pobres, los que no tienen voz. Todos ellos son visitados por María y el Mesías en su seno.\nLa fragilidad no separa. Une.",
-            meditacion: [
-              "¿Qué siente el Corazón de María al caminar días enteros, embarazada, para servir a su prima anciana?",
-              "¿Qué vive el Corazón de Jesús, aún en el vientre, al encontrarse con Juan Bautista también en gestación?",
-              "¿Cuántas veces te has acercado a personas en situación vulnerable? ¿Qué sientes y qué haces al respecto? ¿Cómo estás cruzando tu propia necesidad de ayuda?"
-            ],
-            intercesion: "María, tú que caminaste días enteros para servir a quien te necesitaba, enséñame que la fragilidad no me aísla, sino que me une a otros. Ayúdame a reconocer la gracia de Dios en los vulnerables, y a ofrecerles mi presencia sin condescendencia.\nAmén.",
-            audioContemplacion: "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_2.mp3"
-          },
-          {
-            numero: 3,
-            nombre: "El Nacimiento de Jesús",
-            subtitulo: "Pobreza y refugio",
-            evangelio: {
-              ref: "Lucas 2:1, 4-7 (DHH)",
-              text: "Por aquel tiempo, el emperador Augusto ordenó que se hiciera un censo de todo el mundo. José salió del pueblo de Nazaret, de la región de Galilea, y se fue a Belén. Fue allá a inscribirse, junto con María, su esposa, que se encontraba encinta. Y mientras estaban en Belén, le llegó a María el tiempo de dar a luz. Y allí nació su hijo primogénito, y lo envolvió en pañales y lo acostó en el establo, porque no había alojamiento para ellos en el mesón."
-            },
-            contemplacion: "Lejos del hogar, sin posada, sin hospitalidad\nMaría y José no eligieron dar a luz en un establo. Fueron forzados por las circunstancias: un decreto imperial los desplazó de su hogar, ningún mesón los recibió, y la pobreza les cerró todas las puertas.\nEl Hijo de Dios nació refugiado en una cueva de animales. Sin médico, sin comadrona, sin agua caliente, sin cama digna. María dio a luz en condiciones de extrema precariedad. José hizo lo que pudo con lo poco que tenía.\nY aun así, le dieron la bienvenida al Niño.\nSan José mantuvo la actitud a pesar de todo: Bienvenido a este mundo, Niño Jesús. María lo envolvió en pañales con ternura, lo acostó en el pesebre como si fuera la cuna más preciosa del mundo.\nLa pobreza material no les robó la dignidad. La falta de recursos no les impidió amar. La injusticia del mundo no venció su esperanza.\nPorque Dios no necesita abundancia para nacer. Solo necesita un corazón que lo reciba.",
-            meditacion: [
-              "¿Qué siente el Corazón de María al dar a luz en un refugio de animales, lejos de su hogar?",
-              "¿Qué acepta el Corazón de Jesús al nacer en la pobreza extrema, sin las comodidades básicas?",
-              "¿Qué actitud tienes en los momentos de escasez (falta de agua, dinero, luz eléctrica, salud…)? ¿Cómo estás cruzando la falta de recursos que limita tu vida?"
-            ],
-            intercesion: "Jesús, tú que naciste en un establo porque no había lugar para ti, acompáñame en mi propia pobreza y precariedad. Enséñame que la escasez no me roba la dignidad, y que puedo dar la bienvenida a la vida incluso cuando falta todo.\nAmén.",
-            audioContemplacion: "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_3.mp3"
-          },
-          {
-            numero: 4,
-            nombre: "La Presentación en el Templo",
-            subtitulo: "La espada anunciada",
-            evangelio: {
-              ref: "Lucas 2:22, 25, 28, 34-35 (DHH)",
-              text: "Cuando se cumplieron los días de la purificación de ellos, según la ley de Moisés, llevaron al niño a Jerusalén para presentarlo al Señor. Había en Jerusalén un hombre llamado Simeón, justo y piadoso. Tomó al niño en sus brazos y bendijo a Dios. Luego dijo a María, su madre: «Este niño será causa de caída y de elevación para muchos en Israel; será signo de contradicción, y a ti misma una espada te atravesará el corazón.»"
-            },
-            contemplacion: "El más santo del mundo molestará a muchos\nMaría sostiene a su hijo recién nacido en el Templo. Todo es alegría, gratitud, cumplimiento de la Ley. Pero Simeón, movido por el Espíritu, pronuncia palabras que rompen la paz: Una espada atravesará tu corazón.\nMaría no entiende del todo. Pero presiente que amar a este Niño le costará todo. Hay pérdidas que se anuncian mucho antes de ocurrir. Hay despedidas que empiezan a gestarse en el primer abrazo.\nY aun así, María no huye. No dice: Si este hijo me traerá tanto dolor, prefiero no amarlo tanto. Al contrario: guarda estas palabras en su corazón junto con el amor. Acepta amar sabiendo que amará hasta el dolor.\nSimeón también anuncia algo desconcertante: el más santo del mundo (el Mesías) molestará a muchos. Porque su bondad revelará la falsedad de los hipócritas. Su justicia incomodará a los injustos. Su verdad será intolerable para quienes viven en la mentira.\nA veces, lo verdaderamente bueno es insoportable para quienes no quieren cambiar.",
-            meditacion: [
-              "¿Qué siente el Corazón de María al escuchar que una espada lo atravesará?",
-              "¿Qué sabe el Corazón de Jesús sobre su propio destino, siendo aún un niño en brazos de Simeón?",
-              "¿Alguna vez te ha resultado molesto o insoportable alguien bueno, justo o recto? ¿Qué dolor anticipas que tu corazón resiste nombrar? ¿Cómo estás cruzando la espada anunciada en tu vida?"
-            ],
-            intercesion: "María, tú que aceptaste la espada profetizada sin huir del amor, enséñame a no temer el dolor que viene con amar de verdad. Ayúdame a guardar en mi corazón las palabras difíciles, confiando que Dios me dará fuerza cuando llegue el momento.\nAmén.",
-            audioContemplacion: "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_4.mp3"
-          },
-          {
-            numero: 5,
-            nombre: "El Niño perdido y hallado en el Templo",
-            subtitulo: "Crecer duele",
-            evangelio: {
-              ref: "Lucas 2:41-46 (DHH)",
-              text: "Los padres de Jesús iban todos los años a Jerusalén para la fiesta de la Pascua. Cuando Jesús cumplió doce años, fueron allá todos ellos, como era costumbre. Pero pasados aquellos días, cuando volvían a casa, el niño Jesús se quedó en Jerusalén, sin que sus padres se dieran cuenta. Pensando que Jesús iba entre la gente, hicieron un día de camino; pero luego, al buscarlo entre los parientes y conocidos, no lo encontraron. Así que regresaron a Jerusalén para buscarlo allí. Al cabo de tres días lo encontraron en el templo, sentado entre los maestros, escuchándolos y haciéndoles preguntas."
-            },
-            contemplacion: "El dolor del crecimiento\nMaría y José vivieron tres días de angustia. Habían perdido a su hijo. O más bien: su hijo los había dejado atrás, ocupándose de las cosas de su Padre Dios.\nJesús no se escondió por desobediencia. No los abandonó por rebeldía. Simplemente, estaba creciendo. Y crecer duele. No solo al que crece, sino también a quienes lo aman.\nA los doce años, Jesús comenzó a descubrir su identidad como Hijo de Dios. Necesitaba ese tiempo en el Templo, dialogando con los maestros, escuchando, preguntando, madurando. Sus padres aún no entendían del todo quién era Él, ni hacia dónde lo llevaba su vocación. Pero ese misterio ya comenzaba a revelarse.\nMaría y José sufrieron esa separación sin culpa: no fueron malos padres. Jesús vivió ese \"estirón\" sin malicia: no fue un mal hijo. Simplemente, hay momentos en que los hijos toman su propio camino, y eso es voluntad de Dios.",
-            meditacion: [
-              "¿Qué vive el Corazón de María al comprender que su hijo ya no es solo suyo, sino también del Padre?",
-              "¿Qué descubre el Corazón de Jesús sobre sí mismo cuando se ocupa de las cosas de su Padre Dios?",
-              "¿Qué dolor has sentido al dejar atrás la infancia, la casa paterna, las costumbres de otra época? ¿Cómo estás cruzando el duelo de crecer, de madurar, de tomar tus propias decisiones?"
-            ],
-            intercesion: "Jesús, tú que creciste ocupándote de las cosas de tu Padre, ayúdame a aceptar que crecer duele, pero es voluntad de Dios. Enséñame a soltar lo que ya no me corresponde cargar, y a confiar que mi camino, aunque duela, es el que Tú preparaste para mí.\nAmén.",
-            audioContemplacion: "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_5.mp3"
-          }
-        ]
-      };
+
+      // Cargar datos desde JSON inline (se insertará dinámicamente)
+      const DATA_PLACEHOLDER = {
+```
+
+“nivel”: “CruzAndo la Cruz”,
+“cuaderno”: “Males”,
+“numero”: “1”,
+“audioRezo”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/rezo.mp3”,
+“audioCanto”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/AveMaria_Jacob_Arcadelt_coro_Laus%20Deo_Aguascalientes_2026.mp3”,
+“subtitulosBloques”: {
+“gozosos”: “La vulnerabilidad gozosa”,
+“luminosos”: “Límites que dan luz”,
+“dolorosos”: “Límites que salvan”,
+“gloriosos”: “El mal no es el final”
+},
+“misterios”: {
+“gozosos”: [
+{
+“numero”: 1,
+“nombre”: “La Anunciación”,
+“subtitulo”: “Ser humano es ser vulnerable”,
+“evangelio”: {
+“ref”: “Lucas 1:26-31 (DHH)”,
+“text”: “En el sexto mes, el ángel Gabriel fue enviado por Dios a una ciudad de Galilea llamada Nazaret, a una joven virgen llamada María, comprometida para casarse con un hombre llamado José, descendiente del rey David. El ángel entró en el lugar donde ella estaba, y le dijo: «¡Te saludo, favorecida de Dios! El Señor está contigo.» María quedó muy conmovida al oír estas palabras, y se preguntaba qué significaría aquel saludo. El ángel le dijo: «No tengas miedo, María, pues tú gozas del favor de Dios. Ahora vas a quedar encinta: tendrás un hijo, y le pondrás por nombre Jesús.»”
+},
+“contemplacion”: “Desde la concepción, ser humano es ser vulnerable\nDios eligió hacerse humano comenzando por donde todos comenzamos: siendo frágil.\nJesús no apareció en el mundo como un adulto poderoso. Se hizo embrión en el vientre de María. Diminuto, silencioso, expuesto. Su vida, durante nueve meses, estuvo sostenida por lo más delicado que existe: la carne de una mujer joven, en un pueblo pequeño, en tiempos difíciles.\nMaría recibió esa noticia sin garantías. No sabía lo que vendría. Solo supo que algo estaba comenzando en ella, algo más grande que ella, y que ese algo era absolutamente frágil.\nAsí empieza la vida humana. Así empieza toda vida humana: pequeña, expuesta, sin defensa propia. La fragilidad no es un accidente del camino; es el punto de partida. Dios mismo la eligió. Y al elegirla, nos revela algo que cuesta aceptar: la vulnerabilidad no es lo que hay que superar para vivir bien. Es la condición desde la que la vida comienza, y desde la que Dios actúa.”,
+“meditacion”: [
+“¿Qué siente el Corazón Inmaculado de María al descubrir que Dios mismo eligió comenzar siendo pequeño, frágil, expuesto?”,
+“¿Qué nos revela el Corazón de Jesús al hacerse embrión, al hacerse vida que aún no puede nada, que solo puede ser recibida?”,
+“¿Cuáles son los males —las fragilidades, los límites, las exposiciones— que reconoces como parte inevitable de tu vida desde el principio? ¿Cuál de ellos te cuesta más aceptar como punto de partida y no como fracaso?”
+],
+“intercesion”: “Jesús, tú que elegiste ser vulnerable desde la concepción, ayúdame a aceptar mi propia fragilidad sin vergüenza. Enséñame que necesitar a otros no es debilidad, sino el camino del amor que tú mismo recorriste.\nAmén.”,
+“audioContemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_1.mp3”
+},
+{
+“numero”: 2,
+“nombre”: “La Visitación”,
+“subtitulo”: “La fragilidad que une”,
+“evangelio”: {
+“ref”: “Lucas 1:39-43 (DHH)”,
+“text”: “Por aquellos días, María se fue de prisa a un pueblo de la región montañosa de Judea, y entró en la casa de Zacarías y saludó a Isabel. Cuando Isabel oyó el saludo de María, la criatura se le estremeció en el vientre, y ella quedó llena del Espíritu Santo. Entonces, con voz muy fuerte, dijo: «¡Dios te ha bendecido más que a todas las mujeres, y ha bendecido a tu hijo! ¿Quién soy yo, para que venga a visitarme la madre de mi Señor?»”
+},
+“contemplacion”: “Los primeros ante los ojos de Dios\nMaría, embarazada y joven, camina varios días por terreno montañoso para visitar a Isabel, su prima anciana que también está esperando un hijo. Ambas viven embarazos extraordinarios, pero también ambas están en situación de vulnerabilidad: María es soltera y embarazada (escándalo social), Isabel es anciana y gestante (riesgo físico).\nY sin embargo, en esa fragilidad compartida nace la comunión más hermosa del Evangelio.\nMaría no va a presumir su privilegio de ser la Madre del Mesías. Va a servir. Isabel no siente envidia de la joven favorecida. Siente gratitud por su visita. Ambas reconocen la gracia de Dios en la otra, y se sostienen mutuamente.\nLos primeros ante los ojos de Dios son los frágiles que se acompañan: las mujeres embarazadas, los bebés gestándose, los ancianos, los pobres, los que no tienen voz. Todos ellos son visitados por María y el Mesías en su seno.\nLa fragilidad no separa. Une.”,
+“meditacion”: [
+“¿Qué siente el Corazón de María al caminar días enteros, embarazada, para servir a su prima anciana?”,
+“¿Qué vive el Corazón de Jesús, aún en el vientre, al encontrarse con Juan Bautista también en gestación?”,
+“¿Cuántas veces te has acercado a personas en situación vulnerable? ¿Qué sientes y qué haces al respecto? ¿Cómo estás cruzando tu propia necesidad de ayuda?”
+],
+“intercesion”: “María, tú que caminaste días enteros para servir a quien te necesitaba, enséñame que la fragilidad no me aísla, sino que me une a otros. Ayúdame a reconocer la gracia de Dios en los vulnerables, y a ofrecerles mi presencia sin condescendencia.\nAmén.”,
+“audioContemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_2.mp3”
+},
+{
+“numero”: 3,
+“nombre”: “El Nacimiento de Jesús”,
+“subtitulo”: “Pobreza y refugio”,
+“evangelio”: {
+“ref”: “Lucas 2:1, 4-7 (DHH)”,
+“text”: “Por aquel tiempo, el emperador Augusto ordenó que se hiciera un censo de todo el mundo. José salió del pueblo de Nazaret, de la región de Galilea, y se fue a Belén. Fue allá a inscribirse, junto con María, su esposa, que se encontraba encinta. Y mientras estaban en Belén, le llegó a María el tiempo de dar a luz. Y allí nació su hijo primogénito, y lo envolvió en pañales y lo acostó en el establo, porque no había alojamiento para ellos en el mesón.”
+},
+“contemplacion”: “Lejos del hogar, sin posada, sin hospitalidad\nMaría y José no eligieron dar a luz en un establo. Fueron forzados por las circunstancias: un decreto imperial los desplazó de su hogar, ningún mesón los recibió, y la pobreza les cerró todas las puertas.\nEl Hijo de Dios nació refugiado en una cueva de animales. Sin médico, sin comadrona, sin agua caliente, sin cama digna. María dio a luz en condiciones de extrema precariedad. José hizo lo que pudo con lo poco que tenía.\nY aun así, le dieron la bienvenida al Niño.\nSan José mantuvo la actitud a pesar de todo: Bienvenido a este mundo, Niño Jesús. María lo envolvió en pañales con ternura, lo acostó en el pesebre como si fuera la cuna más preciosa del mundo.\nLa pobreza material no les robó la dignidad. La falta de recursos no les impidió amar. La injusticia del mundo no venció su esperanza.\nPorque Dios no necesita abundancia para nacer. Solo necesita un corazón que lo reciba.”,
+“meditacion”: [
+“¿Qué siente el Corazón de María al dar a luz en un refugio de animales, lejos de su hogar?”,
+“¿Qué acepta el Corazón de Jesús al nacer en la pobreza extrema, sin las comodidades básicas?”,
+“¿Qué actitud tienes en los momentos de escasez (falta de agua, dinero, luz eléctrica, salud…)? ¿Cómo estás cruzando la falta de recursos que limita tu vida?”
+],
+“intercesion”: “Jesús, tú que naciste en un establo porque no había lugar para ti, acompáñame en mi propia pobreza y precariedad. Enséñame que la escasez no me roba la dignidad, y que puedo dar la bienvenida a la vida incluso cuando falta todo.\nAmén.”,
+“audioContemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_3.mp3”
+},
+{
+“numero”: 4,
+“nombre”: “La Presentación en el Templo”,
+“subtitulo”: “La espada anunciada”,
+“evangelio”: {
+“ref”: “Lucas 2:22, 25, 28, 34-35 (DHH)”,
+“text”: “Cuando se cumplieron los días de la purificación de ellos, según la ley de Moisés, llevaron al niño a Jerusalén para presentarlo al Señor. Había en Jerusalén un hombre llamado Simeón, justo y piadoso. Tomó al niño en sus brazos y bendijo a Dios. Luego dijo a María, su madre: «Este niño será causa de caída y de elevación para muchos en Israel; será signo de contradicción, y a ti misma una espada te atravesará el corazón.»”
+},
+“contemplacion”: “El más santo del mundo molestará a muchos\nMaría sostiene a su hijo recién nacido en el Templo. Todo es alegría, gratitud, cumplimiento de la Ley. Pero Simeón, movido por el Espíritu, pronuncia palabras que rompen la paz: Una espada atravesará tu corazón.\nMaría no entiende del todo. Pero presiente que amar a este Niño le costará todo. Hay pérdidas que se anuncian mucho antes de ocurrir. Hay despedidas que empiezan a gestarse en el primer abrazo.\nY aun así, María no huye. No dice: Si este hijo me traerá tanto dolor, prefiero no amarlo tanto. Al contrario: guarda estas palabras en su corazón junto con el amor. Acepta amar sabiendo que amará hasta el dolor.\nSimeón también anuncia algo desconcertante: el más santo del mundo (el Mesías) molestará a muchos. Porque su bondad revelará la falsedad de los hipócritas. Su justicia incomodará a los injustos. Su verdad será intolerable para quienes viven en la mentira.\nA veces, lo verdaderamente bueno es insoportable para quienes no quieren cambiar.”,
+“meditacion”: [
+“¿Qué siente el Corazón de María al escuchar que una espada lo atravesará?”,
+“¿Qué sabe el Corazón de Jesús sobre su propio destino, siendo aún un niño en brazos de Simeón?”,
+“¿Alguna vez te ha resultado molesto o insoportable alguien bueno, justo o recto? ¿Qué dolor anticipas que tu corazón resiste nombrar? ¿Cómo estás cruzando la espada anunciada en tu vida?”
+],
+“intercesion”: “María, tú que aceptaste la espada profetizada sin huir del amor, enséñame a no temer el dolor que viene con amar de verdad. Ayúdame a guardar en mi corazón las palabras difíciles, confiando que Dios me dará fuerza cuando llegue el momento.\nAmén.”,
+“audioContemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_4.mp3”
+},
+{
+“numero”: 5,
+“nombre”: “El Niño perdido y hallado en el Templo”,
+“subtitulo”: “Crecer duele”,
+“evangelio”: {
+“ref”: “Lucas 2:41-46 (DHH)”,
+“text”: “Los padres de Jesús iban todos los años a Jerusalén para la fiesta de la Pascua. Cuando Jesús cumplió doce años, fueron allá todos ellos, como era costumbre. Pero pasados aquellos días, cuando volvían a casa, el niño Jesús se quedó en Jerusalén, sin que sus padres se dieran cuenta. Pensando que Jesús iba entre la gente, hicieron un día de camino; pero luego, al buscarlo entre los parientes y conocidos, no lo encontraron. Así que regresaron a Jerusalén para buscarlo allí. Al cabo de tres días lo encontraron en el templo, sentado entre los maestros, escuchándolos y haciéndoles preguntas.”
+},
+“contemplacion”: “El dolor del crecimiento\nMaría y José vivieron tres días de angustia. Habían perdido a su hijo. O más bien: su hijo los había dejado atrás, ocupándose de las cosas de su Padre Dios.\nJesús no se escondió por desobediencia. No los abandonó por rebeldía. Simplemente, estaba creciendo. Y crecer duele. No solo al que crece, sino también a quienes lo aman.\nA los doce años, Jesús comenzó a descubrir su identidad como Hijo de Dios. Necesitaba ese tiempo en el Templo, dialogando con los maestros, escuchando, preguntando, madurando. Sus padres aún no entendían del todo quién era Él, ni hacia dónde lo llevaba su vocación. Pero ese misterio ya comenzaba a revelarse.\nMaría y José sufrieron esa separación sin culpa: no fueron malos padres. Jesús vivió ese "estirón" sin malicia: no fue un mal hijo. Simplemente, hay momentos en que los hijos toman su propio camino, y eso es voluntad de Dios.\nLos hijos e hijas, en algún momento, desarrollarán sus propias opiniones, sus propios gustos, sus propias decisiones. Dejarán la infancia, la casa paterna, los hábitos de otra época. Y eso duele. Duele al hijo que debe soltar la seguridad de la niñez. Duele a los padres que deben aceptar que ya no son el único centro de la vida de ese hijo.\nPero ese dolor no es señal de fracaso. Es señal de madurez.\nMaría encontró a Jesús al tercer día. Y cuando lo halló, Él le dijo: ¿Por qué me buscaban? ¿No sabían que debo ocuparme de las cosas de mi Padre? (Lucas 2:49). Palabras que María no comprendió del todo. Pero las guardó en su corazón, como había guardado la profecía de Simeón.\nAmar también es soltar. Amar es aceptar que el otro tiene un camino propio, una vocación propia, una relación con Dios que tú no puedes controlar. Y eso, aunque duela, es crecer juntos.”,
+“meditacion”: [
+“¿Qué vive el Corazón de María al comprender que su hijo ya no es solo suyo, sino también del Padre?”,
+“¿Qué descubre el Corazón de Jesús sobre sí mismo cuando se ocupa de las cosas de su Padre Dios?”,
+“¿Qué dolor has sentido al dejar atrás la infancia, la casa paterna, las costumbres de otra época? ¿Cómo estás cruzando el duelo de crecer, de madurar, de tomar tus propias decisiones?”
+],
+“intercesion”: “Jesús, tú que creciste ocupándote de las cosas de tu Padre, ayúdame a aceptar que crecer duele, pero es voluntad de Dios. Enséñame a soltar lo que ya no me corresponde cargar, y a confiar que mi camino, aunque duela, es el que Tú preparaste para mí.\nAmén.”,
+“audioContemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_5.mp3”
+}
+],
+“luminosos”: [
+{
+“numero”: 6,
+“nombre”: “El Bautismo de Jesús”,
+“subtitulo”: “Desgaste y renovación”,
+“evangelio”: {
+“ref”: “Marcos 1:9-11 (DHH)”,
+“text”: “Por aquellos días, Jesús salió de Nazaret, que está en la región de Galilea, y Juan lo bautizó en el río Jordán. En el momento de salir Jesús del agua, vio que el cielo se abría y que el Espíritu Santo bajaba sobre él como una paloma. Y se oyó una voz del cielo, que decía: «Tú eres mi Hijo amado, a quien he elegido.»”
+},
+“contemplacion”: “La vida necesita ser renovada, siempre\nEl agua lava. Restaura. Devuelve al cuerpo lo que el tiempo y el desgaste van quitando. Nadie escapa a esa necesidad. Por más sano que estés, por más que cuides tu vida, el cuerpo pide ser lavado, alimentado, descansado, repuesto. Eso no es señal de que algo salió mal. Es la condición ordinaria de todo lo que vive.\nJesús se metió en el Jordán. El Verbo eterno, que no envejece ni se desgasta, asumió un cuerpo que sí lo hace. Un cuerpo que suda, que se cansa, que se ensucia, que necesita agua. Al sumergirse en el río, el Hijo de Dios hizo suya esa condición: la de una vida que requiere mantenimiento, renovación, cuidado constante.\nNo vino a librarse de esa necesidad. Vino a habitarla. Y al habitarla, la santificó.\nLos males de la vida no son solo las grandes crisis o los golpes inesperados. Son también esto: cuidar lo cotidiano, componer el desorden que vuelve cada día, realizar esa labor de limpieza que nunca termina de satisfacerse de una vez para siempre. Eso también es parte de cargar la cruz. Y Jesús lo conoce desde adentro, desde el agua del Jordán.”,
+“meditacion”: [
+“¿Qué sintió el Corazón Inmaculado de María cuando educó a su hijo en los hábitos de la higiene y el orden?”,
+“¿Qué sintió Jesús al estar esperando, en la fila, como uno más, necesitado de purificación?”,
+“¿Qué áreas de mi vida requieren de un cuidado constante, con ayuda de Dios?”
+],
+“intercesion”: “Jesús, tú que descendiste al Jordán y muchas veces lavaste tu cuerpo, cuidaste tu espacio, tus herramientas y tu trabajo, enséñame a hacer lo mismo. Que yo también aprenda a honrar con dignidad el lugar que habito, el cuerpo que me diste, las cosas que pusiste en mis manos. Que el cuidado de lo cotidiano no me pese como una carga, sino que lo viva como tú lo viviste: con sencillez, con atención, con amor.\nAmén.”,
+“audioContemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_6.mp3”
+},
+{
+“numero”: 7,
+“nombre”: “Las Bodas de Caná”,
+“subtitulo”: “Todo se gasta y consume”,
+“evangelio”: {
+“ref”: “Juan 2:1-5 (DHH)”,
+“text”: “Dos días después hubo una boda en Caná, un pueblo de Galilea. La madre de Jesús estaba allí, y Jesús y sus discípulos fueron también invitados a la boda. Se acabó el vino, y la madre de Jesús le dijo: «Ya no tienen vino.» Jesús le contestó: «Mujer, ¿por qué me dices esto? Mi hora no ha llegado todavía.» Pero ella dijo a los que estaban sirviendo: «Hagan todo lo que él les diga.»”
+},
+“contemplacion”: “Todas las cosas materiales se acaban\nEn medio de la fiesta, el vino se terminó. No por negligencia, sino porque todo lo material se usa, se gasta, se consume, se acaba. Ese es un mal inevitable de la vida finita: nada dura para siempre en este mundo.\nMaría detectó la necesidad antes que nadie. No se quedó paralizada ante la escasez. No culpó a los organizadores. Simplemente acudió a Jesús con confianza: Ya no tienen vino.\nJesús, en un primer momento, parece reacio: Mi hora no ha llegado. Pero María conoce el corazón de su Hijo. Sabe que Él es sensible al sufrimiento humano, incluso al pequeño sufrimiento de una familia humillada por quedarse sin vino en su propia boda.\nY Jesús responde. No con un sermón sobre la austeridad, sino con abundancia creativa. Transforma 600 litros de agua en el mejor vino de la fiesta.\nLa buena noticia es que María nos ayuda a creer en Jesús, y Él abre la puerta de la creatividad productiva para que recibas abundancia incluso cuando todo se está acabando.”,
+“meditacion”: [
+“¿Qué siente el Corazón de María al percibir la necesidad de los novios?”,
+“¿Qué mueve el Corazón de Jesús a realizar su primer milagro ante una necesidad tan "pequeña" como la falta de vino?”,
+“¿Con qué actitud cuidas y obtienes las cosas que te faltan? ¿Cómo estás cruzando la escasez que experimentas hoy?”
+],
+“intercesion”: “María, tú que detectaste la necesidad y la llevaste a Jesús, enséñame a no quedarme paralizado ante la escasez. Jesús, tú que transformaste el agua en vino abundante, abre mi corazón a la creatividad que nace de la confianza en ti.\nAmén.”,
+“audioContemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_7.mp3”
+},
+{
+“numero”: 8,
+“nombre”: “El Anuncio del Reino de Dios”,
+“subtitulo”: “No preguntes "por qué sufre", ayuda”,
+“evangelio”: {
+“ref”: “Juan 9:1-4 (DHH)”,
+“text”: “Al pasar Jesús, vio a un hombre que había nacido ciego. Sus discípulos le preguntaron: «Maestro, ¿por qué nació ciego este hombre? ¿Por el pecado de sus padres, o por su propio pecado?» Jesús les contestó: «Ni por su propio pecado ni por el de sus padres; fue más bien para que en él se demuestre lo que Dios puede hacer. Mientras sea de día, tenemos que hacer el trabajo del que me envió.»”
+},
+“contemplacion”: “No busques culpables, sé instrumento de sanación\nAnte el ciego de nacimiento, los discípulos hicieron la pregunta equivocada: Maestro, ¿quién pecó, él o sus padres, para que naciera ciego?\nBuscaban una explicación. Una razón. Un culpable. Querían que el sufrimiento tuviera sentido.\nJesús cortó en seco esa lógica: «Ni él pecó, ni sus padres.» El mal físico de la ceguera no era castigo por pecado. Era simplemente un mal inevitable de la vida finita, una limitación que este hombre llevaba desde su nacimiento.\nY luego Jesús añade algo revolucionario: «Fue para que en esta oscuridad brille la luz de Dios.»\nNo dijo que Dios causó la ceguera para tener una oportunidad de sanar. Dijo que en medio de ese mal inevitable, Dios puede actuar. La oscuridad se convierte en escenario para la luz.\nY entonces Jesús no siguió filosofando. Actuó. Hizo lodo con saliva, lo untó en los ojos del ciego, y le mandó lavarse. El hombre obedeció, y vio por primera vez en su vida.\nNo te preguntes "por qué" alguien sufre. Si puedes, ayúdale.”,
+“meditacion”: [
+“¿Qué siente el Corazón de María al ver a su Hijo actuar con compasión inmediata?”,
+“Al darle vista al ciego, devolver el habla a los mudos, sanar a los paralíticos, etc. ¿Qué nos revela el Corazón de Jesús, acerca del papel de Dios ante nuestros sufrimientos?”,
+“Aparte de orar, ¿qué haces para aliviar el dolor que hay en el mundo? ¿Cómo estás cruzando tu tentación de buscar culpables, en lugar de ser instrumento de sanación?”
+],
+“intercesion”: “Jesús, tú que sanaste al ciego sin buscar culpables, libérame de la obsesión por encontrar razones al sufrimiento. Enséñame a actuar con compasión donde puedo remediar el mal, y a confiar en tu luz donde no puedo hacer nada más que acompañar.\nAmén.”,
+“audioContemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_8.mp3”
+},
+{
+“numero”: 9,
+“nombre”: “La Transfiguración”,
+“subtitulo”: “Lo inexplicable nos desconcierta”,
+“evangelio”: {
+“ref”: “Marcos 9:2-6 (DHH)”,
+“text”: “Seis días después, Jesús tomó aparte a Pedro, a Santiago y a Juan, y los llevó a una montaña muy alta. Allí, delante de ellos, cambió la apariencia de Jesús. Su ropa se volvió brillante y más blanca que la nieve. Luego vieron a Elías y a Moisés, que estaban conversando con Jesús. Pedro le dijo a Jesús: «Maestro, ¡qué bien que estemos aquí! Vamos a hacer tres chozas: una para ti, otra para Moisés y otra para Elías.» Pero Pedro no sabía qué decir, porque todos estaban asustados.”
+},
+“contemplacion”: “Temor, desconcierto, confusión\nAnte la Transfiguración, los apóstoles no sabían qué hacer. Vieron a Jesús resplandeciente, conversando con Moisés y Elías. Escucharon la voz del Padre desde la nube. Y no entendieron nada.\nPedro, nervioso, propuso construir tres chozas. Una idea absurda. ¿Para qué chozas si Moisés y Elías eran apariciones? Pero no sabía qué más decir. El Evangelio es honesto: Pedro no sabía qué decir, porque todos estaban asustados.\nHay experiencias que desbordan nuestra capacidad de comprensión. Momentos en los que la realidad es más grande que nuestras categorías mentales. Y eso nos desconcierta, nos asusta, nos paraliza.\nEs un mal inevitable de nuestra finitud: no podemos entender todo. Nuestra mente tiene límites. Hay misterios que no caben en palabras. Hay experiencias que solo se pueden vivir, no explicar.\nY está bien. No siempre tienes que entender. A veces solo tienes que estar ahí, asombrado, temblando, sin palabras, dejando que Dios sea más grande que tu comprensión.”,
+“meditacion”: [
+“¿Qué sintió el Corazón de María cuando sus discípulos le contaron lo que vieron en la montaña, sin poder explicarlo del todo?”,
+“¿Qué nos revela el Corazón de Jesús sobre la gloria divina, más allá de lo que podemos comprender?”,
+“Recuerda una experiencia tuya o ajena, difícil de explicar o entender. ¿Cómo estás cruzando tu necesidad de entenderlo todo antes de aceptarlo?”
+],
+“intercesion”: “Jesús, tú que te transfiguraste ante apóstoles desconcertados, ayúdame a aceptar que no siempre entenderé lo que vivo. Enséñame que el misterio no es enemigo de la fe, sino el espacio donde tu gloria se manifiesta más allá de mi comprensión.\nAmén.”,
+“audioContemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_9.mp3”
+},
+{
+“numero”: 10,
+“nombre”: “La Institución de la Eucaristía”,
+“subtitulo”: “Solo puedes estar en un lugar”,
+“evangelio”: {
+“ref”: “Lucas 22:19-20 (DHH)”,
+“text”: “Mientras comían, Jesús tomó en sus manos el pan y, habiendo dado gracias a Dios, lo partió y se lo dio a ellos, diciendo: «Esto es mi cuerpo, que es entregado en favor de ustedes. Hagan esto en memoria de mí.» Lo mismo hizo con la copa después de la cena, diciendo: «Esta copa es la nueva alianza confirmada con mi sangre, la cual es derramada en favor de ustedes.»”
+},
+“contemplacion”: “La limitación del cuerpo, resuelta en el Sacramento\nLos humanos solo podemos estar en un lugar a la vez. Esa es una limitación inevitable de nuestra corporeidad finita. No puedes abrazar a tu madre en México y a un amigo en España al mismo tiempo. No puedes estar en dos sitios simultáneamente.\nJesús, en su humanidad, también vivió esa limitación. Cuando estaba en Galilea, no podía estar en Jerusalén. Cuando visitaba a unos discípulos, otros quedaban lejos. Y sabía que pronto subiría al Padre, dejando a sus amigos solos en la tierra.\nPor eso, en la Última Cena, Jesús consagró el pan y el vino. No como un mero símbolo, sino como su presencia real, viva, permanente. Para quedarse contigo a donde vayas. Para multiplicar su presencia en cada sagrario del mundo, rompiendo la limitación del espacio.\nJesús no se conformó con la distancia inevitable. Creó un camino para estar contigo siempre, en cada Eucaristía, en cada tabernáculo, hasta el fin de los tiempos.”,
+“meditacion”: [
+“¿Qué siente el Corazón de María al saber que su Hijo encontró el modo de quedarse presente en cada Eucaristía?”,
+“¿Qué amor mueve el Corazón de Jesús a inventar la Eucaristía, para vencer la limitación de la distancia?”,
+“¿Qué pretextos pones para dejar de acercarte más a la Eucaristía? ¿Cómo estás cruzando tu limitación de no poder estar cerca de todos los que amas?”
+],
+“intercesion”: “Jesús, tú que te quedaste en la Eucaristía para vencer la distancia, ayúdame a valorar tu presencia real en cada sagrario. Enséñame que aunque yo no pueda estar en todas partes, tú sí puedes estar conmigo siempre, en cada Comunión.\nAmén.”,
+“audioContemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_10.mp3”
+}
+],
+“dolorosos”: [
+{
+“numero”: 11,
+“nombre”: “La Oración en el Huerto”,
+“subtitulo”: “El corazón que se estremece”,
+“evangelio”: {
+“ref”: “Mateo 26:36-39 (DHH)”,
+“text”: “Jesús fue con sus discípulos a un lugar llamado Getsemaní, y les dijo: «Siéntense aquí mientras voy más allá a orar.» Se llevó a Pedro y a los dos hijos de Zebedeo, y comenzó a sentirse muy triste y angustiado. Les dijo: «Siento en mi alma una tristeza de muerte. Quédense aquí y permanezcan despiertos conmigo.» Yendo un poco más adelante, se inclinó hasta tocar el suelo con su frente, y oró así: «Padre mío, si es posible, líbrame de este trago amargo.»”
+},
+“contemplacion”: “Jesús aceptó tener un corazón humano como el tuyo\nJesús, el Hijo de Dios, no vino blindado contra las emociones. Aceptó tener un corazón humano, capaz de sentir tristeza, angustia, ansiedad, miedo.\nEn Getsemaní, su corazón se estremece. Suda sangre. Tiembla ante lo que viene. No quiere la Cruz. No quiere el abandono. No quiere morir. Y no lo oculta. No finge fortaleza. Comparte su dolor con Pedro, Santiago y Juan: Siento en mi alma una tristeza de muerte.\nAlgunos piensan que la vida espiritual avanzada significa "no sentir emociones difíciles". Que la santidad es estar siempre en paz, siempre sereno, siempre fuerte.\nPero Jesús nos enseña lo contrario: ser santo es sentir plenamente, incluso el dolor, y aun así elegir el amor. Ser santo no es no tener miedo. Es tener miedo y seguir avanzando. Es sentir la angustia y no huir de la voluntad del Padre.\nTus sentimientos difíciles no son pecado. Son parte de tu humanidad, como lo fueron de la humanidad de Cristo.”,
+“meditacion”: [
+“¿Qué siente el Corazón de María al saber que su Hijo está agonizando solo en la noche?”,
+“¿Qué batalla libra el Corazón de Jesús entre el miedo humano y la confianza en el Padre?”,
+“¿Qué sentimientos tienes que no aceptas o rechazas? ¿Cómo estás cruzando las emociones difíciles que habitan en ti?”
+],
+“intercesion”: “Jesús, tú que sentiste tristeza de muerte en Getsemaní, ayúdame a no rechazar mis propias emociones difíciles. Enséñame que sentir angustia no me aleja de ti, sino que me hace más humano, más parecido a tu corazón.\nAmén.”,
+“audioContemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_11.mp3”
+},
+{
+“numero”: 12,
+“nombre”: “La Flagelación”,
+“subtitulo”: “El cuerpo vulnerable”,
+“evangelio”: {
+“ref”: “Juan 19:1-3 (DHH)”,
+“text”: “Pilato tomó entonces a Jesús y mandó azotarlo. Los soldados trenzaron una corona de espinas, la pusieron en la cabeza de Jesús y lo vistieron con una capa de color rojo oscuro. Luego se acercaron a él, diciéndole: «¡Viva el Rey de los judíos!» Y le pegaban en la cara.”
+},
+“contemplacion”: “Todo cuerpo sensible es un cuerpo vulnerable\nJesús aceptó su cuerpo, capaz de sentir la suavidad, pero también la dureza. El frío, y también el calor. El placer, y el dolor.\nEn la flagelación, su cuerpo experimenta el límite extremo de la sensibilidad: el látigo desgarra su piel, la sangre brota, los nervios gritan. Cada golpe es una prueba brutal de que todo cuerpo sensible es un cuerpo vulnerable.\nNo puedes tener un cuerpo capaz de sentir el abrazo de tu madre sin que ese mismo cuerpo pueda sentir el golpe del verdugo. No puedes tener terminaciones nerviosas que perciban la caricia sin que esas mismas terminaciones perciban el dolor.\nLa sensibilidad es un don y una cruz. Nos permite experimentar la belleza, pero también nos expone al sufrimiento. Jesús no rechazó esa condición. La asumió hasta las últimas consecuencias.”,
+“meditacion”: [
+“¿Qué siente el Corazón de María al imaginar el cuerpo de su Hijo destrozado por los azotes?”,
+“¿Qué acepta el Corazón de Jesús al soportar el dolor extremo en su cuerpo vulnerable?”,
+“¿Qué sensaciones físicas (olores, ruidos, temperatura, dolor) te resultan insoportables o difíciles de sobrellevar? ¿Cómo estás cruzando la vulnerabilidad de tu propio cuerpo?”
+],
+“intercesion”: “Jesús, tú que aceptaste un cuerpo vulnerable y sensible, ayúdame a no despreciar mi propia corporeidad. Enséñame que sentir dolor no es debilidad, sino prueba de que estoy vivo, de que soy humano como tú.\nAmén.”,
+“audioContemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_12.mp3”
+},
+{
+“numero”: 13,
+“nombre”: “La Coronación de Espinas”,
+“subtitulo”: “Como te ven, te tratan”,
+“evangelio”: {
+“ref”: “Mateo 27:27-30 (DHH)”,
+“text”: “Los soldados del gobernador llevaron a Jesús al palacio y reunieron toda la tropa alrededor de él. Le quitaron su ropa, lo vistieron con una capa roja, trenzaron una corona de espinas y se la pusieron en la cabeza, y en la mano derecha le pusieron una vara. Luego se arrodillaron delante de él, y burlándose le decían: «¡Viva el Rey de los judíos!» También lo escupían, y con la misma vara le golpeaban la cabeza.”
+},
+“contemplacion”: “La gente te trata según la idea que tiene de ti\nAun siendo el Rey de Reyes, Jesús fue maltratado, coronado de espinas, vestido de burla. ¿Por qué? Porque los soldados no lo veían como Él era. Lo veían como un preso, un fracasado, un loco que decía ser rey.\nY lo trataron según esa percepción distorsionada.\nDice el refrán: «Como te ven, te tratan.» Es decir, la gente te trata según la idea que tiene de ti, no como tú eres.\nEso es un mal inevitable de vivir en comunidad: no siempre serás comprendido. No siempre serás visto con justicia. Habrá quienes te juzguen sin conocerte, te malinterpreten, te traten peor de lo que mereces.\nY no hay mucho que puedas hacer al respecto. No puedes controlar la percepción ajena. No puedes obligar a nadie a verte como realmente eres.\nJesús no perdió energía defendiéndose de los soldados. No intentó convencerlos de su dignidad. Guardó silencio. Y en ese silencio, preservó su paz interior.”,
+“meditacion”: [
+“¿Qué siente el Corazón de María al saber que su Hijo, el Rey verdadero, es coronado de espinas en burla?”,
+“¿Qué guarda el Corazón de Jesús en el silencio ante quienes lo maltratan por ignorancia?”,
+“¿Qué haces al saber que alguien tiene una idea equivocada sobre ti? ¿Cómo estás cruzando el dolor de ser malinterpretado o maltratado injustamente?”
+],
+“intercesion”: “Jesús, tú que fuiste coronado de espinas por quienes no te conocían, ayúdame a no desgastarme intentando controlar lo que otros piensan de mí. Enséñame que mi dignidad no depende de la percepción ajena, sino de la verdad de quién soy ante Dios.\nAmén.”,
+“audioContemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_13.mp3”
+},
+{
+“numero”: 14,
+“nombre”: “Jesús carga la Cruz”,
+“subtitulo”: “Todo requiere esfuerzo”,
+“evangelio”: {
+“ref”: “Lucas 23:26-28 (DHH)”,
+“text”: “Llevaron a Jesús para crucificarlo. En el camino encontraron a un hombre llamado Simón, natural de Cirene, y lo obligaron a cargar con la cruz de Jesús. Muchas personas lo seguían; entre ellas había mujeres que lloraban de tristeza por él. Jesús las miró, y les dijo: «Mujeres de Jerusalén, no lloren por mí; lloren más bien por ustedes mismas y por sus hijos.»”
+},
+“contemplacion”: “En esta tierra, todo requiere superar obstáculos\nJesús camina hacia el Calvario cargando la cruz. Cada paso es un esfuerzo. El peso del madero aplasta sus hombros. El cansancio extremo. Las caídas. El cuerpo destrozado que apenas puede sostenerse.\nY aun así, sigue caminando.\nEn esta tierra, todo lo que hagas requiere superar obstáculos, esforzarte y ser paciente. Levantarte de la cama, higiene, alimentación, convivencia, estudio, trabajo, traslado… todo demanda energía. Todo implica vencer la inercia, la gravedad, el cansancio.\nEso no es castigo. Es la condición de la vida finita. Vivir es moverse contra resistencias.\nJesús no se quejó del esfuerzo. Tampoco lo glorificó. Simplemente lo aceptó como parte del camino. Y cuando su cuerpo ya no pudo más, aceptó la ayuda de Simón de Cirene. No fue debilidad. Fue humildad.\nEl esfuerzo es inevitable. Pero no tienes que cargarlo solo.”,
+“meditacion”: [
+“¿Qué siente el Corazón de María al ver a su Hijo caer una y otra vez bajo el peso de la cruz?”,
+“¿Qué sostiene el Corazón de Jesús para seguir avanzando cuando el cuerpo ya no puede más?”,
+“¿Cómo estás aceptando el trabajo y los esfuerzos de cada día? ¿Cómo estás cruzando el cansancio que te pesa?”
+],
+“intercesion”: “Jesús, tú que caminaste al Calvario cargando la cruz, ayúdame a aceptar que vivir requiere esfuerzo constante. Enséñame que el cansancio no es fracaso, y que pedir ayuda cuando no puedo más es sabiduría, no debilidad.\nAmén.”,
+“audioContemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_14.mp3”
+},
+{
+“numero”: 15,
+“nombre”: “La Crucifixión y Muerte de Jesús”,
+“subtitulo”: “Somos mortales”,
+“evangelio”: {
+“ref”: “Lucas 23:33-34, 44-46 (DHH)”,
+“text”: “Cuando llegaron al lugar llamado «La Calavera», crucificaron a Jesús y a los dos criminales, uno a su derecha y otro a su izquierda. Jesús dijo: «Padre, perdónalos, porque no saben lo que hacen.» Era como al mediodía, cuando el sol dejó de brillar, y todo el país quedó en oscuridad hasta las tres de la tarde. La cortina del templo se rasgó por la mitad. Jesús gritó con fuerza: «¡Padre, en tus manos encomiendo mi espíritu!» Y al decir esto, murió.”
+},
+“contemplacion”: “Morir es el trauma inevitable para avanzar\nDesde el útero, como todo ser humano, Jesús, tú y yo somos mortales. Nacer es comenzar a morir. Cada día que vives es un día menos que te queda. No hay escape.\nMorir es el trauma inevitable para avanzar hacia la siguiente etapa, definitiva: el paraíso, donde Cristo nos espera para estar con Él.\nJesús no evitó la muerte. La atravesó. Sintió el dolor extremo. El abandono. La oscuridad. El último aliento. Y entonces, entregó su espíritu al Padre.\nNo murió derrotado. Murió confiando. No murió maldiciendo. Murió perdonando. No murió solo. Murió encomendándose al amor del Padre.\nY al tercer día, resucitó.\nLa muerte no tiene la última palabra. Es solo el portal hacia la vida plena. Pero para atravesar ese portal, hay que soltar. Hay que exhalar el último aliento. Hay que confiar que del otro lado, Dios espera.”,
+“meditacion”: [
+“¿Qué siente el Corazón de María al recibir el cuerpo muerto de su Hijo en sus brazos?”,
+“¿Qué entrega el Corazón de Jesús al Padre, en el momento de morir en la cruz?”,
+“¿Qué sientes y piensas al saber que eres mortal? ¿Cómo estás cruzando tu propio miedo a la muerte?”
+],
+“intercesion”: “Jesús, tú que moriste confiando en el Padre, ayúdame a no huir de mi propia mortalidad. Enséñame que morir es atravesar un portal, y que del otro lado tú me esperas con los brazos abiertos.\nAmén.”,
+“audioContemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_15.mp3”
+}
+],
+“gloriosos”: [
+{
+“numero”: 16,
+“nombre”: “La Resurrección”,
+“subtitulo”: “El dolor que impide ver a Dios”,
+“evangelio”: {
+“ref”: “Lucas 24:13-18 (DHH)”,
+“text”: “Aquel mismo día, dos de los discípulos iban a un pueblo llamado Emaús. Iban hablando de todo lo que había pasado. Mientras conversaban y discutían, Jesús mismo se acercó y comenzó a caminar con ellos. Pero aunque lo veían, algo les impedía darse cuenta de quién era. Jesús les preguntó: «¿De qué van hablando ustedes por el camino?» Se detuvieron tristes, y uno de ellos, que se llamaba Cleofás, contestó: «¿Eres tú el único que ha estado en Jerusalén y no sabe lo que allí ha pasado en estos días?»”
+},
+“contemplacion”: “La tristeza impedía que reconocieran a Jesús\nLos discípulos de Emaús caminaban con el corazón roto. Jesús había muerto. Todo había terminado. Sus esperanzas estaban sepultadas.\nY entonces, Jesús mismo se acercó y caminó con ellos. Pero no lo reconocieron. ¿Por qué? Porque la tristeza y las lágrimas les impedían ver.\nEl dolor los había cegado. La indignación del duelo no les permitía aceptar los testimonios de la resurrección. Estaban tan enfocados en la pérdida que no podían percibir la presencia viva de Cristo junto a ellos.\nA veces, el dolor nos impide ver a Dios caminando con nosotros. No porque Dios esté ausente, sino porque nuestras lágrimas nublan la mirada. No porque Dios no actúe, sino porque nuestra tristeza nos cierra a la esperanza.\nJesús no se ofendió por su ceguera. No los abandonó. Siguió caminando con ellos, con paciencia, explicándoles las Escrituras, hasta que por fin, al partir el pan, se les abrieron los ojos.”,
+“meditacion”: [
+“¿Qué siente el Corazón de María al saber que su Hijo resucitó, venciendo la muerte para siempre?”,
+“¿Qué experimenta el Corazón de Jesús resucitado al caminar con discípulos que no lo reconocen por la tristeza?”,
+“¿Qué dolor te impide ver a Dios contigo? ¿Cómo estás cruzando la ceguera espiritual que nace del sufrimiento?”
+],
+“intercesion”: “Jesús resucitado, tú que caminaste con discípulos ciegos de dolor, abre mis ojos para reconocerte presente en mi vida. Ayúdame a no dejar que la tristeza me ciegue, y enséñame que aun cuando no te veo, tú caminas conmigo.\nAmén.”,
+“audioContemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_16.mp3”
+},
+{
+“numero”: 17,
+“nombre”: “La Ascensión”,
+“subtitulo”: “Lo demasiado bueno cuesta creerlo”,
+“evangelio”: {
+“ref”: “Mateo 28:16-19 (DHH)”,
+“text”: “Los once discípulos fueron a Galilea, al monte que Jesús les había indicado. Y cuando vieron a Jesús, lo adoraron, aunque algunos dudaban. Jesús se acercó y les dijo: «Se me ha dado toda autoridad en el cielo y en la tierra. Vayan, pues, a las gentes de todas las naciones, y háganlas mis discípulos; bautícenlas en el nombre del Padre, del Hijo y del Espíritu Santo.»”
+},
+“contemplacion”: “Algunos adoraban, otros dudaban\nEn el monte de la Ascensión, algunos discípulos se postraban ante el Resucitado. Otros dudaban. No por malicia, sino por incapacidad de aceptar algo "demasiado bueno".\nHabían visto a Jesús morir. Lo habían llorado. Y ahora estaba ahí, vivo, glorioso, a punto de subir al Padre. Era demasiado hermoso para ser verdad.\nA veces somos incapaces de reconocer y aceptar las cosas buenas que nos pasan. Nos acostumbramos tanto al dolor que la alegría nos desconcierta. Nos adaptamos tanto a la pérdida que el reencuentro nos parece imposible.\nEs un mal inevitable de nuestra herida interior: desconfiar de la bondad, esperar siempre lo peor, no atrevernos a creer en la resurrección.\nPero Jesús no rechazó a los que dudaban. No los expulsó del monte. Los envió de todas formas: Vayan y hagan discípulos. Porque la misión no es solo para los que tienen fe perfecta. Es también para los que dudan, pero siguen caminando.”,
+“meditacion”: [
+“¿Qué siente el Corazón de María al ver a su Hijo glorioso subir al Padre, dejándola una vez más?”,
+“¿Qué nos revela el Corazón de Jesús al enviar en misión incluso a quienes todavía dudan?”,
+“¿Qué cosas buenas te resultan difíciles de reconocer y aceptar? ¿Cómo estás cruzando tu desconfianza ante la bondad de Dios?”
+],
+“intercesion”: “Jesús, tú que ascendiste al Padre enviando incluso a los que dudaban, ayúdame a atreverme a creer en lo bueno. Enséñame que la resurrección no es demasiado hermosa para ser verdad, sino la verdad más hermosa que existe.\nAmén.”,
+“audioContemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_17.mp3”
+},
+{
+“numero”: 18,
+“nombre”: “La Venida del Espíritu Santo”,
+“subtitulo”: “La plenitud que otros ridiculizan”,
+“evangelio”: {
+“ref”: “Hechos 1:14; 2:1-4, 13 (DHH)”,
+“text”: “Todos ellos se reunían siempre para orar con algunas mujeres, con María la madre de Jesús, y con sus hermanos. Cuando llegó la fiesta de Pentecostés, estaban todos juntos en el mismo lugar. De repente, un gran ruido que venía del cielo, como de un viento fuerte, resonó en toda la casa donde ellos estaban. Y se les aparecieron lenguas como de fuego que se repartieron, y sobre cada uno de ellos se asentó una. Y todos quedaron llenos del Espíritu Santo. Algunos se burlaban y decían: «Estos están borrachos.»”
+},
+“contemplacion”: “La plenitud espiritual confundida con embriaguez\nPersonas llenas del Espíritu Santo, repletas de Dios, hablan con ardor y luz en su mirada, con valentía, compasión y alegría desbordante.\nY la gente se burlaba de ellos diciendo: «Están borrachos.»\nEs un mal inevitable de vivir en un mundo escéptico: cuando experimentas la plenitud del Espíritu, habrá quienes te ridiculicen. Cuando vives con gozo profundo, habrá quienes te malinterpreten. Cuando tu corazón arda con el fuego de Pentecostés, habrá quienes te acusen de estar fuera de ti.\nNo porque sean malos, sino porque no han experimentado lo que tú vives. Y lo que no se entiende, se ridiculiza.\nMaría estaba ahí, en medio de los discípulos llenos del Espíritu. Ella, que guardó todo en su corazón, que vivió Pentecostés sin aspavientos pero con hondura infinita. No les importó la burla. Siguieron proclamando la Buena Noticia.”,
+“meditacion”: [
+“¿Qué siente el Corazón de María al ver cumplida la promesa de Jesús: el Espíritu Santo descendiendo sobre la comunidad?”,
+“¿Qué dones envía el Corazón de Jesús desde el Padre, para que sus discípulos no se queden paralizados ante el mal?”,
+“¿Qué haces cuando alguien ridiculiza a una buena persona? ¿Cómo estás cruzando el miedo a ser malinterpretado cuando vives con plenitud espiritual?”
+],
+“intercesion”: “Espíritu Santo, tú que llenaste a los discípulos con fuego en Pentecostés, llena también mi corazón con tu ardor. Libérame del miedo al ridículo, y ayúdame a vivir con la plenitud que viene de ti, sin importar lo que otros digan.\nAmén.”,
+“audioContemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_18.mp3”
+},
+{
+“numero”: 19,
+“nombre”: “La Asunción de María”,
+“subtitulo”: “Todo cuerpo vuelve al polvo”,
+“evangelio”: {
+“ref”: “Lucas 1:46-49 (DHH)”,
+“text”: “María dijo: «Mi alma alaba la grandeza del Señor; mi espíritu se alegra en Dios mi Salvador. Porque Dios ha puesto sus ojos en mí, su humilde esclava, y desde ahora siempre me llamarán dichosa; porque el Todopoderoso ha hecho en mí grandes cosas. ¡Santo es su nombre!»”
+},
+“contemplacion”: “Dios liberó a María de la humillación final\nAunque cuides tu salud y belleza, lamentablemente en el sepulcro o crematorio, el cuerpo se descompondrá hasta volver al polvo del que fue creado.\nEs el mal inevitable más humillante: la corrupción de la carne. El cuerpo que fue templo del Espíritu, que amó, que abrazó, que dio vida, terminará deshecho, irreconocible, polvo.\nPero Cristo liberó de esa humillación a su Madre.\nMaría murió, sí. Pero su cuerpo no conoció la corrupción. Fue asunta al cielo, cuerpo y alma, anticipando la resurrección final que todos esperamos.\n¿Por qué Dios hizo esto con María? Porque su cuerpo fue el primer sagrario. Porque en su vientre habitó el Verbo encarnado. Porque ella dio su carne para que el Hijo de Dios tuviera carne.\nY Dios no permitió que ese cuerpo sagrado se deshiciera en la tumba.\nNos recuerda que nuestro cuerpo también resucitará. Que la corrupción del sepulcro no es el final. Que Dios valora tanto tu cuerpo que lo restaurará glorioso en la resurrección final.”,
+“meditacion”: [
+“¿Qué siente el Corazón de María al ser asunta al cielo, anticipando la gloria que todos esperamos?”,
+“¿Qué mueve al Corazón de Jesús a preservar el cuerpo de su Madre de la corrupción del sepulcro?”,
+“¿Qué tanto valoras tu salud y belleza? ¿Cómo estás cruzando tu miedo a la corrupción del cuerpo en la muerte?”
+],
+“intercesion”: “María, tú que fuiste asunta al cielo en cuerpo y alma, enséñame a valorar mi cuerpo como templo del Espíritu. Ayúdame a no temer la muerte, confiando que Dios también restaurará mi cuerpo en la resurrección final.\nAmén.”,
+“audioContemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_19.mp3”
+},
+{
+“numero”: 20,
+“nombre”: “La Coronación de María”,
+“subtitulo”: “Los humildes reciben la gloria”,
+“evangelio”: {
+“ref”: “Lucas 1:51-53 (DHH)”,
+“text”: “María dijo: «Dios ha mostrado el poder de su brazo, deshizo los planes de los orgullosos, quitó del trono a los poderosos y puso en alto a los humildes. Llenó de bienes a los hambrientos y despidió a los ricos con las manos vacías.»”
+},
+“contemplacion”: “El único reino que no tendrá fin\nEl Reino de Dios es el único reino que no tendrá fin. Ningún rey, emperador o gobernante de la historia recibió la máxima corona de gloria.\n¿Quién la recibió? La Mujer humilde y creyente que nos dio al Mesías.\nMaría, la joven de Nazaret. La refugiada en Egipto. La madre dolorosa al pie de la Cruz. La orante silenciosa en Pentecostés. Ella es coronada Reina del cielo y de la tierra.\nNo por sus logros políticos. No por su poder militar. No por su riqueza. Por su fe. Por su sí. Por su humildad.\nDios invierte todas las lógicas del mundo. Los últimos son primeros. Los humildes son exaltados. Los pequeños son grandes en el Reino.\nY María, coronada Reina, nos enseña que la gloria definitiva no es para quienes acumulan poder terrenal, sino para quienes le dan la bienvenida al amor de Dios con corazón sencillo.\n¿Qué personas merecen homenaje y honor, pero nadie se los da? Dios los ve. Y en el Reino, ellos brillarán más que todos los poderosos de la tierra.”,
+“meditacion”: [
+“¿Qué siente el Corazón de María al ser coronada Reina del cielo por su Hijo?”,
+“¿Qué vive el Corazón de Jesús al coronar a su Madre con la gloria eterna?”,
+“¿Qué personas merecen homenaje y honor, pero nadie se los da? ¿Cómo estás cruzando tu tentación de buscar gloria terrenal en lugar de humildad que lleva a la gloria eterna?”
+],
+“intercesion”: “María, Reina humilde coronada de gloria, enséñame que la grandeza verdadera está en la pequeñez. Ayúdame a valorar a quienes el mundo desprecia, y a vivir con la humildad que conduce a la gloria eterna.\nAmén.\nLA COMUNIDAD SOSTIENE\nPárrafo de apertura:\nCargar la cruz juntos\nNo recorriste solo este camino de oración. Aunque estés físicamente a solas, oraste con María, con Jesús, con los santos, con cada persona que en este momento también reza el Rosario en algún lugar del mundo.\nY ahora, algo crucial: tu dolor puede ser luz para otros.\nPorque no tienes que "estar bien" para ayudar: compartir lo que vives sana a quien lo comparte y a quien lo escucha. Cuando nombras tus limitaciones en comunidad, liberas a otros de la vergüenza de nombrar las suyas. Cuando ores por alguien que sufre males inevitables, tu propio corazón se ensancha. Cuando recibes la oración de tus hermanos, aprendes que el amor no depende de ti solo.\nLa forma de crecer es dando.\nJesús no cargó la cruz solo. Simón de Cirene lo ayudó. Las mujeres de Jerusalén lo acompañaron. María estuvo de pie al lado de la Cruz. Juan recibió a María en su casa. La comunidad sostiene cuando cada uno ofrece lo poco que tiene.\nPor eso, te invito a tres pequeñas acciones de comunión esta semana:\nAcción 1 — Compartir:\nComparte con una persona de confianza algo de lo que escribiste en este cuaderno. No todo, solo lo que tu corazón quiera soltar. Nombra un mal inevitable que estás atravesando. Escucha también su historia sin juzgar, sin ofrecer soluciones rápidas. Solo escucha.\nAcción 2 — Orar por otro:\nOra por alguien que esté pasando por un mal inevitable: enfermedad, duelo, pobreza, distancia de un ser querido. Reza una decena del Rosario ofreciéndola por esa persona. Si te animas, dile: Hoy recé por ti. No necesitas dar más explicaciones.\nAcción 3 — Agradecer:\nAgradece a alguien que te haya sostenido en tu dolor, aunque sea con su sola presencia. Puede ser alguien que te escuchó sin intentar arreglarte, alguien que te visitó cuando estabas enfermo, alguien que te dio un abrazo en silencio. Un mensaje breve, una llamada, un gesto. Solo agradece.\nPárrafo de cierre:\nEstas acciones no son obligaciones. Son respuestas. Respuestas al amor que recibiste en esta oración. La comunidad te sostiene cuando te dejas sostener. Y tú sostienes a la comunidad cuando ofreces lo que has recibido.\nFrase de cierre temática:\nLos males inevitables nos unen. Porque todos somos frágiles. Todos necesitamos ayuda. Todos cargamos cruces que no elegimos. Y cuando las cargamos juntos, el peso se vuelve más ligero.\nNo estás aquí solo para sobrevivir tus limitaciones. Estás aquí para ser parte de un Cuerpo que se cuida mutuamente, reconociendo que la finitud no es el final, sino el lugar donde Dios habita con nosotros.\nINVITACIÓN AL SIGUIENTE CUADERNO\nInvitación:\nCruzando la Cruz 2 - Pecado\nLa libertad mal ejercida\nResumen de lo recorrido:\nHas completado el primer cuaderno del Nivel Cruz. Aprendiste a distinguir los límites inevitables de la vida, aquellos dolores que nadie causó deliberadamente. Reconociste que Dios habita tus limitaciones, y comenzaste a cargar la cruz con la comunidad.\nTransición:\nPero no todo dolor proviene de la finitud. Hay otro tipo de sufrimiento: el que viene del pecado.\nAnticipación del siguiente cuaderno:\nAhora es momento de continuar con Cruzando la Cruz 2: Pecado, donde profundizarás en los Misterios del Rosario contemplando:\nEl dolor causado por la libertad mal ejercida (propia y ajena)\nLa diferencia entre culpa real y culpa falsa\nEl camino del perdón a quien te hirió\nLa reconciliación contigo mismo cuando fuiste tú quien falló\nLa gracia del arrepentimiento que sana las raíces del mal moral\nEl itinerario completo "Cruzando la Cruz"\nEste es el segundo de cuatro cuadernos del Nivel Cruz:\n✅ Cuaderno 1: Males (finitud inevitable) — Completado ❤️😇 → Cuaderno 2: Pecado (libertad mal ejercida) — Siguiente paso Cuaderno 3: Conversión (cambio profundo de corazón) Cuaderno 4: Gracia (participar de la vida divina)\nAl completar los cuatro cuadernos, habrás recorrido este proceso del itinerario CruzAndo: aprender a vivir la lógica pascual, atravesando los males y el pecado con la actitud de Cristo, sosteniéndote en la comunidad, y descubriendo que la Cruz no es el final, sino el camino hacia la Resurrección.\nEl segundo cuaderno te está esperando.\nNos vemos en la siguiente etapa.\n¡Goza el Camino!\n— P. César Ricardo Montijo Rivas”,
+“audioContemplacion”: “https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_20.mp3”
+}
+]
+}
+}
+;
+const cuaderno = JSON.parse(DATA_PLACEHOLDER);
+
+```
+      const misteriosActuales = selectedTipo ? cuaderno.misterios[selectedTipo] : [];
+      const subtituloBloque = selectedTipo ? cuaderno.subtitulosBloques[selectedTipo] : '';
 
       const [ci, setCi] = useState(0);
       const [done, setDone] = useState({});
@@ -330,9 +769,13 @@
       const [celeb, setCeleb] = useState(null);
       const [trans, setTrans] = useState(false);
 
-      const m = cuaderno.misterios[ci];
+      if (!selectedTipo) {
+        return <SelectScreen onSelect={(tipo) => setSelectedTipo(tipo)} T={T} darkMode={darkMode} setDarkMode={setDarkMode} />;
+      }
+
+      const m = misteriosActuales[ci];
       const isDone = ci in done;
-      const total = cuaderno.misterios.length;
+      const total = misteriosActuales.length;
       const doneCount = Object.keys(done).length;
 
       const goTo = i => {
@@ -358,6 +801,17 @@
         }
       };
 
+      const backToSelect = () => {
+        setSelectedTipo(null);
+        setCi(0);
+        setDone({});
+        setJournal({});
+        setShowPray(false);
+        setOpenSections({});
+      };
+
+      const tipoLabel = selectedTipo.charAt(0).toUpperCase() + selectedTipo.slice(1);
+
       return (
         <>
           <style>{CSS(T)}</style>
@@ -368,11 +822,18 @@
             <div style={{padding:"20px 18px 16px",background:T.card,borderBottom:"1.5px solid "+T.border}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
                 <div style={{flex:1}}>
-                  <div style={{display:"inline-block",background:LVL.bold,color:"#fff",padding:"4px 12px",borderRadius:16,fontSize:12,fontWeight:600,letterSpacing:0.8,textTransform:"uppercase",marginBottom:8}}>
-                    Nivel Cruz
+                  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+                    <button onClick={backToSelect} style={{background:"none",border:"none",cursor:"pointer",padding:0,display:"flex",alignItems:"center"}}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={T.textDim} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="15,18 9,12 15,6"/>
+                      </svg>
+                    </button>
+                    <div style={{display:"inline-block",background:LVL.bold,color:"#fff",padding:"4px 12px",borderRadius:16,fontSize:12,fontWeight:600,letterSpacing:0.8,textTransform:"uppercase"}}>
+                      Nivel Cruz
+                    </div>
                   </div>
-                  <h1 style={{fontSize:26,fontWeight:700,color:T.text,marginBottom:4}}>{cuaderno.nombre}</h1>
-                  <div style={{fontSize:16,color:T.textSoft,fontStyle:"italic"}}>{cuaderno.subtitulo}</div>
+                  <h1 style={{fontSize:26,fontWeight:700,color:T.text,marginBottom:4}}>{cuaderno.cuaderno}</h1>
+                  <div style={{fontSize:16,color:T.textSoft,fontStyle:"italic"}}>Misterios {tipoLabel}</div>
                 </div>
                 <button 
                   onClick={() => setDarkMode(!darkMode)} 
@@ -406,30 +867,26 @@
 
             <div style={{padding:"16px 18px",background:T.card,borderBottom:"1px solid "+T.border}}>
               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-                {cuaderno.misterios.map((_, i) => {
+                {misteriosActuales.map((_, i) => {
                   const isA = i === ci;
                   const isD = i in done;
-                  const gap = i % 5 === 0 && i !== 0;
                   return (
-                    <div key={i} style={{display:"flex",alignItems:"center"}}>
-                      {gap && <div style={{width:8}} />}
-                      <div onClick={() => goTo(i)} style={{width:isA?24:11,height:11,borderRadius:6,background:isD?GREEN:isA?LVL.bold:T.border,cursor:"pointer",transition:"all 0.3s",boxShadow:isA?"0 0 0 3px "+LVL.light:isD?"0 0 6px "+GREEN+"60":"none"}} />
-                    </div>
+                    <div key={i} onClick={() => goTo(i)} style={{width:isA?24:11,height:11,borderRadius:6,background:isD?GREEN:isA?LVL.bold:T.border,cursor:"pointer",transition:"all 0.3s",boxShadow:isA?"0 0 0 3px "+LVL.light:isD?"0 0 6px "+GREEN+"60":"none"}} />
                   );
                 })}
               </div>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                <span style={{fontSize:13,color:T.textDim}}>Misterios Gozosos {"·"} <em style={{color:LVL.soft}}>{cuaderno.subtitulo}</em></span>
+                <span style={{fontSize:13,color:T.textDim}}>Misterios {tipoLabel} {"·"} <em style={{color:LVL.soft}}>{subtituloBloque}</em></span>
                 <span style={{fontSize:13,fontWeight:700,color:doneCount===total?GREEN:LVL.bold}}>{doneCount}/{total}</span>
               </div>
             </div>
 
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"0 18px 8px"}}>
-              <button onClick={() => goTo(ci-1)} disabled={ci===0} style={{display:"flex",alignItems:"center",gap:4,background:"none",border:"none",cursor:ci===0?"default":"pointer",opacity:ci===0?0.3:1,color:T.textSoft,fontSize:13,fontFamily:"Inter,sans-serif"}}>
+              <button onClick={() => goTo(ci-1)} disabled={ci===0} style={{display:"flex",alignItems:"center",gap:4,background:"none",border:"none",cursor:ci===0?"default":"pointer",opacity:ci===0?0.3:1,color:T.textSoft,fontSize:13,fontFamily:"'Inter',sans-serif"}}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={T.textSoft} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15,18 9,12 15,6"/></svg> Anterior
               </button>
               <span style={{fontSize:13,fontWeight:600,color:T.textDim}}>{ci+1} de {total}</span>
-              <button onClick={() => goTo(ci+1)} disabled={ci===total-1} style={{display:"flex",alignItems:"center",gap:4,background:"none",border:"none",cursor:ci===total-1?"default":"pointer",opacity:ci===total-1?0.3:1,color:T.textSoft,fontSize:13,fontFamily:"Inter,sans-serif"}}>
+              <button onClick={() => goTo(ci+1)} disabled={ci===total-1} style={{display:"flex",alignItems:"center",gap:4,background:"none",border:"none",cursor:ci===total-1?"default":"pointer",opacity:ci===total-1?0.3:1,color:T.textSoft,fontSize:13,fontFamily:"'Inter',sans-serif"}}>
                 Siguiente <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={T.textSoft} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9,6 15,12 9,18"/></svg>
               </button>
             </div>
@@ -437,7 +894,7 @@
             <div style={{padding:"4px 14px 120px",opacity:trans?0:1,transform:trans?"translateY(6px)":"none",transition:"all 0.25s"}}>
               <div style={{borderRadius:18,overflow:"hidden",marginBottom:14,position:"relative",background:"linear-gradient(135deg,"+LVL.light+","+LVL.mist+","+LVL.soft+")",height:170}}>
                 <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",justifyContent:"flex-end",padding:"18px 20px",background:"linear-gradient(to top,rgba(43,38,34,0.75) 0%,rgba(43,38,34,0.15) 60%,transparent 100%)"}}>
-                  <div style={{fontSize:13,fontWeight:600,letterSpacing:1,color:LVL.light,textTransform:"uppercase"}}>{ORDS[ci%5]} Misterio Gozoso</div>
+                  <div style={{fontSize:13,fontWeight:600,letterSpacing:1,color:LVL.light,textTransform:"uppercase"}}>{ORDS[ci%5]} Misterio {tipoLabel}</div>
                   <h2 style={{margin:"3px 0 0",fontSize:24,fontWeight:700,color:"#fff",lineHeight:1.2}}>{m.nombre}</h2>
                   <div style={{fontSize:16,color:"rgba(255,255,255,0.85)",fontStyle:"italic",marginTop:4}}>{m.subtitulo}</div>
                 </div>
@@ -478,7 +935,7 @@
                         onChange={e => setJournal(p => ({...p, [ci]: {...(p[ci]||{}), [qi]: e.target.value}}))}
                         placeholder="Escribe aquí tu reflexión..."
                         rows={3}
-                        style={{width:"100%",padding:"12px 16px",background:T.inputBg,border:"1.5px solid "+T.border,borderRadius:12,color:T.text,fontSize:17,lineHeight:1.7,resize:"vertical",outline:"none",transition:"border 0.2s"}}
+                        style={{width:"100%",padding:"12px 16px",background:T.inputBg,border:"1.5px solid "+T.border,borderRadius:12,color:T.text,fontSize:17,lineHeight:1.7,resize:"vertical",outline:"none",transition:"border 0.2s",fontFamily:"'Inter',sans-serif"}}
                         onFocus={e => e.target.style.borderColor = LVL.soft}
                         onBlur={e => e.target.style.borderColor = T.border}
                       />
@@ -488,7 +945,7 @@
               </Sec>
 
               {!showPray && !isDone && (
-                <button onClick={() => setShowPray(true)} style={{width:"100%",padding:"16px",marginTop:8,background:T.card,border:"1.5px solid "+LVL.light,borderRadius:16,cursor:"pointer",fontSize:17,fontWeight:600,fontFamily:"Inter,sans-serif",color:LVL.bold,display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
+                <button onClick={() => setShowPray(true)} style={{width:"100%",padding:"16px",marginTop:8,background:T.card,border:"1.5px solid "+LVL.light,borderRadius:16,cursor:"pointer",fontSize:17,fontWeight:600,fontFamily:"'Inter',sans-serif",color:LVL.bold,display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
                   {"🙏"} Oración de intercesión
                 </button>
               )}
@@ -497,7 +954,7 @@
                 <div style={{marginTop:10,padding:"22px",background:T.card,borderRadius:18,border:"1.5px solid "+LVL.soft,boxShadow:"0 4px 24px rgba(255,122,0,0.1)",animation:"sU 0.4s ease"}}>
                   <div style={{fontSize:13,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:LVL.bold,marginBottom:12}}>{"🙏"} Intercesión</div>
                   <p style={{fontSize:19,color:T.text,lineHeight:1.85,fontStyle:"italic",whiteSpace:"pre-line"}}>{m.intercesion}</p>
-                  <button onClick={complete} style={{width:"100%",marginTop:20,padding:"16px",background:LVL.bold,border:"none",borderRadius:14,cursor:"pointer",color:"#fff",fontSize:18,fontWeight:700,fontFamily:"Inter,sans-serif",boxShadow:"0 4px 16px rgba(255,122,0,0.3)"}}>
+                  <button onClick={complete} style={{width:"100%",marginTop:20,padding:"16px",background:LVL.bold,border:"none",borderRadius:14,cursor:"pointer",color:"#fff",fontSize:18,fontWeight:700,fontFamily:"'Inter',sans-serif",boxShadow:"0 4px 16px rgba(255,122,0,0.3)"}}>
                     {ci < total - 1 ? "Siguiente Misterio →" : "Completar Cuaderno ✦"}
                   </button>
                 </div>
@@ -539,6 +996,7 @@
       `;
     }
 
+    // El JSON se insertará aquí dinámicamente
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<App />);
 </script>
