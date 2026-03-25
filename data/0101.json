@@ -1,5 +1,4 @@
-Sí, exacto. Todo lo de misterios (línea 34 en adelante) está perfecto. Solo necesitas cambiar las líneas 1-33, que quedarían así:
-json{
+{
   "tema": {
     "id": "0101",
     "mundo_slug": "cruz",
