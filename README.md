@@ -82,10 +82,9 @@ Diócesis de Culiacán, Sinaloa, México
 
 - [ ] Completar 4 cuadernos del Nivel Cruz
 - [ ] Añadir página de selección de cuadernos
-- [ ] Implementar persistent storage (guardar progreso)
+- [ ] Implementar persistent storage (guardar progreso) con Firebase 
 - [ ] Añadir niveles: Emociones, Mente, Corazón, etc.
 - [ ] Crear versión PWA (Progressive Web App)
-- [ ] Integración con comunidad nas.io
 
 ---
 
