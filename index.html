@@ -1071,9 +1071,10 @@ body {
       return;
     }
 
-    // Cargar JSON
+    // Cargar JSON (ruta relativa al directorio del HTML)
+    const base = document.baseURI.substring(0, document.baseURI.lastIndexOf('/') + 1);
     try {
-      const resp = await fetch('data/' + CUADERNO_ID + '.json');
+      const resp = await fetch(base + 'data/' + CUADERNO_ID + '.json');
       if (!resp.ok) throw new Error('HTTP ' + resp.status);
       DATA = await resp.json();
     } catch(e) {
