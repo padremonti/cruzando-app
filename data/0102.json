@@ -1,0 +1,274 @@
+{
+  "tema": {
+    "id": "0102",
+    "mundo_slug": "cruz",
+    "mundo_nombre": "CruzAndo la Cruz",
+    "elemento_slug": "pecado",
+    "siguiente": "0103",
+    "paleta": {
+      "bold": "#FF7A00",
+      "base": "#FF7F09",
+      "soft": "#F69C49",
+      "mist": "#FFA34E",
+      "light": "#FFCFA2",
+      "ultra": "rgba(255,122,0,0.07)"
+    },
+    "bloques": {
+      "gozosos": { "emoji": "🌟", "color": "#D4A017" },
+      "luminosos": { "emoji": "✨", "color": "#01BBE1" },
+      "dolorosos": { "emoji": "✝️", "color": "#C0392B" },
+      "gloriosos": { "emoji": "👑", "color": "#8E44AD" }
+    }
+  },
+  "mundo": "CruzAndo la Cruz",
+  "elemento": "Pecado",
+  "numero": "2",
+  "audio_rezo": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/rezo.mp3",
+  "audio_canto": "",
+  "subtitulos_bloque": {
+    "gozosos": "El Salvador viene a liberarnos",
+    "luminosos": "Cristo revela y vence el pecado",
+    "dolorosos": "Cargar con el pecado del mundo",
+    "gloriosos": "El pecado es derrotado"
+  },
+  "misterios": {
+    "gozosos": [
+
+        {
+            "numero": 1,
+            "titulo": "La Anunciación",
+            "subtitulo": "Jesús viene a salvarnos del pecado",
+            "referencia": "Lucas 1:26-31 (DHH)",
+            "evangelio": "El ángel Gabriel fue enviado por Dios a una ciudad de Galilea llamada Nazaret, a una joven virgen llamada María, comprometida para casarse con un hombre llamado José, descendiente del rey David. El ángel entró en el lugar donde ella estaba, y le dijo: «¡Te saludo, favorecida de Dios! El Señor está contigo.» María quedó muy conmovida al oír estas palabras, y se preguntaba qué significaría aquel saludo. El ángel le dijo: «No tengas miedo, María, pues tú gozas del favor de Dios. Ahora vas a quedar encinta: tendrás un hijo, y le pondrás por nombre Jesús.»",
+            "contemplacion": "El Ángel anunció la misión\nEl nombre Jesús significa Dios salva. No es un nombre casual. Es una declaración de misión.\nEl ángel no le dijo a María: Tendrás un hijo que será famoso, poderoso, admirado. Le dijo: Le pondrás por nombre Jesús, porque Él salvará a su pueblo de sus pecados.\nDios envió a su Hijo al mundo para liberarnos de la maldad.\nNo vino a condenarnos. No vino a señalar con el dedo. Vino a rescatarnos de la esclavitud del pecado. Porque el pecado no solo ofende a Dios, nos esclaviza a nosotros.\nCuando pecamos, nos encadenamos a la mentira, al resentimiento, a la culpa, a los patrones destructivos que repetimos sin poder parar. El pecado nos roba la libertad.\nY Jesús vino a devolvernos esa libertad.\nMaría aceptó ser la Madre del Salvador. Aceptó que en su vientre creciera Aquél que vendría a destruir la maldad desde dentro, no con violencia, sino con amor. Con perdón. Con gracia.",
+            "meditacion": "Por María hacia Jesús:\n¿Qué siente el Corazón Inmaculado de María al saber que su Hijo será el Salvador?\nDesde el Hijo hacia el Padre:\n¿Qué aceptó el Corazón de Jesús al ser enviado para liberar a la humanidad de su esclavitud al pecado?\nHijos y hermanos en el Espíritu:\nEn tu opinión, ¿cuáles son los peores pecados? ¿Cómo te sientes al saber que Jesús vino a salvarte de ellos?",
+            "intercesion": "Jesús, tú que fuiste enviado para salvar, no para condenar,\nlibérame de la esclavitud del pecado.\nEnséñame que tu nombre significa libertad,\ny que tu misión es rescatarme, no rechazarme. Amén.",
+            "audio_contemplacion": ""
+        },
+        {
+            "numero": 2,
+            "titulo": "La Visitación",
+            "subtitulo": "El poder liberador de Cristo, antes de nacer",
+            "referencia": "Lucas 1:39-43 (DHH)",
+            "evangelio": "Por aquellos días, María se fue de prisa a un pueblo de la región montañosa de Judea, y entró en la casa de Zacarías y saludó a Isabel. Cuando Isabel oyó el saludo de María, la criatura se le estremeció en el vientre, y ella quedó llena del Espíritu Santo. Entonces, con voz muy fuerte, dijo: «¡Dios te ha bendecido más que a todas las mujeres, y ha bendecido a tu hijo! ¿Quién soy yo, para que venga a visitarme la madre de mi Señor?»",
+            "contemplacion": "Liberación antes del nacimiento\nAl escuchar a María —portadora del Mesías en gestación—, Isabel se llenó del Espíritu Santo, y el pequeño Juan, en el vientre de su madre, fue liberado de la herida del pecado original.\nAún antes de nacer, ¡tanta gracia y poder liberador tiene Cristo!\nEl pecado original no es una mancha que heredamos como si fuera una enfermedad genética. Es una inclinación desordenada hacia la maldad, una tendencia a poner el yo en el centro, a inventar nuestra propia versión de lo bueno y verdadero.\nTodos nacemos con esa herida. Todos, excepto María.\nPero Juan Bautista, el Precursor, fue santificado en el vientre de Isabel por la presencia de Cristo. No fue concebido sin pecado original, como María, pero fue liberado de sus efectos antes de nacer.\nEsto nos revela algo crucial: el poder de Cristo no tiene límites. Puede liberar a un bebé no nacido. Puede liberar a un anciano en su lecho de muerte. Puede liberarte a ti, ahora mismo, sin importar cuánto hayas pecado.",
+            "meditacion": "Por María hacia Jesús:\n¿Qué siente el Corazón de María al llevar en su vientre al que santifica y libera del pecado?\nDesde el Hijo hacia el Padre:\n¿Qué nos revela el Corazón de Jesús, al liberar del pecado a un embrión humano, Juan Bautista, en el vientre de Santa Isabel?\nHijos y hermanos en el Espíritu:\n¿Qué consecuencias del pecado original te llaman la atención? ¿Egoísmo, orgullo, dificultad para amar...? ¿Cómo estás cruzando esa inclinación desordenada en tu vida?",
+            "intercesion": "Jesús, tú que liberaste a Juan Bautista antes de nacer,\nlibérame de las inclinaciones desordenadas que me esclavizan.\nSana en mí la herida del pecado original,\ny hazme capaz de amar como Tú amas. Amén.",
+            "audio_contemplacion": ""
+        },
+        {
+            "numero": 3,
+            "titulo": "El Nacimiento",
+            "subtitulo": "Dios queda fuera, porque no hay espacio",
+            "referencia": "Lucas 2:1, 4-7 (DHH)",
+            "evangelio": "Por aquel tiempo, el emperador Augusto ordenó que se hiciera un censo de todo el mundo. José salió del pueblo de Nazaret, de la región de Galilea, y se fue a Belén. Fue allá a inscribirse, junto con María, su esposa, que se encontraba encinta. Y mientras estaban en Belén, le llegó a María el tiempo de dar a luz. Y allí nació su hijo primogénito, y lo envolvió en pañales y lo acostó en el establo, porque no había alojamiento para ellos en el mesón.",
+            "contemplacion": "La primera exclusión\nEn su primera noche entre nosotros, Dios no encontró posada en las casas.\nNo fue porque las posadas estuvieran llenas. Fue porque nadie le hizo espacio.\nMaría y José encontraron refugio en una cueva donde los animales dormían, y recostaron al Niño en el pesebre que servía para alimentar al ganado.\nDios fue rechazado antes de poder hablar, antes de poder actuar, antes de poder revelar quién era.\nEste es el primer pecado que Cristo padeció: la indiferencia. La falta de hospitalidad. El rechazo silencioso de quien simplemente cierra la puerta sin siquiera preguntar.\nNo fue un pecado grave en el sentido de violencia o maldad explícita. Fue un pecado cotidiano: no dar espacio a Dios en la propia vida. Estar tan ocupado, tan cómodo, tan lleno de otras cosas, que no hay lugar para Él.\nY ese pecado lo repetimos todos los días.\nCuando no oramos porque no tenemos tiempo. Cuando no perdonamos porque estamos muy heridos. Cuando no servimos porque ya tenemos suficientes problemas propios.\n¿Cuántas veces hemos dejado a Dios afuera de nuestro espacio, de nuestra vida?",
+            "meditacion": "Por María hacia Jesús:\n¿Qué siente el Corazón de María al ver que su Hijo no tiene un lugar digno donde nacer?\nDesde el Hijo hacia el Padre:\n¿Qué te dice el Corazón de Jesús, al aceptar nacer en un refugio de animales, rechazado por la indiferencia humana?\nHijos y hermanos en el Espíritu:\n¿Cuándo has dejado a Dios afuera de tu espacio, de tu vida? ¿Cómo estás cruzando el pecado de la indiferencia?",
+            "intercesion": "Jesús, tú que naciste en un establo porque no te hicimos espacio,\nperdona mi indiferencia.\nAyúdame a abrir las puertas de mi corazón,\npara que encuentres en mí un hogar digno de tu presencia. Amén.",
+            "audio_contemplacion": ""
+        },
+        {
+            "numero": 4,
+            "titulo": "La Presentación",
+            "subtitulo": "Su Nombre es Salvador",
+            "referencia": "Lucas 2:22, 25, 28, 34-35 (DHH)",
+            "evangelio": "Cuando se cumplieron los días de la purificación de ellos, según la ley de Moisés, llevaron al niño a Jerusalén para presentarlo al Señor. Había en Jerusalén un hombre llamado Simeón, justo y piadoso. Tomó al niño en sus brazos y bendijo a Dios. Luego dijo a María, su madre: «Este niño será causa de caída y de elevación para muchos en Israel; será signo de contradicción, y a ti misma una espada te atravesará el corazón.»",
+            "contemplacion": "El nombre que define la misión\nSan José le puso al Niño el nombre de Jesús, revelado por el Ángel, porque su identidad y su misión es ser Aquél que salvará al pueblo de todos sus pecados.\nNo es solo un nombre bonito. Es una declaración de guerra contra el pecado.\nJesús no vino a convivir con el pecado, a tolerarlo, a hacer las paces con él. Vino a destruirlo. A liberar a los esclavizados. A sanar a los heridos. A rescatar a los perdidos.\nSimeón profetizó que este Niño será causa de caída y de elevación. ¿Por qué caída?\nPorque la presencia de Jesús revela el pecado oculto. No lo causa, pero lo expone.\nCuando Jesús aparece en tu vida, no puedes seguir fingiendo que todo está bien. No puedes seguir justificando la mentira, la mediocridad espiritual, la doble vida. Su luz es tan fuerte que ilumina las sombras que preferirías ignorar.\nY eso molesta. Por eso algunos caen: se ofenden, se alejan, lo rechazan.\nPero para quienes aceptan esa luz, se elevan. Son liberados. Perdonados. Restaurados.\n¿Qué piensas y sientes al saber que Dios te quiere salvar de tus faltas, tu pecado, tu maldad?",
+            "meditacion": "Por María hacia Jesús:\n¿Qué siente el Corazón de María al escuchar que su Hijo será signo de contradicción, y revelará los pecados ocultos?\nDesde el Hijo hacia el Padre:\n¿Qué te dice el Corazón de Jesús, sabiendo que Él vino para salvarte de tus pecados?\nHijos y hermanos en el Espíritu:\n¿Qué piensas y sientes al saber que Dios te quiere salvar de tus faltas, tu pecado, tu maldad? ¿Cómo estás respondiendo a esa luz que expone tus sombras?",
+            "intercesion": "Jesús, tú cuyo nombre significa Salvador,\nayúdame a aceptar tu luz en mi vida.\nNo permitas que me ofenda cuando reveles mis pecados ocultos,\nsino que me eleve aceptando tu misericordia. Amén.",
+            "audio_contemplacion": ""
+        },
+        {
+            "numero": 5,
+            "titulo": "Jesús perdido y hallado",
+            "subtitulo": "El dolor causado sin malicia",
+            "referencia": "Lucas 2:41-46 (DHH)",
+            "evangelio": "…pasados aquellos días [de la fiesta de Pascua], cuando volvían a casa, el niño Jesús se quedó en Jerusalén, sin que sus padres se dieran cuenta. Pensando que Jesús iba entre la gente, hicieron un día de camino; pero luego, al buscarlo entre los parientes y conocidos, no lo encontraron. Así que regresaron a Jerusalén para buscarlo allí. Al cabo de tres días lo encontraron en el templo, sentado entre los maestros, escuchándolos y haciéndoles preguntas.",
+            "contemplacion": "Cuando el dolor no implica culpa\nNo fue por desobediencia, ni por rebeldía, ni por maldad: el Niño Jesús permaneció en Jerusalén sin que sus padres lo supieran.\nPero María y José sintieron lo mismo que sienten los padres de hijos desobedientes, rebeldes y extraviados.\nJesús no pecó al quedarse. Pero causó dolor.\nEste Misterio nos enseña algo crucial: a veces, incluso actos inocentes causan dolor a quienes amamos. El pecado amplifica esto infinitamente.\nMaría y José sufrieron tres días de angustia, pensando que habían perdido a su Hijo. No fue culpa de ellos, no fueron malos padres. No fue malicia de Jesús, estaba ocupándose de las cosas de su Padre.\nPero el dolor fue real.\nEsto nos ayuda a entender dos cosas:\n1. No todo dolor que causamos es pecado. A veces, hacer lo correcto, como Jesús ocupándose de su misión, genera conflicto con quienes amamos. Eso no es maldad.\n2. Pero cuando sí pecamos, el dolor que causamos es mucho peor. Porque no solo lastimamos por circunstancias inevitables, sino por elección deliberada.\nSea por inocencia o por maldad, ¿qué es lo peor que le hiciste a quienes te criaron?\nSi fue sin malicia, pide perdón con humildad.\nSi fue con maldad, pide perdón con arrepentimiento.",
+            "meditacion": "Por María hacia Jesús:\n¿Qué vive el Corazón de María durante los tres días sin saber dónde está su hijo, sintiendo que lo perdió?\nDesde el Hijo hacia el Padre:\n¿Qué vive el Corazón de Jesús al ocuparse de las cosas de su Padre, sin saber el dolor que causa a sus padres humanos?\nHijos y hermanos en el Espíritu:\nSea por inocencia o por maldad, ¿qué es lo peor que le hiciste a quienes te criaron? ¿Cómo estás cruzando ese dolor que causaste?",
+            "intercesion": "Jesús, tú que causaste dolor a María y José sin malicia,\nayúdame a distinguir entre errores inocentes y pecados deliberados.\nEnséñame a pedir perdón con humildad cuando lastimo sin querer,\ny con arrepentimiento cuando elijo hacer el mal. Amén.",
+            "audio_contemplacion": ""
+        }
+
+    ],
+
+
+    "luminosos": [
+
+        {
+        "numero": 6,
+        "titulo": "Bautismo en el Jordán",
+        "subtitulo": "El Cordero de Dios que quita el pecado",
+        "referencia": "Juan 1:29, 32-34 (DHH)",
+        "evangelio": "Al día siguiente, Juan vio a Jesús, que se acercaba a él, y dijo: «¡Miren, ese es el Cordero de Dios, que quita el pecado del mundo!» Entonces Juan declaró: «He visto al Espíritu Santo bajar del cielo como una paloma, y reposar sobre él. Yo todavía no sabía quién era; pero el que me envió a bautizar con agua, me dijo: “Aquel sobre quien veas que el Espíritu baja y reposa, ese es el que bautiza con Espíritu Santo.” Yo ya lo he visto, y soy testigo de que es el Hijo de Dios.»",
+        "contemplacion": "Juan Bautista presentó a Jesús\nJuan Bautista lo llamó el Cordero de Dios que quita el pecado del mundo.\nNo dijo que condena el pecado, ni que castiga a los pecadores. Dijo que quita el pecado.\nComo un cordero llevado al matadero, Jesús cargará con el pecado del mundo. No porque sea culpable, sino porque elige tomar sobre sí las consecuencias de nuestra maldad, para liberarnos.\nJuan bautizaba con agua para el arrepentimiento. Pero Jesús bautizará con Espíritu Santo y fuego. No solo limpia el exterior, transforma el interior. No solo perdona el pasado, renueva el futuro.\nEl Espíritu Santo que descendió sobre Jesús en forma de paloma es el mismo que descenderá sobre ti cuando te arrepientas. Y ese Espíritu tiene poder no solo para perdonar, sino para liberar.",
+        "meditacion": "Por María hacia Jesús:\n¿Qué siente el Corazón de María al ver que su Hijo es proclamado como el Cordero que carga con el pecado del mundo?\nDesde el Hijo hacia el Padre:\n¿Qué te dice el Corazón de Jesús, al saber que Él cargará con tu maldad y la de toda la humanidad?\nHijos y hermanos en el Espíritu:\nSi pudieras borrar para siempre un pecado del mundo, ¿cuál sería y por qué? ¿Cómo estás cruzando ese pecado en tu propia vida?",
+        "intercesion": "Jesús, Cordero de Dios que quitas el pecado del mundo,\nten piedad de mí.\nBautízame con tu Espíritu Santo y fuego,\npara que no solo sea perdonado, sino transformado. Amén.",
+        "audio_contemplacion": ""
+        },
+        {
+            "numero": 7,
+            "titulo": "Bodas de Caná",
+            "subtitulo": "De la purificación legalista al vino de la gracia",
+            "referencia": "Juan 2:1-3, 6-9 (DHH)",
+            "evangelio": "Se acabó el vino, y la madre de Jesús le dijo: «Ya no tienen vino.» Había allí seis tinajas de piedra para agua, para los ritos de purificación de los judíos. Cada tinaja podía contener unos cien litros. Jesús dijo a los sirvientes: «Llenen de agua estas tinajas.» Y los sirvientes las llenaron hasta arriba. Entonces Jesús les dijo: «Ahora saquen un poco y llévenselo al encargado de la fiesta.» Así lo hicieron. El encargado de la fiesta probó el agua convertida en vino.",
+            "contemplacion": "Del agua del miedo al vino de la fiesta\nCon temor de quebrantar la ley religiosa de un Dios justiciero, los judíos se lavaban las manos con el agua de seis tinajas.\nEsas tinajas representaban la religiosidad del miedo: cumplir reglas externas para evitar el castigo. Lavarse ritualmente las manos una y otra vez, obsesivamente, pensando que así se volvían puros ante Dios.\nPero Cristo transformó el contenido de esos recipientes en el vino de la bendición amorosa.\nEl agua de la purificación legalista se convirtió en el vino de la nueva alianza. Y el vino, en la cultura bíblica, simboliza alegría, fiesta, abundancia. Más aún, en la Última Cena, Jesús dirá: Este vino es mi sangre, derramada por ustedes para el perdón de los pecados.\nDios no vino a condenarnos por incumplir leyes. Vino a liberarnos del pecado con su sangre derramada.\nLa religiosidad escrupulosa piensa que Dios es un juez severo que nos vigila para castigarnos. Pero Jesús revela que Dios es un Padre amoroso que quiere liberarnos.",
+            "meditacion": "Por María hacia Jesús:\n¿Qué siente el Corazón de María al ver que su Hijo transforma el agua de la purificación en vino de fiesta?\nDesde el Hijo hacia el Padre:\n¿Qué revela el Corazón de Jesús al reemplazar la religión del miedo con la religión del amor?\nHijos y hermanos en el Espíritu:\n¿Qué tan escrupulosa es tu conciencia? ¿Vives con miedo de Dios o con confianza en su misericordia? ¿Cómo estás cruzando la religiosidad legalista?",
+            "intercesion": "Jesús, tú que transformaste el agua en vino,\ntransforma mi miedo en confianza.\nLibérame de la escrupulosidad que me paraliza,\ny enséñame que tu sangre me purifica más que todas mis obsesiones. Amén.",
+            "audio_contemplacion": ""
+        },
+        {
+            "numero": 8,
+            "titulo": "Anuncio del Reino",
+            "subtitulo": "Perdón que sana, sanación que perdona",
+            "referencia": "Lucas 5:18-25 (DHH)",
+            "evangelio": "Unos hombres llegaron trayendo en una camilla a un paralítico, y querían meterlo en la casa para ponerlo delante de Jesús. Pero no encontraban cómo hacerlo porque había mucha gente. Entonces subieron al techo, quitaron algunas tejas y bajaron al enfermo en su camilla, poniéndolo en medio, delante de Jesús. Cuando Jesús vio la fe que tenían, le dijo al enfermo: «Amigo, tus pecados te quedan perdonados.» Entonces los maestros de la ley y los fariseos comenzaron a preguntarse: «¿Quién es este hombre, que se atreve a decir palabras ofensivas contra Dios? Solamente Dios puede perdonar pecados.» Pero Jesús se dio cuenta de lo que estaban pensando, y les preguntó: «¿Por qué piensan ustedes así? ¿Qué es más fácil, decir: “Tus pecados te quedan perdonados”, o decir: “Levántate y anda”? Pues voy a demostrarles que el Hijo del hombre tiene autoridad en la tierra para perdonar pecados.» Entonces le dijo al paralítico: «A ti te digo, levántate, toma tu camilla y vete a tu casa.» Al momento, el paralítico se levantó delante de todos.",
+            "contemplacion": "Jesús le dijo al paralítico: tus pecados son perdonados\nLos fariseos se escandalizaron: ¿Quién es este hombre? ¡Solo Dios puede perdonar pecados!\nTenían razón en una cosa: solo Dios puede perdonar pecados. Pero no entendían que Jesús es Dios.\nY para demostrarlo, sanó al paralítico. Porque si tiene poder para sanar el cuerpo, tiene poder para sanar el alma.\nObserva la conexión: Jesús no separó el perdón de la sanación. Perdonó primero, sanó después. Como diciendo: El verdadero problema no es que no puedas caminar. El verdadero problema es el pecado que te paraliza por dentro.\nEsto no significa que todo sufrimiento físico sea castigo por pecado. Pero sí significa que el pecado nos paraliza espiritualmente, y solo el perdón de Dios nos levanta.\nEl paralítico no pidió perdón. Sus amigos lo llevaron a Jesús. Y Jesús, viendo la fe de ellos, lo perdonó.\nA veces, cuando tú no tienes fuerzas para arrepentirte, la fe de otros te sostiene. Por eso necesitas comunidad.",
+            "meditacion": "Por María hacia Jesús:\n¿Qué siente el Corazón de María al ver que su Hijo tiene autoridad divina para perdonar pecados?\nDesde el Hijo hacia el Padre:\n¿Qué nos revela el Corazón de Jesús cuando perdona los pecados del alma y, a la vez, sana el cuerpo?\nHijos y hermanos en el Espíritu:\n¿Qué tanto celebras el sacramento de la Confesión? ¿Qué te paraliza espiritualmente y necesita ser perdonado? ¿Cómo estás cruzando la vergüenza que te impide acercarte al perdón?",
+            "intercesion": "Jesús, tú que tienes autoridad para perdonar pecados,\nlevántame de mi parálisis espiritual.\nAyúdame a acercarme al sacramento de la Reconciliación sin vergüenza,\nconfiando que tu perdón me sana de raíz. Amén.",
+            "audio_contemplacion": ""
+        },
+        {
+            "numero": 9,
+            "titulo": "La Transfiguración",
+            "subtitulo": "La incredulidad como rechazo",
+            "referencia": "Marcos 9:2-8 (DHH)",
+            "evangelio": "Jesús tomó aparte a Pedro, Santiago y Juan, y subió con ellos a un cerro alto. Allí, delante de ellos, cambió la apariencia de Jesús. Su ropa se volvió brillante y más blanca que la nieve, tan blanca como nadie en el mundo podría dejarla. Y se les aparecieron Elías y Moisés, conversando con Jesús. (…) Entonces una nube los envolvió, y del cielo salió una voz que dijo: «Este es mi Hijo amado; escúchenlo.» Al momento, cuando miraron alrededor, ya no vieron a nadie con ellos, sino a Jesús solo.",
+            "contemplacion": "La luz que ciega y revela\nDespués de la experiencia de la luz radiante en el rostro de Cristo, la aparición de Elías y Moisés, y la voz del Padre en una nube luminosa, Jesús les dijo a los discípulos: No le digan a nadie lo que han visto.\n¿Por qué? Porque para aceptar las cosas más maravillosas se requiere un corazón puro.\nLos discípulos apenas podían creer lo que veían. Estaban asustados, desorientados. Pedro balbuceaba sin saber qué decir.\nY esto nos enseña algo sobre el pecado: la incredulidad es un pecado sutil. No es solo dudar de dogmas o doctrinas. Es rechazar la revelación de Dios porque parece demasiado buena para ser verdad.\n¿Dios realmente me ama incondicionalmente? No puede ser.\n¿Dios realmente me perdona todo? Imposible.\n¿Dios realmente me llama a la santidad? Yo no.\nLa incredulidad no siempre es atea. A veces es religiosa: creemos en Dios, pero no creemos en su bondad infinita.\nNo por curiosidad intelectual honesta, eso no es pecado, sino por resistencia a aceptar un Dios tan misericordioso.",
+            "meditacion": "Por María hacia Jesús:\n¿Qué siente el Corazón de María al saber que su Hijo es el Hijo amado del Padre, revelado en gloria?\nDesde el Hijo hacia el Padre:\n¿Qué revela el Corazón de Jesús sobre su identidad divina en la Transfiguración?\nHijos y hermanos en el Espíritu:\n¿Has puesto en duda la bondad de Dios porque parece demasiado buena para ser verdad? ¿Cómo estás cruzando la incredulidad que te impide aceptar su amor?",
+            "intercesion": "Jesús, tú que te revelaste en gloria en el monte,\ncura mi incredulidad.\nAyúdame a aceptar que tu amor es tan grande como dices,\ny que tu misericordia no tiene límites. Amén.",
+            "audio_contemplacion": ""
+        },
+        {
+            "numero": 10,
+            "titulo": "Institución de la Eucaristía",
+            "subtitulo": "Sangre derramada para el perdón",
+            "referencia": "Marcos 14:22-25 (DHH)",
+            "evangelio": "Mientras comían, Jesús tomó en sus manos el pan y, habiendo dado gracias a Dios, lo partió y se lo dio a ellos, diciendo: «Esto es mi cuerpo.» Luego tomó en sus manos una copa y, habiendo dado gracias a Dios, se la pasó a ellos, y todos bebieron. Les dijo: «Esto es mi sangre, con la que se confirma la alianza, sangre que es derramada en favor de muchos. Les aseguro que no volveré a beber del producto de la vid, hasta el día en que beba el vino nuevo en el reino de Dios.»",
+            "contemplacion": "Por ustedes y por muchos\nJesús tomó el cáliz de su sangre declarando que será derramada: Por ustedes y por muchos, para el perdón de los pecados.\nY así fue: se derramó toda.\nNo solo por nuestras manos, es decir, causada por nosotros, los pecadores que lo crucificamos, sino sobre todo a favor nuestro, para liberarnos de la esclavitud de vivir sin conciencia, sin freno, encadenados al pecado.\nCada vez que celebras la Eucaristía, renuevas la alianza del perdón. Cada vez que recibes el Cuerpo y la Sangre de Cristo, Él te dice: Esto lo hago por ti. Para que seas libre.\nEl vino de Caná fue el inicio. El vino de la Eucaristía es el cumplimiento.\nEn Caná, Cristo transformó el agua de la purificación en vino de fiesta. En la Última Cena, transformó el vino en su Sangre redentora.\n¿Cómo imaginas que sería tu vida, viviendo sin pecar?\nNo en el sentido de nunca cometer errores, sino en el sentido de vivir libre de la esclavitud del pecado. Libre de la mentira. Libre del resentimiento. Libre de la lujuria compulsiva. Libre de la envidia. Libre del egoísmo.\nEsa libertad ya está ofrecida. En cada Eucaristía, Dios te la regala.",
+            "meditacion": "Por María hacia Jesús:\n¿Qué siente el Corazón de María al saber que su Hijo entregará su cuerpo y derramará su sangre para el perdón de los pecados?\nDesde el Hijo hacia el Padre:\n¿Qué ofrece el Corazón de Jesús al instituir la Eucaristía como memorial perpetuo de su sacrificio redentor?\nHijos y hermanos en el Espíritu:\n¿Cómo imaginas que sería tu vida, viviendo sin pecar? ¿Cómo estás cruzando la esclavitud del pecado que te impide vivir libre?",
+            "intercesion": "Jesús, tú que derramaste tu sangre para el perdón de mis pecados,\nlibérame de la esclavitud del mal.\nEnséñame a vivir en la libertad de los hijos de Dios,\nalimentado por tu Cuerpo y tu Sangre en la Eucaristía. Amén.",
+            "audio_contemplacion": ""
+        }
+    ],
+
+    "dolorosos": [
+
+ {
+    "numero": 11,
+    "titulo": "Agonía en Getsemaní",
+    "subtitulo": "Obediencia que redime la desobediencia",
+    "referencia": "Mateo 26:36-39 (DHH)",
+    "evangelio": "Luego fue Jesús con sus discípulos a un lugar llamado Getsemaní, y les dijo: «Siéntense aquí, mientras yo voy allí a orar.» (…) En seguida Jesús se fue un poco más adelante, se inclinó hasta tocar el suelo con su frente, y oró diciendo: «Padre mío, si es posible, líbrame de este trago amargo; pero que no se haga lo que yo quiero, sino lo que quieres tú.»",
+    "contemplacion": "Dos huertos\nEn el huerto del Edén, por temor a la muerte, la desobediencia de Adán condenó a la humanidad.\nEn el huerto de los olivos, aceptando la muerte, la obediencia de Cristo nos redime.\nJesús sudó sangre. Su cuerpo humano se rebeló ante lo que venía. No quería la Copa. No quería el abandono. No quería morir.\nPero dijo: Padre, que se haga tu voluntad.\nEsta no fue una obediencia pasiva. Fue la batalla más feroz del espíritu humano: elegir el bien cuando todo el ser grita por escapar.\nAdán desobedeció buscando ser como Dios. Jesús obedeció, siendo Dios, para restaurarnos como hijos.\n¿Cómo es mi obediencia?\nA veces, obedezco sólo cuando me conviene… Obedezco resentido, como esclavo… quizás, alguna vez he logrado obedecer libremente, como hijo que confía en su Padre.\nEl pecado siempre comienza con desobediencia. Y la santidad siempre comienza con obediencia libre y amorosa.",
+    "meditacion": "Por María hacia Jesús:\n¿Qué siente el Corazón de María al saber que su Hijo está agonizando en el huerto, sudando sangre?\nDesde el Hijo hacia el Padre:\n¿Qué batalla libra el Corazón de Jesús entre su voluntad humana de escapar y su obediencia al Padre?\nHijos y hermanos en el Espíritu:\n¿Cómo es mi obediencia? ¿Obedezco solo cuando me conviene, o confío libremente en Dios? ¿Cómo estoy cruzando mi resistencia a hacer su voluntad?",
+    "intercesion": "Jesús, tú que sudaste sangre antes de obedecer al Padre,\nayúdame en mi propia agonía.\nDame la gracia de elegir tu voluntad sobre la mía,\nconfiando que tu camino, aunque doloroso, es el camino de la vida. Amén.",
+    "audio_contemplacion": ""
+  },
+  {
+    "numero": 12,
+    "titulo": "Flagelación",
+    "subtitulo": "El Siervo Sufriente",
+    "referencia": "Juan 19:1-3 (DHH)",
+    "evangelio": "Pilato tomó entonces a Jesús y mandó azotarlo. Los soldados trenzaron una corona de espinas, la pusieron en la cabeza de Jesús y lo vistieron con una capa de color rojo oscuro. Luego se acercaron a él, diciendo: «¡Viva el Rey de los judíos!» Y le pegaban en la cara.",
+    "contemplacion": "Manso, como cordero llevado al matadero\nSilencioso soportó con paciencia la negatividad hiriente del pecado.\nNo se defendió. No maldijo. No amenazó.\nEl profeta Isaías lo anunció siglos antes: Fue maltratado, pero se humilló y no dijo palabra; como un cordero llevado al matadero, como una oveja ante el que la trasquila, así él no abrió la boca. Ciertamente él cargó con nuestras enfermedades y soportó nuestros dolores. Nosotros pensamos que Dios lo había herido, pero él fue traspasado a causa de nuestra rebeldía, fue atormentado a causa de nuestras maldades; el castigo que sufrió nos trajo la paz, por sus heridas alcanzamos sanación.\nSus heridas nos han curado.\nCada azote que recibió fue un pecado tuyo que Él cargó. Cada golpe fue una mentira, una traición, un abuso, un egoísmo que nosotros cometimos y Él padeció.\nNo porque Dios necesitara verlo sufrir para perdonarnos. Sino porque Jesús eligió cargar las consecuencias de nuestro pecado para mostrarnos hasta dónde llega el amor.\nAhora, contemplo cómo reacciono ante los pecados ajenos… surgen en mi mente pensamientos y deseos de venganza… a veces resentimiento… o el impulso de transferir a otros el daño que sufro. Anhelo aprender de ti, Cristo, a reaccionar con paciencia, perdonando, deteniendo el ciclo de violencia.",
+    "meditacion": "Por María hacia Jesús:\n¿Qué siente el Corazón de María al saber que su Hijo inocente está siendo torturado por los pecados de otros?\nDesde el Hijo hacia el Padre:\n¿Qué aprendes del Corazón de Jesús, que soporta con paciencia las consecuencias del pecado del mundo?\nHijos y hermanos en el Espíritu:\n¿Cómo reaccionas ante los pecados ajenos? ¿Con venganza o con perdón? ¿Cómo estás cruzando el resentimiento que te encadena al pasado?",
+    "intercesion": "Jesús, tú que cargaste con mis pecados en tu cuerpo flagelado,\nenséñame a no multiplicar el mal.\nAyúdame a detener el ciclo de violencia,\nperdonando como Tú perdonaste. Amén.",
+    "audio_contemplacion": ""
+  },
+  {
+    "numero": 13,
+    "titulo": "Coronación de espinas",
+    "subtitulo": "Violencia verbal: insultos, burlas, calumnias",
+    "referencia": "Mateo 27:27-30 (DHH)",
+    "evangelio": "Los soldados del gobernador llevaron a Jesús al palacio y reunieron toda la tropa alrededor de él. Le quitaron su ropa, lo vistieron con una capa roja y le pusieron en la cabeza una corona tejida de espinas y una vara en la mano derecha. Luego se arrodillaron delante de él, y burlándose le decían: «¡Viva el Rey de los judíos!» También lo escupieron, y con la misma vara le golpeaban la cabeza.",
+    "contemplacion": "La violencia de las palabras\nDespués de haberlo torturado físicamente, una lluvia de insultos, maldiciones, sarcasmo, burla y calumnias inundó al Mesías, coronado de espinas.\nLa violencia verbal no deja marcas visibles, pero destruye el alma.\nJesús fue llamado blasfemo, loco, endemoniado, falso profeta, rey de burla. Fue escupido, ridiculizado, humillado públicamente.\nY no respondió.\nNo porque fuera débil. Sino porque elegir no responder a la ofensa es la mayor fortaleza espiritual.\nEl pecado de la lengua es uno de los más comunes y destructivos: chismes, calumnias, insultos, mentiras, palabras hirientes dichas en broma, sarcasmo que humilla.\nSantiago escribió: La lengua es un miembro muy pequeño, pero hace alarde de grandes cosas. Miren cómo un pequeño fuego puede incendiar un gran bosque. Y la lengua es fuego.\nContemplo ahora lo que yo hago al escuchar o recibir palabras ofensivas… a veces me defiendo agresivamente de forma abierta, con palabras hirientes… otras veces exagero la reacción haciéndome el ofendido, con agresividad pasiva, para que se compadezcan de mí.\nQuiero aprender de ti, Cristo, guardando silencio, sin devolver mal por mal.",
+    "meditacion": "Por María hacia Jesús:\n¿Qué siente el Corazón de María al escuchar cómo insultan, ridiculizan y calumnian a su Hijo inocente?\nDesde el Hijo hacia el Padre:\n¿Qué aprendes del Corazón de Jesús, que soportó ser humillado públicamente con palabras hirientes?\nHijos y hermanos en el Espíritu:\n¿Qué haces al escuchar o recibir palabras ofensivas? ¿Respondes con más violencia verbal, o con silencio sanador? ¿Cómo estás cruzando el pecado de la lengua?",
+    "intercesion": "Jesús, tú que fuiste coronado de espinas e insultado,\nguarda mi lengua del mal.\nAyúdame a no devolver ofensa por ofensa,\ny a perdonar las palabras hirientes que recibo. Amén.",
+    "audio_contemplacion": ""
+  },
+  {
+    "numero": 14,
+    "titulo": "Camino al Calvario",
+    "subtitulo": "Olvidar la bondad ajena",
+    "referencia": "Juan 19:6, 15-17 (DHH)",
+    "evangelio": "Cuando vieron a Jesús sentenciado y condenado, gritaban: «¡Crucifícalo! ¡Crucifícalo!» Pilato les preguntó: «¿Pues qué mal ha hecho?» Pero ellos volvieron a gritar: «¡Crucifícalo!» Así que Pilato les soltó a Barrabás; luego mandó azotar a Jesús, y lo entregó para que lo crucificaran. Jesús salió llevando su cruz, para ir al llamado Lugar de la Calavera.",
+    "contemplacion": "La multitud que gritaba \"Hosanna\" ahora grita \"Crucifícalo\"\nCuando vieron a Jesús sentenciado y condenado, la multitud olvidó todo el bien que hizo, y lo trataron igual o peor que cualquier malhechor.\nAcusado de todo, siendo inocente, Él soporta el peso de todos los pecados.\nEsta es una de las formas más crueles del pecado: el olvido selectivo de la bondad ajena.\nJesús sanó enfermos, dio de comer a multitudes, liberó endemoniados, perdonó pecados, enseñó con autoridad, mostró compasión a los marginados.\nPero cuando cayó en desgracia, nadie lo defendió.\n¿Cuántas veces hemos hecho lo mismo?\nAlguien nos ayuda mil veces, pero comete un error, y lo cancelamos, olvidamos todo lo bueno y solo recordamos lo malo.\nUn padre o madre se sacrifica toda la vida, pero en un momento de debilidad falla, y le recordamos solo esa falla.\nUn amigo nos acompaña en nuestras peores crisis, pero nos decepciona una vez, y le retiramos el afecto.",
+    "meditacion": "Por María hacia Jesús:\n¿Qué siente el Corazón de María al ver que la multitud que aclamaba a su Hijo ahora pide su crucifixión?\nDesde el Hijo hacia el Padre:\n¿Qué sintió el Corazón de Jesús al ser condenado por quienes olvidaron todo el bien que les hizo?\nHijos y hermanos en el Espíritu:\n¿Qué tanto olvido la bondad de alguien cuando me encuentro con un defecto suyo? ¿Cómo estoy cruzando el pecado de la ingratitud?",
+    "intercesion": "Jesús, tú que cargaste tu cruz rodeado de quienes te olvidaron,\nlíbrame de la ingratitud.\nEnséñame a recordar el bien que he recibido,\ny a no condenar a otros por sus errores. Amén.",
+    "audio_contemplacion": ""
+  },
+{
+  "numero": 15,
+  "titulo": "Crucifixión",
+  "subtitulo": "El alcance extremo de la maldad humana",
+  "referencia": "Lucas 23:33-34, 44-46 (DHH)",
+  "evangelio": "Cuando llegaron al lugar llamado La Calavera, crucificaron allí a Jesús y a los dos criminales, uno a su derecha y otro a su izquierda. Jesús decía: «Padre, perdónalos, porque no saben lo que hacen.» Era ya como al mediodía, cuando el sol dejó de brillar, y todo el país quedó en oscuridad hasta las tres de la tarde. La cortina del templo se rasgó por la mitad. Jesús gritó con fuerza: «¡Padre, en tus manos encomiendo mi espíritu!» Y al decir esto, murió.",
+  "contemplacion": "Matamos a Dios\nEn cuanto pudimos hacerlo, realmente matamos a Dios hecho hombre.\nEn la Cruz se revela, al mismo tiempo, el alcance de la maldad del corazón humano y la infinita misericordia del Divino Corazón que brota desde el costado abierto.\nJesús no murió de viejo. No murió de enfermedad. Murió asesinado por nosotros.\nY aun así, oró: Padre, perdónalos, porque no saben lo que hacen.\nEste es el misterio más profundo del perdón: Dios perdona incluso a quienes lo matan.\nNo porque el pecado sea poca cosa. Sino porque el amor de Dios es infinitamente más grande que nuestra maldad.\nLa pregunta más radical que este Misterio nos plantea es:\nSi Dios no existiera, ¿cómo sería tu vida?\nSin un Dios que te ame incondicionalmente, sin un Padre que te perdone, sin un Salvador que te libere, sin una esperanza más allá de la muerte... ¿cómo vivirías?\nAlgunos responden: Viviría igual, porque soy buena persona.\nPero Jesús en la Cruz revela que nadie es tan bueno como piensa. Porque todos, de alguna manera, hemos clavado los clavos. Todos hemos elegido la maldad sobre el bien en algún momento.\nY todos necesitamos el perdón que brota del costado abierto de Cristo.",
+  "meditacion": "Por María hacia Jesús:\n¿Qué vive el Corazón de María al ver morir a su Hijo inocente, asesinado por los pecadores que Él vino a salvar?\nDesde el Hijo hacia el Padre:\n¿Qué te revela el Corazón de Jesús, cuando muere perdonando a quienes lo crucifican?\nHijos y hermanos en el Espíritu:\nSi Dios no existiera, ¿cómo sería tu vida? ¿Has cruzado el espejismo de que no necesitas su perdón?",
+  "intercesion": "Jesús, tú que moriste perdonando a quienes te mataron,\nenséñame el verdadero perdón.\nAyúdame a reconocer mi necesidad de tu misericordia,\ny a extenderla a quienes me han herido. Amén.",
+  "audio_contemplacion": ""
+}
+
+    ],
+    "gloriosos": [
+
+ {
+    "numero": 16,
+    "titulo": "Resurrección",
+    "subtitulo": "Recuperar la identidad robada",
+    "referencia": "Lucas 24:13-21 (DHH)",
+    "evangelio": "Dos de los discípulos se dirigían a un pueblo llamado Emaús, a unos once kilómetros de Jerusalén. Iban hablando de todo lo que había pasado. Mientras conversaban y discutían, Jesús mismo se acercó y comenzó a caminar con ellos. Pero aunque lo veían, algo les impedía darse cuenta de quién era. Jesús les preguntó: «—¿De qué van hablando ustedes por el camino?» Se detuvieron tristes, y uno de ellos, que se llamaba Cleofás, contestó: «—¿Eres tú el único que ha estado alojado en Jerusalén y que no sabe lo que ha pasado allí en estos días?» Él les preguntó: «—¿Qué ha pasado?» Le dijeron: «—Lo de Jesús de Nazaret, que era un profeta poderoso en hechos y en palabras delante de Dios y de todo el pueblo; y cómo los jefes de los sacerdotes y nuestras autoridades lo entregaron para que lo condenaran a muerte y lo crucificaran. Nosotros teníamos la esperanza de que él sería el que había de libertar a la nación de Israel. Pero ya hace tres días que pasó todo eso.»",
+    "contemplacion": "Convenía que el Mesías muriera\nJesús les dijo a los discípulos de Emaús: ¿Acaso no era necesario que el Mesías padeciera todo esto antes de ser glorificado?\nLo primero que hace el pecado es separarnos de nuestra identidad, de nuestros vínculos, y de la vida misma.\nEl pecado te roba quién eres. Te dice: Eres tus errores. Eres tu pasado. Eres tu vergüenza.\nEl pecado rompe tus relaciones. Te aísla. Te convence de que nadie puede amarte si supiera lo que has hecho.\nEl pecado te mata espiritualmente. Te deja vacío, sin esperanza, sin propósito.\nPero la Resurrección lo revierte todo.\nJesús resucitó con su identidad restaurada: sigue siendo el Hijo de Dios, pero ahora también es el Primogénito de entre los muertos.\nResucitó con sus vínculos restaurados: se aparece a María Magdalena, a Pedro, a los Once, a más de quinientos hermanos.\nResucitó con vida nueva, indestructible, eterna.\nY esa misma resurrección te está ofrecida a ti.\nEl pecado no define quién eres. Cristo resucitado sí.",
+    "meditacion": "Por María hacia Jesús:\n¿Qué siente el Corazón de María al saber que su Hijo ha vencido la muerte y el pecado?\nDesde el Hijo hacia el Padre:\n¿Qué revela el Corazón de Jesús cuando resucitó, no para vengarse, sino para restaurar lo destruido por el pecado?\nHijos y hermanos en el Espíritu:\n¿Qué identidad, vínculo o vida te robó el pecado? ¿Cómo estás cruzando esa pérdida, confiando en la restauración que Cristo ofrece?",
+    "intercesion": "Jesús resucitado,\ntú que venciste la muerte y el pecado,\nrestaura mi identidad.\nAyúdame a no definirme por mis errores,\nsino por tu amor que me hace nueva criatura. Amén.",
+    "audio_contemplacion": ""
+  },
+  {
+    "numero": 17,
+    "titulo": "Ascensión",
+    "subtitulo": "Bautismo para el perdón de los pecados",
+    "referencia": "Mateo 28:18-20 (DHH)",
+    "evangelio": "Luego Jesús se acercó a ellos y les dijo: «Dios me ha dado toda autoridad en el cielo y en la tierra. Vayan, pues, a las gentes de todas las naciones, y háganlas mis discípulos; bautícenlas en el nombre del Padre, del Hijo y del Espíritu Santo, y enséñenles a obedecer todo lo que les he mandado a ustedes. Por mi parte, yo estaré con ustedes todos los días, hasta el fin del mundo.»",
+    "contemplacion": "Enviados a bautizar para el perdón\nAntes de ascender al Cielo, Jesús les dijo a sus discípulos: Vayan por todo el mundo y anuncien las buenas noticias a toda criatura. El que crea y sea bautizado, será salvo.\nPedro, en su primer discurso después de Pentecostés, proclamó: Conviértanse y bautícense cada uno en el nombre de Jesucristo, para que Dios les perdone sus pecados, y así él les dará el Espíritu Santo.\nEl Bautismo no es solo un ritual simbólico. Es el sacramento del perdón original, donde somos liberados del pecado original y de todos nuestros pecados personales, si somos bautizados de adultos.\nPero más que eso: el Bautismo nos injerta en Cristo resucitado. Morimos con Él, al pecado, y resucitamos con Él, a vida nueva.\nSan Pablo escribió: ¿No saben ustedes que, al quedar unidos a Cristo Jesús en el bautismo, quedamos unidos a su muerte? Pues por el bautismo fuimos sepultados con Cristo, y morimos para ser resucitados y vivir una vida nueva.\nEl Bautismo es tu Pascua personal. El pecado ya no tiene poder sobre ti. Has sido perdonado, liberado, adoptado como hijo de Dios.",
+    "meditacion": "Por María hacia Jesús:\n¿Qué siente el Corazón de María al ver que los apóstoles anuncian la salvación, bautizan y reconcilian a las personas con Dios?\nDesde el Hijo hacia el Padre:\n¿Qué encomendó el Corazón de Jesús a sus discípulos, cuando los envió a bautizar para el perdón de los pecados?\nHijos y hermanos en el Espíritu:\n¿Vives consciente de que fuiste bautizado, perdonado y hecho hijo de Dios? ¿Cómo estás cruzando la tentación de vivir como si el pecado aún te esclavizara?",
+    "intercesion": "Jesús, tú que nos enviaste a bautizar en tu nombre,\nrenueva en mí la gracia de mi Bautismo.\nAyúdame a vivir como hijo de Dios,\nno como esclavo del pecado,\nconfiando que tu perdón me ha hecho nueva criatura. Amén.",
+    "audio_contemplacion": ""
+  },
+    {
+    "numero": 18,
+    "titulo": "Pentecostés",
+    "subtitulo": "El perdón que transforma en apóstol",
+    "referencia": "Hechos 2:1-4 (DHH)",
+    "evangelio": "Cuando llegó la fiesta de Pentecostés, estaban todos juntos en el mismo lugar. De repente, un gran ruido que venía del cielo, como de un viento fuerte, resonó en toda la casa donde ellos estaban. Y se les aparecieron lenguas como de fuego que se repartieron, y sobre cada uno de ellos se asentó una. Y todos quedaron llenos del Espíritu Santo, y comenzaron a hablar en otras lenguas, según el Espíritu les daba que hablasen.",
+    "contemplacion": "Pedro, el que negó, ahora predica\nEl Espíritu Santo desciende sobre los apóstoles que abandonaron a Jesús en su Pasión.\nPedro, quien lo negó tres veces, predica con valentía ante miles: Conviértanse y bautícense cada uno en el nombre de Jesucristo, para que Dios les perdone sus pecados.\nEse día se convirtieron tres mil personas.\nEl perdón de Dios no solo borra el pecado, sino que transforma al pecador en apóstol.\nPedro no quedó paralizado por su traición. No quedó descalificado para siempre. Fue perdonado, restaurado y enviado.\nY lo mismo ocurre contigo.\nTu pasado de pecado no te descalifica del futuro que Dios tiene para ti. Tu historia de fracaso puede convertirse en testimonio de gracia.\nPor eso Pablo escribió: Doy gracias a Cristo Jesús nuestro Señor, que me dio fuerzas y me consideró digno de confianza al ponerme a su servicio, a mí, que antes lo ofendí.",
+    "meditacion": "Por María hacia Jesús:\n¿Qué siente el Corazón de María al ver que el Espíritu Santo transforma a los discípulos que huyeron, en apóstoles valientes?\nDesde el Hijo hacia el Padre:\n¿Qué don envía el Corazón de Jesús, para que sus discípulos no se queden paralizados por el duelo ni por la culpa?\nHijos y hermanos en el Espíritu:\n¿Crees que Dios puede usar tu historia de pecado para bien de otros? ¿Cómo estás cruzando la vergüenza que te impide dar testimonio?",
+    "intercesion": "Espíritu Santo, tú que transformaste a Pedro en apóstol,\ntransforma mi vergüenza en testimonio.\nAyúdame a creer que mi pasado de pecado\npuede convertirse en historia de gracia para otros. Amén.",
+    "audio_contemplacion": ""
+  },
+  {
+    "numero": 19,
+    "titulo": "Asunción de María",
+    "subtitulo": "El pecado no tiene poder eterno sobre tu cuerpo",
+    "referencia": "Compendio del Catecismo de la Iglesia Católica, nn. 105, 202-203",
+    "evangelio": "La Inmaculada Virgen María, preservada inmune de toda mancha de pecado original, terminado el curso de su vida en la tierra, fue asunta en cuerpo y alma a la gloria del cielo. Así como Cristo ha resucitado y vive para siempre, todos nosotros resucitaremos en el último día. Creemos en la verdadera resurrección de esta carne que ahora poseemos, transformada en cuerpo glorioso.",
+    "contemplacion": "El cuerpo que no conoció corrupción\nMaría, preservada del pecado original, no experimentó la corrupción del cuerpo después de la muerte.\nFue asunta —elevada— al Cielo en cuerpo y alma.\nEsto revela algo crucial: el plan de Dios no es solo salvar tu alma, sino resucitar tu cuerpo.\nEl pecado trajo la muerte al mundo. Y con la muerte, la descomposición, el regreso al polvo.\nPero Cristo venció la muerte. Y María, preservada del pecado, anticipó lo que todos los redimidos experimentaremos: la resurrección del cuerpo.\nSan Pablo escribió: Cristo ha resucitado. Él es el primer fruto de la cosecha; después de él, resucitarán todos los que son suyos.\nTal vez abusaste de tu cuerpo con adicciones. Tal vez lo despreciaste. Tal vez pecaste con él de formas que ahora te avergüenzan.\nPero Dios te promete: ese cuerpo resucitará glorioso.\nNo tal como está ahora —herido, envejecido, marcado por el pecado—, sino transformado, libre, inmortal.",
+    "meditacion": "Por María hacia Jesús:\n¿Qué siente el Corazón de María al ser asunta al Cielo, anticipando la gloria que todos los redimidos recibirán?\nDesde el Hijo hacia el Padre:\n¿Qué revela el Corazón de Jesús al elevar a su Madre al Cielo en cuerpo y alma?\nHijos y hermanos en el Espíritu:\n¿Qué pecados temes que definan tu cuerpo o tu historia para siempre? ¿Cómo estás cruzando la vergüenza corporal que te impide abrazar la esperanza de la resurrección?",
+    "intercesion": "María, tú que fuiste asunta al Cielo en cuerpo y alma,\ndame esperanza en la resurrección de mi cuerpo.\nAyúdame a creer que el pecado no tiene la última palabra,\ny que Dios me restaurará completamente. Amén.",
+    "audio_contemplacion": ""
+  },
+{
+  "numero": 20,
+  "titulo": "Coronación de María",
+  "subtitulo": "La gracia, no los méritos",
+  "referencia": "Compendio del Catecismo, n. 96",
+  "evangelio": "«Llena de gracia» indica que María ha sido colmada del favor de Dios y es la beneficiaria de la Redención obrada por su Hijo. Desde el primer instante de su concepción, fue preservada totalmente del pecado y permaneció pura de todo pecado personal durante toda su vida.",
+  "contemplacion": "Reina por gracia, no por perfección\nLa Inmaculada, quien nunca pecó, es coronada Reina del Cielo y de la Tierra.\nNo por méritos propios, sino por gracia.\nEsto desmantela la mentira más destructiva del pecado: Dios solo ama a los perfectos. Si no soy perfecto, no tengo lugar en su Reino.\nMentira.\nIncluso María, sin pecado, necesitó gracia. Ella misma cantó en el Magnificat: Mi espíritu se alegra en Dios mi Salvador.\n¿Salvador de qué, si nunca pecó? Salvador de caer en pecado. Preservada por gracia desde su concepción.\nElla no se salvó a sí misma. Dios la salvó.\nY si ella, sin pecado, necesitó gracia, ¿cuánto más nosotros?\nPero aquí viene la buena noticia: Si ella reina, nosotros también reinaremos.\nNo porque seamos perfectos. Sino porque Cristo es perfecto, y nosotros estamos injertados en Él.\n¿Te cuesta creer que Dios te ama aunque hayas pecado gravemente?\nSi es así, mira a María. Ella es Reina no porque nunca falló, nunca tuvo oportunidad de fallar, pues nunca pecó, sino porque aceptó la gracia.\nY esa misma gracia te está ofrecida a ti.",
+  "meditacion": "Por María hacia Jesús:\n¿Qué siente el Corazón de María al ser coronada Reina, sabiendo que su gloria es pura gracia?\nDesde el Hijo hacia el Padre:\n¿Qué aprendo del Corazón de Jesús que coronó a su Madre, llena de gracia?\nHijos y hermanos en el Espíritu:\n¿Te cuesta creer que Dios te ama aunque hayas pecado gravemente? ¿Cómo estás cruzando la mentira de que solo los perfectos tienen lugar en el Reino?",
+  "intercesion": "María, Reina coronada por gracia,\nenséñame que el amor de Dios no se gana con perfección.\nAyúdame a aceptar la gracia que me ofrece,\nconfiando que, si tú reinas, yo también reinaré con Cristo. Amén.",
+  "audio_contemplacion": ""
+}
+
+    ]
+  }
+}
