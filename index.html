@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#E6DED3">
+<title>CruzAndo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════════════
+   CSS — CruzAndo App · Vanilla JS · Cero dependencias
+   Colores dinámicos via CSS custom properties
+   ══════════════════════════════════════════════════════ */
+
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+
+:root {
+  /* ── Neutros Light ── */
+  --bg: #E6DED3;
+  --card: #FFFCF7;
+  --border: #D9D1C7;
+  --text: #2B2622;
+  --text-soft: #6B6259;
+  --text-dim: #9B9389;
+  --input-bg: #FFFCF7;
+  --sec-bg: #F5F0E8;
+  --shadow: rgba(43,38,34,0.08);
+  --green: #34A853;
+  --green-soft: rgba(52,168,83,0.12);
+  /* ── Paleta del nivel (se sobreescriben desde JS) ── */
+  --lvl-bold: #FF7A00;
+  --lvl-base: #FF7F09;
+  --lvl-soft: #F69C49;
+  --lvl-mist: #FFA34E;
+  --lvl-light: #FFCFA2;
+  --lvl-ultra: rgba(255,122,0,0.07);
+  /* ── Bloques ── */
+  --goz-color: #D4A017;
+  --lum-color: #01BBE1;
+  --dol-color: #C0392B;
+  --glo-color: #8E44AD;
+  /* ── Brand ── */
+  --brand: #01BBE1;
+}
+
+.dark {
+  --bg: #1A1714;
+  --card: #252119;
+  --border: #3A3530;
+  --text: #E6DED3;
+  --text-soft: #B8A898;
+  --text-dim: #786858;
+  --input-bg: #2A2520;
+  --sec-bg: #1E1B16;
+  --shadow: rgba(0,0,0,0.3);
+  --green-soft: rgba(52,168,83,0.18);
+}
+
+html { font-size:18px; }
+body {
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.7;
+  min-height:100dvh;
+  -webkit-font-smoothing:antialiased;
+  transition:background 0.4s,color 0.4s;
+}
+
+/* ── Layout ── */
+.shell { max-width:480px; margin:0 auto; min-height:100dvh; position:relative; }
+.screen { display:none; }
+.screen.active { display:block; }
+
+/* ── Header ── */
+.header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 18px 10px; position:sticky; top:0; z-index:50;
+  background:var(--bg); border-bottom:1px solid var(--border);
+}
+.header-title { font-size:1.05rem; font-weight:700; color:var(--lvl-bold); }
+.header-sub { font-size:0.72rem; color:var(--text-dim); margin-top:1px; }
+.header-actions { display:flex; gap:8px; align-items:center; }
+.icon-btn {
+  width:36px; height:36px; border-radius:50%; border:1px solid var(--border);
+  background:var(--card); cursor:pointer; display:flex; align-items:center;
+  justify-content:center; color:var(--text-soft); transition:all 0.2s;
+}
+.icon-btn:active { transform:scale(0.92); }
+
+/* ── Pantalla de Inicio: Tarjetas de Bloques ── */
+.home-intro { padding:24px 18px 12px; text-align:center; }
+.home-intro h1 { font-size:1.35rem; font-weight:800; color:var(--text); margin-bottom:4px; }
+.home-intro p { font-size:0.82rem; color:var(--text-dim); }
+
+/* ── Banner Misterios del Día ── */
+.today-banner {
+  margin:0 18px 16px; padding:16px 20px; border-radius:16px;
+  background:linear-gradient(135deg,rgba(var(--lvl-light-rgb,255,207,162),0.55),rgba(255,245,232,0.7));
+  border:2px solid var(--lvl-bold);
+  box-shadow:0 3px 16px rgba(var(--lvl-bold-rgb,255,122,0),0.1);
+  cursor:pointer; transition:all 0.25s;
+}
+.dark .today-banner {
+  background:linear-gradient(135deg,rgba(var(--lvl-bold-rgb,255,122,0),0.15),rgba(var(--lvl-bold-rgb,255,122,0),0.05));
+}
+.today-banner:active { transform:scale(0.98); }
+.today-banner-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.today-banner-label {
+  font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:1px;
+  color:var(--lvl-bold); display:flex; align-items:center; gap:6px;
+}
+.today-pulse {
+  width:8px; height:8px; border-radius:50%; background:var(--lvl-bold);
+  animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.5; transform:scale(1.4); } }
+.today-banner-arrow { color:var(--lvl-bold); font-size:1.2rem; font-weight:700; }
+.today-banner h3 { font-size:1.1rem; font-weight:800; margin-bottom:3px; }
+.today-banner-days { font-size:0.72rem; color:var(--text-dim); }
+.block-card.today { border-color:var(--lvl-soft); background:linear-gradient(135deg,rgba(var(--lvl-light-rgb,255,207,162),0.35),var(--card)); }
+.dark .block-card.today { background:linear-gradient(135deg,rgba(var(--lvl-bold-rgb,255,122,0),0.1),var(--card)); }
+
+.block-grid { display:flex; flex-direction:column; gap:14px; padding:8px 18px 24px; }
+.block-card {
+  background:var(--card); border-radius:16px; padding:18px 20px;
+  border:2px solid var(--border); cursor:pointer;
+  transition:all 0.25s; position:relative; overflow:hidden;
+}
+.block-card:active { transform:scale(0.98); }
+.block-card.cleared { border-color:var(--green); }
+.block-card.current { border-color:var(--lvl-bold); box-shadow:0 2px 16px var(--lvl-ultra); }
+.block-card-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.block-emoji { font-size:1.6rem; }
+.block-badge {
+  font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.8px;
+  padding:3px 10px; border-radius:20px;
+}
+.block-badge.pending { background:var(--sec-bg); color:var(--text-dim); }
+.block-badge.progress { background:var(--lvl-ultra); color:var(--lvl-bold); }
+.block-badge.cleared { background:var(--green-soft); color:var(--green); }
+.block-badge.today { background:var(--lvl-bold); color:#fff; }
+.block-title { font-size:1.05rem; font-weight:700; margin-bottom:2px; }
+.block-subtitle { font-size:0.78rem; color:var(--text-soft); font-style:italic; }
+.block-progress { margin-top:12px; }
+.block-dots { display:flex; gap:6px; }
+.block-dot {
+  width:10px; height:10px; border-radius:50%;
+  background:var(--border); transition:all 0.3s;
+}
+.block-dot.done { background:var(--green); box-shadow:0 0 6px rgba(52,168,83,0.4); }
+.block-dot.active { background:var(--lvl-bold); box-shadow:0 0 8px var(--lvl-light); }
+
+/* ── Banner de cuaderno completado ── */
+.cuaderno-done-banner {
+  margin:8px 18px 18px; padding:20px; border-radius:16px;
+  background:linear-gradient(135deg,var(--green-soft),rgba(52,168,83,0.05));
+  border:2px solid var(--green); text-align:center;
+}
+.cuaderno-done-banner h3 { font-size:1.1rem; color:var(--green); margin-bottom:6px; }
+.cuaderno-done-banner p { font-size:0.82rem; color:var(--text-soft); margin-bottom:14px; }
+
+/* ── Botones ── */
+.btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding:14px 28px; border-radius:14px; border:none; cursor:pointer;
+  font-family:inherit; font-size:0.88rem; font-weight:700;
+  transition:all 0.2s; letter-spacing:0.3px;
+}
+.btn:active { transform:scale(0.96); }
+.btn-primary { background:var(--lvl-bold); color:#fff; box-shadow:0 4px 14px rgba(0,0,0,0.15); }
+.btn-green { background:var(--green); color:#fff; }
+.btn-outline { background:transparent; border:2px solid var(--border); color:var(--text-soft); }
+.btn-ghost { background:transparent; color:var(--text-soft); padding:10px 14px; font-size:0.82rem; }
+.btn-block { width:100%; }
+
+/* ── Pantalla de Oración ── */
+.prayer-header { padding:16px 18px 10px; }
+.prayer-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.mystery-counter { font-size:0.72rem; font-weight:600; color:var(--text-dim); letter-spacing:1px; text-transform:uppercase; }
+.mystery-title { font-size:1.15rem; font-weight:800; margin-bottom:2px; }
+.mystery-subtitle { font-size:0.82rem; color:var(--text-soft); font-style:italic; }
+
+/* Cuentas del rosario (cadena de 5) */
+.mystery-beads { padding:0 18px 14px; }
+.mystery-beads svg { width:100%; height:30px; }
+
+/* ── Evangelio ── */
+.evangelio-box {
+  margin:0 18px 14px; padding:20px; border-radius:16px;
+  background:var(--card); border-left:4px solid var(--lvl-soft);
+}
+.evangelio-label {
+  font-size:0.68rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:1.2px; color:var(--lvl-bold); margin-bottom:10px;
+  display:flex; align-items:center; gap:6px;
+}
+.evangelio-text { font-size:0.95rem; line-height:1.85; color:var(--text); }
+.evangelio-ref { font-size:0.78rem; color:var(--text-dim); text-align:right; margin-top:12px; font-style:italic; }
+
+/* ── Acordeón ── */
+.accordion { margin:0 18px 10px; }
+.acc-item { background:var(--card); border-radius:14px; margin-bottom:10px; overflow:hidden; border:1.5px solid var(--border); transition:border-color 0.3s; }
+.acc-item.open { border-color:var(--lvl-soft); }
+.acc-trigger {
+  width:100%; display:flex; align-items:center; justify-content:space-between;
+  padding:14px 18px; background:none; border:none; cursor:pointer;
+  font-family:inherit; color:var(--text); transition:background 0.2s;
+}
+.acc-trigger:active { background:var(--sec-bg); }
+.acc-trigger-left { display:flex; align-items:center; gap:10px; }
+.acc-icon {
+  width:32px; height:32px; border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1rem;
+}
+.acc-label { font-size:0.88rem; font-weight:600; }
+.acc-chevron { transition:transform 0.3s; color:var(--text-dim); }
+.acc-item.open .acc-chevron { transform:rotate(180deg); }
+.acc-body { max-height:0; overflow:hidden; transition:max-height 0.4s ease; }
+.acc-body-inner { padding:0 18px 18px; }
+
+/* ── Audio Player ── */
+.audio-player {
+  display:flex; align-items:center; gap:12px; padding:12px 16px;
+  background:var(--sec-bg); border-radius:12px;
+}
+.play-btn {
+  width:44px; height:44px; border-radius:50%; border:none;
+  background:var(--lvl-bold); color:#fff; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; transition:all 0.2s;
+}
+.play-btn:active { transform:scale(0.9); }
+.audio-info { flex:1; min-width:0; }
+.audio-label { font-size:0.75rem; color:var(--text-soft); margin-bottom:4px; }
+.audio-bar-wrap { width:100%; height:5px; background:var(--border); border-radius:3px; cursor:pointer; position:relative; }
+.audio-bar-fill { height:100%; border-radius:3px; background:var(--lvl-bold); transition:width 0.1s linear; }
+.audio-time { font-size:0.68rem; color:var(--text-dim); margin-top:3px; display:flex; justify-content:space-between; }
+
+/* ── Canto ── */
+.canto-box {
+  padding:18px; background:var(--lvl-ultra); border-radius:14px;
+  border-left:3px solid var(--lvl-soft); text-align:center;
+}
+.canto-box p { font-size:0.88rem; color:var(--text); font-style:italic; line-height:1.7; }
+.canto-box .canto-hint { font-size:0.78rem; color:var(--text-dim); margin-top:8px; display:block; }
+
+/* ── Contemplación texto ── */
+.contempl-text {
+  margin-top:14px; padding:16px 18px; background:var(--sec-bg);
+  border-radius:14px; border-left:3px solid var(--lvl-soft);
+  font-size:0.92rem; line-height:1.9; white-space:pre-line;
+}
+
+/* ── Meditación ── */
+.med-group { margin-bottom:18px; }
+.med-label-row { display:flex; align-items:center; gap:7px; margin-bottom:6px; }
+.med-dot { width:7px; height:7px; border-radius:50%; }
+.med-label-text { font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; }
+.med-question { font-size:0.92rem; line-height:1.7; margin-bottom:10px; }
+.journal-area {
+  width:100%; min-height:100px; padding:14px; border-radius:12px;
+  border:1.5px solid var(--border); background:var(--input-bg);
+  font-family:inherit; font-size:0.88rem; line-height:1.6;
+  color:var(--text); resize:vertical; transition:border-color 0.3s;
+}
+.journal-area:focus { outline:none; border-color:var(--lvl-soft); }
+.journal-area::placeholder { color:var(--text-dim); }
+
+/* ── Intercesión ── */
+.interc-text {
+  padding:18px; background:var(--lvl-ultra); border-radius:14px;
+  font-size:0.92rem; line-height:1.85; white-space:pre-line;
+}
+.amen-btn {
+  display:block; width:100%; margin-top:14px; padding:16px;
+  border-radius:14px; border:none; cursor:pointer;
+  font-family:inherit; font-size:1rem; font-weight:800;
+  background:var(--lvl-bold); color:#fff; letter-spacing:1px;
+  transition:all 0.2s; box-shadow:0 4px 16px rgba(0,0,0,0.12);
+}
+.amen-btn:active { transform:scale(0.96); }
+.amen-btn.done { background:var(--green); }
+
+/* ── Completado de misterio ── */
+.mystery-done-bar {
+  margin:12px 18px; padding:14px 18px; border-radius:14px;
+  background:var(--green-soft); border:1.5px solid rgba(52,168,83,0.2);
+  display:flex; align-items:center; gap:10px;
+}
+.done-check { color:var(--green); font-size:1.2rem; }
+.done-text { font-size:0.82rem; font-weight:600; color:var(--green); }
+.done-date { font-size:0.72rem; color:var(--text-dim); }
+
+/* ── Navegación inferior ── */
+.bottom-nav {
+  padding:14px 18px 28px; display:flex; gap:10px;
+}
+.bottom-nav .btn { flex:1; }
+
+/* ── Pantalla de celebración de bloque ── */
+.celebration-screen { text-align:center; padding:40px 24px; }
+.maria-img {
+  width:200px; height:200px; border-radius:50%; object-fit:cover;
+  border:4px solid var(--lvl-soft); margin:0 auto 24px;
+  box-shadow:0 8px 32px var(--shadow);
+}
+.maria-placeholder {
+  width:200px; height:200px; border-radius:50%; margin:0 auto 24px;
+  background:linear-gradient(135deg,var(--lvl-ultra),var(--lvl-light));
+  border:4px solid var(--lvl-soft); display:flex; align-items:center;
+  justify-content:center; font-size:4rem;
+  box-shadow:0 8px 32px var(--shadow);
+}
+.celebration-title { font-size:1.3rem; font-weight:800; margin-bottom:8px; }
+.celebration-sub { font-size:0.88rem; color:var(--text-soft); margin-bottom:24px; line-height:1.7; }
+
+/* ── Error / Loading ── */
+.loading-screen, .error-screen {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  min-height:80dvh; padding:40px 24px; text-align:center;
+}
+.spinner {
+  width:40px; height:40px; border:3px solid var(--border);
+  border-top-color:var(--lvl-bold); border-radius:50%;
+  animation:spin 0.8s linear infinite; margin-bottom:18px;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* ── Celebración animada ── */
+.confetti-container { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:999; }
+.confetti-piece {
+  position:absolute; width:8px; height:8px; border-radius:2px;
+  animation:confettiFall 2.5s ease-out forwards;
+}
+@keyframes confettiFall {
+  0% { transform:translateY(-20px) rotate(0deg); opacity:1; }
+  100% { transform:translateY(100vh) rotate(720deg); opacity:0; }
+}
+
+/* ── Fade in ── */
+@keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+.fade-in { animation:fadeIn 0.4s ease both; }
+.fade-in-d1 { animation-delay:0.08s; }
+.fade-in-d2 { animation-delay:0.16s; }
+.fade-in-d3 { animation-delay:0.24s; }
+.fade-in-d4 { animation-delay:0.32s; }
+
+/* Responsivo */
+@media(max-width:380px) { html { font-size:16px; } }
+</style>
+</head>
+<body>
+<div class="shell" id="app">
+  <!-- Loading -->
+  <div class="loading-screen" id="scr-loading">
+    <div class="spinner"></div>
+    <p style="font-size:0.88rem;color:var(--text-dim)">Cargando cuaderno…</p>
+  </div>
+
+  <!-- Error -->
+  <div class="error-screen" id="scr-error" style="display:none">
+    <div style="font-size:3rem;margin-bottom:16px">📿</div>
+    <h2 style="font-size:1.1rem;margin-bottom:8px">No se encontró el cuaderno</h2>
+    <p id="error-msg" style="font-size:0.82rem;color:var(--text-dim);margin-bottom:20px"></p>
+    <a href="?c=0101" class="btn btn-primary">Ir a Males (0101)</a>
+  </div>
+
+  <!-- ═══ HEADER (compartido) ═══ -->
+  <header class="header" id="main-header" style="display:none">
+    <div>
+      <div class="header-title" id="h-title"></div>
+      <div class="header-sub" id="h-sub"></div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="btn-dark" title="Modo oscuro">
+        <svg id="ico-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg id="ico-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ═══ PANTALLA INICIO ═══ -->
+  <div class="screen" id="scr-home">
+    <div class="home-intro fade-in">
+      <h1 id="home-title"></h1>
+      <p id="home-element"></p>
+    </div>
+    <div id="today-banner-wrap"></div>
+    <div class="block-grid" id="block-grid"></div>
+    <div id="cuaderno-done-wrap" style="display:none"></div>
+  </div>
+
+  <!-- ═══ PANTALLA DE ORACIÓN ═══ -->
+  <div class="screen" id="scr-prayer">
+    <div class="prayer-header fade-in">
+      <div class="prayer-nav">
+        <button class="btn-ghost" id="btn-back-home">← Inicio</button>
+        <span class="mystery-counter" id="prayer-counter"></span>
+      </div>
+      <div class="mystery-title" id="prayer-title"></div>
+      <div class="mystery-subtitle" id="prayer-subtitle"></div>
+    </div>
+    <div class="mystery-beads" id="prayer-dots"></div>
+
+    <!-- Evangelio -->
+    <div class="evangelio-box fade-in fade-in-d1" id="evangelio-box">
+      <div class="evangelio-label">📖 Evangelio</div>
+      <div class="evangelio-text" id="ev-text"></div>
+      <div class="evangelio-ref" id="ev-ref"></div>
+    </div>
+
+    <!-- Acordeón -->
+    <div class="accordion" id="accordion"></div>
+
+    <!-- Completado -->
+    <div id="mystery-done-wrap" style="display:none"></div>
+
+    <!-- Navegación inferior -->
+    <div class="bottom-nav" id="bottom-nav"></div>
+  </div>
+
+  <!-- ═══ PANTALLA CELEBRACIÓN BLOQUE ═══ -->
+  <div class="screen" id="scr-celebration">
+    <div class="celebration-screen fade-in">
+      <div class="maria-placeholder" id="maria-container">🙏</div>
+      <h2 class="celebration-title" id="celeb-title"></h2>
+      <p class="celebration-sub" id="celeb-sub"></p>
+      <button class="btn btn-primary btn-block" id="btn-celeb-home">Regresar a inicio</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   CruzAndo App · Vanilla JS · Cero dependencias
+   Lee JSON desde data/{id}.json via URL param ?c=0101
+   Toda la paleta de colores viene de DATA.tema.paleta
+   ══════════════════════════════════════════════════════ */
+
+(function() {
+  'use strict';
+
+  // ── Estado global ──
+  let DATA = null;
+  let CUADERNO_ID = null;
+  let currentBlock = null;   // 'gozosos' | 'luminosos' | 'dolorosos' | 'gloriosos'
+  let currentMystery = 0;    // 0-4 dentro del bloque
+  let openSection = null;     // qué acordeón está abierto
+  let progress = {};          // { gozosos: [ts,ts,null,null,null], ... }
+  let journal = {};           // { gozosos: { 0: {q0:'',q1:'',q2:''}, ... }, ... }
+  let isDark = false;
+
+  const BLOCKS = ['gozosos','luminosos','dolorosos','gloriosos'];
+  const BLOCK_NAMES = { gozosos:'Gozosos', luminosos:'Luminosos', dolorosos:'Dolorosos', gloriosos:'Gloriosos' };
+  const ORDS = ['Primer','Segundo','Tercer','Cuarto','Quinto'];
+  const BTYPES = { gozosos:'Gozoso', luminosos:'Luminoso', dolorosos:'Doloroso', gloriosos:'Glorioso' };
+  const MED_LABELS = ['Por María hacia Jesús','Desde el Hijo hacia el Padre','Hijos y hermanos en el Espíritu'];
+  const MED_COLORS = ['#FF7A00','#C0392B','#27AE60'];
+
+  // Misterios del día según tradición católica
+  const DAY_BLOCKS = { 0:'gloriosos', 1:'gozosos', 2:'dolorosos', 3:'gloriosos', 4:'luminosos', 5:'dolorosos', 6:'gozosos' };
+
+  // Audio
+  let audioEl = null;
+  let audioPlaying = false;
+  let currentAudioId = null;
+
+  // ── Utilidades ──
+  const $ = id => document.getElementById(id);
+  const show = id => { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); $(id).classList.add('active'); };
+  const lsKey = () => 'cruzando_' + CUADERNO_ID;
+
+  function saveProgress() {
+    try { localStorage.setItem(lsKey(), JSON.stringify({ progress, journal, isDark })); } catch(e){}
+  }
+  function loadProgress() {
+    try {
+      const raw = localStorage.getItem(lsKey());
+      if (raw) {
+        const d = JSON.parse(raw);
+        if (d.progress) progress = d.progress;
+        if (d.journal) journal = d.journal;
+        if (typeof d.isDark === 'boolean') isDark = d.isDark;
+      }
+    } catch(e){}
+    // Inicializar estructura si no existe
+    BLOCKS.forEach(b => {
+      if (!progress[b]) progress[b] = [null,null,null,null,null];
+      if (!journal[b]) journal[b] = {};
+    });
+  }
+
+  // ── Colores dinámicos ──
+  function hexToRgb(hex) {
+    const h = hex.replace('#','');
+    return [parseInt(h.substring(0,2),16), parseInt(h.substring(2,4),16), parseInt(h.substring(4,6),16)].join(',');
+  }
+  function applyPalette() {
+    if (!DATA || !DATA.tema) return;
+    const p = DATA.tema.paleta;
+    const r = document.documentElement.style;
+    r.setProperty('--lvl-bold', p.bold);
+    r.setProperty('--lvl-base', p.base);
+    r.setProperty('--lvl-soft', p.soft);
+    r.setProperty('--lvl-mist', p.mist);
+    r.setProperty('--lvl-light', p.light);
+    r.setProperty('--lvl-ultra', p.ultra);
+    // RGB versions for rgba() in gradients
+    r.setProperty('--lvl-bold-rgb', hexToRgb(p.bold));
+    r.setProperty('--lvl-light-rgb', hexToRgb(p.light));
+    // Colores de bloques
+    const bl = DATA.tema.bloques;
+    if (bl.gozosos) r.setProperty('--goz-color', bl.gozosos.color);
+    if (bl.luminosos) r.setProperty('--lum-color', bl.luminosos.color);
+    if (bl.dolorosos) r.setProperty('--dol-color', bl.dolorosos.color);
+    if (bl.gloriosos) r.setProperty('--glo-color', bl.gloriosos.color);
+    // Meta theme-color
+    document.querySelector('meta[name="theme-color"]').content = isDark ? '#1A1714' : '#E6DED3';
+  }
+
+  function blockColor(b) {
+    if (!DATA || !DATA.tema || !DATA.tema.bloques[b]) return '#888';
+    return DATA.tema.bloques[b].color;
+  }
+  function blockEmoji(b) {
+    if (!DATA || !DATA.tema || !DATA.tema.bloques[b]) return '📿';
+    return DATA.tema.bloques[b].emoji;
+  }
+
+  // ── Dark mode ──
+  function toggleDark() {
+    isDark = !isDark;
+    document.body.classList.toggle('dark', isDark);
+    $('ico-sun').style.display = isDark ? 'none' : 'block';
+    $('ico-moon').style.display = isDark ? 'block' : 'none';
+    document.querySelector('meta[name="theme-color"]').content = isDark ? '#1A1714' : '#E6DED3';
+    saveProgress();
+  }
+
+  // ── Sonidos de celebración ──
+  function playNotes(freqs) {
+    try {
+      const ac = new (window.AudioContext || window.webkitAudioContext)();
+      freqs.forEach((f, i) => {
+        setTimeout(() => {
+          const o = ac.createOscillator();
+          const g = ac.createGain();
+          o.type = 'sine'; o.frequency.value = f;
+          g.gain.setValueAtTime(0.07, ac.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.35);
+          o.connect(g); g.connect(ac.destination);
+          o.start(); o.stop(ac.currentTime + 0.35);
+        }, i * 180);
+      });
+    } catch(e){}
+  }
+  const MELODIES = [
+    [440,554,659],
+    [523,659,784],
+    [392,494,587,784],
+    [349,440,523,659]
+  ];
+  function celebrationSound(variant) { playNotes(MELODIES[variant % 4]); }
+
+  // ── Confetti ──
+  function showConfetti() {
+    const c = document.createElement('div');
+    c.className = 'confetti-container';
+    const colors = [
+      DATA.tema.paleta.bold, DATA.tema.paleta.soft, DATA.tema.paleta.light,
+      '#34A853', '#FBBC05', '#EA4335'
+    ];
+    for (let i = 0; i < 40; i++) {
+      const p = document.createElement('div');
+      p.className = 'confetti-piece';
+      p.style.left = Math.random() * 100 + '%';
+      p.style.background = colors[Math.floor(Math.random() * colors.length)];
+      p.style.animationDelay = Math.random() * 0.8 + 's';
+      p.style.animationDuration = (2 + Math.random()) + 's';
+      c.appendChild(p);
+    }
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 3500);
+  }
+
+  // ── Audio player ──
+  function stopAudio() {
+    if (audioEl) { audioEl.pause(); audioEl.currentTime = 0; }
+    audioPlaying = false;
+    currentAudioId = null;
+    document.querySelectorAll('.play-btn').forEach(b => { b.innerHTML = playSVG(); });
+    document.querySelectorAll('.audio-bar-fill').forEach(b => { b.style.width = '0%'; });
+  }
+
+  function toggleAudio(src, playerId) {
+    if (!src) return;
+    if (currentAudioId === playerId && audioPlaying) {
+      audioEl.pause();
+      audioPlaying = false;
+      updatePlayBtn(playerId, false);
+      return;
+    }
+    if (currentAudioId !== playerId) {
+      stopAudio();
+      audioEl = new Audio(src);
+      currentAudioId = playerId;
+      audioEl.addEventListener('timeupdate', () => {
+        if (!audioEl.duration) return;
+        const pct = (audioEl.currentTime / audioEl.duration) * 100;
+        const fill = document.querySelector('#' + playerId + ' .audio-bar-fill');
+        if (fill) fill.style.width = pct + '%';
+        const cur = document.querySelector('#' + playerId + ' .a-cur');
+        const dur = document.querySelector('#' + playerId + ' .a-dur');
+        if (cur) cur.textContent = fmtTime(audioEl.currentTime);
+        if (dur) dur.textContent = fmtTime(audioEl.duration);
+      });
+      audioEl.addEventListener('ended', () => {
+        audioPlaying = false;
+        currentAudioId = null;
+        updatePlayBtn(playerId, false);
+      });
+    }
+    audioEl.play().then(() => {
+      audioPlaying = true;
+      updatePlayBtn(playerId, true);
+    }).catch(()=>{});
+  }
+
+  function seekAudio(e, playerId) {
+    if (!audioEl || currentAudioId !== playerId || !audioEl.duration) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const pct = (e.clientX - rect.left) / rect.width;
+    audioEl.currentTime = pct * audioEl.duration;
+  }
+
+  function updatePlayBtn(playerId, playing) {
+    const btn = document.querySelector('#' + playerId + ' .play-btn');
+    if (btn) btn.innerHTML = playing ? pauseSVG() : playSVG();
+  }
+
+  function fmtTime(s) {
+    if (!s || isNaN(s)) return '0:00';
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return m + ':' + (sec < 10 ? '0' : '') + sec;
+  }
+  function playSVG() { return '<svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><polygon points="6,3 20,12 6,21"/></svg>'; }
+  function pauseSVG() { return '<svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><rect x="5" y="3" width="4" height="18" rx="1"/><rect x="15" y="3" width="4" height="18" rx="1"/></svg>'; }
+
+  function audioPlayerHTML(id, label, src) {
+    if (!src) return '<div class="audio-player" style="opacity:0.5"><div style="font-size:0.82rem;color:var(--text-dim)">Audio pendiente</div></div>';
+    return '<div class="audio-player" id="' + id + '">' +
+      '<button class="play-btn" onclick="window._ca.toggleAudio(\'' + src + '\',\'' + id + '\')">' + playSVG() + '</button>' +
+      '<div class="audio-info">' +
+        '<div class="audio-label">' + label + '</div>' +
+        '<div class="audio-bar-wrap" onclick="window._ca.seekAudio(event,\'' + id + '\')">' +
+          '<div class="audio-bar-fill" style="width:0%"></div>' +
+        '</div>' +
+        '<div class="audio-time"><span class="a-cur">0:00</span><span class="a-dur">0:00</span></div>' +
+      '</div></div>';
+  }
+
+  // ── Render: Pantalla de Inicio ──
+  function renderHome() {
+    $('main-header').style.display = '';
+    $('h-title').textContent = DATA.tema.nivel_nombre;
+    $('h-sub').textContent = 'Cuaderno ' + DATA.tema.id;
+    $('home-title').textContent = DATA.tema.nivel_nombre + ' ' + DATA.numero;
+    $('home-element').textContent = DATA.cuaderno;
+
+    const grid = $('block-grid');
+    grid.innerHTML = '';
+
+    let allCleared = true;
+    const todayBlock = DAY_BLOCKS[new Date().getDay()];
+    const todayCleared = progress[todayBlock] && progress[todayBlock].every(x => x !== null);
+
+    // Banner "Misterios del día"
+    const DAY_NAMES_ES = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    const BLOCK_DAYS = {};
+    for (let d = 0; d < 7; d++) { const bl = DAY_BLOCKS[d]; if (!BLOCK_DAYS[bl]) BLOCK_DAYS[bl] = []; BLOCK_DAYS[bl].push(DAY_NAMES_ES[d]); }
+    const todayName = DAY_NAMES_ES[new Date().getDay()];
+    const bannerWrap = $('today-banner-wrap');
+
+    if (!todayCleared) {
+      bannerWrap.innerHTML =
+        '<div class="today-banner fade-in" onclick="window._ca.enterBlock(\'' + todayBlock + '\')">' +
+          '<div class="today-banner-top">' +
+            '<span class="today-banner-label"><span class="today-pulse"></span> Misterios del día · ' + todayName + '</span>' +
+            '<span class="today-banner-arrow">→</span>' +
+          '</div>' +
+          '<h3 style="color:' + blockColor(todayBlock) + '">' + blockEmoji(todayBlock) + ' Misterios ' + BLOCK_NAMES[todayBlock] + '</h3>' +
+          '<div class="today-banner-days">' + BLOCK_DAYS[todayBlock].join(' · ') + '</div>' +
+        '</div>';
+    } else {
+      bannerWrap.innerHTML = '';
+    }
+
+    BLOCKS.forEach((b, bi) => {
+      const mists = DATA.misterios[b] || [];
+      const prog = progress[b] || [];
+      const doneCount = prog.filter(x => x !== null).length;
+      const isCleared = doneCount === 5;
+      const isInProgress = doneCount > 0 && !isCleared;
+      if (!isCleared) allCleared = false;
+
+      const isToday = b === todayBlock && !isCleared;
+      const status = isCleared ? 'cleared' : isInProgress ? 'progress' : (isToday ? 'today' : 'pending');
+      const statusLabel = isCleared ? '✓ Completado' : isInProgress ? 'En progreso' : (isToday ? 'Hoy' : 'Pendiente');
+      const extraClass = isCleared ? 'cleared' : isToday ? 'today' : isInProgress ? 'current' : '';
+
+      const card = document.createElement('div');
+      card.className = 'block-card fade-in fade-in-d' + (bi+1) + ' ' + extraClass;
+      card.onclick = () => enterBlock(b);
+
+      card.innerHTML =
+        '<div class="block-card-top">' +
+          '<span class="block-emoji">' + blockEmoji(b) + '</span>' +
+          '<span class="block-badge ' + status + '">' + statusLabel + '</span>' +
+        '</div>' +
+        '<div class="block-title" style="color:' + blockColor(b) + '">Misterios ' + BLOCK_NAMES[b] + '</div>' +
+        '<div class="block-subtitle">' + (DATA.subtitulos_bloque ? DATA.subtitulos_bloque[b] || '' : '') + '</div>' +
+        '<div class="block-progress"><div class="block-dots">' +
+          [0,1,2,3,4].map(i => {
+            const cls = prog[i] ? 'done' : (doneCount === i && !isCleared ? 'active' : '');
+            return '<div class="block-dot ' + cls + '"></div>';
+          }).join('') +
+        '</div></div>';
+
+      grid.appendChild(card);
+    });
+
+    // Banner de cuaderno completado
+    const wrap = $('cuaderno-done-wrap');
+    if (allCleared && DATA.tema.siguiente) {
+      wrap.style.display = '';
+      wrap.innerHTML =
+        '<div class="cuaderno-done-banner fade-in">' +
+          '<h3>¡Cuaderno completado! 🎉</h3>' +
+          '<p>Has recorrido los 20 Misterios de este cuaderno.</p>' +
+          '<a href="?c=' + DATA.tema.siguiente + '" class="btn btn-green btn-block">Avanzar al siguiente cuaderno →</a>' +
+        '</div>';
+    } else if (allCleared) {
+      wrap.style.display = '';
+      wrap.innerHTML =
+        '<div class="cuaderno-done-banner fade-in">' +
+          '<h3>¡Cuaderno completado! 🎉</h3>' +
+          '<p>Has llegado al final de este cuaderno. ¡Gloria a Dios!</p>' +
+        '</div>';
+    } else {
+      wrap.style.display = 'none';
+    }
+
+    show('scr-home');
+  }
+
+  // ── Entrar a un bloque ──
+  function enterBlock(b) {
+    stopAudio();
+    currentBlock = b;
+    const prog = progress[b] || [];
+    // Ir al primer misterio no completado, o al primero si todos están completados
+    const first = prog.findIndex(x => x === null);
+    currentMystery = first >= 0 ? first : 0;
+    openSection = null;
+    renderPrayer();
+  }
+
+  // ── Render: Pantalla de Oración ──
+  function renderPrayer() {
+    const b = currentBlock;
+    const mi = currentMystery;
+    const mists = DATA.misterios[b];
+    const m = mists[mi];
+    const prog = progress[b];
+
+    $('h-title').textContent = DATA.tema.nivel_nombre;
+    $('h-sub').textContent = BLOCK_NAMES[b];
+
+    // Counter
+    $('prayer-counter').textContent = ORDS[mi] + ' Misterio ' + BTYPES[b];
+    $('prayer-title').textContent = m.titulo;
+    $('prayer-subtitle').textContent = m.subtitulo || '';
+
+    // Beads (rosary chain)
+    const dots = $('prayer-dots');
+    const beadPositions = [24, 72, 120, 168, 216];
+    const boldColor = DATA.tema.paleta.bold;
+    const lightColor = DATA.tema.paleta.light;
+    const borderC = isDark ? '#3A3530' : '#D9D1C7';
+    const lineColorDone = lightColor;
+    const lineColorPending = borderC;
+
+    // Find how far the chain color extends
+    const lastDoneIdx = (() => { for (let i = 4; i >= 0; i--) { if (prog[i]) return i; } return -1; })();
+    const chainEndX = lastDoneIdx >= 0 ? beadPositions[lastDoneIdx] : 24;
+
+    let svgHTML = '<svg viewBox="0 0 240 30" preserveAspectRatio="xMidYMid meet">';
+    // Background line (pending)
+    svgHTML += '<line x1="24" y1="15" x2="216" y2="15" stroke="' + lineColorPending + '" stroke-width="1.5" stroke-linecap="round"/>';
+    // Done line
+    if (lastDoneIdx >= 0) {
+      svgHTML += '<line x1="24" y1="15" x2="' + chainEndX + '" y2="15" stroke="' + lineColorDone + '" stroke-width="1.5" stroke-linecap="round"/>';
+    }
+    // Beads
+    for (let i = 0; i < 5; i++) {
+      const cx = beadPositions[i];
+      if (prog[i]) {
+        // Done bead
+        svgHTML += '<circle cx="' + cx + '" cy="15" r="9" fill="' + boldColor + '" style="cursor:pointer" onclick="window._ca.goMystery(' + i + ')"/>';
+      } else if (i === mi) {
+        // Active bead (current mystery)
+        svgHTML += '<circle cx="' + cx + '" cy="15" r="9.5" fill="none" stroke="' + boldColor + '" stroke-width="2" style="cursor:pointer" onclick="window._ca.goMystery(' + i + ')"/>';
+        svgHTML += '<circle cx="' + cx + '" cy="15" r="4" fill="' + lightColor + '" style="cursor:pointer" onclick="window._ca.goMystery(' + i + ')"/>';
+      } else {
+        // Pending bead
+        svgHTML += '<circle cx="' + cx + '" cy="15" r="9" fill="none" stroke="' + borderC + '" stroke-width="1.2" style="cursor:pointer" onclick="window._ca.goMystery(' + i + ')"/>';
+      }
+    }
+    svgHTML += '</svg>';
+    dots.innerHTML = svgHTML;
+
+    // Evangelio
+    $('ev-text').textContent = m.evangelio;
+    $('ev-ref').textContent = '— ' + m.referencia;
+
+    // Acordeón
+    renderAccordion(b, mi, m);
+
+    // Done bar
+    const doneWrap = $('mystery-done-wrap');
+    if (prog[mi]) {
+      const d = new Date(prog[mi]);
+      doneWrap.style.display = '';
+      doneWrap.innerHTML =
+        '<div class="mystery-done-bar fade-in">' +
+          '<span class="done-check">✓</span>' +
+          '<div><div class="done-text">Misterio completado</div>' +
+          '<div class="done-date">' + d.toLocaleDateString('es-MX',{day:'numeric',month:'long'}) + '</div></div>' +
+        '</div>';
+    } else {
+      doneWrap.style.display = 'none';
+    }
+
+    // Bottom nav
+    renderBottomNav(b, mi);
+
+    show('scr-prayer');
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
+
+  // ── Acordeón ──
+  function renderAccordion(b, mi, m) {
+    const acc = $('accordion');
+    const sections = [
+      { key:'rezar', icon:'📿', label:'Rezar este Misterio', bgVar:'--lvl-ultra' },
+      { key:'canto', icon:'🎵', label:'Canto', bgVar:'--lvl-ultra' },
+      { key:'contemplar', icon:'👁️', label:'Contemplar', bgVar:'--lvl-ultra' },
+      { key:'meditar', icon:'✏️', label:'Meditar y escribir', bgVar:'--lvl-ultra' },
+      { key:'intercesion', icon:'🙏', label:'Intercesión', bgVar:'--lvl-ultra' },
+    ];
+
+    acc.innerHTML = sections.map(s => {
+      const isOpen = openSection === s.key;
+      return '<div class="acc-item' + (isOpen ? ' open' : '') + '" id="acc-' + s.key + '">' +
+        '<button class="acc-trigger" onclick="window._ca.toggleSection(\'' + s.key + '\')">' +
+          '<div class="acc-trigger-left">' +
+            '<div class="acc-icon" style="background:var(' + s.bgVar + ')">' + s.icon + '</div>' +
+            '<span class="acc-label">' + s.label + '</span>' +
+          '</div>' +
+          '<svg class="acc-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>' +
+        '</button>' +
+        '<div class="acc-body" style="max-height:' + (isOpen ? '2000px' : '0') + '">' +
+          '<div class="acc-body-inner">' + sectionContent(s.key, b, mi, m) + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function sectionContent(key, b, mi, m) {
+    if (key === 'rezar') {
+      const src = DATA.audio_rezo || '';
+      return audioPlayerHTML('ap-rezar', 'Padrenuestro · 10 Avemarías · Gloria · Jaculatoria', src);
+    }
+    if (key === 'canto') {
+      const src = DATA.audio_canto || '';
+      if (src) return audioPlayerHTML('ap-canto', 'Canto contemplativo', src);
+      return '<div class="canto-box"><p>🕊️ Momento de silencio y canto contemplativo</p><span class="canto-hint">Tómate unos momentos para cantar, meditar o guardar silencio antes de continuar</span></div>';
+    }
+    if (key === 'contemplar') {
+      const src = m.audio_contemplacion || '';
+      let html = audioPlayerHTML('ap-contempl', 'Audio de la contemplación', src);
+      html += '<div class="contempl-text">' + escHTML(m.contemplacion) + '</div>';
+      return html;
+    }
+    if (key === 'meditar') {
+      return renderMeditation(b, mi, m);
+    }
+    if (key === 'intercesion') {
+      let html = '<div class="interc-text">' + escHTML(m.intercesion) + '</div>';
+      const isDone = progress[b] && progress[b][mi];
+      html += '<button class="amen-btn' + (isDone ? ' done' : '') + '" onclick="window._ca.completeMystery()">' + (isDone ? '✓ Amén' : 'Amén') + '</button>';
+      return html;
+    }
+    return '';
+  }
+
+  function renderMeditation(b, mi, m) {
+    // Parsear las 3 preguntas de meditación
+    const questions = parseMeditation(m.meditacion);
+    const j = journal[b] && journal[b][mi] ? journal[b][mi] : {};
+
+    return questions.map((q, qi) => {
+      const val = j['q' + qi] || '';
+      return '<div class="med-group">' +
+        '<div class="med-label-row">' +
+          '<div class="med-dot" style="background:' + MED_COLORS[qi] + '"></div>' +
+          '<span class="med-label-text" style="color:' + MED_COLORS[qi] + '">' + MED_LABELS[qi] + '</span>' +
+        '</div>' +
+        '<p class="med-question">' + escHTML(q) + '</p>' +
+        '<textarea class="journal-area" placeholder="Escribe tu reflexión…" ' +
+          'oninput="window._ca.saveJournal(\'' + b + '\',' + mi + ',' + qi + ',this.value)">' + escHTML(val) + '</textarea>' +
+      '</div>';
+    }).join('');
+  }
+
+  function parseMeditation(text) {
+    if (!text) return ['','',''];
+    // Intentar separar por las 3 etiquetas
+    const labels = MED_LABELS;
+    const parts = [];
+    let remaining = text;
+    for (let i = 0; i < labels.length; i++) {
+      const idx = remaining.indexOf(labels[i]);
+      if (idx >= 0) {
+        if (i > 0 && parts.length < i) parts.push(remaining.substring(0, idx).trim());
+        remaining = remaining.substring(idx + labels[i].length);
+        // Quitar : inicial si hay
+        remaining = remaining.replace(/^\s*:\s*/, '');
+      }
+    }
+    if (remaining.trim()) parts.push(remaining.trim());
+
+    // Si no se pudo parsear con labels, intentar por líneas
+    if (parts.length < 3) {
+      const lines = text.split('\n').filter(l => l.trim());
+      return [lines[0] || '', lines[1] || '', lines[2] || ''];
+    }
+    return parts.length >= 3 ? parts.slice(0,3) : [...parts, ...Array(3-parts.length).fill('')];
+  }
+
+  function saveJournal(b, mi, qi, val) {
+    if (!journal[b]) journal[b] = {};
+    if (!journal[b][mi]) journal[b][mi] = {};
+    journal[b][mi]['q' + qi] = val;
+    saveProgress();
+  }
+
+  function toggleSection(key) {
+    openSection = openSection === key ? null : key;
+    renderAccordion(currentBlock, currentMystery, DATA.misterios[currentBlock][currentMystery]);
+  }
+
+  // ── Completar misterio ──
+  function completeMystery() {
+    const b = currentBlock;
+    const mi = currentMystery;
+    if (progress[b][mi]) return; // ya completado
+
+    progress[b][mi] = Date.now();
+    saveProgress();
+
+    // Celebración del misterio
+    const variant = BLOCKS.indexOf(b) * 5 + mi;
+    celebrationSound(variant);
+
+    // Checar si el bloque está completo
+    const allDone = progress[b].every(x => x !== null);
+    if (allDone) {
+      // Celebración de bloque completo
+      setTimeout(() => {
+        showConfetti();
+        showCelebration(b);
+      }, 600);
+    } else {
+      // Auto-avanzar al siguiente misterio
+      renderPrayer();
+      if (mi < 4) {
+        setTimeout(() => {
+          currentMystery = mi + 1;
+          openSection = null;
+          stopAudio();
+          renderPrayer();
+        }, 800);
+      }
+    }
+  }
+
+  // ── Bottom Nav ──
+  function renderBottomNav(b, mi) {
+    const nav = $('bottom-nav');
+    const hasPrev = mi > 0;
+    const hasNext = mi < 4;
+    const isDone = progress[b][mi];
+
+    let html = '';
+    if (hasPrev) {
+      html += '<button class="btn btn-outline" onclick="window._ca.goMystery(' + (mi-1) + ')">← Anterior</button>';
+    }
+    if (hasNext && isDone) {
+      html += '<button class="btn btn-primary" onclick="window._ca.goMystery(' + (mi+1) + ')">Siguiente →</button>';
+    } else if (!isDone) {
+      // No mostrar "siguiente" hasta completar con Amén
+    }
+    nav.innerHTML = html;
+  }
+
+  function goMystery(i) {
+    currentMystery = i;
+    openSection = null;
+    stopAudio();
+    renderPrayer();
+  }
+
+  // ── Celebración de bloque ──
+  function showCelebration(b) {
+    const blockName = BLOCK_NAMES[b];
+    const maria = 'img/maria_' + b + '.webp';
+
+    const container = $('maria-container');
+    const img = new Image();
+    img.onload = () => {
+      container.outerHTML = '<img class="maria-img" id="maria-container" src="' + maria + '" alt="Virgen María">';
+    };
+    img.onerror = () => {
+      container.innerHTML = '🙏';
+    };
+    img.src = maria;
+
+    $('celeb-title').textContent = '¡Misterios ' + blockName + ' completados!';
+    $('celeb-sub').textContent = 'Has contemplado los cinco Misterios ' + blockName + ' de este cuaderno. Que María siga acompañándote en el camino.';
+    $('btn-celeb-home').onclick = () => {
+      stopAudio();
+      renderHome();
+    };
+
+    show('scr-celebration');
+    celebrationSound(BLOCKS.indexOf(b));
+  }
+
+  // ── Escape HTML ──
+  function escHTML(s) {
+    if (!s) return '';
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  }
+
+  // ── Iniciar ──
+  async function init() {
+    // Leer ID desde URL
+    const params = new URLSearchParams(window.location.search);
+    CUADERNO_ID = params.get('c') || '0101';
+
+    // Validar formato 4 dígitos
+    if (!/^\d{4}$/.test(CUADERNO_ID)) {
+      showError('ID inválido: ' + CUADERNO_ID + '. Usa un código de 4 dígitos (ej. 0101).');
+      return;
+    }
+
+    // Cargar JSON
+    try {
+      const resp = await fetch('data/' + CUADERNO_ID + '.json');
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      DATA = await resp.json();
+    } catch(e) {
+      showError('No se pudo cargar data/' + CUADERNO_ID + '.json. Verifica que el archivo exista.');
+      return;
+    }
+
+    // Cargar progreso
+    loadProgress();
+
+    // Aplicar dark mode
+    if (isDark) {
+      document.body.classList.add('dark');
+      $('ico-sun').style.display = 'none';
+      $('ico-moon').style.display = 'block';
+    }
+
+    // Aplicar paleta
+    applyPalette();
+
+    // Event listeners
+    $('btn-dark').onclick = toggleDark;
+    $('btn-back-home').onclick = () => { stopAudio(); renderHome(); };
+
+    // API global para onclick en HTML
+    window._ca = {
+      toggleAudio: toggleAudio,
+      seekAudio: seekAudio,
+      toggleSection: toggleSection,
+      completeMystery: completeMystery,
+      goMystery: goMystery,
+      saveJournal: saveJournal,
+      enterBlock: enterBlock,
+    };
+
+    // Render
+    $('scr-loading').style.display = 'none';
+    $('main-header').style.display = '';
+    renderHome();
+  }
+
+  function showError(msg) {
+    $('scr-loading').style.display = 'none';
+    $('error-msg').textContent = msg;
+    $('scr-error').style.display = 'flex';
+  }
+
+  // Arrancar
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+})();
+</script>
+</body>
+</html>
