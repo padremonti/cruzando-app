@@ -99,15 +99,19 @@ body {
 /* ── Banner Misterios del Día ── */
 .today-banner {
   margin:0 18px 16px; padding:16px 20px; border-radius:16px;
-  background:var(--card); border:2px solid var(--lvl-bold);
-  box-shadow:0 3px 18px var(--lvl-ultra);
+  background:linear-gradient(135deg,rgba(var(--lvl-light-rgb,255,207,162),0.55),rgba(255,245,232,0.7));
+  border:2px solid var(--lvl-bold);
+  box-shadow:0 3px 16px rgba(var(--lvl-bold-rgb,255,122,0),0.1);
   cursor:pointer; transition:all 0.25s;
 }
+.dark .today-banner {
+  background:linear-gradient(135deg,rgba(var(--lvl-bold-rgb,255,122,0),0.15),rgba(var(--lvl-bold-rgb,255,122,0),0.05));
+}
 .today-banner:active { transform:scale(0.98); }
-.today-banner-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+.today-banner-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
 .today-banner-label {
   font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:1px;
-  color:var(--lvl-bold); display:flex; align-items:center; gap:5px;
+  color:var(--lvl-bold); display:flex; align-items:center; gap:6px;
 }
 .today-pulse {
   width:8px; height:8px; border-radius:50%; background:var(--lvl-bold);
@@ -115,9 +119,10 @@ body {
 }
 @keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.5; transform:scale(1.4); } }
 .today-banner-arrow { color:var(--lvl-bold); font-size:1.2rem; font-weight:700; }
-.today-banner h3 { font-size:1.1rem; font-weight:800; margin-bottom:2px; }
+.today-banner h3 { font-size:1.1rem; font-weight:800; margin-bottom:3px; }
 .today-banner-days { font-size:0.72rem; color:var(--text-dim); }
-.block-card.today { border-color:var(--lvl-soft); background:linear-gradient(135deg,var(--card),var(--lvl-ultra)); }
+.block-card.today { border-color:var(--lvl-soft); background:linear-gradient(135deg,rgba(var(--lvl-light-rgb,255,207,162),0.35),var(--card)); }
+.dark .block-card.today { background:linear-gradient(135deg,rgba(var(--lvl-bold-rgb,255,122,0),0.1),var(--card)); }
 
 .block-grid { display:flex; flex-direction:column; gap:14px; padding:8px 18px 24px; }
 .block-card {
@@ -179,14 +184,9 @@ body {
 .mystery-title { font-size:1.15rem; font-weight:800; margin-bottom:2px; }
 .mystery-subtitle { font-size:0.82rem; color:var(--text-soft); font-style:italic; }
 
-/* Dots de misterios del bloque */
-.mystery-dots { display:flex; gap:6px; padding:0 18px 14px; }
-.m-dot {
-  flex:1; height:5px; border-radius:3px;
-  background:var(--border); transition:all 0.3s;
-}
-.m-dot.done { background:var(--green); }
-.m-dot.active { background:var(--lvl-bold); }
+/* Cuentas del rosario (cadena de 5) */
+.mystery-beads { padding:0 18px 14px; }
+.mystery-beads svg { width:100%; height:30px; }
 
 /* ── Evangelio ── */
 .evangelio-box {
@@ -405,7 +405,7 @@ body {
       <div class="mystery-title" id="prayer-title"></div>
       <div class="mystery-subtitle" id="prayer-subtitle"></div>
     </div>
-    <div class="mystery-dots" id="prayer-dots"></div>
+    <div class="mystery-beads" id="prayer-dots"></div>
 
     <!-- Evangelio -->
     <div class="evangelio-box fade-in fade-in-d1" id="evangelio-box">
@@ -496,6 +496,10 @@ body {
   }
 
   // ── Colores dinámicos ──
+  function hexToRgb(hex) {
+    const h = hex.replace('#','');
+    return [parseInt(h.substring(0,2),16), parseInt(h.substring(2,4),16), parseInt(h.substring(4,6),16)].join(',');
+  }
   function applyPalette() {
     if (!DATA || !DATA.tema) return;
     const p = DATA.tema.paleta;
@@ -506,6 +510,9 @@ body {
     r.setProperty('--lvl-mist', p.mist);
     r.setProperty('--lvl-light', p.light);
     r.setProperty('--lvl-ultra', p.ultra);
+    // RGB versions for rgba() in gradients
+    r.setProperty('--lvl-bold-rgb', hexToRgb(p.bold));
+    r.setProperty('--lvl-light-rgb', hexToRgb(p.light));
     // Colores de bloques
     const bl = DATA.tema.bloques;
     if (bl.gozosos) r.setProperty('--goz-color', bl.gozosos.color);
@@ -780,14 +787,43 @@ body {
     $('prayer-title').textContent = m.titulo;
     $('prayer-subtitle').textContent = m.subtitulo || '';
 
-    // Dots
+    // Beads (rosary chain)
     const dots = $('prayer-dots');
-    dots.innerHTML = '';
+    const beadPositions = [24, 72, 120, 168, 216];
+    const boldColor = DATA.tema.paleta.bold;
+    const lightColor = DATA.tema.paleta.light;
+    const borderC = isDark ? '#3A3530' : '#D9D1C7';
+    const lineColorDone = lightColor;
+    const lineColorPending = borderC;
+
+    // Find how far the chain color extends
+    const lastDoneIdx = (() => { for (let i = 4; i >= 0; i--) { if (prog[i]) return i; } return -1; })();
+    const chainEndX = lastDoneIdx >= 0 ? beadPositions[lastDoneIdx] : 24;
+
+    let svgHTML = '<svg viewBox="0 0 240 30" preserveAspectRatio="xMidYMid meet">';
+    // Background line (pending)
+    svgHTML += '<line x1="24" y1="15" x2="216" y2="15" stroke="' + lineColorPending + '" stroke-width="1.5" stroke-linecap="round"/>';
+    // Done line
+    if (lastDoneIdx >= 0) {
+      svgHTML += '<line x1="24" y1="15" x2="' + chainEndX + '" y2="15" stroke="' + lineColorDone + '" stroke-width="1.5" stroke-linecap="round"/>';
+    }
+    // Beads
     for (let i = 0; i < 5; i++) {
-      const d = document.createElement('div');
-      d.className = 'm-dot' + (prog[i] ? ' done' : (i === mi ? ' active' : ''));
-      d.onclick = () => { currentMystery = i; openSection = null; stopAudio(); renderPrayer(); };
-      dots.appendChild(d);
+      const cx = beadPositions[i];
+      if (prog[i]) {
+        // Done bead
+        svgHTML += '<circle cx="' + cx + '" cy="15" r="9" fill="' + boldColor + '" style="cursor:pointer" onclick="window._ca.goMystery(' + i + ')"/>';
+      } else if (i === mi) {
+        // Active bead (current mystery)
+        svgHTML += '<circle cx="' + cx + '" cy="15" r="9.5" fill="none" stroke="' + boldColor + '" stroke-width="2" style="cursor:pointer" onclick="window._ca.goMystery(' + i + ')"/>';
+        svgHTML += '<circle cx="' + cx + '" cy="15" r="4" fill="' + lightColor + '" style="cursor:pointer" onclick="window._ca.goMystery(' + i + ')"/>';
+      } else {
+        // Pending bead
+        svgHTML += '<circle cx="' + cx + '" cy="15" r="9" fill="none" stroke="' + borderC + '" stroke-width="1.2" style="cursor:pointer" onclick="window._ca.goMystery(' + i + ')"/>';
+      }
+    }
+    svgHTML += '</svg>';
+    dots.innerHTML = svgHTML;
     }
 
     // Evangelio
