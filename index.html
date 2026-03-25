@@ -154,14 +154,14 @@ body {
 .block-dot.done { background:var(--green); box-shadow:0 0 6px rgba(52,168,83,0.4); }
 .block-dot.active { background:var(--lvl-bold); box-shadow:0 0 8px var(--lvl-light); }
 
-/* ── Banner de cuaderno completado ── */
-.cuaderno-done-banner {
+/* ── Banner de nivel completado ── */
+.nivel-done-banner {
   margin:8px 18px 18px; padding:20px; border-radius:16px;
   background:linear-gradient(135deg,var(--green-soft),rgba(52,168,83,0.05));
   border:2px solid var(--green); text-align:center;
 }
-.cuaderno-done-banner h3 { font-size:1.1rem; color:var(--green); margin-bottom:6px; }
-.cuaderno-done-banner p { font-size:0.82rem; color:var(--text-soft); margin-bottom:14px; }
+.nivel-done-banner h3 { font-size:1.1rem; color:var(--green); margin-bottom:6px; }
+.nivel-done-banner p { font-size:0.82rem; color:var(--text-soft); margin-bottom:14px; }
 
 /* ── Botones ── */
 .btn {
@@ -359,15 +359,15 @@ body {
   <!-- Loading -->
   <div class="loading-screen" id="scr-loading">
     <div class="spinner"></div>
-    <p style="font-size:0.88rem;color:var(--text-dim)">Cargando cuaderno…</p>
+    <p style="font-size:0.88rem;color:var(--text-dim)">Cargando nivel…</p>
   </div>
 
   <!-- Error -->
   <div class="error-screen" id="scr-error" style="display:none">
     <div style="font-size:3rem;margin-bottom:16px">📿</div>
-    <h2 style="font-size:1.1rem;margin-bottom:8px">No se encontró el cuaderno</h2>
+    <h2 style="font-size:1.1rem;margin-bottom:8px">No se encontró el nivel</h2>
     <p id="error-msg" style="font-size:0.82rem;color:var(--text-dim);margin-bottom:20px"></p>
-    <a href="?c=0101" class="btn btn-primary">Ir a Males (0101)</a>
+    <a href="?c=0101" class="btn btn-primary">Ir a Nivel 1-1: Males</a>
   </div>
 
   <!-- ═══ HEADER (compartido) ═══ -->
@@ -392,7 +392,7 @@ body {
     </div>
     <div id="today-banner-wrap"></div>
     <div class="block-grid" id="block-grid"></div>
-    <div id="cuaderno-done-wrap" style="display:none"></div>
+    <div id="nivel-done-wrap" style="display:none"></div>
   </div>
 
   <!-- ═══ PANTALLA DE ORACIÓN ═══ -->
@@ -447,7 +447,7 @@ body {
 
   // ── Estado global ──
   let DATA = null;
-  let CUADERNO_ID = null;
+  let NIVEL_ID = null;
   let currentBlock = null;   // 'gozosos' | 'luminosos' | 'dolorosos' | 'gloriosos'
   let currentMystery = 0;    // 0-4 dentro del bloque
   let openSection = null;     // qué acordeón está abierto
@@ -473,7 +473,7 @@ body {
   // ── Utilidades ──
   const $ = id => document.getElementById(id);
   const show = id => { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); $(id).classList.add('active'); };
-  const lsKey = () => 'cruzando_' + CUADERNO_ID;
+  const lsKey = () => 'cruzando_nivel_' + NIVEL_ID;
 
   function saveProgress() {
     try { localStorage.setItem(lsKey(), JSON.stringify({ progress, journal, isDark })); } catch(e){}
@@ -668,10 +668,10 @@ body {
   // ── Render: Pantalla de Inicio ──
   function renderHome() {
     $('main-header').style.display = '';
-    $('h-title').textContent = DATA.tema.nivel_nombre;
-    $('h-sub').textContent = 'Cuaderno ' + DATA.tema.id;
-    $('home-title').textContent = DATA.tema.nivel_nombre + ' ' + DATA.numero;
-    $('home-element').textContent = DATA.cuaderno;
+    $('h-title').textContent = DATA.tema.mundo_nombre;
+    $('h-sub').textContent = 'Nivel ' + DATA.tema.id;
+    $('home-title').textContent = DATA.tema.mundo_nombre;
+    $('home-element').textContent = 'Nivel ' + DATA.numero + ': ' + DATA.elemento;
 
     const grid = $('block-grid');
     grid.innerHTML = '';
@@ -735,22 +735,22 @@ body {
       grid.appendChild(card);
     });
 
-    // Banner de cuaderno completado
-    const wrap = $('cuaderno-done-wrap');
+    // Banner de nivel completado
+    const wrap = $('nivel-done-wrap');
     if (allCleared && DATA.tema.siguiente) {
       wrap.style.display = '';
       wrap.innerHTML =
-        '<div class="cuaderno-done-banner fade-in">' +
-          '<h3>¡Cuaderno completado! 🎉</h3>' +
-          '<p>Has recorrido los 20 Misterios de este cuaderno.</p>' +
-          '<a href="?c=' + DATA.tema.siguiente + '" class="btn btn-green btn-block">Avanzar al siguiente cuaderno →</a>' +
+        '<div class="nivel-done-banner fade-in">' +
+          '<h3>¡Nivel completado! 🎉</h3>' +
+          '<p>Has recorrido los 20 Misterios de este nivel.</p>' +
+          '<a href="?c=' + DATA.tema.siguiente + '" class="btn btn-green btn-block">Avanzar al siguiente nivel →</a>' +
         '</div>';
     } else if (allCleared) {
       wrap.style.display = '';
       wrap.innerHTML =
-        '<div class="cuaderno-done-banner fade-in">' +
-          '<h3>¡Cuaderno completado! 🎉</h3>' +
-          '<p>Has llegado al final de este cuaderno. ¡Gloria a Dios!</p>' +
+        '<div class="nivel-done-banner fade-in">' +
+          '<h3>¡Nivel completado! 🎉</h3>' +
+          '<p>Has llegado al final de este nivel. ¡Gloria a Dios!</p>' +
         '</div>';
     } else {
       wrap.style.display = 'none';
@@ -779,7 +779,7 @@ body {
     const m = mists[mi];
     const prog = progress[b];
 
-    $('h-title').textContent = DATA.tema.nivel_nombre;
+    $('h-title').textContent = DATA.tema.mundo_nombre;
     $('h-sub').textContent = BLOCK_NAMES[b];
 
     // Counter
@@ -1043,7 +1043,7 @@ body {
     img.src = maria;
 
     $('celeb-title').textContent = '¡Misterios ' + blockName + ' completados!';
-    $('celeb-sub').textContent = 'Has contemplado los cinco Misterios ' + blockName + ' de este cuaderno. Que María siga acompañándote en el camino.';
+    $('celeb-sub').textContent = 'Has contemplado los cinco Misterios ' + blockName + ' de este nivel. Que María siga acompañándote en el camino.';
     $('btn-celeb-home').onclick = () => {
       stopAudio();
       renderHome();
@@ -1063,22 +1063,22 @@ body {
   async function init() {
     // Leer ID desde URL
     const params = new URLSearchParams(window.location.search);
-    CUADERNO_ID = params.get('c') || '0101';
+    NIVEL_ID = params.get('c') || '0101';
 
     // Validar formato 4 dígitos
-    if (!/^\d{4}$/.test(CUADERNO_ID)) {
-      showError('ID inválido: ' + CUADERNO_ID + '. Usa un código de 4 dígitos (ej. 0101).');
+    if (!/^\d{4}$/.test(NIVEL_ID)) {
+      showError('ID inválido: ' + NIVEL_ID + '. Usa un código de 4 dígitos (ej. 0101).');
       return;
     }
 
     // Cargar JSON (ruta relativa al directorio del HTML)
     const base = document.baseURI.substring(0, document.baseURI.lastIndexOf('/') + 1);
     try {
-      const resp = await fetch(base + 'data/' + CUADERNO_ID + '.json');
+      const resp = await fetch(base + 'data/' + NIVEL_ID + '.json');
       if (!resp.ok) throw new Error('HTTP ' + resp.status);
       DATA = await resp.json();
     } catch(e) {
-      showError('No se pudo cargar data/' + CUADERNO_ID + '.json. Verifica que el archivo exista.');
+      showError('No se pudo cargar data/' + NIVEL_ID + '.json. Verifica que el archivo exista.');
       return;
     }
 
