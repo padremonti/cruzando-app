@@ -1072,7 +1072,8 @@ body {
     }
 
     // Cargar JSON (ruta relativa al directorio del HTML)
-    const base = document.baseURI.substring(0, document.baseURI.lastIndexOf('/') + 1);
+    const loc = window.location;
+    const base = loc.origin + loc.pathname.substring(0, loc.pathname.lastIndexOf('/') + 1);
     try {
       const resp = await fetch(base + 'data/' + NIVEL_ID + '.json');
       if (!resp.ok) throw new Error('HTTP ' + resp.status);
