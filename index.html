@@ -475,6 +475,13 @@ body {
   const show = id => { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); $(id).classList.add('active'); };
   const lsKey = () => 'cruzando_nivel_' + NIVEL_ID;
 
+  // Formatear ID "0101" → "Nivel 1-1" (estilo Mario Bros)
+  function nivelLabel(id) {
+    const mundo = parseInt(id.substring(0,2), 10);
+    const nivel = parseInt(id.substring(2,4), 10);
+    return 'Nivel ' + mundo + '-' + nivel;
+  }
+
   function saveProgress() {
     try { localStorage.setItem(lsKey(), JSON.stringify({ progress, journal, isDark })); } catch(e){}
   }
@@ -668,10 +675,10 @@ body {
   // ── Render: Pantalla de Inicio ──
   function renderHome() {
     $('main-header').style.display = '';
-    $('h-title').textContent = DATA.tema.mundo_nombre;
-    $('h-sub').textContent = 'Nivel ' + DATA.tema.id;
+    $('h-title').textContent = 'CruzAndo';
+    $('h-sub').textContent = nivelLabel(DATA.tema.id) + ': ' + DATA.elemento;
     $('home-title').textContent = DATA.tema.mundo_nombre;
-    $('home-element').textContent = 'Nivel ' + DATA.numero + ': ' + DATA.elemento;
+    $('home-element').textContent = nivelLabel(DATA.tema.id) + ': ' + DATA.elemento;
 
     const grid = $('block-grid');
     grid.innerHTML = '';
@@ -779,8 +786,8 @@ body {
     const m = mists[mi];
     const prog = progress[b];
 
-    $('h-title').textContent = DATA.tema.mundo_nombre;
-    $('h-sub').textContent = BLOCK_NAMES[b];
+    $('h-title').textContent = 'CruzAndo';
+    $('h-sub').textContent = nivelLabel(DATA.tema.id) + ' · ' + BLOCK_NAMES[b];
 
     // Counter
     $('prayer-counter').textContent = ORDS[mi] + ' Misterio ' + BTYPES[b];
