@@ -1,0 +1,114 @@
+{
+  "tema": {
+    "id": "0101",
+    "nivel_slug": "cruz",
+    "nivel_nombre": "CruzAndo la Cruz",
+    "cuaderno_slug": "males",
+    "siguiente": "0102",
+    "paleta": {
+      "bold": "#FF7A00",
+      "base": "#FF7F09",
+      "soft": "#F69C49",
+      "mist": "#FFA34E",
+      "light": "#FFCFA2",
+      "ultra": "rgba(255,122,0,0.07)"
+    },
+    "bloques": {
+      "gozosos": { "emoji": "🌟", "color": "#D4A017" },
+      "luminosos": { "emoji": "✨", "color": "#01BBE1" },
+      "dolorosos": { "emoji": "✝️", "color": "#C0392B" },
+      "gloriosos": { "emoji": "👑", "color": "#8E44AD" }
+    }
+  },
+  "nivel": "CruzAndo la Cruz",
+  "cuaderno": "Males",
+  "numero": "1",
+  "audio_rezo": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/rezo.mp3",
+  "audio_canto": "",
+  "subtitulos_bloque": {
+    "gozosos": "La vulnerabilidad gozosa",
+    "luminosos": "Límites que dan luz",
+    "dolorosos": "Límites que salvan",
+    "gloriosos": "El mal no es el final"
+  },
+  "misterios": {
+    "gozosos": [
+      {
+        "numero": 1,
+        "titulo": "La Anunciación",
+        "subtitulo": "Ser humano es ser vulnerable",
+        "referencia": "Lucas 1:26-31 (DHH)",
+        "evangelio": "En el sexto mes, el ángel Gabriel fue enviado por Dios a una ciudad de Galilea llamada Nazaret, a una joven virgen llamada María, comprometida para casarse con un hombre llamado José, descendiente del rey David. El ángel entró en el lugar donde ella estaba, y le dijo: «¡Te saludo, favorecida de Dios! El Señor está contigo.» María quedó muy conmovida al oír estas palabras, y se preguntaba qué significaría aquel saludo. El ángel le dijo: «No tengas miedo, María, pues tú gozas del favor de Dios. Ahora vas a quedar encinta: tendrás un hijo, y le pondrás por nombre Jesús.»",
+        "contemplacion": "Desde la concepción, ser humano es ser vulnerable.\n\nDios eligió hacerse humano comenzando por donde todos comenzamos: siendo frágil. Jesús no apareció en el mundo como un adulto poderoso. Se hizo embrión en el vientre de María. Diminuto, silencioso, expuesto.\n\nMaría recibió esa noticia sin garantías. No sabía lo que vendría. Solo supo que algo estaba comenzando en ella, algo más grande que ella, y que ese algo era absolutamente frágil.\n\nAsí empieza la vida humana. La fragilidad no es un accidente del camino; es el punto de partida. Dios mismo la eligió.",
+        "meditacion": "Por María hacia Jesús: ¿Qué siente el Corazón Inmaculado de María al descubrir que Dios mismo eligió comenzar siendo pequeño, frágil, expuesto?\nDesde el Hijo hacia el Padre: ¿Qué nos revela el Corazón de Jesús al hacerse embrión, al hacerse vida que aún no puede nada, que solo puede ser recibida?\nHijos y hermanos en el Espíritu: ¿Cuáles son los males que reconoces como parte inevitable de tu vida desde el principio? ¿Cuál de ellos te cuesta más aceptar como punto de partida y no como fracaso?",
+        "intercesion": "Señor Jesús, que elegiste comenzar tu vida en la fragilidad de un embrión: enséñanos a reconocer que la vulnerabilidad no es debilidad, sino el lugar donde Tú comienzas a obrar.\n\nMadre María, que recibiste sin garantías el anuncio más grande de la historia: acompáñanos a aceptar nuestra propia fragilidad como punto de partida del encuentro con Dios.\n\nAmén.",
+        "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_1.mp3"
+      },
+      {
+        "numero": 2,
+        "titulo": "La Visitación",
+        "subtitulo": "El mal compartido pesa menos",
+        "referencia": "Lucas 1:39-45 (DHH)",
+        "evangelio": "Por aquellos días, María se fue de prisa a un pueblo de la región montañosa de Judea, y entró en casa de Zacarías y saludó a Isabel. Cuando Isabel oyó el saludo de María, la criatura se le estremeció en el vientre, e Isabel quedó llena del Espíritu Santo. Entonces, con voz muy fuerte, dijo: «¡Dios te ha bendecido más que a todas las mujeres, y ha bendecido a tu hijo!»",
+        "contemplacion": "María no se quedó sola con su misterio. Lo primero que hizo después de recibir al Ángel fue caminar hacia Isabel.\n\nNo fue a buscar explicaciones. No fue a resolver nada. Fue a compartir. Fue a estar con alguien que también estaba viviendo algo que no cabía en las palabras.",
+        "meditacion": "Por María hacia Jesús: ¿Qué siente María al caminar hacia Isabel, llevando en su vientre un misterio que no puede explicar?\nDesde el Hijo hacia el Padre: ¿Qué nos revela Jesús sobre el valor de compartir lo que nos pesa, lo que no entendemos?\nHijos y hermanos en el Espíritu: ¿A quién podrías visitar hoy, no para resolver nada, sino para estar presente?",
+        "intercesion": "Señor Jesús, que fuiste llevado en el vientre de María hacia Isabel: enséñanos a caminar hacia los demás con lo que somos, sin esperar tener todo resuelto.\n\nAmén.",
+        "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_2.mp3"
+      },
+      {
+        "numero": 3,
+        "titulo": "El Nacimiento de Jesús",
+        "subtitulo": "Nacer es quedar expuesto",
+        "referencia": "Lucas 2:1-7 (DHH)",
+        "evangelio": "En aquel tiempo, el emperador Augusto ordenó que se hiciera un censo de todo el mundo. José subió de Galilea, del pueblo de Nazaret, a Judea, a Belén. Fue allá a inscribirse junto con María, su esposa, que se encontraba encinta. Y sucedió que mientras estaban en Belén, le llegó a María el tiempo de dar a luz. Y allí nació su hijo primogénito, y lo envolvió en pañales y lo acostó en el establo, porque no había alojamiento para ellos.",
+        "contemplacion": "Nacer es quedar expuesto. Jesús nació en un pesebre, sin protección institucional, sin comodidades, sin garantías.\n\nEl Hijo de Dios entró al mundo sin privilegios. Y eso nos dice algo que nos cuesta escuchar: la vida no necesita condiciones perfectas para ser sagrada.",
+        "meditacion": "Por María hacia Jesús: ¿Qué siente María al ver a su hijo recién nacido en un establo, lejos de todo lo que esperaba?\nDesde el Hijo hacia el Padre: ¿Qué nos dice Jesús al nacer sin privilegios, sin protección, sin comodidades?\nHijos y hermanos en el Espíritu: ¿En qué áreas de tu vida has esperado condiciones perfectas para comenzar algo importante?",
+        "intercesion": "Señor Jesús, que naciste en un pesebre sin condiciones ideales: enséñanos a comenzar donde estamos, con lo que tenemos.\n\nAmén.",
+        "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_3.mp3"
+      },
+      {
+        "numero": 4,
+        "titulo": "La Presentación en el Templo",
+        "subtitulo": "Entregar lo que más duele",
+        "referencia": "Lucas 2:22-35 (DHH)",
+        "evangelio": "Cuando se cumplió el tiempo en que ellos debían purificarse según la ley de Moisés, llevaron al niño a Jerusalén para presentárselo al Señor. Simeón los bendijo, y le dijo a María, la madre de Jesús: «Mira, este niño está destinado a hacer que muchos en Israel caigan o se levanten. Él será una señal que muchos rechazarán, a fin de que se descubran las intenciones de muchos corazones. Y a ti misma, el dolor te atravesará como una espada.»",
+        "contemplacion": "Simeón no endulzó la realidad. Le dijo a María, con el niño en brazos, que el dolor la atravesaría como una espada.\n\nY María no huyó. No retiró la ofrenda. Permaneció ahí, sosteniendo a su hijo y sosteniendo la verdad de lo que venía.",
+        "meditacion": "Por María hacia Jesús: ¿Qué siente María al escuchar que una espada le atravesará el alma, sin soltar a su hijo?\nDesde el Hijo hacia el Padre: ¿Qué nos enseña Jesús sobre la entrega cuando el futuro es incierto?\nHijos y hermanos en el Espíritu: ¿Qué verdad dolorosa has intentado evitar en lugar de sostenerla con fe?",
+        "intercesion": "Señor Jesús, que fuiste presentado en el Templo mientras tu Madre escuchaba la profecía del dolor: danos la fortaleza para no huir de la verdad.\n\nAmén.",
+        "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_4.mp3"
+      },
+      {
+        "numero": 5,
+        "titulo": "El Niño Perdido y Hallado en el Templo",
+        "subtitulo": "Perder el control no es perder a Dios",
+        "referencia": "Lucas 2:41-52 (DHH)",
+        "evangelio": "Los padres de Jesús iban todos los años a Jerusalén para la fiesta de la Pascua. Cuando Jesús cumplió doce años, fueron allá como era costumbre. Pero cuando regresaron, el niño Jesús se quedó en Jerusalén, sin que sus padres se dieran cuenta. Al cabo de tres días lo encontraron en el templo, sentado entre los maestros de la ley.",
+        "contemplacion": "María y José perdieron a Jesús durante tres días. Tres días de angustia, de búsqueda, de no saber.\n\nDios no les avisó. No les mandó un ángel esta vez. Simplemente los dejó buscar.\n\nA veces Dios permite que perdamos el control, no para castigarnos, sino para que lo encontremos donde no esperábamos.",
+        "meditacion": "Por María hacia Jesús: ¿Qué siente María durante esos tres días sin saber dónde está su hijo?\nDesde el Hijo hacia el Padre: ¿Qué nos enseña Jesús al quedarse en el Templo sin avisar a sus padres?\nHijos y hermanos en el Espíritu: ¿En qué momento de tu vida sentiste que habías perdido a Dios, y luego lo encontraste donde no esperabas?",
+        "intercesion": "Señor Jesús, que permitiste que tus padres te buscaran durante tres días: enséñanos a buscarte con paciencia cuando sentimos que te hemos perdido.\n\nAmén.",
+        "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_5.mp3"
+      }
+    ],
+    "luminosos": [
+      { "numero": 6, "titulo": "El Bautismo de Jesús", "subtitulo": "Reconocer lo que somos", "referencia": "Mateo 3:13-17 (DHH)", "evangelio": "Jesús fue de Galilea al río Jordán, donde estaba Juan, para que éste lo bautizara.", "contemplacion": "Jesús no necesitaba ser bautizado. Pero se puso en la fila con los pecadores.", "meditacion": "Por María hacia Jesús: ¿Qué siente María al ver a su hijo en la fila de los pecadores?\nDesde el Hijo hacia el Padre: ¿Qué nos dice Jesús al ponerse en la fila con nosotros?\nHijos y hermanos en el Espíritu: ¿Qué te cuesta reconocer de ti mismo ante los demás?", "intercesion": "Señor Jesús, que te pusiste en la fila con los pecadores: danos humildad para reconocer lo que somos.\n\nAmén.", "audio_contemplacion": "" },
+      { "numero": 7, "titulo": "Las Bodas de Caná", "subtitulo": "Cuando se acaba lo que teníamos", "referencia": "Juan 2:1-11 (DHH)", "evangelio": "Al tercer día hubo una boda en Caná de Galilea. Se acabó el vino, y la madre de Jesús le dijo: «Ya no tienen vino.»", "contemplacion": "Se acabó el vino. La fiesta estaba por terminar. Y María lo notó antes que nadie.", "meditacion": "Por María hacia Jesús: ¿Qué siente María al notar que algo falta en la fiesta?\nDesde el Hijo hacia el Padre: ¿Qué nos revela Jesús al transformar el agua en vino?\nHijos y hermanos en el Espíritu: ¿Qué se ha acabado en tu vida que necesitas presentarle a Jesús?", "intercesion": "Señor Jesús, que transformaste el agua en vino cuando todo parecía acabarse: transforma lo que falta en nuestra vida.\n\nAmén.", "audio_contemplacion": "" },
+      { "numero": 8, "titulo": "El Anuncio del Reino", "subtitulo": "La verdad que incomoda", "referencia": "Marcos 1:14-15 (DHH)", "evangelio": "Después que metieron a Juan en la cárcel, Jesús fue a Galilea a anunciar las buenas noticias de parte de Dios.", "contemplacion": "Jesús comenzó a predicar justo cuando Juan fue encarcelado. El anuncio del Reino nace en medio de la persecución, no en medio de la comodidad.", "meditacion": "Por María hacia Jesús: ¿Qué siente María al ver a su hijo predicar en medio del peligro?\nDesde el Hijo hacia el Padre: ¿Qué nos dice Jesús al anunciar el Reino cuando es más difícil?\nHijos y hermanos en el Espíritu: ¿Qué verdad necesitas decir aunque sea incómodo?", "intercesion": "Señor Jesús, que anunciaste el Reino en tiempos de persecución: danos valor para la verdad.\n\nAmén.", "audio_contemplacion": "" },
+      { "numero": 9, "titulo": "La Transfiguración", "subtitulo": "La gloria escondida en lo cotidiano", "referencia": "Mateo 17:1-8 (DHH)", "evangelio": "Seis días después, Jesús tomó a Pedro, a Santiago y a Juan, y los llevó a un cerro muy alto.", "contemplacion": "Por un instante, los discípulos vieron a Jesús como realmente es. Resplandeciente. Glorioso. Y luego volvieron a bajar al mundo cotidiano.", "meditacion": "Por María hacia Jesús: ¿Qué siente María sabiendo que su hijo esconde una gloria que pocos pueden ver?\nDesde el Hijo hacia el Padre: ¿Qué nos enseña Jesús al mostrarse glorioso y luego volver a lo ordinario?\nHijos y hermanos en el Espíritu: ¿En qué momentos has vislumbrado algo sagrado en tu vida ordinaria?", "intercesion": "Señor Jesús, que te mostraste glorioso en el Tabor: ábrenos los ojos para ver tu presencia en lo cotidiano.\n\nAmén.", "audio_contemplacion": "" },
+      { "numero": 10, "titulo": "La Institución de la Eucaristía", "subtitulo": "Darse entero cuando todo termina", "referencia": "Lucas 22:14-20 (DHH)", "evangelio": "Cuando llegó la hora, Jesús se sentó a la mesa con los apóstoles. Tomó el pan, dio gracias a Dios, lo partió y se lo dio a ellos diciendo: «Esto es mi cuerpo, entregado por ustedes.»", "contemplacion": "La noche antes de morir, Jesús no huyó. Se sentó a cenar con sus amigos. Y se dio entero.", "meditacion": "Por María hacia Jesús: ¿Qué siente María sabiendo que su hijo se entrega completamente esa noche?\nDesde el Hijo hacia el Padre: ¿Qué nos dice Jesús al convertir el pan en su cuerpo, entregado por nosotros?\nHijos y hermanos en el Espíritu: ¿En qué situación te está pidiendo Dios que te des entero, sin reservarte nada?", "intercesion": "Señor Jesús, que te diste entero en el pan y el vino: enséñanos a entregarnos sin reservas.\n\nAmén.", "audio_contemplacion": "" }
+    ],
+    "dolorosos": [
+      { "numero": 11, "titulo": "La Oración en el Huerto", "subtitulo": "El miedo no es cobardía", "referencia": "Mateo 26:36-46 (DHH)", "evangelio": "Luego fue Jesús con sus discípulos a un lugar llamado Getsemaní, y les dijo: «Siéntense aquí, mientras yo voy allí a orar.»", "contemplacion": "Jesús tuvo miedo. Sudó sangre. Le pidió al Padre que le quitara ese trago amargo. Y el Padre no se lo quitó.", "meditacion": "Por María hacia Jesús: ¿Qué siente María mientras su hijo suda sangre en Getsemaní?\nDesde el Hijo hacia el Padre: ¿Qué nos dice Jesús al pedirle al Padre que le quite el sufrimiento?\nHijos y hermanos en el Espíritu: ¿Qué miedo has sentido que te avergüenza reconocer?", "intercesion": "Señor Jesús, que tuviste miedo y no te avergonzaste de ello: enséñanos que sentir miedo no es ser cobardes.\n\nAmén.", "audio_contemplacion": "" },
+      { "numero": 12, "titulo": "La Flagelación", "subtitulo": "El cuerpo también sufre", "referencia": "Juan 19:1 (DHH)", "evangelio": "Pilato tomó entonces a Jesús y mandó azotarlo.", "contemplacion": "El cuerpo de Jesús fue golpeado. No solo su espíritu, no solo sus ideas. Su carne, sus músculos, su piel.", "meditacion": "Por María hacia Jesús: ¿Qué siente María sabiendo que su hijo está siendo azotado?\nDesde el Hijo hacia el Padre: ¿Qué nos revela Jesús al aceptar el dolor en su cuerpo?\nHijos y hermanos en el Espíritu: ¿Qué dolor físico has minimizado o ignorado que necesita ser reconocido?", "intercesion": "Señor Jesús, que aceptaste el dolor en tu cuerpo: enséñanos a cuidar nuestro cuerpo y a no ignorar su sufrimiento.\n\nAmén.", "audio_contemplacion": "" },
+      { "numero": 13, "titulo": "La Coronación de Espinas", "subtitulo": "La burla que hiere más que el golpe", "referencia": "Mateo 27:27-31 (DHH)", "evangelio": "Los soldados del gobernador llevaron a Jesús al palacio y reunieron alrededor de él a toda la tropa. Le quitaron la ropa y le pusieron un manto rojo. Trenzaron una corona de espinas y se la pusieron en la cabeza.", "contemplacion": "Lo vistieron de rey para burlarse. Le pusieron una corona para humillarlo. La burla duele más que el golpe porque ataca la dignidad.", "meditacion": "Por María hacia Jesús: ¿Qué siente María al saber que su hijo está siendo humillado?\nDesde el Hijo hacia el Padre: ¿Qué nos dice Jesús al aceptar la burla sin devolver el golpe?\nHijos y hermanos en el Espíritu: ¿Qué humillación has sufrido que todavía te duele?", "intercesion": "Señor Jesús, coronado de espinas y burlado: sana las heridas de la humillación que cargamos.\n\nAmén.", "audio_contemplacion": "" },
+      { "numero": 14, "titulo": "Jesús Carga la Cruz", "subtitulo": "Lo que no puedes soltar", "referencia": "Juan 19:17 (DHH)", "evangelio": "Jesús salió llevando su propia cruz, hacia el lugar llamado «La Calavera», que en hebreo se llama Gólgota.", "contemplacion": "Jesús cargó su propia cruz. No la eligió, pero la llevó. A veces la vida nos pone cargas que no elegimos.", "meditacion": "Por María hacia Jesús: ¿Qué siente María al ver a su hijo cargando la cruz por las calles?\nDesde el Hijo hacia el Padre: ¿Qué nos enseña Jesús al cargar algo que no eligió?\nHijos y hermanos en el Espíritu: ¿Qué cruz cargas que no elegiste y que necesitas aprender a llevar?", "intercesion": "Señor Jesús, que cargaste la cruz sin haberla elegido: acompáñanos con las cargas que no elegimos.\n\nAmén.", "audio_contemplacion": "" },
+      { "numero": 15, "titulo": "La Crucifixión y Muerte de Jesús", "subtitulo": "El fin que no es el fin", "referencia": "Lucas 23:44-46 (DHH)", "evangelio": "Desde el mediodía hasta las tres de la tarde, toda la tierra quedó en oscuridad. Entonces Jesús gritó con fuerza: «¡Padre, en tus manos encomiendo mi espíritu!» Y al decir esto, murió.", "contemplacion": "Jesús murió. De verdad murió. No fue un teatro. El Hijo de Dios experimentó la muerte en toda su oscuridad.", "meditacion": "Por María hacia Jesús: ¿Qué siente María al pie de la cruz, viendo morir a su hijo?\nDesde el Hijo hacia el Padre: ¿Qué nos dice Jesús al encomendar su espíritu al Padre en la hora más oscura?\nHijos y hermanos en el Espíritu: ¿Qué ha muerto en tu vida que necesitas encomendar al Padre?", "intercesion": "Señor Jesús, que moriste en la cruz y encomendaste tu espíritu al Padre: enséñanos a soltar lo que necesita morir para que algo nuevo pueda nacer.\n\nAmén.", "audio_contemplacion": "" }
+    ],
+    "gloriosos": [
+      { "numero": 16, "titulo": "La Resurrección", "subtitulo": "Lo que parecía el fin era el comienzo", "referencia": "Mateo 28:1-6 (DHH)", "evangelio": "Pasado el sábado, cuando al amanecer comenzaba el primer día de la semana, María Magdalena y la otra María fueron a ver el sepulcro.", "contemplacion": "La piedra fue removida. El sepulcro estaba vacío. Lo que parecía terminado, apenas comenzaba.", "meditacion": "Por María hacia Jesús: ¿Qué siente María al saber que su hijo ha resucitado?\nDesde el Hijo hacia el Padre: ¿Qué nos dice Jesús al volver de la muerte?\nHijos y hermanos en el Espíritu: ¿Qué situación que dabas por terminada podría estar apenas comenzando?", "intercesion": "Señor Jesús resucitado: renueva nuestra esperanza donde creíamos que ya no había nada.\n\nAmén.", "audio_contemplacion": "" },
+      { "numero": 17, "titulo": "La Ascensión", "subtitulo": "Soltar para crecer", "referencia": "Hechos 1:9-11 (DHH)", "evangelio": "Dicho esto, mientras ellos lo estaban mirando, Jesús fue levantado, y una nube lo envolvió y no lo volvieron a ver.", "contemplacion": "Jesús se fue. Los dejó. Y eso no fue un abandono — fue una invitación a crecer.", "meditacion": "Por María hacia Jesús: ¿Qué siente María al ver a su hijo ascender al cielo?\nDesde el Hijo hacia el Padre: ¿Qué nos enseña Jesús al irse para que el Espíritu pueda venir?\nHijos y hermanos en el Espíritu: ¿Qué necesitas soltar para que algo nuevo pueda llegar?", "intercesion": "Señor Jesús, que ascendiste para que el Espíritu pudiera venir: enséñanos a soltar con confianza.\n\nAmén.", "audio_contemplacion": "" },
+      { "numero": 18, "titulo": "La Venida del Espíritu Santo", "subtitulo": "El fuego que transforma el miedo", "referencia": "Hechos 2:1-4 (DHH)", "evangelio": "Cuando llegó la fiesta de Pentecostés, todos los creyentes se encontraban reunidos en un mismo lugar.", "contemplacion": "Los discípulos estaban encerrados por miedo. El Espíritu llegó como fuego y los sacó a la calle.", "meditacion": "Por María hacia Jesús: ¿Qué siente María al recibir el Espíritu junto con los discípulos?\nDesde el Hijo hacia el Padre: ¿Qué nos dice el Espíritu al transformar el miedo en valentía?\nHijos y hermanos en el Espíritu: ¿Qué miedo te tiene encerrado que el Espíritu podría transformar?", "intercesion": "Espíritu Santo, que transformaste el miedo de los apóstoles en fuego: enciende nuestro corazón.\n\nAmén.", "audio_contemplacion": "" },
+      { "numero": 19, "titulo": "La Asunción de María", "subtitulo": "El cuerpo importa hasta el final", "referencia": "Apocalipsis 12:1 (DHH)", "evangelio": "Apareció en el cielo una gran señal: una mujer vestida del sol, con la luna debajo de sus pies y una corona de doce estrellas en la cabeza.", "contemplacion": "María fue llevada al cielo en cuerpo y alma. Dios no descartó su cuerpo. Lo glorificó.", "meditacion": "Por María hacia Jesús: ¿Qué siente María al ser llevada al cielo con todo lo que es?\nDesde el Hijo hacia el Padre: ¿Qué nos dice Dios al glorificar el cuerpo de María?\nHijos y hermanos en el Espíritu: ¿Cómo cuidas tu cuerpo sabiendo que es templo del Espíritu?", "intercesion": "Madre María, asunta al cielo en cuerpo y alma: recuérdanos que nuestro cuerpo importa y es sagrado.\n\nAmén.", "audio_contemplacion": "" },
+      { "numero": 20, "titulo": "La Coronación de María", "subtitulo": "El servicio que se convierte en gloria", "referencia": "Apocalipsis 12:1 (DHH)", "evangelio": "Apareció en el cielo una gran señal: una mujer vestida del sol, con la luna debajo de sus pies y una corona de doce estrellas en la cabeza.", "contemplacion": "María no buscó la corona. Sirvió. Obedeció. Permaneció. Y Dios la coronó.\n\nLa gloria no se busca. Se recibe cuando se ha servido con fidelidad.", "meditacion": "Por María hacia Jesús: ¿Qué siente María al ser coronada reina del cielo y de la tierra?\nDesde el Hijo hacia el Padre: ¿Qué nos enseña Dios al coronar a quien solo sirvió?\nHijos y hermanos en el Espíritu: ¿Qué servicio silencioso en tu vida podría Dios estar preparando para coronar?", "intercesion": "Madre María, Reina del cielo: recuérdanos que la verdadera grandeza viene del servicio fiel y silencioso.\n\nAmén.", "audio_contemplacion": "" }
+    ]
+  }
+}
