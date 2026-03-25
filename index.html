@@ -96,6 +96,29 @@ body {
 .home-intro h1 { font-size:1.35rem; font-weight:800; color:var(--text); margin-bottom:4px; }
 .home-intro p { font-size:0.82rem; color:var(--text-dim); }
 
+/* ── Banner Misterios del Día ── */
+.today-banner {
+  margin:0 18px 16px; padding:16px 20px; border-radius:16px;
+  background:var(--card); border:2px solid var(--lvl-bold);
+  box-shadow:0 3px 18px var(--lvl-ultra);
+  cursor:pointer; transition:all 0.25s;
+}
+.today-banner:active { transform:scale(0.98); }
+.today-banner-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+.today-banner-label {
+  font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:1px;
+  color:var(--lvl-bold); display:flex; align-items:center; gap:5px;
+}
+.today-pulse {
+  width:8px; height:8px; border-radius:50%; background:var(--lvl-bold);
+  animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.5; transform:scale(1.4); } }
+.today-banner-arrow { color:var(--lvl-bold); font-size:1.2rem; font-weight:700; }
+.today-banner h3 { font-size:1.1rem; font-weight:800; margin-bottom:2px; }
+.today-banner-days { font-size:0.72rem; color:var(--text-dim); }
+.block-card.today { border-color:var(--lvl-soft); background:linear-gradient(135deg,var(--card),var(--lvl-ultra)); }
+
 .block-grid { display:flex; flex-direction:column; gap:14px; padding:8px 18px 24px; }
 .block-card {
   background:var(--card); border-radius:16px; padding:18px 20px;
@@ -114,6 +137,7 @@ body {
 .block-badge.pending { background:var(--sec-bg); color:var(--text-dim); }
 .block-badge.progress { background:var(--lvl-ultra); color:var(--lvl-bold); }
 .block-badge.cleared { background:var(--green-soft); color:var(--green); }
+.block-badge.today { background:var(--lvl-bold); color:#fff; }
 .block-title { font-size:1.05rem; font-weight:700; margin-bottom:2px; }
 .block-subtitle { font-size:0.78rem; color:var(--text-soft); font-style:italic; }
 .block-progress { margin-top:12px; }
@@ -366,6 +390,7 @@ body {
       <h1 id="home-title"></h1>
       <p id="home-element"></p>
     </div>
+    <div id="today-banner-wrap"></div>
     <div class="block-grid" id="block-grid"></div>
     <div id="cuaderno-done-wrap" style="display:none"></div>
   </div>
@@ -646,6 +671,28 @@ body {
 
     let allCleared = true;
     const todayBlock = DAY_BLOCKS[new Date().getDay()];
+    const todayCleared = progress[todayBlock] && progress[todayBlock].every(x => x !== null);
+
+    // Banner "Misterios del día"
+    const DAY_NAMES_ES = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    const BLOCK_DAYS = {};
+    for (let d = 0; d < 7; d++) { const bl = DAY_BLOCKS[d]; if (!BLOCK_DAYS[bl]) BLOCK_DAYS[bl] = []; BLOCK_DAYS[bl].push(DAY_NAMES_ES[d]); }
+    const todayName = DAY_NAMES_ES[new Date().getDay()];
+    const bannerWrap = $('today-banner-wrap');
+
+    if (!todayCleared) {
+      bannerWrap.innerHTML =
+        '<div class="today-banner fade-in" onclick="window._ca.enterBlock(\'' + todayBlock + '\')">' +
+          '<div class="today-banner-top">' +
+            '<span class="today-banner-label"><span class="today-pulse"></span> Misterios del día · ' + todayName + '</span>' +
+            '<span class="today-banner-arrow">→</span>' +
+          '</div>' +
+          '<h3 style="color:' + blockColor(todayBlock) + '">' + blockEmoji(todayBlock) + ' Misterios ' + BLOCK_NAMES[todayBlock] + '</h3>' +
+          '<div class="today-banner-days">' + BLOCK_DAYS[todayBlock].join(' · ') + '</div>' +
+        '</div>';
+    } else {
+      bannerWrap.innerHTML = '';
+    }
 
     BLOCKS.forEach((b, bi) => {
       const mists = DATA.misterios[b] || [];
@@ -655,9 +702,10 @@ body {
       const isInProgress = doneCount > 0 && !isCleared;
       if (!isCleared) allCleared = false;
 
-      const status = isCleared ? 'cleared' : isInProgress ? 'progress' : 'pending';
-      const statusLabel = isCleared ? '✓ Completado' : isInProgress ? 'En progreso' : (b === todayBlock ? 'Hoy' : 'Pendiente');
-      const extraClass = isCleared ? 'cleared' : (isInProgress || b === todayBlock) ? 'current' : '';
+      const isToday = b === todayBlock && !isCleared;
+      const status = isCleared ? 'cleared' : isInProgress ? 'progress' : (isToday ? 'today' : 'pending');
+      const statusLabel = isCleared ? '✓ Completado' : isInProgress ? 'En progreso' : (isToday ? 'Hoy' : 'Pendiente');
+      const extraClass = isCleared ? 'cleared' : isToday ? 'today' : isInProgress ? 'current' : '';
 
       const card = document.createElement('div');
       card.className = 'block-card fade-in fade-in-d' + (bi+1) + ' ' + extraClass;
@@ -1023,6 +1071,7 @@ body {
       completeMystery: completeMystery,
       goMystery: goMystery,
       saveJournal: saveJournal,
+      enterBlock: enterBlock,
     };
 
     // Render
