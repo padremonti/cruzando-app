@@ -1,9 +1,10 @@
-{
+Sí, exacto. Todo lo de misterios (línea 34 en adelante) está perfecto. Solo necesitas cambiar las líneas 1-33, que quedarían así:
+json{
   "tema": {
     "id": "0101",
-    "nivel_slug": "cruz",
-    "nivel_nombre": "CruzAndo la Cruz",
-    "cuaderno_slug": "males",
+    "mundo_slug": "cruz",
+    "mundo_nombre": "CruzAndo la Cruz",
+    "elemento_slug": "males",
     "siguiente": "0102",
     "paleta": {
       "bold": "#FF7A00",
@@ -20,13 +21,13 @@
       "gloriosos": { "emoji": "👑", "color": "#8E44AD" }
     }
   },
-  "nivel": "CruzAndo la Cruz",
-  "cuaderno": "Males",
+  "mundo": "CruzAndo la Cruz",
+  "elemento": "Males",
   "numero": "1",
   "audio_rezo": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/rezo.mp3",
   "audio_canto": "",
   "subtitulos_bloque": {
-    "gozosos": "La vulnerabilidad gozosa",
+    "gozosos": "La vulnerabilidad",
     "luminosos": "Límites que dan luz",
     "dolorosos": "Límites que salvan",
     "gloriosos": "El mal no es el final"
@@ -94,7 +95,7 @@
         "numero": 6,
         "titulo": "Bautismo en el Jordán",
         "subtitulo": "Desgaste y renovación",
-        "referencia": "MARCOS 1:9-11 (DHH)",
+        "referencia": "Marcos 1:9-11 (DHH)",
         "evangelio": "Por aquellos días, Jesús salió de Nazaret, que está en la región de Galilea, y Juan lo bautizó en el río Jordán. En el momento de salir Jesús del agua, vio que el cielo se abría y que el Espíritu Santo bajaba sobre él como una paloma. Y se oyó una voz del cielo, que decía: «Tú eres mi Hijo amado, a quien he elegido.»",
         "contemplacion": "La vida necesita ser renovada, siempre\nEl agua lava. Restaura. Devuelve al cuerpo lo que el tiempo y el desgaste van quitando. Nadie escapa a esa necesidad. Por más sano que estés, por más que cuides tu vida, el cuerpo pide ser lavado, alimentado, descansado, repuesto. Eso no es señal de que algo salió mal. Es la condición ordinaria de todo lo que vive.\nJesús se metió en el Jordán. El Verbo eterno, que no envejece ni se desgasta, asumió un cuerpo que sí lo hace. Un cuerpo que suda, que se cansa, que se ensucia, que necesita agua. Al sumergirse en el río, el Hijo de Dios hizo suya esa condición: la de una vida que requiere mantenimiento, renovación, cuidado constante.\nNo vino a librarse de esa necesidad. Vino a habitarla. Y al habitarla, la santificó.\nLos males de la vida no son solo las grandes crisis o los golpes inesperados. Son también esto: cuidar lo cotidiano, componer el desorden que vuelve cada día, realizar esa labor de limpieza que nunca termina de satisfacerse de una vez para siempre. Eso también es parte de cargar la cruz. Y Jesús lo conoce desde adentro, desde el agua del Jordán.",
         "meditacion": "Por María hacia Jesús:\n¿Qué sintió el Corazón Inmaculado de María cuando educó a su hijo en los hábitos de la higiene y el orden?\nDesde el Hijo hacia el Padre:\n¿Qué sintió Jesús al estar esperando, en la fila, como uno más, necesitado de purificación?\nHijos y hermanos en el Espíritu:\n¿Qué áreas de mi vida requieren de un cuidado constante, con ayuda de Dios?",
