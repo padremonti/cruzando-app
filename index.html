@@ -1,188 +1,1050 @@
 <!DOCTYPE html>
-
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CruzAndo - Males</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#E6DED3">
+<title>CruzAndo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-*{box-sizing:border-box;margin:0;padding:0}
-body,button,textarea,input{font-family:'Inter',system-ui,sans-serif}
-body{margin:0;overflow-x:hidden}
-::placeholder{color:var(--textDim)}
-::-webkit-scrollbar{width:3px}
-::-webkit-scrollbar-thumb{border-radius:2px}
-textarea{resize:vertical}
-:root{--bg:#E6DED3;--card:#FFFCF7;--border:#D9D1C7;--text:#2B2622;--textSoft:#6B6259;--textDim:#9B9389;--disabled:#CFCFCF;--inputBg:#FFFCF7;--secBg:#F5F0E8}
-body.dark{--bg:#1A1714;--card:#252119;--border:#3A3530;--text:#E6DED3;--textSoft:#B8A898;--textDim:#786858;--disabled:#4A4540;--inputBg:#2A2520;--secBg:#1E1B16}
-body{background:var(--bg);color:var(--text)}
-@keyframes sU{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+/* ══════════════════════════════════════════════════════
+   CSS — CruzAndo App · Vanilla JS · Cero dependencias
+   Colores dinámicos via CSS custom properties
+   ══════════════════════════════════════════════════════ */
+
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+
+:root {
+  /* ── Neutros Light ── */
+  --bg: #E6DED3;
+  --card: #FFFCF7;
+  --border: #D9D1C7;
+  --text: #2B2622;
+  --text-soft: #6B6259;
+  --text-dim: #9B9389;
+  --input-bg: #FFFCF7;
+  --sec-bg: #F5F0E8;
+  --shadow: rgba(43,38,34,0.08);
+  --green: #34A853;
+  --green-soft: rgba(52,168,83,0.12);
+  /* ── Paleta del nivel (se sobreescriben desde JS) ── */
+  --lvl-bold: #FF7A00;
+  --lvl-base: #FF7F09;
+  --lvl-soft: #F69C49;
+  --lvl-mist: #FFA34E;
+  --lvl-light: #FFCFA2;
+  --lvl-ultra: rgba(255,122,0,0.07);
+  /* ── Bloques ── */
+  --goz-color: #D4A017;
+  --lum-color: #01BBE1;
+  --dol-color: #C0392B;
+  --glo-color: #8E44AD;
+  /* ── Brand ── */
+  --brand: #01BBE1;
+}
+
+.dark {
+  --bg: #1A1714;
+  --card: #252119;
+  --border: #3A3530;
+  --text: #E6DED3;
+  --text-soft: #B8A898;
+  --text-dim: #786858;
+  --input-bg: #2A2520;
+  --sec-bg: #1E1B16;
+  --shadow: rgba(0,0,0,0.3);
+  --green-soft: rgba(52,168,83,0.18);
+}
+
+html { font-size:18px; }
+body {
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.7;
+  min-height:100dvh;
+  -webkit-font-smoothing:antialiased;
+  transition:background 0.4s,color 0.4s;
+}
+
+/* ── Layout ── */
+.shell { max-width:480px; margin:0 auto; min-height:100dvh; position:relative; }
+.screen { display:none; }
+.screen.active { display:block; }
+
+/* ── Header ── */
+.header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 18px 10px; position:sticky; top:0; z-index:50;
+  background:var(--bg); border-bottom:1px solid var(--border);
+}
+.header-title { font-size:1.05rem; font-weight:700; color:var(--lvl-bold); }
+.header-sub { font-size:0.72rem; color:var(--text-dim); margin-top:1px; }
+.header-actions { display:flex; gap:8px; align-items:center; }
+.icon-btn {
+  width:36px; height:36px; border-radius:50%; border:1px solid var(--border);
+  background:var(--card); cursor:pointer; display:flex; align-items:center;
+  justify-content:center; color:var(--text-soft); transition:all 0.2s;
+}
+.icon-btn:active { transform:scale(0.92); }
+
+/* ── Pantalla de Inicio: Tarjetas de Bloques ── */
+.home-intro { padding:24px 18px 12px; text-align:center; }
+.home-intro h1 { font-size:1.35rem; font-weight:800; color:var(--text); margin-bottom:4px; }
+.home-intro p { font-size:0.82rem; color:var(--text-dim); }
+
+.block-grid { display:flex; flex-direction:column; gap:14px; padding:8px 18px 24px; }
+.block-card {
+  background:var(--card); border-radius:16px; padding:18px 20px;
+  border:2px solid var(--border); cursor:pointer;
+  transition:all 0.25s; position:relative; overflow:hidden;
+}
+.block-card:active { transform:scale(0.98); }
+.block-card.cleared { border-color:var(--green); }
+.block-card.current { border-color:var(--lvl-bold); box-shadow:0 2px 16px var(--lvl-ultra); }
+.block-card-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.block-emoji { font-size:1.6rem; }
+.block-badge {
+  font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.8px;
+  padding:3px 10px; border-radius:20px;
+}
+.block-badge.pending { background:var(--sec-bg); color:var(--text-dim); }
+.block-badge.progress { background:var(--lvl-ultra); color:var(--lvl-bold); }
+.block-badge.cleared { background:var(--green-soft); color:var(--green); }
+.block-title { font-size:1.05rem; font-weight:700; margin-bottom:2px; }
+.block-subtitle { font-size:0.78rem; color:var(--text-soft); font-style:italic; }
+.block-progress { margin-top:12px; }
+.block-dots { display:flex; gap:6px; }
+.block-dot {
+  width:10px; height:10px; border-radius:50%;
+  background:var(--border); transition:all 0.3s;
+}
+.block-dot.done { background:var(--green); box-shadow:0 0 6px rgba(52,168,83,0.4); }
+.block-dot.active { background:var(--lvl-bold); box-shadow:0 0 8px var(--lvl-light); }
+
+/* ── Banner de cuaderno completado ── */
+.cuaderno-done-banner {
+  margin:8px 18px 18px; padding:20px; border-radius:16px;
+  background:linear-gradient(135deg,var(--green-soft),rgba(52,168,83,0.05));
+  border:2px solid var(--green); text-align:center;
+}
+.cuaderno-done-banner h3 { font-size:1.1rem; color:var(--green); margin-bottom:6px; }
+.cuaderno-done-banner p { font-size:0.82rem; color:var(--text-soft); margin-bottom:14px; }
+
+/* ── Botones ── */
+.btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding:14px 28px; border-radius:14px; border:none; cursor:pointer;
+  font-family:inherit; font-size:0.88rem; font-weight:700;
+  transition:all 0.2s; letter-spacing:0.3px;
+}
+.btn:active { transform:scale(0.96); }
+.btn-primary { background:var(--lvl-bold); color:#fff; box-shadow:0 4px 14px rgba(0,0,0,0.15); }
+.btn-green { background:var(--green); color:#fff; }
+.btn-outline { background:transparent; border:2px solid var(--border); color:var(--text-soft); }
+.btn-ghost { background:transparent; color:var(--text-soft); padding:10px 14px; font-size:0.82rem; }
+.btn-block { width:100%; }
+
+/* ── Pantalla de Oración ── */
+.prayer-header { padding:16px 18px 10px; }
+.prayer-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.mystery-counter { font-size:0.72rem; font-weight:600; color:var(--text-dim); letter-spacing:1px; text-transform:uppercase; }
+.mystery-title { font-size:1.15rem; font-weight:800; margin-bottom:2px; }
+.mystery-subtitle { font-size:0.82rem; color:var(--text-soft); font-style:italic; }
+
+/* Dots de misterios del bloque */
+.mystery-dots { display:flex; gap:6px; padding:0 18px 14px; }
+.m-dot {
+  flex:1; height:5px; border-radius:3px;
+  background:var(--border); transition:all 0.3s;
+}
+.m-dot.done { background:var(--green); }
+.m-dot.active { background:var(--lvl-bold); }
+
+/* ── Evangelio ── */
+.evangelio-box {
+  margin:0 18px 14px; padding:20px; border-radius:16px;
+  background:var(--card); border-left:4px solid var(--lvl-soft);
+}
+.evangelio-label {
+  font-size:0.68rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:1.2px; color:var(--lvl-bold); margin-bottom:10px;
+  display:flex; align-items:center; gap:6px;
+}
+.evangelio-text { font-size:0.95rem; line-height:1.85; color:var(--text); }
+.evangelio-ref { font-size:0.78rem; color:var(--text-dim); text-align:right; margin-top:12px; font-style:italic; }
+
+/* ── Acordeón ── */
+.accordion { margin:0 18px 10px; }
+.acc-item { background:var(--card); border-radius:14px; margin-bottom:10px; overflow:hidden; border:1.5px solid var(--border); transition:border-color 0.3s; }
+.acc-item.open { border-color:var(--lvl-soft); }
+.acc-trigger {
+  width:100%; display:flex; align-items:center; justify-content:space-between;
+  padding:14px 18px; background:none; border:none; cursor:pointer;
+  font-family:inherit; color:var(--text); transition:background 0.2s;
+}
+.acc-trigger:active { background:var(--sec-bg); }
+.acc-trigger-left { display:flex; align-items:center; gap:10px; }
+.acc-icon {
+  width:32px; height:32px; border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1rem;
+}
+.acc-label { font-size:0.88rem; font-weight:600; }
+.acc-chevron { transition:transform 0.3s; color:var(--text-dim); }
+.acc-item.open .acc-chevron { transform:rotate(180deg); }
+.acc-body { max-height:0; overflow:hidden; transition:max-height 0.4s ease; }
+.acc-body-inner { padding:0 18px 18px; }
+
+/* ── Audio Player ── */
+.audio-player {
+  display:flex; align-items:center; gap:12px; padding:12px 16px;
+  background:var(--sec-bg); border-radius:12px;
+}
+.play-btn {
+  width:44px; height:44px; border-radius:50%; border:none;
+  background:var(--lvl-bold); color:#fff; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; transition:all 0.2s;
+}
+.play-btn:active { transform:scale(0.9); }
+.audio-info { flex:1; min-width:0; }
+.audio-label { font-size:0.75rem; color:var(--text-soft); margin-bottom:4px; }
+.audio-bar-wrap { width:100%; height:5px; background:var(--border); border-radius:3px; cursor:pointer; position:relative; }
+.audio-bar-fill { height:100%; border-radius:3px; background:var(--lvl-bold); transition:width 0.1s linear; }
+.audio-time { font-size:0.68rem; color:var(--text-dim); margin-top:3px; display:flex; justify-content:space-between; }
+
+/* ── Canto ── */
+.canto-box {
+  padding:18px; background:var(--lvl-ultra); border-radius:14px;
+  border-left:3px solid var(--lvl-soft); text-align:center;
+}
+.canto-box p { font-size:0.88rem; color:var(--text); font-style:italic; line-height:1.7; }
+.canto-box .canto-hint { font-size:0.78rem; color:var(--text-dim); margin-top:8px; display:block; }
+
+/* ── Contemplación texto ── */
+.contempl-text {
+  margin-top:14px; padding:16px 18px; background:var(--sec-bg);
+  border-radius:14px; border-left:3px solid var(--lvl-soft);
+  font-size:0.92rem; line-height:1.9; white-space:pre-line;
+}
+
+/* ── Meditación ── */
+.med-group { margin-bottom:18px; }
+.med-label-row { display:flex; align-items:center; gap:7px; margin-bottom:6px; }
+.med-dot { width:7px; height:7px; border-radius:50%; }
+.med-label-text { font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; }
+.med-question { font-size:0.92rem; line-height:1.7; margin-bottom:10px; }
+.journal-area {
+  width:100%; min-height:100px; padding:14px; border-radius:12px;
+  border:1.5px solid var(--border); background:var(--input-bg);
+  font-family:inherit; font-size:0.88rem; line-height:1.6;
+  color:var(--text); resize:vertical; transition:border-color 0.3s;
+}
+.journal-area:focus { outline:none; border-color:var(--lvl-soft); }
+.journal-area::placeholder { color:var(--text-dim); }
+
+/* ── Intercesión ── */
+.interc-text {
+  padding:18px; background:var(--lvl-ultra); border-radius:14px;
+  font-size:0.92rem; line-height:1.85; white-space:pre-line;
+}
+.amen-btn {
+  display:block; width:100%; margin-top:14px; padding:16px;
+  border-radius:14px; border:none; cursor:pointer;
+  font-family:inherit; font-size:1rem; font-weight:800;
+  background:var(--lvl-bold); color:#fff; letter-spacing:1px;
+  transition:all 0.2s; box-shadow:0 4px 16px rgba(0,0,0,0.12);
+}
+.amen-btn:active { transform:scale(0.96); }
+.amen-btn.done { background:var(--green); }
+
+/* ── Completado de misterio ── */
+.mystery-done-bar {
+  margin:12px 18px; padding:14px 18px; border-radius:14px;
+  background:var(--green-soft); border:1.5px solid rgba(52,168,83,0.2);
+  display:flex; align-items:center; gap:10px;
+}
+.done-check { color:var(--green); font-size:1.2rem; }
+.done-text { font-size:0.82rem; font-weight:600; color:var(--green); }
+.done-date { font-size:0.72rem; color:var(--text-dim); }
+
+/* ── Navegación inferior ── */
+.bottom-nav {
+  padding:14px 18px 28px; display:flex; gap:10px;
+}
+.bottom-nav .btn { flex:1; }
+
+/* ── Pantalla de celebración de bloque ── */
+.celebration-screen { text-align:center; padding:40px 24px; }
+.maria-img {
+  width:200px; height:200px; border-radius:50%; object-fit:cover;
+  border:4px solid var(--lvl-soft); margin:0 auto 24px;
+  box-shadow:0 8px 32px var(--shadow);
+}
+.maria-placeholder {
+  width:200px; height:200px; border-radius:50%; margin:0 auto 24px;
+  background:linear-gradient(135deg,var(--lvl-ultra),var(--lvl-light));
+  border:4px solid var(--lvl-soft); display:flex; align-items:center;
+  justify-content:center; font-size:4rem;
+  box-shadow:0 8px 32px var(--shadow);
+}
+.celebration-title { font-size:1.3rem; font-weight:800; margin-bottom:8px; }
+.celebration-sub { font-size:0.88rem; color:var(--text-soft); margin-bottom:24px; line-height:1.7; }
+
+/* ── Error / Loading ── */
+.loading-screen, .error-screen {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  min-height:80dvh; padding:40px 24px; text-align:center;
+}
+.spinner {
+  width:40px; height:40px; border:3px solid var(--border);
+  border-top-color:var(--lvl-bold); border-radius:50%;
+  animation:spin 0.8s linear infinite; margin-bottom:18px;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* ── Celebración animada ── */
+.confetti-container { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:999; }
+.confetti-piece {
+  position:absolute; width:8px; height:8px; border-radius:2px;
+  animation:confettiFall 2.5s ease-out forwards;
+}
+@keyframes confettiFall {
+  0% { transform:translateY(-20px) rotate(0deg); opacity:1; }
+  100% { transform:translateY(100vh) rotate(720deg); opacity:0; }
+}
+
+/* ── Fade in ── */
+@keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+.fade-in { animation:fadeIn 0.4s ease both; }
+.fade-in-d1 { animation-delay:0.08s; }
+.fade-in-d2 { animation-delay:0.16s; }
+.fade-in-d3 { animation-delay:0.24s; }
+.fade-in-d4 { animation-delay:0.32s; }
+
+/* Responsivo */
+@media(max-width:380px) { html { font-size:16px; } }
 </style>
 </head>
 <body>
-<div id="app"></div>
+<div class="shell" id="app">
+  <!-- Loading -->
+  <div class="loading-screen" id="scr-loading">
+    <div class="spinner"></div>
+    <p style="font-size:0.88rem;color:var(--text-dim)">Cargando cuaderno…</p>
+  </div>
+
+  <!-- Error -->
+  <div class="error-screen" id="scr-error" style="display:none">
+    <div style="font-size:3rem;margin-bottom:16px">📿</div>
+    <h2 style="font-size:1.1rem;margin-bottom:8px">No se encontró el cuaderno</h2>
+    <p id="error-msg" style="font-size:0.82rem;color:var(--text-dim);margin-bottom:20px"></p>
+    <a href="?c=0101" class="btn btn-primary">Ir a Males (0101)</a>
+  </div>
+
+  <!-- ═══ HEADER (compartido) ═══ -->
+  <header class="header" id="main-header" style="display:none">
+    <div>
+      <div class="header-title" id="h-title"></div>
+      <div class="header-sub" id="h-sub"></div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="btn-dark" title="Modo oscuro">
+        <svg id="ico-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg id="ico-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ═══ PANTALLA INICIO ═══ -->
+  <div class="screen" id="scr-home">
+    <div class="home-intro fade-in">
+      <h1 id="home-title"></h1>
+      <p id="home-element"></p>
+    </div>
+    <div class="block-grid" id="block-grid"></div>
+    <div id="cuaderno-done-wrap" style="display:none"></div>
+  </div>
+
+  <!-- ═══ PANTALLA DE ORACIÓN ═══ -->
+  <div class="screen" id="scr-prayer">
+    <div class="prayer-header fade-in">
+      <div class="prayer-nav">
+        <button class="btn-ghost" id="btn-back-home">← Inicio</button>
+        <span class="mystery-counter" id="prayer-counter"></span>
+      </div>
+      <div class="mystery-title" id="prayer-title"></div>
+      <div class="mystery-subtitle" id="prayer-subtitle"></div>
+    </div>
+    <div class="mystery-dots" id="prayer-dots"></div>
+
+    <!-- Evangelio -->
+    <div class="evangelio-box fade-in fade-in-d1" id="evangelio-box">
+      <div class="evangelio-label">📖 Evangelio</div>
+      <div class="evangelio-text" id="ev-text"></div>
+      <div class="evangelio-ref" id="ev-ref"></div>
+    </div>
+
+    <!-- Acordeón -->
+    <div class="accordion" id="accordion"></div>
+
+    <!-- Completado -->
+    <div id="mystery-done-wrap" style="display:none"></div>
+
+    <!-- Navegación inferior -->
+    <div class="bottom-nav" id="bottom-nav"></div>
+  </div>
+
+  <!-- ═══ PANTALLA CELEBRACIÓN BLOQUE ═══ -->
+  <div class="screen" id="scr-celebration">
+    <div class="celebration-screen fade-in">
+      <div class="maria-placeholder" id="maria-container">🙏</div>
+      <h2 class="celebration-title" id="celeb-title"></h2>
+      <p class="celebration-sub" id="celeb-sub"></p>
+      <button class="btn btn-primary btn-block" id="btn-celeb-home">Regresar a inicio</button>
+    </div>
+  </div>
+</div>
+
 <script>
-var DATA = {"nivel": "CruzAndo la Cruz", "cuaderno": "Males", "numero": "1", "subtitulos_bloque": {"gozosos": "La vulnerabilidad gozosa", "luminosos": "L\u00edmites que dan luz", "dolorosos": "L\u00edmites que salvan", "gloriosos": "El mal no es el final"}, "misterios": {"gozosos": [{"numero": 1, "titulo": "Primer Misterio Gozoso: La Anunciaci\u00f3n", "subtitulo": "Ser humano es ser vulnerable", "referencia": "Lucas 1:26-31 (DHH)", "evangelio": "En el sexto mes, el \u00e1ngel Gabriel fue enviado por Dios a una ciudad de Galilea llamada Nazaret, a una joven virgen llamada Mar\u00eda, comprometida para casarse con un hombre llamado Jos\u00e9, descendiente del rey David. El \u00e1ngel entr\u00f3 en el lugar donde ella estaba, y le dijo: \u00ab\u00a1Te saludo, favorecida de Dios! El Se\u00f1or est\u00e1 contigo.\u00bb Mar\u00eda qued\u00f3 muy conmovida al o\u00edr estas palabras, y se preguntaba qu\u00e9 significar\u00eda aquel saludo. El \u00e1ngel le dijo: \u00abNo tengas miedo, Mar\u00eda, pues t\u00fa gozas del favor de Dios. Ahora vas a quedar encinta: tendr\u00e1s un hijo, y le pondr\u00e1s por nombre Jes\u00fas.\u00bb", "contemplacion": "Desde la concepci\u00f3n, ser humano es ser vulnerable\nDios eligi\u00f3 hacerse humano comenzando por donde todos comenzamos: siendo fr\u00e1gil.\nJes\u00fas no apareci\u00f3 en el mundo como un adulto poderoso. Se hizo embri\u00f3n en el vientre de Mar\u00eda. Diminuto, silencioso, expuesto. Su vida, durante nueve meses, estuvo sostenida por lo m\u00e1s delicado que existe: la carne de una mujer joven, en un pueblo peque\u00f1o, en tiempos dif\u00edciles.\nMar\u00eda recibi\u00f3 esa noticia sin garant\u00edas. No sab\u00eda lo que vendr\u00eda. Solo supo que algo estaba comenzando en ella, algo m\u00e1s grande que ella, y que ese algo era absolutamente fr\u00e1gil.\nAs\u00ed empieza la vida humana. As\u00ed empieza toda vida humana: peque\u00f1a, expuesta, sin defensa propia. La fragilidad no es un accidente del camino; es el punto de partida. Dios mismo la eligi\u00f3. Y al elegirla, nos revela algo que cuesta aceptar: la vulnerabilidad no es lo que hay que superar para vivir bien. Es la condici\u00f3n desde la que la vida comienza, y desde la que Dios act\u00faa.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 siente el Coraz\u00f3n Inmaculado de Mar\u00eda al descubrir que Dios mismo eligi\u00f3 comenzar siendo peque\u00f1o, fr\u00e1gil, expuesto?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 nos revela el Coraz\u00f3n de Jes\u00fas al hacerse embri\u00f3n, al hacerse vida que a\u00fan no puede nada, que solo puede ser recibida?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfCu\u00e1les son los males \u2014las fragilidades, los l\u00edmites, las exposiciones\u2014 que reconoces como parte inevitable de tu vida desde el principio? \u00bfCu\u00e1l de ellos te cuesta m\u00e1s aceptar como punto de partida y no como fracaso?", "intercesion": "Jes\u00fas, t\u00fa que elegiste ser vulnerable desde la concepci\u00f3n, ay\u00fadame a aceptar mi propia fragilidad sin verg\u00fcenza. Ens\u00e9\u00f1ame que necesitar a otros no es debilidad, sino el camino del amor que t\u00fa mismo recorriste.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_1.mp3"}, {"numero": 2, "titulo": "Segundo Misterio Gozoso: La Visitaci\u00f3n", "subtitulo": "La fragilidad que une", "referencia": "Lucas 1:39-43 (DHH)", "evangelio": "Por aquellos d\u00edas, Mar\u00eda se fue de prisa a un pueblo de la regi\u00f3n monta\u00f1osa de Judea, y entr\u00f3 en la casa de Zacar\u00edas y salud\u00f3 a Isabel. Cuando Isabel oy\u00f3 el saludo de Mar\u00eda, la criatura se le estremeci\u00f3 en el vientre, y ella qued\u00f3 llena del Esp\u00edritu Santo. Entonces, con voz muy fuerte, dijo: \u00ab\u00a1Dios te ha bendecido m\u00e1s que a todas las mujeres, y ha bendecido a tu hijo! \u00bfQui\u00e9n soy yo, para que venga a visitarme la madre de mi Se\u00f1or?\u00bb", "contemplacion": "Los primeros ante los ojos de Dios\nMar\u00eda, embarazada y joven, camina varios d\u00edas por terreno monta\u00f1oso para visitar a Isabel, su prima anciana que tambi\u00e9n est\u00e1 esperando un hijo. Ambas viven embarazos extraordinarios, pero tambi\u00e9n ambas est\u00e1n en situaci\u00f3n de vulnerabilidad: Mar\u00eda es soltera y embarazada (esc\u00e1ndalo social), Isabel es anciana y gestante (riesgo f\u00edsico).\nY sin embargo, en esa fragilidad compartida nace la comuni\u00f3n m\u00e1s hermosa del Evangelio.\nMar\u00eda no va a presumir su privilegio de ser la Madre del Mes\u00edas. Va a servir. Isabel no siente envidia de la joven favorecida. Siente gratitud por su visita. Ambas reconocen la gracia de Dios en la otra, y se sostienen mutuamente.\nLos primeros ante los ojos de Dios son los fr\u00e1giles que se acompa\u00f1an: las mujeres embarazadas, los beb\u00e9s gest\u00e1ndose, los ancianos, los pobres, los que no tienen voz. Todos ellos son visitados por Mar\u00eda y el Mes\u00edas en su seno.\nLa fragilidad no separa. Une.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 siente el Coraz\u00f3n de Mar\u00eda al caminar d\u00edas enteros, embarazada, para servir a su prima anciana?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 vive el Coraz\u00f3n de Jes\u00fas, a\u00fan en el vientre, al encontrarse con Juan Bautista tambi\u00e9n en gestaci\u00f3n?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfCu\u00e1ntas veces te has acercado a personas en situaci\u00f3n vulnerable? \u00bfQu\u00e9 sientes y qu\u00e9 haces al respecto? \u00bfC\u00f3mo est\u00e1s cruzando tu propia necesidad de ayuda?", "intercesion": "Mar\u00eda, t\u00fa que caminaste d\u00edas enteros para servir a quien te necesitaba, ens\u00e9\u00f1ame que la fragilidad no me a\u00edsla, sino que me une a otros. Ay\u00fadame a reconocer la gracia de Dios en los vulnerables, y a ofrecerles mi presencia sin condescendencia.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_2.mp3"}, {"numero": 3, "titulo": "Tercer Misterio Gozoso: El Nacimiento de Jes\u00fas", "subtitulo": "Pobreza y refugio", "referencia": "Lucas 2:1, 4-7 (DHH)", "evangelio": "Por aquel tiempo, el emperador Augusto orden\u00f3 que se hiciera un censo de todo el mundo. Jos\u00e9 sali\u00f3 del pueblo de Nazaret, de la regi\u00f3n de Galilea, y se fue a Bel\u00e9n. Fue all\u00e1 a inscribirse, junto con Mar\u00eda, su esposa, que se encontraba encinta. Y mientras estaban en Bel\u00e9n, le lleg\u00f3 a Mar\u00eda el tiempo de dar a luz. Y all\u00ed naci\u00f3 su hijo primog\u00e9nito, y lo envolvi\u00f3 en pa\u00f1ales y lo acost\u00f3 en el establo, porque no hab\u00eda alojamiento para ellos en el mes\u00f3n.", "contemplacion": "Lejos del hogar, sin posada, sin hospitalidad\nMar\u00eda y Jos\u00e9 no eligieron dar a luz en un establo. Fueron forzados por las circunstancias: un decreto imperial los desplaz\u00f3 de su hogar, ning\u00fan mes\u00f3n los recibi\u00f3, y la pobreza les cerr\u00f3 todas las puertas.\nEl Hijo de Dios naci\u00f3 refugiado en una cueva de animales. Sin m\u00e9dico, sin comadrona, sin agua caliente, sin cama digna. Mar\u00eda dio a luz en condiciones de extrema precariedad. Jos\u00e9 hizo lo que pudo con lo poco que ten\u00eda.\nY aun as\u00ed, le dieron la bienvenida al Ni\u00f1o.\nSan Jos\u00e9 mantuvo la actitud a pesar de todo: Bienvenido a este mundo, Ni\u00f1o Jes\u00fas. Mar\u00eda lo envolvi\u00f3 en pa\u00f1ales con ternura, lo acost\u00f3 en el pesebre como si fuera la cuna m\u00e1s preciosa del mundo.\nLa pobreza material no les rob\u00f3 la dignidad. La falta de recursos no les impidi\u00f3 amar. La injusticia del mundo no venci\u00f3 su esperanza.\nPorque Dios no necesita abundancia para nacer. Solo necesita un coraz\u00f3n que lo reciba.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 siente el Coraz\u00f3n de Mar\u00eda al dar a luz en un refugio de animales, lejos de su hogar?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 acepta el Coraz\u00f3n de Jes\u00fas al nacer en la pobreza extrema, sin las comodidades b\u00e1sicas?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfQu\u00e9 actitud tienes en los momentos de escasez (falta de agua, dinero, luz el\u00e9ctrica, salud\u2026)? \u00bfC\u00f3mo est\u00e1s cruzando la falta de recursos que limita tu vida?", "intercesion": "Jes\u00fas, t\u00fa que naciste en un establo porque no hab\u00eda lugar para ti, acomp\u00e1\u00f1ame en mi propia pobreza y precariedad. Ens\u00e9\u00f1ame que la escasez no me roba la dignidad, y que puedo dar la bienvenida a la vida incluso cuando falta todo.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_3.mp3"}, {"numero": 4, "titulo": "Cuarto Misterio Gozoso: La Presentaci\u00f3n en el Templo", "subtitulo": "La espada anunciada", "referencia": "Lucas 2:22, 25, 28, 34-35 (DHH)", "evangelio": "Cuando se cumplieron los d\u00edas de la purificaci\u00f3n de ellos, seg\u00fan la ley de Mois\u00e9s, llevaron al ni\u00f1o a Jerusal\u00e9n para presentarlo al Se\u00f1or. Hab\u00eda en Jerusal\u00e9n un hombre llamado Sime\u00f3n, justo y piadoso. Tom\u00f3 al ni\u00f1o en sus brazos y bendijo a Dios. Luego dijo a Mar\u00eda, su madre: \u00abEste ni\u00f1o ser\u00e1 causa de ca\u00edda y de elevaci\u00f3n para muchos en Israel; ser\u00e1 signo de contradicci\u00f3n, y a ti misma una espada te atravesar\u00e1 el coraz\u00f3n.\u00bb", "contemplacion": "El m\u00e1s santo del mundo molestar\u00e1 a muchos\nMar\u00eda sostiene a su hijo reci\u00e9n nacido en el Templo. Todo es alegr\u00eda, gratitud, cumplimiento de la Ley. Pero Sime\u00f3n, movido por el Esp\u00edritu, pronuncia palabras que rompen la paz: Una espada atravesar\u00e1 tu coraz\u00f3n.\nMar\u00eda no entiende del todo. Pero presiente que amar a este Ni\u00f1o le costar\u00e1 todo. Hay p\u00e9rdidas que se anuncian mucho antes de ocurrir. Hay despedidas que empiezan a gestarse en el primer abrazo.\nY aun as\u00ed, Mar\u00eda no huye. No dice: Si este hijo me traer\u00e1 tanto dolor, prefiero no amarlo tanto. Al contrario: guarda estas palabras en su coraz\u00f3n junto con el amor. Acepta amar sabiendo que amar\u00e1 hasta el dolor.\nSime\u00f3n tambi\u00e9n anuncia algo desconcertante: el m\u00e1s santo del mundo (el Mes\u00edas) molestar\u00e1 a muchos. Porque su bondad revelar\u00e1 la falsedad de los hip\u00f3critas. Su justicia incomodar\u00e1 a los injustos. Su verdad ser\u00e1 intolerable para quienes viven en la mentira.\nA veces, lo verdaderamente bueno es insoportable para quienes no quieren cambiar.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 siente el Coraz\u00f3n de Mar\u00eda al escuchar que una espada lo atravesar\u00e1?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 sabe el Coraz\u00f3n de Jes\u00fas sobre su propio destino, siendo a\u00fan un ni\u00f1o en brazos de Sime\u00f3n?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfAlguna vez te ha resultado molesto o insoportable alguien bueno, justo o recto? \u00bfQu\u00e9 dolor anticipas que tu coraz\u00f3n resiste nombrar? \u00bfC\u00f3mo est\u00e1s cruzando la espada anunciada en tu vida?", "intercesion": "Mar\u00eda, t\u00fa que aceptaste la espada profetizada sin huir del amor, ens\u00e9\u00f1ame a no temer el dolor que viene con amar de verdad. Ay\u00fadame a guardar en mi coraz\u00f3n las palabras dif\u00edciles, confiando que Dios me dar\u00e1 fuerza cuando llegue el momento.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_4.mp3"}, {"numero": 5, "titulo": "Quinto Misterio Gozoso: El Ni\u00f1o perdido y hallado en el Templo", "subtitulo": "Crecer duele", "referencia": "Lucas 2:41-46 (DHH)", "evangelio": "Los padres de Jes\u00fas iban todos los a\u00f1os a Jerusal\u00e9n para la fiesta de la Pascua. Cuando Jes\u00fas cumpli\u00f3 doce a\u00f1os, fueron all\u00e1 todos ellos, como era costumbre. Pero pasados aquellos d\u00edas, cuando volv\u00edan a casa, el ni\u00f1o Jes\u00fas se qued\u00f3 en Jerusal\u00e9n, sin que sus padres se dieran cuenta. Pensando que Jes\u00fas iba entre la gente, hicieron un d\u00eda de camino; pero luego, al buscarlo entre los parientes y conocidos, no lo encontraron. As\u00ed que regresaron a Jerusal\u00e9n para buscarlo all\u00ed. Al cabo de tres d\u00edas lo encontraron en el templo, sentado entre los maestros, escuch\u00e1ndolos y haci\u00e9ndoles preguntas.", "contemplacion": "El dolor del crecimiento\nMar\u00eda y Jos\u00e9 vivieron tres d\u00edas de angustia. Hab\u00edan perdido a su hijo. O m\u00e1s bien: su hijo los hab\u00eda dejado atr\u00e1s, ocup\u00e1ndose de las cosas de su Padre Dios.\nJes\u00fas no se escondi\u00f3 por desobediencia. No los abandon\u00f3 por rebeld\u00eda. Simplemente, estaba creciendo. Y crecer duele. No solo al que crece, sino tambi\u00e9n a quienes lo aman.\nA los doce a\u00f1os, Jes\u00fas comenz\u00f3 a descubrir su identidad como Hijo de Dios. Necesitaba ese tiempo en el Templo, dialogando con los maestros, escuchando, preguntando, madurando. Sus padres a\u00fan no entend\u00edan del todo qui\u00e9n era \u00c9l, ni hacia d\u00f3nde lo llevaba su vocaci\u00f3n. Pero ese misterio ya comenzaba a revelarse.\nMar\u00eda y Jos\u00e9 sufrieron esa separaci\u00f3n sin culpa: no fueron malos padres. Jes\u00fas vivi\u00f3 ese \"estir\u00f3n\" sin malicia: no fue un mal hijo. Simplemente, hay momentos en que los hijos toman su propio camino, y eso es voluntad de Dios.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 vive el Coraz\u00f3n de Mar\u00eda al comprender que su hijo ya no es solo suyo, sino tambi\u00e9n del Padre?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 descubre el Coraz\u00f3n de Jes\u00fas sobre s\u00ed mismo cuando se ocupa de las cosas de su Padre Dios?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfQu\u00e9 dolor has sentido al dejar atr\u00e1s la infancia, la casa paterna, las costumbres de otra \u00e9poca? \u00bfC\u00f3mo est\u00e1s cruzando el duelo de crecer, de madurar, de tomar tus propias decisiones?", "intercesion": "Jes\u00fas, t\u00fa que creciste ocup\u00e1ndote de las cosas de tu Padre, ay\u00fadame a aceptar que crecer duele, pero es voluntad de Dios. Ens\u00e9\u00f1ame a soltar lo que ya no me corresponde cargar, y a confiar que mi camino, aunque duela, es el que T\u00fa preparaste para m\u00ed.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_5.mp3"}], "luminosos": [{"numero": 6, "titulo": "Primer Misterio Luminoso: El Bautismo de Jes\u00fas", "subtitulo": "Desgaste y renovaci\u00f3n", "referencia": "Marcos 1:9-11 (DHH)", "evangelio": "Por aquellos d\u00edas, Jes\u00fas sali\u00f3 de Nazaret, que est\u00e1 en la regi\u00f3n de Galilea, y Juan lo bautiz\u00f3 en el r\u00edo Jord\u00e1n. En el momento de salir Jes\u00fas del agua, vio que el cielo se abr\u00eda y que el Esp\u00edritu Santo bajaba sobre \u00e9l como una paloma. Y se oy\u00f3 una voz del cielo, que dec\u00eda: \u00abT\u00fa eres mi Hijo amado, a quien he elegido.\u00bb", "contemplacion": "La vida necesita ser renovada, siempre\nEl agua lava. Restaura. Devuelve al cuerpo lo que el tiempo y el desgaste van quitando. Nadie escapa a esa necesidad. Por m\u00e1s sano que est\u00e9s, por m\u00e1s que cuides tu vida, el cuerpo pide ser lavado, alimentado, descansado, repuesto. Eso no es se\u00f1al de que algo sali\u00f3 mal. Es la condici\u00f3n ordinaria de todo lo que vive.\nJes\u00fas se meti\u00f3 en el Jord\u00e1n. El Verbo eterno, que no envejece ni se desgasta, asumi\u00f3 un cuerpo que s\u00ed lo hace. Un cuerpo que suda, que se cansa, que se ensucia, que necesita agua. Al sumergirse en el r\u00edo, el Hijo de Dios hizo suya esa condici\u00f3n: la de una vida que requiere mantenimiento, renovaci\u00f3n, cuidado constante.\nNo vino a librarse de esa necesidad. Vino a habitarla. Y al habitarla, la santific\u00f3.\nLos males de la vida no son solo las grandes crisis o los golpes inesperados. Son tambi\u00e9n esto: cuidar lo cotidiano, componer el desorden que vuelve cada d\u00eda, realizar esa labor de limpieza que nunca termina de satisfacerse de una vez para siempre. Eso tambi\u00e9n es parte de cargar la cruz. Y Jes\u00fas lo conoce desde adentro, desde el agua del Jord\u00e1n.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 sinti\u00f3 el Coraz\u00f3n Inmaculado de Mar\u00eda cuando educ\u00f3 a su hijo en los h\u00e1bitos de la higiene y el orden?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 sinti\u00f3 Jes\u00fas al estar esperando, en la fila, como uno m\u00e1s, necesitado de purificaci\u00f3n?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfQu\u00e9 \u00e1reas de mi vida requieren de un cuidado constante, con ayuda de Dios?", "intercesion": "Jes\u00fas, t\u00fa que descendiste al Jord\u00e1n y muchas veces lavaste tu cuerpo, cuidaste tu espacio, tus herramientas y tu trabajo, ens\u00e9\u00f1ame a hacer lo mismo. Que yo tambi\u00e9n aprenda a honrar con dignidad el lugar que habito, el cuerpo que me diste, las cosas que pusiste en mis manos. Que el cuidado de lo cotidiano no me pese como una carga, sino que lo viva como t\u00fa lo viviste: con sencillez, con atenci\u00f3n, con amor.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_6.mp3"}, {"numero": 7, "titulo": "Segundo Misterio Luminoso: Las Bodas de Can\u00e1", "subtitulo": "Todo se gasta y consume", "referencia": "Juan 2:1-5 (DHH)", "evangelio": "Dos d\u00edas despu\u00e9s hubo una boda en Can\u00e1, un pueblo de Galilea. La madre de Jes\u00fas estaba all\u00ed, y Jes\u00fas y sus disc\u00edpulos fueron tambi\u00e9n invitados a la boda. Se acab\u00f3 el vino, y la madre de Jes\u00fas le dijo: \u00abYa no tienen vino.\u00bb Jes\u00fas le contest\u00f3: \u00abMujer, \u00bfpor qu\u00e9 me dices esto? Mi hora no ha llegado todav\u00eda.\u00bb Pero ella dijo a los que estaban sirviendo: \u00abHagan todo lo que \u00e9l les diga.\u00bb", "contemplacion": "Todas las cosas materiales se acaban\nEn medio de la fiesta, el vino se termin\u00f3. No por negligencia, sino porque todo lo material se usa, se gasta, se consume, se acaba. Ese es un mal inevitable de la vida finita: nada dura para siempre en este mundo.\nMar\u00eda detect\u00f3 la necesidad antes que nadie. No se qued\u00f3 paralizada ante la escasez. No culp\u00f3 a los organizadores. Simplemente acudi\u00f3 a Jes\u00fas con confianza: Ya no tienen vino.\nJes\u00fas, en un primer momento, parece reacio: Mi hora no ha llegado. Pero Mar\u00eda conoce el coraz\u00f3n de su Hijo. Sabe que \u00c9l es sensible al sufrimiento humano, incluso al peque\u00f1o sufrimiento de una familia humillada por quedarse sin vino en su propia boda.\nY Jes\u00fas responde. No con un serm\u00f3n sobre la austeridad, sino con abundancia creativa. Transforma 600 litros de agua en el mejor vino de la fiesta.\nLa buena noticia es que Mar\u00eda nos ayuda a creer en Jes\u00fas, y \u00c9l abre la puerta de la creatividad productiva para que recibas abundancia incluso cuando todo se est\u00e1 acabando.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 siente el Coraz\u00f3n de Mar\u00eda al percibir la necesidad de los novios?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 mueve el Coraz\u00f3n de Jes\u00fas a realizar su primer milagro ante una necesidad tan \"peque\u00f1a\" como la falta de vino?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfCon qu\u00e9 actitud cuidas y obtienes las cosas que te faltan? \u00bfC\u00f3mo est\u00e1s cruzando la escasez que experimentas hoy?", "intercesion": "Mar\u00eda, t\u00fa que detectaste la necesidad y la llevaste a Jes\u00fas, ens\u00e9\u00f1ame a no quedarme paralizado ante la escasez. Jes\u00fas, t\u00fa que transformaste el agua en vino abundante, abre mi coraz\u00f3n a la creatividad que nace de la confianza en ti.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_7.mp3"}, {"numero": 8, "titulo": "Tercer Misterio Luminoso: El Anuncio del Reino de Dios", "subtitulo": "No preguntes \"por qu\u00e9 sufre\", ayuda", "referencia": "Juan 9:1-4 (DHH)", "evangelio": "Al pasar Jes\u00fas, vio a un hombre que hab\u00eda nacido ciego. Sus disc\u00edpulos le preguntaron: \u00abMaestro, \u00bfpor qu\u00e9 naci\u00f3 ciego este hombre? \u00bfPor el pecado de sus padres, o por su propio pecado?\u00bb Jes\u00fas les contest\u00f3: \u00abNi por su propio pecado ni por el de sus padres; fue m\u00e1s bien para que en \u00e9l se demuestre lo que Dios puede hacer. Mientras sea de d\u00eda, tenemos que hacer el trabajo del que me envi\u00f3.\u00bb", "contemplacion": "No busques culpables, s\u00e9 instrumento de sanaci\u00f3n\nAnte el ciego de nacimiento, los disc\u00edpulos hicieron la pregunta equivocada: Maestro, \u00bfqui\u00e9n pec\u00f3, \u00e9l o sus padres, para que naciera ciego?\nBuscaban una explicaci\u00f3n. Una raz\u00f3n. Un culpable. Quer\u00edan que el sufrimiento tuviera sentido.\nJes\u00fas cort\u00f3 en seco esa l\u00f3gica: \u00abNi \u00e9l pec\u00f3, ni sus padres.\u00bb El mal f\u00edsico de la ceguera no era castigo por pecado. Era simplemente un mal inevitable de la vida finita, una limitaci\u00f3n que este hombre llevaba desde su nacimiento.\nY luego Jes\u00fas a\u00f1ade algo revolucionario: \u00abFue para que en esta oscuridad brille la luz de Dios.\u00bb\nNo dijo que Dios caus\u00f3 la ceguera para tener una oportunidad de sanar. Dijo que en medio de ese mal inevitable, Dios puede actuar. La oscuridad se convierte en escenario para la luz.\nY entonces Jes\u00fas no sigui\u00f3 filosofando. Actu\u00f3. Hizo lodo con saliva, lo unt\u00f3 en los ojos del ciego, y le mand\u00f3 lavarse. El hombre obedeci\u00f3, y vio por primera vez en su vida.\nNo te preguntes \"por qu\u00e9\" alguien sufre. Si puedes, ay\u00fadale.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 siente el Coraz\u00f3n de Mar\u00eda al ver a su Hijo actuar con compasi\u00f3n inmediata?\n2. Desde el Hijo hacia el Padre:\nAl darle vista al ciego, devolver el habla a los mudos, sanar a los paral\u00edticos, etc. \u00bfQu\u00e9 nos revela el Coraz\u00f3n de Jes\u00fas, acerca del papel de Dios ante nuestros sufrimientos?\n3. Hijos y hermanos en el Esp\u00edritu:\nAparte de orar, \u00bfqu\u00e9 haces para aliviar el dolor que hay en el mundo? \u00bfC\u00f3mo est\u00e1s cruzando tu tentaci\u00f3n de buscar culpables, en lugar de ser instrumento de sanaci\u00f3n?", "intercesion": "Jes\u00fas, t\u00fa que sanaste al ciego sin buscar culpables, lib\u00e9rame de la obsesi\u00f3n por encontrar razones al sufrimiento. Ens\u00e9\u00f1ame a actuar con compasi\u00f3n donde puedo remediar el mal, y a confiar en tu luz donde no puedo hacer nada m\u00e1s que acompa\u00f1ar.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_8.mp3"}, {"numero": 9, "titulo": "Cuarto Misterio Luminoso: La Transfiguraci\u00f3n", "subtitulo": "Lo inexplicable nos desconcierta", "referencia": "Marcos 9:2-6 (DHH)", "evangelio": "Seis d\u00edas despu\u00e9s, Jes\u00fas tom\u00f3 aparte a Pedro, a Santiago y a Juan, y los llev\u00f3 a una monta\u00f1a muy alta. All\u00ed, delante de ellos, cambi\u00f3 la apariencia de Jes\u00fas. Su ropa se volvi\u00f3 brillante y m\u00e1s blanca que la nieve. Luego vieron a El\u00edas y a Mois\u00e9s, que estaban conversando con Jes\u00fas. Pedro le dijo a Jes\u00fas: \u00abMaestro, \u00a1qu\u00e9 bien que estemos aqu\u00ed! Vamos a hacer tres chozas: una para ti, otra para Mois\u00e9s y otra para El\u00edas.\u00bb Pero Pedro no sab\u00eda qu\u00e9 decir, porque todos estaban asustados.", "contemplacion": "Temor, desconcierto, confusi\u00f3n\nAnte la Transfiguraci\u00f3n, los ap\u00f3stoles no sab\u00edan qu\u00e9 hacer. Vieron a Jes\u00fas resplandeciente, conversando con Mois\u00e9s y El\u00edas. Escucharon la voz del Padre desde la nube. Y no entendieron nada.\nPedro, nervioso, propuso construir tres chozas. Una idea absurda. \u00bfPara qu\u00e9 chozas si Mois\u00e9s y El\u00edas eran apariciones? Pero no sab\u00eda qu\u00e9 m\u00e1s decir. El Evangelio es honesto: Pedro no sab\u00eda qu\u00e9 decir, porque todos estaban asustados.\nHay experiencias que desbordan nuestra capacidad de comprensi\u00f3n. Momentos en los que la realidad es m\u00e1s grande que nuestras categor\u00edas mentales. Y eso nos desconcierta, nos asusta, nos paraliza.\nEs un mal inevitable de nuestra finitud: no podemos entender todo. Nuestra mente tiene l\u00edmites. Hay misterios que no caben en palabras. Hay experiencias que solo se pueden vivir, no explicar.\nY est\u00e1 bien. No siempre tienes que entender. A veces solo tienes que estar ah\u00ed, asombrado, temblando, sin palabras, dejando que Dios sea m\u00e1s grande que tu comprensi\u00f3n.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 sinti\u00f3 el Coraz\u00f3n de Mar\u00eda cuando sus disc\u00edpulos le contaron lo que vieron en la monta\u00f1a, sin poder explicarlo del todo?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 nos revela el Coraz\u00f3n de Jes\u00fas sobre la gloria divina, m\u00e1s all\u00e1 de lo que podemos comprender?\n3. Hijos y hermanos en el Esp\u00edritu:\nRecuerda una experiencia tuya o ajena, dif\u00edcil de explicar o entender. \u00bfC\u00f3mo est\u00e1s cruzando tu necesidad de entenderlo todo antes de aceptarlo?", "intercesion": "Jes\u00fas, t\u00fa que te transfiguraste ante ap\u00f3stoles desconcertados, ay\u00fadame a aceptar que no siempre entender\u00e9 lo que vivo. Ens\u00e9\u00f1ame que el misterio no es enemigo de la fe, sino el espacio donde tu gloria se manifiesta m\u00e1s all\u00e1 de mi comprensi\u00f3n.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_9.mp3"}, {"numero": 10, "titulo": "Quinto Misterio Luminoso: La Instituci\u00f3n de la Eucarist\u00eda", "subtitulo": "Solo puedes estar en un lugar", "referencia": "Lucas 22:19-20 (DHH)", "evangelio": "Mientras com\u00edan, Jes\u00fas tom\u00f3 en sus manos el pan y, habiendo dado gracias a Dios, lo parti\u00f3 y se lo dio a ellos, diciendo: \u00abEsto es mi cuerpo, que es entregado en favor de ustedes. Hagan esto en memoria de m\u00ed.\u00bb Lo mismo hizo con la copa despu\u00e9s de la cena, diciendo: \u00abEsta copa es la nueva alianza confirmada con mi sangre, la cual es derramada en favor de ustedes.\u00bb", "contemplacion": "La limitaci\u00f3n del cuerpo, resuelta en el Sacramento\nLos humanos solo podemos estar en un lugar a la vez. Esa es una limitaci\u00f3n inevitable de nuestra corporeidad finita. No puedes abrazar a tu madre en M\u00e9xico y a un amigo en Espa\u00f1a al mismo tiempo. No puedes estar en dos sitios simult\u00e1neamente.\nJes\u00fas, en su humanidad, tambi\u00e9n vivi\u00f3 esa limitaci\u00f3n. Cuando estaba en Galilea, no pod\u00eda estar en Jerusal\u00e9n. Cuando visitaba a unos disc\u00edpulos, otros quedaban lejos. Y sab\u00eda que pronto subir\u00eda al Padre, dejando a sus amigos solos en la tierra.\nPor eso, en la \u00daltima Cena, Jes\u00fas consagr\u00f3 el pan y el vino. No como un mero s\u00edmbolo, sino como su presencia real, viva, permanente. Para quedarse contigo a donde vayas. Para multiplicar su presencia en cada sagrario del mundo, rompiendo la limitaci\u00f3n del espacio.\nJes\u00fas no se conform\u00f3 con la distancia inevitable. Cre\u00f3 un camino para estar contigo siempre, en cada Eucarist\u00eda, en cada tabern\u00e1culo, hasta el fin de los tiempos.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 siente el Coraz\u00f3n de Mar\u00eda al saber que su Hijo encontr\u00f3 el modo de quedarse presente en cada Eucarist\u00eda?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 amor mueve el Coraz\u00f3n de Jes\u00fas a inventar la Eucarist\u00eda, para vencer la limitaci\u00f3n de la distancia?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfQu\u00e9 pretextos pones para dejar de acercarte m\u00e1s a la Eucarist\u00eda? \u00bfC\u00f3mo est\u00e1s cruzando tu limitaci\u00f3n de no poder estar cerca de todos los que amas?", "intercesion": "Jes\u00fas, t\u00fa que te quedaste en la Eucarist\u00eda para vencer la distancia, ay\u00fadame a valorar tu presencia real en cada sagrario. Ens\u00e9\u00f1ame que aunque yo no pueda estar en todas partes, t\u00fa s\u00ed puedes estar conmigo siempre, en cada Comuni\u00f3n.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_10.mp3"}], "dolorosos": [{"numero": 11, "titulo": "Primer Misterio Doloroso: La Oraci\u00f3n en el Huerto", "subtitulo": "El coraz\u00f3n que se estremece", "referencia": "Mateo 26:36-39 (DHH)", "evangelio": "Jes\u00fas fue con sus disc\u00edpulos a un lugar llamado Getseman\u00ed, y les dijo: \u00abSi\u00e9ntense aqu\u00ed mientras voy m\u00e1s all\u00e1 a orar.\u00bb Se llev\u00f3 a Pedro y a los dos hijos de Zebedeo, y comenz\u00f3 a sentirse muy triste y angustiado. Les dijo: \u00abSiento en mi alma una tristeza de muerte. Qu\u00e9dense aqu\u00ed y permanezcan despiertos conmigo.\u00bb Yendo un poco m\u00e1s adelante, se inclin\u00f3 hasta tocar el suelo con su frente, y or\u00f3 as\u00ed: \u00abPadre m\u00edo, si es posible, l\u00edbrame de este trago amargo.\u00bb", "contemplacion": "Jes\u00fas acept\u00f3 tener un coraz\u00f3n humano como el tuyo\nJes\u00fas, el Hijo de Dios, no vino blindado contra las emociones. Acept\u00f3 tener un coraz\u00f3n humano, capaz de sentir tristeza, angustia, ansiedad, miedo.\nEn Getseman\u00ed, su coraz\u00f3n se estremece. Suda sangre. Tiembla ante lo que viene. No quiere la Cruz. No quiere el abandono. No quiere morir. Y no lo oculta. No finge fortaleza. Comparte su dolor con Pedro, Santiago y Juan: Siento en mi alma una tristeza de muerte.\nAlgunos piensan que la vida espiritual avanzada significa \"no sentir emociones dif\u00edciles\". Que la santidad es estar siempre en paz, siempre sereno, siempre fuerte.\nPero Jes\u00fas nos ense\u00f1a lo contrario: ser santo es sentir plenamente, incluso el dolor, y aun as\u00ed elegir el amor. Ser santo no es no tener miedo. Es tener miedo y seguir avanzando. Es sentir la angustia y no huir de la voluntad del Padre.\nTus sentimientos dif\u00edciles no son pecado. Son parte de tu humanidad, como lo fueron de la humanidad de Cristo.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 siente el Coraz\u00f3n de Mar\u00eda al saber que su Hijo est\u00e1 agonizando solo en la noche?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 batalla libra el Coraz\u00f3n de Jes\u00fas entre el miedo humano y la confianza en el Padre?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfQu\u00e9 sentimientos tienes que no aceptas o rechazas? \u00bfC\u00f3mo est\u00e1s cruzando las emociones dif\u00edciles que habitan en ti?", "intercesion": "Jes\u00fas, t\u00fa que sentiste tristeza de muerte en Getseman\u00ed, ay\u00fadame a no rechazar mis propias emociones dif\u00edciles. Ens\u00e9\u00f1ame que sentir angustia no me aleja de ti, sino que me hace m\u00e1s humano, m\u00e1s parecido a tu coraz\u00f3n.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_11.mp3"}, {"numero": 12, "titulo": "Segundo Misterio Doloroso: La Flagelaci\u00f3n", "subtitulo": "El cuerpo vulnerable", "referencia": "Juan 19:1-3 (DHH)", "evangelio": "Pilato tom\u00f3 entonces a Jes\u00fas y mand\u00f3 azotarlo. Los soldados trenzaron una corona de espinas, la pusieron en la cabeza de Jes\u00fas y lo vistieron con una capa de color rojo oscuro. Luego se acercaron a \u00e9l, dici\u00e9ndole: \u00ab\u00a1Viva el Rey de los jud\u00edos!\u00bb Y le pegaban en la cara.", "contemplacion": "Todo cuerpo sensible es un cuerpo vulnerable\nJes\u00fas acept\u00f3 su cuerpo, capaz de sentir la suavidad, pero tambi\u00e9n la dureza. El fr\u00edo, y tambi\u00e9n el calor. El placer, y el dolor.\nEn la flagelaci\u00f3n, su cuerpo experimenta el l\u00edmite extremo de la sensibilidad: el l\u00e1tigo desgarra su piel, la sangre brota, los nervios gritan. Cada golpe es una prueba brutal de que todo cuerpo sensible es un cuerpo vulnerable.\nNo puedes tener un cuerpo capaz de sentir el abrazo de tu madre sin que ese mismo cuerpo pueda sentir el golpe del verdugo. No puedes tener terminaciones nerviosas que perciban la caricia sin que esas mismas terminaciones perciban el dolor.\nLa sensibilidad es un don y una cruz. Nos permite experimentar la belleza, pero tambi\u00e9n nos expone al sufrimiento. Jes\u00fas no rechaz\u00f3 esa condici\u00f3n. La asumi\u00f3 hasta las \u00faltimas consecuencias.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 siente el Coraz\u00f3n de Mar\u00eda al imaginar el cuerpo de su Hijo destrozado por los azotes?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 acepta el Coraz\u00f3n de Jes\u00fas al soportar el dolor extremo en su cuerpo vulnerable?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfQu\u00e9 sensaciones f\u00edsicas (olores, ruidos, temperatura, dolor) te resultan insoportables o dif\u00edciles de sobrellevar? \u00bfC\u00f3mo est\u00e1s cruzando la vulnerabilidad de tu propio cuerpo?", "intercesion": "Jes\u00fas, t\u00fa que aceptaste un cuerpo vulnerable y sensible, ay\u00fadame a no despreciar mi propia corporeidad. Ens\u00e9\u00f1ame que sentir dolor no es debilidad, sino prueba de que estoy vivo, de que soy humano como t\u00fa.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_12.mp3"}, {"numero": 13, "titulo": "Tercer Misterio Doloroso: La Coronaci\u00f3n de Espinas", "subtitulo": "Como te ven, te tratan", "referencia": "Mateo 27:27-30 (DHH)", "evangelio": "Los soldados del gobernador llevaron a Jes\u00fas al palacio y reunieron toda la tropa alrededor de \u00e9l. Le quitaron su ropa, lo vistieron con una capa roja, trenzaron una corona de espinas y se la pusieron en la cabeza, y en la mano derecha le pusieron una vara. Luego se arrodillaron delante de \u00e9l, y burl\u00e1ndose le dec\u00edan: \u00ab\u00a1Viva el Rey de los jud\u00edos!\u00bb Tambi\u00e9n lo escup\u00edan, y con la misma vara le golpeaban la cabeza.", "contemplacion": "La gente te trata seg\u00fan la idea que tiene de ti\nAun siendo el Rey de Reyes, Jes\u00fas fue maltratado, coronado de espinas, vestido de burla. \u00bfPor qu\u00e9? Porque los soldados no lo ve\u00edan como \u00c9l era. Lo ve\u00edan como un preso, un fracasado, un loco que dec\u00eda ser rey.\nY lo trataron seg\u00fan esa percepci\u00f3n distorsionada.\nDice el refr\u00e1n: \u00abComo te ven, te tratan.\u00bb Es decir, la gente te trata seg\u00fan la idea que tiene de ti, no como t\u00fa eres.\nEso es un mal inevitable de vivir en comunidad: no siempre ser\u00e1s comprendido. No siempre ser\u00e1s visto con justicia. Habr\u00e1 quienes te juzguen sin conocerte, te malinterpreten, te traten peor de lo que mereces.\nY no hay mucho que puedas hacer al respecto. No puedes controlar la percepci\u00f3n ajena. No puedes obligar a nadie a verte como realmente eres.\nJes\u00fas no perdi\u00f3 energ\u00eda defendi\u00e9ndose de los soldados. No intent\u00f3 convencerlos de su dignidad. Guard\u00f3 silencio. Y en ese silencio, preserv\u00f3 su paz interior.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 siente el Coraz\u00f3n de Mar\u00eda al saber que su Hijo, el Rey verdadero, es coronado de espinas en burla?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 guarda el Coraz\u00f3n de Jes\u00fas en el silencio ante quienes lo maltratan por ignorancia?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfQu\u00e9 haces al saber que alguien tiene una idea equivocada sobre ti? \u00bfC\u00f3mo est\u00e1s cruzando el dolor de ser malinterpretado o maltratado injustamente?", "intercesion": "Jes\u00fas, t\u00fa que fuiste coronado de espinas por quienes no te conoc\u00edan, ay\u00fadame a no desgastarme intentando controlar lo que otros piensan de m\u00ed. Ens\u00e9\u00f1ame que mi dignidad no depende de la percepci\u00f3n ajena, sino de la verdad de qui\u00e9n soy ante Dios.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_13.mp3"}, {"numero": 14, "titulo": "Cuarto Misterio Doloroso: Jes\u00fas carga la Cruz", "subtitulo": "Todo requiere esfuerzo", "referencia": "Lucas 23:26-28 (DHH)", "evangelio": "Llevaron a Jes\u00fas para crucificarlo. En el camino encontraron a un hombre llamado Sim\u00f3n, natural de Cirene, y lo obligaron a cargar con la cruz de Jes\u00fas. Muchas personas lo segu\u00edan; entre ellas hab\u00eda mujeres que lloraban de tristeza por \u00e9l. Jes\u00fas las mir\u00f3, y les dijo: \u00abMujeres de Jerusal\u00e9n, no lloren por m\u00ed; lloren m\u00e1s bien por ustedes mismas y por sus hijos.\u00bb", "contemplacion": "En esta tierra, todo requiere superar obst\u00e1culos\nJes\u00fas camina hacia el Calvario cargando la cruz. Cada paso es un esfuerzo. El peso del madero aplasta sus hombros. El cansancio extremo. Las ca\u00eddas. El cuerpo destrozado que apenas puede sostenerse.\nY aun as\u00ed, sigue caminando.\nEn esta tierra, todo lo que hagas requiere superar obst\u00e1culos, esforzarte y ser paciente. Levantarte de la cama, higiene, alimentaci\u00f3n, convivencia, estudio, trabajo, traslado... todo demanda energ\u00eda. Todo implica vencer la inercia, la gravedad, el cansancio.\nEso no es castigo. Es la condici\u00f3n de la vida finita. Vivir es moverse contra resistencias.\nJes\u00fas no se quej\u00f3 del esfuerzo. Tampoco lo glorific\u00f3. Simplemente lo acept\u00f3 como parte del camino. Y cuando su cuerpo ya no pudo m\u00e1s, acept\u00f3 la ayuda de Sim\u00f3n de Cirene. No fue debilidad. Fue humildad.\nEl esfuerzo es inevitable. Pero no tienes que cargarlo solo.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 siente el Coraz\u00f3n de Mar\u00eda al ver a su Hijo caer una y otra vez bajo el peso de la cruz?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 sostiene el Coraz\u00f3n de Jes\u00fas para seguir avanzando cuando el cuerpo ya no puede m\u00e1s?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfC\u00f3mo est\u00e1s aceptando el trabajo y los esfuerzos de cada d\u00eda? \u00bfC\u00f3mo est\u00e1s cruzando el cansancio que te pesa?", "intercesion": "Jes\u00fas, t\u00fa que caminaste al Calvario cargando la cruz, ay\u00fadame a aceptar que vivir requiere esfuerzo constante. Ens\u00e9\u00f1ame que el cansancio no es fracaso, y que pedir ayuda cuando no puedo m\u00e1s es sabidur\u00eda, no debilidad.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_14.mp3"}, {"numero": 15, "titulo": "Quinto Misterio Doloroso: La Crucifixi\u00f3n y Muerte de Jes\u00fas", "subtitulo": "Somos mortales", "referencia": "Lucas 23:33-34, 44-46 (DHH)", "evangelio": "Cuando llegaron al lugar llamado \u00abLa Calavera\u00bb, crucificaron a Jes\u00fas y a los dos criminales, uno a su derecha y otro a su izquierda. Jes\u00fas dijo: \u00abPadre, perd\u00f3nalos, porque no saben lo que hacen.\u00bb Era como al mediod\u00eda, cuando el sol dej\u00f3 de brillar, y todo el pa\u00eds qued\u00f3 en oscuridad hasta las tres de la tarde. La cortina del templo se rasg\u00f3 por la mitad. Jes\u00fas grit\u00f3 con fuerza: \u00ab\u00a1Padre, en tus manos encomiendo mi esp\u00edritu!\u00bb Y al decir esto, muri\u00f3.", "contemplacion": "Morir es el trauma inevitable para avanzar\nDesde el \u00fatero, como todo ser humano, Jes\u00fas, t\u00fa y yo somos mortales. Nacer es comenzar a morir. Cada d\u00eda que vives es un d\u00eda menos que te queda. No hay escape.\nMorir es el trauma inevitable para avanzar hacia la siguiente etapa, definitiva: el para\u00edso, donde Cristo nos espera para estar con \u00c9l.\nJes\u00fas no evit\u00f3 la muerte. La atraves\u00f3. Sinti\u00f3 el dolor extremo. El abandono. La oscuridad. El \u00faltimo aliento. Y entonces, entreg\u00f3 su esp\u00edritu al Padre.\nNo muri\u00f3 derrotado. Muri\u00f3 confiando. No muri\u00f3 maldiciendo. Muri\u00f3 perdonando. No muri\u00f3 solo. Muri\u00f3 encomend\u00e1ndose al amor del Padre.\nY al tercer d\u00eda, resucit\u00f3.\nLa muerte no tiene la \u00faltima palabra. Es solo el portal hacia la vida plena. Pero para atravesar ese portal, hay que soltar. Hay que exhalar el \u00faltimo aliento. Hay que confiar que del otro lado, Dios espera.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 siente el Coraz\u00f3n de Mar\u00eda al recibir el cuerpo muerto de su Hijo en sus brazos?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 entrega el Coraz\u00f3n de Jes\u00fas al Padre, en el momento de morir en la cruz?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfQu\u00e9 sientes y piensas al saber que eres mortal? \u00bfC\u00f3mo est\u00e1s cruzando tu propio miedo a la muerte?", "intercesion": "Jes\u00fas, t\u00fa que moriste confiando en el Padre, ay\u00fadame a no huir de mi propia mortalidad. Ens\u00e9\u00f1ame que morir es atravesar un portal, y que del otro lado t\u00fa me esperas con los brazos abiertos.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_15.mp3"}], "gloriosos": [{"numero": 16, "titulo": "Primer Misterio Glorioso: La Resurrecci\u00f3n", "subtitulo": "El dolor que impide ver a Dios", "referencia": "Lucas 24:13-18 (DHH)", "evangelio": "Aquel mismo d\u00eda, dos de los disc\u00edpulos iban a un pueblo llamado Ema\u00fas. Iban hablando de todo lo que hab\u00eda pasado. Mientras conversaban y discut\u00edan, Jes\u00fas mismo se acerc\u00f3 y comenz\u00f3 a caminar con ellos. Pero aunque lo ve\u00edan, algo les imped\u00eda darse cuenta de qui\u00e9n era. Jes\u00fas les pregunt\u00f3: \u00ab\u00bfDe qu\u00e9 van hablando ustedes por el camino?\u00bb Se detuvieron tristes, y uno de ellos, que se llamaba Cleof\u00e1s, contest\u00f3: \u00ab\u00bfEres t\u00fa el \u00fanico que ha estado en Jerusal\u00e9n y no sabe lo que all\u00ed ha pasado en estos d\u00edas?\u00bb", "contemplacion": "La tristeza imped\u00eda que reconocieran a Jes\u00fas\nLos disc\u00edpulos de Ema\u00fas caminaban con el coraz\u00f3n roto. Jes\u00fas hab\u00eda muerto. Todo hab\u00eda terminado. Sus esperanzas estaban sepultadas.\nY entonces, Jes\u00fas mismo se acerc\u00f3 y camin\u00f3 con ellos. Pero no lo reconocieron. \u00bfPor qu\u00e9? Porque la tristeza y las l\u00e1grimas les imped\u00edan ver.\nEl dolor los hab\u00eda cegado. La indignaci\u00f3n del duelo no les permit\u00eda aceptar los testimonios de la resurrecci\u00f3n. Estaban tan enfocados en la p\u00e9rdida que no pod\u00edan percibir la presencia viva de Cristo junto a ellos.\nA veces, el dolor nos impide ver a Dios caminando con nosotros. No porque Dios est\u00e9 ausente, sino porque nuestras l\u00e1grimas nublan la mirada. No porque Dios no act\u00fae, sino porque nuestra tristeza nos cierra a la esperanza.\nJes\u00fas no se ofendi\u00f3 por su ceguera. No los abandon\u00f3. Sigui\u00f3 caminando con ellos, con paciencia, explic\u00e1ndoles las Escrituras, hasta que por fin, al partir el pan, se les abrieron los ojos.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 siente el Coraz\u00f3n de Mar\u00eda al saber que su Hijo resucit\u00f3, venciendo la muerte para siempre?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 experimenta el Coraz\u00f3n de Jes\u00fas resucitado al caminar con disc\u00edpulos que no lo reconocen por la tristeza?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfQu\u00e9 dolor te impide ver a Dios contigo? \u00bfC\u00f3mo est\u00e1s cruzando la ceguera espiritual que nace del sufrimiento?", "intercesion": "Jes\u00fas resucitado, t\u00fa que caminaste con disc\u00edpulos ciegos de dolor, abre mis ojos para reconocerte presente en mi vida. Ay\u00fadame a no dejar que la tristeza me ciegue, y ens\u00e9\u00f1ame que aun cuando no te veo, t\u00fa caminas conmigo.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_16.mp3"}, {"numero": 17, "titulo": "Segundo Misterio Glorioso: La Ascensi\u00f3n", "subtitulo": "Lo demasiado bueno cuesta creerlo", "referencia": "Mateo 28:16-19 (DHH)", "evangelio": "Los once disc\u00edpulos fueron a Galilea, al monte que Jes\u00fas les hab\u00eda indicado. Y cuando vieron a Jes\u00fas, lo adoraron, aunque algunos dudaban. Jes\u00fas se acerc\u00f3 y les dijo: \u00abSe me ha dado toda autoridad en el cielo y en la tierra. Vayan, pues, a las gentes de todas las naciones, y h\u00e1ganlas mis disc\u00edpulos; baut\u00edcenlas en el nombre del Padre, del Hijo y del Esp\u00edritu Santo.\u00bb", "contemplacion": "Algunos adoraban, otros dudaban\nEn el monte de la Ascensi\u00f3n, algunos disc\u00edpulos se postraban ante el Resucitado. Otros dudaban. No por malicia, sino por incapacidad de aceptar algo \"demasiado bueno\".\nHab\u00edan visto a Jes\u00fas morir. Lo hab\u00edan llorado. Y ahora estaba ah\u00ed, vivo, glorioso, a punto de subir al Padre. Era demasiado hermoso para ser verdad.\nA veces somos incapaces de reconocer y aceptar las cosas buenas que nos pasan. Nos acostumbramos tanto al dolor que la alegr\u00eda nos desconcierta. Nos adaptamos tanto a la p\u00e9rdida que el reencuentro nos parece imposible.\nEs un mal inevitable de nuestra herida interior: desconfiar de la bondad, esperar siempre lo peor, no atrevernos a creer en la resurrecci\u00f3n.\nPero Jes\u00fas no rechaz\u00f3 a los que dudaban. No los expuls\u00f3 del monte. Los envi\u00f3 de todas formas: Vayan y hagan disc\u00edpulos. Porque la misi\u00f3n no es solo para los que tienen fe perfecta. Es tambi\u00e9n para los que dudan, pero siguen caminando.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 siente el Coraz\u00f3n de Mar\u00eda al ver a su Hijo glorioso subir al Padre, dej\u00e1ndola una vez m\u00e1s?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 nos revela el Coraz\u00f3n de Jes\u00fas al enviar en misi\u00f3n incluso a quienes todav\u00eda dudan?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfQu\u00e9 cosas buenas te resultan dif\u00edciles de reconocer y aceptar? \u00bfC\u00f3mo est\u00e1s cruzando tu desconfianza ante la bondad de Dios?", "intercesion": "Jes\u00fas, t\u00fa que ascendiste al Padre enviando incluso a los que dudaban, ay\u00fadame a atreverme a creer en lo bueno. Ens\u00e9\u00f1ame que la resurrecci\u00f3n no es demasiado hermosa para ser verdad, sino la verdad m\u00e1s hermosa que existe.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_17.mp3"}, {"numero": 18, "titulo": "Tercer Misterio Glorioso: La Venida del Esp\u00edritu Santo", "subtitulo": "La plenitud que otros ridiculizan", "referencia": "Hechos 1:14; 2:1-4, 13 (DHH)", "evangelio": "Todos ellos se reun\u00edan siempre para orar con algunas mujeres, con Mar\u00eda la madre de Jes\u00fas, y con sus hermanos. Cuando lleg\u00f3 la fiesta de Pentecost\u00e9s, estaban todos juntos en el mismo lugar. De repente, un gran ruido que ven\u00eda del cielo, como de un viento fuerte, reson\u00f3 en toda la casa donde ellos estaban. Y se les aparecieron lenguas como de fuego que se repartieron, y sobre cada uno de ellos se asent\u00f3 una. Y todos quedaron llenos del Esp\u00edritu Santo. Algunos se burlaban y dec\u00edan: \u00abEstos est\u00e1n borrachos.\u00bb", "contemplacion": "La plenitud espiritual confundida con embriaguez\nPersonas llenas del Esp\u00edritu Santo, repletas de Dios, hablan con ardor y luz en su mirada, con valent\u00eda, compasi\u00f3n y alegr\u00eda desbordante.\nY la gente se burlaba de ellos diciendo: \u00abEst\u00e1n borrachos.\u00bb\nEs un mal inevitable de vivir en un mundo esc\u00e9ptico: cuando experimentas la plenitud del Esp\u00edritu, habr\u00e1 quienes te ridiculicen. Cuando vives con gozo profundo, habr\u00e1 quienes te malinterpreten. Cuando tu coraz\u00f3n arda con el fuego de Pentecost\u00e9s, habr\u00e1 quienes te acusen de estar fuera de ti.\nNo porque sean malos, sino porque no han experimentado lo que t\u00fa vives. Y lo que no se entiende, se ridiculiza.\nMar\u00eda estaba ah\u00ed, en medio de los disc\u00edpulos llenos del Esp\u00edritu. Ella, que guard\u00f3 todo en su coraz\u00f3n, que vivi\u00f3 Pentecost\u00e9s sin aspavientos pero con hondura infinita. No les import\u00f3 la burla. Siguieron proclamando la Buena Noticia.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 siente el Coraz\u00f3n de Mar\u00eda al ver cumplida la promesa de Jes\u00fas: el Esp\u00edritu Santo descendiendo sobre la comunidad?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 dones env\u00eda el Coraz\u00f3n de Jes\u00fas desde el Padre, para que sus disc\u00edpulos no se queden paralizados ante el mal?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfQu\u00e9 haces cuando alguien ridiculiza a una buena persona? \u00bfC\u00f3mo est\u00e1s cruzando el miedo a ser malinterpretado cuando vives con plenitud espiritual?", "intercesion": "Esp\u00edritu Santo, t\u00fa que llenaste a los disc\u00edpulos con fuego en Pentecost\u00e9s, llena tambi\u00e9n mi coraz\u00f3n con tu ardor. Lib\u00e9rame del miedo al rid\u00edculo, y ay\u00fadame a vivir con la plenitud que viene de ti, sin importar lo que otros digan.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_18.mp3"}, {"numero": 19, "titulo": "Cuarto Misterio Glorioso: La Asunci\u00f3n de Mar\u00eda", "subtitulo": "Todo cuerpo vuelve al polvo", "referencia": "Lucas 1:46-49 (DHH)", "evangelio": "Mar\u00eda dijo: \u00abMi alma alaba la grandeza del Se\u00f1or; mi esp\u00edritu se alegra en Dios mi Salvador. Porque Dios ha puesto sus ojos en m\u00ed, su humilde esclava, y desde ahora siempre me llamar\u00e1n dichosa; porque el Todopoderoso ha hecho en m\u00ed grandes cosas. \u00a1Santo es su nombre!\u00bb", "contemplacion": "Dios liber\u00f3 a Mar\u00eda de la humillaci\u00f3n final\nAunque cuides tu salud y belleza, lamentablemente en el sepulcro o crematorio, el cuerpo se descompondr\u00e1 hasta volver al polvo del que fue creado.\nEs el mal inevitable m\u00e1s humillante: la corrupci\u00f3n de la carne. El cuerpo que fue templo del Esp\u00edritu, que am\u00f3, que abraz\u00f3, que dio vida, terminar\u00e1 deshecho, irreconocible, polvo.\nPero Cristo liber\u00f3 de esa humillaci\u00f3n a su Madre.\nMar\u00eda muri\u00f3, s\u00ed. Pero su cuerpo no conoci\u00f3 la corrupci\u00f3n. Fue asunta al cielo, cuerpo y alma, anticipando la resurrecci\u00f3n final que todos esperamos.\n\u00bfPor qu\u00e9 Dios hizo esto con Mar\u00eda? Porque su cuerpo fue el primer sagrario. Porque en su vientre habit\u00f3 el Verbo encarnado. Porque ella dio su carne para que el Hijo de Dios tuviera carne.\nY Dios no permiti\u00f3 que ese cuerpo sagrado se deshiciera en la tumba.\nNos recuerda que nuestro cuerpo tambi\u00e9n resucitar\u00e1. Que la corrupci\u00f3n del sepulcro no es el final. Que Dios valora tanto tu cuerpo que lo restaurar\u00e1 glorioso en la resurrecci\u00f3n final.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 siente el Coraz\u00f3n de Mar\u00eda al ser asunta al cielo, anticipando la gloria que todos esperamos?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 mueve al Coraz\u00f3n de Jes\u00fas a preservar el cuerpo de su Madre de la corrupci\u00f3n del sepulcro?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfQu\u00e9 tanto valoras tu salud y belleza? \u00bfC\u00f3mo est\u00e1s cruzando tu miedo a la corrupci\u00f3n del cuerpo en la muerte?", "intercesion": "Mar\u00eda, t\u00fa que fuiste asunta al cielo en cuerpo y alma, ens\u00e9\u00f1ame a valorar mi cuerpo como templo del Esp\u00edritu. Ay\u00fadame a no temer la muerte, confiando que Dios tambi\u00e9n restaurar\u00e1 mi cuerpo en la resurrecci\u00f3n final.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_19.mp3"}, {"numero": 20, "titulo": "Quinto Misterio Glorioso: La Coronaci\u00f3n de Mar\u00eda", "subtitulo": "Los humildes reciben la gloria", "referencia": "Lucas 1:51-53 (DHH)", "evangelio": "Mar\u00eda dijo: \u00abDios ha mostrado el poder de su brazo, deshizo los planes de los orgullosos, quit\u00f3 del trono a los poderosos y puso en alto a los humildes. Llen\u00f3 de bienes a los hambrientos y despidi\u00f3 a los ricos con las manos vac\u00edas.\u00bb", "contemplacion": "El \u00fanico reino que no tendr\u00e1 fin\nEl Reino de Dios es el \u00fanico reino que no tendr\u00e1 fin. Ning\u00fan rey, emperador o gobernante de la historia recibi\u00f3 la m\u00e1xima corona de gloria.\n\u00bfQui\u00e9n la recibi\u00f3? La Mujer humilde y creyente que nos dio al Mes\u00edas.\nMar\u00eda, la joven de Nazaret. La refugiada en Egipto. La madre dolorosa al pie de la Cruz. La orante silenciosa en Pentecost\u00e9s. Ella es coronada Reina del cielo y de la tierra.\nNo por sus logros pol\u00edticos. No por su poder militar. No por su riqueza. Por su fe. Por su s\u00ed. Por su humildad.\nDios invierte todas las l\u00f3gicas del mundo. Los \u00faltimos son primeros. Los humildes son exaltados. Los peque\u00f1os son grandes en el Reino.\nY Mar\u00eda, coronada Reina, nos ense\u00f1a que la gloria definitiva no es para quienes acumulan poder terrenal, sino para quienes le dan la bienvenida al amor de Dios con coraz\u00f3n sencillo.\n\u00bfQu\u00e9 personas merecen homenaje y honor, pero nadie se los da? Dios los ve. Y en el Reino, ellos brillar\u00e1n m\u00e1s que todos los poderosos de la tierra.", "meditacion": "1. Por Mar\u00eda hacia Jes\u00fas:\n\u00bfQu\u00e9 siente el Coraz\u00f3n de Mar\u00eda al ser coronada Reina del cielo por su Hijo?\n2. Desde el Hijo hacia el Padre:\n\u00bfQu\u00e9 vive el Coraz\u00f3n de Jes\u00fas al coronar a su Madre con la gloria eterna?\n3. Hijos y hermanos en el Esp\u00edritu:\n\u00bfQu\u00e9 personas merecen homenaje y honor, pero nadie se los da? \u00bfC\u00f3mo est\u00e1s cruzando tu tentaci\u00f3n de buscar gloria terrenal en lugar de humildad que lleva a la gloria eterna?", "intercesion": "Mar\u00eda, Reina humilde coronada de gloria, ens\u00e9\u00f1ame que la grandeza verdadera est\u00e1 en la peque\u00f1ez. Ay\u00fadame a valorar a quienes el mundo desprecia, y a vivir con la humildad que conduce a la gloria eterna.\nAm\u00e9n.", "audio_contemplacion": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_20.mp3"}]}, "audio_rezo": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/rezo.mp3", "audio_canto": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/AveMaria_Jacob_Arcadelt_coro_Laus%20Deo_Aguascalientes_2026.mp3"};
+/* ══════════════════════════════════════════════════════
+   CruzAndo App · Vanilla JS · Cero dependencias
+   Lee JSON desde data/{id}.json via URL param ?c=0101
+   Toda la paleta de colores viene de DATA.tema.paleta
+   ══════════════════════════════════════════════════════ */
 
-var BLOQUE_META = {
-gozosos:   {label:“Misterios Gozosos”,  emoji:”\ud83d\ude0a”,color:”#F6A623”,days:[1,6]},
-luminosos: {label:“Misterios Luminosos”, emoji:”\u2728”,      color:”#F5C518”,days:[4]},
-dolorosos: {label:“Misterios Dolorosos”, emoji:”\u271d\ufe0f”,color:”#C0392B”,days:[2,5]},
-gloriosos: {label:“Misterios Gloriosos”, emoji:”\ud83d\udc51”,color:”#8E44AD”,days:[0,3]}
-};
-var DAY_NAMES=[“Domingo”,“Lunes”,“Martes”,“Mi\u00e9rcoles”,“Jueves”,“Viernes”,“S\u00e1bado”];
-var ORDS=[“Primer”,“Segundo”,“Tercer”,“Cuarto”,“Quinto”];
-var MLABELS=[“Por Mar\u00eda hacia Jes\u00fas”,“Desde el Hijo hacia el Padre”,“Hijos y hermanos en el Esp\u00edritu”];
-var MCOLORS=[”#FF7A00”,”#C0392B”,”#27AE60”];
+(function() {
+  'use strict';
 
-var state={screen:“home”,darkMode:false,ci:0,done:{},journal:{},openSections:{},showPray:false};
+  // ── Estado global ──
+  let DATA = null;
+  let CUADERNO_ID = null;
+  let currentBlock = null;   // 'gozosos' | 'luminosos' | 'dolorosos' | 'gloriosos'
+  let currentMystery = 0;    // 0-4 dentro del bloque
+  let openSection = null;     // qué acordeón está abierto
+  let progress = {};          // { gozosos: [ts,ts,null,null,null], ... }
+  let journal = {};           // { gozosos: { 0: {q0:'',q1:'',q2:''}, ... }, ... }
+  let isDark = false;
 
-function getBloqueForDay(d){for(var k in BLOQUE_META)if(BLOQUE_META[k].days.indexOf(d)!==-1)return k;return”gozosos”;}
-function parseMed(raw){return raw.split(/\n(?=\d.)/).map(function(l){return l.replace(/^\d+.\s*(Por Mar\u00eda hacia Jes\u00fas|Desde el Hijo hacia el Padre|Hijos y hermanos en el Esp\u00edritu):\s*\n?/,””).trim();});}
-function buildM(key){return DATA.misterios[key].map(function(m){return{numero:m.numero,nombre:m.titulo.replace(/^(Primer|Segundo|Tercer|Cuarto|Quinto)\s+Misterio\s+(Gozoso|Luminoso|Doloroso|Glorioso):\s*/i,””),subtitulo:m.subtitulo,evangelio:{ref:m.referencia,text:m.evangelio},contemplacion:m.contemplacion,meditacion:parseMed(m.meditacion),intercesion:m.intercesion,audio:m.audio_contemplacion};});}
-function esc(s){var d=document.createElement(“div”);d.textContent=s;return d.innerHTML;}
-function playNotes(f){try{var ac=new(window.AudioContext||window.webkitAudioContext)();f.forEach(function(fr,i){setTimeout(function(){var o=ac.createOscillator(),g=ac.createGain();o.type=“sine”;o.frequency.value=fr;g.gain.setValueAtTime(0.07,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+0.3);o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+0.3);},i*180);});}catch(e){}}
-function fmt(s){return Math.floor(s/60)+”:”+String(Math.floor(s%60)).padStart(2,“0”);}
+  const BLOCKS = ['gozosos','luminosos','dolorosos','gloriosos'];
+  const BLOCK_NAMES = { gozosos:'Gozosos', luminosos:'Luminosos', dolorosos:'Dolorosos', gloriosos:'Gloriosos' };
+  const ORDS = ['Primer','Segundo','Tercer','Cuarto','Quinto'];
+  const BTYPES = { gozosos:'Gozoso', luminosos:'Luminoso', dolorosos:'Doloroso', gloriosos:'Glorioso' };
+  const MED_LABELS = ['Por María hacia Jesús','Desde el Hijo hacia el Padre','Hijos y hermanos en el Espíritu'];
+  const MED_COLORS = ['#FF7A00','#C0392B','#27AE60'];
 
-var app=document.getElementById(“app”);
+  // Misterios del día según tradición católica
+  const DAY_BLOCKS = { 0:'gloriosos', 1:'gozosos', 2:'dolorosos', 3:'gloriosos', 4:'luminosos', 5:'dolorosos', 6:'gozosos' };
 
-function render(){
-if(state.darkMode)document.body.classList.add(“dark”);else document.body.classList.remove(“dark”);
-app.innerHTML=””;
-if(state.screen===“home”)renderHome();else renderMystery();
-}
+  // Audio
+  let audioEl = null;
+  let audioPlaying = false;
+  let currentAudioId = null;
 
-function renderHome(){
-var dow=new Date().getDay(),tk=getBloqueForDay(dow),tm=BLOQUE_META[tk];
-var h=’<div style="padding:28px 20px 20px;background:var(--card);border-bottom:1.5px solid var(--border);text-align:center;position:relative">’;
-h+=’<button id="dmh" style="position:absolute;top:20px;right:16px;width:38px;height:38px;border-radius:50%;background:var(--secBg);border:1.5px solid var(--border);cursor:pointer">’+(state.darkMode?”\u2600\ufe0f”:”\ud83c\udf19”)+’</button>’;
-h+=’<div style="display:inline-block;background:#FF7A00;color:#fff;padding:4px 14px;border-radius:16px;font-size:12px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:10px">Nivel Cruz</div>’;
-h+=’<h1 style="font-size:30px;font-weight:700;color:var(--text);margin:4px 0 2px">CruzAndo</h1>’;
-h+=’<div style="font-size:17px;color:var(--textSoft)">Males</div>’;
-h+=’<div style="font-size:14px;color:var(--textDim);margin-top:6px;font-style:italic">Cuaderno 1 \u2014 La Cruz</div></div>’;
-h+=’<div style="padding:20px 16px 40px">’;
-h+=’<button id="tbtn" style="width:100%;padding:22px 20px;background:linear-gradient(135deg,#FF7A00,#F69C49);border:none;border-radius:20px;cursor:pointer;text-align:left;color:#fff;margin-bottom:20px;box-shadow:0 6px 24px rgba(255,122,0,0.25);position:relative;overflow:hidden;font-family:Inter,system-ui,sans-serif">’;
-h+=’<div style="position:absolute;top:-30px;right:-20px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.1)"></div>’;
-h+=’<div style="font-size:13px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;opacity:0.85;margin-bottom:6px">Hoy ‘+DAY_NAMES[dow]+’</div>’;
-h+=’<div style="font-size:24px;font-weight:700;margin-bottom:4px">’+tm.emoji+’ ‘+tm.label+’</div>’;
-h+=’<div style="font-size:15px;opacity:0.9;font-style:italic">’+DATA.subtitulos_bloque[tk]+’</div>’;
-h+=’<div style="margin-top:14px;display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.2);padding:8px 16px;border-radius:12px;font-size:15px;font-weight:600">Orar los misterios del d\u00eda \u203a</div>’;
-h+=’</button>’;
-h+=’<div style="font-size:13px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--textDim);margin-bottom:12px;padding-left:4px">O elige otro set de misterios</div>’;
-[“gozosos”,“luminosos”,“dolorosos”,“gloriosos”].forEach(function(k){
-var m=BLOQUE_META[k],it=k===tk,dl=m.days.map(function(d){return DAY_NAMES[d]}).join(” y “);
-h+=’<button class="bk" data-k="'+k+'" style="width:100%;padding:16px 18px;background:var(--card);border:1.5px solid '+(it?'#FFCFA2':'var(--border)')+';border-radius:16px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:14px;margin-bottom:10px;position:relative;font-family:Inter,system-ui,sans-serif">’;
-if(it)h+=’<div style="position:absolute;top:10px;right:12px;font-size:10px;font-weight:700;background:#FF7A00;color:#fff;padding:2px 8px;border-radius:8px">HOY</div>’;
-h+=’<div style="width:46px;height:46px;border-radius:14px;background:'+m.color+'18;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">’+m.emoji+’</div>’;
-h+=’<div style="flex:1"><div style="font-size:16px;font-weight:600;color:var(--text)">’+m.label+’</div>’;
-h+=’<div style="font-size:14px;color:var(--textSoft);font-style:italic;margin-top:2px">’+DATA.subtitulos_bloque[k]+’</div>’;
-h+=’<div style="font-size:12px;color:var(--textDim);margin-top:3px">’+dl+’</div></div>’;
-h+=’<span style="color:var(--textDim)">\u203a</span></button>’;
-});
-h+=’</div>’;
-app.innerHTML=h;
-document.getElementById(“dmh”).onclick=function(){state.darkMode=!state.darkMode;render();};
-document.getElementById(“tbtn”).onclick=function(){goB(tk);};
-document.querySelectorAll(”.bk”).forEach(function(b){b.onclick=function(){goB(b.dataset.k);};});
-}
+  // ── Utilidades ──
+  const $ = id => document.getElementById(id);
+  const show = id => { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); $(id).classList.add('active'); };
+  const lsKey = () => 'cruzando_' + CUADERNO_ID;
 
-function goB(k){state.screen=k;state.ci=0;state.done={};state.openSections={};state.showPray=false;render();window.scrollTo(0,0);}
+  function saveProgress() {
+    try { localStorage.setItem(lsKey(), JSON.stringify({ progress, journal, isDark })); } catch(e){}
+  }
+  function loadProgress() {
+    try {
+      const raw = localStorage.getItem(lsKey());
+      if (raw) {
+        const d = JSON.parse(raw);
+        if (d.progress) progress = d.progress;
+        if (d.journal) journal = d.journal;
+        if (typeof d.isDark === 'boolean') isDark = d.isDark;
+      }
+    } catch(e){}
+    // Inicializar estructura si no existe
+    BLOCKS.forEach(b => {
+      if (!progress[b]) progress[b] = [null,null,null,null,null];
+      if (!journal[b]) journal[b] = {};
+    });
+  }
 
-function renderMystery(){
-var key=state.screen,meta=BLOQUE_META[key],ms=buildM(key),sub=DATA.subtitulos_bloque[key],tot=ms.length,ci=state.ci,m=ms[ci],iD=state.done[ci]!=null,dc=Object.keys(state.done).length,bl=meta.label.replace(“Misterios “,””);
-var h=’<div style="padding:14px 18px;background:var(--card);border-bottom:1.5px solid var(--border)">’;
-h+=’<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">’;
-h+=’<button id="bk" style="background:none;border:none;cursor:pointer;color:#FF7A00;font-size:14px;font-weight:600;font-family:Inter,system-ui,sans-serif;padding:0">\u2039 Inicio</button>’;
-h+=’<button id="dmm" style="width:36px;height:36px;border-radius:50%;background:var(--secBg);border:1.5px solid var(--border);cursor:pointer">’+(state.darkMode?”\u2600\ufe0f”:”\ud83c\udf19”)+’</button></div>’;
-h+=’<div style="display:inline-block;background:#FF7A00;color:#fff;padding:3px 10px;border-radius:14px;font-size:11px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:6px">Nivel Cruz \u2014 Males</div>’;
-h+=’<h1 style="font-size:22px;font-weight:700;color:var(--text);margin:2px 0">’+meta.emoji+’ ‘+meta.label+’</h1>’;
-h+=’<div style="font-size:15px;color:var(--textSoft);font-style:italic">’+sub+’</div></div>’;
-// Dots
-h+=’<div style="padding:14px 18px;background:var(--card);border-bottom:1px solid var(--border)"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">’;
-for(var i=0;i<tot;i++){var iA=i===ci,iDD=state.done[i]!=null;h+=’<div class="dt" data-i="'+i+'" style="width:'+(iA?24:11)+'px;height:11px;border-radius:6px;background:'+(iDD?'#00C853':iA?'#FF7A00':'var(--border)')+';cursor:pointer;box-shadow:'+(iA?'0 0 0 3px #FFCFA2':iDD?'0 0 6px rgba(0,200,83,0.4)':'none')+'"></div>’;}
-h+=’</div><div style="display:flex;justify-content:space-between"><span style="font-size:13px;color:var(--textDim)">’+meta.label+’</span><span style="font-size:13px;font-weight:700;color:'+(dc===tot?'#00C853':'#FF7A00')+'">’+dc+’/’+tot+’</span></div></div>’;
-// Nav
-h+=’<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 18px">’;
-h+=’<button id="pv" style="background:none;border:none;cursor:'+(ci===0?'default':'pointer')+';opacity:'+(ci===0?'0.3':'1')+';color:var(--textSoft);font-size:13px;font-family:Inter,system-ui,sans-serif">\u2039 Anterior</button>’;
-h+=’<span style="font-size:13px;font-weight:600;color:var(--textDim)">’+(ci+1)+’ de ‘+tot+’</span>’;
-h+=’<button id="nx" style="background:none;border:none;cursor:'+(ci===tot-1?'default':'pointer')+';opacity:'+(ci===tot-1?'0.3':'1')+';color:var(--textSoft);font-size:13px;font-family:Inter,system-ui,sans-serif">Siguiente \u203a</button></div>’;
-// Content
-h+=’<div style="padding:4px 14px 120px">’;
-// Hero
-h+=’<div style="border-radius:18px;overflow:hidden;margin-bottom:14px;position:relative;background:linear-gradient(135deg,#FFCFA2,#FFA34E,#F69C49);height:160px"><div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:18px 20px;background:linear-gradient(to top,rgba(43,38,34,0.75) 0%,rgba(43,38,34,0.15) 60%,transparent 100%)">’;
-h+=’<div style="font-size:13px;font-weight:600;letter-spacing:1px;color:#FFCFA2;text-transform:uppercase">’+ORDS[ci]+’ Misterio ‘+bl.slice(0,-1)+’</div>’;
-h+=’<h2 style="margin:3px 0 0;font-size:22px;font-weight:700;color:#fff;line-height:1.2">’+esc(m.nombre)+’</h2>’;
-h+=’<div style="font-size:15px;color:rgba(255,255,255,0.85);font-style:italic;margin-top:4px">’+esc(m.subtitulo)+’</div></div></div>’;
-// Evangelio
-h+=’<div style="padding:16px 18px;background:var(--card);border-radius:16px;border:1.5px solid var(--border);margin-bottom:10px">’;
-h+=’<div style="font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#FF7A00;margin-bottom:10px">\ud83d\udcd6 Evangelio</div>’;
-h+=’<div style="font-size:18px;color:var(--text);line-height:1.8;white-space:pre-line">’+esc(m.evangelio.text)+’</div>’;
-h+=’<div style="font-size:14px;color:var(--textDim);margin-top:12px;text-align:right;font-style:italic">\u2014 ‘+esc(m.evangelio.ref)+’</div></div>’;
-// Accordions
-h+=acc(“rezar”,”\ud83d\ude4f”,“Rezar este Misterio”,aud(DATA.audio_rezo,“Padrenuestro + 10 Avemar\u00edas + Gloria”));
-h+=acc(“canto”,”\ud83c\udfb5”,“Canto”,aud(DATA.audio_canto,“Ave Mar\u00eda \u2014 Arcadelt \u2014 Coro Laus Deo”));
-h+=acc(“contemplar”,”\ud83d\udc41\ufe0f”,“Contemplar”,aud(m.audio,“Audio de la contemplaci\u00f3n”)+’<div style="margin-top:14px;padding:16px 18px;background:var(--secBg);border-radius:14px;border-left:3px solid #F69C49"><div style="font-size:18px;color:var(--text);line-height:1.85;white-space:pre-line">’+esc(m.contemplacion)+’</div></div>’);
-// Meditar
-var mh=’<div style="display:flex;flex-direction:column;gap:20px">’;
-for(var qi=0;qi<m.meditacion.length;qi++){var jk=ci+’*’+key,jv=(state.journal[jk]&&state.journal[jk][qi])||””;
-mh+=’<div><div style="display:flex;align-items:center;gap:7px;margin-bottom:6px"><div style="width:7px;height:7px;border-radius:4px;background:'+MCOLORS[qi]+'"></div><span style="font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:'+MCOLORS[qi]+'">’+MLABELS[qi]+’</span></div>’;
-mh+=’<p style="font-size:18px;color:var(--text);line-height:1.7;margin-bottom:10px">’+esc(m.meditacion[qi])+’</p>’;
-mh+=’<textarea class="jt" data-qi="'+qi+'" rows="3" placeholder="Escribe aqu\u00ed tu reflexi\u00f3n..." style="width:100%;padding:12px 16px;background:var(--inputBg);border:1.5px solid var(--border);border-radius:12px;color:var(--text);font-size:17px;line-height:1.7;outline:none;font-family:Inter,system-ui,sans-serif">’+esc(jv)+’</textarea></div>’;}
-mh+=’</div>’;
-h+=acc(“meditar”,”\u270d\ufe0f”,“Meditar y escribir”,mh);
-// Prayer
-if(!state.showPray&&!iD)h+=’<button id="sp" style="width:100%;padding:16px;margin-top:8px;background:var(--card);border:1.5px solid #FFCFA2;border-radius:16px;cursor:pointer;font-size:17px;font-weight:600;font-family:Inter,system-ui,sans-serif;color:#FF7A00">\ud83d\ude4f Oraci\u00f3n de intercesi\u00f3n</button>’;
-if(state.showPray&&!iD){
-h+=’<div style="margin-top:10px;padding:22px;background:var(--card);border-radius:18px;border:1.5px solid #F69C49;box-shadow:0 4px 24px rgba(255,122,0,0.1);animation:sU 0.4s ease">’;
-h+=’<div style="font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#FF7A00;margin-bottom:12px">\ud83d\ude4f Intercesi\u00f3n</div>’;
-h+=’<p style="font-size:19px;color:var(--text);line-height:1.85;font-style:italic;white-space:pre-line">’+esc(m.intercesion)+’</p>’;
-h+=’<button id="cb" style="width:100%;margin-top:20px;padding:16px;background:#FF7A00;border:none;border-radius:14px;cursor:pointer;color:#fff;font-size:18px;font-weight:700;font-family:Inter,system-ui,sans-serif;box-shadow:0 4px 16px rgba(255,122,0,0.3)">’+(ci<tot-1?‘Siguiente Misterio \u2192’:‘Completar bloque \u2726’)+’</button></div>’;}
-if(iD){var dd=new Date(state.done[ci]);h+=’<div style="margin-top:10px;padding:16px 20px;background:rgba(0,200,83,0.08);border-radius:16px;border:1.5px solid rgba(0,200,83,0.2);display:flex;align-items:center;gap:12px;animation:sU 0.4s ease"><span style="font-size:22px;color:#00C853">\u2713</span><div><div style="font-size:17px;font-weight:600;color:#00C853">Misterio completado</div><div style="font-size:14px;color:var(--textDim);margin-top:2px">’+dd.toLocaleDateString(“es-MX”,{day:“numeric”,month:“long”})+’</div></div></div>’;}
-h+=’</div>’;
-app.innerHTML=h;
-// Events
-document.getElementById(“bk”).onclick=function(){state.screen=“home”;render();window.scrollTo(0,0);};
-document.getElementById(“dmm”).onclick=function(){state.darkMode=!state.darkMode;render();};
-if(ci>0)document.getElementById(“pv”).onclick=function(){goM(ci-1);};
-if(ci<tot-1)document.getElementById(“nx”).onclick=function(){goM(ci+1);};
-document.querySelectorAll(”.dt”).forEach(function(d){d.onclick=function(){goM(parseInt(d.dataset.i));};});
-document.querySelectorAll(”.ah”).forEach(function(hd){hd.onclick=function(){state.openSections[hd.dataset.s]=!state.openSections[hd.dataset.s];render();};});
-document.querySelectorAll(”.jt”).forEach(function(t){t.oninput=function(){var q=parseInt(t.dataset.qi),jk=ci+’*’+key;if(!state.journal[jk])state.journal[jk]={};state.journal[jk][q]=t.value;};});
-var sp=document.getElementById(“sp”);if(sp)sp.onclick=function(){state.showPray=true;render();};
-var cb=document.getElementById(“cb”);if(cb)cb.onclick=function(){state.done[ci]=Date.now();state.showPray=false;playNotes([440,554,659]);if(ci<tot-1)setTimeout(function(){goM(ci+1);},1200);else{setTimeout(function(){playNotes([523,659,784]);},600);render();}};
-document.querySelectorAll(”.aw”).forEach(initAP);
-}
+  // ── Colores dinámicos ──
+  function applyPalette() {
+    if (!DATA || !DATA.tema) return;
+    const p = DATA.tema.paleta;
+    const r = document.documentElement.style;
+    r.setProperty('--lvl-bold', p.bold);
+    r.setProperty('--lvl-base', p.base);
+    r.setProperty('--lvl-soft', p.soft);
+    r.setProperty('--lvl-mist', p.mist);
+    r.setProperty('--lvl-light', p.light);
+    r.setProperty('--lvl-ultra', p.ultra);
+    // Colores de bloques
+    const bl = DATA.tema.bloques;
+    if (bl.gozosos) r.setProperty('--goz-color', bl.gozosos.color);
+    if (bl.luminosos) r.setProperty('--lum-color', bl.luminosos.color);
+    if (bl.dolorosos) r.setProperty('--dol-color', bl.dolorosos.color);
+    if (bl.gloriosos) r.setProperty('--glo-color', bl.gloriosos.color);
+    // Meta theme-color
+    document.querySelector('meta[name="theme-color"]').content = isDark ? '#1A1714' : '#E6DED3';
+  }
 
-function goM(i){state.ci=i;state.openSections={};state.showPray=false;render();window.scrollTo(0,0);}
+  function blockColor(b) {
+    if (!DATA || !DATA.tema || !DATA.tema.bloques[b]) return '#888';
+    return DATA.tema.bloques[b].color;
+  }
+  function blockEmoji(b) {
+    if (!DATA || !DATA.tema || !DATA.tema.bloques[b]) return '📿';
+    return DATA.tema.bloques[b].emoji;
+  }
 
-function acc(sec,icon,title,content){
-var o=state.openSections[sec];
-var h=’<div style="margin-top:10px;background:var(--card);border-radius:16px;border:1.5px solid var(--border);overflow:hidden">’;
-h+=’<div class="ah" data-s="'+sec+'" style="padding:14px 18px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;background:'+(o?'rgba(255,122,0,0.08)':'transparent')+'">’;
-h+=’<div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">’+icon+’</span><span style="font-size:17px;font-weight:600;color:'+(o?'#FF7A00':'var(--text)')+'">’+title+’</span></div>’;
-h+=’<span style="color:'+(o?'#FF7A00':'var(--textDim)')+';display:inline-block;transform:rotate('+(o?'180':'0')+'deg);transition:transform 0.3s">\u25bc</span></div>’;
-if(o)h+=’<div style="padding:0 18px 18px;animation:sU 0.3s ease">’+content+’</div>’;
-h+=’</div>’;return h;
-}
+  // ── Dark mode ──
+  function toggleDark() {
+    isDark = !isDark;
+    document.body.classList.toggle('dark', isDark);
+    $('ico-sun').style.display = isDark ? 'none' : 'block';
+    $('ico-moon').style.display = isDark ? 'block' : 'none';
+    document.querySelector('meta[name="theme-color"]').content = isDark ? '#1A1714' : '#E6DED3';
+    saveProgress();
+  }
 
-function aud(src,label){
-if(!src)return’<div style="padding:12px 16px;background:var(--secBg);border-radius:12px;color:var(--textDim)">Audio pr\u00f3ximamente</div>’;
-return’<div class="aw" data-src="'+esc(src)+'" data-label="'+esc(label)+'" style="padding:12px 16px;background:var(--secBg);border-radius:12px"><div style="display:flex;align-items:center;gap:12px"><button class="ap" style="width:42px;height:42px;border-radius:50%;background:#FF7A00;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-size:18px">\u25b6</button><div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:500;color:var(--text);margin-bottom:4px">’+esc(label)+’</div><div class="at" style="font-size:13px;color:var(--textDim);margin-bottom:6px">0:00 / 0:00</div><div class="ab" style="width:100%;height:4px;background:var(--border);border-radius:2px;cursor:pointer;position:relative"><div class="ag" style="height:100%;background:#FF7A00;border-radius:2px;width:0%"></div></div></div></div></div>’;
-}
+  // ── Sonidos de celebración ──
+  function playNotes(freqs) {
+    try {
+      const ac = new (window.AudioContext || window.webkitAudioContext)();
+      freqs.forEach((f, i) => {
+        setTimeout(() => {
+          const o = ac.createOscillator();
+          const g = ac.createGain();
+          o.type = 'sine'; o.frequency.value = f;
+          g.gain.setValueAtTime(0.07, ac.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.35);
+          o.connect(g); g.connect(ac.destination);
+          o.start(); o.stop(ac.currentTime + 0.35);
+        }, i * 180);
+      });
+    } catch(e){}
+  }
+  const MELODIES = [
+    [440,554,659],
+    [523,659,784],
+    [392,494,587,784],
+    [349,440,523,659]
+  ];
+  function celebrationSound(variant) { playNotes(MELODIES[variant % 4]); }
 
-function initAP(w){
-var src=w.dataset.src,a=new Audio(src),pb=w.querySelector(”.ap”),te=w.querySelector(”.at”),bar=w.querySelector(”.ab”),prog=w.querySelector(”.ag”),pl=false;
-a.addEventListener(“loadedmetadata”,function(){te.textContent=“0:00 / “+fmt(a.duration);});
-a.addEventListener(“timeupdate”,function(){te.textContent=fmt(a.currentTime)+” / “+fmt(a.duration||0);if(a.duration)prog.style.width=(a.currentTime/a.duration*100)+”%”;});
-a.addEventListener(“ended”,function(){pl=false;pb.textContent=”\u25b6”;});
-a.addEventListener(“error”,function(){te.textContent=“Error al cargar”;pb.style.background=”#999”;});
-pb.onclick=function(){if(pl){a.pause();pl=false;pb.textContent=”\u25b6”;}else{a.play().catch(function(){});pl=true;pb.textContent=”\u23f8”;}};
-bar.onclick=function(e){if(!a.duration)return;var r=bar.getBoundingClientRect();a.currentTime=((e.clientX-r.left)/r.width)*a.duration;};
-}
+  // ── Confetti ──
+  function showConfetti() {
+    const c = document.createElement('div');
+    c.className = 'confetti-container';
+    const colors = [
+      DATA.tema.paleta.bold, DATA.tema.paleta.soft, DATA.tema.paleta.light,
+      '#34A853', '#FBBC05', '#EA4335'
+    ];
+    for (let i = 0; i < 40; i++) {
+      const p = document.createElement('div');
+      p.className = 'confetti-piece';
+      p.style.left = Math.random() * 100 + '%';
+      p.style.background = colors[Math.floor(Math.random() * colors.length)];
+      p.style.animationDelay = Math.random() * 0.8 + 's';
+      p.style.animationDuration = (2 + Math.random()) + 's';
+      c.appendChild(p);
+    }
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 3500);
+  }
 
-render();
+  // ── Audio player ──
+  function stopAudio() {
+    if (audioEl) { audioEl.pause(); audioEl.currentTime = 0; }
+    audioPlaying = false;
+    currentAudioId = null;
+    document.querySelectorAll('.play-btn').forEach(b => { b.innerHTML = playSVG(); });
+    document.querySelectorAll('.audio-bar-fill').forEach(b => { b.style.width = '0%'; });
+  }
+
+  function toggleAudio(src, playerId) {
+    if (!src) return;
+    if (currentAudioId === playerId && audioPlaying) {
+      audioEl.pause();
+      audioPlaying = false;
+      updatePlayBtn(playerId, false);
+      return;
+    }
+    if (currentAudioId !== playerId) {
+      stopAudio();
+      audioEl = new Audio(src);
+      currentAudioId = playerId;
+      audioEl.addEventListener('timeupdate', () => {
+        if (!audioEl.duration) return;
+        const pct = (audioEl.currentTime / audioEl.duration) * 100;
+        const fill = document.querySelector('#' + playerId + ' .audio-bar-fill');
+        if (fill) fill.style.width = pct + '%';
+        const cur = document.querySelector('#' + playerId + ' .a-cur');
+        const dur = document.querySelector('#' + playerId + ' .a-dur');
+        if (cur) cur.textContent = fmtTime(audioEl.currentTime);
+        if (dur) dur.textContent = fmtTime(audioEl.duration);
+      });
+      audioEl.addEventListener('ended', () => {
+        audioPlaying = false;
+        currentAudioId = null;
+        updatePlayBtn(playerId, false);
+      });
+    }
+    audioEl.play().then(() => {
+      audioPlaying = true;
+      updatePlayBtn(playerId, true);
+    }).catch(()=>{});
+  }
+
+  function seekAudio(e, playerId) {
+    if (!audioEl || currentAudioId !== playerId || !audioEl.duration) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const pct = (e.clientX - rect.left) / rect.width;
+    audioEl.currentTime = pct * audioEl.duration;
+  }
+
+  function updatePlayBtn(playerId, playing) {
+    const btn = document.querySelector('#' + playerId + ' .play-btn');
+    if (btn) btn.innerHTML = playing ? pauseSVG() : playSVG();
+  }
+
+  function fmtTime(s) {
+    if (!s || isNaN(s)) return '0:00';
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return m + ':' + (sec < 10 ? '0' : '') + sec;
+  }
+  function playSVG() { return '<svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><polygon points="6,3 20,12 6,21"/></svg>'; }
+  function pauseSVG() { return '<svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><rect x="5" y="3" width="4" height="18" rx="1"/><rect x="15" y="3" width="4" height="18" rx="1"/></svg>'; }
+
+  function audioPlayerHTML(id, label, src) {
+    if (!src) return '<div class="audio-player" style="opacity:0.5"><div style="font-size:0.82rem;color:var(--text-dim)">Audio pendiente</div></div>';
+    return '<div class="audio-player" id="' + id + '">' +
+      '<button class="play-btn" onclick="window._ca.toggleAudio(\'' + src + '\',\'' + id + '\')">' + playSVG() + '</button>' +
+      '<div class="audio-info">' +
+        '<div class="audio-label">' + label + '</div>' +
+        '<div class="audio-bar-wrap" onclick="window._ca.seekAudio(event,\'' + id + '\')">' +
+          '<div class="audio-bar-fill" style="width:0%"></div>' +
+        '</div>' +
+        '<div class="audio-time"><span class="a-cur">0:00</span><span class="a-dur">0:00</span></div>' +
+      '</div></div>';
+  }
+
+  // ── Render: Pantalla de Inicio ──
+  function renderHome() {
+    $('main-header').style.display = '';
+    $('h-title').textContent = DATA.tema.nivel_nombre;
+    $('h-sub').textContent = 'Cuaderno ' + DATA.tema.id;
+    $('home-title').textContent = DATA.tema.nivel_nombre + ' ' + DATA.numero;
+    $('home-element').textContent = DATA.cuaderno;
+
+    const grid = $('block-grid');
+    grid.innerHTML = '';
+
+    let allCleared = true;
+    const todayBlock = DAY_BLOCKS[new Date().getDay()];
+
+    BLOCKS.forEach((b, bi) => {
+      const mists = DATA.misterios[b] || [];
+      const prog = progress[b] || [];
+      const doneCount = prog.filter(x => x !== null).length;
+      const isCleared = doneCount === 5;
+      const isInProgress = doneCount > 0 && !isCleared;
+      if (!isCleared) allCleared = false;
+
+      const status = isCleared ? 'cleared' : isInProgress ? 'progress' : 'pending';
+      const statusLabel = isCleared ? '✓ Completado' : isInProgress ? 'En progreso' : (b === todayBlock ? 'Hoy' : 'Pendiente');
+      const extraClass = isCleared ? 'cleared' : (isInProgress || b === todayBlock) ? 'current' : '';
+
+      const card = document.createElement('div');
+      card.className = 'block-card fade-in fade-in-d' + (bi+1) + ' ' + extraClass;
+      card.onclick = () => enterBlock(b);
+
+      card.innerHTML =
+        '<div class="block-card-top">' +
+          '<span class="block-emoji">' + blockEmoji(b) + '</span>' +
+          '<span class="block-badge ' + status + '">' + statusLabel + '</span>' +
+        '</div>' +
+        '<div class="block-title" style="color:' + blockColor(b) + '">Misterios ' + BLOCK_NAMES[b] + '</div>' +
+        '<div class="block-subtitle">' + (DATA.subtitulos_bloque ? DATA.subtitulos_bloque[b] || '' : '') + '</div>' +
+        '<div class="block-progress"><div class="block-dots">' +
+          [0,1,2,3,4].map(i => {
+            const cls = prog[i] ? 'done' : (doneCount === i && !isCleared ? 'active' : '');
+            return '<div class="block-dot ' + cls + '"></div>';
+          }).join('') +
+        '</div></div>';
+
+      grid.appendChild(card);
+    });
+
+    // Banner de cuaderno completado
+    const wrap = $('cuaderno-done-wrap');
+    if (allCleared && DATA.tema.siguiente) {
+      wrap.style.display = '';
+      wrap.innerHTML =
+        '<div class="cuaderno-done-banner fade-in">' +
+          '<h3>¡Cuaderno completado! 🎉</h3>' +
+          '<p>Has recorrido los 20 Misterios de este cuaderno.</p>' +
+          '<a href="?c=' + DATA.tema.siguiente + '" class="btn btn-green btn-block">Avanzar al siguiente cuaderno →</a>' +
+        '</div>';
+    } else if (allCleared) {
+      wrap.style.display = '';
+      wrap.innerHTML =
+        '<div class="cuaderno-done-banner fade-in">' +
+          '<h3>¡Cuaderno completado! 🎉</h3>' +
+          '<p>Has llegado al final de este cuaderno. ¡Gloria a Dios!</p>' +
+        '</div>';
+    } else {
+      wrap.style.display = 'none';
+    }
+
+    show('scr-home');
+  }
+
+  // ── Entrar a un bloque ──
+  function enterBlock(b) {
+    stopAudio();
+    currentBlock = b;
+    const prog = progress[b] || [];
+    // Ir al primer misterio no completado, o al primero si todos están completados
+    const first = prog.findIndex(x => x === null);
+    currentMystery = first >= 0 ? first : 0;
+    openSection = null;
+    renderPrayer();
+  }
+
+  // ── Render: Pantalla de Oración ──
+  function renderPrayer() {
+    const b = currentBlock;
+    const mi = currentMystery;
+    const mists = DATA.misterios[b];
+    const m = mists[mi];
+    const prog = progress[b];
+
+    $('h-title').textContent = DATA.tema.nivel_nombre;
+    $('h-sub').textContent = BLOCK_NAMES[b];
+
+    // Counter
+    $('prayer-counter').textContent = ORDS[mi] + ' Misterio ' + BTYPES[b];
+    $('prayer-title').textContent = m.titulo;
+    $('prayer-subtitle').textContent = m.subtitulo || '';
+
+    // Dots
+    const dots = $('prayer-dots');
+    dots.innerHTML = '';
+    for (let i = 0; i < 5; i++) {
+      const d = document.createElement('div');
+      d.className = 'm-dot' + (prog[i] ? ' done' : (i === mi ? ' active' : ''));
+      d.onclick = () => { currentMystery = i; openSection = null; stopAudio(); renderPrayer(); };
+      dots.appendChild(d);
+    }
+
+    // Evangelio
+    $('ev-text').textContent = m.evangelio;
+    $('ev-ref').textContent = '— ' + m.referencia;
+
+    // Acordeón
+    renderAccordion(b, mi, m);
+
+    // Done bar
+    const doneWrap = $('mystery-done-wrap');
+    if (prog[mi]) {
+      const d = new Date(prog[mi]);
+      doneWrap.style.display = '';
+      doneWrap.innerHTML =
+        '<div class="mystery-done-bar fade-in">' +
+          '<span class="done-check">✓</span>' +
+          '<div><div class="done-text">Misterio completado</div>' +
+          '<div class="done-date">' + d.toLocaleDateString('es-MX',{day:'numeric',month:'long'}) + '</div></div>' +
+        '</div>';
+    } else {
+      doneWrap.style.display = 'none';
+    }
+
+    // Bottom nav
+    renderBottomNav(b, mi);
+
+    show('scr-prayer');
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
+
+  // ── Acordeón ──
+  function renderAccordion(b, mi, m) {
+    const acc = $('accordion');
+    const sections = [
+      { key:'rezar', icon:'📿', label:'Rezar este Misterio', bgVar:'--lvl-ultra' },
+      { key:'canto', icon:'🎵', label:'Canto', bgVar:'--lvl-ultra' },
+      { key:'contemplar', icon:'👁️', label:'Contemplar', bgVar:'--lvl-ultra' },
+      { key:'meditar', icon:'✏️', label:'Meditar y escribir', bgVar:'--lvl-ultra' },
+      { key:'intercesion', icon:'🙏', label:'Intercesión', bgVar:'--lvl-ultra' },
+    ];
+
+    acc.innerHTML = sections.map(s => {
+      const isOpen = openSection === s.key;
+      return '<div class="acc-item' + (isOpen ? ' open' : '') + '" id="acc-' + s.key + '">' +
+        '<button class="acc-trigger" onclick="window._ca.toggleSection(\'' + s.key + '\')">' +
+          '<div class="acc-trigger-left">' +
+            '<div class="acc-icon" style="background:var(' + s.bgVar + ')">' + s.icon + '</div>' +
+            '<span class="acc-label">' + s.label + '</span>' +
+          '</div>' +
+          '<svg class="acc-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>' +
+        '</button>' +
+        '<div class="acc-body" style="max-height:' + (isOpen ? '2000px' : '0') + '">' +
+          '<div class="acc-body-inner">' + sectionContent(s.key, b, mi, m) + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function sectionContent(key, b, mi, m) {
+    if (key === 'rezar') {
+      const src = DATA.audio_rezo || '';
+      return audioPlayerHTML('ap-rezar', 'Padrenuestro · 10 Avemarías · Gloria · Jaculatoria', src);
+    }
+    if (key === 'canto') {
+      const src = DATA.audio_canto || '';
+      if (src) return audioPlayerHTML('ap-canto', 'Canto contemplativo', src);
+      return '<div class="canto-box"><p>🕊️ Momento de silencio y canto contemplativo</p><span class="canto-hint">Tómate unos momentos para cantar, meditar o guardar silencio antes de continuar</span></div>';
+    }
+    if (key === 'contemplar') {
+      const src = m.audio_contemplacion || '';
+      let html = audioPlayerHTML('ap-contempl', 'Audio de la contemplación', src);
+      html += '<div class="contempl-text">' + escHTML(m.contemplacion) + '</div>';
+      return html;
+    }
+    if (key === 'meditar') {
+      return renderMeditation(b, mi, m);
+    }
+    if (key === 'intercesion') {
+      let html = '<div class="interc-text">' + escHTML(m.intercesion) + '</div>';
+      const isDone = progress[b] && progress[b][mi];
+      html += '<button class="amen-btn' + (isDone ? ' done' : '') + '" onclick="window._ca.completeMystery()">' + (isDone ? '✓ Amén' : 'Amén') + '</button>';
+      return html;
+    }
+    return '';
+  }
+
+  function renderMeditation(b, mi, m) {
+    // Parsear las 3 preguntas de meditación
+    const questions = parseMeditation(m.meditacion);
+    const j = journal[b] && journal[b][mi] ? journal[b][mi] : {};
+
+    return questions.map((q, qi) => {
+      const val = j['q' + qi] || '';
+      return '<div class="med-group">' +
+        '<div class="med-label-row">' +
+          '<div class="med-dot" style="background:' + MED_COLORS[qi] + '"></div>' +
+          '<span class="med-label-text" style="color:' + MED_COLORS[qi] + '">' + MED_LABELS[qi] + '</span>' +
+        '</div>' +
+        '<p class="med-question">' + escHTML(q) + '</p>' +
+        '<textarea class="journal-area" placeholder="Escribe tu reflexión…" ' +
+          'oninput="window._ca.saveJournal(\'' + b + '\',' + mi + ',' + qi + ',this.value)">' + escHTML(val) + '</textarea>' +
+      '</div>';
+    }).join('');
+  }
+
+  function parseMeditation(text) {
+    if (!text) return ['','',''];
+    // Intentar separar por las 3 etiquetas
+    const labels = MED_LABELS;
+    const parts = [];
+    let remaining = text;
+    for (let i = 0; i < labels.length; i++) {
+      const idx = remaining.indexOf(labels[i]);
+      if (idx >= 0) {
+        if (i > 0 && parts.length < i) parts.push(remaining.substring(0, idx).trim());
+        remaining = remaining.substring(idx + labels[i].length);
+        // Quitar : inicial si hay
+        remaining = remaining.replace(/^\s*:\s*/, '');
+      }
+    }
+    if (remaining.trim()) parts.push(remaining.trim());
+
+    // Si no se pudo parsear con labels, intentar por líneas
+    if (parts.length < 3) {
+      const lines = text.split('\n').filter(l => l.trim());
+      return [lines[0] || '', lines[1] || '', lines[2] || ''];
+    }
+    return parts.length >= 3 ? parts.slice(0,3) : [...parts, ...Array(3-parts.length).fill('')];
+  }
+
+  function saveJournal(b, mi, qi, val) {
+    if (!journal[b]) journal[b] = {};
+    if (!journal[b][mi]) journal[b][mi] = {};
+    journal[b][mi]['q' + qi] = val;
+    saveProgress();
+  }
+
+  function toggleSection(key) {
+    openSection = openSection === key ? null : key;
+    renderAccordion(currentBlock, currentMystery, DATA.misterios[currentBlock][currentMystery]);
+  }
+
+  // ── Completar misterio ──
+  function completeMystery() {
+    const b = currentBlock;
+    const mi = currentMystery;
+    if (progress[b][mi]) return; // ya completado
+
+    progress[b][mi] = Date.now();
+    saveProgress();
+
+    // Celebración del misterio
+    const variant = BLOCKS.indexOf(b) * 5 + mi;
+    celebrationSound(variant);
+
+    // Checar si el bloque está completo
+    const allDone = progress[b].every(x => x !== null);
+    if (allDone) {
+      // Celebración de bloque completo
+      setTimeout(() => {
+        showConfetti();
+        showCelebration(b);
+      }, 600);
+    } else {
+      // Auto-avanzar al siguiente misterio
+      renderPrayer();
+      if (mi < 4) {
+        setTimeout(() => {
+          currentMystery = mi + 1;
+          openSection = null;
+          stopAudio();
+          renderPrayer();
+        }, 800);
+      }
+    }
+  }
+
+  // ── Bottom Nav ──
+  function renderBottomNav(b, mi) {
+    const nav = $('bottom-nav');
+    const hasPrev = mi > 0;
+    const hasNext = mi < 4;
+    const isDone = progress[b][mi];
+
+    let html = '';
+    if (hasPrev) {
+      html += '<button class="btn btn-outline" onclick="window._ca.goMystery(' + (mi-1) + ')">← Anterior</button>';
+    }
+    if (hasNext && isDone) {
+      html += '<button class="btn btn-primary" onclick="window._ca.goMystery(' + (mi+1) + ')">Siguiente →</button>';
+    } else if (!isDone) {
+      // No mostrar "siguiente" hasta completar con Amén
+    }
+    nav.innerHTML = html;
+  }
+
+  function goMystery(i) {
+    currentMystery = i;
+    openSection = null;
+    stopAudio();
+    renderPrayer();
+  }
+
+  // ── Celebración de bloque ──
+  function showCelebration(b) {
+    const blockName = BLOCK_NAMES[b];
+    const maria = 'img/maria_' + b + '.webp';
+
+    const container = $('maria-container');
+    const img = new Image();
+    img.onload = () => {
+      container.outerHTML = '<img class="maria-img" id="maria-container" src="' + maria + '" alt="Virgen María">';
+    };
+    img.onerror = () => {
+      container.innerHTML = '🙏';
+    };
+    img.src = maria;
+
+    $('celeb-title').textContent = '¡Misterios ' + blockName + ' completados!';
+    $('celeb-sub').textContent = 'Has contemplado los cinco Misterios ' + blockName + ' de este cuaderno. Que María siga acompañándote en el camino.';
+    $('btn-celeb-home').onclick = () => {
+      stopAudio();
+      renderHome();
+    };
+
+    show('scr-celebration');
+    celebrationSound(BLOCKS.indexOf(b));
+  }
+
+  // ── Escape HTML ──
+  function escHTML(s) {
+    if (!s) return '';
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  }
+
+  // ── Iniciar ──
+  async function init() {
+    // Leer ID desde URL
+    const params = new URLSearchParams(window.location.search);
+    CUADERNO_ID = params.get('c') || '0101';
+
+    // Validar formato 4 dígitos
+    if (!/^\d{4}$/.test(CUADERNO_ID)) {
+      showError('ID inválido: ' + CUADERNO_ID + '. Usa un código de 4 dígitos (ej. 0101).');
+      return;
+    }
+
+    // Cargar JSON
+    try {
+      const resp = await fetch('data/' + CUADERNO_ID + '.json');
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      DATA = await resp.json();
+    } catch(e) {
+      showError('No se pudo cargar data/' + CUADERNO_ID + '.json. Verifica que el archivo exista.');
+      return;
+    }
+
+    // Cargar progreso
+    loadProgress();
+
+    // Aplicar dark mode
+    if (isDark) {
+      document.body.classList.add('dark');
+      $('ico-sun').style.display = 'none';
+      $('ico-moon').style.display = 'block';
+    }
+
+    // Aplicar paleta
+    applyPalette();
+
+    // Event listeners
+    $('btn-dark').onclick = toggleDark;
+    $('btn-back-home').onclick = () => { stopAudio(); renderHome(); };
+
+    // API global para onclick en HTML
+    window._ca = {
+      toggleAudio: toggleAudio,
+      seekAudio: seekAudio,
+      toggleSection: toggleSection,
+      completeMystery: completeMystery,
+      goMystery: goMystery,
+      saveJournal: saveJournal,
+    };
+
+    // Render
+    $('scr-loading').style.display = 'none';
+    $('main-header').style.display = '';
+    renderHome();
+  }
+
+  function showError(msg) {
+    $('scr-loading').style.display = 'none';
+    $('error-msg').textContent = msg;
+    $('scr-error').style.display = 'flex';
+  }
+
+  // Arrancar
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+})();
 </script>
-
 </body>
 </html>
