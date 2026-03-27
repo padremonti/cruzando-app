@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>CruzAndo — Demo Lux + Mariano</title>
+<title>CruzAndo — Demo Lux + Mariano (GitHub)</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',system-ui,sans-serif;background:#E6DED3;color:#2B2622;min-height:100dvh}
@@ -49,13 +49,6 @@ body{font-family:'Inter',system-ui,sans-serif;background:#E6DED3;color:#2B2622;m
 }
 .lux-svg.spin{animation:luxSpin 2s ease-in-out}
 
-/* Pulso lento contemplativo */
-@keyframes luxContemplative{
-  0%, 100%{opacity:0.85;transform:scale(1)}
-  50%{opacity:1;transform:scale(1.12)}
-}
-.lux-svg.contemplative{animation:luxContemplative 5s ease-in-out infinite}
-
 /* ═══ PARTÍCULAS DE LUZ ═══ */
 .particle{
   position:absolute;width:4px;height:4px;
@@ -100,7 +93,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#E6DED3;color:#2B2622;m
 .mariano-overlay.active{display:flex}
 
 .mariano-character{
-  width:140px;height:auto;
+  width:182px;height:auto;
   transform:translateX(200px);
   opacity:0;
 }
@@ -118,7 +111,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#E6DED3;color:#2B2622;m
 
 /* Metros flotantes */
 .meters-float{
-  position:absolute;top:50%;right:180px;
+  position:absolute;top:50%;right:220px;
   font-size:18px;font-weight:800;color:#00C853;
   text-shadow:0 2px 8px rgba(0,200,83,0.4);
   opacity:0;transform:translateY(0);
@@ -139,7 +132,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#E6DED3;color:#2B2622;m
 .celebration-overlay.visible{display:flex}
 
 .celebration-mariano{
-  width:200px;height:auto;margin-bottom:20px;
+  width:260px;height:auto;margin-bottom:20px;
   animation:popScale 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
 }
 
@@ -187,6 +180,15 @@ body{font-family:'Inter',system-ui,sans-serif;background:#E6DED3;color:#2B2622;m
   0%{transform:translateY(-20px) rotate(0deg);opacity:1}
   100%{transform:translateY(100vh) rotate(720deg);opacity:0}
 }
+
+/* Error de carga */
+.error-msg{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  background:#EA4335;color:#fff;padding:12px 20px;
+  border-radius:8px;font-size:13px;z-index:300;
+  display:none;
+}
+.error-msg.show{display:block}
 </style>
 </head>
 <body>
@@ -209,9 +211,9 @@ body{font-family:'Inter',system-ui,sans-serif;background:#E6DED3;color:#2B2622;m
           </filter>
         </defs>
         <g filter="url(#luxGlow)">
-          <!-- Lux delgada: 50% del grosor original -->
-          <rect x="45.3125" y="0.285" width="9.375" height="99.43" fill="#FFFCF7"/>
-          <rect x="0" y="45.33" width="100" height="9.34" fill="#FFFCF7"/>
+          <!-- Lux muy delgada: 40.6% del grosor original -->
+          <rect x="46.1926" y="0.285" width="7.6148" height="99.43" fill="#FFFCF7"/>
+          <rect x="0" y="46.2068" width="100" height="7.5864" fill="#FFFCF7"/>
         </g>
       </svg>
     </div>
@@ -226,7 +228,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#E6DED3;color:#2B2622;m
     <div class="fake-card">
       <div class="fake-text">
         <strong>Lux</strong> es tu guía constante (cruz blanca en header).<br>
-        <strong>Mariano</strong> aparece al ganar metros o celebrar.<br><br>
+        <strong>Mariano</strong> aparece desde GitHub al ganar metros o celebrar.<br><br>
         Prueba los botones para ver las animaciones.
       </div>
     </div>
@@ -234,9 +236,10 @@ body{font-family:'Inter',system-ui,sans-serif;background:#E6DED3;color:#2B2622;m
 
   <!-- BOTONES -->
   <div class="actions">
-    <button class="act-btn act-50" onclick="gainMeters(50)">📿 Escuchar rezo (+50m)</button>
-    <button class="act-btn act-50" onclick="gainMeters(30)">👁️ Contemplación (+30m)</button>
-    <button class="act-btn act-100" onclick="gainMeters(100)">🙏 Completar misterio (+100m)</button>
+    <button class="act-btn act-50" onclick="gainMeters(50, 'walking')">📿 Escuchar rezo (+50m)</button>
+    <button class="act-btn act-50" onclick="gainMeters(30, 'contemplative')">👁️ Contemplación (+30m)</button>
+    <button class="act-btn act-50" onclick="gainMeters(40, 'rosario')">📿 Rezar Rosario (+40m)</button>
+    <button class="act-btn act-100" onclick="gainMeters(100, 'happy')">🙏 Completar misterio (+100m)</button>
     <button class="act-btn act-200" onclick="celebrate()">✨ Completar bloque (+200m)</button>
   </div>
 </div>
@@ -244,17 +247,17 @@ body{font-family:'Inter',system-ui,sans-serif;background:#E6DED3;color:#2B2622;m
 <!-- MARIANO SLIDE-IN -->
 <div class="mariano-overlay" id="marianoOverlay">
   <div class="meters-float" id="metersFloat">+50m</div>
-  <img src="mariano-idle.png" class="mariano-character" id="marianoChar" alt="Mariano">
+  <img id="marianoChar" class="mariano-character" alt="Mariano">
 </div>
 
 <!-- CELEBRACIÓN -->
 <div class="celebration-overlay" id="celebOverlay">
   <div style="position:relative">
-    <img src="mariano-idle.png" class="celebration-mariano" alt="Mariano celebra">
+    <img id="marianoCharCeleb" class="celebration-mariano" alt="Mariano celebra">
     <svg class="celeb-lux" viewBox="0 0 100 100">
       <g filter="url(#luxGlow)">
-        <rect x="45.3125" y="0.285" width="9.375" height="99.43" fill="#FFFCF7"/>
-        <rect x="0" y="45.33" width="100" height="9.34" fill="#FFFCF7"/>
+        <rect x="46.1926" y="0.285" width="7.6148" height="99.43" fill="#FFFCF7"/>
+        <rect x="0" y="46.2068" width="100" height="7.5864" fill="#FFFCF7"/>
       </g>
     </svg>
   </div>
@@ -263,11 +266,34 @@ body{font-family:'Inter',system-ui,sans-serif;background:#E6DED3;color:#2B2622;m
   <button class="celeb-btn" onclick="hideCelebration()">Continuar →</button>
 </div>
 
+<!-- Error message -->
+<div class="error-msg" id="errorMsg"></div>
+
 <script>
+// Configuración de rutas
+const MARIANO_BASE = 'https://padremonti.github.io/cruzando-app/assets/mariano/';
+
 var totalMeters = 0;
 
-function gainMeters(m) {
+// Precargar imágenes de Mariano
+var marianoImages = {};
+var imagesToPreload = ['idle', 'walking', 'contemplative', 'rosario', 'happy', 'celebrate'];
+
+function preloadImages() {
+  imagesToPreload.forEach(function(pose) {
+    var img = new Image();
+    img.src = MARIANO_BASE + 'mariano-' + pose + '.png';
+    marianoImages[pose] = img;
+  });
+}
+
+// Precargar al cargar la página
+window.addEventListener('DOMContentLoaded', preloadImages);
+
+function gainMeters(m, pose) {
   totalMeters += m;
+  
+  console.log('Intentando cargar: mariano-' + pose + '.png');
   
   // Lux brilla
   var lux = document.getElementById('luxSvg');
@@ -277,10 +303,27 @@ function gainMeters(m) {
   // Partículas desde Lux
   spawnParticles(3);
   
-  // Mariano slide-in
+  // Cargar imagen de Mariano desde GitHub
   var overlay = document.getElementById('marianoOverlay');
+  var img = document.getElementById('marianoChar');
   var floatText = document.getElementById('metersFloat');
+  
+  var imageUrl = MARIANO_BASE + 'mariano-' + pose + '.png';
+  console.log('URL completa:', imageUrl);
+  
+  img.src = imageUrl;
   floatText.textContent = '+' + m + 'm';
+  
+  // Manejo de éxito
+  img.onload = function() {
+    console.log('✅ Imagen cargada exitosamente:', imageUrl);
+  };
+  
+  // Manejo de error de carga
+  img.onerror = function() {
+    console.error('❌ Error cargando:', imageUrl);
+    showError('Error cargando mariano-' + pose + '.png desde GitHub');
+  };
   
   overlay.classList.add('active');
   
@@ -302,6 +345,14 @@ function celebrate() {
   lux.classList.add('spin');
   setTimeout(function() { lux.classList.remove('spin'); }, 2000);
   
+  // Cargar imagen de celebración
+  var img = document.getElementById('marianoCharCeleb');
+  img.src = MARIANO_BASE + 'mariano-celebrate.png';
+  
+  img.onerror = function() {
+    showError('Error cargando mariano-celebrate.png desde GitHub');
+  };
+  
   // Mostrar celebración
   document.getElementById('celebMeters').textContent = '+200m';
   document.getElementById('celebOverlay').classList.add('visible');
@@ -318,6 +369,15 @@ function celebrate() {
 
 function hideCelebration() {
   document.getElementById('celebOverlay').classList.remove('visible');
+}
+
+function showError(msg) {
+  var err = document.getElementById('errorMsg');
+  err.textContent = msg;
+  err.classList.add('show');
+  setTimeout(function() {
+    err.classList.remove('show');
+  }, 4000);
 }
 
 function spawnParticles(count) {
