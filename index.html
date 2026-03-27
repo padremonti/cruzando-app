@@ -854,7 +854,9 @@ body {
 
   // ── Ganar metros (Mariano aparece) ──
   function gainMeters(meters, pose) {
+    console.log('gainMeters llamado:', meters, pose);
     totalMeters += meters;
+    console.log('Total metros ahora:', totalMeters);
     updateMetersDisplay();
     saveProgress();
 
@@ -870,13 +872,22 @@ body {
 
   // ── Mostrar Mariano slide-in ──
   function showMarianoSlide(meters, pose) {
+    console.log('showMarianoSlide llamado:', meters, pose);
     const overlay = $('mariano-overlay');
     const img = $('mariano-slide-img');
     const text = $('meters-float-text');
     
-    if (!overlay || !img || !text) return;
+    console.log('Elementos encontrados:', {overlay, img, text});
+    
+    if (!overlay || !img || !text) {
+      console.error('Faltan elementos del overlay de Mariano');
+      return;
+    }
 
-    img.src = MARIANO_BASE + 'mariano-' + pose + '.png';
+    const imageUrl = MARIANO_BASE + 'mariano-' + pose + '.png';
+    console.log('Cargando imagen:', imageUrl);
+    
+    img.src = imageUrl;
     text.textContent = '+' + meters.toLocaleString('es-MX') + 'm';
     
     overlay.style.display = 'flex';
@@ -1025,26 +1036,36 @@ body {
         currentAudioId = null;
         updatePlayBtn(playerId, false);
         
+        console.log('Audio terminado:', playerId);
+        
         // Disparar recompensa si no se ha dado antes
         const rewardKey = currentBlock + '_' + currentMystery + '_' + playerId;
+        console.log('RewardKey:', rewardKey, 'Ya existe?', !!audioRewards[rewardKey]);
+        
         if (!audioRewards[rewardKey]) {
           audioRewards[rewardKey] = true;
           
           // Determinar metros y pose según tipo de audio
           let meters, pose;
-          if (playerId.includes('rezo')) {
+          if (playerId.includes('rezar')) {
             meters = 1200;
             pose = 'walking';
-          } else if (playerId.includes('contemplacion')) {
+            console.log('Detectado: REZAR');
+          } else if (playerId.includes('contempl')) {
             meters = 800;
             pose = 'contemplative';
+            console.log('Detectado: CONTEMPLACIÓN');
           } else if (playerId.includes('canto')) {
             meters = 100;
             pose = 'happy';
+            console.log('Detectado: CANTO');
           }
           
           if (meters && pose) {
+            console.log('Llamando gainMeters:', meters, pose);
             gainMeters(meters, pose);
+          } else {
+            console.log('NO se detectó tipo de audio válido');
           }
         }
       });
