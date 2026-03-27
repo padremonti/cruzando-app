@@ -368,6 +368,157 @@ body {
 .fade-in-d3 { animation-delay:0.24s; }
 .fade-in-d4 { animation-delay:0.32s; }
 
+/* ══════════════════════════════════════════════════════
+   GAMIFICACIÓN: Lux + Mariano + Metros
+   ══════════════════════════════════════════════════════ */
+
+/* ── Lux (cruz guía en header) ── */
+.lux-container {
+  position:relative; width:36px; height:36px;
+  display:flex; align-items:center; justify-content:center;
+}
+.lux-svg {
+  width:24px; height:24px;
+  filter:drop-shadow(0 0 2px #FFFCF7);
+  animation:luxBreathe 3s ease-in-out infinite;
+}
+.lux-svg.shine { animation:luxBreathe 3s ease-in-out infinite, luxShine 0.6s ease-out; }
+.lux-svg.spin { animation:luxSpin 2s linear; }
+
+@keyframes luxBreathe {
+  0%,100% { transform:scale(1); opacity:0.9; }
+  50% { transform:scale(1.08); opacity:1; }
+}
+@keyframes luxShine {
+  0%,100% { filter:drop-shadow(0 0 2px #FFFCF7); }
+  50% { filter:drop-shadow(0 0 16px #FFFCF7); }
+}
+@keyframes luxSpin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
+
+/* Partículas de Lux */
+.lux-particle {
+  position:absolute; width:4px; height:4px; border-radius:50%;
+  background:#FFFCF7; left:50%; top:50%; opacity:0.8;
+  animation:luxParticleFly 1.5s ease-out forwards;
+  pointer-events:none;
+}
+@keyframes luxParticleFly {
+  0% { transform:translate(0,0) scale(1); opacity:0.8; }
+  100% { transform:translate(var(--x),var(--y)) scale(0); opacity:0; }
+}
+
+/* ── Display de metros ── */
+.meters-display {
+  display:flex; align-items:center; gap:6px;
+  background:var(--sec-bg); padding:6px 12px; border-radius:12px;
+  border:1.5px solid var(--border);
+}
+.meters-display span { font-size:0.82rem; font-weight:700; color:var(--lvl-bold); }
+
+/* ── Mariano Slide-in Overlay ── */
+.mariano-overlay {
+  position:fixed; top:0; right:0; bottom:0; width:100%;
+  pointer-events:none; z-index:90;
+  display:flex; align-items:center; justify-content:flex-end;
+  padding-right:20px;
+}
+.mariano-slide {
+  width:182px; height:auto;
+  animation:marianoSlide 2.5s ease-in-out;
+}
+@keyframes marianoSlide {
+  0% { transform:translateX(200px); opacity:0; }
+  30% { transform:translateX(0); opacity:1; }
+  70% { transform:translateX(0); opacity:1; }
+  100% { transform:translateX(200px); opacity:0; }
+}
+
+.meters-float {
+  position:absolute; top:50%; right:220px;
+  font-size:1rem; font-weight:800; color:var(--green);
+  text-shadow:0 2px 8px rgba(52,168,83,0.4);
+  animation:metersFloat 2.5s ease-out;
+}
+@keyframes metersFloat {
+  0% { transform:translateY(0); opacity:0; }
+  30% { opacity:1; }
+  70% { opacity:1; }
+  100% { transform:translateY(-40px); opacity:0; }
+}
+
+/* ── Mariano Grand Celebration ── */
+.mariano-grand-overlay {
+  position:fixed; inset:0;
+  background:rgba(0,0,0,0.5);
+  display:flex; align-items:center; justify-content:center;
+  z-index:101; pointer-events:none;
+}
+.mariano-grand-container { position:relative; width:260px; height:260px; }
+.mariano-grand {
+  width:260px; height:auto; margin-bottom:20px;
+  animation:popScale 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+@keyframes popScale {
+  0% { transform:scale(0); opacity:0; }
+  60% { transform:scale(1.1); opacity:1; }
+  100% { transform:scale(1); opacity:1; }
+}
+
+.mariano-grand-lux {
+  position:absolute; top:50%; left:50%;
+  transform:translate(-50%, -50%);
+}
+.mariano-grand-lux svg { width:32px; height:32px; }
+.mariano-grand-lux.orbit1 svg { animation:luxOrbit1 3s ease-in-out infinite; }
+.mariano-grand-lux.orbit2 svg { animation:luxOrbit2 3s ease-in-out infinite; }
+.mariano-grand-lux.orbit3 svg { animation:luxOrbit3 3s ease-in-out infinite; }
+.mariano-grand-lux.orbit4 svg { animation:luxOrbit4 3s ease-in-out infinite; }
+
+@keyframes luxOrbit1 {
+  0% { transform:rotate(0deg) translateX(120px) rotate(0deg) scale(1); }
+  25% { transform:rotate(90deg) translateX(120px) rotate(-90deg) scale(1.5); }
+  50% { transform:rotate(180deg) translateX(120px) rotate(-180deg) scale(1); }
+  75% { transform:rotate(270deg) translateX(120px) rotate(-270deg) scale(1.5); }
+  100% { transform:rotate(360deg) translateX(120px) rotate(-360deg) scale(1); }
+}
+@keyframes luxOrbit2 {
+  0% { transform:rotate(45deg) translateX(120px) rotate(-45deg) scale(1); }
+  25% { transform:rotate(135deg) translateX(120px) rotate(-135deg) scale(1.6); }
+  50% { transform:rotate(225deg) translateX(120px) rotate(-225deg) scale(1); }
+  75% { transform:rotate(315deg) translateX(120px) rotate(-315deg) scale(1.6); }
+  100% { transform:rotate(405deg) translateX(120px) rotate(-405deg) scale(1); }
+}
+@keyframes luxOrbit3 {
+  0% { transform:rotate(0deg) translateX(120px) rotate(0deg) scale(1.3); }
+  33% { transform:rotate(120deg) translateX(120px) rotate(-120deg) scale(1); }
+  66% { transform:rotate(240deg) translateX(120px) rotate(-240deg) scale(1.7); }
+  100% { transform:rotate(360deg) translateX(120px) rotate(-360deg) scale(1.3); }
+}
+@keyframes luxOrbit4 {
+  0% { transform:rotate(90deg) translateX(120px) rotate(-90deg) scale(1.2); }
+  20% { transform:rotate(162deg) translateX(120px) rotate(-162deg) scale(1.5); }
+  40% { transform:rotate(234deg) translateX(120px) rotate(-234deg) scale(1); }
+  60% { transform:rotate(306deg) translateX(120px) rotate(-306deg) scale(1.6); }
+  80% { transform:rotate(378deg) translateX(120px) rotate(-378deg) scale(1.1); }
+  100% { transform:rotate(450deg) translateX(120px) rotate(-450deg) scale(1.2); }
+}
+
+.mariano-grand-meters {
+  text-align:center; color:#fff; font-size:1.55rem; font-weight:800;
+  text-shadow:0 4px 16px rgba(0,0,0,0.5); margin-top:20px;
+}
+.mariano-grand-text {
+  text-align:center; color:#fff; font-size:1rem; margin-top:8px;
+  text-shadow:0 2px 8px rgba(0,0,0,0.5);
+}
+
+/* Confetti para grand celebration */
+.grand-confetti {
+  position:fixed; width:8px; height:8px; border-radius:50%;
+  animation:confettiFall 2.5s ease-out forwards;
+  pointer-events:none;
+}
+
 /* Responsivo */
 @media(max-width:380px) { html { font-size:16px; } }
 </style>
@@ -395,6 +546,30 @@ body {
       <div class="header-sub" id="h-sub"></div>
     </div>
     <div class="header-actions">
+      <!-- Display de metros -->
+      <div class="meters-display" id="meters-display">
+        <span>🚶‍♂️</span>
+        <span id="meters-value">0m</span>
+      </div>
+      <!-- Lux (cruz guía) -->
+      <div class="lux-container" id="lux-container">
+        <svg class="lux-svg" id="lux-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <filter id="luxGlow">
+              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+              <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
+          <g filter="url(#luxGlow)">
+            <rect x="46.1926" y="0.285" width="7.6148" height="99.43" fill="#FFFCF7"/>
+            <rect x="0" y="46.2068" width="100" height="7.5864" fill="#FFFCF7"/>
+          </g>
+        </svg>
+      </div>
+      <!-- Toggle dark mode -->
       <button class="icon-btn" id="btn-dark" title="Modo oscuro">
         <svg id="ico-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
         <svg id="ico-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
@@ -451,6 +626,31 @@ body {
       <button class="btn btn-primary btn-block" id="btn-celeb-home">Regresar a inicio</button>
     </div>
   </div>
+
+  <!-- ═══ OVERLAYS DE MARIANO ═══ -->
+  <!-- Mariano Slide-in (aparece al ganar metros) -->
+  <div class="mariano-overlay" id="mariano-overlay" style="display:none">
+    <img id="mariano-slide-img" class="mariano-slide" alt="Mariano">
+    <div class="meters-float" id="meters-float-text"></div>
+  </div>
+
+  <!-- Mariano Grand Celebration (pantalla completa al completar bloque) -->
+  <div class="mariano-grand-overlay" id="mariano-grand-overlay" style="display:none">
+    <div class="mariano-grand-container">
+      <img id="mariano-grand-img" class="mariano-grand" alt="Mariano celebrando">
+      <div class="mariano-grand-lux" id="mariano-grand-lux">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <g filter="url(#luxGlow)">
+            <rect x="46.1926" y="0.285" width="7.6148" height="99.43" fill="#FFFCF7"/>
+            <rect x="0" y="46.2068" width="100" height="7.5864" fill="#FFFCF7"/>
+          </g>
+        </svg>
+      </div>
+      <div class="mariano-grand-meters" id="mariano-grand-meters"></div>
+      <div class="mariano-grand-text" id="mariano-grand-text"></div>
+      <div id="grand-confetti-container"></div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -473,6 +673,15 @@ body {
   let journal = {};           // { gozosos: { 0: {q0:'',q1:'',q2:''}, ... }, ... }
   let medConfirmed = {};      // { gozosos: { 0: {q0:true,q1:false,q2:false}, ... }, ... }
   let isDark = false;
+
+  // ── Gamificación ──
+  let totalMeters = 0;
+  let reflectionRewards = {}; // { blockId_mysteryId_questionId: true }
+  let audioRewards = {};      // { blockId_mysteryId_audioType: true }
+  let restPoseIndex = 0;
+  let orbitIndex = 0;
+  const REST_POSES = ['rest-staff', 'rest-sitting', 'rest-rock', 'rest-tree'];
+  const MARIANO_BASE = 'https://padremonti.github.io/cruzando-app/assets/mariano/';
 
   const BLOCKS = ['gozosos','luminosos','dolorosos','gloriosos'];
   const BLOCK_NAMES = { gozosos:'Gozosos', luminosos:'Luminosos', dolorosos:'Dolorosos', gloriosos:'Gloriosos' };
@@ -502,7 +711,17 @@ body {
   }
 
   function saveProgress() {
-    try { localStorage.setItem(lsKey(), JSON.stringify({ progress, journal, medConfirmed, isDark })); } catch(e){}
+    try { 
+      localStorage.setItem(lsKey(), JSON.stringify({ 
+        progress, 
+        journal, 
+        medConfirmed, 
+        isDark,
+        totalMeters,
+        reflectionRewards,
+        audioRewards
+      })); 
+    } catch(e){}
   }
   function loadProgress() {
     try {
@@ -513,6 +732,9 @@ body {
         if (d.journal) journal = d.journal;
         if (d.medConfirmed) medConfirmed = d.medConfirmed;
         if (typeof d.isDark === 'boolean') isDark = d.isDark;
+        if (typeof d.totalMeters === 'number') totalMeters = d.totalMeters;
+        if (d.reflectionRewards) reflectionRewards = d.reflectionRewards;
+        if (d.audioRewards) audioRewards = d.audioRewards;
       }
     } catch(e){}
     // Inicializar estructura si no existe
@@ -520,6 +742,7 @@ body {
       if (!progress[b]) progress[b] = [null,null,null,null,null];
       if (!journal[b]) journal[b] = {};
     });
+    updateMetersDisplay();
   }
 
   // ── Colores dinámicos ──
@@ -557,6 +780,157 @@ body {
   function blockEmoji(b) {
     if (!DATA || !DATA.tema || !DATA.tema.bloques[b]) return '📿';
     return DATA.tema.bloques[b].emoji;
+  }
+
+  // ══════════════════════════════════════════════════════
+  // GAMIFICACIÓN: Lux + Mariano + Metros + Sonidos
+  // ══════════════════════════════════════════════════════
+
+  // ── Actualizar display de metros ──
+  function updateMetersDisplay() {
+    const display = $('meters-value');
+    if (display) {
+      display.textContent = totalMeters.toLocaleString('es-MX') + 'm';
+    }
+  }
+
+  // ── Obtener siguiente pose de descanso (ciclo) ──
+  function getNextRestPose() {
+    const pose = REST_POSES[restPoseIndex];
+    restPoseIndex = (restPoseIndex + 1) % REST_POSES.length;
+    return pose;
+  }
+
+  // ── Obtener siguiente órbita de Lux (ciclo) ──
+  function getNextOrbit() {
+    const orbit = 'orbit' + ((orbitIndex % 4) + 1);
+    orbitIndex++;
+    return orbit;
+  }
+
+  // ── Lux: Brillo y partículas ──
+  function luxShine() {
+    const lux = $('lux-svg');
+    if (!lux) return;
+    lux.classList.add('shine');
+    setTimeout(() => lux.classList.remove('shine'), 600);
+    spawnLuxParticles(3);
+  }
+
+  function spawnLuxParticles(count) {
+    const container = $('lux-container');
+    if (!container) return;
+    for (let i = 0; i < count; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'lux-particle';
+      particle.style.setProperty('--x', (Math.random() - 0.5) * 100 + 'px');
+      particle.style.setProperty('--y', (Math.random() - 0.5) * 100 + 'px');
+      container.appendChild(particle);
+      setTimeout(() => particle.remove(), 1500);
+    }
+  }
+
+  // ── Sonido recompensante (melódico) ──
+  function playRewardSound() {
+    try {
+      const ac = new (window.AudioContext || window.webkitAudioContext)();
+      const frequencies = [523, 659]; // C5 + E5 (acorde mayor alegre)
+      frequencies.forEach((f, i) => {
+        setTimeout(() => {
+          const o = ac.createOscillator();
+          const g = ac.createGain();
+          o.type = 'sine';
+          o.frequency.value = f;
+          g.gain.setValueAtTime(0.12, ac.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.35);
+          o.connect(g);
+          g.connect(ac.destination);
+          o.start();
+          o.stop(ac.currentTime + 0.35);
+        }, i * 90);
+      });
+    } catch(e) {}
+  }
+
+  // ── Ganar metros (Mariano aparece) ──
+  function gainMeters(meters, pose) {
+    totalMeters += meters;
+    updateMetersDisplay();
+    saveProgress();
+
+    // Lux brilla
+    luxShine();
+
+    // Sonido recompensante
+    playRewardSound();
+
+    // Mariano aparece
+    showMarianoSlide(meters, pose);
+  }
+
+  // ── Mostrar Mariano slide-in ──
+  function showMarianoSlide(meters, pose) {
+    const overlay = $('mariano-overlay');
+    const img = $('mariano-slide-img');
+    const text = $('meters-float-text');
+    
+    if (!overlay || !img || !text) return;
+
+    img.src = MARIANO_BASE + 'mariano-' + pose + '.png';
+    text.textContent = '+' + meters.toLocaleString('es-MX') + 'm';
+    
+    overlay.style.display = 'flex';
+    setTimeout(() => {
+      overlay.style.display = 'none';
+    }, 2500);
+  }
+
+  // ── Celebración grand (Mariano + Lux + Confetti) ──
+  function showMarianoGrandCelebration() {
+    totalMeters += 1000;
+    updateMetersDisplay();
+    saveProgress();
+
+    const overlay = $('mariano-grand-overlay');
+    const img = $('mariano-grand-img');
+    const luxEl = $('mariano-grand-lux');
+    const metersEl = $('mariano-grand-meters');
+    const textEl = $('mariano-grand-text');
+    const confettiContainer = $('grand-confetti-container');
+
+    if (!overlay) return;
+
+    // Configurar contenido
+    img.src = MARIANO_BASE + 'mariano-celebrate.png';
+    metersEl.textContent = '+1,000m';
+    textEl.innerHTML = '¡Bloque completado!<br>Has recorrido una etapa del camino';
+
+    // Órbita de Lux
+    const orbit = getNextOrbit();
+    luxEl.className = 'mariano-grand-lux ' + orbit;
+
+    // Confetti
+    confettiContainer.innerHTML = '';
+    const colors = ['#01BCE0', '#00C853', '#FBBC05', '#FF7A00', '#FFFCF7'];
+    for (let i = 0; i < 40; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'grand-confetti';
+      piece.style.background = colors[i % 5];
+      piece.style.left = Math.random() * 100 + '%';
+      piece.style.animationDelay = Math.random() * 0.5 + 's';
+      confettiContainer.appendChild(piece);
+    }
+
+    // Sonido de celebración
+    playNotes([523, 659, 784, 880, 1047]);
+
+    // Mostrar overlay
+    overlay.style.display = 'flex';
+
+    // Ocultar después de 3.5 segundos
+    setTimeout(() => {
+      overlay.style.display = 'none';
+    }, 3500);
   }
 
   // ── Dark mode ──
@@ -650,6 +1024,29 @@ body {
         audioPlaying = false;
         currentAudioId = null;
         updatePlayBtn(playerId, false);
+        
+        // Disparar recompensa si no se ha dado antes
+        const rewardKey = currentBlock + '_' + currentMystery + '_' + playerId;
+        if (!audioRewards[rewardKey]) {
+          audioRewards[rewardKey] = true;
+          
+          // Determinar metros y pose según tipo de audio
+          let meters, pose;
+          if (playerId.includes('rezo')) {
+            meters = 1200;
+            pose = 'walking';
+          } else if (playerId.includes('contemplacion')) {
+            meters = 800;
+            pose = 'contemplative';
+          } else if (playerId.includes('canto')) {
+            meters = 100;
+            pose = 'happy';
+          }
+          
+          if (meters && pose) {
+            gainMeters(meters, pose);
+          }
+        }
       });
     }
     audioEl.play().then(() => {
@@ -1026,6 +1423,13 @@ body {
       btn.className = 'med-confirm done glow';
       btn.textContent = '✓ Reflexión guardada';
     }
+
+    // GAMIFICACIÓN: Dar recompensa de 650m con Mariano descansando
+    const rewardKey = b + '_' + mi + '_q' + qi;
+    if (!reflectionRewards[rewardKey]) {
+      reflectionRewards[rewardKey] = true;
+      gainMeters(650, getNextRestPose());
+    }
   }
 
   function toggleSection(key) {
@@ -1096,28 +1500,34 @@ body {
 
   // ── Celebración de bloque ──
   function showCelebration(b) {
-    const blockName = BLOCK_NAMES[b];
-    const maria = 'img/maria_' + b + '.webp';
+    // PRIMERO: Celebración grand de Mariano (pantalla completa, 3.5s)
+    showMarianoGrandCelebration();
 
-    const container = $('maria-container');
-    const img = new Image();
-    img.onload = () => {
-      container.outerHTML = '<img class="maria-img" id="maria-container" src="' + maria + '" alt="Virgen María">';
-    };
-    img.onerror = () => {
-      container.innerHTML = '🙏';
-    };
-    img.src = maria;
+    // DESPUÉS: Pantalla de celebración tradicional
+    setTimeout(() => {
+      const blockName = BLOCK_NAMES[b];
+      const maria = 'img/maria_' + b + '.webp';
 
-    $('celeb-title').textContent = '¡Misterios ' + blockName + ' completados!';
-    $('celeb-sub').textContent = 'Has contemplado los cinco Misterios ' + blockName + ' de este nivel. Que María siga acompañándote en el camino.';
-    $('btn-celeb-home').onclick = () => {
-      stopAudio();
-      renderHome();
-    };
+      const container = $('maria-container');
+      const img = new Image();
+      img.onload = () => {
+        container.outerHTML = '<img class="maria-img" id="maria-container" src="' + maria + '" alt="Virgen María">';
+      };
+      img.onerror = () => {
+        container.innerHTML = '🙏';
+      };
+      img.src = maria;
 
-    show('scr-celebration');
-    celebrationSound(BLOCKS.indexOf(b));
+      $('celeb-title').textContent = '¡Misterios ' + blockName + ' completados!';
+      $('celeb-sub').textContent = 'Has contemplado los cinco Misterios ' + blockName + ' de este nivel. Que María siga acompañándote en el camino.';
+      $('btn-celeb-home').onclick = () => {
+        stopAudio();
+        renderHome();
+      };
+
+      show('scr-celebration');
+      celebrationSound(BLOCKS.indexOf(b));
+    }, 3500); // Esperar a que termine Mariano Grand
   }
 
   // ── Escape HTML ──
