@@ -1,851 +1,1205 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CruzAndo - Males</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#E6DED3">
+<title>CruzAndo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════════════
+   CSS — CruzAndo App · Vanilla JS · Cero dependencias
+   Colores dinámicos via CSS custom properties
+   ══════════════════════════════════════════════════════ */
+
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+
+:root {
+  /* ── Neutros Light ── */
+  --bg: #E6DED3;
+  --card: #FFFCF7;
+  --border: #D9D1C7;
+  --text: #2B2622;
+  --text-soft: #6B6259;
+  --text-dim: #9B9389;
+  --input-bg: #FFFCF7;
+  --sec-bg: #F5F0E8;
+  --shadow: rgba(43,38,34,0.08);
+  --green: #34A853;
+  --green-soft: rgba(52,168,83,0.12);
+  /* ── Paleta del nivel (se sobreescriben desde JS) ── */
+  --lvl-bold: #FF7A00;
+  --lvl-base: #FF7F09;
+  --lvl-soft: #F69C49;
+  --lvl-mist: #FFA34E;
+  --lvl-light: #FFCFA2;
+  --lvl-ultra: rgba(255,122,0,0.07);
+  /* ── Bloques ── */
+  --goz-color: #D4A017;
+  --lum-color: #01BBE1;
+  --dol-color: #C0392B;
+  --glo-color: #8E44AD;
+  /* ── Brand ── */
+  --brand: #01BBE1;
+}
+
+.dark {
+  --bg: #1A1714;
+  --card: #252119;
+  --border: #3A3530;
+  --text: #E6DED3;
+  --text-soft: #B8A898;
+  --text-dim: #786858;
+  --input-bg: #2A2520;
+  --sec-bg: #1E1B16;
+  --shadow: rgba(0,0,0,0.3);
+  --green-soft: rgba(52,168,83,0.18);
+}
+
+html { font-size:18px; }
+body {
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.7;
+  min-height:100dvh;
+  -webkit-font-smoothing:antialiased;
+  transition:background 0.4s,color 0.4s;
+}
+
+/* ── Layout ── */
+.shell { max-width:480px; margin:0 auto; min-height:100dvh; position:relative; }
+.screen { display:none; }
+.screen.active { display:block; }
+
+/* ── Header ── */
+.header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 18px 10px; position:sticky; top:0; z-index:50;
+  background:var(--bg); border-bottom:1px solid var(--border);
+}
+.header-title { font-size:1.05rem; font-weight:700; color:var(--lvl-bold); }
+.header-sub { font-size:0.72rem; color:var(--text-dim); margin-top:1px; }
+.header-actions { display:flex; gap:8px; align-items:center; }
+.icon-btn {
+  width:36px; height:36px; border-radius:50%; border:1px solid var(--border);
+  background:var(--card); cursor:pointer; display:flex; align-items:center;
+  justify-content:center; color:var(--text-soft); transition:all 0.2s;
+}
+.icon-btn:active { transform:scale(0.92); }
+
+/* ── Pantalla de Inicio: Tarjetas de Bloques ── */
+.home-intro { padding:24px 18px 12px; text-align:center; }
+.home-intro h1 { font-size:1.35rem; font-weight:800; color:var(--text); margin-bottom:4px; }
+.home-intro p { font-size:0.82rem; color:var(--text-dim); }
+
+/* ── Banner Misterios del Día ── */
+.today-banner {
+  margin:0 18px 16px; padding:16px 20px; border-radius:16px;
+  background:linear-gradient(135deg,rgba(var(--lvl-light-rgb,255,207,162),0.55),rgba(255,245,232,0.7));
+  border:2px solid var(--lvl-bold);
+  box-shadow:0 3px 16px rgba(var(--lvl-bold-rgb,255,122,0),0.1);
+  cursor:pointer; transition:all 0.25s;
+}
+.dark .today-banner {
+  background:linear-gradient(135deg,rgba(var(--lvl-bold-rgb,255,122,0),0.15),rgba(var(--lvl-bold-rgb,255,122,0),0.05));
+}
+.today-banner:active { transform:scale(0.98); }
+.today-banner-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.today-banner-label {
+  font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:1px;
+  color:var(--lvl-bold); display:flex; align-items:center; gap:6px;
+}
+.today-pulse {
+  width:8px; height:8px; border-radius:50%; background:var(--lvl-bold);
+  animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.5; transform:scale(1.4); } }
+.today-banner-arrow { color:var(--lvl-bold); font-size:1.2rem; font-weight:700; }
+.today-banner h3 { font-size:1.1rem; font-weight:800; margin-bottom:3px; }
+.today-banner-days { font-size:0.72rem; color:var(--text-dim); }
+.block-card.today { border-color:var(--lvl-soft); background:linear-gradient(135deg,rgba(var(--lvl-light-rgb,255,207,162),0.35),var(--card)); }
+.dark .block-card.today { background:linear-gradient(135deg,rgba(var(--lvl-bold-rgb,255,122,0),0.1),var(--card)); }
+
+.block-grid { display:flex; flex-direction:column; gap:14px; padding:8px 18px 24px; }
+.block-card {
+  background:var(--card); border-radius:16px; padding:18px 20px;
+  border:2px solid var(--border); cursor:pointer;
+  transition:all 0.25s; position:relative; overflow:hidden;
+}
+.block-card:active { transform:scale(0.98); }
+.block-card.cleared { border-color:var(--green); }
+.block-card.current { border-color:var(--lvl-bold); box-shadow:0 2px 16px var(--lvl-ultra); }
+.block-card-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.block-emoji { font-size:1.6rem; }
+.block-badge {
+  font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.8px;
+  padding:3px 10px; border-radius:20px;
+}
+.block-badge.pending { background:var(--sec-bg); color:var(--text-dim); }
+.block-badge.progress { background:var(--lvl-ultra); color:var(--lvl-bold); }
+.block-badge.cleared { background:var(--green-soft); color:var(--green); }
+.block-badge.today { background:var(--lvl-bold); color:#fff; }
+.block-title { font-size:1.05rem; font-weight:700; margin-bottom:2px; }
+.block-subtitle { font-size:0.78rem; color:var(--text-soft); font-style:italic; }
+.block-progress { margin-top:12px; }
+.block-dots { display:flex; gap:6px; }
+.block-dot {
+  width:10px; height:10px; border-radius:50%;
+  background:var(--border); transition:all 0.3s;
+}
+.block-dot.done { background:var(--green); box-shadow:0 0 6px rgba(52,168,83,0.4); }
+.block-dot.active { background:var(--lvl-bold); box-shadow:0 0 8px var(--lvl-light); }
+
+/* ── Banner de nivel completado ── */
+.nivel-done-banner {
+  margin:8px 18px 18px; padding:20px; border-radius:16px;
+  background:linear-gradient(135deg,var(--green-soft),rgba(52,168,83,0.05));
+  border:2px solid var(--green); text-align:center;
+}
+.nivel-done-banner h3 { font-size:1.1rem; color:var(--green); margin-bottom:6px; }
+.nivel-done-banner p { font-size:0.82rem; color:var(--text-soft); margin-bottom:14px; }
+
+/* ── Botones ── */
+.btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding:14px 28px; border-radius:14px; border:none; cursor:pointer;
+  font-family:inherit; font-size:0.88rem; font-weight:700;
+  transition:all 0.2s; letter-spacing:0.3px;
+}
+.btn:active { transform:scale(0.96); }
+.btn-primary { background:var(--lvl-bold); color:#fff; box-shadow:0 4px 14px rgba(0,0,0,0.15); }
+.btn-green { background:var(--green); color:#fff; }
+.btn-outline { background:transparent; border:2px solid var(--border); color:var(--text-soft); }
+.btn-ghost { background:transparent; color:var(--text-soft); padding:10px 14px; font-size:0.82rem; }
+.btn-block { width:100%; }
+
+/* ── Pantalla de Oración ── */
+.prayer-header { padding:16px 18px 10px; }
+.prayer-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.mystery-counter { font-size:0.72rem; font-weight:600; color:var(--text-dim); letter-spacing:1px; text-transform:uppercase; }
+.mystery-title { font-size:1.15rem; font-weight:800; margin-bottom:2px; }
+.mystery-subtitle { font-size:0.82rem; color:var(--text-soft); font-style:italic; }
+
+/* Cuentas del rosario (cadena de 5) */
+.mystery-beads { padding:0 18px 14px; }
+.mystery-beads svg { width:100%; height:30px; }
+
+/* ── Evangelio ── */
+.evangelio-box {
+  margin:0 18px 14px; padding:20px; border-radius:16px;
+  background:var(--card); border-left:4px solid var(--lvl-soft);
+}
+.evangelio-label {
+  font-size:0.68rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:1.2px; color:var(--lvl-bold); margin-bottom:10px;
+  display:flex; align-items:center; gap:6px;
+}
+.evangelio-text { font-size:0.95rem; line-height:1.85; color:var(--text); }
+.evangelio-ref { font-size:0.78rem; color:var(--text-dim); text-align:right; margin-top:12px; font-style:italic; }
+
+/* ── Acordeón ── */
+.accordion { margin:0 18px 10px; }
+.acc-item { background:var(--card); border-radius:14px; margin-bottom:10px; overflow:hidden; border:1.5px solid var(--border); transition:border-color 0.3s; }
+.acc-item.open { border-color:var(--lvl-soft); }
+.acc-trigger {
+  width:100%; display:flex; align-items:center; justify-content:space-between;
+  padding:14px 18px; background:none; border:none; cursor:pointer;
+  font-family:inherit; color:var(--text); transition:background 0.2s;
+}
+.acc-trigger:active { background:var(--sec-bg); }
+.acc-trigger-left { display:flex; align-items:center; gap:10px; }
+.acc-icon {
+  width:32px; height:32px; border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1rem;
+}
+.acc-label { font-size:0.88rem; font-weight:600; }
+.acc-chevron { transition:transform 0.3s; color:var(--text-dim); }
+.acc-item.open .acc-chevron { transform:rotate(180deg); }
+.acc-body { max-height:0; overflow:hidden; transition:max-height 0.4s ease; }
+.acc-body-inner { padding:0 18px 18px; }
+
+/* ── Audio Player ── */
+.audio-player {
+  display:flex; align-items:center; gap:12px; padding:12px 16px;
+  background:var(--sec-bg); border-radius:12px;
+}
+.play-btn {
+  width:44px; height:44px; border-radius:50%; border:none;
+  background:var(--lvl-bold); color:#fff; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; transition:all 0.2s;
+}
+.play-btn:active { transform:scale(0.9); }
+.audio-info { flex:1; min-width:0; }
+.audio-label { font-size:0.75rem; color:var(--text-soft); margin-bottom:4px; }
+.audio-bar-wrap { width:100%; height:5px; background:var(--border); border-radius:3px; cursor:pointer; position:relative; }
+.audio-bar-fill { height:100%; border-radius:3px; background:var(--lvl-bold); transition:width 0.1s linear; }
+.audio-time { font-size:0.68rem; color:var(--text-dim); margin-top:3px; display:flex; justify-content:space-between; }
+
+/* ── Canto ── */
+.canto-box {
+  padding:18px; background:var(--lvl-ultra); border-radius:14px;
+  border-left:3px solid var(--lvl-soft); text-align:center;
+}
+.canto-box p { font-size:0.88rem; color:var(--text); font-style:italic; line-height:1.7; }
+.canto-box .canto-hint { font-size:0.78rem; color:var(--text-dim); margin-top:8px; display:block; }
+
+/* ── Contemplación texto ── */
+.contempl-text {
+  margin-top:14px; padding:16px 18px; background:var(--sec-bg);
+  border-radius:14px; border-left:3px solid var(--lvl-soft);
+  font-size:0.92rem; line-height:1.9; white-space:pre-line;
+}
+
+/* ── Meditación ── */
+.med-group { margin-bottom:18px; }
+.med-label-row { display:flex; align-items:center; gap:7px; margin-bottom:6px; }
+.med-dot { width:7px; height:7px; border-radius:50%; }
+.med-label-text { font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; }
+.med-question { font-size:0.92rem; line-height:1.7; margin-bottom:10px; }
+.journal-area {
+  width:100%; min-height:100px; padding:14px; border-radius:12px;
+  border:1.5px solid var(--border); background:var(--input-bg);
+  font-family:inherit; font-size:0.88rem; line-height:1.6;
+  color:var(--text); resize:vertical; transition:border-color 0.3s;
+}
+.journal-area:focus { outline:none; border-color:var(--lvl-soft); }
+.journal-area::placeholder { color:var(--text-dim); }
+.med-confirm {
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  width:100%; margin-top:8px; padding:10px; border-radius:10px;
+  border:1.5px solid var(--border); background:var(--sec-bg);
+  font-family:inherit; font-size:0.78rem; font-weight:600;
+  color:var(--text-soft); cursor:pointer; transition:all 0.3s;
+}
+.med-confirm:active { transform:scale(0.96); }
+.med-confirm.done {
+  background:var(--green-soft); border-color:var(--green);
+  color:var(--green); cursor:default;
+}
+@keyframes medGlow {
+  0% { box-shadow:0 0 0 0 rgba(52,168,83,0.4); }
+  70% { box-shadow:0 0 0 10px rgba(52,168,83,0); }
+  100% { box-shadow:0 0 0 0 rgba(52,168,83,0); }
+}
+.med-confirm.glow { animation:medGlow 0.6s ease; }
+
+/* ── Intercesión ── */
+.interc-text {
+  padding:18px; background:var(--lvl-ultra); border-radius:14px;
+  font-size:0.92rem; line-height:1.85; white-space:pre-line;
+}
+.amen-btn {
+  display:block; width:100%; margin-top:14px; padding:16px;
+  border-radius:14px; border:none; cursor:pointer;
+  font-family:inherit; font-size:1rem; font-weight:800;
+  background:var(--lvl-bold); color:#fff; letter-spacing:1px;
+  transition:all 0.2s; box-shadow:0 4px 16px rgba(0,0,0,0.12);
+}
+.amen-btn:active { transform:scale(0.96); }
+.amen-btn.done { background:var(--green); }
+
+/* ── Completado de misterio ── */
+.mystery-done-bar {
+  margin:12px 18px; padding:14px 18px; border-radius:14px;
+  background:var(--green-soft); border:1.5px solid rgba(52,168,83,0.2);
+  display:flex; align-items:center; gap:10px;
+}
+.done-check { color:var(--green); font-size:1.2rem; }
+.done-text { font-size:0.82rem; font-weight:600; color:var(--green); }
+.done-date { font-size:0.72rem; color:var(--text-dim); }
+
+/* ── Navegación inferior ── */
+.bottom-nav {
+  padding:14px 18px 28px; display:flex; gap:10px;
+}
+.bottom-nav .btn { flex:1; }
+
+/* ── Pantalla de celebración de bloque ── */
+.celebration-screen { text-align:center; padding:40px 24px; }
+.maria-img {
+  width:200px; height:200px; border-radius:50%; object-fit:cover;
+  border:4px solid var(--lvl-soft); margin:0 auto 24px;
+  box-shadow:0 8px 32px var(--shadow);
+}
+.maria-placeholder {
+  width:200px; height:200px; border-radius:50%; margin:0 auto 24px;
+  background:linear-gradient(135deg,var(--lvl-ultra),var(--lvl-light));
+  border:4px solid var(--lvl-soft); display:flex; align-items:center;
+  justify-content:center; font-size:4rem;
+  box-shadow:0 8px 32px var(--shadow);
+}
+.celebration-title { font-size:1.3rem; font-weight:800; margin-bottom:8px; }
+.celebration-sub { font-size:0.88rem; color:var(--text-soft); margin-bottom:24px; line-height:1.7; }
+
+/* ── Error / Loading ── */
+.loading-screen, .error-screen {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  min-height:80dvh; padding:40px 24px; text-align:center;
+}
+.spinner {
+  width:40px; height:40px; border:3px solid var(--border);
+  border-top-color:var(--lvl-bold); border-radius:50%;
+  animation:spin 0.8s linear infinite; margin-bottom:18px;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* ── Celebración animada ── */
+.confetti-container { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:999; }
+.confetti-piece {
+  position:absolute; width:8px; height:8px; border-radius:2px;
+  animation:confettiFall 2.5s ease-out forwards;
+}
+@keyframes confettiFall {
+  0% { transform:translateY(-20px) rotate(0deg); opacity:1; }
+  100% { transform:translateY(100vh) rotate(720deg); opacity:0; }
+}
+
+/* ── Fade in ── */
+@keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+.fade-in { animation:fadeIn 0.4s ease both; }
+.fade-in-d1 { animation-delay:0.08s; }
+.fade-in-d2 { animation-delay:0.16s; }
+.fade-in-d3 { animation-delay:0.24s; }
+.fade-in-d4 { animation-delay:0.32s; }
+
+/* Responsivo */
+@media(max-width:380px) { html { font-size:16px; } }
+</style>
 </head>
 <body>
-    <div id="root"></div>
-    
-    <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+<div class="shell" id="app">
+  <!-- Loading -->
+  <div class="loading-screen" id="scr-loading">
+    <div class="spinner"></div>
+    <p style="font-size:0.88rem;color:var(--text-dim)">Cargando nivel…</p>
+  </div>
 
-        const LVL = {bold:"#FF7A00",base:"#FF7F09",soft:"#F69C49",mist:"#FFA34E",light:"#FFCFA2",ultra:"rgba(255,122,0,0.08)"};
-        const BRAND = "#01BBE1";
-        const GREEN = "#00C853";
-        const LIGHT = {bg:"#E6DED3",card:"#FFFCF7",border:"#D9D1C7",text:"#2B2622",textSoft:"#6B6259",textDim:"#9B9389",disabled:"#CFCFCF",inputBg:"#FFFCF7",secBg:"#F5F0E8"};
-        const DARK = {bg:"#1A1714",card:"#252119",border:"#3A3530",text:"#E6DED3",textSoft:"#B8A898",textDim:"#786858",disabled:"#4A4540",inputBg:"#2A2520",secBg:"#1E1B16"};
+  <!-- Error -->
+  <div class="error-screen" id="scr-error" style="display:none">
+    <div style="font-size:3rem;margin-bottom:16px">📿</div>
+    <h2 style="font-size:1.1rem;margin-bottom:8px">No se encontró el nivel</h2>
+    <p id="error-msg" style="font-size:0.82rem;color:var(--text-dim);margin-bottom:20px"></p>
+    <a href="?c=0101" class="btn btn-primary">Ir a Nivel 1-1: Males</a>
+  </div>
 
-        const ORDS = ["Primer","Segundo","Tercer","Cuarto","Quinto"];
-        const MLABELS = ["Por María hacia Jesús","Desde el Hijo hacia el Padre","Hijos y hermanos en el Espíritu"];
-        const MCOLORS = ["#FF7A00","#C0392B","#27AE60"];
+  <!-- ═══ HEADER (compartido) ═══ -->
+  <header class="header" id="main-header" style="display:none">
+    <div>
+      <div class="header-title" id="h-title"></div>
+      <div class="header-sub" id="h-sub"></div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="btn-dark" title="Modo oscuro">
+        <svg id="ico-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg id="ico-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
 
-        function playNotes(freqs) {
-          try {
-            const ac = new (window.AudioContext || window.webkitAudioContext)();
-            freqs.forEach((f, i) => {
-              setTimeout(() => {
-                const o = ac.createOscillator();
-                const g = ac.createGain();
-                o.type = "sine";
-                o.frequency.value = f;
-                g.gain.setValueAtTime(0.07, ac.currentTime);
-                g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.3);
-                o.connect(g);
-                g.connect(ac.destination);
-                o.start();
-                o.stop(ac.currentTime + 0.3);
-              }, i * 180);
-            });
-          } catch (e) {}
-        }
+  <!-- ═══ PANTALLA INICIO ═══ -->
+  <div class="screen" id="scr-home">
+    <div class="home-intro fade-in">
+      <h1 id="home-title"></h1>
+      <p id="home-element"></p>
+    </div>
+    <div id="today-banner-wrap"></div>
+    <div class="block-grid" id="block-grid"></div>
+    <div id="nivel-done-wrap" style="display:none"></div>
+  </div>
 
-        const CELEBS = [[440,554,659],[523,659,784],[392,494,587,784],[349,440,523,659]];
+  <!-- ═══ PANTALLA DE ORACIÓN ═══ -->
+  <div class="screen" id="scr-prayer">
+    <div class="prayer-header fade-in">
+      <div class="prayer-nav">
+        <button class="btn-ghost" id="btn-back-home">← Inicio</button>
+        <span class="mystery-counter" id="prayer-counter"></span>
+      </div>
+      <div class="mystery-title" id="prayer-title"></div>
+      <div class="mystery-subtitle" id="prayer-subtitle"></div>
+    </div>
+    <div class="mystery-beads" id="prayer-dots"></div>
 
-        function CelebOverlay({ variant, onDone }) {
-          useEffect(() => {
-            playNotes(CELEBS[variant % 4]);
-            const t = setTimeout(onDone, 2200);
-            return () => clearTimeout(t);
-          }, []);
+    <!-- Evangelio -->
+    <div class="evangelio-box fade-in fade-in-d1" id="evangelio-box">
+      <div class="evangelio-label">📖 Evangelio</div>
+      <div class="evangelio-text" id="ev-text"></div>
+      <div class="evangelio-ref" id="ev-ref"></div>
+    </div>
 
-          const particles = Array.from({ length: 12 }, (_, i) => i);
-          const v = variant % 4;
+    <!-- Acordeón -->
+    <div class="accordion" id="accordion"></div>
 
-          if (v === 0) return (
-            <div style={overlayStyle}>
-              <div style={{width:120,height:120,borderRadius:"50%",border:"3px solid "+LVL.bold,animation:"haloX 1.8s ease-out forwards",opacity:0}} />
-            </div>
-          );
-          if (v === 1) return (
-            <div style={overlayStyle}>
-              {particles.map(i => (
-                <div key={i} style={{position:"absolute",width:3,height:20+Math.random()*30,background:LVL.soft,borderRadius:2,left:(15+i*6)+"%",bottom:0,opacity:0,animation:"riseL 1.6s "+i*0.1+"s ease-out forwards"}} />
-              ))}
-            </div>
-          );
-          if (v === 2) return (
-            <div style={overlayStyle}>
-              <svg width="100" height="130" viewBox="0 0 100 130" style={{animation:"crossG 2s ease-out forwards"}}>
-                <line x1="50" y1="5" x2="50" y2="125" stroke={LVL.light} strokeWidth="4" strokeLinecap="round"/>
-                <line x1="20" y1="40" x2="80" y2="40" stroke={LVL.light} strokeWidth="4" strokeLinecap="round"/>
-              </svg>
-            </div>
-          );
-          return (
-            <div style={overlayStyle}>
-              {particles.map(i => (
-                <div key={i} style={{position:"absolute",width:6+Math.random()*6,height:6+Math.random()*6,borderRadius:"50%",background:[LVL.bold,LVL.soft,LVL.light,GREEN][i%4],left:(10+Math.random()*80)+"%",top:(20+Math.random()*60)+"%",opacity:0,animation:"fDot 1.8s "+i*0.12+"s ease-out forwards"}} />
-              ))}
-            </div>
-          );
-        }
+    <!-- Completado -->
+    <div id="mystery-done-wrap" style="display:none"></div>
 
-        const overlayStyle = {position:"fixed",inset:0,display:"flex",alignItems:"center",justifyContent:"center",pointerEvents:"none",zIndex:100};
+    <!-- Navegación inferior -->
+    <div class="bottom-nav" id="bottom-nav"></div>
+  </div>
 
-        function GrandCeleb({ onDone }) {
-          useEffect(() => {
-            playNotes([440,554,659]);
-            setTimeout(() => playNotes([523,659,784]), 600);
-            setTimeout(() => playNotes([392,494,587,784]), 1200);
-            const t = setTimeout(onDone, 3500);
-            return () => clearTimeout(t);
-          }, []);
+  <!-- ═══ PANTALLA CELEBRACIÓN BLOQUE ═══ -->
+  <div class="screen" id="scr-celebration">
+    <div class="celebration-screen fade-in">
+      <div class="maria-placeholder" id="maria-container">🙏</div>
+      <h2 class="celebration-title" id="celeb-title"></h2>
+      <p class="celebration-sub" id="celeb-sub"></p>
+      <button class="btn btn-primary btn-block" id="btn-celeb-home">Regresar a inicio</button>
+    </div>
+  </div>
+</div>
 
-          const rays = Array.from({ length: 20 }, (_, i) => i);
-          return (
-            <div style={{...overlayStyle, background:"rgba(0,0,0,0.4)"}}>
-              <div style={{position:"relative",width:200,height:200,animation:"gPulse 3s ease-out forwards"}}>
-                {rays.map(i => (
-                  <div key={i} style={{position:"absolute",left:"50%",top:"50%",width:2,height:60+Math.random()*40,background:LVL.soft,borderRadius:2,transformOrigin:"center top",transform:"rotate("+i*18+"deg)",opacity:0,animation:"rayB 2s "+i*0.08+"s ease-out forwards"}} />
-                ))}
-                <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center"}}>
-                  <div style={{width:80,height:80,borderRadius:"50%",background:LVL.bold,display:"flex",alignItems:"center",justifyContent:"center",animation:"gScale 2s ease-out forwards",boxShadow:"0 0 60px "+LVL.bold+"80"}}>
-                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="4,12 10,18 20,6"/></svg>
-                  </div>
-                </div>
-              </div>
-            </div>
-          );
-        }
+<script>
+/* ══════════════════════════════════════════════════════
+   CruzAndo App · Vanilla JS · Cero dependencias
+   Lee JSON desde data/{id}.json via URL param ?c=0101
+   Toda la paleta de colores viene de DATA.tema.paleta
+   ══════════════════════════════════════════════════════ */
 
-        function AudioPlayer({ src, label, T, onComplete, meters, pose }) {
-          const ref = useRef(null);
-          const [playing, setPlaying] = useState(false);
-          const [time, setTime] = useState(0);
-          const [dur, setDur] = useState(0);
-          const [error, setError] = useState(null);
-          const [completed, setCompleted] = useState(false);
+(function() {
+  'use strict';
 
-          useEffect(() => {
-            if (!ref.current) return;
-            playing ? ref.current.play().catch(err => {
-              console.error('Error reproduciendo:', err);
-              setError('No se pudo reproducir');
-              setPlaying(false);
-            }) : ref.current.pause();
-          }, [playing]);
+  // ── Estado global ──
+  let DATA = null;
+  let NIVEL_ID = null;
+  let currentBlock = null;   // 'gozosos' | 'luminosos' | 'dolorosos' | 'gloriosos'
+  let currentMystery = 0;    // 0-4 dentro del bloque
+  let openSection = null;     // qué acordeón está abierto
+  let progress = {};          // { gozosos: [ts,ts,null,null,null], ... }
+  let journal = {};           // { gozosos: { 0: {q0:'',q1:'',q2:''}, ... }, ... }
+  let medConfirmed = {};      // { gozosos: { 0: {q0:true,q1:false,q2:false}, ... }, ... }
+  let isDark = false;
 
-          const handleEnded = () => {
-            setPlaying(false);
-            if (!completed && onComplete && meters && pose) {
-              setCompleted(true);
-              onComplete(meters, pose);
-            }
-          };
+  const BLOCKS = ['gozosos','luminosos','dolorosos','gloriosos'];
+  const BLOCK_NAMES = { gozosos:'Gozosos', luminosos:'Luminosos', dolorosos:'Dolorosos', gloriosos:'Gloriosos' };
+  const ORDS = ['Primer','Segundo','Tercer','Cuarto','Quinto'];
+  const BTYPES = { gozosos:'Gozoso', luminosos:'Luminoso', dolorosos:'Doloroso', gloriosos:'Glorioso' };
+  const MED_LABELS = ['Por María hacia Jesús','Desde el Hijo hacia el Padre','Hijos y hermanos en el Espíritu'];
+  const MED_COLORS = ['#FF7A00','#C0392B','#27AE60'];
 
-          const fmt = s => Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
+  // Misterios del día según tradición católica
+  const DAY_BLOCKS = { 0:'gloriosos', 1:'gozosos', 2:'dolorosos', 3:'gloriosos', 4:'luminosos', 5:'dolorosos', 6:'gozosos' };
 
-          if (!src) return (
-            <div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",background:T.secBg,borderRadius:12}}>
-              <div style={{width:42,height:42,borderRadius:"50%",background:T.disabled,display:"flex",alignItems:"center",justifyContent:"center",opacity:0.5}}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill={T.textDim}><polygon points="6,3 20,12 6,21"/></svg>
-              </div>
-              <div>
-                <div style={{fontSize:16,fontWeight:500,color:T.textSoft}}>{label}</div>
-                <div style={{fontSize:14,color:T.textDim,marginTop:2}}>Audio próximamente</div>
-              </div>
-            </div>
-          );
+  // Audio
+  let audioEl = null;
+  let audioPlaying = false;
+  let currentAudioId = null;
 
-          return (
-            <div style={{padding:"12px 16px",background:T.secBg,borderRadius:12}}>
-              <audio ref={ref} src={src}
-                onTimeUpdate={() => setTime(ref.current.currentTime)}
-                onLoadedMetadata={() => {
-                  setDur(ref.current.duration);
-                  setError(null);
-                }}
-                onEnded={handleEnded}
-                onError={(e) => {
-                  console.error('Error cargando audio:', src, e);
-                  setError('Error al cargar el archivo');
-                  setPlaying(false);
-                }}
-              />
-              <div style={{display:"flex",alignItems:"center",gap:12}}>
-                <button onClick={() => setPlaying(!playing)} style={{width:42,height:42,borderRadius:"50%",background:error?"#999":completed?GREEN:LVL.bold,border:"none",cursor:error?"not-allowed":"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                  {completed ? (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="4,12 10,18 20,6"/></svg>
-                  ) : playing ? (
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg>
-                  ) : (
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><polygon points="6,3 20,12 6,21"/></svg>
-                  )}
-                </button>
-                <div style={{flex:1,minWidth:0}}>
-                  <div style={{display:"flex",alignItems:"center",gap:6}}>
-                    <div style={{fontSize:15,fontWeight:500,color:T.text}}>{label}</div>
-                    {completed && meters && <span style={{fontSize:12,fontWeight:700,color:GREEN}}>+{meters}m</span>}
-                  </div>
-                  {error ? (
-                    <div style={{fontSize:13,color:"#C00",marginTop:4}}>{error} - Verifica el nombre del archivo en R2</div>
-                  ) : (
-                    <div style={{fontSize:13,color:T.textDim,marginTop:4}}>{fmt(time)} / {fmt(dur)}</div>
-                  )}
-                  <div onClick={e => {
-                    if (error) return;
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    const pct = (e.clientX - rect.left) / rect.width;
-                    ref.current.currentTime = pct * dur;
-                  }} style={{width:"100%",height:4,background:T.border,borderRadius:2,cursor:error?"not-allowed":"pointer",position:"relative",marginTop:6}}>
-                    <div style={{height:"100%",background:error?"#999":completed?GREEN:LVL.bold,borderRadius:2,width:(dur > 0 ? time / dur * 100 : 0)+"%",transition:"width 0.1s"}} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          );
-        }
+  // ── Utilidades ──
+  const $ = id => document.getElementById(id);
+  const show = id => { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); $(id).classList.add('active'); };
+  const lsKey = () => 'cruzando_nivel_' + NIVEL_ID;
 
-        function Sec({ icon, title, children, T, open, onToggle }) {
-          return (
-            <div style={{marginTop:10,background:T.card,borderRadius:16,border:"1.5px solid "+T.border,overflow:"hidden"}}>
-              <div onClick={onToggle} style={{padding:"14px 18px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between",background:open?LVL.ultra:"transparent",transition:"background 0.2s"}}>
-                <div style={{display:"flex",alignItems:"center",gap:10}}>
-                  <span style={{fontSize:20}}>{icon}</span>
-                  <span style={{fontSize:17,fontWeight:600,color:open?LVL.bold:T.text}}>{title}</span>
-                </div>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={open?LVL.bold:T.textDim} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{transform:open?"rotate(180deg)":"rotate(0)",transition:"transform 0.3s"}}><polyline points="6,9 12,15 18,9"/></svg>
-              </div>
-              {open && (
-                <div style={{padding:"0 18px 18px",animation:"sU 0.3s ease"}}>
-                  {children}
-                </div>
-              )}
-            </div>
-          );
-        }
+  // Formatear ID "0101" → "Nivel 1-1" (estilo Mario Bros)
+  function nivelLabel(id) {
+    const mundo = parseInt(id.substring(0,2), 10);
+    const nivel = parseInt(id.substring(2,4), 10);
+    return 'Nivel ' + mundo + '-' + nivel;
+  }
 
-        const ICON_ROSARY = "🙏";
-        const ICON_MUSIC = "🎵";
-        const ICON_EYE = "👁️";
-        const ICON_PEN = "✍️";
+  function saveProgress() {
+    try { localStorage.setItem(lsKey(), JSON.stringify({ progress, journal, medConfirmed, isDark })); } catch(e){}
+  }
+  function loadProgress() {
+    try {
+      const raw = localStorage.getItem(lsKey());
+      if (raw) {
+        const d = JSON.parse(raw);
+        if (d.progress) progress = d.progress;
+        if (d.journal) journal = d.journal;
+        if (d.medConfirmed) medConfirmed = d.medConfirmed;
+        if (typeof d.isDark === 'boolean') isDark = d.isDark;
+      }
+    } catch(e){}
+    // Inicializar estructura si no existe
+    BLOCKS.forEach(b => {
+      if (!progress[b]) progress[b] = [null,null,null,null,null];
+      if (!journal[b]) journal[b] = {};
+    });
+  }
 
-        function App() {
-          const [darkMode, setDarkMode] = useState(false);
-          const T = darkMode ? DARK : LIGHT;
-          
-          const cuaderno = {
-            nivel: "CruzAndo la Cruz",
-            nombre: "Males",
-            numero: 1,
-            subtitulo: "La vulnerabilidad gozosa",
-            audioRezo: "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/rezo.mp3",
-            audioCanto: "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/AveMaria_Jacob_Arcadelt_coro_Laus%20Deo_Aguascalientes_2026.mp3",
-            misterios: [
-              {
-                numero: 1,
-                nombre: "La Anunciación",
-                subtitulo: "Ser humano es ser vulnerable",
-                evangelio: {
-                  ref: "Lucas 1:26-31 (DHH)",
-                  text: "En el sexto mes, el ángel Gabriel fue enviado por Dios a una ciudad de Galilea llamada Nazaret, a una joven virgen llamada María, comprometida para casarse con un hombre llamado José, descendiente del rey David. El ángel entró en el lugar donde ella estaba, y le dijo: «¡Te saludo, favorecida de Dios! El Señor está contigo.» María quedó muy conmovida al oír estas palabras, y se preguntaba qué significaría aquel saludo. El ángel le dijo: «No tengas miedo, María, pues tú gozas del favor de Dios. Ahora vas a quedar encinta: tendrás un hijo, y le pondrás por nombre Jesús.»"
-                },
-                contemplacion: "Desde la concepción, ser humano es ser vulnerable\nDios eligió hacerse humano comenzando por donde todos comenzamos: siendo frágil.\nJesús no apareció en el mundo como un adulto poderoso. Se hizo embrión en el vientre de María. Diminuto, silencioso, expuesto. Su vida, durante nueve meses, estuvo sostenida por lo más delicado que existe: la carne de una mujer joven, en un pueblo pequeño, en tiempos difíciles.\nMaría recibió esa noticia sin garantías. No sabía lo que vendría. Solo supo que algo estaba comenzando en ella, algo más grande que ella, y que ese algo era absolutamente frágil.\nAsí empieza la vida humana. Así empieza toda vida humana: pequeña, expuesta, sin defensa propia. La fragilidad no es un accidente del camino; es el punto de partida. Dios mismo la eligió. Y al elegirla, nos revela algo que cuesta aceptar: la vulnerabilidad no es lo que hay que superar para vivir bien. Es la condición desde la que la vida comienza, y desde la que Dios actúa.",
-                meditacion: [
-                  "¿Qué siente el Corazón Inmaculado de María al descubrir que Dios mismo eligió comenzar siendo pequeño, frágil, expuesto?",
-                  "¿Qué nos revela el Corazón de Jesús al hacerse embrión, al hacerse vida que aún no puede nada, que solo puede ser recibida?",
-                  "¿Cuáles son los males —las fragilidades, los límites, las exposiciones— que reconoces como parte inevitable de tu vida desde el principio? ¿Cuál de ellos te cuesta más aceptar como punto de partida y no como fracaso?"
-                ],
-                intercesion: "Jesús, tú que elegiste ser vulnerable desde la concepción, ayúdame a aceptar mi propia fragilidad sin vergüenza. Enséñame que necesitar a otros no es debilidad, sino el camino del amor que tú mismo recorriste.\nAmén.",
-                audioContemplacion: "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_1.mp3"
-              },
-              {
-                numero: 2,
-                nombre: "La Visitación",
-                subtitulo: "La fragilidad que une",
-                evangelio: {
-                  ref: "Lucas 1:39-43 (DHH)",
-                  text: "Por aquellos días, María se fue de prisa a un pueblo de la región montañosa de Judea, y entró en la casa de Zacarías y saludó a Isabel. Cuando Isabel oyó el saludo de María, la criatura se le estremeció en el vientre, y ella quedó llena del Espíritu Santo. Entonces, con voz muy fuerte, dijo: «¡Dios te ha bendecido más que a todas las mujeres, y ha bendecido a tu hijo! ¿Quién soy yo, para que venga a visitarme la madre de mi Señor?»"
-                },
-                contemplacion: "Los primeros ante los ojos de Dios\nMaría, embarazada y joven, camina varios días por terreno montañoso para visitar a Isabel, su prima anciana que también está esperando un hijo. Ambas viven embarazos extraordinarios, pero también ambas están en situación de vulnerabilidad: María es soltera y embarazada (escándalo social), Isabel es anciana y gestante (riesgo físico).\nY sin embargo, en esa fragilidad compartida nace la comunión más hermosa del Evangelio.\nMaría no va a presumir su privilegio de ser la Madre del Mesías. Va a servir. Isabel no siente envidia de la joven favorecida. Siente gratitud por su visita. Ambas reconocen la gracia de Dios en la otra, y se sostienen mutuamente.\nLos primeros ante los ojos de Dios son los frágiles que se acompañan: las mujeres embarazadas, los bebés gestándose, los ancianos, los pobres, los que no tienen voz. Todos ellos son visitados por María y el Mesías en su seno.\nLa fragilidad no separa. Une.",
-                meditacion: [
-                  "¿Qué siente el Corazón de María al caminar días enteros, embarazada, para servir a su prima anciana?",
-                  "¿Qué vive el Corazón de Jesús, aún en el vientre, al encontrarse con Juan Bautista también en gestación?",
-                  "¿Cuántas veces te has acercado a personas en situación vulnerable? ¿Qué sientes y qué haces al respecto? ¿Cómo estás cruzando tu propia necesidad de ayuda?"
-                ],
-                intercesion: "María, tú que caminaste días enteros para servir a quien te necesitaba, enséñame que la fragilidad no me aísla, sino que me une a otros. Ayúdame a reconocer la gracia de Dios en los vulnerables, y a ofrecerles mi presencia sin condescendencia.\nAmén.",
-                audioContemplacion: "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_2.mp3"
-              },
-              {
-                numero: 3,
-                nombre: "El Nacimiento de Jesús",
-                subtitulo: "Pobreza y refugio",
-                evangelio: {
-                  ref: "Lucas 2:1, 4-7 (DHH)",
-                  text: "Por aquel tiempo, el emperador Augusto ordenó que se hiciera un censo de todo el mundo. José salió del pueblo de Nazaret, de la región de Galilea, y se fue a Belén. Fue allá a inscribirse, junto con María, su esposa, que se encontraba encinta. Y mientras estaban en Belén, le llegó a María el tiempo de dar a luz. Y allí nació su hijo primogénito, y lo envolvió en pañales y lo acostó en el establo, porque no había alojamiento para ellos en el mesón."
-                },
-                contemplacion: "Lejos del hogar, sin posada, sin hospitalidad\nMaría y José no eligieron dar a luz en un establo. Fueron forzados por las circunstancias: un decreto imperial los desplazó de su hogar, ningún mesón los recibió, y la pobreza les cerró todas las puertas.\nEl Hijo de Dios nació refugiado en una cueva de animales. Sin médico, sin comadrona, sin agua caliente, sin cama digna. María dio a luz en condiciones de extrema precariedad. José hizo lo que pudo con lo poco que tenía.\nY aun así, le dieron la bienvenida al Niño.\nSan José mantuvo la actitud a pesar de todo: Bienvenido a este mundo, Niño Jesús. María lo envolvió en pañales con ternura, lo acostó en el pesebre como si fuera la cuna más preciosa del mundo.\nLa pobreza material no les robó la dignidad. La falta de recursos no les impidió amar. La injusticia del mundo no venció su esperanza.\nPorque Dios no necesita abundancia para nacer. Solo necesita un corazón que lo reciba.",
-                meditacion: [
-                  "¿Qué siente el Corazón de María al dar a luz en un refugio de animales, lejos de su hogar?",
-                  "¿Qué acepta el Corazón de Jesús al nacer en la pobreza extrema, sin las comodidades básicas?",
-                  "¿Qué actitud tienes en los momentos de escasez (falta de agua, dinero, luz eléctrica, salud…)? ¿Cómo estás cruzando la falta de recursos que limita tu vida?"
-                ],
-                intercesion: "Jesús, tú que naciste en un establo porque no había lugar para ti, acompáñame en mi propia pobreza y precariedad. Enséñame que la escasez no me roba la dignidad, y que puedo dar la bienvenida a la vida incluso cuando falta todo.\nAmén.",
-                audioContemplacion: "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_3.mp3"
-              },
-              {
-                numero: 4,
-                nombre: "La Presentación en el Templo",
-                subtitulo: "La espada anunciada",
-                evangelio: {
-                  ref: "Lucas 2:22, 25, 28, 34-35 (DHH)",
-                  text: "Cuando se cumplieron los días de la purificación de ellos, según la ley de Moisés, llevaron al niño a Jerusalén para presentarlo al Señor. Había en Jerusalén un hombre llamado Simeón, justo y piadoso. Tomó al niño en sus brazos y bendijo a Dios. Luego dijo a María, su madre: «Este niño será causa de caída y de elevación para muchos en Israel; será signo de contradicción, y a ti misma una espada te atravesará el corazón.»"
-                },
-                contemplacion: "El más santo del mundo molestará a muchos\nMaría sostiene a su hijo recién nacido en el Templo. Todo es alegría, gratitud, cumplimiento de la Ley. Pero Simeón, movido por el Espíritu, pronuncia palabras que rompen la paz: Una espada atravesará tu corazón.\nMaría no entiende del todo. Pero presiente que amar a este Niño le costará todo. Hay pérdidas que se anuncian mucho antes de ocurrir. Hay despedidas que empiezan a gestarse en el primer abrazo.\nY aun así, María no huye. No dice: Si este hijo me traerá tanto dolor, prefiero no amarlo tanto. Al contrario: guarda estas palabras en su corazón junto con el amor. Acepta amar sabiendo que amará hasta el dolor.\nSimeón también anuncia algo desconcertante: el más santo del mundo (el Mesías) molestará a muchos. Porque su bondad revelará la falsedad de los hipócritas. Su justicia incomodará a los injustos. Su verdad será intolerable para quienes viven en la mentira.\nA veces, lo verdaderamente bueno es insoportable para quienes no quieren cambiar.",
-                meditacion: [
-                  "¿Qué siente el Corazón de María al escuchar que una espada lo atravesará?",
-                  "¿Qué sabe el Corazón de Jesús sobre su propio destino, siendo aún un niño en brazos de Simeón?",
-                  "¿Alguna vez te ha resultado molesto o insoportable alguien bueno, justo o recto? ¿Qué dolor anticipas que tu corazón resiste nombrar? ¿Cómo estás cruzando la espada anunciada en tu vida?"
-                ],
-                intercesion: "María, tú que aceptaste la espada profetizada sin huir del amor, enséñame a no temer el dolor que viene con amar de verdad. Ayúdame a guardar en mi corazón las palabras difíciles, confiando que Dios me dará fuerza cuando llegue el momento.\nAmén.",
-                audioContemplacion: "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_4.mp3"
-              },
-              {
-                numero: 5,
-                nombre: "El Niño perdido y hallado en el Templo",
-                subtitulo: "Crecer duele",
-                evangelio: {
-                  ref: "Lucas 2:41-46 (DHH)",
-                  text: "Los padres de Jesús iban todos los años a Jerusalén para la fiesta de la Pascua. Cuando Jesús cumplió doce años, fueron allá todos ellos, como era costumbre. Pero pasados aquellos días, cuando volvían a casa, el niño Jesús se quedó en Jerusalén, sin que sus padres se dieran cuenta. Pensando que Jesús iba entre la gente, hicieron un día de camino; pero luego, al buscarlo entre los parientes y conocidos, no lo encontraron. Así que regresaron a Jerusalén para buscarlo allí. Al cabo de tres días lo encontraron en el templo, sentado entre los maestros, escuchándolos y haciéndoles preguntas."
-                },
-                contemplacion: "El dolor del crecimiento\nMaría y José vivieron tres días de angustia. Habían perdido a su hijo. O más bien: su hijo los había dejado atrás, ocupándose de las cosas de su Padre Dios.\nJesús no se escondió por desobediencia. No los abandonó por rebeldía. Simplemente, estaba creciendo. Y crecer duele. No solo al que crece, sino también a quienes lo aman.\nA los doce años, Jesús comenzó a descubrir su identidad como Hijo de Dios. Necesitaba ese tiempo en el Templo, dialogando con los maestros, escuchando, preguntando, madurando. Sus padres aún no entendían del todo quién era Él, ni hacia dónde lo llevaba su vocación. Pero ese misterio ya comenzaba a revelarse.\nMaría y José sufrieron esa separación sin culpa: no fueron malos padres. Jesús vivió ese \"estirón\" sin malicia: no fue un mal hijo. Simplemente, hay momentos en que los hijos toman su propio camino, y eso es voluntad de Dios.",
-                meditacion: [
-                  "¿Qué vive el Corazón de María al comprender que su hijo ya no es solo suyo, sino también del Padre?",
-                  "¿Qué descubre el Corazón de Jesús sobre sí mismo cuando se ocupa de las cosas de su Padre Dios?",
-                  "¿Qué dolor has sentido al dejar atrás la infancia, la casa paterna, las costumbres de otra época? ¿Cómo estás cruzando el duelo de crecer, de madurar, de tomar tus propias decisiones?"
-                ],
-                intercesion: "Jesús, tú que creciste ocupándote de las cosas de tu Padre, ayúdame a aceptar que crecer duele, pero es voluntad de Dios. Enséñame a soltar lo que ya no me corresponde cargar, y a confiar que mi camino, aunque duela, es el que Tú preparaste para mí.\nAmén.",
-                audioContemplacion: "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/1_1_5.mp3"
-              }
-            ]
-          };
+  // ── Colores dinámicos ──
+  function hexToRgb(hex) {
+    const h = hex.replace('#','');
+    return [parseInt(h.substring(0,2),16), parseInt(h.substring(2,4),16), parseInt(h.substring(4,6),16)].join(',');
+  }
+  function applyPalette() {
+    if (!DATA || !DATA.tema) return;
+    const p = DATA.tema.paleta;
+    const r = document.documentElement.style;
+    r.setProperty('--lvl-bold', p.bold);
+    r.setProperty('--lvl-base', p.base);
+    r.setProperty('--lvl-soft', p.soft);
+    r.setProperty('--lvl-mist', p.mist);
+    r.setProperty('--lvl-light', p.light);
+    r.setProperty('--lvl-ultra', p.ultra);
+    // RGB versions for rgba() in gradients
+    r.setProperty('--lvl-bold-rgb', hexToRgb(p.bold));
+    r.setProperty('--lvl-light-rgb', hexToRgb(p.light));
+    // Colores de bloques
+    const bl = DATA.tema.bloques;
+    if (bl.gozosos) r.setProperty('--goz-color', bl.gozosos.color);
+    if (bl.luminosos) r.setProperty('--lum-color', bl.luminosos.color);
+    if (bl.dolorosos) r.setProperty('--dol-color', bl.dolorosos.color);
+    if (bl.gloriosos) r.setProperty('--glo-color', bl.gloriosos.color);
+    // Meta theme-color
+    document.querySelector('meta[name="theme-color"]').content = isDark ? '#1A1714' : '#E6DED3';
+  }
 
-          const [ci, setCi] = useState(0);
-          const [done, setDone] = useState({});
-          const [journal, setJournal] = useState({});
-          const [openSec, setOpenSec] = useState(null);
-          const [showPray, setShowPray] = useState(false);
-          const [celeb, setCeleb] = useState(null);
-          const [trans, setTrans] = useState(false);
+  function blockColor(b) {
+    if (!DATA || !DATA.tema || !DATA.tema.bloques[b]) return '#888';
+    return DATA.tema.bloques[b].color;
+  }
+  function blockEmoji(b) {
+    if (!DATA || !DATA.tema || !DATA.tema.bloques[b]) return '📿';
+    return DATA.tema.bloques[b].emoji;
+  }
 
-          // Sistema de gamificación
-          const [totalMeters, setTotalMeters] = useState(0);
-          const [marianoOverlay, setMarianoOverlay] = useState(null);
-          const [luxShine, setLuxShine] = useState(false);
-          const [luxParticles, setLuxParticles] = useState([]);
-          const [marianoGrandCeleb, setMarianoGrandCeleb] = useState(null);
-          const [reflectionRewards, setReflectionRewards] = useState({});  // {ci_qi: true}
-          const restPosesRef = useRef(['rest-staff', 'rest-sitting', 'rest-rock', 'rest-tree']);
-          const restIndexRef = useRef(0);
-          const orbitIndexRef = useRef(0);
+  // ── Dark mode ──
+  function toggleDark() {
+    isDark = !isDark;
+    document.body.classList.toggle('dark', isDark);
+    $('ico-sun').style.display = isDark ? 'none' : 'block';
+    $('ico-moon').style.display = isDark ? 'block' : 'none';
+    document.querySelector('meta[name="theme-color"]').content = isDark ? '#1A1714' : '#E6DED3';
+    saveProgress();
+  }
 
-          const MARIANO_BASE = 'https://padremonti.github.io/cruzando-app/assets/mariano/';
+  // ── Sonidos de celebración ──
+  function playNotes(freqs) {
+    try {
+      const ac = new (window.AudioContext || window.webkitAudioContext)();
+      freqs.forEach((f, i) => {
+        setTimeout(() => {
+          const o = ac.createOscillator();
+          const g = ac.createGain();
+          o.type = 'sine'; o.frequency.value = f;
+          g.gain.setValueAtTime(0.07, ac.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.35);
+          o.connect(g); g.connect(ac.destination);
+          o.start(); o.stop(ac.currentTime + 0.35);
+        }, i * 180);
+      });
+    } catch(e){}
+  }
+  const MELODIES = [
+    [440,554,659],
+    [523,659,784],
+    [392,494,587,784],
+    [349,440,523,659]
+  ];
+  function celebrationSound(variant) { playNotes(MELODIES[variant % 4]); }
 
-          // Función para ganar metros
-          const gainMeters = (meters, pose) => {
-            setTotalMeters(p => p + meters);
-            
-            // Lux brilla
-            setLuxShine(true);
-            setTimeout(() => setLuxShine(false), 600);
-            
-            // Partículas desde Lux
-            spawnLuxParticles(3);
-            
-            // Mariano aparece
-            setMarianoOverlay({ meters, pose });
-            playNotes([440, 554]);
-            
-            setTimeout(() => setMarianoOverlay(null), 2500);
-          };
+  // ── Confetti ──
+  function showConfetti() {
+    const c = document.createElement('div');
+    c.className = 'confetti-container';
+    const colors = [
+      DATA.tema.paleta.bold, DATA.tema.paleta.soft, DATA.tema.paleta.light,
+      '#34A853', '#FBBC05', '#EA4335'
+    ];
+    for (let i = 0; i < 40; i++) {
+      const p = document.createElement('div');
+      p.className = 'confetti-piece';
+      p.style.left = Math.random() * 100 + '%';
+      p.style.background = colors[Math.floor(Math.random() * colors.length)];
+      p.style.animationDelay = Math.random() * 0.8 + 's';
+      p.style.animationDuration = (2 + Math.random()) + 's';
+      c.appendChild(p);
+    }
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 3500);
+  }
 
-          // Función para obtener siguiente pose de descanso
-          const getNextRestPose = () => {
-            const pose = restPosesRef.current[restIndexRef.current];
-            restIndexRef.current = (restIndexRef.current + 1) % restPosesRef.current.length;
-            return pose;
-          };
+  // ── Audio player ──
+  function stopAudio() {
+    if (audioEl) { audioEl.pause(); audioEl.currentTime = 0; }
+    audioPlaying = false;
+    currentAudioId = null;
+    document.querySelectorAll('.play-btn').forEach(b => { b.innerHTML = playSVG(); });
+    document.querySelectorAll('.audio-bar-fill').forEach(b => { b.style.width = '0%'; });
+  }
 
-          // Función para obtener siguiente órbita de Lux
-          const getNextOrbit = () => {
-            const orbit = `orbit${(orbitIndexRef.current % 4) + 1}`;
-            orbitIndexRef.current++;
-            return orbit;
-          };
+  function toggleAudio(src, playerId) {
+    if (!src) return;
+    if (currentAudioId === playerId && audioPlaying) {
+      audioEl.pause();
+      audioPlaying = false;
+      updatePlayBtn(playerId, false);
+      return;
+    }
+    if (currentAudioId !== playerId) {
+      stopAudio();
+      audioEl = new Audio(src);
+      currentAudioId = playerId;
+      audioEl.addEventListener('timeupdate', () => {
+        if (!audioEl.duration) return;
+        const pct = (audioEl.currentTime / audioEl.duration) * 100;
+        const fill = document.querySelector('#' + playerId + ' .audio-bar-fill');
+        if (fill) fill.style.width = pct + '%';
+        const cur = document.querySelector('#' + playerId + ' .a-cur');
+        const dur = document.querySelector('#' + playerId + ' .a-dur');
+        if (cur) cur.textContent = fmtTime(audioEl.currentTime);
+        if (dur) dur.textContent = fmtTime(audioEl.duration);
+      });
+      audioEl.addEventListener('ended', () => {
+        audioPlaying = false;
+        currentAudioId = null;
+        updatePlayBtn(playerId, false);
+      });
+    }
+    audioEl.play().then(() => {
+      audioPlaying = true;
+      updatePlayBtn(playerId, true);
+    }).catch(()=>{});
+  }
 
-          // Función para crear partículas de Lux
-          const spawnLuxParticles = (count) => {
-            const newParticles = Array.from({ length: count }, (_, i) => ({
-              id: Date.now() + i,
-              x: (Math.random() - 0.5) * 100,
-              y: (Math.random() - 0.5) * 100
-            }));
-            setLuxParticles(p => [...p, ...newParticles]);
-            setTimeout(() => {
-              setLuxParticles(p => p.filter(pt => !newParticles.find(np => np.id === pt.id)));
-            }, 1500);
-          };
+  function seekAudio(e, playerId) {
+    if (!audioEl || currentAudioId !== playerId || !audioEl.duration) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const pct = (e.clientX - rect.left) / rect.width;
+    audioEl.currentTime = pct * audioEl.duration;
+  }
 
-          const m = cuaderno.misterios[ci];
-          const isDone = ci in done;
-          const total = cuaderno.misterios.length;
-          const doneCount = Object.keys(done).length;
+  function updatePlayBtn(playerId, playing) {
+    const btn = document.querySelector('#' + playerId + ' .play-btn');
+    if (btn) btn.innerHTML = playing ? pauseSVG() : playSVG();
+  }
 
-          const goTo = i => {
-            if (i < 0 || i >= total) return;
-            setTrans(true);
-            setTimeout(() => {
-              setCi(i);
-              setOpenSec(null);
-              setShowPray(false);
-              setTrans(false);
-              window.scrollTo(0,0);
-            }, 250);
-          };
+  function fmtTime(s) {
+    if (!s || isNaN(s)) return '0:00';
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return m + ':' + (sec < 10 ? '0' : '') + sec;
+  }
+  function playSVG() { return '<svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><polygon points="6,3 20,12 6,21"/></svg>'; }
+  function pauseSVG() { return '<svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><rect x="5" y="3" width="4" height="18" rx="1"/><rect x="15" y="3" width="4" height="18" rx="1"/></svg>'; }
 
-          const complete = () => {
-            setDone(p => ({...p, [ci]: Date.now()}));
-            setCeleb(ci);
-            setShowPray(false);
-            if (ci === total - 1) {
-              // Bloque completado - dar bonus de 1000m y mostrar celebración de Mariano
-              setTimeout(() => {
-                setTotalMeters(p => p + 1000);
-                setMarianoGrandCeleb(getNextOrbit());
-                playNotes([523, 659, 784, 880, 1047]);
-              }, 2500);
-              setTimeout(() => {
-                setMarianoGrandCeleb(null);
-                setCeleb("grand");
-              }, 5500);
-              setTimeout(() => setCeleb(null), 9000);
-            } else {
-              setTimeout(() => goTo(ci + 1), 2500);
-            }
-          };
+  function audioPlayerHTML(id, label, src) {
+    if (!src) return '<div class="audio-player" style="opacity:0.5"><div style="font-size:0.82rem;color:var(--text-dim)">Audio pendiente</div></div>';
+    return '<div class="audio-player" id="' + id + '">' +
+      '<button class="play-btn" onclick="window._ca.toggleAudio(\'' + src + '\',\'' + id + '\')">' + playSVG() + '</button>' +
+      '<div class="audio-info">' +
+        '<div class="audio-label">' + label + '</div>' +
+        '<div class="audio-bar-wrap" onclick="window._ca.seekAudio(event,\'' + id + '\')">' +
+          '<div class="audio-bar-fill" style="width:0%"></div>' +
+        '</div>' +
+        '<div class="audio-time"><span class="a-cur">0:00</span><span class="a-dur">0:00</span></div>' +
+      '</div></div>';
+  }
 
-          return (
-            <>
-              <style>{CSS(T)}</style>
-              {celeb === "grand" && <GrandCeleb onDone={() => setCeleb(null)} />}
-              {celeb !== null && celeb !== "grand" && <CelebOverlay variant={celeb} onDone={() => setCeleb(null)} />}
+  // ── Render: Pantalla de Inicio ──
+  function renderHome() {
+    $('main-header').style.display = '';
+    $('h-title').textContent = 'CruzAndo';
+    $('h-sub').textContent = nivelLabel(DATA.tema.id) + ': ' + DATA.elemento;
+    $('home-title').textContent = DATA.tema.mundo_nombre;
+    $('home-element').textContent = nivelLabel(DATA.tema.id) + ': ' + DATA.elemento;
 
-              <div style={{minHeight:"100vh",background:T.bg,paddingBottom:40}}>
-                <div style={{padding:"20px 18px 16px",background:T.card,borderBottom:"1.5px solid "+T.border}}>
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
-                    <div style={{flex:1}}>
-                      <div style={{display:"inline-block",background:LVL.bold,color:"#fff",padding:"4px 12px",borderRadius:16,fontSize:12,fontWeight:600,letterSpacing:0.8,textTransform:"uppercase",marginBottom:8}}>
-                        Nivel Cruz
-                      </div>
-                      <h1 style={{fontSize:26,fontWeight:700,color:T.text,marginBottom:4}}>{cuaderno.nombre}</h1>
-                      <div style={{fontSize:16,color:T.textSoft,fontStyle:"italic"}}>{cuaderno.subtitulo}</div>
-                    </div>
-                    <div style={{display:"flex",alignItems:"center",gap:12}}>
-                      {/* Display de metros totales */}
-                      <div style={{
-                        display:"flex",
-                        alignItems:"center",
-                        gap:6,
-                        background:T.secBg,
-                        padding:"6px 12px",
-                        borderRadius:12,
-                        border:"1.5px solid "+T.border
-                      }}>
-                        <span style={{fontSize:14,fontWeight:600,color:T.textDim}}>🚶‍♂️</span>
-                        <span style={{fontSize:15,fontWeight:700,color:LVL.bold}}>
-                          {totalMeters.toLocaleString()}m
-                        </span>
-                      </div>
-                      {/* Lux - Cruz guía */}
-                      <div style={{position:"relative",width:36,height:36,display:"flex",alignItems:"center",justifyContent:"center"}}>
-                        <svg 
-                          viewBox="0 0 100 100" 
-                          style={{
-                            width:24,
-                            height:24,
-                            animation:"luxBreathe 3s ease-in-out infinite"+(luxShine ? ", luxShine 0.6s ease-out" : ""),
-                            filter:"drop-shadow(0 0 2px #FFFCF7)"+(luxShine ? " drop-shadow(0 0 16px #FFFCF7)" : "")
-                          }}
-                        >
-                          <defs>
-                            <filter id="luxGlow">
-                              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-                              <feMerge>
-                                <feMergeNode in="coloredBlur"/>
-                                <feMergeNode in="SourceGraphic"/>
-                              </feMerge>
-                            </filter>
-                          </defs>
-                          <g filter="url(#luxGlow)">
-                            <rect x="46.1926" y="0.285" width="7.6148" height="99.43" fill="#FFFCF7"/>
-                            <rect x="0" y="46.2068" width="100" height="7.5864" fill="#FFFCF7"/>
-                          </g>
-                        </svg>
-                        {/* Partículas de Lux */}
-                        {luxParticles.map(p => (
-                          <div 
-                            key={p.id}
-                            style={{
-                              position:"absolute",
-                              width:4,
-                              height:4,
-                              borderRadius:"50%",
-                              background:"#FFFCF7",
-                              left:"50%",
-                              top:"50%",
-                              opacity:0.8,
-                              animation:"luxParticle 1.5s ease-out forwards",
-                              "--x": p.x + "px",
-                              "--y": p.y + "px"
-                            }}
-                          />
-                        ))}
-                      </div>
-                      {/* Toggle dark mode */}
-                      <button 
-                      onClick={() => setDarkMode(!darkMode)} 
-                      style={{
-                        width:40,
-                        height:40,
-                        borderRadius:"50%",
-                        background:T.secBg,
-                        border:"1.5px solid "+T.border,
-                        cursor:"pointer",
-                        display:"flex",
-                        alignItems:"center",
-                        justifyContent:"center",
-                        flexShrink:0,
-                        transition:"all 0.2s"
-                      }}
-                      title={darkMode ? "Modo claro" : "Modo oscuro"}
-                    >
-                      {darkMode ? (
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={T.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-                        </svg>
-                      ) : (
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={T.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                        </svg>
-                      )}
-                    </button>
-                    </div>
-                  </div>
-                </div>
+    const grid = $('block-grid');
+    grid.innerHTML = '';
 
-                <div style={{padding:"16px 18px",background:T.card,borderBottom:"1px solid "+T.border}}>
-                  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-                    {cuaderno.misterios.map((_, i) => {
-                      const isA = i === ci;
-                      const isD = i in done;
-                      const gap = i % 5 === 0 && i !== 0;
-                      return (
-                        <div key={i} style={{display:"flex",alignItems:"center"}}>
-                          {gap && <div style={{width:8}} />}
-                          <div onClick={() => goTo(i)} style={{width:isA?24:11,height:11,borderRadius:6,background:isD?GREEN:isA?LVL.bold:T.border,cursor:"pointer",transition:"all 0.3s",boxShadow:isA?"0 0 0 3px "+LVL.light:isD?"0 0 6px "+GREEN+"60":"none"}} />
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                    <span style={{fontSize:13,color:T.textDim}}>Misterios Gozosos {"·"} <em style={{color:LVL.soft}}>{cuaderno.subtitulo}</em></span>
-                    <span style={{fontSize:13,fontWeight:700,color:doneCount===total?GREEN:LVL.bold}}>{doneCount}/{total}</span>
-                  </div>
-                </div>
+    let allCleared = true;
+    const todayBlock = DAY_BLOCKS[new Date().getDay()];
+    const todayCleared = progress[todayBlock] && progress[todayBlock].every(x => x !== null);
 
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"0 18px 8px"}}>
-                  <button onClick={() => goTo(ci-1)} disabled={ci===0} style={{display:"flex",alignItems:"center",gap:4,background:"none",border:"none",cursor:ci===0?"default":"pointer",opacity:ci===0?0.3:1,color:T.textSoft,fontSize:13,fontFamily:"Inter,sans-serif"}}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={T.textSoft} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15,18 9,12 15,6"/></svg> Anterior
-                  </button>
-                  <span style={{fontSize:13,fontWeight:600,color:T.textDim}}>{ci+1} de {total}</span>
-                  <button onClick={() => goTo(ci+1)} disabled={ci===total-1} style={{display:"flex",alignItems:"center",gap:4,background:"none",border:"none",cursor:ci===total-1?"default":"pointer",opacity:ci===total-1?0.3:1,color:T.textSoft,fontSize:13,fontFamily:"Inter,sans-serif"}}>
-                    Siguiente <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={T.textSoft} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9,6 15,12 9,18"/></svg>
-                  </button>
-                </div>
+    // Banner "Misterios del día"
+    const DAY_NAMES_ES = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    const BLOCK_DAYS = {};
+    for (let d = 0; d < 7; d++) { const bl = DAY_BLOCKS[d]; if (!BLOCK_DAYS[bl]) BLOCK_DAYS[bl] = []; BLOCK_DAYS[bl].push(DAY_NAMES_ES[d]); }
+    const todayName = DAY_NAMES_ES[new Date().getDay()];
+    const bannerWrap = $('today-banner-wrap');
 
-                <div style={{padding:"4px 14px 120px",opacity:trans?0:1,transform:trans?"translateY(6px)":"none",transition:"all 0.25s"}}>
-                  <div style={{borderRadius:18,overflow:"hidden",marginBottom:14,position:"relative",background:"linear-gradient(135deg,"+LVL.light+","+LVL.mist+","+LVL.soft+")",height:170}}>
-                    <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",justifyContent:"flex-end",padding:"18px 20px",background:"linear-gradient(to top,rgba(43,38,34,0.75) 0%,rgba(43,38,34,0.15) 60%,transparent 100%)"}}>
-                      <div style={{fontSize:13,fontWeight:600,letterSpacing:1,color:LVL.light,textTransform:"uppercase"}}>{ORDS[ci%5]} Misterio Gozoso</div>
-                      <h2 style={{margin:"3px 0 0",fontSize:24,fontWeight:700,color:"#fff",lineHeight:1.2}}>{m.nombre}</h2>
-                      <div style={{fontSize:16,color:"rgba(255,255,255,0.85)",fontStyle:"italic",marginTop:4}}>{m.subtitulo}</div>
-                    </div>
-                  </div>
+    if (!todayCleared) {
+      bannerWrap.innerHTML =
+        '<div class="today-banner fade-in" onclick="window._ca.enterBlock(\'' + todayBlock + '\')">' +
+          '<div class="today-banner-top">' +
+            '<span class="today-banner-label"><span class="today-pulse"></span> Misterios del día · ' + todayName + '</span>' +
+            '<span class="today-banner-arrow">→</span>' +
+          '</div>' +
+          '<h3 style="color:' + blockColor(todayBlock) + '">' + blockEmoji(todayBlock) + ' Misterios ' + BLOCK_NAMES[todayBlock] + '</h3>' +
+          '<div class="today-banner-days">' + BLOCK_DAYS[todayBlock].join(' · ') + '</div>' +
+        '</div>';
+    } else {
+      bannerWrap.innerHTML = '';
+    }
 
-                  <div style={{padding:"16px 18px",background:T.card,borderRadius:16,border:"1.5px solid "+T.border,marginBottom:10}}>
-                    <div style={{fontSize:13,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:LVL.bold,marginBottom:10}}>{"📖"} Evangelio</div>
-                    <div style={{fontSize:18,color:T.text,lineHeight:1.8,whiteSpace:"pre-line"}}>{m.evangelio.text}</div>
-                    <div style={{fontSize:14,color:T.textDim,marginTop:12,textAlign:"right",fontStyle:"italic"}}>{"—"} {m.evangelio.ref}</div>
-                  </div>
+    BLOCKS.forEach((b, bi) => {
+      const mists = DATA.misterios[b] || [];
+      const prog = progress[b] || [];
+      const doneCount = prog.filter(x => x !== null).length;
+      const isCleared = doneCount === 5;
+      const isInProgress = doneCount > 0 && !isCleared;
+      if (!isCleared) allCleared = false;
 
-                  <Sec icon={ICON_ROSARY} title="Rezar este Misterio" T={T} open={openSec==="rezar"} onToggle={() => setOpenSec(openSec==="rezar"?null:"rezar")}>
-                    <AudioPlayer 
-                      src={cuaderno.audioRezo} 
-                      label="Padrenuestro + 10 Avemarías + Gloria" 
-                      T={T} 
-                      onComplete={gainMeters}
-                      meters={1200}
-                      pose="walking"
-                    />
-                  </Sec>
+      const isToday = b === todayBlock && !isCleared;
+      const status = isCleared ? 'cleared' : isInProgress ? 'progress' : (isToday ? 'today' : 'pending');
+      const statusLabel = isCleared ? '✓ Completado' : isInProgress ? 'En progreso' : (isToday ? 'Hoy' : 'Pendiente');
+      const extraClass = isCleared ? 'cleared' : isToday ? 'today' : isInProgress ? 'current' : '';
 
-                  <Sec icon={ICON_MUSIC} title="Canto" T={T} open={openSec==="canto"} onToggle={() => setOpenSec(openSec==="canto"?null:"canto")}>
-                    <AudioPlayer 
-                      src={cuaderno.audioCanto} 
-                      label="Ave María — Jacob Arcadelt — Coro Laus Deo (Aguascalientes, 2026)" 
-                      T={T}
-                      onComplete={gainMeters}
-                      meters={100}
-                      pose="happy"
-                    />
-                  </Sec>
+      const card = document.createElement('div');
+      card.className = 'block-card fade-in fade-in-d' + (bi+1) + ' ' + extraClass;
+      card.onclick = () => enterBlock(b);
 
-                  <Sec icon={ICON_EYE} title="Contemplar" T={T} open={openSec==="contemplar"} onToggle={() => setOpenSec(openSec==="contemplar"?null:"contemplar")}>
-                    <AudioPlayer 
-                      src={m.audioContemplacion} 
-                      label="Audio de la contemplación" 
-                      T={T}
-                      onComplete={gainMeters}
-                      meters={800}
-                      pose="contemplative"
-                    />
-                    <div style={{marginTop:14,padding:"16px 18px",background:T.secBg,borderRadius:14,borderLeft:"3px solid "+LVL.soft}}>
-                      <div style={{fontSize:18,color:T.text,lineHeight:1.85,whiteSpace:"pre-line"}}>{m.contemplacion}</div>
-                    </div>
-                  </Sec>
+      card.innerHTML =
+        '<div class="block-card-top">' +
+          '<span class="block-emoji">' + blockEmoji(b) + '</span>' +
+          '<span class="block-badge ' + status + '">' + statusLabel + '</span>' +
+        '</div>' +
+        '<div class="block-title" style="color:' + blockColor(b) + '">Misterios ' + BLOCK_NAMES[b] + '</div>' +
+        '<div class="block-subtitle">' + (DATA.subtitulos_bloque ? DATA.subtitulos_bloque[b] || '' : '') + '</div>' +
+        '<div class="block-progress"><div class="block-dots">' +
+          [0,1,2,3,4].map(i => {
+            const cls = prog[i] ? 'done' : (doneCount === i && !isCleared ? 'active' : '');
+            return '<div class="block-dot ' + cls + '"></div>';
+          }).join('') +
+        '</div></div>';
 
-                  <Sec icon={ICON_PEN} title="Meditar y escribir" T={T} open={openSec==="meditar"} onToggle={() => setOpenSec(openSec==="meditar"?null:"meditar")}>
-                    <div style={{display:"flex",flexDirection:"column",gap:20}}>
-                      {m.meditacion.map((q, qi) => (
-                        <div key={qi}>
-                          <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:6}}>
-                            <div style={{width:7,height:7,borderRadius:4,background:MCOLORS[qi]}} />
-                            <span style={{fontSize:13,fontWeight:600,letterSpacing:1,textTransform:"uppercase",color:MCOLORS[qi]}}>{MLABELS[qi]}</span>
-                          </div>
-                          <p style={{fontSize:18,color:T.text,lineHeight:1.7,marginBottom:10}}>{q}</p>
-                          <textarea
-                            value={journal[ci]?.[qi] || ""}
-                            onChange={e => {
-                              const newValue = e.target.value;
-                              setJournal(p => ({...p, [ci]: {...(p[ci]||{}), [qi]: newValue}}));
-                              
-                              // Dar recompensa si alcanza 140 caracteres y no se ha dado antes
-                              const rewardKey = `${ci}_${qi}`;
-                              if (newValue.length >= 140 && !reflectionRewards[rewardKey]) {
-                                setReflectionRewards(p => ({...p, [rewardKey]: true}));
-                                gainMeters(650, getNextRestPose());
-                              }
-                            }}
-                            placeholder="Escribe aquí tu reflexión..."
-                            rows={3}
-                            style={{
-                              width:"100%",
-                              padding:"12px 16px",
-                              background:T.inputBg,
-                              border:"1.5px solid "+(reflectionRewards[`${ci}_${qi}`] ? GREEN : T.border),
-                              borderRadius:12,
-                              color:T.text,
-                              fontSize:17,
-                              lineHeight:1.7,
-                              resize:"vertical",
-                              outline:"none",
-                              transition:"border 0.2s",
-                              boxShadow: reflectionRewards[`${ci}_${qi}`] ? `0 0 0 3px ${GREEN}20` : "none"
-                            }}
-                            onFocus={e => e.target.style.borderColor = reflectionRewards[`${ci}_${qi}`] ? GREEN : LVL.soft}
-                            onBlur={e => e.target.style.borderColor = reflectionRewards[`${ci}_${qi}`] ? GREEN : T.border}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </Sec>
+      grid.appendChild(card);
+    });
 
-                  {!showPray && !isDone && (
-                    <button onClick={() => setShowPray(true)} style={{width:"100%",padding:"16px",marginTop:8,background:T.card,border:"1.5px solid "+LVL.light,borderRadius:16,cursor:"pointer",fontSize:17,fontWeight:600,fontFamily:"Inter,sans-serif",color:LVL.bold,display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
-                      {"🙏"} Oración de intercesión
-                    </button>
-                  )}
+    // Banner de nivel completado
+    const wrap = $('nivel-done-wrap');
+    if (allCleared && DATA.tema.siguiente) {
+      wrap.style.display = '';
+      wrap.innerHTML =
+        '<div class="nivel-done-banner fade-in">' +
+          '<h3>¡Nivel completado! 🎉</h3>' +
+          '<p>Has recorrido los 20 Misterios de este nivel.</p>' +
+          '<a href="?c=' + DATA.tema.siguiente + '" class="btn btn-green btn-block">Avanzar al siguiente nivel →</a>' +
+        '</div>';
+    } else if (allCleared) {
+      wrap.style.display = '';
+      wrap.innerHTML =
+        '<div class="nivel-done-banner fade-in">' +
+          '<h3>¡Nivel completado! 🎉</h3>' +
+          '<p>Has llegado al final de este nivel. ¡Gloria a Dios!</p>' +
+        '</div>';
+    } else {
+      wrap.style.display = 'none';
+    }
 
-                  {showPray && !isDone && (
-                    <div style={{marginTop:10,padding:"22px",background:T.card,borderRadius:18,border:"1.5px solid "+LVL.soft,boxShadow:"0 4px 24px rgba(255,122,0,0.1)",animation:"sU 0.4s ease"}}>
-                      <div style={{fontSize:13,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:LVL.bold,marginBottom:12}}>{"🙏"} Intercesión</div>
-                      <p style={{fontSize:19,color:T.text,lineHeight:1.85,fontStyle:"italic",whiteSpace:"pre-line"}}>{m.intercesion}</p>
-                      <button onClick={complete} style={{width:"100%",marginTop:20,padding:"16px",background:LVL.bold,border:"none",borderRadius:14,cursor:"pointer",color:"#fff",fontSize:18,fontWeight:700,fontFamily:"Inter,sans-serif",boxShadow:"0 4px 16px rgba(255,122,0,0.3)"}}>
-                        {ci < total - 1 ? "Siguiente Misterio →" : "Completar Cuaderno ✦"}
-                      </button>
-                    </div>
-                  )}
+    show('scr-home');
+  }
 
-                  {isDone && (
-                    <div style={{marginTop:10,padding:"16px 20px",background:GREEN+"15",borderRadius:16,border:"1.5px solid "+GREEN+"30",display:"flex",alignItems:"center",gap:12,animation:"sU 0.4s ease"}}>
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={GREEN} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="4,12 10,18 20,6"/></svg>
-                      <div>
-                        <div style={{fontSize:17,fontWeight:600,color:GREEN}}>Misterio completado</div>
-                        <div style={{fontSize:14,color:T.textDim,marginTop:2}}>{new Date(done[ci]).toLocaleDateString("es-MX",{day:"numeric",month:"long"})}</div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
+  // ── Entrar a un bloque ──
+  function enterBlock(b) {
+    stopAudio();
+    currentBlock = b;
+    const prog = progress[b] || [];
+    // Ir al primer misterio no completado, o al primero si todos están completados
+    const first = prog.findIndex(x => x === null);
+    currentMystery = first >= 0 ? first : 0;
+    openSection = null;
+    renderPrayer();
+  }
 
-              {/* Overlay de Mariano - Slide in */}
-              {marianoOverlay && (
-                <div style={{
-                  position:"fixed",
-                  top:0,
-                  right:0,
-                  bottom:0,
-                  width:"100%",
-                  pointerEvents:"none",
-                  zIndex:90,
-                  display:"flex",
-                  alignItems:"center",
-                  justifyContent:"flex-end",
-                  paddingRight:20
-                }}>
-                  <img 
-                    src={MARIANO_BASE + 'mariano-' + marianoOverlay.pose + '.png'}
-                    alt="Mariano"
-                    style={{
-                      width:182,
-                      height:"auto",
-                      animation:"marianoSlide 2.5s ease-in-out"
-                    }}
-                  />
-                  <div style={{
-                    position:"absolute",
-                    top:"50%",
-                    right:220,
-                    fontSize:18,
-                    fontWeight:800,
-                    color:GREEN,
-                    textShadow:"0 2px 8px rgba(0,200,83,0.4)",
-                    animation:"metersFloat 2.5s ease-out"
-                  }}>
-                    +{marianoOverlay.meters}m
-                  </div>
-                </div>
-              )}
+  // ── Render: Pantalla de Oración ──
+  function renderPrayer() {
+    const b = currentBlock;
+    const mi = currentMystery;
+    const mists = DATA.misterios[b];
+    const m = mists[mi];
+    const prog = progress[b];
 
-              {/* Overlay de Mariano - Grand Celebration */}
-              {marianoGrandCeleb && (
-                <div style={{
-                  position:"fixed",
-                  inset:0,
-                  background:"rgba(0,0,0,0.5)",
-                  display:"flex",
-                  alignItems:"center",
-                  justifyContent:"center",
-                  zIndex:101,
-                  pointerEvents:"none"
-                }}>
-                  <div style={{position:"relative",width:260,height:260}}>
-                    {/* Mariano celebrando */}
-                    <img 
-                      src={MARIANO_BASE + 'mariano-celebrate.png'}
-                      alt="Mariano celebrando"
-                      style={{
-                        width:260,
-                        height:"auto",
-                        marginBottom:20,
-                        animation:"popScale 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards"
-                      }}
-                    />
-                    
-                    {/* Lux orbitando */}
-                    <div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%, -50%)"}}>
-                      <svg 
-                        viewBox="0 0 100 100" 
-                        style={{
-                          width:32,
-                          height:32,
-                          animation:`${marianoGrandCeleb} 3s ease-in-out infinite`
-                        }}
-                      >
-                        <g filter="url(#luxGlow)">
-                          <rect x="46.1926" y="0.285" width="7.6148" height="99.43" fill="#FFFCF7"/>
-                          <rect x="0" y="46.2068" width="100" height="7.5864" fill="#FFFCF7"/>
-                        </g>
-                      </svg>
-                    </div>
+    $('h-title').textContent = 'CruzAndo';
+    $('h-sub').textContent = nivelLabel(DATA.tema.id) + ' · ' + BLOCK_NAMES[b];
 
-                    {/* Metros ganados */}
-                    <div style={{
-                      textAlign:"center",
-                      color:"#fff",
-                      fontSize:28,
-                      fontWeight:800,
-                      textShadow:"0 4px 16px rgba(0,0,0,0.5)",
-                      marginTop:20
-                    }}>
-                      +1,000m
-                    </div>
-                    
-                    <div style={{
-                      textAlign:"center",
-                      color:"#fff",
-                      fontSize:18,
-                      marginTop:8,
-                      textShadow:"0 2px 8px rgba(0,0,0,0.5)"
-                    }}>
-                      ¡Bloque completado!<br/>Has recorrido una etapa del camino
-                    </div>
+    // Counter
+    $('prayer-counter').textContent = ORDS[mi] + ' Misterio ' + BTYPES[b];
+    $('prayer-title').textContent = m.titulo;
+    $('prayer-subtitle').textContent = m.subtitulo || '';
 
-                    {/* Confetti */}
-                    {Array.from({length:40}, (_, i) => (
-                      <div 
-                        key={i}
-                        style={{
-                          position:"fixed",
-                          width:8,
-                          height:8,
-                          borderRadius:"50%",
-                          background:["#01BCE0","#00C853","#FBBC05","#FF7A00","#FFFCF7"][i % 5],
-                          left:Math.random() * 100 + "%",
-                          top:"-20px",
-                          animation:`confettiFall ${2 + Math.random() * 2}s linear forwards`,
-                          animationDelay:Math.random() * 0.5 + "s"
-                        }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </>
-          );
-        }
+    // Beads (rosary chain)
+    const dots = $('prayer-dots');
+    const beadPositions = [24, 72, 120, 168, 216];
+    const boldColor = DATA.tema.paleta.bold;
+    const lightColor = DATA.tema.paleta.light;
+    const borderC = isDark ? '#3A3530' : '#D9D1C7';
+    const lineColorDone = lightColor;
+    const lineColorPending = borderC;
 
-        function CSS(T) {
-          return `
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-            *{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif}
-            body{margin:0;background:${T.bg};font-family:'Inter',sans-serif}
-            textarea{font-family:'Inter',sans-serif}
-            button{font-family:'Inter',sans-serif}
-            ::placeholder{color:${T.textDim}}
-            ::-webkit-scrollbar{width:3px}
-            ::-webkit-scrollbar-thumb{background:${T.border};border-radius:2px}
-            @keyframes sU{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-            @keyframes haloX{0%{transform:scale(0.3);opacity:0}30%{opacity:1}100%{transform:scale(2.5);opacity:0}}
-            @keyframes riseL{0%{transform:translateY(0);opacity:0}20%{opacity:0.8}100%{transform:translateY(-200px);opacity:0}}
-            @keyframes crossG{0%{opacity:0;transform:scale(0.5)}40%{opacity:1;transform:scale(1.1)}100%{opacity:0;transform:scale(1.3)}}
-            @keyframes fDot{0%{transform:scale(0) translateY(20px);opacity:0}30%{opacity:0.9;transform:scale(1.2) translateY(0)}100%{transform:scale(0) translateY(-40px);opacity:0}}
-            @keyframes gPulse{0%{transform:scale(0)}30%{transform:scale(1.1)}50%{transform:scale(0.95)}100%{transform:scale(1);opacity:0}}
-            @keyframes rayB{0%{height:0;opacity:0}30%{opacity:0.7}100%{height:100px;opacity:0}}
-            @keyframes gScale{0%{transform:scale(0)}40%{transform:scale(1.2)}60%{transform:scale(0.9)}100%{transform:scale(1)}}
-          `;
-        }
+    // Find how far the chain color extends
+    const lastDoneIdx = (() => { for (let i = 4; i >= 0; i--) { if (prog[i]) return i; } return -1; })();
+    const chainEndX = lastDoneIdx >= 0 ? beadPositions[lastDoneIdx] : 24;
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
+    let svgHTML = '<svg viewBox="0 0 240 30" preserveAspectRatio="xMidYMid meet">';
+    // Background line (pending)
+    svgHTML += '<line x1="24" y1="15" x2="216" y2="15" stroke="' + lineColorPending + '" stroke-width="1.5" stroke-linecap="round"/>';
+    // Done line
+    if (lastDoneIdx >= 0) {
+      svgHTML += '<line x1="24" y1="15" x2="' + chainEndX + '" y2="15" stroke="' + lineColorDone + '" stroke-width="1.5" stroke-linecap="round"/>';
+    }
+    // Beads
+    for (let i = 0; i < 5; i++) {
+      const cx = beadPositions[i];
+      if (prog[i]) {
+        // Done bead
+        svgHTML += '<circle cx="' + cx + '" cy="15" r="9" fill="' + boldColor + '" style="cursor:pointer" onclick="window._ca.goMystery(' + i + ')"/>';
+      } else if (i === mi) {
+        // Active bead (current mystery)
+        svgHTML += '<circle cx="' + cx + '" cy="15" r="9.5" fill="none" stroke="' + boldColor + '" stroke-width="2" style="cursor:pointer" onclick="window._ca.goMystery(' + i + ')"/>';
+        svgHTML += '<circle cx="' + cx + '" cy="15" r="4" fill="' + lightColor + '" style="cursor:pointer" onclick="window._ca.goMystery(' + i + ')"/>';
+      } else {
+        // Pending bead
+        svgHTML += '<circle cx="' + cx + '" cy="15" r="9" fill="none" stroke="' + borderC + '" stroke-width="1.2" style="cursor:pointer" onclick="window._ca.goMystery(' + i + ')"/>';
+      }
+    }
+    svgHTML += '</svg>';
+    dots.innerHTML = svgHTML;
+
+    // Evangelio
+    $('ev-text').textContent = m.evangelio;
+    $('ev-ref').textContent = '— ' + m.referencia;
+
+    // Acordeón
+    renderAccordion(b, mi, m);
+
+    // Done bar
+    const doneWrap = $('mystery-done-wrap');
+    if (prog[mi]) {
+      const d = new Date(prog[mi]);
+      doneWrap.style.display = '';
+      doneWrap.innerHTML =
+        '<div class="mystery-done-bar fade-in">' +
+          '<span class="done-check">✓</span>' +
+          '<div><div class="done-text">Misterio completado</div>' +
+          '<div class="done-date">' + d.toLocaleDateString('es-MX',{day:'numeric',month:'long'}) + '</div></div>' +
+        '</div>';
+    } else {
+      doneWrap.style.display = 'none';
+    }
+
+    // Bottom nav
+    renderBottomNav(b, mi);
+
+    show('scr-prayer');
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
+
+  // ── Acordeón ──
+  function renderAccordion(b, mi, m) {
+    const acc = $('accordion');
+    const sections = [
+      { key:'rezar', icon:'📿', label:'Rezar este Misterio', bgVar:'--lvl-ultra' },
+      { key:'canto', icon:'🎵', label:'Canto', bgVar:'--lvl-ultra' },
+      { key:'contemplar', icon:'👁️', label:'Contemplar', bgVar:'--lvl-ultra' },
+      { key:'meditar', icon:'✏️', label:'Meditar y escribir', bgVar:'--lvl-ultra' },
+      { key:'intercesion', icon:'🙏', label:'Intercesión', bgVar:'--lvl-ultra' },
+    ];
+
+    acc.innerHTML = sections.map(s => {
+      const isOpen = openSection === s.key;
+      return '<div class="acc-item' + (isOpen ? ' open' : '') + '" id="acc-' + s.key + '">' +
+        '<button class="acc-trigger" onclick="window._ca.toggleSection(\'' + s.key + '\')">' +
+          '<div class="acc-trigger-left">' +
+            '<div class="acc-icon" style="background:var(' + s.bgVar + ')">' + s.icon + '</div>' +
+            '<span class="acc-label">' + s.label + '</span>' +
+          '</div>' +
+          '<svg class="acc-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>' +
+        '</button>' +
+        '<div class="acc-body" style="max-height:' + (isOpen ? '2000px' : '0') + '">' +
+          '<div class="acc-body-inner">' + sectionContent(s.key, b, mi, m) + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function sectionContent(key, b, mi, m) {
+    if (key === 'rezar') {
+      const src = DATA.audio_rezo || '';
+      return audioPlayerHTML('ap-rezar', 'Padrenuestro · 10 Avemarías · Gloria · Jaculatoria', src);
+    }
+    if (key === 'canto') {
+      const src = DATA.audio_canto || '';
+      if (src) return audioPlayerHTML('ap-canto', 'Canto contemplativo', src);
+      return '<div class="canto-box"><p>🕊️ Momento de silencio y canto contemplativo</p><span class="canto-hint">Tómate unos momentos para cantar, meditar o guardar silencio antes de continuar</span></div>';
+    }
+    if (key === 'contemplar') {
+      const src = m.audio_contemplacion || '';
+      let html = audioPlayerHTML('ap-contempl', 'Audio de la contemplación', src);
+      html += '<div class="contempl-text">' + escHTML(m.contemplacion) + '</div>';
+      return html;
+    }
+    if (key === 'meditar') {
+      return renderMeditation(b, mi, m);
+    }
+    if (key === 'intercesion') {
+      let html = '<div class="interc-text">' + escHTML(m.intercesion) + '</div>';
+      const isDone = progress[b] && progress[b][mi];
+      html += '<button class="amen-btn' + (isDone ? ' done' : '') + '" onclick="window._ca.completeMystery()">' + (isDone ? '✓ Amén' : 'Amén') + '</button>';
+      return html;
+    }
+    return '';
+  }
+
+  function renderMeditation(b, mi, m) {
+    // Parsear las 3 preguntas de meditación
+    const questions = parseMeditation(m.meditacion);
+    const j = journal[b] && journal[b][mi] ? journal[b][mi] : {};
+    const mc = medConfirmed[b] && medConfirmed[b][mi] ? medConfirmed[b][mi] : {};
+
+    return questions.map((q, qi) => {
+      const val = j['q' + qi] || '';
+      const confirmed = mc['q' + qi] || false;
+      const btnClass = 'med-confirm' + (confirmed ? ' done' : '');
+      const btnText = confirmed ? '✓ Reflexión guardada' : '📝 Guardar reflexión';
+      return '<div class="med-group">' +
+        '<div class="med-label-row">' +
+          '<div class="med-dot" style="background:' + MED_COLORS[qi] + '"></div>' +
+          '<span class="med-label-text" style="color:' + MED_COLORS[qi] + '">' + MED_LABELS[qi] + '</span>' +
+        '</div>' +
+        '<p class="med-question">' + escHTML(q) + '</p>' +
+        '<textarea class="journal-area" id="med-ta-' + qi + '" placeholder="Escribe tu reflexión…" ' +
+          'oninput="window._ca.onMedInput(\'' + b + '\',' + mi + ',' + qi + ',this.value)">' + escHTML(val) + '</textarea>' +
+        '<button class="' + btnClass + '" id="med-btn-' + qi + '" onclick="window._ca.confirmReflection(\'' + b + '\',' + mi + ',' + qi + ')">' + btnText + '</button>' +
+      '</div>';
+    }).join('');
+  }
+
+  function parseMeditation(text) {
+    if (!text) return ['','',''];
+    // Intentar separar por las 3 etiquetas
+    const labels = MED_LABELS;
+    const parts = [];
+    let remaining = text;
+    for (let i = 0; i < labels.length; i++) {
+      const idx = remaining.indexOf(labels[i]);
+      if (idx >= 0) {
+        if (i > 0 && parts.length < i) parts.push(remaining.substring(0, idx).trim());
+        remaining = remaining.substring(idx + labels[i].length);
+        // Quitar : inicial si hay
+        remaining = remaining.replace(/^\s*:\s*/, '');
+      }
+    }
+    if (remaining.trim()) parts.push(remaining.trim());
+
+    // Si no se pudo parsear con labels, intentar por líneas
+    if (parts.length < 3) {
+      const lines = text.split('\n').filter(l => l.trim());
+      return [lines[0] || '', lines[1] || '', lines[2] || ''];
+    }
+    return parts.length >= 3 ? parts.slice(0,3) : [...parts, ...Array(3-parts.length).fill('')];
+  }
+
+  function saveJournal(b, mi, qi, val) {
+    if (!journal[b]) journal[b] = {};
+    if (!journal[b][mi]) journal[b][mi] = {};
+    journal[b][mi]['q' + qi] = val;
+    saveProgress();
+  }
+
+  function onMedInput(b, mi, qi, val) {
+    saveJournal(b, mi, qi, val);
+    // Auto-trigger a los 140 caracteres si no está confirmado aún
+    if (!medConfirmed[b]) medConfirmed[b] = {};
+    if (!medConfirmed[b][mi]) medConfirmed[b][mi] = {};
+    if (!medConfirmed[b][mi]['q' + qi] && val.length >= 140) {
+      confirmReflection(b, mi, qi);
+    }
+  }
+
+  function confirmReflection(b, mi, qi) {
+    if (!medConfirmed[b]) medConfirmed[b] = {};
+    if (!medConfirmed[b][mi]) medConfirmed[b][mi] = {};
+    if (medConfirmed[b][mi]['q' + qi]) return; // ya confirmado
+
+    // Verificar que haya texto
+    const j = journal[b] && journal[b][mi] ? journal[b][mi] : {};
+    const val = j['q' + qi] || '';
+    if (val.trim().length < 5) return; // muy corto, ignorar
+
+    medConfirmed[b][mi]['q' + qi] = true;
+    saveProgress();
+
+    // Sonido suave (nota ascendente según pregunta)
+    const freqs = [[523,659],[587,740],[659,880]];
+    playNotes(freqs[qi] || freqs[0]);
+
+    // Visual: actualizar botón con glow
+    const btn = document.getElementById('med-btn-' + qi);
+    if (btn) {
+      btn.className = 'med-confirm done glow';
+      btn.textContent = '✓ Reflexión guardada';
+    }
+  }
+
+  function toggleSection(key) {
+    openSection = openSection === key ? null : key;
+    renderAccordion(currentBlock, currentMystery, DATA.misterios[currentBlock][currentMystery]);
+  }
+
+  // ── Completar misterio ──
+  function completeMystery() {
+    const b = currentBlock;
+    const mi = currentMystery;
+    if (progress[b][mi]) return; // ya completado
+
+    progress[b][mi] = Date.now();
+    saveProgress();
+
+    // Celebración del misterio
+    const variant = BLOCKS.indexOf(b) * 5 + mi;
+    celebrationSound(variant);
+
+    // Checar si el bloque está completo
+    const allDone = progress[b].every(x => x !== null);
+    if (allDone) {
+      // Celebración de bloque completo
+      setTimeout(() => {
+        showConfetti();
+        showCelebration(b);
+      }, 600);
+    } else {
+      // Auto-avanzar al siguiente misterio
+      renderPrayer();
+      if (mi < 4) {
+        setTimeout(() => {
+          currentMystery = mi + 1;
+          openSection = null;
+          stopAudio();
+          renderPrayer();
+        }, 800);
+      }
+    }
+  }
+
+  // ── Bottom Nav ──
+  function renderBottomNav(b, mi) {
+    const nav = $('bottom-nav');
+    const hasPrev = mi > 0;
+    const hasNext = mi < 4;
+    const isDone = progress[b][mi];
+
+    let html = '';
+    if (hasPrev) {
+      html += '<button class="btn btn-outline" onclick="window._ca.goMystery(' + (mi-1) + ')">← Anterior</button>';
+    }
+    if (hasNext && isDone) {
+      html += '<button class="btn btn-primary" onclick="window._ca.goMystery(' + (mi+1) + ')">Siguiente →</button>';
+    } else if (!isDone) {
+      // No mostrar "siguiente" hasta completar con Amén
+    }
+    nav.innerHTML = html;
+  }
+
+  function goMystery(i) {
+    currentMystery = i;
+    openSection = null;
+    stopAudio();
+    renderPrayer();
+  }
+
+  // ── Celebración de bloque ──
+  function showCelebration(b) {
+    const blockName = BLOCK_NAMES[b];
+    const maria = 'img/maria_' + b + '.webp';
+
+    const container = $('maria-container');
+    const img = new Image();
+    img.onload = () => {
+      container.outerHTML = '<img class="maria-img" id="maria-container" src="' + maria + '" alt="Virgen María">';
+    };
+    img.onerror = () => {
+      container.innerHTML = '🙏';
+    };
+    img.src = maria;
+
+    $('celeb-title').textContent = '¡Misterios ' + blockName + ' completados!';
+    $('celeb-sub').textContent = 'Has contemplado los cinco Misterios ' + blockName + ' de este nivel. Que María siga acompañándote en el camino.';
+    $('btn-celeb-home').onclick = () => {
+      stopAudio();
+      renderHome();
+    };
+
+    show('scr-celebration');
+    celebrationSound(BLOCKS.indexOf(b));
+  }
+
+  // ── Escape HTML ──
+  function escHTML(s) {
+    if (!s) return '';
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  }
+
+  // ── Iniciar ──
+  async function init() {
+    // Leer ID desde URL
+    const params = new URLSearchParams(window.location.search);
+    NIVEL_ID = params.get('c') || '0101';
+
+    // Validar formato 4 dígitos
+    if (!/^\d{4}$/.test(NIVEL_ID)) {
+      showError('ID inválido: ' + NIVEL_ID + '. Usa un código de 4 dígitos (ej. 0101).');
+      return;
+    }
+
+    // Cargar JSON (ruta relativa al directorio del HTML)
+    const loc = window.location;
+    const base = loc.origin + loc.pathname.substring(0, loc.pathname.lastIndexOf('/') + 1);
+    try {
+      const resp = await fetch(base + 'data/' + NIVEL_ID + '.json');
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      DATA = await resp.json();
+    } catch(e) {
+      showError('No se pudo cargar data/' + NIVEL_ID + '.json. Verifica que el archivo exista.');
+      return;
+    }
+
+    // Cargar progreso
+    loadProgress();
+
+    // Aplicar dark mode
+    if (isDark) {
+      document.body.classList.add('dark');
+      $('ico-sun').style.display = 'none';
+      $('ico-moon').style.display = 'block';
+    }
+
+    // Aplicar paleta
+    applyPalette();
+
+    // Event listeners
+    $('btn-dark').onclick = toggleDark;
+    $('btn-back-home').onclick = () => { stopAudio(); renderHome(); };
+
+    // API global para onclick en HTML
+    window._ca = {
+      toggleAudio: toggleAudio,
+      seekAudio: seekAudio,
+      toggleSection: toggleSection,
+      completeMystery: completeMystery,
+      goMystery: goMystery,
+      saveJournal: saveJournal,
+      onMedInput: onMedInput,
+      confirmReflection: confirmReflection,
+      enterBlock: enterBlock,
+    };
+
+    // Render
+    $('scr-loading').style.display = 'none';
+    $('main-header').style.display = '';
+    renderHome();
+  }
+
+  function showError(msg) {
+    $('scr-loading').style.display = 'none';
+    $('error-msg').textContent = msg;
+    $('scr-error').style.display = 'flex';
+  }
+
+  // Arrancar
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+})();
+</script>
 </body>
 </html>
