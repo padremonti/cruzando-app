@@ -143,11 +143,47 @@ body{font-family:'Inter',system-ui,sans-serif;background:#E6DED3;color:#2B2622;m
 
 .celeb-lux{
   position:absolute;width:32px;height:32px;
-  animation:luxOrbit 3s linear infinite;
 }
+.celeb-lux.orbit1{animation:luxOrbit1 3s ease-in-out infinite}
+.celeb-lux.orbit2{animation:luxOrbit2 3s ease-in-out infinite}
+.celeb-lux.orbit3{animation:luxOrbit3 3s ease-in-out infinite}
+.celeb-lux.orbit4{animation:luxOrbit4 3s ease-in-out infinite}
 @keyframes luxOrbit{
   from{transform:rotate(0deg) translateX(120px) rotate(0deg)}
   to{transform:rotate(360deg) translateX(120px) rotate(-360deg)}
+}
+
+/* 4 trayectorias diferentes con efecto de acercamiento */
+@keyframes luxOrbit1{
+  0%{transform:rotate(0deg) translateX(120px) rotate(0deg) scale(1)}
+  25%{transform:rotate(90deg) translateX(120px) rotate(-90deg) scale(1.5)}
+  50%{transform:rotate(180deg) translateX(120px) rotate(-180deg) scale(1)}
+  75%{transform:rotate(270deg) translateX(120px) rotate(-270deg) scale(1.5)}
+  100%{transform:rotate(360deg) translateX(120px) rotate(-360deg) scale(1)}
+}
+
+@keyframes luxOrbit2{
+  0%{transform:rotate(45deg) translateX(120px) rotate(-45deg) scale(1)}
+  25%{transform:rotate(135deg) translateX(120px) rotate(-135deg) scale(1.6)}
+  50%{transform:rotate(225deg) translateX(120px) rotate(-225deg) scale(1)}
+  75%{transform:rotate(315deg) translateX(120px) rotate(-315deg) scale(1.6)}
+  100%{transform:rotate(405deg) translateX(120px) rotate(-405deg) scale(1)}
+}
+
+@keyframes luxOrbit3{
+  0%{transform:rotate(0deg) translateX(120px) rotate(0deg) scale(1.3)}
+  33%{transform:rotate(120deg) translateX(120px) rotate(-120deg) scale(1)}
+  66%{transform:rotate(240deg) translateX(120px) rotate(-240deg) scale(1.7)}
+  100%{transform:rotate(360deg) translateX(120px) rotate(-360deg) scale(1.3)}
+}
+
+@keyframes luxOrbit4{
+  0%{transform:rotate(90deg) translateX(120px) rotate(-90deg) scale(1.2)}
+  20%{transform:rotate(162deg) translateX(120px) rotate(-162deg) scale(1.5)}
+  40%{transform:rotate(234deg) translateX(120px) rotate(-234deg) scale(1)}
+  60%{transform:rotate(306deg) translateX(120px) rotate(-306deg) scale(1.6)}
+  80%{transform:rotate(378deg) translateX(120px) rotate(-378deg) scale(1.1)}
+  100%{transform:rotate(450deg) translateX(120px) rotate(-450deg) scale(1.2)}
 }
 
 .celeb-meters{
@@ -239,6 +275,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#E6DED3;color:#2B2622;m
     <button class="act-btn act-50" onclick="gainMeters(50, 'walking')">📿 Escuchar rezo (+50m)</button>
     <button class="act-btn act-50" onclick="gainMeters(30, 'contemplative')">👁️ Contemplación (+30m)</button>
     <button class="act-btn act-50" onclick="gainMeters(40, 'rosario')">📿 Rezar Rosario (+40m)</button>
+    <button class="act-btn act-50" onclick="gainMeters(20, getNextRestPose())">✏️ Guardar reflexión (+20m)</button>
     <button class="act-btn act-100" onclick="gainMeters(100, 'happy')">🙏 Completar misterio (+100m)</button>
     <button class="act-btn act-200" onclick="celebrate()">✨ Completar bloque (+200m)</button>
   </div>
@@ -277,7 +314,27 @@ var totalMeters = 0;
 
 // Precargar imágenes de Mariano
 var marianoImages = {};
-var imagesToPreload = ['idle', 'walking', 'contemplative', 'rosario', 'happy', 'celebrate'];
+var imagesToPreload = ['idle', 'walking', 'contemplative', 'rosario', 'happy', 'celebrate', 'rest-staff', 'rest-sitting', 'rest-rock', 'rest-tree'];
+
+// Poses de descanso en ciclo
+var restPoses = ['rest-staff', 'rest-sitting', 'rest-rock', 'rest-tree'];
+var currentRestIndex = 0;
+
+// Órbitas de Lux en ciclo
+var luxOrbits = ['orbit1', 'orbit2', 'orbit3', 'orbit4'];
+var currentOrbitIndex = 0;
+
+function getNextRestPose() {
+  var pose = restPoses[currentRestIndex];
+  currentRestIndex = (currentRestIndex + 1) % restPoses.length;
+  return pose;
+}
+
+function getNextLuxOrbit() {
+  var orbit = luxOrbits[currentOrbitIndex];
+  currentOrbitIndex = (currentOrbitIndex + 1) % luxOrbits.length;
+  return orbit;
+}
 
 function preloadImages() {
   imagesToPreload.forEach(function(pose) {
@@ -344,6 +401,15 @@ function celebrate() {
   var lux = document.getElementById('luxSvg');
   lux.classList.add('spin');
   setTimeout(function() { lux.classList.remove('spin'); }, 2000);
+  
+  // Aplicar órbita cíclica a Lux en celebración
+  var luxCeleb = document.querySelector('.celeb-lux');
+  // Remover clases anteriores
+  luxCeleb.className = 'celeb-lux';
+  // Agregar nueva órbita
+  var nextOrbit = getNextLuxOrbit();
+  luxCeleb.classList.add(nextOrbit);
+  console.log('Lux órbita:', nextOrbit);
   
   // Cargar imagen de celebración
   var img = document.getElementById('marianoCharCeleb');
