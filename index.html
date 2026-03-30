@@ -1,0 +1,2308 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#E6DED3">
+<title>CruzAndo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════════════
+   CSS — CruzAndo App · Vanilla JS · Cero dependencias
+   Colores dinámicos via CSS custom properties
+   ══════════════════════════════════════════════════════ */
+
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+
+:root {
+  /* ── Neutros Light ── */
+  --bg: #E6DED3;
+  --card: #FFFCF7;
+  --border: #D9D1C7;
+  --text: #2B2622;
+  --text-soft: #6B6259;
+  --text-dim: #9B9389;
+  --input-bg: #FFFCF7;
+  --sec-bg: #F5F0E8;
+  --shadow: rgba(43,38,34,0.08);
+  --green: #34A853;
+  --green-soft: rgba(52,168,83,0.12);
+  /* ── Paleta del nivel (se sobreescriben desde JS) ── */
+  --lvl-bold: #FF7A00;
+  --lvl-base: #FF7F09;
+  --lvl-soft: #F69C49;
+  --lvl-mist: #FFA34E;
+  --lvl-light: #FFCFA2;
+  --lvl-ultra: rgba(255,122,0,0.07);
+  /* ── Bloques ── */
+  --goz-color: #D4A017;
+  --lum-color: #01BBE1;
+  --dol-color: #C0392B;
+  --glo-color: #8E44AD;
+  /* ── Brand ── */
+  --brand: #01BBE1;
+}
+
+.dark {
+  --bg: #1A1714;
+  --card: #252119;
+  --border: #3A3530;
+  --text: #E6DED3;
+  --text-soft: #B8A898;
+  --text-dim: #786858;
+  --input-bg: #2A2520;
+  --sec-bg: #1E1B16;
+  --shadow: rgba(0,0,0,0.3);
+  --green-soft: rgba(52,168,83,0.18);
+}
+
+html { font-size:18px; }
+body {
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.7;
+  min-height:100dvh;
+  -webkit-font-smoothing:antialiased;
+  transition:background 0.4s,color 0.4s;
+}
+
+/* ── Layout ── */
+.shell { max-width:480px; margin:0 auto; min-height:100dvh; position:relative; }
+.screen { display:none; }
+.screen.active { display:block; }
+
+/* ── Header ── */
+.header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 18px 10px; position:sticky; top:0; z-index:50;
+  background:var(--bg); border-bottom:1px solid var(--border);
+}
+.header-title { font-size:1.05rem; font-weight:700; color:var(--lvl-bold); }
+.header-sub { font-size:0.72rem; color:var(--text-dim); margin-top:1px; }
+.header-actions { display:flex; gap:8px; align-items:center; }
+.icon-btn {
+  width:36px; height:36px; border-radius:50%; border:1px solid var(--border);
+  background:var(--card); cursor:pointer; display:flex; align-items:center;
+  justify-content:center; color:var(--text-soft); transition:all 0.2s;
+}
+.icon-btn:active { transform:scale(0.92); }
+
+/* ══════════════════════════════════════════════════════
+   CUADERNO HOME — Guía del Peregrino
+   ══════════════════════════════════════════════════════ */
+
+/* Pantalla home sin padding: el cuaderno ocupa todo */
+#scr-home { padding:0; display:flex; flex-direction:column; align-items:center; min-height:100dvh; }
+
+/* ── Pestaña Misterios del Día ── */
+.tab-hoy-wrap { width:100%; display:flex; justify-content:center; margin-bottom:-3px; position:relative; z-index:40; padding-top:14px; }
+.tab-hoy-btn {
+  display:flex; align-items:center; gap:9px;
+  padding:10px 26px; border-radius:14px 14px 0 0;
+  border:none; background:var(--lvl-bold);
+  font-family:inherit; font-size:0.9rem; font-weight:700;
+  color:#fff; cursor:pointer; letter-spacing:0.2px;
+  animation:tabPulse 2.5s ease-in-out infinite;
+}
+.tab-hoy-btn:active { transform:scale(0.97); }
+@keyframes tabPulse {
+  0%,100% { box-shadow:0 0 0 0 rgba(255,122,0,0.5); }
+  50%      { box-shadow:0 0 0 8px rgba(255,122,0,0); }
+}
+.tab-pulse-dot {
+  width:8px; height:8px; border-radius:50%; background:#fff; opacity:0.9;
+  animation:dotBlink 2.5s ease-in-out infinite;
+}
+@keyframes dotBlink {
+  0%,100% { opacity:0.9; transform:scale(1); }
+  50%      { opacity:0.5; transform:scale(1.5); }
+}
+
+/* ── Escena del cuaderno ── */
+.book-scene {
+  perspective:1800px;
+  width:100%; max-width:420px;
+  flex:1;
+  display:flex; align-items:center; justify-content:center;
+  padding:0 18px 24px;
+}
+
+.book-wrap {
+  position:relative;
+  width:100%; max-width:360px;
+  height:min(72dvh, 520px);
+  transform-style:preserve-3d;
+}
+
+/* Lomo */
+.bk-spine {
+  position:absolute; left:-20px; top:0;
+  width:20px; height:100%;
+  background:#6B4226;
+  transform:rotateY(-90deg) translateZ(0);
+  transform-origin:right center;
+  border-radius:4px 0 0 4px;
+}
+
+/* Contratapa */
+.bk-back {
+  position:absolute; width:100%; height:100%;
+  background:#5A3520;
+  border-radius:0 8px 8px 0;
+  transform:translateZ(-7px);
+}
+
+/* Páginas interiores */
+.bk-pages {
+  position:absolute; width:93%; height:97%;
+  top:1.5%; left:4%;
+  background:var(--card);
+  border-radius:0 4px 4px 0;
+  transform:translateZ(-1px);
+  overflow:visible;
+}
+.bk-pages::after {
+  content:''; position:absolute; inset:0;
+  background:repeating-linear-gradient(
+    to bottom, transparent 0, transparent 22px,
+    rgba(43,38,34,0.06) 22px, rgba(43,38,34,0.06) 23px
+  );
+  border-radius:0 4px 4px 0;
+}
+
+/* ── Listones ── */
+.bk-ribbons {
+  position:absolute; right:-28px; top:28px;
+  display:flex; flex-direction:column; gap:18px;
+  z-index:25;
+}
+
+.bk-ribbon {
+  display:flex; align-items:center;
+  cursor:pointer; transition:transform 0.15s;
+  position:relative;
+}
+.bk-ribbon:active { transform:scale(0.95) translateX(3px); }
+
+.bk-ribbon-body {
+  width:48px; height:28px;
+  border-radius:0 7px 7px 0;
+  position:relative;
+  transition:width 0.25s ease, box-shadow 0.25s;
+  box-shadow:3px 2px 6px rgba(0,0,0,0.28);
+  display:flex; align-items:center; justify-content:flex-end;
+  padding-right:6px;
+}
+.bk-ribbon.active .bk-ribbon-body {
+  width:62px;
+  box-shadow:4px 3px 10px rgba(0,0,0,0.38);
+}
+/* Costura del listón */
+.bk-ribbon-body::before {
+  content:''; position:absolute; left:0; top:50%;
+  transform:translateY(-50%);
+  width:4px; height:18px;
+  background:rgba(0,0,0,0.18);
+  border-radius:0 2px 2px 0;
+}
+
+.bk-ribbon-check { font-size:11px; color:rgba(255,255,255,0.95); display:none; }
+.bk-ribbon.done .bk-ribbon-check { display:block; }
+
+.bk-ribbon-label {
+  position:absolute; right:66px;
+  font-size:0.72rem; font-weight:700;
+  color:var(--text); white-space:nowrap;
+  opacity:0; pointer-events:none;
+  transition:opacity 0.2s;
+  background:var(--card);
+  padding:3px 8px; border-radius:6px;
+  border:1px solid var(--border);
+  box-shadow:0 2px 8px var(--shadow);
+}
+.bk-ribbon.active .bk-ribbon-label { opacity:1; }
+
+/* Colores litúrgicos */
+.rib-g .bk-ribbon-body { background:#1A56A0; }
+.rib-l .bk-ribbon-body { background:#D8D3CC; border:1.5px solid #B0AAA2; }
+.rib-d .bk-ribbon-body { background:#B91C1C; }
+.rib-r .bk-ribbon-body { background:#C8900A; }
+
+/* ── Tapa delantera ── */
+.bk-cover {
+  position:absolute; width:100%; height:100%;
+  background:#7A4F2E;
+  border-radius:0 8px 8px 0;
+  transform-origin:left center;
+  transform:translateZ(7px) rotateY(0deg);
+  transition:transform 1s cubic-bezier(0.645,0.045,0.355,1.000);
+  backface-visibility:hidden;
+  z-index:15; overflow:hidden;
+}
+.bk-cover.open { transform:translateZ(7px) rotateY(-168deg); }
+
+/* Veta de madera */
+.bk-cover::before {
+  content:''; position:absolute; inset:0;
+  background:repeating-linear-gradient(
+    93deg, transparent 0, transparent 22px,
+    rgba(0,0,0,0.035) 22px, rgba(0,0,0,0.035) 23px
+  );
+}
+/* Borde dorado sutil */
+.bk-cover::after {
+  content:''; position:absolute; inset:6px;
+  border:1px solid rgba(255,252,247,0.18);
+  border-radius:0 4px 4px 0; pointer-events:none;
+}
+
+.bk-cover-inner {
+  position:relative; width:100%; height:100%;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:12px; padding:32px 28px;
+}
+
+.bk-cross { width:40px; height:40px; position:relative; flex-shrink:0; }
+.bk-cross::before {
+  content:''; position:absolute; left:50%; top:0;
+  transform:translateX(-50%);
+  width:8px; height:100%; background:#FFFCF7; border-radius:3px;
+}
+.bk-cross::after {
+  content:''; position:absolute; top:50%; left:0;
+  transform:translateY(-50%);
+  width:100%; height:8px; background:#FFFCF7; border-radius:3px;
+}
+
+.bk-cover-orn { width:48px; height:1px; background:rgba(255,252,247,0.28); }
+.bk-cover-title {
+  font-size:1.2rem; font-weight:800;
+  color:#FFFCF7; text-align:center; line-height:1.4;
+}
+.bk-cover-sub {
+  font-size:0.78rem; color:rgba(255,252,247,0.62);
+  font-style:italic; text-align:center;
+}
+
+/* ── Viewport de páginas ── */
+.bk-viewport {
+  position:absolute; width:100%; height:100%;
+  border-radius:0 8px 8px 0;
+  transform:translateZ(6px);
+  overflow:hidden;
+  pointer-events:none;
+}
+.bk-viewport.active { pointer-events:auto; }
+
+/* Página genérica con slide */
+.bk-page {
+  position:absolute; width:100%; height:100%;
+  background:var(--card);
+  padding:28px 24px 22px;
+  display:flex; flex-direction:column; align-items:center; gap:10px;
+  transform:translateX(100%);
+  transition:transform 0.42s cubic-bezier(0.4,0,0.2,1), opacity 0.32s ease;
+  opacity:0;
+}
+.bk-page::after {
+  content:''; position:absolute; inset:0;
+  background:repeating-linear-gradient(
+    to bottom, transparent 0, transparent 24px,
+    rgba(43,38,34,0.05) 24px, rgba(43,38,34,0.05) 25px
+  );
+  pointer-events:none; border-radius:0 8px 8px 0;
+}
+.bk-page.enter-r  { transform:translateX(100%); opacity:0; }
+.bk-page.enter-l  { transform:translateX(-100%); opacity:0; }
+.bk-page.pg-current { transform:translateX(0); opacity:1; }
+.bk-page.exit-l   { transform:translateX(-100%); opacity:0; }
+.bk-page.exit-r   { transform:translateX(100%); opacity:0; }
+
+/* Elementos de la página de bloque */
+.pg-strip  { width:52px; height:5px; border-radius:3px; margin-bottom:4px; flex-shrink:0; }
+.pg-tag    { font-size:0.65rem; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:var(--text-dim); }
+.pg-emoji  { font-size:2.2rem; line-height:1; }
+.pg-title  { font-size:1.25rem; font-weight:800; color:var(--text); text-align:center; }
+.pg-sub    { font-size:0.82rem; font-weight:500; color:var(--text-soft); font-style:italic; text-align:center; line-height:1.55; max-width:220px; }
+.pg-div    { width:40px; height:1px; background:var(--border); margin:2px 0; }
+
+/* Puntos de progreso */
+.pg-dots   { display:flex; gap:8px; }
+.pg-dot {
+  width:11px; height:11px; border-radius:50%;
+  border:2px solid var(--border); background:transparent;
+  transition:all 0.3s;
+}
+.pg-dot.done { background:var(--green); border-color:var(--green); box-shadow:0 0 6px rgba(52,168,83,0.4); }
+
+/* Sello completado */
+.pg-sello {
+  display:none; flex-direction:column; align-items:center; gap:4px; margin-top:4px;
+}
+.pg-sello.vis { display:flex; }
+.sello-ring {
+  width:52px; height:52px; border-radius:50%;
+  border:2.5px solid var(--green);
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.3rem; color:var(--green); position:relative;
+}
+.sello-ring::before {
+  content:''; position:absolute; inset:-6px;
+  border-radius:50%; border:1.5px dashed rgba(52,168,83,0.35);
+}
+.sello-txt { font-size:0.65rem; letter-spacing:1px; text-transform:uppercase; color:var(--green); font-weight:700; }
+
+/* Botón Orar */
+.btn-orar-pg {
+  margin-top:auto; width:100%; padding:15px;
+  border-radius:12px; border:none;
+  font-family:inherit; font-size:1rem; font-weight:800;
+  color:#fff; cursor:pointer; letter-spacing:0.3px;
+  transition:opacity 0.2s, transform 0.15s;
+  position:relative; z-index:2;
+}
+.btn-orar-pg:active { transform:scale(0.97); }
+
+/* ── Sombra libro ── */
+.bk-shadow {
+  position:absolute; bottom:-16px; left:50%;
+  transform:translateX(-50%);
+  width:220px; height:16px;
+  background:rgba(43,38,34,0.12);
+  border-radius:50%; filter:blur(6px);
+  transition:width 0.8s ease;
+}
+.bk-shadow.open { width:360px; }
+
+/* ── Banner nivel completado (debajo del cuaderno) ── */
+.nivel-done-banner {
+  margin:16px 18px 18px; padding:20px; border-radius:16px;
+  background:linear-gradient(135deg,var(--green-soft),rgba(52,168,83,0.05));
+  border:2px solid var(--green); text-align:center;
+  width:100%; max-width:420px;
+}
+.nivel-done-banner h3 { font-size:1.1rem; color:var(--green); margin-bottom:6px; }
+.nivel-done-banner p  { font-size:0.82rem; color:var(--text-soft); margin-bottom:14px; }
+
+/* ── Botones ── */
+.btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding:14px 28px; border-radius:14px; border:none; cursor:pointer;
+  font-family:inherit; font-size:0.88rem; font-weight:700;
+  transition:all 0.2s; letter-spacing:0.3px;
+}
+.btn:active { transform:scale(0.96); }
+.btn-primary { background:var(--lvl-bold); color:#fff; box-shadow:0 4px 14px rgba(0,0,0,0.15); }
+.btn-green { background:var(--green); color:#fff; }
+.btn-outline { background:transparent; border:2px solid var(--border); color:var(--text-soft); }
+.btn-ghost { background:transparent; color:var(--text-soft); padding:10px 14px; font-size:0.82rem; }
+.btn-block { width:100%; }
+
+/* ── Pantalla de Oración ── */
+.prayer-header { padding:16px 18px 10px; }
+.prayer-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.mystery-counter { font-size:0.72rem; font-weight:600; color:var(--text-dim); letter-spacing:1px; text-transform:uppercase; }
+.mystery-title { font-size:1.15rem; font-weight:800; margin-bottom:2px; }
+.mystery-subtitle { font-size:0.82rem; color:var(--text-soft); font-style:italic; }
+
+/* Cuentas del rosario (cadena de 5) */
+.mystery-beads { padding:0 18px 14px; }
+.mystery-beads svg { width:100%; height:30px; }
+
+/* ── Evangelio ── */
+.evangelio-box {
+  margin:0 18px 14px; padding:20px; border-radius:16px;
+  background:var(--card); border-left:4px solid var(--lvl-soft);
+}
+.evangelio-label {
+  font-size:0.68rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:1.2px; color:var(--lvl-bold); margin-bottom:10px;
+  display:flex; align-items:center; gap:6px;
+}
+.evangelio-text { font-size:0.95rem; line-height:1.85; color:var(--text); }
+.evangelio-ref { font-size:0.78rem; color:var(--text-dim); text-align:right; margin-top:12px; font-style:italic; }
+
+/* ── Acordeón ── */
+.accordion { margin:0 18px 10px; }
+.acc-item { background:var(--card); border-radius:14px; margin-bottom:10px; overflow:hidden; border:1.5px solid var(--border); transition:border-color 0.3s; }
+.acc-item.open { border-color:var(--lvl-soft); }
+.acc-trigger {
+  width:100%; display:flex; align-items:center; justify-content:space-between;
+  padding:14px 18px; background:none; border:none; cursor:pointer;
+  font-family:inherit; color:var(--text); transition:background 0.2s;
+}
+.acc-trigger:active { background:var(--sec-bg); }
+.acc-trigger-left { display:flex; align-items:center; gap:10px; }
+.acc-icon {
+  width:32px; height:32px; border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1rem;
+}
+.acc-label { font-size:0.88rem; font-weight:600; }
+.acc-chevron { transition:transform 0.3s; color:var(--text-dim); }
+.acc-item.open .acc-chevron { transform:rotate(180deg); }
+.acc-body { max-height:0; overflow:hidden; transition:max-height 0.4s ease; }
+.acc-body-inner { padding:0 18px 18px; }
+
+/* ── Audio Player ── */
+.audio-player {
+  display:flex; align-items:center; gap:12px; padding:12px 16px;
+  background:var(--sec-bg); border-radius:12px;
+}
+.play-btn {
+  width:44px; height:44px; border-radius:50%; border:none;
+  background:var(--lvl-bold); color:#fff; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; transition:all 0.2s;
+}
+.play-btn:active { transform:scale(0.9); }
+.audio-info { flex:1; min-width:0; }
+.audio-label { font-size:0.75rem; color:var(--text-soft); margin-bottom:4px; }
+.audio-bar-wrap { width:100%; height:5px; background:var(--border); border-radius:3px; cursor:pointer; position:relative; }
+.audio-bar-fill { height:100%; border-radius:3px; background:var(--lvl-bold); transition:width 0.1s linear; }
+.audio-time { font-size:0.68rem; color:var(--text-dim); margin-top:3px; display:flex; justify-content:space-between; }
+
+/* ── Canto ── */
+.canto-box {
+  padding:18px; background:var(--lvl-ultra); border-radius:14px;
+  border-left:3px solid var(--lvl-soft); text-align:center;
+}
+.canto-box p { font-size:0.88rem; color:var(--text); font-style:italic; line-height:1.7; }
+.canto-box .canto-hint { font-size:0.78rem; color:var(--text-dim); margin-top:8px; display:block; }
+
+/* ── Contemplación texto ── */
+.contempl-text {
+  margin-top:14px; padding:16px 18px; background:var(--sec-bg);
+  border-radius:14px; border-left:3px solid var(--lvl-soft);
+  font-size:0.92rem; line-height:1.9; white-space:pre-line;
+}
+
+/* ── Meditación ── */
+.med-group { margin-bottom:18px; }
+.med-label-row { display:flex; align-items:center; gap:7px; margin-bottom:6px; }
+.med-dot { width:7px; height:7px; border-radius:50%; }
+.med-label-text { font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; }
+.med-question { font-size:0.92rem; line-height:1.7; margin-bottom:10px; }
+.journal-area {
+  width:100%; min-height:100px; padding:14px; border-radius:12px;
+  border:1.5px solid var(--border); background:var(--input-bg);
+  font-family:inherit; font-size:0.88rem; line-height:1.6;
+  color:var(--text); resize:vertical; transition:border-color 0.3s;
+}
+.journal-area:focus { outline:none; border-color:var(--lvl-soft); }
+.journal-area::placeholder { color:var(--text-dim); }
+.med-confirm {
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  width:100%; margin-top:8px; padding:10px; border-radius:10px;
+  border:1.5px solid var(--border); background:var(--sec-bg);
+  font-family:inherit; font-size:0.78rem; font-weight:600;
+  color:var(--text-soft); cursor:pointer; transition:all 0.3s;
+}
+.med-confirm:active { transform:scale(0.96); }
+.med-confirm.done {
+  background:var(--green-soft); border-color:var(--green);
+  color:var(--green); cursor:default;
+}
+@keyframes medGlow {
+  0% { box-shadow:0 0 0 0 rgba(52,168,83,0.4); }
+  70% { box-shadow:0 0 0 10px rgba(52,168,83,0); }
+  100% { box-shadow:0 0 0 0 rgba(52,168,83,0); }
+}
+.med-confirm.glow { animation:medGlow 0.6s ease; }
+
+/* ── Intercesión ── */
+.interc-text {
+  padding:18px; background:var(--lvl-ultra); border-radius:14px;
+  font-size:0.92rem; line-height:1.85; white-space:pre-line;
+}
+.amen-btn {
+  display:block; width:100%; margin-top:14px; padding:16px;
+  border-radius:14px; border:none; cursor:pointer;
+  font-family:inherit; font-size:1rem; font-weight:800;
+  background:var(--lvl-bold); color:#fff; letter-spacing:1px;
+  transition:all 0.2s; box-shadow:0 4px 16px rgba(0,0,0,0.12);
+}
+.amen-btn:active { transform:scale(0.96); }
+.amen-btn.done { background:var(--green); }
+
+/* ── Completado de misterio ── */
+.mystery-done-bar {
+  margin:12px 18px; padding:14px 18px; border-radius:14px;
+  background:var(--green-soft); border:1.5px solid rgba(52,168,83,0.2);
+  display:flex; align-items:center; gap:10px;
+}
+.done-check { color:var(--green); font-size:1.2rem; }
+.done-text { font-size:0.82rem; font-weight:600; color:var(--green); }
+.done-date { font-size:0.72rem; color:var(--text-dim); }
+
+/* ── Navegación inferior ── */
+.bottom-nav {
+  padding:14px 18px 28px; display:flex; gap:10px;
+}
+.bottom-nav .btn { flex:1; }
+
+/* ── Pantalla de celebración de bloque ── */
+.celebration-screen { text-align:center; padding:40px 24px; }
+.maria-img {
+  width:200px; height:200px; border-radius:50%; object-fit:cover;
+  border:4px solid var(--lvl-soft); margin:0 auto 24px;
+  box-shadow:0 8px 32px var(--shadow);
+}
+.maria-placeholder {
+  width:200px; height:200px; border-radius:50%; margin:0 auto 24px;
+  background:linear-gradient(135deg,var(--lvl-ultra),var(--lvl-light));
+  border:4px solid var(--lvl-soft); display:flex; align-items:center;
+  justify-content:center; font-size:4rem;
+  box-shadow:0 8px 32px var(--shadow);
+}
+.celebration-title { font-size:1.3rem; font-weight:800; margin-bottom:8px; }
+.celebration-sub { font-size:0.88rem; color:var(--text-soft); margin-bottom:24px; line-height:1.7; }
+
+/* ── Error / Loading ── */
+.loading-screen, .error-screen {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  min-height:80dvh; padding:40px 24px; text-align:center;
+}
+.spinner {
+  width:40px; height:40px; border:3px solid var(--border);
+  border-top-color:var(--lvl-bold); border-radius:50%;
+  animation:spin 0.8s linear infinite; margin-bottom:18px;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* ── Celebración animada ── */
+.confetti-container { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:999; }
+.confetti-piece {
+  position:absolute; width:8px; height:8px; border-radius:2px;
+  animation:confettiFall 2.5s ease-out forwards;
+}
+@keyframes confettiFall {
+  0% { transform:translateY(-20px) rotate(0deg); opacity:1; }
+  100% { transform:translateY(100vh) rotate(720deg); opacity:0; }
+}
+
+/* ── Fade in ── */
+@keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+.fade-in { animation:fadeIn 0.4s ease both; }
+.fade-in-d1 { animation-delay:0.08s; }
+.fade-in-d2 { animation-delay:0.16s; }
+.fade-in-d3 { animation-delay:0.24s; }
+.fade-in-d4 { animation-delay:0.32s; }
+
+/* ══════════════════════════════════════════════════════
+   GAMIFICACIÓN: Lux + Mariano + Metros
+   ══════════════════════════════════════════════════════ */
+
+/* ── Lux (cruz guía en header) ── */
+.lux-container {
+  position:relative; width:36px; height:36px;
+  display:flex; align-items:center; justify-content:center;
+}
+.lux-svg {
+  width:24px; height:24px;
+  filter:drop-shadow(0 0 2px #FFFCF7);
+  animation:luxBreathe 3s ease-in-out infinite;
+}
+.lux-svg.shine { animation:luxBreathe 3s ease-in-out infinite, luxShine 0.6s ease-out; }
+.lux-svg.spin { animation:luxSpin 2s linear; }
+
+@keyframes luxBreathe {
+  0%,100% { transform:scale(1); opacity:0.9; }
+  50% { transform:scale(1.08); opacity:1; }
+}
+@keyframes luxShine {
+  0%,100% { filter:drop-shadow(0 0 2px #FFFCF7); }
+  50% { filter:drop-shadow(0 0 16px #FFFCF7); }
+}
+@keyframes luxSpin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
+
+/* Partículas de Lux */
+.lux-particle {
+  position:absolute; width:4px; height:4px; border-radius:50%;
+  background:#FFFCF7; left:50%; top:50%; opacity:0.8;
+  animation:luxParticleFly 1.5s ease-out forwards;
+  pointer-events:none;
+}
+@keyframes luxParticleFly {
+  0% { transform:translate(0,0) scale(1); opacity:0.8; }
+  100% { transform:translate(var(--x),var(--y)) scale(0); opacity:0; }
+}
+
+/* ── Display de metros ── */
+.meters-display {
+  display:flex; align-items:center; gap:6px;
+  background:var(--sec-bg); padding:6px 12px; border-radius:12px;
+  border:1.5px solid var(--border);
+}
+.meters-display span { font-size:0.82rem; font-weight:700; color:var(--lvl-bold); }
+
+/* ── Mariano Slide-in Overlay ── */
+.mariano-overlay {
+  position:fixed; top:0; right:0; bottom:0; width:100%;
+  pointer-events:none; z-index:90;
+  display:flex; align-items:center; justify-content:flex-end;
+  padding-right:20px;
+}
+.mariano-slide {
+  width:182px; height:auto;
+  animation:marianoSlide 2.5s ease-in-out;
+}
+@keyframes marianoSlide {
+  0% { transform:translateX(200px); opacity:0; }
+  30% { transform:translateX(0); opacity:1; }
+  70% { transform:translateX(0); opacity:1; }
+  100% { transform:translateX(200px); opacity:0; }
+}
+
+.meters-float {
+  position:absolute; top:50%; right:220px;
+  font-size:1rem; font-weight:800; color:var(--green);
+  text-shadow:0 2px 8px rgba(52,168,83,0.4);
+  animation:metersFloat 2.5s ease-out;
+}
+@keyframes metersFloat {
+  0% { transform:translateY(0); opacity:0; }
+  30% { opacity:1; }
+  70% { opacity:1; }
+  100% { transform:translateY(-40px); opacity:0; }
+}
+
+/* ── Mariano Grand Celebration ── */
+.mariano-grand-overlay {
+  position:fixed; inset:0;
+  background:rgba(0,0,0,0.5);
+  display:flex; align-items:center; justify-content:center;
+  z-index:101; pointer-events:none;
+}
+.mariano-grand-container { position:relative; width:260px; height:260px; }
+.mariano-grand {
+  width:260px; height:auto; margin-bottom:20px;
+  animation:popScale 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+@keyframes popScale {
+  0% { transform:scale(0); opacity:0; }
+  60% { transform:scale(1.1); opacity:1; }
+  100% { transform:scale(1); opacity:1; }
+}
+
+.mariano-grand-lux {
+  position:absolute; top:50%; left:50%;
+  transform:translate(-50%, -50%);
+}
+.mariano-grand-lux svg { width:32px; height:32px; }
+.mariano-grand-lux.orbit1 svg { animation:luxOrbit1 3s ease-in-out infinite; }
+.mariano-grand-lux.orbit2 svg { animation:luxOrbit2 3s ease-in-out infinite; }
+.mariano-grand-lux.orbit3 svg { animation:luxOrbit3 3s ease-in-out infinite; }
+.mariano-grand-lux.orbit4 svg { animation:luxOrbit4 3s ease-in-out infinite; }
+
+@keyframes luxOrbit1 {
+  0% { transform:rotate(0deg) translateX(120px) rotate(0deg) scale(1); }
+  25% { transform:rotate(90deg) translateX(120px) rotate(-90deg) scale(1.5); }
+  50% { transform:rotate(180deg) translateX(120px) rotate(-180deg) scale(1); }
+  75% { transform:rotate(270deg) translateX(120px) rotate(-270deg) scale(1.5); }
+  100% { transform:rotate(360deg) translateX(120px) rotate(-360deg) scale(1); }
+}
+@keyframes luxOrbit2 {
+  0% { transform:rotate(45deg) translateX(120px) rotate(-45deg) scale(1); }
+  25% { transform:rotate(135deg) translateX(120px) rotate(-135deg) scale(1.6); }
+  50% { transform:rotate(225deg) translateX(120px) rotate(-225deg) scale(1); }
+  75% { transform:rotate(315deg) translateX(120px) rotate(-315deg) scale(1.6); }
+  100% { transform:rotate(405deg) translateX(120px) rotate(-405deg) scale(1); }
+}
+@keyframes luxOrbit3 {
+  0% { transform:rotate(0deg) translateX(120px) rotate(0deg) scale(1.3); }
+  33% { transform:rotate(120deg) translateX(120px) rotate(-120deg) scale(1); }
+  66% { transform:rotate(240deg) translateX(120px) rotate(-240deg) scale(1.7); }
+  100% { transform:rotate(360deg) translateX(120px) rotate(-360deg) scale(1.3); }
+}
+@keyframes luxOrbit4 {
+  0% { transform:rotate(90deg) translateX(120px) rotate(-90deg) scale(1.2); }
+  20% { transform:rotate(162deg) translateX(120px) rotate(-162deg) scale(1.5); }
+  40% { transform:rotate(234deg) translateX(120px) rotate(-234deg) scale(1); }
+  60% { transform:rotate(306deg) translateX(120px) rotate(-306deg) scale(1.6); }
+  80% { transform:rotate(378deg) translateX(120px) rotate(-378deg) scale(1.1); }
+  100% { transform:rotate(450deg) translateX(120px) rotate(-450deg) scale(1.2); }
+}
+
+.mariano-grand-meters {
+  text-align:center; color:#fff; font-size:1.55rem; font-weight:800;
+  text-shadow:0 4px 16px rgba(0,0,0,0.5); margin-top:20px;
+}
+.mariano-grand-text {
+  text-align:center; color:#fff; font-size:1rem; margin-top:8px;
+  text-shadow:0 2px 8px rgba(0,0,0,0.5);
+}
+
+/* Confetti para grand celebration */
+.grand-confetti {
+  position:fixed; width:8px; height:8px; border-radius:50%;
+  animation:confettiFall 2.5s ease-out forwards;
+  pointer-events:none;
+}
+
+/* Responsivo */
+@media(max-width:380px) { html { font-size:16px; } }
+
+/* ══════════════════════════════════════════════════════
+   MICRO-APRENDIZAJE
+   ══════════════════════════════════════════════════════ */
+.micro-header { padding:16px 18px 10px; }
+.micro-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.micro-bloque-label { font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--lvl-bold); }
+.micro-titulo   { font-size:1.2rem; font-weight:800; color:var(--text); margin-bottom:2px; }
+.micro-subtitulo{ font-size:0.88rem; color:var(--text-soft); font-style:italic; }
+.micro-progress-bar { margin:0 18px 20px; height:4px; background:var(--border); border-radius:2px; overflow:hidden; }
+.micro-progress-fill{ height:100%; background:var(--lvl-bold); border-radius:2px; transition:width 0.4s ease; }
+.micro-content  { padding:0 18px; }
+.micro-card {
+  background:var(--card); border-radius:18px; padding:26px 22px;
+  border:1.5px solid var(--border); margin-bottom:20px;
+  animation:fadeIn 0.35s ease both;
+}
+.micro-card-emoji { font-size:2.2rem; margin-bottom:14px; display:block; }
+.micro-card-texto { font-size:1.05rem; line-height:1.85; color:var(--text); }
+.micro-tts-btn {
+  display:flex; align-items:center; gap:6px; margin-top:18px;
+  padding:10px 16px; border-radius:10px; border:1.5px solid var(--border);
+  background:var(--sec-bg); color:var(--text-soft);
+  font-family:inherit; font-size:0.82rem; font-weight:600; cursor:pointer; transition:all 0.2s;
+}
+.micro-tts-btn:active { transform:scale(0.96); }
+.micro-tts-btn.playing { border-color:var(--lvl-soft); color:var(--lvl-bold); background:var(--lvl-ultra); }
+.micro-pregunta-box {
+  background:var(--card); border-radius:18px; padding:24px 22px;
+  border:1.5px solid var(--border); margin-bottom:20px; animation:fadeIn 0.35s ease both;
+}
+.micro-pregunta-label { font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--lvl-bold); margin-bottom:10px; }
+.micro-pregunta-emoji { font-size:1.6rem; margin-bottom:10px; display:block; }
+.micro-pregunta-texto { font-size:1rem; line-height:1.75; color:var(--text); margin-bottom:18px; }
+.micro-opciones { display:flex; flex-direction:column; gap:10px; }
+.micro-opcion {
+  padding:16px 18px; border-radius:14px; border:1.5px solid var(--border);
+  background:var(--sec-bg); font-family:inherit; font-size:0.95rem; line-height:1.5;
+  color:var(--text); cursor:pointer; text-align:left; transition:all 0.2s;
+}
+.micro-opcion:active { transform:scale(0.98); }
+.micro-opcion.selected { border-color:var(--lvl-soft); background:var(--lvl-ultra); }
+.micro-opcion-letra { font-weight:800; color:var(--lvl-bold); margin-right:6px; }
+.micro-eco {
+  margin-top:16px; padding:16px 18px; border-radius:14px;
+  background:var(--sec-bg); border-left:3px solid var(--lvl-soft);
+  font-size:0.95rem; line-height:1.8; color:var(--text-soft);
+  animation:fadeIn 0.4s ease both; display:none;
+}
+.micro-eco.visible { display:block; }
+.micro-eco-emoji { font-size:1.1rem; margin-right:4px; }
+.micro-nav-btns { padding:14px 18px 28px; display:flex; gap:10px; }
+.micro-nav-btns .btn { flex:1; }
+.btn-rezar { background:var(--lvl-bold); color:#fff; box-shadow:0 4px 14px rgba(0,0,0,0.15); font-size:1rem; padding:16px; }
+</style>
+</head>
+<body>
+<div class="shell" id="app">
+  <!-- Loading -->
+  <div class="loading-screen" id="scr-loading">
+    <div class="spinner"></div>
+    <p style="font-size:0.88rem;color:var(--text-dim)">Cargando nivel…</p>
+  </div>
+
+  <!-- Error -->
+  <div class="error-screen" id="scr-error" style="display:none">
+    <div style="font-size:3rem;margin-bottom:16px">📿</div>
+    <h2 style="font-size:1.1rem;margin-bottom:8px">No se encontró el nivel</h2>
+    <p id="error-msg" style="font-size:0.82rem;color:var(--text-dim);margin-bottom:20px"></p>
+    <a href="?c=0101" class="btn btn-primary">Ir a Nivel 1-1: Males</a>
+  </div>
+
+  <!-- ═══ HEADER (compartido) ═══ -->
+  <header class="header" id="main-header" style="display:none">
+    <div>
+      <div class="header-title" id="h-title"></div>
+      <div class="header-sub" id="h-sub"></div>
+    </div>
+    <div class="header-actions">
+      <!-- Display de metros -->
+      <div class="meters-display" id="meters-display">
+        <span>🚶‍♂️</span>
+        <span id="meters-value">0m</span>
+      </div>
+      <!-- Lux (cruz guía) -->
+      <div class="lux-container" id="lux-container">
+        <svg class="lux-svg" id="lux-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <filter id="luxGlow">
+              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+              <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
+          <g filter="url(#luxGlow)">
+            <rect x="46.1926" y="0.285" width="7.6148" height="99.43" fill="#FFFCF7"/>
+            <rect x="0" y="46.2068" width="100" height="7.5864" fill="#FFFCF7"/>
+          </g>
+        </svg>
+      </div>
+      <!-- Toggle dark mode -->
+      <button class="icon-btn" id="btn-dark" title="Modo oscuro">
+        <svg id="ico-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg id="ico-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ═══ PANTALLA INICIO — CUADERNO ═══ -->
+  <div class="screen" id="scr-home">
+
+    <!-- Pestaña Misterios del Día -->
+    <div class="tab-hoy-wrap">
+      <button class="tab-hoy-btn" id="btn-hoy">
+        <span class="tab-pulse-dot"></span>
+        <span id="tab-hoy-label">Misterios del Día</span>
+      </button>
+    </div>
+
+    <!-- Escena del cuaderno -->
+    <div class="book-scene">
+      <div style="position:relative; width:100%; max-width:360px; height:min(72dvh,520px);">
+
+        <div class="book-wrap" id="book-wrap">
+          <div class="bk-spine"></div>
+          <div class="bk-back"></div>
+
+          <!-- Páginas con listones -->
+          <div class="bk-pages">
+            <div class="bk-ribbons" id="bk-ribbons">
+              <div class="bk-ribbon rib-g" data-bloque="gozosos" data-idx="0">
+                <div class="bk-ribbon-body"><span class="bk-ribbon-check">✓</span></div>
+                <span class="bk-ribbon-label">Gozosos</span>
+              </div>
+              <div class="bk-ribbon rib-l" data-bloque="luminosos" data-idx="1">
+                <div class="bk-ribbon-body"><span class="bk-ribbon-check">✓</span></div>
+                <span class="bk-ribbon-label">Luminosos</span>
+              </div>
+              <div class="bk-ribbon rib-d" data-bloque="dolorosos" data-idx="2">
+                <div class="bk-ribbon-body"><span class="bk-ribbon-check">✓</span></div>
+                <span class="bk-ribbon-label">Dolorosos</span>
+              </div>
+              <div class="bk-ribbon rib-r" data-bloque="gloriosos" data-idx="3">
+                <div class="bk-ribbon-body"><span class="bk-ribbon-check">✓</span></div>
+                <span class="bk-ribbon-label">Gloriosos</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Viewport con páginas deslizantes -->
+          <div class="bk-viewport" id="bk-viewport">
+
+            <!-- Página Gozosos -->
+            <div class="bk-page enter-r" id="bkpg-gozosos" data-idx="0">
+              <div class="pg-strip" id="pgstrip-gozosos"></div>
+              <div class="pg-tag">Misterios</div>
+              <div class="pg-emoji" id="pgemoji-gozosos"></div>
+              <div class="pg-title" id="pgtitle-gozosos"></div>
+              <div class="pg-sub"   id="pgsub-gozosos"></div>
+              <div class="pg-div"></div>
+              <div class="pg-dots"  id="pgdots-gozosos"></div>
+              <div class="pg-sello" id="pgsello-gozosos">
+                <div class="sello-ring">✓</div>
+                <div class="sello-txt">Completado</div>
+              </div>
+              <button class="btn-orar-pg" id="btnp-gozosos" data-bloque="gozosos"></button>
+            </div>
+
+            <!-- Página Luminosos -->
+            <div class="bk-page enter-r" id="bkpg-luminosos" data-idx="1">
+              <div class="pg-strip" id="pgstrip-luminosos"></div>
+              <div class="pg-tag">Misterios</div>
+              <div class="pg-emoji" id="pgemoji-luminosos"></div>
+              <div class="pg-title" id="pgtitle-luminosos"></div>
+              <div class="pg-sub"   id="pgsub-luminosos"></div>
+              <div class="pg-div"></div>
+              <div class="pg-dots"  id="pgdots-luminosos"></div>
+              <div class="pg-sello" id="pgsello-luminosos">
+                <div class="sello-ring">✓</div>
+                <div class="sello-txt">Completado</div>
+              </div>
+              <button class="btn-orar-pg" id="btnp-luminosos" data-bloque="luminosos"></button>
+            </div>
+
+            <!-- Página Dolorosos -->
+            <div class="bk-page enter-r" id="bkpg-dolorosos" data-idx="2">
+              <div class="pg-strip" id="pgstrip-dolorosos"></div>
+              <div class="pg-tag">Misterios</div>
+              <div class="pg-emoji" id="pgemoji-dolorosos"></div>
+              <div class="pg-title" id="pgtitle-dolorosos"></div>
+              <div class="pg-sub"   id="pgsub-dolorosos"></div>
+              <div class="pg-div"></div>
+              <div class="pg-dots"  id="pgdots-dolorosos"></div>
+              <div class="pg-sello" id="pgsello-dolorosos">
+                <div class="sello-ring">✓</div>
+                <div class="sello-txt">Completado</div>
+              </div>
+              <button class="btn-orar-pg" id="btnp-dolorosos" data-bloque="dolorosos"></button>
+            </div>
+
+            <!-- Página Gloriosos -->
+            <div class="bk-page enter-r" id="bkpg-gloriosos" data-idx="3">
+              <div class="pg-strip" id="pgstrip-gloriosos"></div>
+              <div class="pg-tag">Misterios</div>
+              <div class="pg-emoji" id="pgemoji-gloriosos"></div>
+              <div class="pg-title" id="pgtitle-gloriosos"></div>
+              <div class="pg-sub"   id="pgsub-gloriosos"></div>
+              <div class="pg-div"></div>
+              <div class="pg-dots"  id="pgdots-gloriosos"></div>
+              <div class="pg-sello" id="pgsello-gloriosos">
+                <div class="sello-ring">✓</div>
+                <div class="sello-txt">Completado</div>
+              </div>
+              <button class="btn-orar-pg" id="btnp-gloriosos" data-bloque="gloriosos"></button>
+            </div>
+
+          </div><!-- /bk-viewport -->
+
+          <!-- Tapa delantera -->
+          <div class="bk-cover" id="bk-cover">
+            <div class="bk-cover-inner">
+              <div class="bk-cross"></div>
+              <div class="bk-cover-orn"></div>
+              <div class="bk-cover-title" id="bk-cover-title">CruzAndo<br>la Cruz</div>
+              <div class="bk-cover-sub">Guía del Peregrino</div>
+              <div class="bk-cover-orn"></div>
+            </div>
+          </div>
+
+        </div><!-- /book-wrap -->
+        <div class="bk-shadow" id="bk-shadow"></div>
+
+      </div>
+    </div><!-- /book-scene -->
+
+    <!-- Banner nivel completado -->
+    <div id="nivel-done-wrap" style="display:none; width:100%; padding:0 18px;"></div>
+
+  </div><!-- /scr-home -->
+
+  <!-- ═══ PANTALLA DE PREPARACIÓN (micro-aprendizaje) ═══ -->
+  <div class="screen" id="scr-micro">
+    <div class="micro-header fade-in">
+      <div class="micro-nav">
+        <button class="btn-ghost" id="btn-back-micro">← Inicio</button>
+        <span class="micro-bloque-label" id="micro-bloque-label"></span>
+      </div>
+      <div class="micro-titulo" id="micro-titulo"></div>
+      <div class="micro-subtitulo" id="micro-subtitulo"></div>
+    </div>
+    <div class="micro-progress-bar">
+      <div class="micro-progress-fill" id="micro-progress-fill" style="width:0%"></div>
+    </div>
+    <div class="micro-content" id="micro-content"></div>
+    <div class="micro-nav-btns" id="micro-nav-btns"></div>
+  </div>
+
+  <!-- ═══ PANTALLA DE ORACIÓN ═══ -->
+  <div class="screen" id="scr-prayer">
+    <div class="prayer-header fade-in">
+      <div class="prayer-nav">
+        <button class="btn-ghost" id="btn-back-home">← Inicio</button>
+        <span class="mystery-counter" id="prayer-counter"></span>
+      </div>
+      <div class="mystery-title" id="prayer-title"></div>
+      <div class="mystery-subtitle" id="prayer-subtitle"></div>
+    </div>
+    <div class="mystery-beads" id="prayer-dots"></div>
+
+    <!-- Evangelio -->
+    <div class="evangelio-box fade-in fade-in-d1" id="evangelio-box">
+      <div class="evangelio-label">📖 Evangelio</div>
+      <div class="evangelio-text" id="ev-text"></div>
+      <div class="evangelio-ref" id="ev-ref"></div>
+    </div>
+
+    <!-- Acordeón -->
+    <div class="accordion" id="accordion"></div>
+
+    <!-- Completado -->
+    <div id="mystery-done-wrap" style="display:none"></div>
+
+    <!-- Navegación inferior -->
+    <div class="bottom-nav" id="bottom-nav"></div>
+  </div>
+
+  <!-- ═══ PANTALLA CELEBRACIÓN BLOQUE ═══ -->
+  <div class="screen" id="scr-celebration">
+    <div class="celebration-screen fade-in">
+      <div class="maria-placeholder" id="maria-container">🙏</div>
+      <h2 class="celebration-title" id="celeb-title"></h2>
+      <p class="celebration-sub" id="celeb-sub"></p>
+      <button class="btn btn-primary btn-block" id="btn-celeb-home">Regresar a inicio</button>
+    </div>
+  </div>
+
+  <!-- ═══ OVERLAYS DE MARIANO ═══ -->
+  <!-- Mariano Slide-in (aparece al ganar metros) -->
+  <div class="mariano-overlay" id="mariano-overlay" style="display:none">
+    <img id="mariano-slide-img" class="mariano-slide" alt="Mariano">
+    <div class="meters-float" id="meters-float-text"></div>
+  </div>
+
+  <!-- Mariano Grand Celebration (pantalla completa al completar bloque) -->
+  <div class="mariano-grand-overlay" id="mariano-grand-overlay" style="display:none">
+    <div class="mariano-grand-container">
+      <img id="mariano-grand-img" class="mariano-grand" alt="Mariano celebrando">
+      <div class="mariano-grand-lux" id="mariano-grand-lux">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <g filter="url(#luxGlow)">
+            <rect x="46.1926" y="0.285" width="7.6148" height="99.43" fill="#FFFCF7"/>
+            <rect x="0" y="46.2068" width="100" height="7.5864" fill="#FFFCF7"/>
+          </g>
+        </svg>
+      </div>
+      <div class="mariano-grand-meters" id="mariano-grand-meters"></div>
+      <div class="mariano-grand-text" id="mariano-grand-text"></div>
+      <div id="grand-confetti-container"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   CruzAndo App · Vanilla JS · Cero dependencias
+   Lee JSON desde data/{id}.json via URL param ?c=0101
+   Toda la paleta de colores viene de DATA.tema.paleta
+   ══════════════════════════════════════════════════════ */
+
+(function() {
+  'use strict';
+
+  // ── Estado global ──
+  let DATA = null;
+  let NIVEL_ID = null;
+  let MICRO_DATA = null;       // datos de {id}-micro.json (preparación)
+  let currentBlock = null;   // 'gozosos' | 'luminosos' | 'dolorosos' | 'gloriosos'
+  let currentMystery = 0;    // 0-4 dentro del bloque
+  let openSection = null;     // qué acordeón está abierto
+  let progress = {};          // { gozosos: [ts,ts,null,null,null], ... }
+  let journal = {};           // { gozosos: { 0: {q0:'',q1:'',q2:''}, ... }, ... }
+  let medConfirmed = {};      // { gozosos: { 0: {q0:true,q1:false,q2:false}, ... }, ... }
+  let microDone = {};         // { gozosos: true, ... } — preparación ya completada
+  let isDark = false;
+
+  // ── Estado micro-aprendizaje ──
+  let microStep = 0;
+  let microAnswered = false;
+
+  // ── Gamificación ──
+  let totalMeters = 0;
+  let reflectionRewards = {}; // { blockId_mysteryId_questionId: true }
+  let audioRewards = {};      // { blockId_mysteryId_audioType: true }
+  let restPoseIndex = 0;
+  let orbitIndex = 0;
+  const REST_POSES = ['rest-staff', 'rest-sitting', 'rest-rock', 'rest-tree'];
+  const MARIANO_BASE = 'https://padremonti.github.io/cruzando-app/assets/mariano/';
+
+  const BLOCKS = ['gozosos','luminosos','dolorosos','gloriosos'];
+  const BLOCK_NAMES = { gozosos:'Gozosos', luminosos:'Luminosos', dolorosos:'Dolorosos', gloriosos:'Gloriosos' };
+  const ORDS = ['Primer','Segundo','Tercer','Cuarto','Quinto'];
+  const BTYPES = { gozosos:'Gozoso', luminosos:'Luminoso', dolorosos:'Doloroso', gloriosos:'Glorioso' };
+  const MED_LABELS = ['Por María hacia Jesús','Desde el Hijo hacia el Padre','Hijos y hermanos en el Espíritu'];
+  const MED_COLORS = ['#FF7A00','#C0392B','#27AE60'];
+
+  // Misterios del día según tradición católica
+  const DAY_BLOCKS = { 0:'gloriosos', 1:'gozosos', 2:'dolorosos', 3:'gloriosos', 4:'luminosos', 5:'dolorosos', 6:'gozosos' };
+
+  // Audio
+  let audioEl = null;
+  let audioPlaying = false;
+  let currentAudioId = null;
+
+  // ── Utilidades ──
+  const $ = id => document.getElementById(id);
+  const show = id => { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); $(id).classList.add('active'); };
+  const lsKey = () => 'cruzando_nivel_' + NIVEL_ID;
+
+  // Formatear ID "0101" → "Nivel 1-1" (estilo Mario Bros)
+  function nivelLabel(id) {
+    const mundo = parseInt(id.substring(0,2), 10);
+    const nivel = parseInt(id.substring(2,4), 10);
+    return 'Nivel ' + mundo + '-' + nivel;
+  }
+
+  function saveProgress() {
+    try { 
+      localStorage.setItem(lsKey(), JSON.stringify({ 
+        progress, journal, medConfirmed, microDone,
+        isDark, totalMeters, reflectionRewards, audioRewards
+      })); 
+    } catch(e){}
+  }
+  function loadProgress() {
+    try {
+      const raw = localStorage.getItem(lsKey());
+      if (raw) {
+        const d = JSON.parse(raw);
+        if (d.progress)  progress  = d.progress;
+        if (d.journal)   journal   = d.journal;
+        if (d.medConfirmed) medConfirmed = d.medConfirmed;
+        if (d.microDone) microDone = d.microDone;
+        if (typeof d.isDark === 'boolean') isDark = d.isDark;
+        if (typeof d.totalMeters === 'number') totalMeters = d.totalMeters;
+        if (d.reflectionRewards) reflectionRewards = d.reflectionRewards;
+        if (d.audioRewards) audioRewards = d.audioRewards;
+      }
+    } catch(e){}
+    // Inicializar estructura si no existe
+    BLOCKS.forEach(b => {
+      if (!progress[b]) progress[b] = [null,null,null,null,null];
+      if (!journal[b]) journal[b] = {};
+    });
+    updateMetersDisplay();
+  }
+
+  // ── Colores dinámicos ──
+  function hexToRgb(hex) {
+    const h = hex.replace('#','');
+    return [parseInt(h.substring(0,2),16), parseInt(h.substring(2,4),16), parseInt(h.substring(4,6),16)].join(',');
+  }
+  function applyPalette() {
+    if (!DATA || !DATA.tema) return;
+    const p = DATA.tema.paleta;
+    const r = document.documentElement.style;
+    r.setProperty('--lvl-bold', p.bold);
+    r.setProperty('--lvl-base', p.base);
+    r.setProperty('--lvl-soft', p.soft);
+    r.setProperty('--lvl-mist', p.mist);
+    r.setProperty('--lvl-light', p.light);
+    r.setProperty('--lvl-ultra', p.ultra);
+    // RGB versions for rgba() in gradients
+    r.setProperty('--lvl-bold-rgb', hexToRgb(p.bold));
+    r.setProperty('--lvl-light-rgb', hexToRgb(p.light));
+    // Colores de bloques
+    const bl = DATA.tema.bloques;
+    if (bl.gozosos) r.setProperty('--goz-color', bl.gozosos.color);
+    if (bl.luminosos) r.setProperty('--lum-color', bl.luminosos.color);
+    if (bl.dolorosos) r.setProperty('--dol-color', bl.dolorosos.color);
+    if (bl.gloriosos) r.setProperty('--glo-color', bl.gloriosos.color);
+    // Meta theme-color
+    document.querySelector('meta[name="theme-color"]').content = isDark ? '#1A1714' : '#E6DED3';
+  }
+
+  function blockColor(b) {
+    if (!DATA || !DATA.tema || !DATA.tema.bloques[b]) return '#888';
+    return DATA.tema.bloques[b].color;
+  }
+  function blockEmoji(b) {
+    if (!DATA || !DATA.tema || !DATA.tema.bloques[b]) return '📿';
+    return DATA.tema.bloques[b].emoji;
+  }
+
+  // ══════════════════════════════════════════════════════
+  // GAMIFICACIÓN: Lux + Mariano + Metros + Sonidos
+  // ══════════════════════════════════════════════════════
+
+  // ── Actualizar display de metros ──
+  function updateMetersDisplay() {
+    const display = $('meters-value');
+    if (display) {
+      display.textContent = totalMeters.toLocaleString('es-MX') + 'm';
+    }
+  }
+
+  // ── Obtener siguiente pose de descanso (ciclo) ──
+  function getNextRestPose() {
+    const pose = REST_POSES[restPoseIndex];
+    restPoseIndex = (restPoseIndex + 1) % REST_POSES.length;
+    return pose;
+  }
+
+  // ── Obtener siguiente órbita de Lux (ciclo) ──
+  function getNextOrbit() {
+    const orbit = 'orbit' + ((orbitIndex % 4) + 1);
+    orbitIndex++;
+    return orbit;
+  }
+
+  // ── Lux: Brillo y partículas ──
+  function luxShine() {
+    const lux = $('lux-svg');
+    if (!lux) return;
+    lux.classList.add('shine');
+    setTimeout(() => lux.classList.remove('shine'), 600);
+    spawnLuxParticles(3);
+  }
+
+  function spawnLuxParticles(count) {
+    const container = $('lux-container');
+    if (!container) return;
+    for (let i = 0; i < count; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'lux-particle';
+      particle.style.setProperty('--x', (Math.random() - 0.5) * 100 + 'px');
+      particle.style.setProperty('--y', (Math.random() - 0.5) * 100 + 'px');
+      container.appendChild(particle);
+      setTimeout(() => particle.remove(), 1500);
+    }
+  }
+
+  // ── Sonido recompensante (melódico) ──
+  function playRewardSound() {
+    try {
+      const ac = new (window.AudioContext || window.webkitAudioContext)();
+      const frequencies = [523, 659]; // C5 + E5 (acorde mayor alegre)
+      frequencies.forEach((f, i) => {
+        setTimeout(() => {
+          const o = ac.createOscillator();
+          const g = ac.createGain();
+          o.type = 'sine';
+          o.frequency.value = f;
+          g.gain.setValueAtTime(0.12, ac.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.35);
+          o.connect(g);
+          g.connect(ac.destination);
+          o.start();
+          o.stop(ac.currentTime + 0.35);
+        }, i * 90);
+      });
+    } catch(e) {}
+  }
+
+  // ── Ganar metros (Mariano aparece) ──
+  function gainMeters(meters, pose) {
+    console.log('gainMeters llamado:', meters, pose);
+    totalMeters += meters;
+    console.log('Total metros ahora:', totalMeters);
+    updateMetersDisplay();
+    saveProgress();
+
+    // Lux brilla
+    luxShine();
+
+    // Sonido recompensante
+    playRewardSound();
+
+    // Mariano aparece
+    showMarianoSlide(meters, pose);
+  }
+
+  // ── Mostrar Mariano slide-in ──
+  function showMarianoSlide(meters, pose) {
+    console.log('showMarianoSlide llamado:', meters, pose);
+    const overlay = $('mariano-overlay');
+    const img = $('mariano-slide-img');
+    const text = $('meters-float-text');
+    
+    console.log('Elementos encontrados:', {overlay, img, text});
+    
+    if (!overlay || !img || !text) {
+      console.error('Faltan elementos del overlay de Mariano');
+      return;
+    }
+
+    const imageUrl = MARIANO_BASE + 'mariano-' + pose + '.png';
+    console.log('Cargando imagen:', imageUrl);
+    
+    img.src = imageUrl;
+    text.textContent = '+' + meters.toLocaleString('es-MX') + 'm';
+    
+    overlay.style.display = 'flex';
+    setTimeout(() => {
+      overlay.style.display = 'none';
+    }, 2500);
+  }
+
+  // ── Celebración grand (Mariano + Lux + Confetti) ──
+  function showMarianoGrandCelebration() {
+    totalMeters += 1000;
+    updateMetersDisplay();
+    saveProgress();
+
+    const overlay = $('mariano-grand-overlay');
+    const img = $('mariano-grand-img');
+    const luxEl = $('mariano-grand-lux');
+    const metersEl = $('mariano-grand-meters');
+    const textEl = $('mariano-grand-text');
+    const confettiContainer = $('grand-confetti-container');
+
+    if (!overlay) return;
+
+    // Configurar contenido
+    img.src = MARIANO_BASE + 'mariano-celebrate.png';
+    metersEl.textContent = '+1,000m';
+    textEl.innerHTML = '¡Bloque completado!<br>Has recorrido una etapa del camino';
+
+    // Órbita de Lux
+    const orbit = getNextOrbit();
+    luxEl.className = 'mariano-grand-lux ' + orbit;
+
+    // Confetti
+    confettiContainer.innerHTML = '';
+    const colors = ['#01BCE0', '#00C853', '#FBBC05', '#FF7A00', '#FFFCF7'];
+    for (let i = 0; i < 40; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'grand-confetti';
+      piece.style.background = colors[i % 5];
+      piece.style.left = Math.random() * 100 + '%';
+      piece.style.animationDelay = Math.random() * 0.5 + 's';
+      confettiContainer.appendChild(piece);
+    }
+
+    // Sonido de celebración
+    playNotes([523, 659, 784, 880, 1047]);
+
+    // Mostrar overlay
+    overlay.style.display = 'flex';
+
+    // Ocultar después de 3.5 segundos
+    setTimeout(() => {
+      overlay.style.display = 'none';
+    }, 3500);
+  }
+
+  // ── Dark mode ──
+  function toggleDark() {
+    isDark = !isDark;
+    document.body.classList.toggle('dark', isDark);
+    $('ico-sun').style.display = isDark ? 'none' : 'block';
+    $('ico-moon').style.display = isDark ? 'block' : 'none';
+    document.querySelector('meta[name="theme-color"]').content = isDark ? '#1A1714' : '#E6DED3';
+    saveProgress();
+  }
+
+  // ── Sonidos de celebración ──
+  function playNotes(freqs) {
+    try {
+      const ac = new (window.AudioContext || window.webkitAudioContext)();
+      freqs.forEach((f, i) => {
+        setTimeout(() => {
+          const o = ac.createOscillator();
+          const g = ac.createGain();
+          o.type = 'sine'; o.frequency.value = f;
+          g.gain.setValueAtTime(0.07, ac.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.35);
+          o.connect(g); g.connect(ac.destination);
+          o.start(); o.stop(ac.currentTime + 0.35);
+        }, i * 180);
+      });
+    } catch(e){}
+  }
+  const MELODIES = [
+    [440,554,659],
+    [523,659,784],
+    [392,494,587,784],
+    [349,440,523,659]
+  ];
+  function celebrationSound(variant) { playNotes(MELODIES[variant % 4]); }
+
+  // ── Confetti ──
+  function showConfetti() {
+    const c = document.createElement('div');
+    c.className = 'confetti-container';
+    const colors = [
+      DATA.tema.paleta.bold, DATA.tema.paleta.soft, DATA.tema.paleta.light,
+      '#34A853', '#FBBC05', '#EA4335'
+    ];
+    for (let i = 0; i < 40; i++) {
+      const p = document.createElement('div');
+      p.className = 'confetti-piece';
+      p.style.left = Math.random() * 100 + '%';
+      p.style.background = colors[Math.floor(Math.random() * colors.length)];
+      p.style.animationDelay = Math.random() * 0.8 + 's';
+      p.style.animationDuration = (2 + Math.random()) + 's';
+      c.appendChild(p);
+    }
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 3500);
+  }
+
+  // ── Audio player ──
+  function stopAudio() {
+    if (audioEl) { audioEl.pause(); audioEl.currentTime = 0; }
+    audioPlaying = false;
+    currentAudioId = null;
+    document.querySelectorAll('.play-btn').forEach(b => { b.innerHTML = playSVG(); });
+    document.querySelectorAll('.audio-bar-fill').forEach(b => { b.style.width = '0%'; });
+  }
+
+  function toggleAudio(src, playerId) {
+    if (!src) return;
+    if (currentAudioId === playerId && audioPlaying) {
+      audioEl.pause();
+      audioPlaying = false;
+      updatePlayBtn(playerId, false);
+      return;
+    }
+    if (currentAudioId !== playerId) {
+      stopAudio();
+      audioEl = new Audio(src);
+      currentAudioId = playerId;
+      audioEl.addEventListener('timeupdate', () => {
+        if (!audioEl.duration) return;
+        const pct = (audioEl.currentTime / audioEl.duration) * 100;
+        const fill = document.querySelector('#' + playerId + ' .audio-bar-fill');
+        if (fill) fill.style.width = pct + '%';
+        const cur = document.querySelector('#' + playerId + ' .a-cur');
+        const dur = document.querySelector('#' + playerId + ' .a-dur');
+        if (cur) cur.textContent = fmtTime(audioEl.currentTime);
+        if (dur) dur.textContent = fmtTime(audioEl.duration);
+      });
+      audioEl.addEventListener('ended', () => {
+        audioPlaying = false;
+        currentAudioId = null;
+        updatePlayBtn(playerId, false);
+        
+        console.log('Audio terminado:', playerId);
+        
+        // Disparar recompensa si no se ha dado antes
+        const rewardKey = currentBlock + '_' + currentMystery + '_' + playerId;
+        console.log('RewardKey:', rewardKey, 'Ya existe?', !!audioRewards[rewardKey]);
+        
+        if (!audioRewards[rewardKey]) {
+          audioRewards[rewardKey] = true;
+          
+          // Determinar metros y pose según tipo de audio
+          let meters, pose;
+          if (playerId.includes('rezar')) {
+            meters = 1200;
+            pose = 'walking';
+            console.log('Detectado: REZAR');
+          } else if (playerId.includes('contempl')) {
+            meters = 800;
+            pose = 'contemplative';
+            console.log('Detectado: CONTEMPLACIÓN');
+          } else if (playerId.includes('canto')) {
+            meters = 100;
+            pose = 'happy';
+            console.log('Detectado: CANTO');
+          }
+          
+          if (meters && pose) {
+            console.log('Llamando gainMeters:', meters, pose);
+            gainMeters(meters, pose);
+          } else {
+            console.log('NO se detectó tipo de audio válido');
+          }
+        }
+      });
+    }
+    audioEl.play().then(() => {
+      audioPlaying = true;
+      updatePlayBtn(playerId, true);
+    }).catch(()=>{});
+  }
+
+  function seekAudio(e, playerId) {
+    if (!audioEl || currentAudioId !== playerId || !audioEl.duration) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const pct = (e.clientX - rect.left) / rect.width;
+    audioEl.currentTime = pct * audioEl.duration;
+  }
+
+  function updatePlayBtn(playerId, playing) {
+    const btn = document.querySelector('#' + playerId + ' .play-btn');
+    if (btn) btn.innerHTML = playing ? pauseSVG() : playSVG();
+  }
+
+  function fmtTime(s) {
+    if (!s || isNaN(s)) return '0:00';
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return m + ':' + (sec < 10 ? '0' : '') + sec;
+  }
+  function playSVG() { return '<svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><polygon points="6,3 20,12 6,21"/></svg>'; }
+  function pauseSVG() { return '<svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><rect x="5" y="3" width="4" height="18" rx="1"/><rect x="15" y="3" width="4" height="18" rx="1"/></svg>'; }
+
+  function audioPlayerHTML(id, label, src) {
+    if (!src) return '<div class="audio-player" style="opacity:0.5"><div style="font-size:0.82rem;color:var(--text-dim)">Audio pendiente</div></div>';
+    return '<div class="audio-player" id="' + id + '">' +
+      '<button class="play-btn" onclick="window._ca.toggleAudio(\'' + src + '\',\'' + id + '\')">' + playSVG() + '</button>' +
+      '<div class="audio-info">' +
+        '<div class="audio-label">' + label + '</div>' +
+        '<div class="audio-bar-wrap" onclick="window._ca.seekAudio(event,\'' + id + '\')">' +
+          '<div class="audio-bar-fill" style="width:0%"></div>' +
+        '</div>' +
+        '<div class="audio-time"><span class="a-cur">0:00</span><span class="a-dur">0:00</span></div>' +
+      '</div></div>';
+  }
+
+  // ══════════════════════════════════════════════════════
+  // CUADERNO HOME — Guía del Peregrino
+  // ══════════════════════════════════════════════════════
+
+  // Colores litúrgicos de los listones / strip
+  const RIBBON_COLORS = {
+    gozosos:   '#1A56A0',
+    luminosos: '#9B9389',
+    dolorosos: '#B91C1C',
+    gloriosos: '#C8900A'
+  };
+  const RIBBON_BTN_COLORS = {
+    gozosos:   '#1A56A0',
+    luminosos: '#6B6259',
+    dolorosos: '#B91C1C',
+    gloriosos: '#C8900A'
+  };
+
+  let bkCurrentIdx  = null;   // índice del bloque abierto (0-3)
+  let bkIsOpen      = false;
+  let bkAnimating   = false;
+
+  function renderHome() {
+    // Header
+    $('main-header').style.display = '';
+    $('h-title').textContent = 'CruzAndo';
+    $('h-sub').textContent = nivelLabel(DATA.tema.id) + ': ' + DATA.elemento;
+
+    // Portada dinámica
+    const coverTitle = $('bk-cover-title');
+    if (coverTitle) coverTitle.innerHTML = (DATA.tema.mundo_nombre || 'CruzAndo la Cruz').replace(' ', '<br>');
+
+    // Pestaña Misterios del día
+    const DAY_NAMES_ES = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    const todayBlock = DAY_BLOCKS[new Date().getDay()];
+    const todayName  = DAY_NAMES_ES[new Date().getDay()];
+    const tabBtn = $('btn-hoy');
+    if (tabBtn) {
+      $('tab-hoy-label').textContent = 'Hoy · ' + todayName + ' · ' + blockEmoji(todayBlock) + ' ' + BLOCK_NAMES[todayBlock];
+      tabBtn.onclick = () => bkSelectBloque(todayBlock);
+    }
+
+    // Rellenar cada página con datos del JSON
+    let allCleared = true;
+    BLOCKS.forEach((b, bi) => {
+      const prog    = progress[b] || [];
+      const done    = prog.filter(x => x !== null).length;
+      const cleared = done === 5;
+      if (!cleared) allCleared = false;
+
+      const color   = RIBBON_COLORS[b];
+      const subText = DATA.subtitulos_bloque ? (DATA.subtitulos_bloque[b] || '') : '';
+
+      // Strip de color
+      const strip = $('pgstrip-' + b);
+      if (strip) strip.style.background = color;
+
+      // Emoji y textos
+      const eEl = $('pgemoji-' + b);
+      if (eEl) eEl.textContent = blockEmoji(b);
+
+      const tEl = $('pgtitle-' + b);
+      if (tEl) tEl.textContent = 'Misterios ' + BLOCK_NAMES[b];
+
+      const sEl = $('pgsub-' + b);
+      if (sEl) sEl.textContent = subText;
+
+      // Puntos de progreso
+      const dotsEl = $('pgdots-' + b);
+      if (dotsEl) {
+        dotsEl.innerHTML = [0,1,2,3,4].map(i =>
+          '<div class="pg-dot' + (prog[i] ? ' done' : '') + '"></div>'
+        ).join('');
+      }
+
+      // Sello
+      const sello = $('pgsello-' + b);
+      if (sello) sello.classList.toggle('vis', cleared);
+
+      // Listón done
+      const rib = document.querySelector('.bk-ribbon[data-bloque="' + b + '"]');
+      if (rib) rib.classList.toggle('done', cleared);
+
+      // Botón Orar
+      const btn = $('btnp-' + b);
+      if (btn) {
+        if (cleared) {
+          btn.style.background = 'var(--green)';
+          btn.textContent = '✓ Orar de nuevo';
+        } else {
+          btn.style.background = RIBBON_BTN_COLORS[b];
+          btn.textContent = '📿 Orar';
+        }
+        btn.onclick = () => bkGoOrar(b);
+      }
+    });
+
+    // Listones: click
+    document.querySelectorAll('.bk-ribbon').forEach(r => {
+      r.onclick = () => bkSelectBloque(r.dataset.bloque);
+    });
+
+    // Banner nivel completado
+    const wrap = $('nivel-done-wrap');
+    if (allCleared && DATA.tema.siguiente) {
+      wrap.style.display = '';
+      wrap.innerHTML =
+        '<div class="nivel-done-banner fade-in">' +
+          '<h3>¡Nivel completado! 🎉</h3>' +
+          '<p>Has recorrido los 20 Misterios de este nivel.</p>' +
+          '<a href="?c=' + DATA.tema.siguiente + '" class="btn btn-green btn-block">Avanzar al siguiente nivel →</a>' +
+        '</div>';
+    } else if (allCleared) {
+      wrap.style.display = '';
+      wrap.innerHTML =
+        '<div class="nivel-done-banner fade-in">' +
+          '<h3>¡Nivel completado! 🎉</h3>' +
+          '<p>¡Gloria a Dios! Has llegado al final de este nivel.</p>' +
+        '</div>';
+    } else {
+      wrap.style.display = 'none';
+    }
+
+    // Restaurar estado del cuaderno
+    bkCurrentIdx = null;
+    bkIsOpen     = false;
+    bkAnimating  = false;
+    $('bk-cover').classList.remove('open');
+    $('bk-shadow').classList.remove('open');
+    $('bk-viewport').classList.remove('active');
+    document.querySelectorAll('.bk-page').forEach(p => {
+      p.classList.remove('pg-current','exit-l','exit-r','enter-l');
+      p.classList.add('enter-r');
+    });
+    document.querySelectorAll('.bk-ribbon').forEach(r => r.classList.remove('active'));
+
+    show('scr-home');
+  }
+
+  // ── Seleccionar bloque desde listón ──
+  function bkSelectBloque(bloque) {
+    if (bkAnimating) return;
+    const newIdx = BLOCKS.indexOf(bloque);
+
+    // Marcar listón activo
+    document.querySelectorAll('.bk-ribbon').forEach(r =>
+      r.classList.toggle('active', r.dataset.bloque === bloque)
+    );
+
+    if (!bkIsOpen) {
+      // Primera apertura: girar tapa
+      bkAnimating = true; bkIsOpen = true;
+      $('bk-cover').classList.add('open');
+      $('bk-shadow').classList.add('open');
+      setTimeout(() => {
+        $('bk-viewport').classList.add('active');
+        bkShowPage(bloque, 'right');
+        bkCurrentIdx = newIdx;
+        bkAnimating  = false;
+      }, 750);
+      return;
+    }
+
+    if (bkCurrentIdx === newIdx) return;
+
+    // Dirección: listón más arriba (índice menor) → viene de la derecha
+    const dir = newIdx < bkCurrentIdx ? 'right' : 'left';
+    bkSlideTo(bloque, newIdx, dir);
+  }
+
+  function bkSlideTo(bloque, newIdx, dir) {
+    if (bkAnimating) return;
+    bkAnimating = true;
+
+    const oldPage = $('bkpg-' + BLOCKS[bkCurrentIdx]);
+    oldPage.classList.remove('pg-current');
+    oldPage.classList.add(dir === 'right' ? 'exit-r' : 'exit-l');
+
+    setTimeout(() => {
+      oldPage.classList.remove('exit-l','exit-r','pg-current');
+      oldPage.classList.add('enter-r');
+      bkShowPage(bloque, dir === 'right' ? 'left' : 'right');
+      bkCurrentIdx = newIdx;
+      bkAnimating  = false;
+    }, 440);
+  }
+
+  function bkShowPage(bloque, fromDir) {
+    const pg = $('bkpg-' + bloque);
+    pg.classList.remove('enter-r','enter-l','exit-l','exit-r','pg-current');
+    pg.classList.add(fromDir === 'right' ? 'enter-r' : 'enter-l');
+    pg.offsetHeight; // reflow
+    pg.classList.remove('enter-r','enter-l');
+    pg.classList.add('pg-current');
+  }
+
+  // ── Botón Orar: transición hacia micro o prayer ──
+  function bkGoOrar(bloque) {
+    if (bkAnimating) return;
+    bkAnimating = true;
+
+    // Página actual sale hacia la izquierda
+    const curPg = $('bkpg-' + bloque);
+    curPg.classList.remove('pg-current');
+    curPg.classList.add('exit-l');
+
+    setTimeout(() => {
+      curPg.classList.remove('exit-l','pg-current');
+      curPg.classList.add('enter-r');
+      bkAnimating = false;
+      // Ir al micro o a la oración
+      enterBlock(bloque);
+    }, 440);
+  }
+
+  // ── Entrar a un bloque ──
+  function enterBlock(b) {
+    stopAudio();
+    currentBlock = b;
+    const prog = progress[b] || [];
+    const first = prog.findIndex(x => x === null);
+    currentMystery = first >= 0 ? first : 0;
+    openSection = null;
+    // Si hay micro y no se ha completado para este bloque → preparación
+    if (MICRO_DATA && MICRO_DATA.bloques && MICRO_DATA.bloques[b] && !microDone[b]) {
+      renderMicro(b);
+    } else {
+      renderPrayer();
+    }
+  }
+
+  // ══════════════════════════════════════════════════════
+  // MICRO-APRENDIZAJE
+  // ══════════════════════════════════════════════════════
+
+  function renderMicro(b) {
+    const bd = MICRO_DATA.bloques[b];
+    microStep = 0; microAnswered = false;
+    $('h-title').textContent = 'CruzAndo';
+    $('h-sub').textContent = 'Preparación · ' + BLOCK_NAMES[b];
+    $('micro-bloque-label').textContent = 'Misterios ' + BLOCK_NAMES[b];
+    $('micro-titulo').textContent = bd.titulo;
+    $('micro-subtitulo').textContent = bd.subtitulo || '';
+    $('btn-back-micro').onclick = () => { stopAudio(); renderHome(); };
+    renderMicroStep(b);
+    show('scr-micro');
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
+
+  function renderMicroStep(b) {
+    const bd = MICRO_DATA.bloques[b];
+    const tarjetas = bd.tarjetas || [];
+    const total = tarjetas.length + 1;
+    $('micro-progress-fill').style.width = Math.round((microStep / total) * 100) + '%';
+
+    const content  = $('micro-content');
+    const navBtns  = $('micro-nav-btns');
+
+    if (microStep < tarjetas.length) {
+      const t = tarjetas[microStep];
+      content.innerHTML =
+        '<div class="micro-card">' +
+          '<span class="micro-card-emoji">' + (t.emoji || '📖') + '</span>' +
+          '<p class="micro-card-texto">' + escHTML(t.texto) + '</p>' +
+          '<button class="micro-tts-btn" id="micro-tts-btn" onclick="window._ca.microTTS()">🔊 Escuchar</button>' +
+        '</div>';
+      const esUltima = microStep === tarjetas.length - 1;
+      navBtns.innerHTML =
+        (microStep > 0 ? '<button class="btn btn-outline" onclick="window._ca.microPrev()">← Anterior</button>' : '') +
+        '<button class="btn btn-primary" onclick="window._ca.microNext()">' + (esUltima ? 'Pregunta →' : 'Siguiente →') + '</button>';
+    } else {
+      const preg = bd.pregunta;
+      microAnswered = false;
+      content.innerHTML =
+        '<div class="micro-pregunta-box">' +
+          '<div class="micro-pregunta-label">🤲 Pregunta de apertura</div>' +
+          '<span class="micro-pregunta-emoji">' + (preg.emoji || '💭') + '</span>' +
+          '<p class="micro-pregunta-texto">' + escHTML(preg.texto) + '</p>' +
+          '<div class="micro-opciones">' +
+            preg.opciones.map((op, oi) =>
+              '<button class="micro-opcion" id="micro-op-' + oi + '" onclick="window._ca.microResponder(' + oi + ')">' +
+                '<span class="micro-opcion-letra">' + op.letra + '</span>' + escHTML(op.texto) +
+              '</button>'
+            ).join('') +
+          '</div>' +
+          '<div class="micro-eco" id="micro-eco"></div>' +
+        '</div>';
+      navBtns.innerHTML =
+        '<button class="btn btn-outline" onclick="window._ca.microPrev()">← Anterior</button>' +
+        '<button class="btn btn-primary btn-rezar" id="btn-ir-rezar" style="display:none" onclick="window._ca.microFinalizar()">📿 Rezar ahora</button>';
+    }
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
+
+  function microResponder(oi) {
+    if (microAnswered) return;
+    microAnswered = true;
+    const b = currentBlock;
+    const op = MICRO_DATA.bloques[b].pregunta.opciones[oi];
+    MICRO_DATA.bloques[b].pregunta.opciones.forEach((_, i) => {
+      const btn = $('micro-op-' + i);
+      if (btn) btn.classList.toggle('selected', i === oi);
+    });
+    const ecoEl = $('micro-eco');
+    if (ecoEl) {
+      ecoEl.innerHTML = '<span class="micro-eco-emoji">' + (op.emoji || '✨') + '</span> ' + escHTML(op.eco);
+      ecoEl.classList.add('visible');
+    }
+    playNotes([523, 659]);
+    const btnR = $('btn-ir-rezar');
+    if (btnR) btnR.style.display = '';
+  }
+
+  function microNext() { microStep++; renderMicroStep(currentBlock); }
+  function microPrev() { if (microStep > 0) { microStep--; renderMicroStep(currentBlock); } }
+
+  function microTTS() {
+    const t = MICRO_DATA.bloques[currentBlock].tarjetas[microStep];
+    if (!t) return;
+    const btn = $('micro-tts-btn');
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+      if (btn) { btn.classList.remove('playing'); btn.textContent = '🔊 Escuchar'; }
+      return;
+    }
+    const utt = new SpeechSynthesisUtterance(t.texto);
+    utt.lang = 'es-MX'; utt.rate = 0.9;
+    const voces = window.speechSynthesis.getVoices();
+    const voz = voces.find(v => v.lang.startsWith('es') && v.name.toLowerCase().includes('male')) ||
+                voces.find(v => v.lang.startsWith('es') && !v.name.toLowerCase().includes('female')) ||
+                voces.find(v => v.lang.startsWith('es')) || null;
+    if (voz) utt.voice = voz;
+    utt.onstart = () => { if (btn) { btn.classList.add('playing'); btn.textContent = '⏹ Detener'; } };
+    utt.onend = utt.onerror = () => { if (btn) { btn.classList.remove('playing'); btn.textContent = '🔊 Escuchar'; } };
+    window.speechSynthesis.speak(utt);
+  }
+
+  function microFinalizar() {
+    microDone[currentBlock] = true;
+    saveProgress();
+    playNotes([523, 659, 784, 880]);
+    luxShine();
+    setTimeout(() => renderPrayer(), 600);
+  }
+
+  // ── Render: Pantalla de Oración ──
+  function renderPrayer() {
+    const b = currentBlock;
+    const mi = currentMystery;
+    const mists = DATA.misterios[b];
+    const m = mists[mi];
+    const prog = progress[b];
+
+    $('h-title').textContent = 'CruzAndo';
+    $('h-sub').textContent = nivelLabel(DATA.tema.id) + ' · ' + BLOCK_NAMES[b];
+
+    // Counter
+    $('prayer-counter').textContent = ORDS[mi] + ' Misterio ' + BTYPES[b];
+    $('prayer-title').textContent = m.titulo;
+    $('prayer-subtitle').textContent = m.subtitulo || '';
+
+    // Beads (rosary chain)
+    const dots = $('prayer-dots');
+    const beadPositions = [24, 72, 120, 168, 216];
+    const boldColor = DATA.tema.paleta.bold;
+    const lightColor = DATA.tema.paleta.light;
+    const borderC = isDark ? '#3A3530' : '#D9D1C7';
+    const lineColorDone = lightColor;
+    const lineColorPending = borderC;
+
+    // Find how far the chain color extends
+    const lastDoneIdx = (() => { for (let i = 4; i >= 0; i--) { if (prog[i]) return i; } return -1; })();
+    const chainEndX = lastDoneIdx >= 0 ? beadPositions[lastDoneIdx] : 24;
+
+    let svgHTML = '<svg viewBox="0 0 240 30" preserveAspectRatio="xMidYMid meet">';
+    // Background line (pending)
+    svgHTML += '<line x1="24" y1="15" x2="216" y2="15" stroke="' + lineColorPending + '" stroke-width="1.5" stroke-linecap="round"/>';
+    // Done line
+    if (lastDoneIdx >= 0) {
+      svgHTML += '<line x1="24" y1="15" x2="' + chainEndX + '" y2="15" stroke="' + lineColorDone + '" stroke-width="1.5" stroke-linecap="round"/>';
+    }
+    // Beads
+    for (let i = 0; i < 5; i++) {
+      const cx = beadPositions[i];
+      if (prog[i]) {
+        // Done bead
+        svgHTML += '<circle cx="' + cx + '" cy="15" r="9" fill="' + boldColor + '" style="cursor:pointer" onclick="window._ca.goMystery(' + i + ')"/>';
+      } else if (i === mi) {
+        // Active bead (current mystery)
+        svgHTML += '<circle cx="' + cx + '" cy="15" r="9.5" fill="none" stroke="' + boldColor + '" stroke-width="2" style="cursor:pointer" onclick="window._ca.goMystery(' + i + ')"/>';
+        svgHTML += '<circle cx="' + cx + '" cy="15" r="4" fill="' + lightColor + '" style="cursor:pointer" onclick="window._ca.goMystery(' + i + ')"/>';
+      } else {
+        // Pending bead
+        svgHTML += '<circle cx="' + cx + '" cy="15" r="9" fill="none" stroke="' + borderC + '" stroke-width="1.2" style="cursor:pointer" onclick="window._ca.goMystery(' + i + ')"/>';
+      }
+    }
+    svgHTML += '</svg>';
+    dots.innerHTML = svgHTML;
+
+    // Evangelio
+    $('ev-text').textContent = m.evangelio;
+    $('ev-ref').textContent = '— ' + m.referencia;
+
+    // Acordeón
+    renderAccordion(b, mi, m);
+
+    // Done bar
+    const doneWrap = $('mystery-done-wrap');
+    if (prog[mi]) {
+      const d = new Date(prog[mi]);
+      doneWrap.style.display = '';
+      doneWrap.innerHTML =
+        '<div class="mystery-done-bar fade-in">' +
+          '<span class="done-check">✓</span>' +
+          '<div><div class="done-text">Misterio completado</div>' +
+          '<div class="done-date">' + d.toLocaleDateString('es-MX',{day:'numeric',month:'long'}) + '</div></div>' +
+        '</div>';
+    } else {
+      doneWrap.style.display = 'none';
+    }
+
+    // Bottom nav
+    renderBottomNav(b, mi);
+
+    show('scr-prayer');
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
+
+  // ── Acordeón ──
+  function renderAccordion(b, mi, m) {
+    const acc = $('accordion');
+    const sections = [
+      { key:'rezar', icon:'📿', label:'Rezar este Misterio', bgVar:'--lvl-ultra' },
+      { key:'canto', icon:'🎵', label:'Canto', bgVar:'--lvl-ultra' },
+      { key:'contemplar', icon:'👁️', label:'Contemplar', bgVar:'--lvl-ultra' },
+      { key:'meditar', icon:'✏️', label:'Meditar y escribir', bgVar:'--lvl-ultra' },
+      { key:'intercesion', icon:'🙏', label:'Intercesión', bgVar:'--lvl-ultra' },
+    ];
+
+    acc.innerHTML = sections.map(s => {
+      const isOpen = openSection === s.key;
+      return '<div class="acc-item' + (isOpen ? ' open' : '') + '" id="acc-' + s.key + '">' +
+        '<button class="acc-trigger" onclick="window._ca.toggleSection(\'' + s.key + '\')">' +
+          '<div class="acc-trigger-left">' +
+            '<div class="acc-icon" style="background:var(' + s.bgVar + ')">' + s.icon + '</div>' +
+            '<span class="acc-label">' + s.label + '</span>' +
+          '</div>' +
+          '<svg class="acc-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>' +
+        '</button>' +
+        '<div class="acc-body" style="max-height:' + (isOpen ? '2000px' : '0') + '">' +
+          '<div class="acc-body-inner">' + sectionContent(s.key, b, mi, m) + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function sectionContent(key, b, mi, m) {
+    if (key === 'rezar') {
+      const src = DATA.audio_rezo || '';
+      return audioPlayerHTML('ap-rezar', 'Padrenuestro · 10 Avemarías · Gloria · Jaculatoria', src);
+    }
+    if (key === 'canto') {
+      const src = DATA.audio_canto || '';
+      if (src) return audioPlayerHTML('ap-canto', 'Canto contemplativo', src);
+      return '<div class="canto-box"><p>🕊️ Momento de silencio y canto contemplativo</p><span class="canto-hint">Tómate unos momentos para cantar, meditar o guardar silencio antes de continuar</span></div>';
+    }
+    if (key === 'contemplar') {
+      const src = m.audio_contemplacion || '';
+      let html = audioPlayerHTML('ap-contempl', 'Audio de la contemplación', src);
+      html += '<div class="contempl-text">' + escHTML(m.contemplacion) + '</div>';
+      return html;
+    }
+    if (key === 'meditar') {
+      return renderMeditation(b, mi, m);
+    }
+    if (key === 'intercesion') {
+      let html = '<div class="interc-text">' + escHTML(m.intercesion) + '</div>';
+      const isDone = progress[b] && progress[b][mi];
+      html += '<button class="amen-btn' + (isDone ? ' done' : '') + '" onclick="window._ca.completeMystery()">' + (isDone ? '✓ Amén' : 'Amén') + '</button>';
+      return html;
+    }
+    return '';
+  }
+
+  function renderMeditation(b, mi, m) {
+    // Parsear las 3 preguntas de meditación
+    const questions = parseMeditation(m.meditacion);
+    const j = journal[b] && journal[b][mi] ? journal[b][mi] : {};
+    const mc = medConfirmed[b] && medConfirmed[b][mi] ? medConfirmed[b][mi] : {};
+
+    return questions.map((q, qi) => {
+      const val = j['q' + qi] || '';
+      const confirmed = mc['q' + qi] || false;
+      const btnClass = 'med-confirm' + (confirmed ? ' done' : '');
+      const btnText = confirmed ? '✓ Reflexión guardada' : '📝 Guardar reflexión';
+      return '<div class="med-group">' +
+        '<div class="med-label-row">' +
+          '<div class="med-dot" style="background:' + MED_COLORS[qi] + '"></div>' +
+          '<span class="med-label-text" style="color:' + MED_COLORS[qi] + '">' + MED_LABELS[qi] + '</span>' +
+        '</div>' +
+        '<p class="med-question">' + escHTML(q) + '</p>' +
+        '<textarea class="journal-area" id="med-ta-' + qi + '" placeholder="Escribe tu reflexión…" ' +
+          'oninput="window._ca.onMedInput(\'' + b + '\',' + mi + ',' + qi + ',this.value)">' + escHTML(val) + '</textarea>' +
+        '<button class="' + btnClass + '" id="med-btn-' + qi + '" onclick="window._ca.confirmReflection(\'' + b + '\',' + mi + ',' + qi + ')">' + btnText + '</button>' +
+      '</div>';
+    }).join('');
+  }
+
+  function parseMeditation(text) {
+    if (!text) return ['','',''];
+    // Intentar separar por las 3 etiquetas
+    const labels = MED_LABELS;
+    const parts = [];
+    let remaining = text;
+    for (let i = 0; i < labels.length; i++) {
+      const idx = remaining.indexOf(labels[i]);
+      if (idx >= 0) {
+        if (i > 0 && parts.length < i) parts.push(remaining.substring(0, idx).trim());
+        remaining = remaining.substring(idx + labels[i].length);
+        // Quitar : inicial si hay
+        remaining = remaining.replace(/^\s*:\s*/, '');
+      }
+    }
+    if (remaining.trim()) parts.push(remaining.trim());
+
+    // Si no se pudo parsear con labels, intentar por líneas
+    if (parts.length < 3) {
+      const lines = text.split('\n').filter(l => l.trim());
+      return [lines[0] || '', lines[1] || '', lines[2] || ''];
+    }
+    return parts.length >= 3 ? parts.slice(0,3) : [...parts, ...Array(3-parts.length).fill('')];
+  }
+
+  function saveJournal(b, mi, qi, val) {
+    if (!journal[b]) journal[b] = {};
+    if (!journal[b][mi]) journal[b][mi] = {};
+    journal[b][mi]['q' + qi] = val;
+    saveProgress();
+  }
+
+  function onMedInput(b, mi, qi, val) {
+    saveJournal(b, mi, qi, val);
+    // Auto-trigger a los 140 caracteres si no está confirmado aún
+    if (!medConfirmed[b]) medConfirmed[b] = {};
+    if (!medConfirmed[b][mi]) medConfirmed[b][mi] = {};
+    if (!medConfirmed[b][mi]['q' + qi] && val.length >= 140) {
+      confirmReflection(b, mi, qi);
+    }
+  }
+
+  function confirmReflection(b, mi, qi) {
+    if (!medConfirmed[b]) medConfirmed[b] = {};
+    if (!medConfirmed[b][mi]) medConfirmed[b][mi] = {};
+    if (medConfirmed[b][mi]['q' + qi]) return; // ya confirmado
+
+    // Verificar que haya texto
+    const j = journal[b] && journal[b][mi] ? journal[b][mi] : {};
+    const val = j['q' + qi] || '';
+    if (val.trim().length < 5) return; // muy corto, ignorar
+
+    medConfirmed[b][mi]['q' + qi] = true;
+    saveProgress();
+
+    // Sonido suave (nota ascendente según pregunta)
+    const freqs = [[523,659],[587,740],[659,880]];
+    playNotes(freqs[qi] || freqs[0]);
+
+    // Visual: actualizar botón con glow
+    const btn = document.getElementById('med-btn-' + qi);
+    if (btn) {
+      btn.className = 'med-confirm done glow';
+      btn.textContent = '✓ Reflexión guardada';
+    }
+
+    // GAMIFICACIÓN: Dar recompensa de 650m con Mariano descansando
+    const rewardKey = b + '_' + mi + '_q' + qi;
+    if (!reflectionRewards[rewardKey]) {
+      reflectionRewards[rewardKey] = true;
+      gainMeters(650, getNextRestPose());
+    }
+  }
+
+  function toggleSection(key) {
+    openSection = openSection === key ? null : key;
+    renderAccordion(currentBlock, currentMystery, DATA.misterios[currentBlock][currentMystery]);
+  }
+
+  // ── Completar misterio ──
+  function completeMystery() {
+    const b = currentBlock;
+    const mi = currentMystery;
+    if (progress[b][mi]) return; // ya completado
+
+    progress[b][mi] = Date.now();
+    saveProgress();
+
+    // Celebración del misterio
+    const variant = BLOCKS.indexOf(b) * 5 + mi;
+    celebrationSound(variant);
+
+    // Checar si el bloque está completo
+    const allDone = progress[b].every(x => x !== null);
+    if (allDone) {
+      // Celebración de bloque completo
+      setTimeout(() => {
+        showConfetti();
+        showCelebration(b);
+      }, 600);
+    } else {
+      // Auto-avanzar al siguiente misterio
+      renderPrayer();
+      if (mi < 4) {
+        setTimeout(() => {
+          currentMystery = mi + 1;
+          openSection = null;
+          stopAudio();
+          renderPrayer();
+        }, 800);
+      }
+    }
+  }
+
+  // ── Bottom Nav ──
+  function renderBottomNav(b, mi) {
+    const nav = $('bottom-nav');
+    const hasPrev = mi > 0;
+    const hasNext = mi < 4;
+    const isDone = progress[b][mi];
+
+    let html = '';
+    if (hasPrev) {
+      html += '<button class="btn btn-outline" onclick="window._ca.goMystery(' + (mi-1) + ')">← Anterior</button>';
+    }
+    if (hasNext && isDone) {
+      html += '<button class="btn btn-primary" onclick="window._ca.goMystery(' + (mi+1) + ')">Siguiente →</button>';
+    } else if (!isDone) {
+      // No mostrar "siguiente" hasta completar con Amén
+    }
+    nav.innerHTML = html;
+  }
+
+  function goMystery(i) {
+    currentMystery = i;
+    openSection = null;
+    stopAudio();
+    renderPrayer();
+  }
+
+  // ── Celebración de bloque ──
+  function showCelebration(b) {
+    // PRIMERO: Celebración grand de Mariano (pantalla completa, 3.5s)
+    showMarianoGrandCelebration();
+
+    // DESPUÉS: Pantalla de celebración tradicional
+    setTimeout(() => {
+      const blockName = BLOCK_NAMES[b];
+      const maria = 'img/maria_' + b + '.webp';
+
+      const container = $('maria-container');
+      const img = new Image();
+      img.onload = () => {
+        container.outerHTML = '<img class="maria-img" id="maria-container" src="' + maria + '" alt="Virgen María">';
+      };
+      img.onerror = () => {
+        container.innerHTML = '🙏';
+      };
+      img.src = maria;
+
+      $('celeb-title').textContent = '¡Misterios ' + blockName + ' completados!';
+      $('celeb-sub').textContent = 'Has contemplado los cinco Misterios ' + blockName + ' de este nivel. Que María siga acompañándote en el camino.';
+      $('btn-celeb-home').onclick = () => {
+        stopAudio();
+        renderHome();
+      };
+
+      show('scr-celebration');
+      celebrationSound(BLOCKS.indexOf(b));
+    }, 3500); // Esperar a que termine Mariano Grand
+  }
+
+  // ── Escape HTML ──
+  function escHTML(s) {
+    if (!s) return '';
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  }
+
+  // ── Iniciar ──
+  async function init() {
+    // Leer ID desde URL
+    const params = new URLSearchParams(window.location.search);
+    NIVEL_ID = params.get('c') || '0101';
+
+    // Validar formato 4 dígitos
+    if (!/^\d{4}$/.test(NIVEL_ID)) {
+      showError('ID inválido: ' + NIVEL_ID + '. Usa un código de 4 dígitos (ej. 0101).');
+      return;
+    }
+
+    // Cargar JSON (ruta relativa al directorio del HTML)
+    const loc = window.location;
+    const base = loc.origin + loc.pathname.substring(0, loc.pathname.lastIndexOf('/') + 1);
+    try {
+      const resp = await fetch(base + 'data/' + NIVEL_ID + '.json');
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      DATA = await resp.json();
+    } catch(e) {
+      showError('No se pudo cargar data/' + NIVEL_ID + '.json. Verifica que el archivo exista.');
+      return;
+    }
+
+    // Cargar micro-data (opcional, no bloquea si no existe)
+    try {
+      const mr = await fetch(base + 'data/' + NIVEL_ID + '-micro.json');
+      if (mr.ok) MICRO_DATA = await mr.json();
+    } catch(e) { MICRO_DATA = null; }
+
+    // Cargar progreso
+    loadProgress();
+
+    // Aplicar dark mode
+    if (isDark) {
+      document.body.classList.add('dark');
+      $('ico-sun').style.display = 'none';
+      $('ico-moon').style.display = 'block';
+    }
+
+    // Aplicar paleta
+    applyPalette();
+
+    // Event listeners
+    $('btn-dark').onclick = toggleDark;
+    $('btn-back-home').onclick = () => { stopAudio(); renderHome(); };
+
+    // API global para onclick en HTML
+    window._ca = {
+      toggleAudio: toggleAudio,
+      seekAudio: seekAudio,
+      toggleSection: toggleSection,
+      completeMystery: completeMystery,
+      goMystery: goMystery,
+      saveJournal: saveJournal,
+      onMedInput: onMedInput,
+      confirmReflection: confirmReflection,
+      enterBlock: enterBlock,
+      microNext: microNext,
+      microPrev: microPrev,
+      microTTS: microTTS,
+      microResponder: microResponder,
+      microFinalizar: microFinalizar,
+      bkSelectBloque: bkSelectBloque,
+      bkGoOrar: bkGoOrar,
+    };
+
+    // Render
+    $('scr-loading').style.display = 'none';
+    $('main-header').style.display = '';
+    renderHome();
+  }
+
+  function showError(msg) {
+    $('scr-loading').style.display = 'none';
+    $('error-msg').textContent = msg;
+    $('scr-error').style.display = 'flex';
+  }
+
+  // Arrancar
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+})();
+</script>
+</body>
+</html>
