@@ -801,6 +801,174 @@ body {
 .micro-nav-btns { padding:14px 18px 28px; display:flex; gap:10px; }
 .micro-nav-btns .btn { flex:1; }
 .btn-rezar { background:var(--lvl-bold); color:#fff; box-shadow:0 4px 14px rgba(0,0,0,0.15); font-size:1rem; padding:16px; }
+
+/* ══════════════════════════════════════════════════════
+   LIBRO INTEGRADO — Micro dentro del viewport del libro
+   ══════════════════════════════════════════════════════ */
+
+/* Página de micro-aprendizaje dentro del libro */
+.bk-page-micro {
+  position:absolute; width:100%; height:100%;
+  background:var(--card);
+  display:flex; flex-direction:column;
+  transform:translateX(100%);
+  transition:transform 0.42s cubic-bezier(0.4,0,0.2,1), opacity 0.32s ease;
+  opacity:0;
+  border-radius:0 8px 8px 0;
+  overflow:hidden;
+}
+.bk-page-micro::after {
+  content:''; position:absolute; inset:0;
+  background:repeating-linear-gradient(
+    to bottom, transparent 0, transparent 24px,
+    rgba(43,38,34,0.05) 24px, rgba(43,38,34,0.05) 25px
+  );
+  pointer-events:none; border-radius:0 8px 8px 0;
+}
+.bk-page-micro.pg-current { transform:translateX(0); opacity:1; }
+.bk-page-micro.enter-r  { transform:translateX(100%); opacity:0; }
+.bk-page-micro.enter-l  { transform:translateX(-100%); opacity:0; }
+.bk-page-micro.exit-l   { transform:translateX(-100%); opacity:0; }
+.bk-page-micro.exit-r   { transform:translateX(100%); opacity:0; }
+
+/* Cabecera de micro dentro del libro */
+.bk-micro-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 16px 10px; border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.bk-micro-back {
+  font-size:0.72rem; font-weight:700; color:var(--text-soft);
+  background:none; border:none; cursor:pointer; padding:4px 8px;
+  font-family:inherit;
+}
+.bk-micro-back:active { opacity:0.6; }
+.bk-micro-tag {
+  font-size:0.62rem; font-weight:700; letter-spacing:1px;
+  text-transform:uppercase; color:var(--lvl-bold);
+}
+.bk-micro-dots {
+  display:flex; gap:4px; align-items:center;
+}
+.bk-micro-dot {
+  width:6px; height:6px; border-radius:50%;
+  background:var(--border); transition:all 0.3s;
+}
+.bk-micro-dot.active { background:var(--lvl-bold); transform:scale(1.2); }
+.bk-micro-dot.done   { background:var(--green); }
+
+/* Contenido scrollable de la micro-ficha */
+.bk-micro-body {
+  flex:1; overflow-y:auto; padding:18px 16px 8px;
+  -webkit-overflow-scrolling:touch;
+  display:flex; flex-direction:column; align-items:flex-start; gap:12px;
+}
+.bk-micro-emoji { font-size:2rem; line-height:1; }
+.bk-micro-text { font-size:0.92rem; line-height:1.8; color:var(--text); }
+.bk-micro-tts {
+  display:flex; align-items:center; gap:5px; margin-top:6px;
+  padding:8px 12px; border-radius:10px; border:1.5px solid var(--border);
+  background:var(--sec-bg); color:var(--text-soft);
+  font-family:inherit; font-size:0.75rem; font-weight:600; cursor:pointer;
+  transition:all 0.2s;
+}
+.bk-micro-tts.playing { border-color:var(--lvl-soft); color:var(--lvl-bold); background:var(--lvl-ultra); }
+
+/* Pregunta dentro del libro */
+.bk-micro-q-label {
+  font-size:0.62rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:1px; color:var(--lvl-bold);
+}
+.bk-micro-q-emoji { font-size:1.5rem; }
+.bk-micro-q-text {
+  font-size:0.88rem; line-height:1.7; color:var(--text); font-weight:500;
+}
+.bk-micro-opciones { display:flex; flex-direction:column; gap:8px; width:100%; }
+.bk-micro-opcion {
+  padding:12px 14px; border-radius:12px; border:1.5px solid var(--border);
+  background:var(--sec-bg); font-family:inherit; font-size:0.82rem; line-height:1.5;
+  color:var(--text); cursor:pointer; text-align:left; transition:all 0.2s; width:100%;
+}
+.bk-micro-opcion.selected { border-color:var(--lvl-soft); background:var(--lvl-ultra); }
+.bk-micro-opcion-letra { font-weight:800; color:var(--lvl-bold); margin-right:4px; }
+.bk-micro-eco {
+  padding:12px 14px; border-radius:12px;
+  background:var(--sec-bg); border-left:3px solid var(--lvl-soft);
+  font-size:0.82rem; line-height:1.75; color:var(--text-soft);
+  animation:fadeIn 0.4s ease both; display:none; width:100%;
+}
+.bk-micro-eco.visible { display:block; }
+
+/* Barra de progreso dentro del libro */
+.bk-micro-progress {
+  height:3px; background:var(--border); border-radius:2px; margin:0 16px;
+  flex-shrink:0; overflow:hidden;
+}
+.bk-micro-progress-fill {
+  height:100%; background:var(--lvl-bold); border-radius:2px; transition:width 0.4s ease;
+}
+
+/* Pie de página con botones de navegación */
+.bk-micro-footer {
+  padding:10px 14px 14px; display:flex; gap:8px; flex-shrink:0;
+  border-top:1px solid var(--border);
+}
+.bk-micro-btn {
+  flex:1; padding:12px 10px; border-radius:10px; border:none;
+  font-family:inherit; font-size:0.82rem; font-weight:700;
+  cursor:pointer; transition:all 0.2s;
+}
+.bk-micro-btn:active { transform:scale(0.96); }
+.bk-micro-btn-sec { background:var(--sec-bg); border:1.5px solid var(--border); color:var(--text-soft); }
+.bk-micro-btn-pri { background:var(--lvl-bold); color:#fff; }
+.bk-micro-btn-rezar { background:var(--lvl-bold); color:#fff; display:none; }
+
+/* ══════════════════════════════════════════════════════
+   TRANSICIÓN LIBRO ↔ ORACIÓN
+   ══════════════════════════════════════════════════════ */
+
+/* Wrapper del libro que se anima al salir/entrar */
+#book-outer-wrap {
+  width:100%; max-width:360px;
+  height:min(72dvh, 520px);
+  transition: transform 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.45s ease;
+  transform-origin: top center;
+}
+#book-outer-wrap.exit-up {
+  transform: scale(0.82) translateY(-40px);
+  opacity: 0;
+  pointer-events: none;
+}
+#book-outer-wrap.enter-down {
+  transform: scale(0.82) translateY(-40px);
+  opacity: 0;
+}
+
+/* scr-prayer aparece desde abajo */
+#scr-prayer {
+  animation: none;
+}
+#scr-prayer.slide-in-up {
+  animation: prayerSlideIn 0.5s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+@keyframes prayerSlideIn {
+  from { transform:translateY(60px); opacity:0; }
+  to   { transform:translateY(0);    opacity:1; }
+}
+#scr-prayer.slide-out-down {
+  animation: prayerSlideOut 0.4s cubic-bezier(0.4,0,0.6,1) forwards;
+}
+@keyframes prayerSlideOut {
+  from { transform:translateY(0);    opacity:1; }
+  to   { transform:translateY(60px); opacity:0; }
+}
+
+/* ── fadeIn ── */
+@keyframes fadeIn {
+  from { opacity:0; transform:translateY(6px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
 </style>
 </head>
 <body>
@@ -872,7 +1040,8 @@ body {
     <div class="book-scene">
       <div style="position:relative; width:100%; max-width:360px; height:min(72dvh,520px);">
 
-        <div class="book-wrap" id="book-wrap">
+        <div id="book-outer-wrap">
+          <div class="book-wrap" id="book-wrap">
           <div class="bk-spine"></div>
           <div class="bk-back"></div>
 
@@ -965,6 +1134,25 @@ body {
               <button class="btn-orar-pg" id="btnp-gloriosos" data-bloque="gloriosos"></button>
             </div>
 
+
+            <!-- Página de micro-aprendizaje integrada en el libro -->
+            <div class="bk-page-micro enter-r" id="bkpg-micro">
+              <!-- Header -->
+              <div class="bk-micro-header">
+                <button class="bk-micro-back" id="bk-micro-back-btn">← Volver</button>
+                <span class="bk-micro-tag" id="bk-micro-tag"></span>
+                <div class="bk-micro-dots" id="bk-micro-dots"></div>
+              </div>
+              <!-- Barra de progreso -->
+              <div class="bk-micro-progress">
+                <div class="bk-micro-progress-fill" id="bk-micro-progress-fill" style="width:0%"></div>
+              </div>
+              <!-- Contenido de la ficha -->
+              <div class="bk-micro-body" id="bk-micro-body"></div>
+              <!-- Botones de navegación -->
+              <div class="bk-micro-footer" id="bk-micro-footer"></div>
+            </div>
+
           </div><!-- /bk-viewport -->
 
           <!-- Tapa delantera -->
@@ -979,6 +1167,7 @@ body {
           </div>
 
         </div><!-- /book-wrap -->
+        </div><!-- /book-outer-wrap -->
         <div class="bk-shadow" id="bk-shadow"></div>
 
       </div>
@@ -1666,6 +1855,15 @@ body {
     });
     document.querySelectorAll('.bk-ribbon').forEach(r => r.classList.remove('active'));
 
+    // Restaurar libro si venía de oración
+    const outer = $('book-outer-wrap');
+    if (outer && outer.classList.contains('exit-up')) {
+      outer.classList.remove('exit-up');
+      outer.classList.add('enter-down');
+      outer.offsetHeight;
+      outer.classList.remove('enter-down');
+    }
+
     show('scr-home');
   }
 
@@ -1726,12 +1924,16 @@ body {
     pg.classList.add('pg-current');
   }
 
-  // ── Botón Orar: transición hacia micro o prayer ──
+  // ── Botón Orar: muestra micro dentro del libro o va directo a oración ──
   function bkGoOrar(bloque) {
     if (bkAnimating) return;
     bkAnimating = true;
+    currentBlock = bloque;
 
-    // Página actual sale hacia la izquierda
+    const hasUnfinished = !microDone[bloque];
+    const hasMicro = MICRO_DATA && MICRO_DATA.bloques && MICRO_DATA.bloques[bloque];
+
+    // Página resumen sale hacia la izquierda
     const curPg = $('bkpg-' + bloque);
     curPg.classList.remove('pg-current');
     curPg.classList.add('exit-l');
@@ -1740,24 +1942,244 @@ body {
       curPg.classList.remove('exit-l','pg-current');
       curPg.classList.add('enter-r');
       bkAnimating = false;
-      // Ir al micro o a la oración
-      enterBlock(bloque);
+
+      if (hasMicro && hasUnfinished) {
+        // Mostrar micro DENTRO del libro
+        bkShowMicro(bloque);
+      } else {
+        // Ir directo a oración (transición libro↑)
+        transitionToprayer(bloque);
+      }
     }, 440);
   }
 
-  // ── Entrar a un bloque ──
-  function enterBlock(b) {
+  // ── Mostrar micro-aprendizaje dentro del viewport del libro ──
+  let bkMicroStep = 0;
+  let bkMicroAnswered = false;
+  let bkMicroBloque = null;
+
+  function bkShowMicro(bloque) {
+    bkMicroBloque = bloque;
+    bkMicroStep = 0;
+    bkMicroAnswered = false;
+
+    const pg = $('bkpg-micro');
+    pg.classList.remove('enter-r','enter-l','exit-l','exit-r','pg-current');
+    pg.classList.add('enter-r');
+    pg.offsetHeight; // reflow
+    pg.classList.remove('enter-r');
+    pg.classList.add('pg-current');
+
+    // Botón volver a resumen
+    const backBtn = $('bk-micro-back-btn');
+    if (backBtn) backBtn.onclick = () => bkMicroBackToSummary(bloque);
+
+    bkRenderMicroStep();
+  }
+
+  function bkMicroBackToSummary(bloque) {
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    const microPg = $('bkpg-micro');
+    const summPg  = $('bkpg-' + bloque);
+
+    microPg.classList.remove('pg-current');
+    microPg.classList.add('exit-r');
+
+    summPg.classList.remove('enter-r','enter-l');
+    summPg.classList.add('enter-l');
+    summPg.offsetHeight;
+    summPg.classList.remove('enter-l');
+    summPg.classList.add('pg-current');
+
+    setTimeout(() => {
+      microPg.classList.remove('exit-r','pg-current');
+      microPg.classList.add('enter-r');
+    }, 450);
+
+    bkCurrentIdx = BLOCKS.indexOf(bloque);
+  }
+
+  function bkRenderMicroStep() {
+    const b  = bkMicroBloque;
+    const bd = MICRO_DATA.bloques[b];
+    const tarjetas = bd.tarjetas || [];
+    const total = tarjetas.length + 1;
+    const step  = bkMicroStep;
+
+    // Tag con nombre del bloque
+    const tagEl = $('bk-micro-tag');
+    if (tagEl) tagEl.textContent = 'Misterios ' + BLOCK_NAMES[b];
+
+    // Puntos de progreso
+    const dotsEl = $('bk-micro-dots');
+    if (dotsEl) {
+      dotsEl.innerHTML = Array.from({length: total}, (_, i) =>
+        '<div class="bk-micro-dot' +
+        (i < step ? ' done' : i === step ? ' active' : '') + '"></div>'
+      ).join('');
+    }
+
+    // Barra de progreso
+    const fill = $('bk-micro-progress-fill');
+    if (fill) fill.style.width = Math.round((step / total) * 100) + '%';
+
+    const body   = $('bk-micro-body');
+    const footer = $('bk-micro-footer');
+
+    if (step < tarjetas.length) {
+      // Ficha de contenido
+      const t = tarjetas[step];
+      const esUltima = step === tarjetas.length - 1;
+      body.innerHTML =
+        '<div class="bk-micro-emoji">' + (t.emoji || '📖') + '</div>' +
+        '<p class="bk-micro-text">' + escHTML(t.texto) + '</p>' +
+        '<button class="bk-micro-tts" id="bk-micro-tts-btn" onclick="window._ca.bkMicroTTS()">🔊 Escuchar</button>';
+      footer.innerHTML =
+        (step > 0 ? '<button class="bk-micro-btn bk-micro-btn-sec" onclick="window._ca.bkMicroPrev()">← Anterior</button>' : '') +
+        '<button class="bk-micro-btn bk-micro-btn-pri" onclick="window._ca.bkMicroNext()">' +
+        (esUltima ? 'Pregunta →' : 'Siguiente →') + '</button>';
+    } else {
+      // Pregunta de apertura
+      const preg = bd.pregunta;
+      bkMicroAnswered = false;
+      body.innerHTML =
+        '<div class="bk-micro-q-label">🤲 Pregunta de apertura</div>' +
+        '<div class="bk-micro-q-emoji">' + (preg.emoji || '💭') + '</div>' +
+        '<p class="bk-micro-q-text">' + escHTML(preg.texto) + '</p>' +
+        '<div class="bk-micro-opciones">' +
+          preg.opciones.map((op, oi) =>
+            '<button class="bk-micro-opcion" id="bk-micro-op-' + oi + '" onclick="window._ca.bkMicroResponder(' + oi + ')">' +
+              '<span class="bk-micro-opcion-letra">' + op.letra + '</span>' + escHTML(op.texto) +
+            '</button>'
+          ).join('') +
+        '</div>' +
+        '<div class="bk-micro-eco" id="bk-micro-eco"></div>';
+      footer.innerHTML =
+        '<button class="bk-micro-btn bk-micro-btn-sec" onclick="window._ca.bkMicroPrev()">← Anterior</button>' +
+        '<button class="bk-micro-btn bk-micro-btn-rezar" id="bk-micro-btn-rezar" onclick="window._ca.bkMicroFinalizar()">📿 Rezar ahora</button>';
+    }
+    // Scroll al inicio de la ficha
+    if (body) body.scrollTop = 0;
+  }
+
+  function bkMicroNext() {
+    if (bkMicroStep < (MICRO_DATA.bloques[bkMicroBloque].tarjetas.length)) {
+      bkMicroStep++;
+      bkRenderMicroStep();
+    }
+  }
+  function bkMicroPrev() {
+    if (bkMicroStep > 0) { bkMicroStep--; bkRenderMicroStep(); }
+  }
+
+  function bkMicroTTS() {
+    const t = MICRO_DATA.bloques[bkMicroBloque].tarjetas[bkMicroStep];
+    if (!t) return;
+    const btn = $('bk-micro-tts-btn');
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+      if (btn) { btn.classList.remove('playing'); btn.textContent = '🔊 Escuchar'; }
+      return;
+    }
+    const utt = new SpeechSynthesisUtterance(t.texto);
+    utt.lang = 'es-MX'; utt.rate = 0.9;
+    const voces = window.speechSynthesis.getVoices();
+    const voz = voces.find(v => v.lang.startsWith('es') && v.name.toLowerCase().includes('male')) ||
+               voces.find(v => v.lang.startsWith('es') && !v.name.toLowerCase().includes('female')) ||
+               voces.find(v => v.lang.startsWith('es')) || null;
+    if (voz) utt.voice = voz;
+    utt.onstart = () => { if (btn) { btn.classList.add('playing'); btn.textContent = '⏹ Detener'; } };
+    utt.onend = utt.onerror = () => { if (btn) { btn.classList.remove('playing'); btn.textContent = '🔊 Escuchar'; } };
+    window.speechSynthesis.speak(utt);
+  }
+
+  function bkMicroResponder(oi) {
+    if (bkMicroAnswered) return;
+    bkMicroAnswered = true;
+    const op = MICRO_DATA.bloques[bkMicroBloque].pregunta.opciones[oi];
+    MICRO_DATA.bloques[bkMicroBloque].pregunta.opciones.forEach((_, i) => {
+      const btn = $('bk-micro-op-' + i);
+      if (btn) btn.classList.toggle('selected', i === oi);
+    });
+    const eco = $('bk-micro-eco');
+    if (eco) {
+      eco.innerHTML = '<span style="margin-right:4px">' + (op.emoji || '✨') + '</span>' + escHTML(op.eco);
+      eco.classList.add('visible');
+    }
+    playNotes([523, 659]);
+    const btnR = $('bk-micro-btn-rezar');
+    if (btnR) { btnR.style.display = ''; }
+  }
+
+  function bkMicroFinalizar() {
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    microDone[bkMicroBloque] = true;
+    saveProgress();
+    playNotes([523, 659, 784, 880]);
+    luxShine();
+    // Transición: el libro sube y desaparece
+    setTimeout(() => transitionToPrayer(bkMicroBloque), 300);
+  }
+
+  // ── Transición libro → pantalla de oración ──
+  function transitionToPlayer(bloque) { transitionToPrayer(bloque); } // alias
+  function transitionToBook() {
+    // Mostrar libro regresando
+    const outer = $('book-outer-wrap');
+    if (outer) {
+      outer.classList.remove('exit-up');
+      outer.classList.add('enter-down');
+      outer.offsetHeight;
+      outer.classList.remove('enter-down');
+    }
+  }
+
+  function transitionToPrayer(bloque) {
     stopAudio();
+    currentBlock = bloque;
+    const prog = progress[bloque] || [];
+    const first = prog.findIndex(x => x === null);
+    currentMystery = first >= 0 ? first : 0;
+    openSection = null;
+
+    // Animar libro hacia arriba
+    const outer = $('book-outer-wrap');
+    if (outer) {
+      outer.classList.add('exit-up');
+    }
+
+    setTimeout(() => {
+      // Mostrar pantalla de oración con animación
+      renderPrayer();
+      const prayerScr = $('scr-prayer');
+      prayerScr.classList.add('slide-in-up');
+      setTimeout(() => prayerScr.classList.remove('slide-in-up'), 550);
+    }, 420);
+  }
+
+  // ── Entrar a un bloque (vía hoy-tab o directo) ──
+  function enterBlock(b) {
+    // Ahora todo pasa por bkGoOrar (el libro es el motor)
+    // Esta función puede ser llamada si se llega desde tab-hoy sin haber abierto el libro
     currentBlock = b;
     const prog = progress[b] || [];
     const first = prog.findIndex(x => x === null);
     currentMystery = first >= 0 ? first : 0;
     openSection = null;
-    // Si hay micro y no se ha completado para este bloque → preparación
-    if (MICRO_DATA && MICRO_DATA.bloques && MICRO_DATA.bloques[b] && !microDone[b]) {
-      renderMicro(b);
+    const hasMicro = MICRO_DATA && MICRO_DATA.bloques && MICRO_DATA.bloques[b];
+    if (hasMicro && !microDone[b]) {
+      // Necesita pasar por el libro: seleccionar bloque y mostrar
+      // Si el libro aún no está abierto, abrirlo primero
+      if (!bkIsOpen) {
+        // Primero abrir el libro mostrando la página de ese bloque
+        bkSelectBloque(b);
+        // Dar tiempo a que se abra el libro antes de ir al micro
+        setTimeout(() => { bkGoOrar(b); }, 1100);
+      } else {
+        bkGoOrar(b);
+      }
     } else {
-      renderPrayer();
+      transitionToPlayer(b);
     }
   }
 
@@ -2261,7 +2683,15 @@ body {
 
     // Event listeners
     $('btn-dark').onclick = toggleDark;
-    $('btn-back-home').onclick = () => { stopAudio(); renderHome(); };
+    $('btn-back-home').onclick = () => {
+      stopAudio();
+      const prayerScr = $('scr-prayer');
+      prayerScr.classList.add('slide-out-down');
+      setTimeout(() => {
+        prayerScr.classList.remove('slide-out-down');
+        renderHome();
+      }, 400);
+    };
 
     // API global para onclick en HTML
     window._ca = {
@@ -2281,6 +2711,12 @@ body {
       microFinalizar: microFinalizar,
       bkSelectBloque: bkSelectBloque,
       bkGoOrar: bkGoOrar,
+      // Micro integrado en el libro
+      bkMicroNext: bkMicroNext,
+      bkMicroPrev: bkMicroPrev,
+      bkMicroTTS: bkMicroTTS,
+      bkMicroResponder: bkMicroResponder,
+      bkMicroFinalizar: bkMicroFinalizar,
     };
 
     // Render
