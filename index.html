@@ -1957,11 +1957,15 @@ body {
   let bkMicroStep = 0;
   let bkMicroAnswered = false;
   let bkMicroBloque = null;
+  let bkMicroSelectedIdx = -1;
+  let bkMicroSelectedEco = '';
 
   function bkShowMicro(bloque) {
     bkMicroBloque = bloque;
     bkMicroStep = 0;
     bkMicroAnswered = false;
+    bkMicroSelectedIdx = -1;
+    bkMicroSelectedEco = '';
 
     const pg = $('bkpg-micro');
     pg.classList.remove('enter-r','enter-l','exit-l','exit-r','pg-current');
@@ -2048,15 +2052,17 @@ body {
         '<p class="bk-micro-q-text">' + escHTML(preg.texto) + '</p>' +
         '<div class="bk-micro-opciones">' +
           preg.opciones.map((op, oi) =>
-            '<button class="bk-micro-opcion" id="bk-micro-op-' + oi + '" onclick="window._ca.bkMicroResponder(' + oi + ')">' +
+            '<button class="bk-micro-opcion' + (bkMicroAnswered && bkMicroSelectedIdx === oi ? ' selected' : '') + '" id="bk-micro-op-' + oi + '" onclick="window._ca.bkMicroResponder(' + oi + ')">' +
               '<span class="bk-micro-opcion-letra">' + op.letra + '</span>' + escHTML(op.texto) +
             '</button>'
           ).join('') +
         '</div>' +
-        '<div class="bk-micro-eco" id="bk-micro-eco"></div>';
+        '<div class="bk-micro-eco' + (bkMicroAnswered ? ' visible' : '') + '" id="bk-micro-eco">' +
+          (bkMicroAnswered && bkMicroSelectedEco ? bkMicroSelectedEco : '') +
+        '</div>';
       footer.innerHTML =
         '<button class="bk-micro-btn bk-micro-btn-sec" onclick="window._ca.bkMicroPrev()">← Anterior</button>' +
-        '<button class="bk-micro-btn bk-micro-btn-rezar" id="bk-micro-btn-rezar" onclick="window._ca.bkMicroFinalizar()">📿 Rezar ahora</button>';
+        '<button class="bk-micro-btn bk-micro-btn-rezar" id="bk-micro-btn-rezar" onclick="window._ca.bkMicroFinalizar()" style="' + (bkMicroAnswered ? '' : 'display:none') + '">📿 Rezar ahora</button>';
     }
     // Scroll al inicio de la ficha
     if (body) body.scrollTop = 0;
@@ -2096,19 +2102,21 @@ body {
   function bkMicroResponder(oi) {
     if (bkMicroAnswered) return;
     bkMicroAnswered = true;
+    bkMicroSelectedIdx = oi;
     const op = MICRO_DATA.bloques[bkMicroBloque].pregunta.opciones[oi];
+    bkMicroSelectedEco = '<span style="margin-right:4px">' + (op.emoji || '✨') + '</span>' + escHTML(op.eco);
     MICRO_DATA.bloques[bkMicroBloque].pregunta.opciones.forEach((_, i) => {
       const btn = $('bk-micro-op-' + i);
       if (btn) btn.classList.toggle('selected', i === oi);
     });
     const eco = $('bk-micro-eco');
     if (eco) {
-      eco.innerHTML = '<span style="margin-right:4px">' + (op.emoji || '✨') + '</span>' + escHTML(op.eco);
+      eco.innerHTML = bkMicroSelectedEco;
       eco.classList.add('visible');
     }
     playNotes([523, 659]);
     const btnR = $('bk-micro-btn-rezar');
-    if (btnR) { btnR.style.display = ''; }
+    if (btnR) { btnR.style.display = 'block'; }
   }
 
   function bkMicroFinalizar() {
