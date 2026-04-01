@@ -661,6 +661,7 @@ body {
   const REST_POSES  = ['rest-staff','rest-sitting','rest-rock','rest-tree'];
   const MARIANO_BASE = 'https://padremonti.github.io/cruzando-app/assets/mariano/';
   const MUSIC_BASE   = 'https://pub-faed94e375aa443e846e07f81ef93274.r2.dev/';
+  const AUDIO_BASE   = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/';
 
   let restPoseIndex = 0;
   let orbitIndex    = 0;
@@ -681,6 +682,13 @@ body {
     const m = parseInt(id.substring(0,2), 10);
     const n = parseInt(id.substring(2,4), 10);
     return 'Nivel ' + m + '-' + n;
+  }
+
+  // Construir URL de contemplación desde NIVEL_ID y número de misterio
+  function contemplacionUrl(m) {
+    const mundo = parseInt(NIVEL_ID.substring(0,2), 10);
+    const nivel  = parseInt(NIVEL_ID.substring(2,4), 10);
+    return AUDIO_BASE + mundo + '_' + nivel + '_' + m.numero + '.mp3';
   }
 
   // Construir URL del canto desde NIVEL_ID y número de misterio
@@ -1572,8 +1580,8 @@ body {
       return audioPlayerHTML('ap-canto-' + m.numero, 'Canto contemplativo', src);
     }
     if (key === 'contemplar') {
-      const src = m.audio_contemplacion || '';
-      return audioPlayerHTML('ap-contempl', 'Audio de la contemplación', src) +
+      const src = contemplacionUrl(m);
+      return audioPlayerHTML('ap-contempl-' + m.numero, 'Audio de la contemplación', src) +
              '<div class="contempl-text">' + escHTML(m.contemplacion) + '</div>';
     }
     if (key === 'meditar')    { return renderMeditation(b, mi, m); }
