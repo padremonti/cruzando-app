@@ -1,0 +1,292 @@
+{
+  "id": "0102",
+  "nivel": "CruzAndo la Cruz",
+  "cuaderno": "Pecado",
+  "tension_vertebral": "La libertad mal ejercida",
+  "bloques": {
+    "gozosos": {
+      "tarjetas": [
+        {
+          "emoji": "🌅",
+          "titulo": "El Salvador viene por ti",
+          "contenido": "Jesús no viene a condenarte, sino a liberarte. Entra en una historia herida para abrir un camino de regreso."
+        },
+        {
+          "emoji": "🕊️",
+          "titulo": "No todo dolor es culpa",
+          "contenido": "Hay males que nadie eligió y pecados que sí fueron elegidos. Distinguirlos te evita culpas falsas y te devuelve claridad."
+        },
+        {
+          "emoji": "🪞",
+          "titulo": "Pecar deforma la verdad",
+          "contenido": "El pecado no solo rompe una regla. También inventa una versión falsa del bien, del amor y de ti mismo."
+        },
+        {
+          "emoji": "🤲",
+          "titulo": "La misericordia ya te busca",
+          "contenido": "Lo peor no es haber pecado. Lo peor sería quedarte encerrado creyendo que ya no hay salida."
+        }
+      ],
+      "preguntas": [
+        {
+          "pregunta": "Cuando escuchas la palabra pecado, ¿cómo la vives más hoy?",
+          "opciones": [
+            {
+              "texto": "La siento cercana a mi historia",
+              "emoji": "🪶",
+              "eco": "Lo estás mirando con honestidad."
+            },
+            {
+              "texto": "La siento lejana o confusa",
+              "emoji": "🌫️",
+              "eco": "Nombrarlo ya empieza a aclararlo."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Qué te cuesta más distinguir en tu vida?",
+          "opciones": [
+            {
+              "texto": "Lo que sufrí sin haberlo elegido",
+              "emoji": "🌧️",
+              "eco": "Esa diferencia puede traerte alivio."
+            },
+            {
+              "texto": "Lo que sí hice con libertad",
+              "emoji": "🪨",
+              "eco": "Reconocerlo es un paso serio."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Cómo llegas a esta oración?",
+          "opciones": [
+            {
+              "texto": "Quiero verdad y claridad",
+              "emoji": "🕯️",
+              "eco": "Esa luz puede sostener tu oración."
+            },
+            {
+              "texto": "Quiero misericordia y descanso",
+              "emoji": "🫶",
+              "eco": "Ese deseo ya abre espacio interior."
+            }
+          ]
+        }
+      ]
+    },
+    "luminosos": {
+      "tarjetas": [
+        {
+          "emoji": "💡",
+          "titulo": "Cristo desenmascara la mentira",
+          "contenido": "Jesús revela que el pecado no libera: encierra. Allí donde la mentira promete poder, Él devuelve verdad."
+        },
+        {
+          "emoji": "⚖️",
+          "titulo": "Hay responsabilidad real",
+          "contenido": "No todo es accidente ni destino. Cuando la libertad se tuerce, hay daño verdadero y alguien debe responder por él."
+        },
+        {
+          "emoji": "🩹",
+          "titulo": "Dios no está con el agresor",
+          "contenido": "Si pecaron contra ti, Dios no fue cómplice. Él estuvo del lado herido, contigo, padeciendo la injusticia."
+        },
+        {
+          "emoji": "🔓",
+          "titulo": "La verdad empieza a liberar",
+          "contenido": "Nombrar el pecado propio o ajeno no empeora la herida. Muchas veces es el inicio de la liberación."
+        }
+      ],
+      "preguntas": [
+        {
+          "pregunta": "Cuando alguien usó mal su libertad contra ti, ¿qué quedó más marcado en ti?",
+          "opciones": [
+            {
+              "texto": "La herida todavía pesa",
+              "emoji": "💔",
+              "eco": "Ese peso merece ser nombrado."
+            },
+            {
+              "texto": "La confusión fue más profunda",
+              "emoji": "🌀",
+              "eco": "La confusión también deja huella."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Qué te resulta más difícil mirar de frente?",
+          "opciones": [
+            {
+              "texto": "Que alguien fue responsable",
+              "emoji": "⚠️",
+              "eco": "Aceptar eso puede doler mucho."
+            },
+            {
+              "texto": "Que yo también he dañado",
+              "emoji": "🪞",
+              "eco": "Esa lucidez no es poca cosa."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Qué quisieras que Cristo ilumine al orar estos misterios?",
+          "opciones": [
+            {
+              "texto": "Una herida que sigo cargando",
+              "emoji": "🩹",
+              "eco": "Puedes llevarla tal como está."
+            },
+            {
+              "texto": "Una zona de mi responsabilidad",
+              "emoji": "🕯️",
+              "eco": "Esa apertura ya deja entrar luz."
+            }
+          ]
+        }
+      ]
+    },
+    "dolorosos": {
+      "tarjetas": [
+        {
+          "emoji": "🩸",
+          "titulo": "Jesús cargó el pecado",
+          "contenido": "Cristo sufrió traición, abandono, mentira y violencia. Vivió en su carne el pecado ajeno sin reproducirlo."
+        },
+        {
+          "emoji": "🛑",
+          "titulo": "El mal puede detenerse",
+          "contenido": "No estás obligado a reciclar el daño recibido. Si te unes a Cristo, puedes frenar el pecado en ti."
+        },
+        {
+          "emoji": "🌹",
+          "titulo": "María sufrió sin contaminarse",
+          "contenido": "La Inmaculada no fue inmune al sufrimiento. Padeció el pecado ajeno sin responder con amargura."
+        },
+        {
+          "emoji": "🔥",
+          "titulo": "La gracia no multiplica sombras",
+          "contenido": "La gracia no borra mágicamente el dolor, pero sí te capacita para no devolver mal por mal."
+        }
+      ],
+      "preguntas": [
+        {
+          "pregunta": "Cuando piensas en el pecado del mundo, ¿qué te resuena más por dentro?",
+          "opciones": [
+            {
+              "texto": "Lo que otros hicieron contra mí",
+              "emoji": "🌧️",
+              "eco": "Esa memoria merece ser tratada con respeto."
+            },
+            {
+              "texto": "Lo que yo hice contra otros",
+              "emoji": "🪵",
+              "eco": "Esa carga también puede ponerse ante Dios."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Qué te cuesta más ante una herida profunda?",
+          "opciones": [
+            {
+              "texto": "No endurecerme por dentro",
+              "emoji": "🧱",
+              "eco": "Eso toca una lucha muy real."
+            },
+            {
+              "texto": "No quedarme hundido en culpa",
+              "emoji": "🌊",
+              "eco": "Salir de ahí también cuesta mucho."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Qué quieres ofrecer hoy al pie de la Cruz?",
+          "opciones": [
+            {
+              "texto": "Mi herida y mi cansancio",
+              "emoji": "🤲",
+              "eco": "Puedes ofrecerlos sin ocultarlos."
+            },
+            {
+              "texto": "Mi culpa y deseo de cambio",
+              "emoji": "🕊️",
+              "eco": "Ese deseo puede volverse oración."
+            }
+          ]
+        }
+      ]
+    },
+    "gloriosos": {
+      "tarjetas": [
+        {
+          "emoji": "✨",
+          "titulo": "El pecado será derrotado al final",
+          "contenido": "La Resurrección proclama que la maldad no tiene la última palabra. Cristo abre futuro incluso donde hubo ruina."
+        },
+        {
+          "emoji": "🗝️",
+          "titulo": "Perdonar abre la celda",
+          "contenido": "Perdonar no excusa ni olvida todo. Pero sí rompe la cadena que te ata una y otra vez al daño."
+        },
+        {
+          "emoji": "🌱",
+          "titulo": "Arrepentirse rehace el camino",
+          "contenido": "El arrepentimiento no es hundirte en desprecio. Es reconocer, reparar y elegir de nuevo el bien."
+        },
+        {
+          "emoji": "💧",
+          "titulo": "Dios rehace al pecador",
+          "contenido": "Aunque no recibas perdón humano de inmediato, la misericordia de Dios puede levantarte y reformar tu vida."
+        }
+      ],
+      "preguntas": [
+        {
+          "pregunta": "Cuando oyes hablar de perdón, ¿qué aparece primero en ti?",
+          "opciones": [
+            {
+              "texto": "Deseo de quedar libre",
+              "emoji": "🕊️",
+              "eco": "Ese deseo apunta a algo vivo."
+            },
+            {
+              "texto": "Resistencia o temor",
+              "emoji": "🫥",
+              "eco": "Esa resistencia también tiene historia."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Qué te parece hoy más exigente?",
+          "opciones": [
+            {
+              "texto": "Perdonar a quien me dañó",
+              "emoji": "🩹",
+              "eco": "Es una tarea muy honda."
+            },
+            {
+              "texto": "Pedir perdón de verdad",
+              "emoji": "🙏",
+              "eco": "Eso pide mucha verdad interior."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Qué gracia necesitas para orar en este bloque final?",
+          "opciones": [
+            {
+              "texto": "Memoria sanada para perdonar",
+              "emoji": "🌤️",
+              "eco": "Esa gracia puede darte un aire nuevo."
+            },
+            {
+              "texto": "Valentía para arrepentirme",
+              "emoji": "🔥",
+              "eco": "Esa valentía ya está en ti, y está creciendo."
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

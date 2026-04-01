@@ -1,0 +1,296 @@
+{
+  "id": "0103",
+  "nivel": "CruzAndo la Cruz",
+  "cuaderno": "Conversión",
+  "tension_vertebral": "Recapacitar y avanzar hacia Dios",
+  "bloques": {
+    "gozosos": {
+      "subtitulo": "Vivir de cara a Dios",
+      "tarjetas": [
+        {
+          "emoji": "🧭",
+          "titulo": "Convertirse es reorientarse",
+          "contenido": "La conversión no es solo lamentar el pecado. Es volver a orientar tu vida hacia Dios, una y otra vez."
+        },
+        {
+          "emoji": "🌱",
+          "titulo": "El cambio puede empezar hoy",
+          "contenido": "No necesitas una crisis espectacular para convertirte. A veces todo empieza con un pequeño giro interior."
+        },
+        {
+          "emoji": "💙",
+          "titulo": "María vivió diciendo sí",
+          "contenido": "María no volvió de lejos: caminó siempre hacia Dios. Su vida fue una disponibilidad constante."
+        },
+        {
+          "emoji": "👣",
+          "titulo": "Jesús avanzó humanamente",
+          "contenido": "Jesús creció, aprendió y abrazó la voluntad del Padre. En eso nos precede y nos acompaña."
+        }
+      ],
+      "preguntas": [
+        {
+          "pregunta": "¿Cómo percibes hoy tu camino con Dios?",
+          "opciones": [
+            {
+              "texto": "Siento deseo de volver",
+              "emoji": "🕊️",
+              "eco": "Ese deseo ya es un comienzo real."
+            },
+            {
+              "texto": "Me siento en proceso",
+              "emoji": "🚶",
+              "eco": "También ahí Dios te sigue guiando."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Qué te ayuda más a pensar la conversión?",
+          "opciones": [
+            {
+              "texto": "Como un regreso",
+              "emoji": "🏠",
+              "eco": "Volver también puede ser sanar la dirección."
+            },
+            {
+              "texto": "Como un crecimiento",
+              "emoji": "🌿",
+              "eco": "Crecer hacia Dios también es conversión."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Qué quieres pedir al comenzar este bloque?",
+          "opciones": [
+            {
+              "texto": "Escuchar mejor a Dios",
+              "emoji": "👂",
+              "eco": "Tu corazón se dispone a escuchar."
+            },
+            {
+              "texto": "Dar un paso concreto",
+              "emoji": "👣",
+              "eco": "Ese paso puede abrir camino."
+            }
+          ]
+        }
+      ]
+    },
+    "luminosos": {
+      "subtitulo": "Conversión proclamada y aceptada",
+      "tarjetas": [
+        {
+          "emoji": "📢",
+          "titulo": "Dios llama primero",
+          "contenido": "La conversión no nace solo de tu esfuerzo. Comienza cuando Dios te sale al encuentro y te invita."
+        },
+        {
+          "emoji": "🤝",
+          "titulo": "Tiene forma de alianza",
+          "contenido": "Convertirse es responder a una iniciativa divina. Es caminar con Dios, no solo proponerte mejorar."
+        },
+        {
+          "emoji": "👀",
+          "titulo": "Una mirada cambia rumbos",
+          "contenido": "Muchos cambiaron al sentirse mirados por Cristo de otra manera. Su verdad no te humilla: te despierta."
+        },
+        {
+          "emoji": "💧",
+          "titulo": "Aceptar también transforma",
+          "contenido": "La Samaritana, Mateo o Zaqueo recibieron una invitación. La conversión madura cuando se acepta."
+        }
+      ],
+      "preguntas": [
+        {
+          "pregunta": "¿Cómo sueles vivir los llamados de Dios?",
+          "opciones": [
+            {
+              "texto": "Los percibo con claridad",
+              "emoji": "✨",
+              "eco": "¡Qué bien que reconoces esa luz!"
+            },
+            {
+              "texto": "Los percibo a medias",
+              "emoji": "🌫️",
+              "eco": "Aun entre neblina, Dios se deja encontrar."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Qué te cuesta más al escuchar una llamada interior?",
+          "opciones": [
+            {
+              "texto": "Confiar y responder",
+              "emoji": "💙",
+              "eco": "Nombrar esa dificultad ya abre espacio."
+            },
+            {
+              "texto": "Entender qué me pide",
+              "emoji": "🧩",
+              "eco": "No siempre todo se ve de inmediato."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Qué gracia quieres pedir en oración?",
+          "opciones": [
+            {
+              "texto": "Docilidad para decir sí",
+              "emoji": "🤍",
+              "eco": "Tu sí puede madurar en la oración."
+            },
+            {
+              "texto": "Luz para discernir",
+              "emoji": "🕯️",
+              "eco": "Esa luz también se recibe paso a paso."
+            }
+          ]
+        }
+      ]
+    },
+    "dolorosos": {
+      "subtitulo": "Un camino arduo",
+      "tarjetas": [
+        {
+          "emoji": "🔥",
+          "titulo": "La conversión duele a veces",
+          "contenido": "Cambiar de rumbo implica dejar hábitos, excusas y seguridades. Por eso la conversión puede ser ardua."
+        },
+        {
+          "emoji": "🌫️",
+          "titulo": "No siempre se avanza claro",
+          "contenido": "Hay etapas de entusiasmo, otras de neblina y otras de purificación. Todo eso forma parte del camino."
+        },
+        {
+          "emoji": "⏳",
+          "titulo": "Recaer no anula todo",
+          "contenido": "Volver a tropezar no significa que nada cambió. A veces la conversión madura lentamente."
+        },
+        {
+          "emoji": "❤️",
+          "titulo": "No caminas esto solo",
+          "contenido": "Jesús y María sostienen procesos que tú solo no puedes terminar. La gracia acompaña lo arduo."
+        }
+      ],
+      "preguntas": [
+        {
+          "pregunta": "¿Cómo vives tus intentos de cambio cuando se hacen difíciles?",
+          "opciones": [
+            {
+              "texto": "Me canso fácilmente",
+              "emoji": "😓",
+              "eco": "En ese cansancio compruebas que tu respuesta es real."
+            },
+            {
+              "texto": "Sigo, aunque cueste",
+              "emoji": "🪵",
+              "eco": "Tu perseverancia ya dice mucho, ¡sigue así!."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Qué te pesa más en este camino de conversión?",
+          "opciones": [
+            {
+              "texto": "Repetir caídas",
+              "emoji": "🔁",
+              "eco": "Duele repetir, pero no estás detenido."
+            },
+            {
+              "texto": "No ver resultados",
+              "emoji": "⌛",
+              "eco": "La lentitud también puede ser fecunda."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Qué necesitas ofrecer hoy en oración?",
+          "opciones": [
+            {
+              "texto": "Mi cansancio",
+              "emoji": "🫶",
+              "eco": "Puedes presentarte así, sin ocultarte."
+            },
+            {
+              "texto": "Mi deseo de seguir",
+              "emoji": "🔥",
+              "eco": "Ese deseo merece ser fortalecido."
+            }
+          ]
+        }
+      ]
+    },
+    "gloriosos": {
+      "subtitulo": "El pecado es derrotado",
+      "tarjetas": [
+        {
+          "emoji": "🌅",
+          "titulo": "La conversión abre futuro",
+          "contenido": "No estás condenado a repetir siempre lo mismo. En Cristo, el pecado no tiene la última palabra."
+        },
+        {
+          "emoji": "🕊️",
+          "titulo": "Cambiar sí es posible",
+          "contenido": "La gracia de Dios puede rehacer una vida desde dentro. La esperanza cristiana no es ingenua: es pascual."
+        },
+        {
+          "emoji": "🔓",
+          "titulo": "La libertad puede sanar",
+          "contenido": "La misma libertad que se torció puede ser sanada y orientada de nuevo. Dios no te cancela, ni cancela tu historia."
+        },
+        {
+          "emoji": "🤲",
+          "titulo": "Dios sigue obrando en ti",
+          "contenido": "La conversión continua es una alianza viva. Dios no se cansa de volver a llamarte hacia la plenitud."
+        }
+      ],
+      "preguntas": [
+        {
+          "pregunta": "¿Qué se despierta en ti, al saber que el cambio es posible?",
+          "opciones": [
+            {
+              "texto": "Me da esperanza",
+              "emoji": "🌤️",
+              "eco": "Qué bueno que algo en ti se abre."
+            },
+            {
+              "texto": "Me cuesta creerlo",
+              "emoji": "🫥",
+              "eco": "También puedes presentarle esa dificultad a Dios."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Qué significa para ti vencer el pecado hoy?",
+          "opciones": [
+            {
+              "texto": "Volver a levantarme",
+              "emoji": "📈",
+              "eco": "Levantarte ya es una victoria real."
+            },
+            {
+              "texto": "Caminar con más verdad",
+              "emoji": "🪞",
+              "eco": "Esa verdad puede ordenar el camino."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Qué gracia quieres pedir al cerrar este bloque?",
+          "opciones": [
+            {
+              "texto": "Esperanza perseverante",
+              "emoji": "🕯️",
+              "eco": "La esperanza también se fortalece orando."
+            },
+            {
+              "texto": "Fidelidad cotidiana",
+              "emoji": "📿",
+              "eco": "La fidelidad diaria provoca grandes cambios."
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

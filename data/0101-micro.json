@@ -1,163 +1,296 @@
 {
   "id": "0101",
-  "elemento": "Males",
   "nivel": "CruzAndo la Cruz",
+  "cuaderno": "Males",
+  "tension_vertebral": "La verdad me libera",
   "bloques": {
     "gozosos": {
-      "titulo": "La vulnerabilidad",
-      "subtitulo": "Ser humano es ser vulnerable",
+      "subtitulo": "La vulnerabilidad",
       "tarjetas": [
         {
-          "id": "g1",
-          "texto": "Nadie elige nacer frágil. Sin embargo, todos comenzamos igual: pequeños, expuestos, dependiendo de otros para sobrevivir. Esa fragilidad no es un defecto. Es el punto de partida de toda vida humana.",
-          "emoji": "🌱"
+          "emoji": "🌱",
+          "titulo": "Nacemos necesitados",
+          "contenido": "Toda vida humana comienza pequeña, expuesta y dependiente. La fragilidad no es un fallo de origen, sino nuestra condición primera."
         },
         {
-          "id": "g2",
-          "texto": "Llamamos males inevitables a las limitaciones que forman parte de ser criaturas finitas: la enfermedad, el envejecimiento, la pérdida, el cansancio, la muerte. No son castigos. No son señales de que algo anda mal en ti. Simplemente son.",
-          "emoji": "🍂"
+          "emoji": "🤲",
+          "titulo": "Recibir también es humano",
+          "contenido": "Nadie se sostiene solo al inicio. Necesitar cuidado, ayuda y amparo forma parte de ser criatura."
         },
         {
-          "id": "g3",
-          "texto": "Dios mismo eligió comenzar siendo pequeño. Jesús se hizo embrión en el vientre de María: diminuto, silencioso, expuesto. Al elegir la fragilidad, nos revela que la vulnerabilidad no es lo que hay que superar. Es la condición desde la que Dios actúa.",
-          "emoji": "✨"
+          "emoji": "🍂",
+          "titulo": "Hay límites inevitables",
+          "contenido": "Enfermar, cansarse, perder y envejecer no son castigos. Son límites propios de una vida finita."
+        },
+        {
+          "emoji": "✨",
+          "titulo": "Dios eligió la fragilidad",
+          "contenido": "Jesús quiso comenzar como todo ser humano: pequeño y vulnerable. Dios no despreció nuestra condición; la habitó."
         }
       ],
-      "pregunta": {
-        "texto": "Cuando piensas en tu propia fragilidad —una enfermedad, una limitación, algo que no puedes controlar— ¿qué sientes?",
-        "emoji": "🤔",
-        "opciones": [
-          {
-            "letra": "A",
-            "texto": "Vergüenza o frustración. Quisiera no tener esos límites.",
-            "eco": "Es una reacción muy humana. Nuestro espíritu fue creado para la eternidad, y por eso cada límite duele. María también sintió ese peso al recibir la noticia del ángel: algo comenzaba en ella más grande que ella. No la avergonzó, la sostuvo. Eso mismo puedes pedirle hoy.",
-            "emoji": "💛"
-          },
-          {
-            "letra": "B",
-            "texto": "Algo de paz. Entiendo que la fragilidad es parte de la vida.",
-            "eco": "Esa paz es un don, aunque no siempre llegue sola. Dios eligió nacer vulnerable para mostrarte que la fragilidad no te separa de Él. Al contrario: es el lugar donde Él más se acerca. Lleva esa paz contigo al rezar.",
-            "emoji": "🕊️"
-          }
-        ]
-      }
+      "preguntas": [
+        {
+          "pregunta": "Cuando piensas en tu fragilidad, ¿qué sueles experimentar primero?",
+          "opciones": [
+            {
+              "texto": "Siento incomodidad o resistencia.",
+              "emoji": "💛",
+              "eco": "Ese roce interior también merece ternura."
+            },
+            {
+              "texto": "Siento aceptación serena.",
+              "emoji": "🕊️",
+              "eco": "Esa serenidad puede sostener tu oración."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Qué te cuesta más de depender de otros en algún momento?",
+          "opciones": [
+            {
+              "texto": "Pedir ayuda me cuesta mucho.",
+              "emoji": "🤝",
+              "eco": "Nombrarlo ya abre una puerta real."
+            },
+            {
+              "texto": "Recibir ayuda me resulta natural.",
+              "emoji": "🌿",
+              "eco": "Esa apertura también es una gracia."
+            }
+          ]
+        },
+        {
+          "pregunta": "Al disponerte a orar este bloque, ¿qué quieres presentar hoy?",
+          "opciones": [
+            {
+              "texto": "Quiero ofrecer un límite que me pesa.",
+              "emoji": "🕯️",
+              "eco": "Puedes traerlo sin maquillarlo."
+            },
+            {
+              "texto": "Quiero agradecer mi pequeñez humana.",
+              "emoji": "🌟",
+              "eco": "Esa gratitud ya es camino de verdad."
+            }
+          ]
+        }
+      ]
     },
     "luminosos": {
-      "titulo": "Límites que dan luz",
-      "subtitulo": "La vida necesita ser renovada, siempre",
+      "subtitulo": "Límites que dan luz",
       "tarjetas": [
         {
-          "id": "l1",
-          "texto": "Los males de la vida no son solo las grandes crisis. Son también lo cotidiano: el cuerpo que se cansa, las cosas que se gastan, las situaciones que no podemos controlar del todo. Ningún ser humano escapa a esa necesidad de renovación.",
-          "emoji": "💧"
+          "emoji": "💧",
+          "titulo": "La vida pide cuidado",
+          "contenido": "El cuerpo se desgasta, las fuerzas cambian y muchas cosas requieren renovación. Vivir implica atender lo que necesita sostén."
         },
         {
-          "id": "l2",
-          "texto": "Ante el ciego de nacimiento, los discípulos preguntaron: ¿quién pecó? Jesús cortó esa lógica: ni él ni sus padres. El mal físico no era castigo. Y luego, sin más, actuó: sanó. No te preguntes quién tiene la culpa. Si puedes ayudar, ayuda.",
-          "emoji": "👁️"
+          "emoji": "👁️",
+          "titulo": "No todo límite es culpa",
+          "contenido": "Jesús rompió la lógica de culpar al que sufre. Un mal físico no significa rechazo de Dios."
         },
         {
-          "id": "l3",
-          "texto": "Jesús se metió en el río Jordán, un cuerpo que se cansa, que necesita agua, que requiere cuidado constante. Al habitarlo, santificó ese cuidado. Mantener lo cotidiano con atención y amor también es parte de cargar la cruz.",
-          "emoji": "🌊"
+          "emoji": "🌊",
+          "titulo": "Lo cotidiano también importa",
+          "contenido": "Agua, descanso, limpieza, alimento, ritmos y atención amorosa: todo eso pertenece a una vida cuidada."
+        },
+        {
+          "emoji": "🪔",
+          "titulo": "El límite puede revelar",
+          "contenido": "Cuando algo no alcanza, se descubre lo esencial. A veces el límite no cierra la vida: la enfoca."
         }
       ],
-      "pregunta": {
-        "texto": "Cuando algo en tu vida se gasta, se acaba o necesita renovarse constantemente, ¿cuál es tu primera reacción?",
-        "emoji": "🔄",
-        "opciones": [
-          {
-            "letra": "A",
-            "texto": "Me agoto. Parece que el esfuerzo nunca termina.",
-            "eco": "Esa fatiga es real y Jesús la conoce desde adentro. Él también sintió el cansancio de lo cotidiano. Precisamente por eso se bautizó: no porque lo necesitara, sino para mostrarte que Él habita esa necesidad contigo. Puedes rezar desde ese agotamiento, no a pesar de él.",
-            "emoji": "🫶"
-          },
-          {
-            "letra": "B",
-            "texto": "Trato de verlo con calma. Lo cotidiano también tiene su gracia.",
-            "eco": "Esa mirada contemplativa es un fruto del Espíritu. María detectó la falta de vino antes que nadie, sin alarmarse, y fue directo a Jesús. Esa actitud: atención sin angustia, acción sin pánico, es la que te va a sostener en el camino.",
-            "emoji": "🌿"
-          }
-        ]
-      }
+      "preguntas": [
+        {
+          "pregunta": "Cuando algo en tu vida necesita renovarse una y otra vez, ¿cómo reaccionas?",
+          "opciones": [
+            {
+              "texto": "Me cansa repetir el esfuerzo.",
+              "emoji": "🫶",
+              "eco": "Ese cansancio merece ser reconocido."
+            },
+            {
+              "texto": "Lo asumo con cierta calma.",
+              "emoji": "🌼",
+              "eco": "Esa calma puede volverse luz concreta."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Qué te ilumina más cuando aceptas un límite real?",
+          "opciones": [
+            {
+              "texto": "Veo mejor lo que sí importa.",
+              "emoji": "🔦",
+              "eco": "Esa claridad vale mucho hoy."
+            },
+            {
+              "texto": "Aprendo a pedir apoyo oportuno.",
+              "emoji": "🤲",
+              "eco": "Esa lucidez te hace más libre."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Cómo llegas a la oración en este bloque luminoso?",
+          "opciones": [
+            {
+              "texto": "Necesito descanso interior.",
+              "emoji": "🌙",
+              "eco": "Puedes orar desde esa necesidad."
+            },
+            {
+              "texto": "Quiero ofrecer mi atención diaria.",
+              "emoji": "☀️",
+              "eco": "Ese ofrecimiento ya tiene peso espiritual."
+            }
+          ]
+        }
+      ]
     },
     "dolorosos": {
-      "titulo": "Límites que salvan",
-      "subtitulo": "El dolor no destruye lo que ya fue amado",
+      "subtitulo": "Límites que salvan",
       "tarjetas": [
         {
-          "id": "d1",
-          "texto": "Hay males que se anuncian antes de llegar. Simeón le dijo a María: una espada atravesará tu corazón. María no huyó. No dijo: si este hijo me traerá tanto dolor, prefiero amarlo menos. Aceptó amar sabiendo que le costaría todo.",
-          "emoji": "⚔️"
+          "emoji": "⚔️",
+          "titulo": "Hay dolores anunciados",
+          "contenido": "A veces el sufrimiento se presiente antes de llegar. Aun así, amar sigue valiendo la pena."
         },
         {
-          "id": "d2",
-          "texto": "No todo dolor proviene de la misma fuente. Los males son limitaciones que nadie causó. El pecado es el dolor causado por la libertad mal ejercida. Confundirlos lleva a culpar a Dios por lo que Él no causó, o a culparte por lo que no elegiste.",
-          "emoji": "🔍"
+          "emoji": "🔍",
+          "titulo": "No todo dolor nace igual",
+          "contenido": "Los males son límites que nadie eligió. El pecado, en cambio, hiere desde una libertad mal usada."
         },
         {
-          "id": "d3",
-          "texto": "Dios no causó tus males. Dios los vive contigo. No está afuera observando el sufrimiento a distancia. Habita el sufrimiento desde dentro, en el corazón de quien lo padece. No estás solo en tu límite.",
-          "emoji": "🤝"
+          "emoji": "🤝",
+          "titulo": "Dios no mira de lejos",
+          "contenido": "En Cristo, Dios entra en el dolor humano. No contempla tu sufrimiento desde fuera, sino desde dentro."
+        },
+        {
+          "emoji": "🪵",
+          "titulo": "La cruz no niega el amor",
+          "contenido": "El dolor no borra lo amado ni invalida lo vivido. La cruz atraviesa la historia sin vaciarla de sentido."
         }
       ],
-      "pregunta": {
-        "texto": "¿Has confundido alguna vez un mal inevitable (algo que nadie causó) con un castigo de Dios o con una culpa propia?",
-        "emoji": "💭",
-        "opciones": [
-          {
-            "letra": "A",
-            "texto": "Sí, me ha costado no culparme o no cuestionar a Dios.",
-            "eco": "Esa confusión es muy común, y hacerse cargo de ella ya es un paso de madurez. Jesús no justificó el dolor. Lo atravesó con dignidad. Y desde adentro, desde el huerto, desde la cruz, nos mostró que Dios no causa los males: los acompaña. Hoy puedes soltar esa carga.",
-            "emoji": "🌅"
-          },
-          {
-            "letra": "B",
-            "texto": "He logrado distinguirlos. Los males no me los impone Dios.",
-            "eco": "Esa claridad es un regalo que vale la pena sostener. En momentos de crisis es fácil perderla. Los Misterios Dolorosos son precisamente ese recordatorio: Jesús no merecía sufrir lo que sufrió, y aun así lo atravesó con confianza. Que eso te fortalezca hoy.",
-            "emoji": "🕯️"
-          }
-        ]
-      }
+      "preguntas": [
+        {
+          "pregunta": "Cuando sufres algo que no elegiste, ¿qué aparece más en ti?",
+          "opciones": [
+            {
+              "texto": "Me cuesta no preguntarme por qué.",
+              "emoji": "🌫️",
+              "eco": "Esa pregunta también necesita compañía."
+            },
+            {
+              "texto": "Procuro sostenerme sin huir.",
+              "emoji": "🕯️",
+              "eco": "Esa firmeza interior ya dice mucho."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Te ha costado distinguir entre mal inevitable y culpa personal?",
+          "opciones": [
+            {
+              "texto": "Sí, a veces lo confundo.",
+              "emoji": "🪞",
+              "eco": "Esa confusión pesa de verdad."
+            },
+            {
+              "texto": "He aprendido a diferenciarlos.",
+              "emoji": "📍",
+              "eco": "Esa claridad conviene cuidarla."
+            }
+          ]
+        },
+        {
+          "pregunta": "Al entrar en este bloque, ¿qué gracia necesitas más?",
+          "opciones": [
+            {
+              "texto": "Necesito consuelo para un dolor concreto.",
+              "emoji": "💜",
+              "eco": "Ponle nombre y déjalo estar."
+            },
+            {
+              "texto": "Necesito fortaleza para acompañar a alguien.",
+              "emoji": "🌄",
+              "eco": "Tu disponibilidad ya es valiosa."
+            }
+          ]
+        }
+      ]
     },
     "gloriosos": {
-      "titulo": "El mal no es el final",
-      "subtitulo": "Los males se cruzan: atravesar y marcar con Cristo",
+      "subtitulo": "El mal no es el final",
       "tarjetas": [
         {
-          "id": "r1",
-          "texto": "Cruzar tiene un doble sentido en este itinerario. Primero, atravesar: los males inevitables no se superan como quien resuelve un problema. Se atraviesan paso a paso, sin negarlo, sin huir, sostenido por la comunidad y por la gracia.",
-          "emoji": "🚶"
+          "emoji": "🚶",
+          "titulo": "Los males se atraviesan",
+          "contenido": "No todo límite se resuelve. Muchos males se cruzan paso a paso, con tiempo, verdad y compañía."
         },
         {
-          "id": "r2",
-          "texto": "Segundo, marcar con la Cruz: cuando atraviesas un mal con la actitud de Jesús, ese mal queda marcado por la Cruz. No porque el mal sea bueno o necesario, sino porque Dios es más fuerte que el mal. Los males no desaparecen mágicamente, pero tampoco tienen la última palabra.",
-          "emoji": "✝️"
+          "emoji": "✝️",
+          "titulo": "La cruz deja marca",
+          "contenido": "Cuando un mal se vive con Cristo, no desaparece mágicamente. Pero deja de tener la última palabra."
         },
         {
-          "id": "r3",
-          "texto": "La forma de crecer es dando. Cuando atraviesas tus propios males con gracia, tu corazón se ensancha. Te vuelves capaz de acompañar a otros en su dolor sin juzgarlos, sin minimizar los hechos. Te conviertes en instrumento de consuelo.",
-          "emoji": "🌻"
+          "emoji": "🌅",
+          "titulo": "La esperanza permanece",
+          "contenido": "La resurrección no borra la historia: la transfigura. Lo vivido en amor no se pierde."
+        },
+        {
+          "emoji": "🌻",
+          "titulo": "El dolor puede abrir",
+          "contenido": "Quien atraviesa sus límites con gracia suele volverse más compasivo. El corazón ensanchado aprende a consolar."
         }
       ],
-      "pregunta": {
-        "texto": "Al comenzar este bloque de Misterios Gloriosos, ¿desde dónde te acercas hoy?",
-        "emoji": "🙏",
-        "opciones": [
-          {
-            "letra": "A",
-            "texto": "Con un mal concreto que todavía no he podido cruzar.",
-            "eco": "Trae ese mal exactamente así, sin adornos. Los Misterios Gloriosos no piden que ya hayas superado nada. Te acompañan en el camino hacia la resurrección, que empieza desde donde estás. María también contempló la gloria de su Hijo desde el dolor de haberlo perdido.",
-            "emoji": "💜"
-          },
-          {
-            "letra": "B",
-            "texto": "Con gratitud, recordando cómo Dios me ha acompañado en mis límites.",
-            "eco": "Esa gratitud es fruto de haber atravesado algo. Llévala al Rosario como ofrenda. Los Misterios Gloriosos son la confirmación de lo que ya sabes desde la experiencia: el mal no es el final. Que ese saber se profundice hoy en la oración.",
-            "emoji": "🌟"
-          }
-        ]
-      }
+      "preguntas": [
+        {
+          "pregunta": "Hoy, al mirar tus males, ¿desde dónde te sitúas más?",
+          "opciones": [
+            {
+              "texto": "Desde una herida aún abierta.",
+              "emoji": "❤️‍🩹",
+              "eco": "Todavía abierta también puede orarse."
+            },
+            {
+              "texto": "Desde algo ya atravesado.",
+              "emoji": "🌠",
+              "eco": "Esa memoria puede dar esperanza."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Qué queda en ti después de haber cruzado algún límite?",
+          "opciones": [
+            {
+              "texto": "Más compasión por otros.",
+              "emoji": "🤍",
+              "eco": "Esa compasión es fruto verdadero."
+            },
+            {
+              "texto": "Más gratitud por la gracia.",
+              "emoji": "🙏",
+              "eco": "Esa gratitud guarda mucha verdad."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Cómo quieres entrar a la oración gloriosa de hoy?",
+          "opciones": [
+            {
+              "texto": "Con deseo de esperanza.",
+              "emoji": "🕊️",
+              "eco": "Ese deseo ya mira hacia adelante."
+            },
+            {
+              "texto": "Con ganas de ofrecer consuelo.",
+              "emoji": "🌿",
+              "eco": "Ese impulso puede bendecir a otros."
+            }
+          ]
+        }
+      ]
     }
   }
 }

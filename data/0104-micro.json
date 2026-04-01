@@ -1,0 +1,296 @@
+{
+  "id": "0104",
+  "nivel": "CruzAndo la Cruz",
+  "cuaderno": "Gracia",
+  "tension_vertebral": "Dios te regala vivir en ti",
+  "bloques": {
+    "gozosos": {
+      "subtitulo": "Don que sorprende",
+      "tarjetas": [
+        {
+          "emoji": "🎁",
+          "titulo": "La gracia es más de lo que imaginas",
+          "contenido": "La gracia no es solo ayuda ocasional. Es Dios compartiéndote su propia vida de un modo real y gratuito."
+        },
+        {
+          "emoji": "🌿",
+          "titulo": "Fuiste hecho para Dios",
+          "contenido": "No eres extraño para Él. Fuiste creado con una apertura profunda que solo Dios puede llenar plenamente."
+        },
+        {
+          "emoji": "💫",
+          "titulo": "Dios toma la iniciativa",
+          "contenido": "Antes de que entiendas todo, Dios ya se mueve hacia ti. La gracia suele empezar antes de que la reconozcas."
+        },
+        {
+          "emoji": "🤲",
+          "titulo": "Recibir también es responder",
+          "contenido": "La gracia se ofrece gratuitamente, pero no se impone. Puede ser recibida, bienvenida y cuidada en libertad."
+        }
+      ],
+      "preguntas": [
+        {
+          "pregunta": "Cuando escuchas la palabra gracia, ¿qué despierta más en ti?",
+          "opciones": [
+            {
+              "texto": "Asombro y deseo de entenderla mejor",
+              "emoji": "✨",
+              "eco": "Ese asombro ya abre interiormente."
+            },
+            {
+              "texto": "Confusión, porque me parece algo abstracto",
+              "emoji": "🌫️",
+              "eco": "También desde ahí puede aclararse mucho."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Cómo llegas a este cuaderno sobre la gracia?",
+          "opciones": [
+            {
+              "texto": "Con hambre de Dios",
+              "emoji": "🫶",
+              "eco": "Ese hambre puede ser muy fecunda."
+            },
+            {
+              "texto": "Con cansancio y necesidad de sostén",
+              "emoji": "🪵",
+              "eco": "Ahí también puede encontrarte el don."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Qué quisieras reconocer esta semana de oración?",
+          "opciones": [
+            {
+              "texto": "Que Dios ya ha obrado en mi historia",
+              "emoji": "🕯️",
+              "eco": "Mirarlo así puede darte gratitud."
+            },
+            {
+              "texto": "Que todavía puedo recibir más",
+              "emoji": "🌱",
+              "eco": "Abrirte más ya es una gracia."
+            }
+          ]
+        }
+      ]
+    },
+    "luminosos": {
+      "subtitulo": "Don que se manifiesta",
+      "tarjetas": [
+        {
+          "emoji": "💡",
+          "titulo": "La gracia se hace visible",
+          "contenido": "Se manifiesta en una paz más honda, en fortaleza inesperada, en compasión real y en un amor que madura."
+        },
+        {
+          "emoji": "🤝",
+          "titulo": "Es relación, no magia",
+          "contenido": "La gracia no funciona como varita ni como efecto especial. Tiene forma de alianza viva entre Dios y tú."
+        },
+        {
+          "emoji": "👑",
+          "titulo": "María, llena de gracia",
+          "contenido": "María recibió plenamente la vida de Dios y la acogió libremente. Su sí constante muestra cómo se habita el don."
+        },
+        {
+          "emoji": "🌊",
+          "titulo": "De Cristo recibimos gracia",
+          "contenido": "Jesús no solo trae la gracia: en Él se nos comunica la abundancia misma de Dios, gracia sobre gracia."
+        }
+      ],
+      "preguntas": [
+        {
+          "pregunta": "¿Dónde te parece que la gracia se ha manifestado más en tu vida?",
+          "opciones": [
+            {
+              "texto": "En momentos de luz y consuelo",
+              "emoji": "🌤️",
+              "eco": "Es bueno reconocer esos rastros."
+            },
+            {
+              "texto": "En fuerzas que no sé explicar",
+              "emoji": "💪",
+              "eco": "Muchas veces ahí se asoma Dios."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Qué te ayuda más a pensar la gracia?",
+          "opciones": [
+            {
+              "texto": "Como presencia que acompaña",
+              "emoji": "🚶",
+              "eco": "Esa imagen puede sostener bastante."
+            },
+            {
+              "texto": "Como vida divina en mí",
+              "emoji": "🔥",
+              "eco": "Es una intuición muy honda."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Qué quisieras contemplar al orar estos misterios?",
+          "opciones": [
+            {
+              "texto": "El sí libre de María",
+              "emoji": "🤍",
+              "eco": "Su disponibilidad puede enseñarte mucho."
+            },
+            {
+              "texto": "La abundancia que viene de Cristo",
+              "emoji": "💧",
+              "eco": "Esa fuente no se agota fácilmente."
+            }
+          ]
+        }
+      ]
+    },
+    "dolorosos": {
+      "subtitulo": "Don que transforma",
+      "tarjetas": [
+        {
+          "emoji": "🪨",
+          "titulo": "La gracia no evita toda prueba",
+          "contenido": "No te saca mágicamente del dolor. Pero te da una forma nueva de atravesarlo, sin quedar destruido por dentro."
+        },
+        {
+          "emoji": "⚒️",
+          "titulo": "Tu esfuerzo cuenta",
+          "contenido": "La gracia no suple tu naturaleza ni anula tu libertad. Eleva lo que eres y fortalece tu respuesta concreta."
+        },
+        {
+          "emoji": "🫀",
+          "titulo": "Dios trabaja en lo profundo",
+          "contenido": "La gracia transforma desde dentro: sana afectos, ordena deseos, fortalece la voluntad y ensancha el corazón."
+        },
+        {
+          "emoji": "🌙",
+          "titulo": "También actúa cuando no la sientes",
+          "contenido": "No siempre notarás su presencia con claridad. Aun así, Dios puede seguir obrando silenciosamente en tu historia."
+        }
+      ],
+      "preguntas": [
+        {
+          "pregunta": "Cuando la vida se vuelve ardua, ¿qué necesitas más?",
+          "opciones": [
+            {
+              "texto": "Fuerza para seguir",
+              "emoji": "🛡️",
+              "eco": "Esa fuerza puede ser pedida."
+            },
+            {
+              "texto": "Descanso para no quebrarme",
+              "emoji": "🛏️",
+              "eco": "También descansar puede ser gracia."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Qué te cuesta más aceptar sobre la gracia?",
+          "opciones": [
+            {
+              "texto": "Que no depende solo de mí",
+              "emoji": "🙇",
+              "eco": "Soltar control no siempre es fácil."
+            },
+            {
+              "texto": "Que sí me implica personalmente",
+              "emoji": "👣",
+              "eco": "Recibir también pide responder."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Qué zona de tu vida quisieras que Dios transforme más?",
+          "opciones": [
+            {
+              "texto": "Mi mundo interior",
+              "emoji": "🫧",
+              "eco": "Ahí empieza mucho cambio verdadero."
+            },
+            {
+              "texto": "Mi forma concreta de vivir",
+              "emoji": "🏗️",
+              "eco": "La gracia también toca lo cotidiano."
+            }
+          ]
+        }
+      ]
+    },
+    "gloriosos": {
+      "subtitulo": "Don que da vida",
+      "tarjetas": [
+        {
+          "emoji": "🌅",
+          "titulo": "La gracia hace vivir",
+          "contenido": "No es un adorno espiritual. Es participación real en la vida de Dios, fuente de una existencia nueva."
+        },
+        {
+          "emoji": "🕊️",
+          "titulo": "Dios habita en ti",
+          "contenido": "La gracia tiene densidad de presencia. Dios no solo te ayuda desde fuera: quiere vivir en ti y contigo."
+        },
+        {
+          "emoji": "🎶",
+          "titulo": "La gratitud dispone el corazón",
+          "contenido": "Cuando reconoces el don recibido, algo se ensancha por dentro. La gratitud te vuelve más disponible a la gracia."
+        },
+        {
+          "emoji": "🌳",
+          "titulo": "La vida divina puede crecer",
+          "contenido": "La gracia tiene historia. Puede madurar, arraigarse y dar fruto en ti a lo largo del tiempo."
+        }
+      ],
+      "preguntas": [
+        {
+          "pregunta": "¿Qué te despierta pensar que Dios quiere habitar en ti?",
+          "opciones": [
+            {
+              "texto": "Consuelo y esperanza",
+              "emoji": "🏠",
+              "eco": "Qué bueno que te suene a hogar."
+            },
+            {
+              "texto": "Respeto y asombro",
+              "emoji": "🌌",
+              "eco": "Ese asombro puede volverse oración."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Qué fruto quisieras ver crecer más en tu vida?",
+          "opciones": [
+            {
+              "texto": "Gratitud estable",
+              "emoji": "🙏",
+              "eco": "La gratitud cambia mucho por dentro."
+            },
+            {
+              "texto": "Vida interior más viva",
+              "emoji": "🔥",
+              "eco": "Ese deseo merece ser cuidado."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Con qué quieres cerrar este nivel Cruz?",
+          "opciones": [
+            {
+              "texto": "Con confianza en el don de Dios",
+              "emoji": "🤲",
+              "eco": "La confianza deja recibir mejor."
+            },
+            {
+              "texto": "Con gratitud por el camino recorrido",
+              "emoji": "📿",
+              "eco": "Dar gracias también consolida el camino."
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
