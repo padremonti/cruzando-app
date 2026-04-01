@@ -619,6 +619,10 @@ body {
     }
   });
 
+  // Exponer funciones usadas en onclick inline
+  window.navigateTo  = navigateTo;
+  window.getOrarUrl  = getOrarUrl;
+
   var isLight = localStorage.getItem('ca_home_light') === '1';
   function apply(light) {
     document.body.classList.toggle('light', light);
