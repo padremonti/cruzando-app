@@ -1559,7 +1559,7 @@ body {
       return audioPlayerHTML('ap-rezar', 'Padrenuestro · 10 Avemarías · Gloria · Jaculatoria', DATA.audio_rezo || '');
     }
     if (key === 'canto') {
-      const src = DATA.audio_canto || '';
+      const src = m.audio_canto || '';
       if (src) return audioPlayerHTML('ap-canto', 'Canto contemplativo', src);
       return '<div class="canto-box"><p>🕊️ Momento de silencio y canto contemplativo</p><span class="canto-hint">Tómate unos momentos para cantar o guardar silencio antes de continuar</span></div>';
     }
