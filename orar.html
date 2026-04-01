@@ -660,6 +660,7 @@ body {
   const DAY_BLOCKS  = { 0:'gloriosos',1:'gozosos',2:'dolorosos',3:'gloriosos',4:'luminosos',5:'dolorosos',6:'gozosos' };
   const REST_POSES  = ['rest-staff','rest-sitting','rest-rock','rest-tree'];
   const MARIANO_BASE = 'https://padremonti.github.io/cruzando-app/assets/mariano/';
+  const MUSIC_BASE   = 'https://pub-faed94e375aa443e846e07f81ef93274.r2.dev/';
 
   let restPoseIndex = 0;
   let orbitIndex    = 0;
@@ -680,6 +681,14 @@ body {
     const m = parseInt(id.substring(0,2), 10);
     const n = parseInt(id.substring(2,4), 10);
     return 'Nivel ' + m + '-' + n;
+  }
+
+  // Construir URL del canto desde NIVEL_ID y número de misterio
+  function cantoUrl(m) {
+    // NIVEL_ID = '0101' → mundo=1, nivel=1
+    const mundo = parseInt(NIVEL_ID.substring(0,2), 10);
+    const nivel = parseInt(NIVEL_ID.substring(2,4), 10);
+    return MUSIC_BASE + 'M_' + mundo + '_' + nivel + '_' + m.numero + '.mp3';
   }
 
   function escHTML(s) {
@@ -1559,9 +1568,8 @@ body {
       return audioPlayerHTML('ap-rezar', 'Padrenuestro · 10 Avemarías · Gloria · Jaculatoria', DATA.audio_rezo || '');
     }
     if (key === 'canto') {
-      const src = m.audio_canto || '';
-      if (src) return audioPlayerHTML('ap-canto', 'Canto contemplativo', src);
-      return '<div class="canto-box"><p>🕊️ Momento de silencio y canto contemplativo</p><span class="canto-hint">Tómate unos momentos para cantar o guardar silencio antes de continuar</span></div>';
+      const src = cantoUrl(m);
+      return audioPlayerHTML('ap-canto-' + m.numero, 'Canto contemplativo', src);
     }
     if (key === 'contemplar') {
       const src = m.audio_contemplacion || '';
