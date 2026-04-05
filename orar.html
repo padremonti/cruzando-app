@@ -197,6 +197,26 @@ body {
   font-size:0.78rem; color:var(--text-dim); cursor:pointer; padding:8px;
 }
 
+/* ── Tarjeta día completado ── */
+.today-banner-done {
+  border-color:var(--green);
+  background:linear-gradient(135deg,var(--green-soft),var(--card));
+  cursor:default;
+}
+.dark .today-banner-done {
+  background:linear-gradient(135deg,rgba(52,168,83,0.08),var(--card));
+}
+
+/* ── Etiqueta "Solo hoy" en bloques Mundo 1 Free ── */
+.block-dayonly-tag {
+  position:absolute; bottom:10px; right:12px;
+  font-size:0.58rem; font-weight:700;
+  color:var(--text-dim);
+  background:var(--sec-bg);
+  border-radius:8px; padding:2px 8px;
+  letter-spacing:0.3px;
+}
+
 .nivel-done-banner {
   margin:8px 18px 18px; padding:20px; border-radius:16px;
   background:linear-gradient(135deg,var(--green-soft),rgba(52,168,83,0.05));
@@ -528,9 +548,15 @@ body {
 
   <!-- ═══ HEADER (compartido) ═══ -->
   <header class="header" id="main-header" style="display:none">
-    <div>
-      <div class="header-title" id="h-title"></div>
-      <div class="header-sub" id="h-sub"></div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <button id="btn-go-home" title="Ir al inicio" onclick="window.location.href='index.html'" style="background:none;border:none;cursor:pointer;padding:4px 6px;color:var(--text-dim);font-size:0.78rem;font-weight:600;display:flex;align-items:center;gap:4px;border-radius:8px;transition:color 0.2s">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Inicio
+      </button>
+      <div>
+        <div class="header-title" id="h-title"></div>
+        <div class="header-sub" id="h-sub"></div>
+      </div>
     </div>
     <div class="header-actions">
       <div class="meters-display" id="meters-display">
@@ -732,12 +758,12 @@ body {
   // ── Plan del usuario (se carga desde Firebase al init) ──
   let USER_PLAN = 'free';   // 'free' | 'beta' | 'premium'
   const FIREBASE_CONFIG = {
-      apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
-    authDomain: "cruzando-app.firebaseapp.com",
-    projectId: "cruzando-app",
-    storageBucket: "cruzando-app.firebasestorage.app",
-    messagingSenderId: "408196948528",
-    appId: "1:408196948528:web:de291e8afc969252e943f5"
+    apiKey:            "TU_API_KEY",
+    authDomain:        "TU_PROJECT.firebaseapp.com",
+    projectId:         "TU_PROJECT_ID",
+    storageBucket:     "TU_PROJECT.appspot.com",
+    messagingSenderId: "TU_SENDER_ID",
+    appId:             "TU_APP_ID"
   };
   let restPoseIndex = 0;
   let orbitIndex    = 0;
@@ -1126,6 +1152,11 @@ body {
     const todayName  = DAY_NAMES_ES[new Date().getDay()];
     const bannerWrap = $('today-banner-wrap');
 
+    // Para usuarios Free en Mundo 1: mostrar siempre la tarjeta "Misterios del día"
+    // (incluso si ya completó el bloque de hoy — muestra estado completado)
+    const mundoId = parseInt(NIVEL_ID.substring(0,2), 10);
+    const showDayCard = (USER_PLAN === 'free') && (mundoId === 1);
+
     if (!todayCleared) {
       bannerWrap.innerHTML =
         '<div class="today-banner fade-in" onclick="window._ca.enterBlock(\'' + todayBlock + '\')">' +
@@ -1135,6 +1166,22 @@ body {
           '</div>' +
           '<h3 style="color:' + blockColor(todayBlock) + '">' + blockEmoji(todayBlock) + ' Misterios ' + BLOCK_NAMES[todayBlock] + '</h3>' +
           '<div class="today-banner-days">' + BLOCK_DAYS[todayBlock].join(' · ') + '</div>' +
+        '</div>';
+    } else if (showDayCard) {
+      // Bloque del día ya completado — mostrar tarjeta de "vuelve mañana"
+      const tomorrowDay = (new Date().getDay() + 1) % 7;
+      const tomorrowBlock = DAY_BLOCKS[tomorrowDay];
+      const tomorrowName  = DAY_NAMES_ES[tomorrowDay];
+      bannerWrap.innerHTML =
+        '<div class="today-banner today-banner-done fade-in">' +
+          '<div class="today-banner-top">' +
+            '<span class="today-banner-label" style="color:var(--green)">✓ Completado hoy · ' + todayName + '</span>' +
+          '</div>' +
+          '<h3 style="color:var(--green)">' + blockEmoji(todayBlock) + ' Misterios ' + BLOCK_NAMES[todayBlock] + '</h3>' +
+          '<div class="today-banner-days" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">' +
+            '🌅 Mañana (' + tomorrowName + '): <strong style="color:' + blockColor(tomorrowBlock) + '">' +
+            'Misterios ' + BLOCK_NAMES[tomorrowBlock] + '</strong>' +
+          '</div>' +
         '</div>';
     } else {
       bannerWrap.innerHTML = '';
@@ -1150,9 +1197,13 @@ body {
       const isToday    = b === todayBlock && !isCleared;
 
       // ── Control de acceso por plan ──────────────────────────────
-      // Free: solo puede orar el bloque del día en Mundo 1
+      // Free en Mundo 1: ve los 4 bloques, pero solo puede ORAR el del día
+      //   → los otros se muestran normales pero enterBlock los bloquea
+      // Free en Mundo 2+: todos los bloques bloqueados con candado
       const mundoId    = parseInt(NIVEL_ID.substring(0,2), 10);
-      const isLocked   = (USER_PLAN === 'free') && (!isToday || mundoId > 1);
+      const isLocked   = (USER_PLAN === 'free') && (mundoId > 1);
+      // En Mundo 1 Free, marcar visualmente los que NO son hoy como "solo premium al orar"
+      const isDayOnly  = (USER_PLAN === 'free') && (mundoId === 1) && !isToday && !isCleared;
 
       const status     = isLocked  ? 'locked'   :
                          isCleared ? 'cleared'  :
@@ -1178,10 +1229,13 @@ body {
         ? '<span style="font-size:0.62rem;padding:2px 8px;border-radius:10px;background:var(--lvl-ultra);color:var(--lvl-bold);font-weight:700;margin-left:6px">✦ Preparación</span>'
         : '';
 
-      // Overlay de candado si está bloqueado
+      // Overlay de candado si está bloqueado (Mundos 2+)
+      // Indicador suave si es Mundo 1 pero no es el bloque de hoy
       const lockOverlay = isLocked
         ? '<div class="block-lock-overlay">🔒</div>'
-        : '';
+        : isDayOnly
+          ? '<div class="block-dayonly-tag">Solo con Premium · hoy: ' + BLOCK_NAMES[todayBlock] + '</div>'
+          : '';
 
       card.innerHTML =
         '<div class="block-card-top">' +
@@ -1230,12 +1284,21 @@ body {
   // ════════════════════════════════
   function enterBlock(b) {
     // ── Verificar acceso por plan ─────────────────────────────────
-    const todayBlock = DAY_BLOCKS[new Date().getDay()];
-    const mundoId    = parseInt(NIVEL_ID.substring(0,2), 10);
-    const isToday    = b === todayBlock && !(progress[b] && progress[b].every(x => x !== null));
-    const isLocked   = (USER_PLAN === 'free') && (!isToday || mundoId > 1);
+    const todayBlock  = DAY_BLOCKS[new Date().getDay()];
+    const mundoId     = parseInt(NIVEL_ID.substring(0,2), 10);
+    const isCleared   = progress[b] && progress[b].every(x => x !== null);
+    const isToday     = b === todayBlock && !isCleared;
 
-    if (isLocked) {
+    // Mundo 2+: siempre bloqueado para Free
+    if (USER_PLAN === 'free' && mundoId > 1) {
+      document.getElementById('modal-premium-orar').classList.add('open');
+      return;
+    }
+
+    // Mundo 1: Free puede orar SOLO el bloque del día (no cleared)
+    // Si el bloque ya está cleared, puede verlo pero no re-orar (normal)
+    // Si es otro bloque que no es el de hoy y no está cleared → bloquear
+    if (USER_PLAN === 'free' && mundoId === 1 && !isToday && !isCleared) {
       document.getElementById('modal-premium-orar').classList.add('open');
       return;
     }
