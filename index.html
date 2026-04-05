@@ -263,6 +263,44 @@ body {
 .code-feedback { font-size:0.72rem; min-height:18px; margin-top:4px; padding-left:4px; }
 .code-feedback.ok { color:var(--green); }
 .code-feedback.err { color:#E74C3C; }
+/* ── Banner oferta de lanzamiento ── */
+.launch-banner {
+  background:linear-gradient(135deg, rgba(255,122,0,0.15), rgba(255,122,0,0.05));
+  border:1px solid rgba(255,122,0,0.3);
+  border-radius:14px; padding:14px 16px; margin-bottom:16px; text-align:center;
+}
+.launch-banner-tag {
+  font-size:0.65rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:0.8px; color:var(--orange); margin-bottom:4px;
+}
+.launch-banner-text {
+  font-size:0.88rem; font-weight:700; color:var(--text); margin-bottom:6px;
+}
+.launch-banner-code {
+  font-size:0.78rem; color:var(--text-soft);
+}
+.launch-banner-code strong {
+  font-family:monospace; font-size:0.9rem; color:var(--orange);
+  background:rgba(255,122,0,0.1); padding:2px 8px; border-radius:6px;
+  letter-spacing:1px;
+}
+
+/* ── Planes desactivados ── */
+.premium-card.disabled {
+  opacity:0.6; cursor:default; pointer-events:none;
+}
+.premium-card-prices {
+  display:flex; align-items:baseline; gap:6px;
+}
+.premium-card-price-old {
+  font-size:0.75rem; color:var(--text-dim);
+  text-decoration:line-through;
+}
+.coming-soon-note {
+  font-size:0.72rem; color:var(--text-dim); text-align:center;
+  margin-top:8px; margin-bottom:4px; line-height:1.6;
+}
+
 .premium-features {
   margin:16px 0; display:flex; flex-direction:column; gap:6px;
 }
@@ -443,23 +481,39 @@ body {
         <div class="premium-header-sub">Avanza a tu ritmo por todos los Mundos del camino.</div>
       </div>
 
-      <!-- Planes -->
+      <!-- Banner oferta de lanzamiento -->
+      <div class="launch-banner">
+        <div class="launch-banner-tag">🎉 Oferta de lanzamiento</div>
+        <div class="launch-banner-text">50% de descuento en tu primer año</div>
+        <div class="launch-banner-code">Código: <strong>LAUNCH2026</strong></div>
+      </div>
+
+      <!-- Planes (desactivados hasta que Stripe esté listo) -->
       <div class="premium-plans">
-        <div class="premium-card selected" id="plan-anual" onclick="selectPlan('anual')">
+        <div class="premium-card selected disabled" id="plan-anual">
           <div class="premium-badge">Más popular</div>
           <div class="premium-card-top">
             <span class="premium-card-name">Anual</span>
-            <span class="premium-card-price">$1,850 <span>MXN / año</span></span>
+            <div class="premium-card-prices">
+              <span class="premium-card-price-old">$1,850</span>
+              <span class="premium-card-price">$925 <span>MXN / año</span></span>
+            </div>
           </div>
-          <div class="premium-card-desc">Equivale a $154/mes · 2 meses gratis</div>
+          <div class="premium-card-desc">Equivale a $77/mes · 2 meses gratis incluidos</div>
         </div>
-        <div class="premium-card" id="plan-mensual" onclick="selectPlan('mensual')">
+        <div class="premium-card disabled" id="plan-mensual">
           <div class="premium-card-top">
             <span class="premium-card-name">Mensual</span>
-            <span class="premium-card-price">$185 <span>MXN / mes</span></span>
+            <div class="premium-card-prices">
+              <span class="premium-card-price-old">$185</span>
+              <span class="premium-card-price">$93 <span>MXN / mes</span></span>
+            </div>
           </div>
           <div class="premium-card-desc">Cancela cuando quieras</div>
         </div>
+      </div>
+      <div class="coming-soon-note">
+        💳 Pagos disponibles próximamente. Usa tu código de acceso mientras tanto.
       </div>
 
       <!-- Beneficios -->
@@ -480,7 +534,7 @@ body {
       <div class="code-feedback" id="code-feedback"></div>
 
       <button class="btn-primary" id="btn-premium-continuar" style="margin-top:20px">
-        Continuar
+        Aplicar código de acceso
       </button>
       <button class="btn-modal-close" onclick="closeModal('modal-premium')">Ahora no</button>
     </div>
@@ -620,7 +674,7 @@ import { getFirestore, doc, getDoc,
 // ── CONFIGURACIÓN FIREBASE ────────────────────────────────────────
 // *** PEGA AQUÍ TU firebaseConfig ***
 const FIREBASE_CONFIG = {
-   apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
+    apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
     authDomain: "cruzando-app.firebaseapp.com",
     projectId: "cruzando-app",
     storageBucket: "cruzando-app.firebasestorage.app",
@@ -630,8 +684,8 @@ const FIREBASE_CONFIG = {
 
 // ── PRICE IDs DE STRIPE ───────────────────────────────────────────
 // *** PEGA AQUÍ TUS PRICE IDs ***
-const STRIPE_PRICE_MENSUAL = "price_1TIcVOCRd4PM0jIp9oEF54j4";
-const STRIPE_PRICE_ANUAL   = "price_1TIca0CRd4PM0jIparwSPFfT";
+const STRIPE_PRICE_MENSUAL = "price_TU_PRICE_ID_MENSUAL";
+const STRIPE_PRICE_ANUAL   = "price_TU_PRICE_ID_ANUAL";
 
 // ── CÓDIGO BETA ───────────────────────────────────────────────────
 const BETA_CODE         = "BETA2026";
