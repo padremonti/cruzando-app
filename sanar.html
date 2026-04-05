@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1A0E04">
+<title>Talleres · CruzAndo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════════════
+   sanar.html · CruzAndo App · Talleres de Sanación
+   ══════════════════════════════════════════════════════ */
+
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+
+:root {
+  --bg:        #1A0E04;
+  --bg2:       #120A02;
+  --card:      #2C1810;
+  --card2:     #341E12;
+  --border:    #4A2E1A;
+  --text:      #F0E6DA;
+  --text-soft: #C4A882;
+  --text-dim:  #7A5C40;
+  --orange:    #FF7A00;
+  --green:     #4CAF7D;
+  --shadow:    rgba(0,0,0,0.45);
+}
+
+body.light {
+  --bg:        #F5F0E8;
+  --bg2:       #EDE5D8;
+  --card:      #FFFCF7;
+  --card2:     #F7F2EA;
+  --border:    #D9CFC4;
+  --text:      #2B2622;
+  --text-soft: #6B6259;
+  --text-dim:  #9B9389;
+  --shadow:    rgba(43,38,34,0.1);
+}
+
+html { font-size:18px; }
+body {
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.7;
+  min-height:100dvh;
+  -webkit-font-smoothing:antialiased;
+  transition:background 0.3s,color 0.3s;
+}
+
+.shell { max-width:480px; margin:0 auto; min-height:100dvh; }
+
+/* ── HEADER ── */
+.header {
+  display:flex; align-items:center; gap:10px;
+  padding:14px 18px 12px;
+  position:sticky; top:0; z-index:50;
+  background:var(--bg);
+  border-bottom:1px solid var(--border);
+}
+.back-btn {
+  width:36px; height:36px; border-radius:50%;
+  border:1px solid var(--border);
+  background:var(--card);
+  cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  color:var(--text-soft);
+  transition:all 0.2s; flex-shrink:0;
+}
+.back-btn:active { transform:scale(0.92); }
+.back-btn svg { width:18px; height:18px; }
+.header-center { flex:1; min-width:0; }
+.header-title  { font-size:1.05rem; font-weight:700; color:var(--orange); line-height:1.2; }
+.header-sub    { font-size:0.72rem; color:var(--text-dim); margin-top:1px; }
+
+/* ══ PANTALLAS BASE ══ */
+.pant {
+  display:none; flex-direction:column;
+  align-items:center; justify-content:center;
+  min-height:calc(100dvh - 65px);
+  padding:40px 24px; text-align:center; gap:18px;
+}
+.pant.active { display:flex; }
+
+/* ── AUTH GATE ── */
+.gate-icon {
+  width:72px; height:72px; border-radius:50%;
+  background:rgba(255,122,0,0.1);
+  border:2px solid rgba(255,122,0,0.25);
+  display:flex; align-items:center; justify-content:center;
+  font-size:2.2rem;
+}
+.gate-title {
+  font-family:'Lora',serif; font-size:1.3rem; font-weight:600;
+  color:var(--text); line-height:1.3;
+}
+.gate-sub { font-size:0.83rem; color:var(--text-soft); max-width:280px; line-height:1.65; }
+.cta-btn {
+  background:var(--orange); color:#fff;
+  border:none; border-radius:14px;
+  padding:13px 28px;
+  font-family:inherit; font-size:0.9rem; font-weight:700;
+  cursor:pointer; transition:all 0.2s;
+}
+.cta-btn:active { transform:scale(0.96); opacity:0.9; }
+.cta-btn.outline {
+  background:transparent;
+  border:2px solid var(--orange);
+  color:var(--orange);
+}
+
+/* ── SPINNER ── */
+.spinner {
+  width:36px; height:36px;
+  border:3px solid var(--border);
+  border-top-color:var(--orange);
+  border-radius:50%;
+  animation:spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+.loading-text { font-size:0.82rem; color:var(--text-dim); }
+
+/* ══ CONTENIDO PRINCIPAL ══ */
+#mainContent { display:none; padding-bottom:80px; }
+
+/* ── INTRO HERO ── */
+.hero {
+  padding:24px 18px 18px;
+  border-bottom:1px solid var(--border);
+}
+.hero-label {
+  font-size:0.68rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:1.2px; color:var(--orange);
+  display:flex; align-items:center; gap:6px;
+  margin-bottom:8px;
+}
+.hero-label-dot {
+  width:6px; height:6px; border-radius:50%;
+  background:var(--orange);
+  animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.4)} }
+.hero h1 {
+  font-family:'Lora',serif;
+  font-size:1.35rem; font-weight:600;
+  color:var(--text); line-height:1.3; margin-bottom:6px;
+}
+.hero p { font-size:0.82rem; color:var(--text-soft); line-height:1.6; }
+
+/* ── CATEGORÍAS ── */
+.categorias { padding:20px 18px 0; }
+
+.categoria-header {
+  display:flex; align-items:center; gap:10px;
+  margin-bottom:14px;
+}
+.categoria-linea { flex:1; height:1px; background:var(--border); }
+.categoria-nombre {
+  font-size:0.7rem; font-weight:700;
+  text-transform:uppercase; letter-spacing:1px;
+  color:var(--text-dim); white-space:nowrap;
+}
+
+/* ── TARJETAS DE TALLER ── */
+.taller-card {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  margin-bottom:14px;
+  overflow:hidden;
+  transition:transform 0.15s, box-shadow 0.15s;
+  animation:fadeUp 0.35s ease both;
+}
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(10px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* ── THUMBNAIL / PLAYER AREA ── */
+.taller-thumb {
+  position:relative;
+  width:100%;
+  padding-top:56.25%; /* 16:9 */
+  background:var(--bg2);
+  cursor:pointer;
+  overflow:hidden;
+}
+.taller-thumb img {
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  object-fit:cover;
+  transition:transform 0.3s;
+}
+.taller-thumb:hover img { transform:scale(1.03); }
+
+/* overlay degradado */
+.thumb-overlay {
+  position:absolute; inset:0;
+  background:linear-gradient(to top, rgba(20,8,0,0.7) 0%, transparent 60%);
+  display:flex; align-items:center; justify-content:center;
+}
+
+/* botón play */
+.play-btn {
+  width:56px; height:56px; border-radius:50%;
+  background:rgba(255,122,0,0.92);
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 4px 20px rgba(255,122,0,0.4);
+  transition:transform 0.2s, box-shadow 0.2s;
+}
+.taller-thumb:active .play-btn {
+  transform:scale(0.92);
+  box-shadow:0 2px 10px rgba(255,122,0,0.3);
+}
+.play-btn svg { width:24px; height:24px; fill:#fff; margin-left:3px; }
+
+/* chip de duración sobre thumbnail */
+.thumb-duracion {
+  position:absolute; bottom:10px; right:10px;
+  background:rgba(20,8,0,0.75);
+  color:#fff; font-size:0.68rem; font-weight:600;
+  padding:3px 8px; border-radius:6px;
+  backdrop-filter:blur(4px);
+}
+
+/* ── PLAYER INLINE (YouTube iframe) ── */
+.taller-player {
+  display:none;
+  position:relative;
+  width:100%;
+  padding-top:56.25%;
+  background:#000;
+}
+.taller-player iframe {
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  border:none;
+}
+.player-close {
+  position:absolute; top:8px; right:8px; z-index:10;
+  width:30px; height:30px; border-radius:50%;
+  background:rgba(0,0,0,0.6);
+  border:none; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  color:#fff; font-size:14px;
+  backdrop-filter:blur(4px);
+  transition:background 0.2s;
+}
+.player-close:hover { background:rgba(255,50,50,0.7); }
+
+/* ── INFO DEL TALLER ── */
+.taller-body { padding:14px 16px 16px; }
+.taller-titulo {
+  font-family:'Lora',serif;
+  font-size:0.97rem; font-weight:600;
+  color:var(--text); line-height:1.3;
+  margin-bottom:5px;
+}
+.taller-desc {
+  font-size:0.8rem; color:var(--text-soft);
+  line-height:1.55; margin-bottom:12px;
+}
+.taller-meta {
+  display:flex; align-items:center; gap:8px;
+}
+.meta-chip {
+  display:flex; align-items:center; gap:4px;
+  font-size:0.7rem; font-weight:600;
+  padding:3px 9px; border-radius:20px;
+  background:rgba(255,122,0,0.1);
+  color:var(--orange); border:1px solid rgba(255,122,0,0.2);
+}
+.meta-chip svg { width:12px; height:12px; }
+
+/* chip membresía */
+.pro-chip {
+  font-size:0.68rem; font-weight:700;
+  padding:2px 8px; border-radius:20px;
+  background:rgba(76,175,125,0.12);
+  color:var(--green);
+  border:1px solid rgba(76,175,125,0.25);
+  letter-spacing:0.3px;
+}
+
+/* ── LOCK (sin membresía) ── */
+.taller-lock {
+  position:relative;
+}
+.taller-lock .taller-thumb { cursor:default; }
+.taller-lock .play-btn { background:rgba(120,100,80,0.7); box-shadow:none; }
+.lock-overlay {
+  position:absolute; inset:0;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:6px;
+  background:rgba(20,8,0,0.55);
+  backdrop-filter:blur(2px);
+}
+.lock-icon { font-size:1.8rem; }
+.lock-text {
+  font-size:0.72rem; font-weight:700;
+  color:rgba(255,255,255,0.85);
+  background:rgba(0,0,0,0.4);
+  padding:3px 12px; border-radius:20px;
+}
+.taller-lock .taller-body { opacity:0.55; pointer-events:none; }
+
+/* ── ESTADO VACÍO ── */
+.empty-wrap {
+  padding:60px 28px;
+  text-align:center;
+  display:flex; flex-direction:column;
+  align-items:center; gap:14px;
+}
+.empty-icon { font-size:2.8rem; opacity:0.5; }
+.empty-title {
+  font-family:'Lora',serif;
+  font-size:1.1rem; font-weight:600; color:var(--text);
+}
+.empty-sub { font-size:0.82rem; color:var(--text-soft); max-width:260px; line-height:1.6; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ══ HEADER ══ -->
+  <header class="header">
+    <button class="back-btn" aria-label="Regresar" onclick="goBack()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+           stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </button>
+    <div class="header-center">
+      <div class="header-title">Talleres de Sanación</div>
+      <div class="header-sub" id="headerSub">Contenido para miembros</div>
+    </div>
+  </header>
+
+  <!-- ══ PANTALLA: Sin sesión ══ -->
+  <div class="pant" id="pantAuth">
+    <div class="gate-icon">🎓</div>
+    <p class="gate-title">Inicia sesión para ver los talleres</p>
+    <p class="gate-sub">Estos talleres son exclusivos para peregrinos registrados en CruzAndo.</p>
+    <button class="cta-btn" onclick="goBack()">← Regresar al inicio</button>
+  </div>
+
+  <!-- ══ PANTALLA: Cargando ══ -->
+  <div class="pant" id="pantLoading">
+    <div class="spinner"></div>
+    <p class="loading-text">Cargando talleres…</p>
+  </div>
+
+  <!-- ══ PANTALLA: Sin membresía ══ -->
+  <div class="pant" id="pantNoMem">
+    <div class="gate-icon">🔒</div>
+    <p class="gate-title">Contenido para miembros Pro</p>
+    <p class="gate-sub">Los talleres de video están disponibles con la membresía CruzAndo Pro. ¡Goza el camino!</p>
+    <button class="cta-btn" onclick="goBack()">← Regresar al inicio</button>
+    <button class="cta-btn outline" onclick="goBack()">Ver planes</button>
+  </div>
+
+  <!-- ══ CONTENIDO PRINCIPAL ══ -->
+  <div id="mainContent">
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero-label">
+        <span class="hero-label-dot"></span>
+        Exclusivo para miembros
+      </div>
+      <h1>Talleres de Arranque</h1>
+      <p>Videos de formación para acompañarte en momentos clave del camino. Tómalos a tu ritmo.</p>
+    </div>
+
+    <!-- Categorías se renderizan aquí -->
+    <div class="categorias" id="categoriasContainer"></div>
+
+  </div>
+
+</div><!-- /.shell -->
+
+<!-- ══════════════════════════════════════════
+     FIREBASE SDK v10 (compat) vía CDN
+     ══════════════════════════════════════════ -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
+/* ════════════════════════════════════════════════════
+   CONFIGURACIÓN FIREBASE
+   ── Pega aquí tus valores del proyecto ──
+   ════════════════════════════════════════════════════ */
+const firebaseConfig = {
+  apiKey:            "TU_API_KEY",
+  authDomain:        "TU_AUTH_DOMAIN",
+  projectId:         "TU_PROJECT_ID",
+  storageBucket:     "TU_STORAGE_BUCKET",
+  messagingSenderId: "TU_MESSAGING_SENDER_ID",
+  appId:             "TU_APP_ID"
+};
+
+/* ════════════════════════════════════════════════════
+   HELPERS
+   ════════════════════════════════════════════════════ */
+
+// Thumbnail de YouTube por videoId
+function ytThumb(videoId) {
+  return `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
+}
+
+// Escapa HTML básico
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ════════════════════════════════════════════════════
+   NAVEGACIÓN
+   ════════════════════════════════════════════════════ */
+function goBack() {
+  const base = window.location.origin
+    + window.location.pathname.replace(/\/sanar\.html$/, '/');
+  window.location.href = base + 'index.html';
+}
+
+/* ════════════════════════════════════════════════════
+   PANTALLAS
+   ════════════════════════════════════════════════════ */
+function mostrarPant(id) {
+  ['pantAuth','pantLoading','pantNoMem'].forEach(p => {
+    document.getElementById(p).classList.remove('active');
+  });
+  document.getElementById('mainContent').style.display = 'none';
+
+  if (id === 'main') {
+    document.getElementById('mainContent').style.display = 'block';
+  } else {
+    document.getElementById(id).classList.add('active');
+  }
+}
+
+/* ════════════════════════════════════════════════════
+   PLAYER INLINE
+   ════════════════════════════════════════════════════ */
+function abrirVideo(cardId, videoId) {
+  const card   = document.getElementById(cardId);
+  const thumb  = card.querySelector('.taller-thumb');
+  const player = card.querySelector('.taller-player');
+
+  // Detener cualquier otro video abierto
+  document.querySelectorAll('.taller-player').forEach(p => {
+    if (p !== player) cerrarPlayerEl(p);
+  });
+
+  // Insertar iframe
+  player.innerHTML = `
+    <iframe
+      src="https://www.youtube.com/embed/${esc(videoId)}?autoplay=1&rel=0&modestbranding=1"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen>
+    </iframe>
+    <button class="player-close" onclick="cerrarPlayer('${cardId}')" aria-label="Cerrar video">✕</button>
+  `;
+
+  thumb.style.display  = 'none';
+  player.style.display = 'block';
+
+  // Scroll suave hacia la tarjeta
+  card.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function cerrarPlayer(cardId) {
+  const card = document.getElementById(cardId);
+  cerrarPlayerEl(card.querySelector('.taller-player'));
+  card.querySelector('.taller-thumb').style.display = 'block';
+}
+
+function cerrarPlayerEl(playerEl) {
+  if (!playerEl) return;
+  playerEl.innerHTML = '';
+  playerEl.style.display = 'none';
+  // Mostrar thumb hermano
+  const thumb = playerEl.previousElementSibling;
+  if (thumb && thumb.classList.contains('taller-thumb')) {
+    thumb.style.display = 'block';
+  }
+}
+
+/* ════════════════════════════════════════════════════
+   RENDER
+   ════════════════════════════════════════════════════ */
+function renderCategorias(categorias, tieneMem) {
+  const container = document.getElementById('categoriasContainer');
+
+  if (!categorias.length) {
+    container.innerHTML = `
+      <div class="empty-wrap">
+        <div class="empty-icon">🎬</div>
+        <p class="empty-title">Próximamente</p>
+        <p class="empty-sub">Estamos preparando los talleres. ¡Vuelve pronto!</p>
+      </div>`;
+    return;
+  }
+
+  let html = '';
+
+  categorias.forEach((cat, ci) => {
+    html += `
+      <div class="categoria-header" style="animation-delay:${ci*60}ms">
+        <div class="categoria-linea"></div>
+        <span class="categoria-nombre">${esc(cat.nombre)}</span>
+        <div class="categoria-linea"></div>
+      </div>`;
+
+    (cat.talleres || []).forEach((t, ti) => {
+      const cardId  = `card_${esc(t.id)}`;
+      const bloq    = tieneMem ? '' : 'taller-lock';
+      const delay   = (ci * 3 + ti) * 60;
+
+      const thumbClick = tieneMem
+        ? `onclick="abrirVideo('${cardId}','${esc(t.videoId)}')"`
+        : '';
+
+      const lockOverlay = !tieneMem ? `
+        <div class="lock-overlay">
+          <span class="lock-icon">🔒</span>
+          <span class="lock-text">Solo miembros Pro</span>
+        </div>` : '';
+
+      html += `
+        <div class="taller-card ${bloq}" id="${cardId}" style="animation-delay:${delay}ms">
+
+          <!-- Thumbnail -->
+          <div class="taller-thumb" ${thumbClick}>
+            <img src="${ytThumb(t.videoId)}"
+                 alt="${esc(t.titulo)}"
+                 loading="lazy"
+                 onerror="this.src='data:image/svg+xml,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'320\\' height=\\'180\\' style=\\'background:%231A0E04\\'></svg>'">
+            <div class="thumb-overlay">
+              <div class="play-btn">
+                <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              </div>
+            </div>
+            <span class="thumb-duracion">▶ ${esc(t.duracion)}</span>
+            ${lockOverlay}
+          </div>
+
+          <!-- Player inline (vacío hasta que se abre) -->
+          <div class="taller-player"></div>
+
+          <!-- Info -->
+          <div class="taller-body">
+            <div class="taller-titulo">${esc(t.titulo)}</div>
+            <div class="taller-desc">${esc(t.descripcion)}</div>
+            <div class="taller-meta">
+              <span class="meta-chip">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                     stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                ${esc(t.duracion)}
+              </span>
+              ${tieneMem
+                ? '<span class="pro-chip">✓ Pro</span>'
+                : '<span class="pro-chip" style="background:rgba(122,92,64,0.15);color:var(--text-dim);border-color:rgba(122,92,64,0.2)">Pro</span>'}
+            </div>
+          </div>
+
+        </div>`;
+    });
+  });
+
+  container.innerHTML = html;
+}
+
+/* ════════════════════════════════════════════════════
+   INICIALIZACIÓN FIREBASE
+   ════════════════════════════════════════════════════ */
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db   = firebase.firestore();
+
+// Hereda preferencia de modo oscuro/claro
+const savedTheme = localStorage.getItem('cruzando_theme');
+if (savedTheme === 'light') document.body.classList.add('light');
+
+mostrarPant('pantLoading');
+
+auth.onAuthStateChanged(async (user) => {
+
+  if (!user) {
+    mostrarPant('pantAuth');
+    return;
+  }
+
+  try {
+    // 1. Leer membresía del usuario
+    const userDoc  = await db.collection('users').doc(user.uid).get();
+    const userData = userDoc.exists ? userDoc.data() : {};
+    const tieneMem = userData.membresia === true;
+
+    // 2. Leer todas las categorías de talleres
+    const snap = await db.collection('talleres')
+      .orderBy('orden', 'asc')
+      .get();
+
+    const categorias = snap.docs.map(d => d.data());
+
+    // 3. Actualizar header
+    const sub = document.getElementById('headerSub');
+    sub.textContent = tieneMem
+      ? `Hola, peregrino · Plan Pro`
+      : `Usuario free · Contenido bloqueado`;
+
+    // 4. Mostrar contenido
+    mostrarPant('main');
+    renderCategorias(categorias, tieneMem);
+
+  } catch (err) {
+    console.error('Error cargando talleres:', err);
+    mostrarPant('pantAuth');
+    document.querySelector('#pantAuth .gate-title').textContent = 'Error al cargar talleres';
+    document.querySelector('#pantAuth .gate-sub').textContent   =
+      'Ocurrió un problema. Intenta recargar la página.';
+  }
+
+});
+</script>
+</body>
+</html>
