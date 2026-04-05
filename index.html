@@ -3,1028 +3,2014 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#1A0E04">
-<meta name="description" content="CruzAndo — Reza y contempla los 20 Misterios del Santo Rosario en un itinerario de formación espiritual. Peregrinar la vida con María hacia Jesucristo.">
-<title>CruzAndo</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#E6DED3">
+<title>CruzAndo · Orar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
+/* ══════════════════════════════════════════════════════
+   CruzAndo · orar.html · MVP Vanilla JS · Cero deps
+   Motor genérico: lee data/{id}.json + data/{id}-micro.json
+   Flujo: Bloques → Micro-learning (1ª vez) → Oración
+   ══════════════════════════════════════════════════════ */
+
 *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
 
 :root {
-  --bg:        #1A0E04;
-  --bg2:       #120A02;
-  --card:      #2C1810;
-  --card2:     #3A2015;
-  --border:    #4A2E1A;
-  --text:      #F0E6DA;
-  --text-soft: #C4A882;
-  --text-dim:  #7A5C40;
-  --orange:    #FF7A00;
-  --orange-soft:#F69C49;
-  --orange-dim: rgba(255,122,0,0.12);
-  --orange-glow:rgba(255,122,0,0.25);
-  --green:     #4CAF7D;
-  --green-soft:rgba(76,175,125,0.15);
-  --gold:      #D4A017;
-  --brand:     #01BBE1;
+  --bg: #E6DED3;
+  --card: #FFFCF7;
+  --border: #D9D1C7;
+  --text: #2B2622;
+  --text-soft: #6B6259;
+  --text-dim: #9B9389;
+  --input-bg: #FFFCF7;
+  --sec-bg: #F5F0E8;
+  --shadow: rgba(43,38,34,0.08);
+  --green: #34A853;
+  --green-soft: rgba(52,168,83,0.12);
+  --lvl-bold: #FF7A00;
+  --lvl-base: #FF7F09;
+  --lvl-soft: #F69C49;
+  --lvl-mist: #FFA34E;
+  --lvl-light: #FFCFA2;
+  --lvl-ultra: rgba(255,122,0,0.07);
+  --goz-color: #D4A017;
+  --lum-color: #01BBE1;
+  --dol-color: #C0392B;
+  --glo-color: #8E44AD;
 }
-.light {
-  --bg:        #E6DED3;
-  --bg2:       #D9CFC4;
-  --card:      #FFFCF7;
-  --card2:     #F5EDE4;
-  --border:    #D0C4B8;
-  --text:      #2B1A0E;
-  --text-soft: #6B5040;
-  --text-dim:  #9B8878;
-  --orange-dim: rgba(255,122,0,0.08);
-  --orange-glow:rgba(255,122,0,0.18);
+
+.dark {
+  --bg: #1A1714;
+  --card: #252119;
+  --border: #3A3530;
+  --text: #E6DED3;
+  --text-soft: #B8A898;
+  --text-dim: #786858;
+  --input-bg: #2A2520;
+  --sec-bg: #1E1B16;
+  --shadow: rgba(0,0,0,0.3);
+  --green-soft: rgba(52,168,83,0.18);
 }
-.light .bg-glow { background:radial-gradient(ellipse at center, rgba(255,122,0,0.05) 0%, rgba(255,122,0,0.02) 40%, transparent 70%); }
-.light .header { background:linear-gradient(180deg, var(--bg) 80%, transparent); }
-.light .meters-chip { background:var(--card); border-color:var(--border); }
-.light .icon-btn { background:var(--card); border-color:var(--border); }
-.light .verse-card { background:linear-gradient(135deg, #FFFCF7 0%, #FFF3E8 100%); border-color:rgba(255,122,0,0.2); }
-.light .verse-ornament { color:var(--orange); }
-.light .bloque-bar-wrap { background:rgba(0,0,0,0.08); }
-.light .modulo-orar   { background:linear-gradient(145deg,#FFF0E0,#FFE4C8); border-color:rgba(255,122,0,0.28); }
-.light .modulo-sanar  { background:linear-gradient(145deg,#FFF4EA,#FAEADE); border-color:rgba(255,122,0,0.14); }
-.light .modulo-diario { background:linear-gradient(145deg,#F5EDE4,#EDE3D8); border-color:rgba(255,122,0,0.09); }
-.light .orar-titulo   { color:var(--orange); }
-.light .orar-sep      { background:rgba(255,122,0,0.18); }
-.light .orar-nivel-tag { background:rgba(255,122,0,0.08); }
-.light .plan-chip-free { background:rgba(0,0,0,0.06); }
-.light .modal-sheet { background:var(--card); }
-.light .modal-input { background:var(--bg2); }
-.light .premium-card { background:var(--card2); border-color:var(--border); }
-.light .premium-card.selected { border-color:var(--orange); }
-.light .code-input { background:var(--bg2); }
 
 html { font-size:18px; }
 body {
   font-family:'Inter',system-ui,sans-serif;
   background:var(--bg); color:var(--text);
-  line-height:1.6; min-height:100dvh;
+  line-height:1.7; min-height:100dvh;
   -webkit-font-smoothing:antialiased;
-  transition:background 0.35s, color 0.35s;
+  transition:background 0.4s,color 0.4s;
 }
-.shell { max-width:480px; margin:0 auto; min-height:100dvh; position:relative; overflow:hidden; }
-.bg-glow {
-  position:fixed; top:-20%; left:50%; transform:translateX(-50%);
-  width:700px; height:700px; pointer-events:none; z-index:0;
-  background:radial-gradient(ellipse at center, rgba(255,122,0,0.07) 0%, rgba(255,122,0,0.03) 40%, transparent 70%);
-}
+
+.shell { max-width:480px; margin:0 auto; min-height:100dvh; position:relative; }
+.screen { display:none; }
+.screen.active { display:block; }
 
 /* ── Header ── */
 .header {
-  position:sticky; top:0; z-index:100;
   display:flex; align-items:center; justify-content:space-between;
-  padding:14px 20px 12px;
-  background:linear-gradient(180deg, var(--bg) 70%, transparent);
+  padding:14px 18px 10px; position:sticky; top:0; z-index:50;
+  background:var(--bg); border-bottom:1px solid var(--border);
 }
-.header-brand { display:flex; align-items:center; gap:9px; }
-.lux-wrap { opacity:0.9; display:flex; align-items:center; }
-.brand-name { font-family:'Lora',serif; font-size:1.05rem; font-weight:600; letter-spacing:0.3px; }
-.header-right { display:flex; align-items:center; gap:8px; }
-.meters-chip {
-  display:flex; align-items:center; gap:5px;
-  background:var(--card); border:1px solid var(--border);
-  border-radius:20px; padding:5px 12px;
-  font-size:0.72rem; font-weight:600; color:var(--text-soft);
-}
-.plan-chip-free {
-  font-size:0.6rem; font-weight:700; text-transform:uppercase;
-  letter-spacing:0.8px; padding:2px 8px; border-radius:10px;
-  background:rgba(255,255,255,0.07); color:var(--text-dim);
-}
-.plan-chip-beta {
-  font-size:0.6rem; font-weight:700; text-transform:uppercase;
-  letter-spacing:0.8px; padding:2px 8px; border-radius:10px;
-  background:rgba(1,187,225,0.15); color:var(--brand);
-}
-.plan-chip-premium {
-  font-size:0.6rem; font-weight:700; text-transform:uppercase;
-  letter-spacing:0.8px; padding:2px 8px; border-radius:10px;
-  background:rgba(255,122,0,0.15); color:var(--orange);
-}
-.dark-toggle {
-  width:36px; height:20px; border-radius:10px;
-  background:var(--card); border:1px solid var(--border);
-  cursor:pointer; position:relative; transition:background 0.3s;
-  display:flex; align-items:center; padding:2px;
-}
-.dark-toggle-knob {
-  width:16px; height:16px; border-radius:50%;
-  display:flex; align-items:center; justify-content:center;
-  font-size:0.65rem; transition:transform 0.3s;
-  background:var(--bg2);
-}
-.light .dark-toggle-knob { transform:translateX(16px); }
+.header-title { font-size:1.05rem; font-weight:700; color:var(--lvl-bold); }
+.header-sub { font-size:0.72rem; color:var(--text-dim); margin-top:1px; }
+.header-actions { display:flex; gap:8px; align-items:center; }
 .icon-btn {
-  width:36px; height:36px; border-radius:50%;
-  background:var(--card); border:1px solid var(--border);
-  display:flex; align-items:center; justify-content:center;
-  cursor:pointer; color:var(--text-soft); transition:all 0.2s;
+  width:36px; height:36px; border-radius:50%; border:1px solid var(--border);
+  background:var(--card); cursor:pointer; display:flex; align-items:center;
+  justify-content:center; color:var(--text-soft); transition:all 0.2s;
 }
 .icon-btn:active { transform:scale(0.92); }
 
-/* ── Pantalla de carga ── */
-#scr-loading {
-  display:flex; flex-direction:column; align-items:center;
-  justify-content:center; min-height:100dvh; gap:16px;
+/* ── Metros display ── */
+.meters-display {
+  display:flex; align-items:center; gap:5px; padding:5px 10px;
+  background:var(--card); border-radius:20px; border:1px solid var(--border);
+  font-size:0.78rem; font-weight:700; color:var(--text-soft);
 }
-.spinner {
-  width:36px; height:36px; border:3px solid var(--border);
-  border-top-color:var(--orange); border-radius:50%;
-  animation:spin 0.8s linear infinite;
-}
-@keyframes spin { to { transform:rotate(360deg); } }
-.loading-text { font-size:0.78rem; color:var(--text-dim); }
 
-/* ── Pantalla de login ── */
-#scr-login {
-  display:none; flex-direction:column; align-items:center;
-  justify-content:center; min-height:90dvh;
-  padding:40px 28px; text-align:center; gap:14px;
+/* ── Lux ── */
+.lux-container { position:relative; width:36px; height:36px; display:flex; align-items:center; justify-content:center; }
+.lux-svg { width:24px; height:24px; filter:drop-shadow(0 0 2px #FFFCF7); animation:luxBreathe 3s ease-in-out infinite; }
+.lux-svg.shine { animation:luxBreathe 3s ease-in-out infinite, luxShine 0.6s ease-out; }
+@keyframes luxBreathe { 0%,100% { transform:scale(1); opacity:0.9; } 50% { transform:scale(1.08); opacity:1; } }
+@keyframes luxShine { 0%,100% { filter:drop-shadow(0 0 2px #FFFCF7); } 50% { filter:drop-shadow(0 0 16px #FFFCF7); } }
+.lux-particle {
+  position:absolute; width:4px; height:4px; border-radius:50%;
+  background:#FFFCF7; pointer-events:none;
+  animation:luxParticle 1.5s ease-out forwards;
+  --x:0px; --y:0px;
 }
-#scr-login.active { display:flex; }
-.login-cruz { width:52px; height:52px; opacity:0.85; margin-bottom:8px; }
-.login-title { font-family:'Lora',serif; font-size:1.4rem; font-weight:600; margin-bottom:4px; }
-.login-sub { font-size:0.78rem; color:var(--text-soft); max-width:260px; line-height:1.7; margin-bottom:12px; }
-.btn-login-google {
-  display:flex; align-items:center; justify-content:center; gap:10px;
-  width:100%; max-width:300px; padding:14px 20px;
-  background:var(--card); border:1.5px solid var(--border);
-  border-radius:14px; cursor:pointer; font-family:inherit;
-  font-size:0.85rem; font-weight:600; color:var(--text); transition:all 0.2s;
+@keyframes luxParticle { 0% { transform:translate(0,0) scale(1); opacity:0.9; } 100% { transform:translate(var(--x),var(--y)) scale(0); opacity:0; } }
+
+/* ══ PANTALLA: BLOQUES ══ */
+.home-intro { padding:24px 18px 12px; text-align:center; }
+.home-intro h1 { font-size:1.35rem; font-weight:800; color:var(--text); margin-bottom:4px; }
+.home-intro p { font-size:0.82rem; color:var(--text-dim); }
+
+.today-banner {
+  margin:0 18px 16px; padding:16px 20px; border-radius:16px;
+  background:linear-gradient(135deg,rgba(var(--lvl-light-rgb,255,207,162),0.55),rgba(255,245,232,0.7));
+  border:2px solid var(--lvl-bold); cursor:pointer; transition:all 0.25s;
 }
-.btn-login-google:active { transform:scale(0.97); }
-.login-divider { font-size:0.7rem; color:var(--text-dim); }
-.btn-login-email {
+.dark .today-banner { background:linear-gradient(135deg,rgba(var(--lvl-bold-rgb,255,122,0),0.15),rgba(var(--lvl-bold-rgb,255,122,0),0.05)); }
+.today-banner:active { transform:scale(0.98); }
+.today-banner-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.today-banner-label { font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--lvl-bold); display:flex; align-items:center; gap:6px; }
+.today-pulse { width:8px; height:8px; border-radius:50%; background:var(--lvl-bold); animation:pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.5; transform:scale(1.4); } }
+.today-banner-arrow { color:var(--lvl-bold); font-size:1.2rem; font-weight:700; }
+.today-banner h3 { font-size:1.1rem; font-weight:800; margin-bottom:3px; }
+.today-banner-days { font-size:0.72rem; color:var(--text-dim); }
+
+.block-grid { display:flex; flex-direction:column; gap:14px; padding:8px 18px 24px; }
+.block-card {
+  background:var(--card); border-radius:16px; padding:18px 20px;
+  border:2px solid var(--border); cursor:pointer; transition:all 0.25s;
+  position:relative; overflow:hidden;
+}
+.block-card:active { transform:scale(0.98); }
+.block-card.cleared { border-color:var(--green); }
+.block-card.current { border-color:var(--lvl-bold); box-shadow:0 2px 16px var(--lvl-ultra); }
+.block-card.today { border-color:var(--lvl-soft); background:linear-gradient(135deg,rgba(var(--lvl-light-rgb,255,207,162),0.35),var(--card)); }
+.dark .block-card.today { background:linear-gradient(135deg,rgba(var(--lvl-bold-rgb,255,122,0),0.1),var(--card)); }
+.block-card-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.block-emoji { font-size:1.6rem; }
+.block-badge { font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; padding:3px 10px; border-radius:20px; }
+.block-badge.pending { background:var(--sec-bg); color:var(--text-dim); }
+.block-badge.progress { background:var(--lvl-ultra); color:var(--lvl-bold); }
+.block-badge.cleared { background:var(--green-soft); color:var(--green); }
+.block-badge.today { background:var(--lvl-bold); color:#fff; }
+.block-title { font-size:1.05rem; font-weight:700; margin-bottom:2px; }
+.block-subtitle { font-size:0.78rem; color:var(--text-soft); font-style:italic; }
+.block-progress { margin-top:12px; }
+.block-dots { display:flex; gap:6px; }
+.block-dot { width:10px; height:10px; border-radius:50%; background:var(--border); transition:all 0.3s; }
+.block-dot.done { background:var(--green); box-shadow:0 0 6px rgba(52,168,83,0.4); }
+.block-dot.active { background:var(--lvl-bold); box-shadow:0 0 8px var(--lvl-light); }
+
+/* ── Bloque bloqueado (Free) ── */
+.block-card.locked {
+  opacity:0.5; cursor:default;
+  filter:saturate(0.3);
+}
+.block-card.locked:active { transform:none; }
+.block-lock-overlay {
+  position:absolute; inset:0;
   display:flex; align-items:center; justify-content:center;
-  width:100%; max-width:300px; padding:13px 20px;
-  background:transparent; border:1.5px solid var(--border);
-  border-radius:14px; cursor:pointer; font-family:inherit;
-  font-size:0.82rem; font-weight:500; color:var(--text-soft); transition:all 0.2s;
+  background:rgba(0,0,0,0.18); border-radius:14px;
+  font-size:1.4rem; pointer-events:none;
 }
-.btn-login-email:active { transform:scale(0.97); }
+.block-badge.locked { background:var(--sec-bg); color:var(--text-dim); }
 
-/* ── Modal base ── */
-.modal-overlay {
-  display:none; position:fixed; inset:0; z-index:200;
-  background:rgba(0,0,0,0.65); align-items:flex-end; justify-content:center;
+/* ── Modal Premium (desde orar.html) ── */
+.premium-modal-overlay {
+  display:none; position:fixed; inset:0; z-index:300;
+  background:rgba(0,0,0,0.65);
+  align-items:flex-end; justify-content:center;
 }
-.modal-overlay.open { display:flex; }
-.modal-sheet {
+.premium-modal-overlay.open { display:flex; }
+.premium-modal-sheet {
   background:var(--card); border-radius:24px 24px 0 0;
   padding:28px 24px 44px; width:100%; max-width:480px;
-  max-height:92dvh; overflow-y:auto;
+  text-align:center;
 }
-.modal-title {
-  font-family:'Lora',serif; font-size:1.1rem; font-weight:600;
-  margin-bottom:20px; text-align:center;
+.premium-modal-icon { font-size:2.2rem; margin-bottom:10px; }
+.premium-modal-title {
+  font-size:1.1rem; font-weight:800; margin-bottom:6px;
 }
-.modal-input {
-  width:100%; padding:13px 16px; margin-bottom:12px;
-  background:var(--bg2); border:1.5px solid var(--border);
-  border-radius:12px; font-family:inherit; font-size:0.85rem;
-  color:var(--text); outline:none; transition:border-color 0.2s;
+.premium-modal-sub {
+  font-size:0.8rem; color:var(--text-soft); line-height:1.7;
+  margin-bottom:20px; max-width:280px; margin-left:auto; margin-right:auto;
 }
-.modal-input:focus { border-color:var(--orange); }
-.btn-primary {
-  width:100%; padding:14px; margin-top:4px;
-  background:var(--orange); border:none; border-radius:12px;
+.btn-premium-join {
+  display:block; width:100%; padding:14px;
+  background:var(--lvl-bold); border:none; border-radius:14px;
   font-family:inherit; font-size:0.88rem; font-weight:700;
-  color:#fff; cursor:pointer; transition:opacity 0.2s;
+  color:#fff; cursor:pointer; transition:opacity 0.2s; margin-bottom:10px;
 }
-.btn-primary:active { opacity:0.85; }
-.btn-primary:disabled { opacity:0.4; cursor:not-allowed; }
-.modal-error { font-size:0.74rem; color:#E74C3C; text-align:center; margin-top:8px; min-height:18px; }
-.modal-switch { font-size:0.74rem; color:var(--text-dim); text-align:center; margin-top:12px; cursor:pointer; }
-.modal-switch span { color:var(--orange); }
-.btn-modal-close {
-  display:block; margin:16px auto 0; background:none; border:none;
-  font-size:0.78rem; color:var(--text-dim); cursor:pointer; font-family:inherit;
+.btn-premium-join:active { opacity:0.85; }
+.btn-premium-later {
+  background:none; border:none; font-family:inherit;
+  font-size:0.78rem; color:var(--text-dim); cursor:pointer; padding:8px;
 }
 
-/* ── Modal Premium ── */
-.premium-header {
-  text-align:center; margin-bottom:24px;
+/* ── Tarjeta día completado ── */
+.today-banner-done {
+  border-color:var(--green);
+  background:linear-gradient(135deg,var(--green-soft),var(--card));
+  cursor:default;
 }
-.premium-header-icon { font-size:2rem; margin-bottom:8px; }
-.premium-header-title {
-  font-family:'Lora',serif; font-size:1.2rem; font-weight:600; margin-bottom:4px;
-}
-.premium-header-sub { font-size:0.75rem; color:var(--text-soft); line-height:1.6; }
-.premium-plans { display:flex; flex-direction:column; gap:10px; margin-bottom:20px; }
-.premium-card {
-  border:2px solid var(--border); border-radius:16px;
-  padding:16px 18px; cursor:pointer; transition:all 0.2s;
-  background:var(--card2); position:relative;
-}
-.premium-card.selected { border-color:var(--orange); background:rgba(255,122,0,0.06); }
-.premium-card:active { transform:scale(0.98); }
-.premium-card-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
-.premium-card-name { font-size:0.88rem; font-weight:700; }
-.premium-card-price { font-size:1rem; font-weight:700; color:var(--orange); }
-.premium-card-price span { font-size:0.7rem; color:var(--text-dim); font-weight:400; }
-.premium-card-desc { font-size:0.7rem; color:var(--text-dim); }
-.premium-badge {
-  position:absolute; top:-1px; right:16px;
-  font-size:0.58rem; font-weight:700; text-transform:uppercase;
-  letter-spacing:0.6px; background:var(--green); color:#fff;
-  padding:2px 8px; border-radius:0 0 8px 8px;
-}
-.premium-divider {
-  display:flex; align-items:center; gap:10px; margin:16px 0;
-  font-size:0.7rem; color:var(--text-dim);
-}
-.premium-divider::before, .premium-divider::after {
-  content:''; flex:1; height:1px; background:var(--border);
-}
-.code-input-wrap { position:relative; margin-bottom:4px; }
-.code-input {
-  width:100%; padding:12px 16px; padding-right:80px;
-  background:var(--bg2); border:1.5px solid var(--border);
-  border-radius:12px; font-family:inherit; font-size:0.85rem;
-  color:var(--text); outline:none; text-transform:uppercase;
-  letter-spacing:1px; transition:border-color 0.2s;
-}
-.code-input:focus { border-color:var(--orange); }
-.code-input.valid { border-color:var(--green); }
-.code-input.invalid { border-color:#E74C3C; }
-.btn-code-apply {
-  position:absolute; right:8px; top:50%; transform:translateY(-50%);
-  background:var(--orange); border:none; border-radius:8px;
-  padding:6px 12px; font-family:inherit; font-size:0.72rem;
-  font-weight:700; color:#fff; cursor:pointer;
-}
-.code-feedback { font-size:0.72rem; min-height:18px; margin-top:4px; padding-left:4px; }
-.code-feedback.ok { color:var(--green); }
-.code-feedback.err { color:#E74C3C; }
-/* ── Banner oferta de lanzamiento ── */
-.launch-banner {
-  background:linear-gradient(135deg, rgba(255,122,0,0.15), rgba(255,122,0,0.05));
-  border:1px solid rgba(255,122,0,0.3);
-  border-radius:14px; padding:14px 16px; margin-bottom:16px; text-align:center;
-}
-.launch-banner-tag {
-  font-size:0.65rem; font-weight:700; text-transform:uppercase;
-  letter-spacing:0.8px; color:var(--orange); margin-bottom:4px;
-}
-.launch-banner-text {
-  font-size:0.88rem; font-weight:700; color:var(--text); margin-bottom:6px;
-}
-.launch-banner-code {
-  font-size:0.78rem; color:var(--text-soft);
-}
-.launch-banner-code strong {
-  font-family:monospace; font-size:0.9rem; color:var(--orange);
-  background:rgba(255,122,0,0.1); padding:2px 8px; border-radius:6px;
-  letter-spacing:1px;
+.dark .today-banner-done {
+  background:linear-gradient(135deg,rgba(52,168,83,0.08),var(--card));
 }
 
-/* ── Planes desactivados ── */
-.premium-card.disabled {
-  opacity:0.6; cursor:default; pointer-events:none;
-}
-.premium-card-prices {
-  display:flex; align-items:baseline; gap:6px;
-}
-.premium-card-price-old {
-  font-size:0.75rem; color:var(--text-dim);
-  text-decoration:line-through;
-}
-.coming-soon-note {
-  font-size:0.72rem; color:var(--text-dim); text-align:center;
-  margin-top:8px; margin-bottom:4px; line-height:1.6;
+/* ── Etiqueta "Solo hoy" en bloques Mundo 1 Free ── */
+.block-dayonly-tag {
+  position:absolute; bottom:10px; right:12px;
+  font-size:0.58rem; font-weight:700;
+  color:var(--text-dim);
+  background:var(--sec-bg);
+  border-radius:8px; padding:2px 8px;
+  letter-spacing:0.3px;
 }
 
-.premium-features {
-  margin:16px 0; display:flex; flex-direction:column; gap:6px;
+.nivel-done-banner {
+  margin:8px 18px 18px; padding:20px; border-radius:16px;
+  background:linear-gradient(135deg,var(--green-soft),rgba(52,168,83,0.05));
+  border:2px solid var(--green); text-align:center;
 }
-.premium-feature {
-  display:flex; align-items:center; gap:8px;
-  font-size:0.75rem; color:var(--text-soft);
-}
-.premium-feature-icon { color:var(--orange); font-size:0.8rem; flex-shrink:0; }
+.nivel-done-banner h3 { font-size:1.1rem; color:var(--green); margin-bottom:6px; }
+.nivel-done-banner p { font-size:0.82rem; color:var(--text-soft); margin-bottom:14px; }
 
-/* ── Pantalla principal ── */
-#scr-home { display:none; }
-#scr-home.active { display:block; }
-
-/* ── Saludo ── */
-.greeting-section { padding:20px 20px 12px; position:relative; z-index:1; }
-.greeting-label { font-size:0.68rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:1.2px; margin-bottom:4px; }
-.greeting-name { font-family:'Lora',serif; font-size:1.3rem; font-weight:600; line-height:1.3; margin-bottom:4px; }
-.greeting-name em { color:var(--orange-soft); font-style:normal; }
-.greeting-sub { font-size:0.72rem; color:var(--text-dim); }
-
-/* ── Módulos ── */
-.modulos-section { padding:8px 16px 32px; position:relative; z-index:1; }
-.modulos-grid { display:grid; gap:12px; grid-template-columns:1fr 1fr; }
-.modulo-card {
-  border-radius:20px; padding:18px 16px; cursor:pointer;
-  border:1px solid transparent; position:relative; overflow:hidden;
-  transition:transform 0.18s, box-shadow 0.18s;
-}
-.modulo-card:active { transform:scale(0.97); }
-.modulo-orar {
-  grid-column:1 / -1;
-  background:linear-gradient(145deg, #2C1400, #1E0D00);
-  border-color:rgba(255,122,0,0.35);
-  box-shadow:0 6px 28px rgba(255,122,0,0.1);
-}
-.orar-header { margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; }
-.orar-nivel-tag {
-  font-size:0.65rem; font-weight:700; letter-spacing:0.8px;
-  text-transform:uppercase; color:var(--orange-soft);
-  background:rgba(255,122,0,0.1); border-radius:6px; padding:3px 8px;
-}
-.orar-titulo { font-family:'Lora',serif; font-size:1.6rem; font-weight:600; color:var(--orange); margin-bottom:10px; }
-.orar-sep { height:1px; background:rgba(255,122,0,0.12); margin-bottom:12px; }
-.bloques-progress { display:flex; flex-direction:column; gap:7px; }
-.bloque-row { display:flex; align-items:center; gap:8px; }
-.bloque-name { font-size:0.7rem; font-weight:600; min-width:72px; }
-.bloque-bar-wrap { flex:1; height:5px; border-radius:3px; background:rgba(255,255,255,0.07); }
-.bloque-bar-fill { height:100%; border-radius:3px; transition:width 0.6s ease; }
-.bloque-count { font-size:0.65rem; color:var(--text-dim); min-width:28px; text-align:right; }
-.verse-card {
-  grid-column:1 / -1;
-  background:linear-gradient(135deg, #211508 0%, #1C1005 100%);
-  border:1px solid rgba(255,122,0,0.12);
-  border-radius:20px; padding:18px 18px 16px; position:relative; overflow:hidden;
-}
-.verse-ornament {
-  font-family:'Lora',serif; font-size:2.8rem; line-height:1;
-  color:var(--orange-soft); opacity:0.25; position:absolute; top:10px; left:14px;
-}
-.verse-label { font-size:0.62rem; text-transform:uppercase; letter-spacing:1.2px; color:var(--text-dim); margin-bottom:6px; position:relative; }
-.verse-text { font-family:'Lora',serif; font-size:0.82rem; font-style:italic; line-height:1.75; color:var(--text-soft); position:relative; }
-.verse-ref { font-size:0.65rem; color:var(--text-dim); margin-top:8px; text-align:right; position:relative; }
-.modulo-sanar { background:linear-gradient(145deg,#1E1206,#160D04); border-color:rgba(255,122,0,0.09); }
-.modulo-diario { background:linear-gradient(145deg,#1A1006,#130B03); border-color:rgba(255,122,0,0.06); }
-.modulo-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
-.modulo-icon-wrap { font-size:1.1rem; }
-.modulo-badge { font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.7px; color:var(--text-dim); background:rgba(255,255,255,0.04); border-radius:6px; padding:2px 7px; }
-.modulo-titulo { font-family:'Lora',serif; font-size:1.05rem; font-weight:600; margin-bottom:5px; }
-.modulo-desc { font-size:0.7rem; color:var(--text-dim); line-height:1.6; margin-bottom:10px; }
-.modulo-footer { display:flex; align-items:center; justify-content:space-between; }
-.modulo-meta { font-size:0.66rem; color:var(--text-dim); display:flex; align-items:center; gap:5px; }
-.modulo-cta { font-size:0.72rem; font-weight:700; color:var(--text-soft); display:flex; align-items:center; gap:4px; transition:gap 0.2s; }
-.modulo-card:hover .modulo-cta { gap:8px; }
-.modulo-card::before {
-  content:''; position:absolute; top:-60%; left:-40%;
-  width:80%; height:200%;
-  background:linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.03) 50%, transparent 60%);
-  transform:rotate(10deg); transition:left 0.5s ease; pointer-events:none;
-}
-.modulo-card:hover::before { left:100%; }
-
-/* ── Banner Premium (para usuarios Free) ── */
-.banner-premium {
-  grid-column:1 / -1;
-  background:linear-gradient(135deg, rgba(255,122,0,0.12), rgba(255,122,0,0.05));
-  border:1px solid rgba(255,122,0,0.25);
-  border-radius:16px; padding:16px 18px;
-  display:flex; align-items:center; justify-content:space-between; gap:12px;
-  cursor:pointer; transition:all 0.2s;
-}
-.banner-premium:active { transform:scale(0.98); }
-.banner-premium-text { flex:1; }
-.banner-premium-title { font-size:0.82rem; font-weight:700; color:var(--orange); margin-bottom:2px; }
-.banner-premium-sub { font-size:0.7rem; color:var(--text-dim); line-height:1.5; }
-.banner-premium-btn {
-  background:var(--orange); color:#fff; border:none;
-  border-radius:10px; padding:8px 14px; font-family:inherit;
-  font-size:0.75rem; font-weight:700; cursor:pointer; white-space:nowrap;
+/* ══ PANTALLA: MICRO-LEARNING ══ */
+#scr-micro {
+  min-height:100dvh;
+  background:var(--bg);
 }
 
-/* ── Nav overlay ── */
-.nav-overlay { position:fixed; inset:0; background:var(--bg); opacity:0; pointer-events:none; z-index:150; transition:opacity 0.38s; }
-.nav-overlay.fade-out { opacity:1; pointer-events:all; }
-.tap-ripple {
-  position:fixed; width:6px; height:6px; border-radius:50%;
-  background:rgba(255,122,0,0.4); transform:translate(-50%,-50%) scale(0);
-  animation:ripple 0.5s ease-out forwards; pointer-events:none; z-index:200;
+.micro-header {
+  padding:18px 18px 14px;
+  display:flex; align-items:center; justify-content:space-between;
 }
-@keyframes ripple { to { transform:translate(-50%,-50%) scale(20); opacity:0; } }
-@keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
-@keyframes bounceUp {
-  0%   { opacity:0; transform:translateY(32px) scale(0.97); }
-  60%  { opacity:1; transform:translateY(-6px) scale(1.01); }
-  80%  { transform:translateY(3px) scale(0.99); }
-  100% { transform:translateY(0) scale(1); }
+.micro-header-left { display:flex; flex-direction:column; }
+.micro-level-label { font-size:0.68rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:1.5px; font-weight:600; margin-bottom:3px; }
+.micro-title { font-size:1.1rem; font-weight:700; color:var(--lvl-bold); }
+
+.micro-progress-bar {
+  margin:0 18px 18px; height:4px; background:var(--border); border-radius:2px; overflow:hidden;
 }
-.anim-in { animation:bounceUp 0.55s cubic-bezier(0.34,1.56,0.64,1) both; }
-.anim-in:nth-child(1) { animation-delay:0.05s; }
-.anim-in:nth-child(2) { animation-delay:0.12s; }
-.anim-in:nth-child(3) { animation-delay:0.19s; }
-.anim-in:nth-child(4) { animation-delay:0.26s; }
-.anim-in:nth-child(5) { animation-delay:0.33s; }
+.micro-progress-fill {
+  height:100%; background:var(--lvl-bold); border-radius:2px;
+  transition:width 0.4s ease;
+}
+
+.micro-progress-dots {
+  display:flex; justify-content:center; gap:7px; margin-bottom:20px;
+}
+.micro-dot {
+  height:8px; border-radius:4px; background:var(--border);
+  transition:all 0.4s ease;
+}
+.micro-dot.done { background:var(--green); width:8px; }
+.micro-dot.active { background:var(--lvl-bold); width:24px; }
+.micro-dot.pending { width:8px; }
+
+.micro-content { padding:0 18px; }
+
+/* Tarjeta de micro-learning */
+.micro-card {
+  background:var(--card); border-radius:20px; padding:28px 24px;
+  border:1.5px solid var(--border);
+  box-shadow:0 6px 28px var(--shadow);
+  animation:fadeSlideUp 0.35s ease both;
+  min-height:220px; display:flex; flex-direction:column; justify-content:space-between;
+}
+.micro-card-emoji { font-size:2rem; margin-bottom:12px; }
+.micro-card-title { font-size:1.2rem; font-weight:700; color:var(--lvl-bold); margin-bottom:14px; line-height:1.3; }
+.micro-card-body { font-size:0.95rem; line-height:1.8; color:var(--text); flex:1; }
+.micro-card-footer {
+  display:flex; justify-content:space-between; align-items:center;
+  margin-top:20px; padding-top:14px; border-top:1px solid var(--border);
+}
+.micro-card-counter { font-size:0.68rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.8px; font-weight:600; }
+.micro-listen-btn {
+  font-size:0.75rem; padding:5px 10px; border-radius:8px;
+  border:1px solid var(--border); background:var(--sec-bg);
+  color:var(--text-soft); cursor:pointer; transition:all 0.2s;
+  font-family:inherit; font-weight:500;
+}
+.micro-listen-btn.speaking { background:var(--lvl-ultra); border-color:var(--lvl-soft); color:var(--lvl-bold); }
+
+/* Pregunta A/B */
+.micro-question-card {
+  background:var(--card); border-radius:20px; padding:28px 24px;
+  border:1.5px solid var(--border);
+  box-shadow:0 6px 28px var(--shadow);
+  animation:fadeSlideUp 0.35s ease both;
+}
+.micro-q-label {
+  font-size:0.65rem; color:var(--lvl-bold); text-transform:uppercase;
+  letter-spacing:1.5px; font-weight:700; margin-bottom:14px;
+  display:flex; align-items:center; gap:6px;
+}
+.micro-q-label span { font-size:0.68rem; color:var(--text-dim); margin-left:auto; font-weight:400; letter-spacing:0; text-transform:none; }
+.micro-question-text { font-size:1.1rem; font-weight:600; line-height:1.5; margin-bottom:20px; }
+.micro-options { display:flex; flex-direction:column; gap:10px; }
+.micro-option {
+  display:flex; align-items:center; gap:12px; padding:14px 16px;
+  border-radius:14px; border:1.5px solid var(--border);
+  background:var(--sec-bg); cursor:pointer; transition:all 0.25s;
+  font-family:inherit; font-size:0.9rem; line-height:1.5;
+  color:var(--text); text-align:left;
+}
+.micro-option:active { transform:scale(0.98); }
+.micro-option.selected {
+  border-color:var(--lvl-bold); background:var(--lvl-ultra);
+}
+.micro-option.dimmed { opacity:0.4; }
+.micro-option-radio {
+  flex-shrink:0; width:22px; height:22px; border-radius:50%;
+  border:1.5px solid var(--border); background:transparent;
+  display:flex; align-items:center; justify-content:center;
+  transition:all 0.25s; font-size:0.7rem; color:#fff; font-weight:700;
+}
+.micro-option.selected .micro-option-radio {
+  background:var(--lvl-bold); border-color:var(--lvl-bold);
+}
+
+.micro-eco {
+  margin-top:16px; padding:14px 16px; border-radius:14px;
+  border-left:3px solid var(--lvl-bold); background:var(--lvl-ultra);
+  animation:fadeSlideUp 0.3s ease both;
+  display:flex; align-items:flex-start; gap:10px;
+}
+.micro-eco-emoji { font-size:1.2rem; flex-shrink:0; }
+.micro-eco-text { font-size:0.88rem; line-height:1.65; font-weight:500; }
+
+/* Pantalla final del micro */
+.micro-final {
+  text-align:center; padding:50px 24px 30px;
+  animation:fadeSlideUp 0.4s ease both;
+}
+.micro-final-lux {
+  margin:0 auto 20px;
+  width:48px; height:48px;
+  display:flex; align-items:center; justify-content:center;
+  animation:luxBreathe 3s ease-in-out infinite;
+  filter:drop-shadow(0 0 10px #FFFCF7);
+}
+.micro-final h3 { font-size:1.3rem; font-weight:800; color:var(--lvl-bold); margin-bottom:10px; }
+.micro-final p { font-size:0.92rem; line-height:1.7; color:var(--text-soft); margin-bottom:8px; max-width:300px; margin-left:auto; margin-right:auto; }
+.micro-final-meters {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:7px 18px; border-radius:20px;
+  background:var(--green-soft); color:var(--green);
+  font-size:0.88rem; font-weight:700; margin:14px 0 28px;
+}
+
+/* Navegación inferior del micro */
+.micro-nav {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:20px 18px 0;
+}
+.micro-btn-back {
+  background:none; border:none; cursor:pointer; font-family:inherit;
+  font-size:0.88rem; font-weight:500; color:var(--text-dim); padding:8px;
+}
+.micro-btn-back:disabled { opacity:0.3; cursor:default; }
+.micro-btn-next {
+  padding:12px 22px; border-radius:12px; border:none;
+  background:var(--lvl-bold); color:#fff; font-family:inherit;
+  font-size:0.88rem; font-weight:700; cursor:pointer;
+  transition:all 0.2s; box-shadow:0 4px 14px rgba(0,0,0,0.12);
+}
+.micro-btn-next:active { transform:scale(0.96); }
+.micro-swipe-hint {
+  text-align:center; margin-top:14px;
+  font-size:0.75rem; color:var(--text-dim); font-style:italic;
+}
+
+/* ══ PANTALLA: ORACIÓN ══ */
+.prayer-header { padding:16px 18px 10px; }
+.prayer-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.mystery-counter { font-size:0.72rem; font-weight:600; color:var(--text-dim); letter-spacing:1px; text-transform:uppercase; }
+.mystery-title { font-size:1.15rem; font-weight:800; margin-bottom:2px; }
+.mystery-subtitle { font-size:0.82rem; color:var(--text-soft); font-style:italic; }
+
+.mystery-beads { padding:0 18px 14px; }
+.mystery-beads svg { width:100%; height:30px; }
+
+.evangelio-box { margin:0 18px 14px; padding:20px; border-radius:16px; background:var(--card); border-left:4px solid var(--lvl-soft); }
+.evangelio-label { font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:1.2px; color:var(--lvl-bold); margin-bottom:10px; display:flex; align-items:center; gap:6px; }
+.evangelio-text { font-size:0.95rem; line-height:1.85; color:var(--text); }
+.evangelio-ref { font-size:0.78rem; color:var(--text-dim); text-align:right; margin-top:12px; font-style:italic; }
+
+.accordion { margin:0 18px 10px; }
+.acc-item { background:var(--card); border-radius:14px; margin-bottom:10px; overflow:hidden; border:1.5px solid var(--border); transition:border-color 0.3s; }
+.acc-item.open { border-color:var(--lvl-soft); }
+.acc-trigger { width:100%; display:flex; align-items:center; justify-content:space-between; padding:14px 18px; background:none; border:none; cursor:pointer; font-family:inherit; color:var(--text); transition:background 0.2s; }
+.acc-trigger:active { background:var(--sec-bg); }
+.acc-trigger-left { display:flex; align-items:center; gap:10px; }
+.acc-icon { width:32px; height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1rem; }
+.acc-label { font-size:0.88rem; font-weight:600; }
+.acc-chevron { transition:transform 0.3s; color:var(--text-dim); }
+.acc-item.open .acc-chevron { transform:rotate(180deg); }
+.acc-body { max-height:0; overflow:hidden; transition:max-height 0.4s ease; }
+.acc-body-inner { padding:0 18px 18px; }
+
+.audio-player { display:flex; align-items:center; gap:12px; padding:12px 16px; background:var(--sec-bg); border-radius:12px; }
+.play-btn { width:44px; height:44px; border-radius:50%; border:none; background:var(--lvl-bold); color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all 0.2s; }
+.play-btn:active { transform:scale(0.9); }
+.audio-info { flex:1; min-width:0; }
+.audio-label { font-size:0.75rem; color:var(--text-soft); margin-bottom:4px; }
+.audio-bar-wrap { width:100%; height:5px; background:var(--border); border-radius:3px; cursor:pointer; position:relative; }
+.audio-bar-fill { height:100%; border-radius:3px; background:var(--lvl-bold); transition:width 0.1s linear; }
+.audio-time { font-size:0.68rem; color:var(--text-dim); margin-top:3px; display:flex; justify-content:space-between; }
+
+.canto-box { padding:18px; background:var(--lvl-ultra); border-radius:14px; border-left:3px solid var(--lvl-soft); text-align:center; }
+.canto-box p { font-size:0.88rem; color:var(--text); font-style:italic; line-height:1.7; }
+.canto-box .canto-hint { font-size:0.78rem; color:var(--text-dim); margin-top:8px; display:block; }
+
+.contempl-text { margin-top:14px; padding:16px 18px; background:var(--sec-bg); border-radius:14px; border-left:3px solid var(--lvl-soft); font-size:0.92rem; line-height:1.9; white-space:pre-line; }
+
+.med-group { margin-bottom:18px; }
+.med-label-row { display:flex; align-items:center; gap:7px; margin-bottom:6px; }
+.med-dot { width:7px; height:7px; border-radius:50%; }
+.med-label-text { font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; }
+.med-question { font-size:0.92rem; line-height:1.7; margin-bottom:10px; }
+.journal-area { width:100%; min-height:100px; padding:14px; border-radius:12px; border:1.5px solid var(--border); background:var(--input-bg); font-family:inherit; font-size:0.88rem; line-height:1.6; color:var(--text); resize:vertical; transition:border-color 0.3s; }
+.journal-area:focus { outline:none; border-color:var(--lvl-soft); }
+.journal-area::placeholder { color:var(--text-dim); }
+.med-confirm { display:flex; align-items:center; justify-content:center; gap:6px; width:100%; margin-top:8px; padding:10px; border-radius:10px; border:1.5px solid var(--border); background:var(--sec-bg); font-family:inherit; font-size:0.78rem; font-weight:600; color:var(--text-soft); cursor:pointer; transition:all 0.3s; }
+.med-confirm:active { transform:scale(0.96); }
+.med-confirm.done { background:var(--green-soft); border-color:var(--green); color:var(--green); cursor:default; }
+@keyframes medGlow { 0% { box-shadow:0 0 0 0 rgba(52,168,83,0.4); } 70% { box-shadow:0 0 0 10px rgba(52,168,83,0); } 100% { box-shadow:0 0 0 0 rgba(52,168,83,0); } }
+.med-confirm.glow { animation:medGlow 0.6s ease; }
+
+.interc-text { padding:18px; background:var(--lvl-ultra); border-radius:14px; font-size:0.92rem; line-height:1.85; white-space:pre-line; }
+.amen-btn { display:block; width:100%; margin-top:14px; padding:16px; border-radius:14px; border:none; cursor:pointer; font-family:inherit; font-size:1rem; font-weight:800; background:var(--lvl-bold); color:#fff; letter-spacing:1px; transition:all 0.2s; box-shadow:0 4px 16px rgba(0,0,0,0.12); }
+.amen-btn:active { transform:scale(0.96); }
+.amen-btn.done { background:var(--green); }
+
+.mystery-done-bar { margin:12px 18px; padding:14px 18px; border-radius:14px; background:var(--green-soft); border:1.5px solid rgba(52,168,83,0.2); display:flex; align-items:center; gap:10px; }
+.done-check { color:var(--green); font-size:1.2rem; }
+.done-text { font-size:0.82rem; font-weight:600; color:var(--green); }
+.done-date { font-size:0.72rem; color:var(--text-dim); }
+
+.bottom-nav { padding:14px 18px 28px; display:flex; gap:10px; }
+.bottom-nav .btn { flex:1; }
+
+/* ══ PANTALLA: CELEBRACIÓN ══ */
+.celebration-screen { text-align:center; padding:40px 24px; }
+.maria-placeholder { width:200px; height:200px; border-radius:50%; margin:0 auto 24px; background:linear-gradient(135deg,var(--lvl-ultra),var(--lvl-light)); border:4px solid var(--lvl-soft); display:flex; align-items:center; justify-content:center; font-size:4rem; box-shadow:0 8px 32px var(--shadow); }
+.maria-img { width:200px; height:200px; border-radius:50%; object-fit:cover; border:4px solid var(--lvl-soft); margin:0 auto 24px; box-shadow:0 8px 32px var(--shadow); }
+.celebration-title { font-size:1.3rem; font-weight:800; margin-bottom:8px; }
+.celebration-sub { font-size:0.88rem; color:var(--text-soft); margin-bottom:24px; line-height:1.7; }
+
+/* ══ BOTONES COMUNES ══ */
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:14px 28px; border-radius:14px; border:none; cursor:pointer; font-family:inherit; font-size:0.88rem; font-weight:700; transition:all 0.2s; letter-spacing:0.3px; }
+.btn:active { transform:scale(0.96); }
+.btn-primary { background:var(--lvl-bold); color:#fff; box-shadow:0 4px 14px rgba(0,0,0,0.15); }
+.btn-green { background:var(--green); color:#fff; }
+.btn-outline { background:transparent; border:2px solid var(--border); color:var(--text-soft); }
+.btn-ghost { background:transparent; color:var(--text-soft); padding:10px 14px; font-size:0.82rem; }
+.btn-block { width:100%; }
+
+/* ══ OVERLAYS DE MARIANO ══ */
+.mariano-overlay {
+  position:fixed; bottom:0; right:0; z-index:90;
+  display:none; flex-direction:column; align-items:flex-end;
+  pointer-events:none;
+}
+.mariano-slide {
+  width:120px; height:auto;
+  animation:marianoSlideIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+@keyframes marianoSlideIn { from { transform:translateX(140px); opacity:0; } to { transform:translateX(0); opacity:1; } }
+.meters-float {
+  position:absolute; bottom:110px; right:18px;
+  background:var(--green); color:#fff;
+  font-size:1.1rem; font-weight:800; padding:6px 14px; border-radius:20px;
+  animation:floatUp 1.5s ease-out forwards;
+  box-shadow:0 4px 14px rgba(52,168,83,0.4);
+}
+@keyframes floatUp { 0% { opacity:0; transform:translateY(10px) scale(0.8); } 20% { opacity:1; transform:translateY(0) scale(1); } 70% { opacity:1; transform:translateY(-16px) scale(1); } 100% { opacity:0; transform:translateY(-28px) scale(0.9); } }
+
+.mariano-grand-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,0.5);
+  display:none; align-items:center; justify-content:center;
+  z-index:101; pointer-events:none;
+}
+.mariano-grand-container { position:relative; width:260px; height:260px; }
+.mariano-grand { width:260px; height:auto; margin-bottom:20px; animation:popScale 0.6s cubic-bezier(0.68,-0.55,0.265,1.55) forwards; }
+@keyframes popScale { 0% { transform:scale(0); opacity:0; } 60% { transform:scale(1.1); opacity:1; } 100% { transform:scale(1); opacity:1; } }
+.mariano-grand-lux { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); }
+.mariano-grand-lux.orbit1 svg { animation:luxOrbit1 3s ease-in-out infinite; }
+@keyframes luxOrbit1 { 0% { transform:rotate(0deg) translateX(120px) rotate(0deg) scale(1); } 25% { transform:rotate(90deg) translateX(120px) rotate(-90deg) scale(1.5); } 50% { transform:rotate(180deg) translateX(120px) rotate(-180deg) scale(1); } 75% { transform:rotate(270deg) translateX(120px) rotate(-270deg) scale(1.5); } 100% { transform:rotate(360deg) translateX(120px) rotate(-360deg) scale(1); } }
+.mariano-grand-meters { text-align:center; color:#fff; font-size:1.55rem; font-weight:800; text-shadow:0 4px 16px rgba(0,0,0,0.5); margin-top:20px; }
+.mariano-grand-text { text-align:center; color:#fff; font-size:1rem; margin-top:8px; text-shadow:0 2px 8px rgba(0,0,0,0.5); }
+.grand-confetti { position:fixed; width:8px; height:8px; border-radius:50%; animation:confettiFall 2.5s ease-out forwards; pointer-events:none; }
+
+/* ══ LOADING / ERROR ══ */
+.loading-screen, .error-screen { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:80dvh; padding:40px 24px; text-align:center; }
+.spinner { width:40px; height:40px; border:3px solid var(--border); border-top-color:var(--lvl-bold); border-radius:50%; animation:spin 0.8s linear infinite; margin-bottom:18px; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* ══ ANIMACIONES ══ */
+@keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+@keyframes fadeSlideUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+.fade-in { animation:fadeIn 0.4s ease both; }
+.fade-in-d1 { animation-delay:0.08s; }
+.fade-in-d2 { animation-delay:0.16s; }
+.fade-in-d3 { animation-delay:0.24s; }
+.fade-in-d4 { animation-delay:0.32s; }
+
+@keyframes confettiFall { 0% { transform:translateY(-20px) rotate(0deg); opacity:1; } 100% { transform:translateY(100vh) rotate(720deg); opacity:0; } }
+.confetti-container { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:999; }
+.confetti-piece { position:absolute; width:8px; height:8px; border-radius:2px; animation:confettiFall 2.5s ease-out forwards; }
+
+/* Transición entre screens del micro */
+.micro-transition-overlay {
+  position:fixed; inset:0; z-index:80;
+  background:var(--bg);
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; pointer-events:none;
+  transition:opacity 0.3s;
+}
+.micro-transition-overlay.active { opacity:1; pointer-events:all; }
+.micro-transition-lux {
+  animation:luxBreathe 1.5s ease-in-out infinite;
+  filter:drop-shadow(0 0 20px #FFFCF7);
+}
+
+@media(max-width:380px) { html { font-size:16px; } }
 </style>
 </head>
 <body>
-<div class="shell">
-  <div class="bg-glow"></div>
+<div class="shell" id="app">
 
-  <!-- ═══ CARGA ═══ -->
-  <div id="scr-loading">
+  <!-- Loading -->
+  <div class="loading-screen" id="scr-loading">
     <div class="spinner"></div>
-    <div class="loading-text">Cargando…</div>
+    <p style="font-size:0.88rem;color:var(--text-dim)">Cargando nivel…</p>
   </div>
 
-  <!-- ═══ LOGIN ═══ -->
-  <div id="scr-login">
-    <svg class="login-cruz" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-      <rect x="46.2" y="0" width="7.6" height="100" fill="#FF7A00"/>
-      <rect x="0" y="46.2" width="100" height="7.6" fill="#FF7A00"/>
-    </svg>
-    <div class="login-title">CruzAndo</div>
-    <div class="login-sub">Inicia sesión para guardar tu progreso en el camino.</div>
-    <button class="btn-login-google" id="btn-google">
-      <svg width="18" height="18" viewBox="0 0 24 24">
-        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
-        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-      </svg>
-      Continuar con Google
-    </button>
-    <div class="login-divider">o</div>
-    <button class="btn-login-email" id="btn-show-email">
-      Continuar con correo electrónico
-    </button>
+  <!-- Error -->
+  <div class="error-screen" id="scr-error" style="display:none">
+    <div style="font-size:3rem;margin-bottom:16px">📿</div>
+    <h2 style="font-size:1.1rem;margin-bottom:8px">No se encontró el nivel</h2>
+    <p id="error-msg" style="font-size:0.82rem;color:var(--text-dim);margin-bottom:20px"></p>
+    <a href="?c=0101" class="btn btn-primary">Ir a Nivel 1-1: Males</a>
   </div>
 
-  <!-- ═══ MODAL EMAIL ═══ -->
-  <div class="modal-overlay" id="modal-email">
-    <div class="modal-sheet">
-      <div class="modal-title" id="modal-title">Iniciar sesión</div>
-      <input class="modal-input" id="inp-email" type="email" placeholder="Correo electrónico" autocomplete="email">
-      <input class="modal-input" id="inp-password" type="password" placeholder="Contraseña" autocomplete="current-password">
-      <input class="modal-input" id="inp-name" type="text" placeholder="Tu nombre" autocomplete="name" style="display:none">
-      <button class="btn-primary" id="btn-modal-submit">Entrar</button>
-      <div class="modal-error" id="modal-error"></div>
-      <div class="modal-switch" id="modal-switch">¿No tienes cuenta? <span id="modal-switch-text">Crear una</span></div>
-      <button class="btn-modal-close" id="btn-modal-close">Cancelar</button>
+  <!-- ═══ HEADER (compartido) ═══ -->
+  <header class="header" id="main-header" style="display:none">
+    <div>
+      <div class="header-title" id="h-title"></div>
+      <div class="header-sub" id="h-sub"></div>
     </div>
-  </div>
-
-  <!-- ═══ MODAL PREMIUM ═══ -->
-  <div class="modal-overlay" id="modal-premium">
-    <div class="modal-sheet">
-      <div class="premium-header">
-        <div class="premium-header-icon">🚶‍♂️</div>
-        <div class="premium-header-title">Únete a Premium</div>
-        <div class="premium-header-sub">Avanza a tu ritmo por todos los Mundos del camino.</div>
+    <div class="header-actions">
+      <div class="meters-display" id="meters-display">
+        <span>🚶‍♂️</span>
+        <span id="meters-value">0m</span>
       </div>
-
-      <!-- Banner oferta de lanzamiento -->
-      <div class="launch-banner">
-        <div class="launch-banner-tag">🎉 Oferta de lanzamiento</div>
-        <div class="launch-banner-text">50% de descuento en tu primer año</div>
-        <div class="launch-banner-code">Código: <strong>LAUNCH2026</strong></div>
+      <div class="lux-container" id="lux-container">
+        <svg class="lux-svg" id="lux-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs><filter id="luxGlow"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+          <g filter="url(#luxGlow)">
+            <rect x="46.1926" y="0.285" width="7.6148" height="99.43" fill="#FFFCF7"/>
+            <rect x="0" y="46.2068" width="100" height="7.5864" fill="#FFFCF7"/>
+          </g>
+        </svg>
       </div>
-
-      <!-- Planes (desactivados hasta que Stripe esté listo) -->
-      <div class="premium-plans">
-        <div class="premium-card selected disabled" id="plan-anual">
-          <div class="premium-badge">Más popular</div>
-          <div class="premium-card-top">
-            <span class="premium-card-name">Anual</span>
-            <div class="premium-card-prices">
-              <span class="premium-card-price-old">$1,850</span>
-              <span class="premium-card-price">$925 <span>MXN / año</span></span>
-            </div>
-          </div>
-          <div class="premium-card-desc">Equivale a $77/mes · 2 meses gratis incluidos</div>
-        </div>
-        <div class="premium-card disabled" id="plan-mensual">
-          <div class="premium-card-top">
-            <span class="premium-card-name">Mensual</span>
-            <div class="premium-card-prices">
-              <span class="premium-card-price-old">$185</span>
-              <span class="premium-card-price">$93 <span>MXN / mes</span></span>
-            </div>
-          </div>
-          <div class="premium-card-desc">Cancela cuando quieras</div>
-        </div>
-      </div>
-      <div class="coming-soon-note">
-        💳 Pagos disponibles próximamente. Usa tu código de acceso mientras tanto.
-      </div>
-
-      <!-- Beneficios -->
-      <div class="premium-features">
-        <div class="premium-feature"><span class="premium-feature-icon">✦</span> Acceso a todos los Mundos conforme avanzas</div>
-        <div class="premium-feature"><span class="premium-feature-icon">✦</span> Elige cualquier bloque cualquier día</div>
-        <div class="premium-feature"><span class="premium-feature-icon">✦</span> Reflexiones y progreso completos</div>
-        <div class="premium-feature"><span class="premium-feature-icon">✦</span> Insignias exclusivas de peregrino</div>
-        <div class="premium-feature"><span class="premium-feature-icon">✦</span> Player de cantos (próximamente)</div>
-      </div>
-
-      <!-- Código de descuento -->
-      <div class="premium-divider">¿Tienes un código?</div>
-      <div class="code-input-wrap">
-        <input class="code-input" id="inp-code" type="text" placeholder="CÓDIGO DE ACCESO" maxlength="20">
-        <button class="btn-code-apply" onclick="applyCode()">Aplicar</button>
-      </div>
-      <div class="code-feedback" id="code-feedback"></div>
-
-      <button class="btn-primary" id="btn-premium-continuar" style="margin-top:20px">
-        Aplicar código de acceso
+      <button class="icon-btn" id="btn-dark" title="Modo oscuro">
+        <svg id="ico-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg id="ico-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
       </button>
-      <button class="btn-modal-close" onclick="closeModal('modal-premium')">Ahora no</button>
+    </div>
+  </header>
+
+  <!-- ═══ PANTALLA: BLOQUES ═══ -->
+  <div class="screen" id="scr-home">
+    <div class="home-intro fade-in">
+      <h1 id="home-title"></h1>
+      <p id="home-element"></p>
+    </div>
+    <div id="today-banner-wrap"></div>
+    <div id="nivel-done-wrap" style="display:none"></div>
+    <div class="block-grid" id="block-grid"></div>
+  </div>
+
+  <!-- ═══ MODAL: PREMIUM (desde orar.html) ═══ -->
+  <div class="premium-modal-overlay" id="modal-premium-orar">
+    <div class="premium-modal-sheet">
+      <div class="premium-modal-icon">🔓</div>
+      <div class="premium-modal-title">Desbloquea este bloque</div>
+      <div class="premium-modal-sub">
+        Con el plan Free puedes orar los <strong>Misterios del día</strong>.<br>
+        Únete a Premium para elegir cualquier bloque cualquier día
+        y avanzar por todos los Mundos.
+      </div>
+      <button class="btn-premium-join" onclick="window.location.href='index.html#premium'">
+        Únete a Premium →
+      </button>
+      <button class="btn-premium-later" onclick="document.getElementById('modal-premium-orar').classList.remove('open')">
+        Ahora no
+      </button>
     </div>
   </div>
 
-  <!-- ═══ HOME ═══ -->
-  <div id="scr-home">
-    <header class="header">
-      <div class="header-brand">
-        <div class="lux-wrap">
-          <svg viewBox="0 0 100 100" width="22" height="22" xmlns="http://www.w3.org/2000/svg">
-            <defs><filter id="lg"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-            <g filter="url(#lg)">
-              <rect x="46.2" y="0.3" width="7.6" height="99.4" fill="#FFFCF7"/>
-              <rect x="0" y="46.2" width="100" height="7.6" fill="#FFFCF7"/>
-            </g>
-          </svg>
-        </div>
-        <span class="brand-name">CruzAndo</span>
+  <!-- ═══ PANTALLA: MICRO-LEARNING ═══ -->
+  <div class="screen" id="scr-micro">
+    <div class="micro-header">
+      <div class="micro-header-left">
+        <div class="micro-level-label" id="micro-level-label"></div>
+        <div class="micro-title" id="micro-title"></div>
       </div>
-      <div class="header-right">
-        <div class="meters-chip">
-          <span class="meters-icon">🚶‍♂️</span>
-          <span id="metros-display">0m</span>
-        </div>
-        <span id="plan-chip" class="plan-chip-free">Free</span>
-        <button class="dark-toggle" id="btn-dark" onclick="toggleDark()" title="Cambiar modo">
-          <div class="dark-toggle-knob" id="toggle-knob">🌙</div>
-        </button>
-        <button class="icon-btn" id="btn-perfil" title="Mi perfil">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-        </button>
-      </div>
-    </header>
-
-    <section class="greeting-section">
-      <div class="greeting-label">Bienvenido de vuelta</div>
-      <div class="greeting-name">
-        <span id="greeting-time">Buenas tardes</span>, <em id="user-name">Peregrino</em>
-      </div>
-      <div class="greeting-sub" id="greeting-sub">Cargando tu camino…</div>
-    </section>
-
-    <section class="modulos-section">
-      <div class="modulos-grid">
-
-        <div class="modulo-card modulo-orar anim-in" onclick="navigateTo(getOrarUrl(), event)">
-          <div class="orar-header">
-            <span class="orar-nivel-tag" id="orar-nivel-tag">Nivel 1-1</span>
-          </div>
-          <div class="orar-titulo">Orar →</div>
-          <div class="orar-sep"></div>
-          <div class="bloques-progress">
-            <div class="bloque-row">
-              <span class="bloque-name" style="color:#D4A017">Gozosos</span>
-              <div class="bloque-bar-wrap"><div class="bloque-bar-fill" id="bar-gozosos" style="width:0%;background:#D4A017"></div></div>
-              <span class="bloque-count" id="cnt-gozosos">0/5</span>
-            </div>
-            <div class="bloque-row">
-              <span class="bloque-name" style="color:#01BBE1">Luminosos</span>
-              <div class="bloque-bar-wrap"><div class="bloque-bar-fill" id="bar-luminosos" style="width:0%;background:#01BBE1"></div></div>
-              <span class="bloque-count" id="cnt-luminosos">0/5</span>
-            </div>
-            <div class="bloque-row">
-              <span class="bloque-name" style="color:#C0392B">Dolorosos</span>
-              <div class="bloque-bar-wrap"><div class="bloque-bar-fill" id="bar-dolorosos" style="width:0%;background:#C0392B"></div></div>
-              <span class="bloque-count" id="cnt-dolorosos">0/5</span>
-            </div>
-            <div class="bloque-row">
-              <span class="bloque-name" style="color:#8E44AD">Gloriosos</span>
-              <div class="bloque-bar-wrap"><div class="bloque-bar-fill" id="bar-gloriosos" style="width:0%;background:#8E44AD"></div></div>
-              <span class="bloque-count" id="cnt-gloriosos">0/5</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="verse-card anim-in" style="margin:0;">
-          <span class="verse-ornament">"</span>
-          <div class="verse-label">Palabra del día</div>
-          <p class="verse-text">El que quiera salvar su vida, la perderá; pero el que pierda su vida por causa mía, la encontrará.</p>
-          <div class="verse-ref">— Mateo 16:25 (DHH)</div>
-        </div>
-
-        <div class="modulo-card modulo-sanar anim-in" onclick="navigateTo('sanar.html', event)">
-          <div class="modulo-top">
-            <div class="modulo-icon-wrap">🌿</div>
-            <span class="modulo-badge">Ejercicios</span>
-          </div>
-          <div class="modulo-titulo">Sanar</div>
-          <div class="modulo-desc">Talleres breves para acompañar momentos difíciles: duelo, perdón, cansancio, crisis.</div>
-          <div class="modulo-footer">
-            <span class="modulo-meta">✦ 6 talleres</span>
-            <span class="modulo-cta">Explorar →</span>
-          </div>
-        </div>
-
-        <div class="modulo-card modulo-diario anim-in" onclick="navigateTo('diario.html', event)">
-          <div class="modulo-top">
-            <div class="modulo-icon-wrap">📓</div>
-            <span class="modulo-badge">Mis logros</span>
-          </div>
-          <div class="modulo-titulo">Mi Diario</div>
-          <div class="modulo-desc">Reflexiones, misterios contemplados y registro de tu peregrinación.</div>
-          <div class="modulo-footer">
-            <span class="modulo-meta" id="diario-metros">🚶‍♂️ 0m</span>
-            <span class="modulo-cta">Ver →</span>
-          </div>
-        </div>
-
-        <!-- Banner Premium — solo visible para usuarios Free -->
-        <div class="banner-premium anim-in" id="banner-premium" style="display:none" onclick="openModal('modal-premium')">
-          <div class="banner-premium-text">
-            <div class="banner-premium-title">¿Quieres ir más lejos?</div>
-            <div class="banner-premium-sub">Desbloquea todos los Mundos y avanza a tu ritmo.</div>
-          </div>
-          <button class="banner-premium-btn">Únete →</button>
-        </div>
-
-      </div>
-    </section>
+      <button class="btn-ghost" id="micro-btn-skip" style="font-size:0.75rem;padding:6px 10px">Saltar →</button>
+    </div>
+    <div class="micro-progress-bar"><div class="micro-progress-fill" id="micro-progress-fill"></div></div>
+    <div class="micro-progress-dots" id="micro-progress-dots"></div>
+    <div class="micro-content" id="micro-content"></div>
+    <div class="micro-nav" id="micro-nav">
+      <button class="micro-btn-back" id="micro-btn-back">← Anterior</button>
+      <button class="micro-btn-next" id="micro-btn-next">Siguiente →</button>
+    </div>
+    <div class="micro-swipe-hint" id="micro-swipe-hint">Desliza o toca para avanzar</div>
   </div>
 
-  <div class="nav-overlay" id="nav-overlay"></div>
-</div>
+  <!-- ═══ PANTALLA: ORACIÓN ═══ -->
+  <div class="screen" id="scr-prayer">
+    <div class="prayer-header fade-in">
+      <div class="prayer-nav">
+        <button class="btn-ghost" id="btn-back-home">← Inicio</button>
+        <span class="mystery-counter" id="prayer-counter"></span>
+      </div>
+      <div class="mystery-title" id="prayer-title"></div>
+      <div class="mystery-subtitle" id="prayer-subtitle"></div>
+    </div>
+    <div class="mystery-beads" id="prayer-dots"></div>
+    <div class="evangelio-box fade-in fade-in-d1" id="evangelio-box">
+      <div class="evangelio-label">📖 Evangelio</div>
+      <div class="evangelio-text" id="ev-text"></div>
+      <div class="evangelio-ref" id="ev-ref"></div>
+    </div>
+    <div class="accordion" id="accordion"></div>
+    <div id="mystery-done-wrap" style="display:none"></div>
+    <div class="bottom-nav" id="bottom-nav"></div>
+  </div>
 
-<script type="module">
-// ── Firebase SDK ──────────────────────────────────────────────────
-import { initializeApp }           from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getAuth, onAuthStateChanged,
-         signInWithPopup, GoogleAuthProvider,
-         signInWithEmailAndPassword,
-         createUserWithEmailAndPassword,
-         signOut }                 from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import { getFirestore, doc, getDoc,
-         setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+  <!-- ═══ PANTALLA: CELEBRACIÓN ═══ -->
+  <div class="screen" id="scr-celebration">
+    <div class="celebration-screen fade-in">
+      <div class="maria-placeholder" id="maria-container">🙏</div>
+      <h2 class="celebration-title" id="celeb-title"></h2>
+      <p class="celebration-sub" id="celeb-sub"></p>
+      <button class="btn btn-primary btn-block" id="btn-celeb-home">Regresar a inicio</button>
+    </div>
+  </div>
 
-// ── CONFIGURACIÓN FIREBASE ────────────────────────────────────────
-// *** PEGA AQUÍ TU firebaseConfig ***
-const FIREBASE_CONFIG = {
+  <!-- ═══ OVERLAY: MARIANO SLIDE ═══ -->
+  <div class="mariano-overlay" id="mariano-overlay">
+    <img id="mariano-slide-img" class="mariano-slide" alt="Mariano">
+    <div class="meters-float" id="meters-float-text"></div>
+  </div>
+
+  <!-- ═══ OVERLAY: MARIANO GRAND ═══ -->
+  <div class="mariano-grand-overlay" id="mariano-grand-overlay">
+    <div class="mariano-grand-container">
+      <img id="mariano-grand-img" class="mariano-grand" alt="Mariano celebrando">
+      <div class="mariano-grand-lux orbit1" id="mariano-grand-lux">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="32" height="32">
+          <g filter="url(#luxGlow)">
+            <rect x="46.1926" y="0.285" width="7.6148" height="99.43" fill="#FFFCF7"/>
+            <rect x="0" y="46.2068" width="100" height="7.5864" fill="#FFFCF7"/>
+          </g>
+        </svg>
+      </div>
+      <div class="mariano-grand-meters" id="mariano-grand-meters"></div>
+      <div class="mariano-grand-text" id="mariano-grand-text"></div>
+      <div id="grand-confetti-container"></div>
+    </div>
+  </div>
+
+  <!-- ═══ OVERLAY: TRANSICIÓN MICRO ═══ -->
+  <div class="micro-transition-overlay" id="micro-transition-overlay">
+    <div class="micro-transition-lux">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="48" height="48">
+        <g filter="url(#luxGlow)">
+          <rect x="46.1926" y="0.285" width="7.6148" height="99.43" fill="#FFFCF7"/>
+          <rect x="0" y="46.2068" width="100" height="7.5864" fill="#FFFCF7"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+</div><!-- /.shell -->
+
+<script>
+/* ══════════════════════════════════════════════════════
+   CruzAndo · orar.html · Motor genérico · Vanilla JS
+   Lee: data/{id}.json  +  data/{id}-micro.json
+   Flujo: Bloques → Micro (1ª vez) → Oración
+   ══════════════════════════════════════════════════════ */
+
+(function() {
+  'use strict';
+
+  // ════════════════════════════════
+  // ESTADO GLOBAL
+  // ════════════════════════════════
+  let DATA       = null;   // data/{id}.json
+  let MICRO      = null;   // data/{id}-micro.json  (puede ser null)
+  let NIVEL_ID   = null;
+
+  let currentBlock   = null;   // 'gozosos' | 'luminosos' | 'dolorosos' | 'gloriosos'
+  let currentMystery = 0;
+  let openSection    = null;
+  let isDark         = false;
+
+  // Progreso de oración
+  let progress      = {};   // { gozosos: [ts,ts,null,null,null], ... }
+  let journal       = {};
+  let medConfirmed  = {};
+
+  // Gamificación
+  let totalMeters       = 0;
+  let reflectionRewards = {};
+  let audioRewards      = {};
+  let microDone         = {};   // { gozosos: true, ... } — micro completado para ese bloque
+
+  // Micro-learning state
+  let microStep        = 0;   // paso actual dentro del micro
+  let microSteps       = [];  // array plano: [{type:'card',...}, {type:'question',...}, {type:'final'}]
+  let microAnswered    = {};  // { stepIndex: opcionIndex }
+  let microSpeaking    = false;
+  let microSpeechUtil  = null;
+
+  // Audio oración
+  let audioEl       = null;
+  let audioPlaying  = false;
+  let currentAudioId = null;
+
+  const BLOCKS      = ['gozosos','luminosos','dolorosos','gloriosos'];
+  const BLOCK_NAMES = { gozosos:'Gozosos', luminosos:'Luminosos', dolorosos:'Dolorosos', gloriosos:'Gloriosos' };
+  const ORDS        = ['Primer','Segundo','Tercer','Cuarto','Quinto'];
+  const BTYPES      = { gozosos:'Gozoso', luminosos:'Luminoso', dolorosos:'Doloroso', gloriosos:'Glorioso' };
+  const MED_LABELS  = ['Por María hacia Jesús','Desde el Hijo hacia el Padre','Hijos y hermanos en el Espíritu'];
+  const MED_COLORS  = ['#FF7A00','#C0392B','#27AE60'];
+  const DAY_BLOCKS  = { 0:'gloriosos',1:'gozosos',2:'dolorosos',3:'gloriosos',4:'luminosos',5:'dolorosos',6:'gozosos' };
+  const REST_POSES  = ['rest-staff','rest-sitting','rest-rock','rest-tree'];
+  const MARIANO_BASE = 'https://padremonti.github.io/cruzando-app/assets/mariano/';
+  const MUSIC_BASE   = 'https://pub-faed94e375aa443e846e07f81ef93274.r2.dev/';
+  const AUDIO_BASE   = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/';
+
+
+  // ── Plan del usuario (se carga desde Firebase al init) ──
+  let USER_PLAN = 'free';   // 'free' | 'beta' | 'premium'
+  const FIREBASE_CONFIG = {
     apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
     authDomain: "cruzando-app.firebaseapp.com",
     projectId: "cruzando-app",
     storageBucket: "cruzando-app.firebasestorage.app",
     messagingSenderId: "408196948528",
     appId: "1:408196948528:web:de291e8afc969252e943f5"
-};
+  };
+  let restPoseIndex = 0;
+  let orbitIndex    = 0;
 
-// ── PRICE IDs DE STRIPE ───────────────────────────────────────────
-// *** PEGA AQUÍ TUS PRICE IDs ***
-const STRIPE_PRICE_MENSUAL = "price_TU_PRICE_ID_MENSUAL";
-const STRIPE_PRICE_ANUAL   = "price_TU_PRICE_ID_ANUAL";
+  // ════════════════════════════════
+  // UTILIDADES
+  // ════════════════════════════════
+  const $ = id => document.getElementById(id);
 
-// ── CÓDIGO BETA ───────────────────────────────────────────────────
-const BETA_CODE         = "BETA2026";
-const BETA_DAYS         = 60;
-const LAUNCH_DISCOUNT   = "LAUNCH50"; // código de 50% OFF lanzamiento
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    $(id).classList.add('active');
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
 
-// ── Init ──────────────────────────────────────────────────────────
-const fbApp = initializeApp(FIREBASE_CONFIG);
-const auth  = getAuth(fbApp);
-const db    = getFirestore(fbApp);
+  function lsKey()      { return 'cruzando_nivel_' + NIVEL_ID; }
+  function nivelLabel(id) {
+    const m = parseInt(id.substring(0,2), 10);
+    const n = parseInt(id.substring(2,4), 10);
+    return 'Nivel ' + m + '-' + n;
+  }
 
-// ── Estado ────────────────────────────────────────────────────────
-let currentUser    = null;
-let currentPlan    = 'free'; // 'free' | 'beta' | 'premium'
-let currentNivelId = '0101';
-let selectedPlan   = 'anual';
-let codeApplied    = null;   // null | 'beta' | 'discount'
+  // Construir URL de contemplación desde NIVEL_ID y número de misterio
+  function contemplacionUrl(m) {
+    const mundo = parseInt(NIVEL_ID.substring(0,2), 10);
+    const nivel  = parseInt(NIVEL_ID.substring(2,4), 10);
+    return AUDIO_BASE + mundo + '_' + nivel + '_' + m.numero + '.mp3';
+  }
 
-// ── Tema ──────────────────────────────────────────────────────────
-var isLight = localStorage.getItem('ca_home_light') === '1';
-function applyTheme(light) {
-  document.body.classList.toggle('light', light);
-  var k = document.getElementById('toggle-knob');
-  if (k) k.textContent = light ? '☀️' : '🌙';
-  document.querySelector('meta[name="theme-color"]').content = light ? '#E6DED3' : '#1A0E04';
-  localStorage.setItem('ca_home_light', light ? '1' : '0');
-}
-window.toggleDark = function() { isLight = !isLight; applyTheme(isLight); };
-if (isLight) applyTheme(true);
+  // Construir URL del canto desde NIVEL_ID y número de misterio
+  function cantoUrl(m) {
+    // NIVEL_ID = '0101' → mundo=1, nivel=1
+    const mundo = parseInt(NIVEL_ID.substring(0,2), 10);
+    const nivel = parseInt(NIVEL_ID.substring(2,4), 10);
+    return MUSIC_BASE + 'M_' + mundo + '_' + nivel + '_' + m.numero + '.mp3';
+  }
 
-// ── Helpers de fecha ─────────────────────────────────────────────
-function greetingTime() {
-  var h = new Date().getHours();
-  if (h < 12) return 'Buenos días';
-  if (h < 19) return 'Buenas tardes';
-  return 'Buenas noches';
-}
-function todayLabel() {
-  var dias   = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-  var meses  = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  var d = new Date();
-  return dias[d.getDay()] + ' ' + d.getDate() + ' de ' + meses[d.getMonth()];
-}
+  function escHTML(s) {
+    if (!s) return '';
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  }
 
-// ── Leer progreso local ───────────────────────────────────────────
-function getCurrentNivel() {
-  var keys = Object.keys(localStorage).filter(function(k) { return k.startsWith('cruzando_nivel_'); });
-  if (!keys.length) return '0101';
-  var active = null;
-  keys.sort();
-  for (var i = 0; i < keys.length; i++) {
+  function hexToRgb(hex) {
+    const h = hex.replace('#','');
+    return [parseInt(h.substring(0,2),16), parseInt(h.substring(2,4),16), parseInt(h.substring(4,6),16)].join(',');
+  }
+
+  // ════════════════════════════════
+  // PERSISTENCIA
+  // ════════════════════════════════
+  function saveProgress() {
     try {
-      var d = JSON.parse(localStorage.getItem(keys[i]));
-      if (!d || !d.progress) continue;
-      var blocks = ['gozosos','luminosos','dolorosos','gloriosos'];
-      var allDone = blocks.every(function(b) { return d.progress[b] && d.progress[b].every(function(x) { return x !== null; }); });
-      if (!allDone) { active = keys[i].replace('cruzando_nivel_', ''); break; }
+      localStorage.setItem(lsKey(), JSON.stringify({
+        progress, journal, medConfirmed, isDark,
+        totalMeters, reflectionRewards, audioRewards, microDone
+      }));
     } catch(e) {}
   }
-  return active || keys[keys.length-1].replace('cruzando_nivel_', '');
-}
-function getProgreso(nivelId) {
-  try { return JSON.parse(localStorage.getItem('cruzando_nivel_' + nivelId)); } catch(e) { return null; }
-}
-function getTotalMetros() {
-  var t = 0;
-  Object.keys(localStorage).filter(function(k) { return k.startsWith('cruzando_nivel_'); }).forEach(function(k) {
-    try { var d = JSON.parse(localStorage.getItem(k)); if (d && typeof d.totalMeters === 'number') t += d.totalMeters; } catch(e) {}
-  });
-  return t;
-}
 
-// ── Verificar beta expirado ───────────────────────────────────────
-function checkBetaExpiry(userData) {
-  if (userData.plan !== 'beta') return userData.plan;
-  if (!userData.betaExpiresAt) return 'free';
-  var expires = userData.betaExpiresAt.toDate ? userData.betaExpiresAt.toDate() : new Date(userData.betaExpiresAt);
-  if (new Date() > expires) return 'free'; // beta expirado → cae a free
-  return 'beta';
-}
-
-// ── Renderizar home ───────────────────────────────────────────────
-function renderHome(userData) {
-  // Plan
-  currentPlan = checkBetaExpiry(userData);
-  var chipEl = document.getElementById('plan-chip');
-  if (chipEl) {
-    chipEl.textContent = currentPlan === 'premium' ? 'Premium' : currentPlan === 'beta' ? 'Beta' : 'Free';
-    chipEl.className   = currentPlan === 'premium' ? 'plan-chip-premium' : currentPlan === 'beta' ? 'plan-chip-beta' : 'plan-chip-free';
-  }
-
-  // Banner premium — solo para free
-  var banner = document.getElementById('banner-premium');
-  if (banner) banner.style.display = currentPlan === 'free' ? '' : 'none';
-
-  // Nombre
-  var name = (userData.displayName || '').split(' ')[0] || 'Peregrino';
-  var nameEl = document.getElementById('user-name');
-  if (nameEl) nameEl.textContent = name;
-
-  // Saludo y fecha
-  var gtEl = document.getElementById('greeting-time');
-  if (gtEl) gtEl.textContent = greetingTime();
-  var subEl = document.getElementById('greeting-sub');
-  if (subEl) subEl.textContent = todayLabel();
-
-  // Nivel activo
-  currentNivelId = getCurrentNivel();
-  var mundo = parseInt(currentNivelId.substring(0,2), 10);
-  var nivel  = parseInt(currentNivelId.substring(2,4), 10);
-  var tagEl = document.getElementById('orar-nivel-tag');
-  if (tagEl) tagEl.textContent = 'Nivel ' + mundo + '-' + nivel + ' · En progreso';
-
-  // Barras de bloques
-  var data   = getProgreso(currentNivelId);
-  var blocks = ['gozosos','luminosos','dolorosos','gloriosos'];
-  blocks.forEach(function(b) {
-    var arr  = (data && data.progress && data.progress[b]) ? data.progress[b] : [null,null,null,null,null];
-    var done = arr.filter(function(x) { return x !== null; }).length;
-    var bar  = document.getElementById('bar-' + b);
-    var cnt  = document.getElementById('cnt-' + b);
-    if (bar) bar.style.width = (done / 5 * 100) + '%';
-    if (cnt) cnt.textContent = done + '/5';
-  });
-
-  // Metros
-  var totalM   = getTotalMetros();
-  var metrosEl = document.getElementById('metros-display');
-  if (metrosEl) metrosEl.textContent = totalM.toLocaleString('es-MX') + 'm';
-  var diarioEl = document.getElementById('diario-metros');
-  if (diarioEl) diarioEl.textContent = '🚶‍♂️ ' + totalM.toLocaleString('es-MX') + 'm';
-}
-
-// ── Crear doc de usuario en Firestore ────────────────────────────
-async function ensureUserDoc(user, extraData) {
-  try {
-    var ref  = doc(db, 'users', user.uid);
-    var snap = await getDoc(ref);
-    if (!snap.exists()) {
-      var data = Object.assign({
-        email:       user.email || '',
-        displayName: user.displayName || '',
-        photoURL:    user.photoURL || '',
-        createdAt:   serverTimestamp(),
-        plan:        'free'
-      }, extraData || {});
-      await setDoc(ref, data);
-      await setDoc(doc(db, 'users', user.uid, 'gamification', 'stats'), {
-        totalMetros: 0, nivelesCompletados: [], bloquesCompletados: {},
-        rewardsClaimed: {}, badgesPending: [], lastActiveAt: serverTimestamp()
-      });
-      return data;
-    }
-    return snap.data();
-  } catch(e) {
-    console.warn('[CruzAndo] ensureUserDoc:', e);
-    return { plan: 'free' };
-  }
-}
-
-// ── Mostrar pantalla ──────────────────────────────────────────────
-function showScreen(name) {
-  document.getElementById('scr-loading').style.display = 'none';
-  document.getElementById('scr-login').classList.remove('active');
-  document.getElementById('scr-home').classList.remove('active');
-  if (name === 'login') document.getElementById('scr-login').classList.add('active');
-  if (name === 'home')  document.getElementById('scr-home').classList.add('active');
-}
-
-// ── Auth state ────────────────────────────────────────────────────
-onAuthStateChanged(auth, async function(user) {
-  if (user) {
-    currentUser = user;
-    var userData = await ensureUserDoc(user);
-    renderHome(userData);
-    showScreen('home');
-  } else {
-    currentUser = null;
-    showScreen('login');
-  }
-});
-
-// ── Login Google ──────────────────────────────────────────────────
-document.getElementById('btn-google').addEventListener('click', async function() {
-  try {
-    var provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
-  } catch(e) { console.warn('[CruzAndo] Google login:', e.message); }
-});
-
-// ── Modal email ───────────────────────────────────────────────────
-var modalMode = 'login';
-document.getElementById('btn-show-email').addEventListener('click', function() {
-  modalMode = 'login';
-  document.getElementById('modal-title').textContent = 'Iniciar sesión';
-  document.getElementById('modal-switch-text').textContent = 'Crear una';
-  document.getElementById('inp-name').style.display = 'none';
-  document.getElementById('modal-error').textContent = '';
-  openModal('modal-email');
-});
-document.getElementById('btn-modal-close').addEventListener('click', function() { closeModal('modal-email'); });
-document.getElementById('modal-switch').addEventListener('click', function() {
-  modalMode = modalMode === 'login' ? 'register' : 'login';
-  document.getElementById('modal-title').textContent = modalMode === 'register' ? 'Crear cuenta' : 'Iniciar sesión';
-  document.getElementById('modal-switch-text').textContent = modalMode === 'register' ? 'Ya tengo una' : 'Crear una';
-  document.getElementById('inp-name').style.display = modalMode === 'register' ? '' : 'none';
-  document.getElementById('modal-error').textContent = '';
-});
-document.getElementById('btn-modal-submit').addEventListener('click', async function() {
-  var email    = document.getElementById('inp-email').value.trim();
-  var password = document.getElementById('inp-password').value;
-  var name     = document.getElementById('inp-name').value.trim();
-  var errEl    = document.getElementById('modal-error');
-  errEl.textContent = '';
-  if (!email || !password) { errEl.textContent = 'Por favor completa todos los campos.'; return; }
-  try {
-    if (modalMode === 'login') {
-      await signInWithEmailAndPassword(auth, email, password);
-    } else {
-      if (!name) { errEl.textContent = 'Escribe tu nombre.'; return; }
-      var result = await createUserWithEmailAndPassword(auth, email, password);
-      await setDoc(doc(db, 'users', result.user.uid), {
-        email, displayName: name, photoURL: '',
-        createdAt: serverTimestamp(), plan: 'free'
-      });
-    }
-    closeModal('modal-email');
-  } catch(e) {
-    var msgs = {
-      'auth/user-not-found':      'No existe una cuenta con ese correo.',
-      'auth/wrong-password':      'Contraseña incorrecta.',
-      'auth/invalid-credential':  'Correo o contraseña incorrectos.',
-      'auth/email-already-in-use':'Ese correo ya tiene una cuenta.',
-      'auth/weak-password':       'La contraseña debe tener al menos 6 caracteres.',
-      'auth/invalid-email':       'El correo no es válido.'
-    };
-    errEl.textContent = msgs[e.code] || 'Error: ' + e.message;
-  }
-});
-
-// ── Perfil / cerrar sesión ────────────────────────────────────────
-document.getElementById('btn-perfil').addEventListener('click', async function() {
-  if (confirm('¿Cerrar sesión?')) { await signOut(auth); }
-});
-
-// ── Selección de plan Premium ─────────────────────────────────────
-window.selectPlan = function(plan) {
-  selectedPlan = plan;
-  document.getElementById('plan-anual').classList.toggle('selected', plan === 'anual');
-  document.getElementById('plan-mensual').classList.toggle('selected', plan === 'mensual');
-};
-
-// ── Aplicar código ────────────────────────────────────────────────
-window.applyCode = async function() {
-  var code    = document.getElementById('inp-code').value.trim().toUpperCase();
-  var inpEl   = document.getElementById('inp-code');
-  var fbEl    = document.getElementById('code-feedback');
-  var btnEl   = document.getElementById('btn-premium-continuar');
-
-  if (!code) { fbEl.textContent = 'Escribe un código.'; fbEl.className = 'code-feedback err'; return; }
-
-  // Verificar código beta
-  if (code === BETA_CODE) {
-    codeApplied = 'beta';
-    inpEl.classList.add('valid'); inpEl.classList.remove('invalid');
-    fbEl.textContent = '¡Código válido! 60 días de acceso Premium sin costo.';
-    fbEl.className = 'code-feedback ok';
-    btnEl.textContent = 'Activar acceso Beta';
-    return;
-  }
-
-  // Verificar código de descuento en Firestore
-  try {
-    var snap = await getDoc(doc(db, 'config', 'discounts'));
-    var discounts = snap.exists() ? (snap.data().codes || {}) : {};
-    if (discounts[code]) {
-      codeApplied = 'discount';
-      var pct = discounts[code].percent || 50;
-      inpEl.classList.add('valid'); inpEl.classList.remove('invalid');
-      fbEl.textContent = '¡Código válido! ' + pct + '% de descuento aplicado.';
-      fbEl.className = 'code-feedback ok';
-    } else {
-      codeApplied = null;
-      inpEl.classList.add('invalid'); inpEl.classList.remove('valid');
-      fbEl.textContent = 'Código no válido.';
-      fbEl.className = 'code-feedback err';
-    }
-  } catch(e) {
-    fbEl.textContent = 'No se pudo verificar el código. Intenta de nuevo.';
-    fbEl.className = 'code-feedback err';
-  }
-};
-
-// ── Continuar con Premium ─────────────────────────────────────────
-document.getElementById('btn-premium-continuar').addEventListener('click', async function() {
-  if (!currentUser) return;
-
-  // Caso 1: código beta → activar plan beta directamente sin Stripe
-  if (codeApplied === 'beta') {
+  function loadProgress() {
     try {
-      var expires = new Date();
-      expires.setDate(expires.getDate() + BETA_DAYS);
-      await setDoc(doc(db, 'users', currentUser.uid), {
-        plan: 'beta',
-        betaExpiresAt: expires
-      }, { merge: true });
-      closeModal('modal-premium');
-      // Refrescar la pantalla
-      var userData = await getDoc(doc(db, 'users', currentUser.uid));
-      renderHome(userData.data());
-    } catch(e) {
-      console.warn('[CruzAndo] activar beta:', e);
+      const raw = localStorage.getItem(lsKey());
+      if (raw) {
+        const d = JSON.parse(raw);
+        if (d.progress)          progress          = d.progress;
+        if (d.journal)           journal           = d.journal;
+        if (d.medConfirmed)      medConfirmed      = d.medConfirmed;
+        if (typeof d.isDark === 'boolean') isDark  = d.isDark;
+        if (typeof d.totalMeters === 'number') totalMeters = d.totalMeters;
+        if (d.reflectionRewards) reflectionRewards = d.reflectionRewards;
+        if (d.audioRewards)      audioRewards      = d.audioRewards;
+        if (d.microDone)         microDone         = d.microDone;
+      }
+    } catch(e) {}
+    BLOCKS.forEach(b => {
+      if (!progress[b]) progress[b] = [null,null,null,null,null];
+      if (!journal[b])  journal[b]  = {};
+    });
+    updateMetersDisplay();
+  }
+
+  // ════════════════════════════════
+  // PALETA DE COLORES
+  // ════════════════════════════════
+  function applyPalette() {
+    if (!DATA || !DATA.tema) return;
+    const p = DATA.tema.paleta;
+    const r = document.documentElement.style;
+    r.setProperty('--lvl-bold',  p.bold);
+    r.setProperty('--lvl-base',  p.base);
+    r.setProperty('--lvl-soft',  p.soft);
+    r.setProperty('--lvl-mist',  p.mist);
+    r.setProperty('--lvl-light', p.light);
+    r.setProperty('--lvl-ultra', p.ultra);
+    r.setProperty('--lvl-bold-rgb',  hexToRgb(p.bold));
+    r.setProperty('--lvl-light-rgb', hexToRgb(p.light));
+    const bl = DATA.tema.bloques;
+    if (bl.gozosos)  r.setProperty('--goz-color', bl.gozosos.color);
+    if (bl.luminosos) r.setProperty('--lum-color', bl.luminosos.color);
+    if (bl.dolorosos) r.setProperty('--dol-color', bl.dolorosos.color);
+    if (bl.gloriosos) r.setProperty('--glo-color', bl.gloriosos.color);
+    document.querySelector('meta[name="theme-color"]').content = isDark ? '#1A1714' : '#E6DED3';
+  }
+
+  function blockColor(b) {
+    if (!DATA || !DATA.tema || !DATA.tema.bloques[b]) return '#888';
+    return DATA.tema.bloques[b].color;
+  }
+  function blockEmoji(b) {
+    if (!DATA || !DATA.tema || !DATA.tema.bloques[b]) return '📿';
+    return DATA.tema.bloques[b].emoji;
+  }
+
+  // ════════════════════════════════
+  // DARK MODE
+  // ════════════════════════════════
+  function toggleDark() {
+    isDark = !isDark;
+    document.body.classList.toggle('dark', isDark);
+    $('ico-sun').style.display  = isDark ? 'none'  : 'block';
+    $('ico-moon').style.display = isDark ? 'block' : 'none';
+    document.querySelector('meta[name="theme-color"]').content = isDark ? '#1A1714' : '#E6DED3';
+    saveProgress();
+  }
+
+  // ════════════════════════════════
+  // GAMIFICACIÓN: LUX + MARIANO + METROS
+  // ════════════════════════════════
+  function updateMetersDisplay() {
+    const el = $('meters-value');
+    if (el) el.textContent = totalMeters.toLocaleString('es-MX') + 'm';
+  }
+
+  function luxShine() {
+    const lux = $('lux-svg');
+    if (!lux) return;
+    lux.classList.add('shine');
+    setTimeout(() => lux.classList.remove('shine'), 600);
+    spawnLuxParticles(3);
+  }
+
+  function spawnLuxParticles(count) {
+    const c = $('lux-container');
+    if (!c) return;
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('div');
+      p.className = 'lux-particle';
+      p.style.setProperty('--x', (Math.random()-0.5)*100+'px');
+      p.style.setProperty('--y', (Math.random()-0.5)*100+'px');
+      c.appendChild(p);
+      setTimeout(() => p.remove(), 1500);
     }
-    return;
   }
 
-  // Caso 2: ir a Stripe Checkout
-  // (Se implementa en la siguiente fase con Stripe)
-  // Por ahora mostramos un mensaje informativo
-  alert('El pago con Stripe se activará próximamente. Por ahora usa el código BETA2026 si eres beta tester.');
-});
-
-// ── Navegación ────────────────────────────────────────────────────
-window.getOrarUrl = function() { return 'orar.html?c=' + currentNivelId; };
-window.openModal  = function(id) { document.getElementById(id).classList.add('open'); };
-window.closeModal = function(id) { document.getElementById(id).classList.remove('open'); };
-window.navigateTo = function(url, e) {
-  if (e) {
-    var r = document.createElement('div');
-    r.className = 'tap-ripple';
-    r.style.left = e.clientX + 'px'; r.style.top = e.clientY + 'px';
-    document.body.appendChild(r);
-    setTimeout(function() { r.remove(); }, 500);
+  function gainMeters(meters, pose) {
+    totalMeters += meters;
+    updateMetersDisplay();
+    saveProgress();
+    luxShine();
+    playRewardSound();
+    showMarianoSlide(meters, pose);
   }
-  var ov = document.getElementById('nav-overlay');
-  if (ov) { ov.classList.add('fade-out'); setTimeout(function() { window.location.href = url; }, 380); }
-  else window.location.href = url;
-};
 
+  function showMarianoSlide(meters, pose) {
+    const overlay = $('mariano-overlay');
+    const img     = $('mariano-slide-img');
+    const text    = $('meters-float-text');
+    if (!overlay || !img || !text) return;
+    img.src = MARIANO_BASE + 'mariano-' + pose + '.png';
+    text.textContent = '+' + meters.toLocaleString('es-MX') + 'm';
+    overlay.style.display = 'flex';
+    setTimeout(() => { overlay.style.display = 'none'; }, 2500);
+  }
+
+  function showMarianoGrandCelebration() {
+    totalMeters += 1000;
+    updateMetersDisplay();
+    saveProgress();
+    const overlay        = $('mariano-grand-overlay');
+    const img            = $('mariano-grand-img');
+    const metersEl       = $('mariano-grand-meters');
+    const textEl         = $('mariano-grand-text');
+    const confettiWrap   = $('grand-confetti-container');
+    if (!overlay) return;
+    img.src          = MARIANO_BASE + 'mariano-celebrate.png';
+    metersEl.textContent = '+1,000m';
+    textEl.innerHTML     = '¡Bloque completado!<br>Has recorrido una etapa del camino';
+    confettiWrap.innerHTML = '';
+    const colors = ['#01BCE0','#00C853','#FBBC05','#FF7A00','#FFFCF7'];
+    for (let i = 0; i < 40; i++) {
+      const p = document.createElement('div');
+      p.className = 'grand-confetti';
+      p.style.background    = colors[i % 5];
+      p.style.left          = Math.random() * 100 + '%';
+      p.style.top           = '-20px';
+      p.style.animationDelay = Math.random() * 0.5 + 's';
+      confettiWrap.appendChild(p);
+    }
+    playNotes([523,659,784,880,1047]);
+    overlay.style.display = 'flex';
+    setTimeout(() => { overlay.style.display = 'none'; }, 3500);
+  }
+
+  function getNextRestPose() {
+    const pose = REST_POSES[restPoseIndex];
+    restPoseIndex = (restPoseIndex + 1) % REST_POSES.length;
+    return pose;
+  }
+
+  // ════════════════════════════════
+  // AUDIO: SONIDOS SINTÉTICOS
+  // ════════════════════════════════
+  let _ac = null;
+  function getAC() {
+    if (!_ac) _ac = new (window.AudioContext || window.webkitAudioContext)();
+    if (_ac.state === 'suspended') _ac.resume();
+    return _ac;
+  }
+
+  function playBubble() {
+    try {
+      const ctx = getAC(), now = ctx.currentTime;
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(150, now);
+      o.frequency.exponentialRampToValueAtTime(580, now + 0.055);
+      o.frequency.exponentialRampToValueAtTime(220, now + 0.14);
+      g.gain.setValueAtTime(0, now);
+      g.gain.linearRampToValueAtTime(0.18, now + 0.012);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(now); o.stop(now + 0.2);
+    } catch(e) {}
+  }
+
+  function playSoftTap() {
+    try {
+      const ctx = getAC(), now = ctx.currentTime;
+      const bSz = ctx.sampleRate * 0.03, buf = ctx.createBuffer(1, bSz, ctx.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < bSz; i++) d[i] = (Math.random()*2-1) * Math.exp(-i/(bSz*0.15));
+      const s = ctx.createBufferSource(); s.buffer = buf;
+      const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.setValueAtTime(600, now);
+      const g = ctx.createGain(); g.gain.setValueAtTime(0.25, now); g.gain.exponentialRampToValueAtTime(0.001, now+0.08);
+      s.connect(f); f.connect(g); g.connect(ctx.destination); s.start(now); s.stop(now+0.1);
+    } catch(e) {}
+  }
+
+  function playChoir(rootFreq) {
+    try {
+      const ctx = getAC(), now = ctx.currentTime;
+      const ratios = [1,1.5,2,2.5];
+      const master = ctx.createGain();
+      master.gain.setValueAtTime(0, now);
+      master.gain.linearRampToValueAtTime(0.08, now+0.12);
+      master.gain.linearRampToValueAtTime(0.05, now+0.35);
+      master.gain.linearRampToValueAtTime(0, now+0.7);
+      master.connect(ctx.destination);
+      ratios.forEach((r, i) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = i % 2 === 0 ? 'sine' : 'triangle';
+        o.frequency.setValueAtTime(rootFreq * r, now);
+        const lfo = ctx.createOscillator(), lg = ctx.createGain();
+        lfo.frequency.setValueAtTime(4.5 + i*0.3, now); lg.gain.setValueAtTime(1.5, now);
+        lfo.connect(lg); lg.connect(o.frequency); lfo.start(now); lfo.stop(now+0.75);
+        g.gain.setValueAtTime(i===0 ? 0.7 : 0.4, now);
+        o.connect(g); g.connect(master); o.start(now); o.stop(now+0.75);
+      });
+    } catch(e) {}
+  }
+
+  const CHOIR_NOTES = [220,246,261,277,293,329,349,370];
+  function playTransitionChoir(i) { playChoir(CHOIR_NOTES[i % 8]); }
+
+  function playCompleteChoir() {
+    [261,329,392,523].forEach((f,i) => setTimeout(() => playChoir(f), i*180));
+  }
+
+  function playRewardSound() {
+    try {
+      const ac = getAC();
+      [523,659].forEach((f,i) => {
+        setTimeout(() => {
+          const o = ac.createOscillator(), g = ac.createGain();
+          o.type = 'sine'; o.frequency.value = f;
+          g.gain.setValueAtTime(0.12, ac.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime+0.35);
+          o.connect(g); g.connect(ac.destination);
+          o.start(); o.stop(ac.currentTime+0.35);
+        }, i*90);
+      });
+    } catch(e) {}
+  }
+
+  function playNotes(freqs) {
+    try {
+      const ac = getAC();
+      freqs.forEach((f,i) => {
+        setTimeout(() => {
+          const o = ac.createOscillator(), g = ac.createGain();
+          o.type = 'sine'; o.frequency.value = f;
+          g.gain.setValueAtTime(0.07, ac.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime+0.35);
+          o.connect(g); g.connect(ac.destination);
+          o.start(); o.stop(ac.currentTime+0.35);
+        }, i*180);
+      });
+    } catch(e) {}
+  }
+
+  const MELODIES = [[440,554,659],[523,659,784],[392,494,587,784],[349,440,523,659]];
+  function celebrationSound(variant) { playNotes(MELODIES[variant % 4]); }
+
+  // TTS — voz masculina
+  function speakText(text) {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'es-MX'; u.rate = 0.88; u.pitch = 0.85;
+    const voices = window.speechSynthesis.getVoices();
+    const maleVoice = voices.find(v => v.lang.startsWith('es') && /male|jorge|diego|carlos|andrés/i.test(v.name))
+      || voices.find(v => v.lang.startsWith('es-MX'))
+      || voices.find(v => v.lang.startsWith('es'));
+    if (maleVoice) u.voice = maleVoice;
+    u.onstart = () => { microSpeaking = true; renderMicroListenBtn(true); };
+    u.onend   = () => { microSpeaking = false; renderMicroListenBtn(false); };
+    u.onerror = () => { microSpeaking = false; renderMicroListenBtn(false); };
+    microSpeechUtil = u;
+    window.speechSynthesis.speak(u);
+  }
+
+  function stopSpeech() {
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    microSpeaking = false;
+    renderMicroListenBtn(false);
+  }
+
+  function renderMicroListenBtn(speaking) {
+    const btn = document.querySelector('.micro-listen-btn');
+    if (!btn) return;
+    btn.textContent = speaking ? '⏹ Detener' : '🔊 Escuchar';
+    btn.classList.toggle('speaking', speaking);
+  }
+
+  // ════════════════════════════════
+  // CONFETTI
+  // ════════════════════════════════
+  function showConfetti() {
+    const c = document.createElement('div');
+    c.className = 'confetti-container';
+    const colors = [DATA.tema.paleta.bold, DATA.tema.paleta.soft, DATA.tema.paleta.light, '#34A853','#FBBC05','#EA4335'];
+    for (let i = 0; i < 40; i++) {
+      const p = document.createElement('div');
+      p.className = 'confetti-piece';
+      p.style.left            = Math.random()*100 + '%';
+      p.style.background      = colors[Math.floor(Math.random()*colors.length)];
+      p.style.animationDelay  = Math.random()*0.8 + 's';
+      p.style.animationDuration = (2+Math.random()) + 's';
+      c.appendChild(p);
+    }
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 3500);
+  }
+
+  // ════════════════════════════════
+  // PANTALLA: BLOQUES (HOME)
+  // ════════════════════════════════
+  function renderHome() {
+    stopAudio();
+    stopSpeech();
+    $('h-title').textContent = 'CruzAndo';
+    $('h-sub').textContent   = nivelLabel(DATA.tema.id) + ': ' + DATA.elemento;
+    $('home-title').textContent   = DATA.tema.mundo_nombre;
+    $('home-element').textContent = nivelLabel(DATA.tema.id) + ': ' + DATA.elemento;
+
+    const grid       = $('block-grid');
+    grid.innerHTML   = '';
+    const todayBlock = DAY_BLOCKS[new Date().getDay()];
+    let allCleared   = true;
+    const todayCleared = progress[todayBlock] && progress[todayBlock].every(x => x !== null);
+
+    // Banner "Misterios del día"
+    const DAY_NAMES_ES = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    const BLOCK_DAYS   = {};
+    for (let d = 0; d < 7; d++) { const bl = DAY_BLOCKS[d]; if (!BLOCK_DAYS[bl]) BLOCK_DAYS[bl] = []; BLOCK_DAYS[bl].push(DAY_NAMES_ES[d]); }
+    const todayName  = DAY_NAMES_ES[new Date().getDay()];
+    const bannerWrap = $('today-banner-wrap');
+
+    // Para usuarios Free en Mundo 1: mostrar siempre la tarjeta "Misterios del día"
+    // (incluso si ya completó el bloque de hoy — muestra estado completado)
+    const mundoId = parseInt(NIVEL_ID.substring(0,2), 10);
+    const showDayCard = (USER_PLAN === 'free') && (mundoId === 1);
+
+    if (!todayCleared) {
+      bannerWrap.innerHTML =
+        '<div class="today-banner fade-in" onclick="window._ca.enterBlock(\'' + todayBlock + '\')">' +
+          '<div class="today-banner-top">' +
+            '<span class="today-banner-label"><span class="today-pulse"></span> Misterios del día · ' + todayName + '</span>' +
+            '<span class="today-banner-arrow">→</span>' +
+          '</div>' +
+          '<h3 style="color:' + blockColor(todayBlock) + '">' + blockEmoji(todayBlock) + ' Misterios ' + BLOCK_NAMES[todayBlock] + '</h3>' +
+          '<div class="today-banner-days">' + BLOCK_DAYS[todayBlock].join(' · ') + '</div>' +
+        '</div>';
+    } else if (showDayCard) {
+      // Bloque del día ya completado — mostrar tarjeta de "vuelve mañana"
+      const tomorrowDay = (new Date().getDay() + 1) % 7;
+      const tomorrowBlock = DAY_BLOCKS[tomorrowDay];
+      const tomorrowName  = DAY_NAMES_ES[tomorrowDay];
+      bannerWrap.innerHTML =
+        '<div class="today-banner today-banner-done fade-in">' +
+          '<div class="today-banner-top">' +
+            '<span class="today-banner-label" style="color:var(--green)">✓ Completado hoy · ' + todayName + '</span>' +
+          '</div>' +
+          '<h3 style="color:var(--green)">' + blockEmoji(todayBlock) + ' Misterios ' + BLOCK_NAMES[todayBlock] + '</h3>' +
+          '<div class="today-banner-days" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">' +
+            '🌅 Mañana (' + tomorrowName + '): <strong style="color:' + blockColor(tomorrowBlock) + '">' +
+            'Misterios ' + BLOCK_NAMES[tomorrowBlock] + '</strong>' +
+          '</div>' +
+        '</div>';
+    } else {
+      bannerWrap.innerHTML = '';
+    }
+
+    BLOCKS.forEach((b, bi) => {
+      const prog       = progress[b] || [];
+      const doneCount  = prog.filter(x => x !== null).length;
+      const isCleared  = doneCount === 5;
+      const isInProg   = doneCount > 0 && !isCleared;
+      if (!isCleared) allCleared = false;
+
+      const isToday    = b === todayBlock && !isCleared;
+
+      // ── Control de acceso por plan ──────────────────────────────
+      // Free en Mundo 1: ve los 4 bloques, pero solo puede ORAR el del día
+      //   → los otros se muestran normales pero enterBlock los bloquea
+      // Free en Mundo 2+: todos los bloques bloqueados con candado
+      const mundoId    = parseInt(NIVEL_ID.substring(0,2), 10);
+      const isLocked   = (USER_PLAN === 'free') && (mundoId > 1);
+      // En Mundo 1 Free, marcar visualmente los que NO son hoy como "solo premium al orar"
+      const isDayOnly  = (USER_PLAN === 'free') && (mundoId === 1) && !isToday && !isCleared;
+
+      const status     = isLocked  ? 'locked'   :
+                         isCleared ? 'cleared'  :
+                         isInProg  ? 'progress' :
+                         isToday   ? 'today'    : 'pending';
+      const statusLabel= isLocked  ? '🔒 Premium' :
+                         isCleared ? '✓ Completado' :
+                         isInProg  ? 'En progreso'  :
+                         isToday   ? 'Hoy'          : 'Pendiente';
+      const extraClass = isLocked  ? 'locked'  :
+                         isCleared ? 'cleared' :
+                         isToday   ? 'today'   :
+                         isInProg  ? 'current' : '';
+      const hasMicro   = MICRO && MICRO.bloques && MICRO.bloques[b];
+      const microReady = microDone[b];
+
+      const card = document.createElement('div');
+      card.className = 'block-card fade-in fade-in-d' + (bi+1) + ' ' + extraClass;
+      card.onclick   = () => enterBlock(b);
+
+      // Indicador de micro si aplica (solo si no está bloqueado)
+      const microTag = (!isLocked && hasMicro && !microReady)
+        ? '<span style="font-size:0.62rem;padding:2px 8px;border-radius:10px;background:var(--lvl-ultra);color:var(--lvl-bold);font-weight:700;margin-left:6px">✦ Preparación</span>'
+        : '';
+
+      // Overlay de candado si está bloqueado (Mundos 2+)
+      // Indicador suave si es Mundo 1 pero no es el bloque de hoy
+      const lockOverlay = isLocked
+        ? '<div class="block-lock-overlay">🔒</div>'
+        : isDayOnly
+          ? '<div class="block-dayonly-tag">Solo con Premium · hoy: ' + BLOCK_NAMES[todayBlock] + '</div>'
+          : '';
+
+      card.innerHTML =
+        '<div class="block-card-top">' +
+          '<span class="block-emoji">' + blockEmoji(b) + '</span>' +
+          '<span class="block-badge ' + status + '">' + statusLabel + '</span>' +
+        '</div>' +
+        '<div class="block-title" style="color:' + blockColor(b) + '">Misterios ' + BLOCK_NAMES[b] + microTag + '</div>' +
+        '<div class="block-subtitle">' + (DATA.subtitulos_bloque ? DATA.subtitulos_bloque[b] || '' : '') + '</div>' +
+        '<div class="block-progress"><div class="block-dots">' +
+          [0,1,2,3,4].map(i => {
+            const cls = prog[i] ? 'done' : (doneCount === i && !isCleared && !isLocked ? 'active' : '');
+            return '<div class="block-dot ' + cls + '"></div>';
+          }).join('') +
+        '</div></div>' +
+        lockOverlay;
+
+      grid.appendChild(card);
+    });
+
+    // Banner nivel completado
+    const wrap = $('nivel-done-wrap');
+    if (allCleared && DATA.tema.siguiente) {
+      wrap.style.display = '';
+      wrap.innerHTML =
+        '<div class="nivel-done-banner fade-in">' +
+          '<h3>¡Nivel completado! 🎉</h3>' +
+          '<p>Has recorrido los 20 Misterios de este nivel.</p>' +
+          '<a href="?c=' + DATA.tema.siguiente + '" class="btn btn-green btn-block">Avanzar al siguiente nivel →</a>' +
+        '</div>';
+    } else if (allCleared) {
+      wrap.style.display = '';
+      wrap.innerHTML =
+        '<div class="nivel-done-banner fade-in">' +
+          '<h3>¡Nivel completado! 🎉</h3>' +
+          '<p>Has llegado al final de este nivel. ¡Gloria a Dios!</p>' +
+        '</div>';
+    } else {
+      wrap.style.display = 'none';
+    }
+
+    show('scr-home');
+  }
+
+  // ════════════════════════════════
+  // ENTRAR A UN BLOQUE → decide micro o directo
+  // ════════════════════════════════
+  function enterBlock(b) {
+    // ── Verificar acceso por plan ─────────────────────────────────
+    const todayBlock  = DAY_BLOCKS[new Date().getDay()];
+    const mundoId     = parseInt(NIVEL_ID.substring(0,2), 10);
+    const isCleared   = progress[b] && progress[b].every(x => x !== null);
+    const isToday     = b === todayBlock && !isCleared;
+
+    // Mundo 2+: siempre bloqueado para Free
+    if (USER_PLAN === 'free' && mundoId > 1) {
+      document.getElementById('modal-premium-orar').classList.add('open');
+      return;
+    }
+
+    // Mundo 1: Free puede orar SOLO el bloque del día (no cleared)
+    // Si el bloque ya está cleared, puede verlo pero no re-orar (normal)
+    // Si es otro bloque que no es el de hoy y no está cleared → bloquear
+    if (USER_PLAN === 'free' && mundoId === 1 && !isToday && !isCleared) {
+      document.getElementById('modal-premium-orar').classList.add('open');
+      return;
+    }
+
+    currentBlock = b;
+    const prog   = progress[b] || [];
+    const first  = prog.findIndex(x => x === null);
+    currentMystery = first >= 0 ? first : 0;
+    openSection    = null;
+
+    // ¿Hay micro para este bloque y aún no se ha completado?
+    if (MICRO && MICRO.bloques && MICRO.bloques[b] && !microDone[b]) {
+      buildMicroSteps(b);
+      renderMicro();
+    } else {
+      renderPrayer();
+    }
+  }
+
+  // ════════════════════════════════
+  // MICRO-LEARNING: CONSTRUCCIÓN
+  // ════════════════════════════════
+  function buildMicroSteps(b) {
+    const bloqueData = MICRO.bloques[b];
+    microSteps    = [];
+    microStep     = 0;
+    microAnswered = {};
+
+    // Tarjetas
+    if (bloqueData.tarjetas) {
+      bloqueData.tarjetas.forEach((t, i) => {
+        microSteps.push({ type:'card', data:t, index:i, total:bloqueData.tarjetas.length });
+      });
+    }
+    // Preguntas A/B
+    if (bloqueData.preguntas) {
+      bloqueData.preguntas.forEach((p, i) => {
+        microSteps.push({ type:'question', data:p, index:i, total:bloqueData.preguntas.length });
+      });
+    }
+    // Pantalla final
+    microSteps.push({ type:'final' });
+  }
+
+  // ════════════════════════════════
+  // MICRO-LEARNING: RENDER
+  // ════════════════════════════════
+  function renderMicro() {
+    const b          = currentBlock;
+    const bloqueData = MICRO.bloques[b];
+    const total      = microSteps.length;
+    const step       = microSteps[microStep];
+    const isFinal    = step.type === 'final';
+    const isQuestion = step.type === 'question';
+    const isCard     = step.type === 'card';
+
+    // Header
+    $('micro-level-label').textContent = nivelLabel(DATA.tema.id) + ' · Misterios ' + BLOCK_NAMES[b];
+    $('micro-title').textContent       = bloqueData.subtitulo || 'Prepárate para orar';
+
+    // Progress bar
+    const pct = Math.round((microStep / (total - 1)) * 100);
+    $('micro-progress-fill').style.width = pct + '%';
+
+    // Progress dots
+    const dotsEl = $('micro-progress-dots');
+    dotsEl.innerHTML = microSteps.slice(0, -1).map((s, i) => {
+      const cls = i < microStep ? 'done' : i === microStep ? 'active' : 'pending';
+      return '<div class="micro-dot ' + cls + '"></div>';
+    }).join('');
+
+    // Contenido
+    const contentEl = $('micro-content');
+    contentEl.innerHTML = '';
+
+    if (isCard) {
+      contentEl.innerHTML = renderMicroCard(step);
+    } else if (isQuestion) {
+      contentEl.innerHTML = renderMicroQuestion(step);
+    } else if (isFinal) {
+      contentEl.innerHTML = renderMicroFinal();
+    }
+
+    // Navegación
+    const navEl          = $('micro-nav');
+    const swipeHint      = $('micro-swipe-hint');
+    const skipBtn        = $('micro-btn-skip');
+    const backBtn        = $('micro-btn-back');
+    const nextBtn        = $('micro-btn-next');
+
+    if (isFinal) {
+      navEl.style.display     = 'none';
+      swipeHint.style.display = 'none';
+      skipBtn.style.display   = 'none';
+    } else {
+      navEl.style.display   = 'flex';
+      skipBtn.style.display = '';
+
+      backBtn.disabled = microStep === 0;
+
+      if (isCard) {
+        nextBtn.style.display = 'inline-flex';
+        nextBtn.textContent   = microStep === microSteps.length - 2 ? 'Listo para rezar →' : 'Siguiente →';
+        swipeHint.style.display = '';
+      } else if (isQuestion) {
+        // El botón "siguiente" de pregunta aparece sólo al responder
+        const answered = microAnswered[microStep] !== undefined;
+        nextBtn.style.display   = answered ? 'inline-flex' : 'none';
+        nextBtn.textContent     = microStep === microSteps.length - 2 ? 'Listo para rezar →' : 'Siguiente →';
+        swipeHint.style.display = 'none';
+      }
+    }
+
+    // Attach option handlers después del render
+    if (isQuestion) attachOptionHandlers(step);
+
+    show('scr-micro');
+  }
+
+  function renderMicroCard(step) {
+    const t = step.data;
+    return '<div class="micro-card">' +
+      '<div>' +
+        '<div class="micro-card-emoji">' + (t.emoji || '✦') + '</div>' +
+        '<div class="micro-card-title">' + escHTML(t.titulo) + '</div>' +
+        '<div class="micro-card-body">' + escHTML(t.contenido) + '</div>' +
+      '</div>' +
+      '<div class="micro-card-footer">' +
+        '<span class="micro-card-counter">Reflexión ' + (step.index+1) + ' de ' + step.total + '</span>' +
+        '<button class="micro-listen-btn" onclick="window._ca.microToggleSpeech()">' +
+          (microSpeaking ? '⏹ Detener' : '🔊 Escuchar') +
+        '</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function renderMicroQuestion(step) {
+    const q        = step.data;
+    const answered = microAnswered[microStep];
+    const isAns    = answered !== undefined;
+
+    let optionsHTML = q.opciones.map((o, i) => {
+      const isSel = isAns && answered === i;
+      const isDim = isAns && answered !== i;
+      return '<button class="micro-option' + (isSel ? ' selected' : '') + (isDim ? ' dimmed' : '') + '" ' +
+        'data-opt-index="' + i + '" ' +
+        (isAns ? 'disabled' : '') + '>' +
+        '<span class="micro-option-radio">' + (isSel ? '✓' : '') + '</span>' +
+        escHTML(o.texto) +
+      '</button>';
+    }).join('');
+
+    let ecoHTML = '';
+    if (isAns) {
+      const op = q.opciones[answered];
+      ecoHTML = '<div class="micro-eco">' +
+        '<span class="micro-eco-emoji">' + (op.emoji || '✦') + '</span>' +
+        '<span class="micro-eco-text">' + escHTML(op.eco) + '</span>' +
+      '</div>';
+    }
+
+    return '<div class="micro-question-card">' +
+      '<div class="micro-q-label">✦ Prepara tu corazón <span>' + (step.index+1) + ' de ' + step.total + '</span></div>' +
+      '<p class="micro-question-text">' + escHTML(q.pregunta) + '</p>' +
+      '<div class="micro-options">' + optionsHTML + '</div>' +
+      ecoHTML +
+    '</div>';
+  }
+
+  function renderMicroFinal() {
+    return '<div class="micro-final">' +
+      '<div class="micro-final-lux">' +
+        '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="48" height="48">' +
+          '<g filter="url(#luxGlow)">' +
+            '<rect x="46.1926" y="0.285" width="7.6148" height="99.43" fill="#FFFCF7"/>' +
+            '<rect x="0" y="46.2068" width="100" height="7.5864" fill="#FFFCF7"/>' +
+          '</g>' +
+        '</svg>' +
+      '</div>' +
+      '<h3>Tu corazón está preparado</h3>' +
+      '<p>Lo que necesitas ya lo traes contigo.</p>' +
+      '<div class="micro-final-meters">+800m ganados 🚶‍♂️</div>' +
+      '<button class="btn btn-primary btn-block" onclick="window._ca.microFinish()">Comenzar a rezar →</button>' +
+    '</div>';
+  }
+
+  function attachOptionHandlers(step) {
+    document.querySelectorAll('.micro-option').forEach(btn => {
+      if (btn.disabled) return;
+      btn.addEventListener('click', () => {
+        const i = parseInt(btn.getAttribute('data-opt-index'));
+        playSoftTap();
+        microAnswered[microStep] = i;
+        renderMicro(); // re-render con respuesta elegida
+      });
+    });
+  }
+
+  // Micro: toggle escuchar tarjeta
+  function microToggleSpeech() {
+    if (microSpeaking) {
+      stopSpeech();
+      return;
+    }
+    const step = microSteps[microStep];
+    if (step && step.type === 'card') {
+      playBubble();
+      speakText(step.data.titulo + '. ' + step.data.contenido);
+    }
+  }
+
+  // Micro: avanzar
+  function microAdvance() {
+    stopSpeech();
+    const step = microSteps[microStep];
+
+    // Si es pregunta y no está respondida, no avanzar
+    if (step.type === 'question' && microAnswered[microStep] === undefined) return;
+
+    if (microStep < microSteps.length - 1) {
+      const transitionDuration = 400;
+      const overlay = $('micro-transition-overlay');
+      overlay.classList.add('active');
+      playTransitionChoir(microStep);
+      setTimeout(() => {
+        microStep++;
+        overlay.classList.remove('active');
+        renderMicro();
+      }, transitionDuration);
+    }
+  }
+
+  // Micro: retroceder
+  function microBack() {
+    if (microStep === 0) return;
+    stopSpeech();
+    playBubble();
+    microStep--;
+    renderMicro();
+  }
+
+  // Micro: saltar (va directo a oración sin marcar como done)
+  function microSkip() {
+    stopSpeech();
+    playBubble();
+    renderPrayer();
+  }
+
+  // Micro: completado → +800m → oración
+  function microFinish() {
+    microDone[currentBlock] = true;
+    saveProgress();
+    playCompleteChoir();
+    gainMeters(800, 'walking');
+    setTimeout(() => renderPrayer(), 600);
+  }
+
+  // Swipe en micro
+  let microTouchX = null;
+  function microOnTouchStart(e) { microTouchX = e.touches[0].clientX; }
+  function microOnTouchEnd(e) {
+    if (microTouchX === null) return;
+    const diff = microTouchX - e.changedTouches[0].clientX;
+    if (diff > 60)  { microAdvance(); }
+    if (diff < -60) { microBack(); }
+    microTouchX = null;
+  }
+
+  // ════════════════════════════════
+  // AUDIO DE ORACIÓN
+  // ════════════════════════════════
+  function stopAudio() {
+    if (audioEl) { audioEl.pause(); audioEl.currentTime = 0; }
+    audioPlaying   = false;
+    currentAudioId = null;
+    document.querySelectorAll('.play-btn').forEach(b => { b.innerHTML = playSVG(); });
+    document.querySelectorAll('.audio-bar-fill').forEach(b => { b.style.width = '0%'; });
+  }
+
+  function toggleAudio(src, playerId) {
+    if (!src) return;
+    if (currentAudioId === playerId && audioPlaying) {
+      audioEl.pause(); audioPlaying = false;
+      updatePlayBtn(playerId, false);
+      return;
+    }
+    if (currentAudioId !== playerId) {
+      stopAudio();
+      audioEl        = new Audio(src);
+      currentAudioId = playerId;
+      audioEl.addEventListener('timeupdate', () => {
+        if (!audioEl.duration) return;
+        const pct  = (audioEl.currentTime / audioEl.duration) * 100;
+        const fill = document.querySelector('#' + playerId + ' .audio-bar-fill');
+        if (fill) fill.style.width = pct + '%';
+        const cur = document.querySelector('#' + playerId + ' .a-cur');
+        const dur = document.querySelector('#' + playerId + ' .a-dur');
+        if (cur) cur.textContent = fmtTime(audioEl.currentTime);
+        if (dur) dur.textContent = fmtTime(audioEl.duration);
+      });
+      audioEl.addEventListener('ended', () => {
+        audioPlaying   = false;
+        currentAudioId = null;
+        updatePlayBtn(playerId, false);
+        const rewardKey = currentBlock + '_' + currentMystery + '_' + playerId;
+        if (!audioRewards[rewardKey]) {
+          audioRewards[rewardKey] = true;
+          let meters, pose;
+          if (playerId.includes('rezar'))   { meters=1200; pose='walking'; }
+          else if (playerId.includes('contempl')) { meters=800; pose='contemplative'; }
+          else if (playerId.includes('canto'))    { meters=400; pose='happy'; }
+          if (meters && pose) gainMeters(meters, pose);
+        }
+      });
+    }
+    audioEl.play().then(() => { audioPlaying = true; updatePlayBtn(playerId, true); }).catch(()=>{});
+  }
+
+  function seekAudio(e, playerId) {
+    if (!audioEl || currentAudioId !== playerId || !audioEl.duration) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    audioEl.currentTime = ((e.clientX - rect.left) / rect.width) * audioEl.duration;
+  }
+
+  function updatePlayBtn(playerId, playing) {
+    const btn = document.querySelector('#' + playerId + ' .play-btn');
+    if (btn) btn.innerHTML = playing ? pauseSVG() : playSVG();
+  }
+
+  function fmtTime(s) {
+    if (!s || isNaN(s)) return '0:00';
+    const m = Math.floor(s/60), sec = Math.floor(s%60);
+    return m + ':' + (sec < 10 ? '0' : '') + sec;
+  }
+  function playSVG()  { return '<svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><polygon points="6,3 20,12 6,21"/></svg>'; }
+  function pauseSVG() { return '<svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><rect x="5" y="3" width="4" height="18" rx="1"/><rect x="15" y="3" width="4" height="18" rx="1"/></svg>'; }
+
+  function audioPlayerHTML(id, label, src) {
+    if (!src) return '<div class="audio-player" style="opacity:0.5"><div style="font-size:0.82rem;color:var(--text-dim)">Audio pendiente</div></div>';
+    return '<div class="audio-player" id="' + id + '">' +
+      '<button class="play-btn" onclick="window._ca.toggleAudio(\'' + src + '\',\'' + id + '\')">' + playSVG() + '</button>' +
+      '<div class="audio-info">' +
+        '<div class="audio-label">' + label + '</div>' +
+        '<div class="audio-bar-wrap" onclick="window._ca.seekAudio(event,\'' + id + '\')">' +
+          '<div class="audio-bar-fill" style="width:0%"></div>' +
+        '</div>' +
+        '<div class="audio-time"><span class="a-cur">0:00</span><span class="a-dur">0:00</span></div>' +
+      '</div></div>';
+  }
+
+  // ════════════════════════════════
+  // PANTALLA: ORACIÓN
+  // ════════════════════════════════
+  function renderPrayer() {
+    const b    = currentBlock;
+    const mi   = currentMystery;
+    const mists = DATA.misterios[b];
+    const m    = mists[mi];
+    const prog = progress[b];
+
+    $('h-title').textContent = 'CruzAndo';
+    $('h-sub').textContent   = nivelLabel(DATA.tema.id) + ' · ' + BLOCK_NAMES[b];
+    $('prayer-counter').textContent  = ORDS[mi] + ' Misterio ' + BTYPES[b];
+    $('prayer-title').textContent    = m.titulo;
+    $('prayer-subtitle').textContent = m.subtitulo || '';
+
+    // Cuentas del rosario
+    const beadPositions = [24,72,120,168,216];
+    const boldColor     = DATA.tema.paleta.bold;
+    const lightColor    = DATA.tema.paleta.light;
+    const borderC       = isDark ? '#3A3530' : '#D9D1C7';
+    const lastDoneIdx   = (() => { for (let i=4;i>=0;i--) { if (prog[i]) return i; } return -1; })();
+    const chainEndX     = lastDoneIdx >= 0 ? beadPositions[lastDoneIdx] : 24;
+
+    let svg = '<svg viewBox="0 0 240 30" preserveAspectRatio="xMidYMid meet">';
+    svg += '<line x1="24" y1="15" x2="216" y2="15" stroke="' + borderC + '" stroke-width="1.5" stroke-linecap="round"/>';
+    if (lastDoneIdx >= 0) svg += '<line x1="24" y1="15" x2="' + chainEndX + '" y2="15" stroke="' + lightColor + '" stroke-width="1.5" stroke-linecap="round"/>';
+    for (let i=0; i<5; i++) {
+      const cx = beadPositions[i];
+      if (prog[i]) {
+        svg += '<circle cx="' + cx + '" cy="15" r="9" fill="' + boldColor + '" style="cursor:pointer" onclick="window._ca.goMystery(' + i + ')"/>';
+      } else if (i === mi) {
+        svg += '<circle cx="' + cx + '" cy="15" r="9.5" fill="none" stroke="' + boldColor + '" stroke-width="2" style="cursor:pointer" onclick="window._ca.goMystery(' + i + ')"/>';
+        svg += '<circle cx="' + cx + '" cy="15" r="4" fill="' + lightColor + '" style="cursor:pointer" onclick="window._ca.goMystery(' + i + ')"/>';
+      } else {
+        svg += '<circle cx="' + cx + '" cy="15" r="9" fill="none" stroke="' + borderC + '" stroke-width="1.2" style="cursor:pointer" onclick="window._ca.goMystery(' + i + ')"/>';
+      }
+    }
+    svg += '</svg>';
+    $('prayer-dots').innerHTML = svg;
+
+    // Evangelio
+    $('ev-text').textContent = m.evangelio;
+    $('ev-ref').textContent  = '— ' + m.referencia;
+
+    // Acordeón
+    renderAccordion(b, mi, m);
+
+    // Done bar
+    const doneWrap = $('mystery-done-wrap');
+    if (prog[mi]) {
+      const d = new Date(prog[mi]);
+      doneWrap.style.display = '';
+      doneWrap.innerHTML =
+        '<div class="mystery-done-bar fade-in">' +
+          '<span class="done-check">✓</span>' +
+          '<div><div class="done-text">Misterio completado</div>' +
+          '<div class="done-date">' + d.toLocaleDateString('es-MX',{day:'numeric',month:'long'}) + '</div></div>' +
+        '</div>';
+    } else {
+      doneWrap.style.display = 'none';
+    }
+
+    renderBottomNav(b, mi);
+    show('scr-prayer');
+  }
+
+  function renderAccordion(b, mi, m) {
+    const acc = $('accordion');
+    const sections = [
+      { key:'rezar',      icon:'📿', label:'Rezar este Misterio' },
+      { key:'canto',      icon:'🎵', label:'Canto' },
+      { key:'contemplar', icon:'👁️', label:'Contemplar' },
+      { key:'meditar',    icon:'✏️', label:'Meditar y escribir' },
+      { key:'intercesion',icon:'🙏', label:'Intercesión' },
+    ];
+    acc.innerHTML = sections.map(s => {
+      const isOpen = openSection === s.key;
+      return '<div class="acc-item' + (isOpen ? ' open' : '') + '" id="acc-' + s.key + '">' +
+        '<button class="acc-trigger" onclick="window._ca.toggleSection(\'' + s.key + '\')">' +
+          '<div class="acc-trigger-left">' +
+            '<div class="acc-icon" style="background:var(--lvl-ultra)">' + s.icon + '</div>' +
+            '<span class="acc-label">' + s.label + '</span>' +
+          '</div>' +
+          '<svg class="acc-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>' +
+        '</button>' +
+        '<div class="acc-body" style="max-height:' + (isOpen ? '2000px' : '0') + '">' +
+          '<div class="acc-body-inner">' + sectionContent(s.key, b, mi, m) + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function sectionContent(key, b, mi, m) {
+    if (key === 'rezar') {
+      return audioPlayerHTML('ap-rezar', 'Padrenuestro · 10 Avemarías · Gloria · Jaculatoria', DATA.audio_rezo || '');
+    }
+    if (key === 'canto') {
+      const src = cantoUrl(m);
+      return audioPlayerHTML('ap-canto-' + m.numero, 'Canto contemplativo', src);
+    }
+    if (key === 'contemplar') {
+      const src = contemplacionUrl(m);
+      return audioPlayerHTML('ap-contempl-' + m.numero, 'Audio de la contemplación', src) +
+             '<div class="contempl-text">' + escHTML(m.contemplacion) + '</div>';
+    }
+    if (key === 'meditar')    { return renderMeditation(b, mi, m); }
+    if (key === 'intercesion') {
+      const isDone = progress[b] && progress[b][mi];
+      return '<div class="interc-text">' + escHTML(m.intercesion) + '</div>' +
+        '<button class="amen-btn' + (isDone ? ' done' : '') + '" onclick="window._ca.completeMystery()">' +
+          (isDone ? '✓ Amén' : 'Amén') +
+        '</button>';
+    }
+    return '';
+  }
+
+  function renderMeditation(b, mi, m) {
+    const questions = parseMeditation(m.meditacion);
+    const j  = journal[b] && journal[b][mi] ? journal[b][mi] : {};
+    const mc = medConfirmed[b] && medConfirmed[b][mi] ? medConfirmed[b][mi] : {};
+    return questions.map((q, qi) => {
+      const val       = j['q' + qi] || '';
+      const confirmed = mc['q' + qi] || false;
+      return '<div class="med-group">' +
+        '<div class="med-label-row">' +
+          '<div class="med-dot" style="background:' + MED_COLORS[qi] + '"></div>' +
+          '<span class="med-label-text" style="color:' + MED_COLORS[qi] + '">' + MED_LABELS[qi] + '</span>' +
+        '</div>' +
+        '<p class="med-question">' + escHTML(q) + '</p>' +
+        '<textarea class="journal-area" id="med-ta-' + qi + '" placeholder="Escribe tu reflexión…" ' +
+          'oninput="window._ca.onMedInput(\'' + b + '\',' + mi + ',' + qi + ',this.value)">' + escHTML(val) + '</textarea>' +
+        '<button class="med-confirm' + (confirmed ? ' done' : '') + '" id="med-btn-' + qi + '" ' +
+          'onclick="window._ca.confirmReflection(\'' + b + '\',' + mi + ',' + qi + ')">' +
+          (confirmed ? '✓ Reflexión guardada' : '📝 Guardar reflexión') +
+        '</button>' +
+      '</div>';
+    }).join('');
+  }
+
+  function parseMeditation(text) {
+    if (!text) return ['','',''];
+    const parts = [];
+    let remaining = text;
+    for (let i = 0; i < MED_LABELS.length; i++) {
+      const idx = remaining.indexOf(MED_LABELS[i]);
+      if (idx >= 0) {
+        if (i > 0 && parts.length < i) parts.push(remaining.substring(0, idx).trim());
+        remaining = remaining.substring(idx + MED_LABELS[i].length).replace(/^\s*:\s*/, '');
+      }
+    }
+    if (remaining.trim()) parts.push(remaining.trim());
+    if (parts.length < 3) {
+      const lines = text.split('\n').filter(l => l.trim());
+      return [lines[0]||'', lines[1]||'', lines[2]||''];
+    }
+    return parts.length >= 3 ? parts.slice(0,3) : [...parts, ...Array(3-parts.length).fill('')];
+  }
+
+  function onMedInput(b, mi, qi, val) {
+    if (!journal[b])     journal[b]     = {};
+    if (!journal[b][mi]) journal[b][mi] = {};
+    journal[b][mi]['q'+qi] = val;
+    saveProgress();
+    if (!medConfirmed[b])     medConfirmed[b]     = {};
+    if (!medConfirmed[b][mi]) medConfirmed[b][mi] = {};
+    if (!medConfirmed[b][mi]['q'+qi] && val.length >= 140) confirmReflection(b, mi, qi);
+  }
+
+  function confirmReflection(b, mi, qi) {
+    if (!medConfirmed[b])     medConfirmed[b]     = {};
+    if (!medConfirmed[b][mi]) medConfirmed[b][mi] = {};
+    if (medConfirmed[b][mi]['q'+qi]) return;
+    const val = (journal[b] && journal[b][mi] && journal[b][mi]['q'+qi]) || '';
+    if (val.trim().length < 5) return;
+    medConfirmed[b][mi]['q'+qi] = true;
+    saveProgress();
+    playNotes([[523,659],[587,740],[659,880]][qi] || [523,659]);
+    const btn = $('med-btn-' + qi);
+    if (btn) { btn.className = 'med-confirm done glow'; btn.textContent = '✓ Reflexión guardada'; }
+    const rewardKey = b + '_' + mi + '_q' + qi;
+    if (!reflectionRewards[rewardKey]) {
+      reflectionRewards[rewardKey] = true;
+      gainMeters(650, getNextRestPose());
+    }
+  }
+
+  function toggleSection(key) {
+    openSection = openSection === key ? null : key;
+    renderAccordion(currentBlock, currentMystery, DATA.misterios[currentBlock][currentMystery]);
+  }
+
+  function completeMystery() {
+    const b  = currentBlock;
+    const mi = currentMystery;
+    if (progress[b][mi]) return;
+    progress[b][mi] = Date.now();
+    saveProgress();
+    celebrationSound(BLOCKS.indexOf(b) * 5 + mi);
+    const allDone = progress[b].every(x => x !== null);
+    if (allDone) {
+      setTimeout(() => { showConfetti(); showCelebration(b); }, 600);
+    } else {
+      renderPrayer();
+      if (mi < 4) {
+        setTimeout(() => { currentMystery = mi+1; openSection = null; stopAudio(); renderPrayer(); }, 800);
+      }
+    }
+  }
+
+  function renderBottomNav(b, mi) {
+    const nav    = $('bottom-nav');
+    const hasPrev = mi > 0;
+    const isDone  = progress[b][mi];
+    let html = '';
+    if (hasPrev) html += '<button class="btn btn-outline" onclick="window._ca.goMystery(' + (mi-1) + ')">← Anterior</button>';
+    if (mi < 4 && isDone) html += '<button class="btn btn-primary" onclick="window._ca.goMystery(' + (mi+1) + ')">Siguiente →</button>';
+    nav.innerHTML = html;
+  }
+
+  function goMystery(i) {
+    currentMystery = i; openSection = null; stopAudio(); renderPrayer();
+  }
+
+  function showCelebration(b) {
+    showMarianoGrandCelebration();
+    setTimeout(() => {
+      $('celeb-title').textContent = '¡Misterios ' + BLOCK_NAMES[b] + ' completados!';
+      $('celeb-sub').textContent   = 'Has contemplado los cinco Misterios ' + BLOCK_NAMES[b] + ' de este nivel. Que María siga acompañándote en el camino.';
+      $('btn-celeb-home').onclick  = () => { stopAudio(); window.location.href = 'index.html'; };
+      // Intentar cargar imagen
+      const maria = 'img/maria_' + b + '.webp';
+      const img = new Image();
+      img.onload  = () => { $('maria-container').outerHTML = '<img class="maria-img" id="maria-container" src="' + maria + '" alt="Virgen María">'; };
+      img.onerror = () => { $('maria-container').innerHTML = '🙏'; };
+      img.src = maria;
+      celebrationSound(BLOCKS.indexOf(b));
+      show('scr-celebration');
+    }, 3500);
+  }
+
+  // ════════════════════════════════
+  // INIT
+  // ════════════════════════════════
+  async function init() {
+    const params = new URLSearchParams(window.location.search);
+    NIVEL_ID     = params.get('c') || '0101';
+
+    if (!/^\d{4}$/.test(NIVEL_ID)) {
+      showError('ID inválido: ' + NIVEL_ID);
+      return;
+    }
+
+    const loc  = window.location;
+    const base = loc.origin + loc.pathname.substring(0, loc.pathname.lastIndexOf('/') + 1);
+
+    // ── Cargar plan del usuario desde Firebase ────────────────────
+    // Se hace en paralelo con los JSON para no retrasar la carga.
+    // Si Firebase no responde, el usuario queda en 'free' (seguro por defecto).
+    const planPromise = (async () => {
+      try {
+        const { initializeApp }    = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
+        const { getAuth, onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
+        const { getFirestore, doc, getDoc }   = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+
+        const fbApp = initializeApp(FIREBASE_CONFIG, 'orar');
+        const auth  = getAuth(fbApp);
+        const db    = getFirestore(fbApp);
+
+        return new Promise(resolve => {
+          // Timeout de seguridad: si Firebase tarda más de 4s, seguimos con 'free'
+          const timeout = setTimeout(() => resolve('free'), 4000);
+          onAuthStateChanged(auth, async (user) => {
+            clearTimeout(timeout);
+            if (!user) { resolve('free'); return; }
+            try {
+              const snap = await getDoc(doc(db, 'users', user.uid));
+              if (!snap.exists()) { resolve('free'); return; }
+              const data    = snap.data();
+              let plan      = data.plan || 'free';
+              // Verificar expiración de beta
+              if (plan === 'beta' && data.betaExpiresAt) {
+                const expires = data.betaExpiresAt.toDate ? data.betaExpiresAt.toDate() : new Date(data.betaExpiresAt);
+                if (new Date() > expires) plan = 'free';
+              }
+              resolve(plan);
+            } catch(e) { resolve('free'); }
+          });
+        });
+      } catch(e) {
+        return 'free'; // Firebase no disponible: modo offline seguro
+      }
+    })();
+
+    // Cargar JSON principal
+    try {
+      const resp = await fetch(base + 'data/' + NIVEL_ID + '.json');
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      DATA = await resp.json();
+    } catch(e) {
+      showError('No se pudo cargar data/' + NIVEL_ID + '.json');
+      return;
+    }
+
+    // Cargar micro-learning (silencioso si no existe)
+    try {
+      const resp = await fetch(base + 'data/' + NIVEL_ID + '-micro.json');
+      if (resp.ok) MICRO = await resp.json();
+    } catch(e) { /* sin micro, ok */ }
+
+    // Esperar el plan (ya debería estar listo si Firebase responde rápido)
+    USER_PLAN = await planPromise;
+
+    loadProgress();
+
+    if (isDark) {
+      document.body.classList.add('dark');
+      $('ico-sun').style.display  = 'none';
+      $('ico-moon').style.display = 'block';
+    }
+
+    applyPalette();
+
+    // Event listeners
+    $('btn-dark').onclick      = toggleDark;
+    $('btn-back-home').onclick = () => { stopAudio(); stopSpeech(); window.location.href = 'index.html'; };
+    $('micro-btn-back').onclick = () => microBack();
+    $('micro-btn-next').onclick = () => microAdvance();
+    $('micro-btn-skip').onclick = () => microSkip();
+
+    // Swipe en micro
+    const microScr = $('scr-micro');
+    microScr.addEventListener('touchstart', microOnTouchStart, { passive:true });
+    microScr.addEventListener('touchend',   microOnTouchEnd,   { passive:true });
+
+    // API global para onclick inline
+    window._ca = {
+      toggleAudio,       seekAudio,
+      toggleSection,     completeMystery,
+      goMystery,         onMedInput,
+      confirmReflection, enterBlock,
+      microToggleSpeech, microFinish,
+    };
+
+    // Precargar voces TTS
+    if (window.speechSynthesis) {
+      window.speechSynthesis.getVoices();
+      window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+    }
+
+    $('scr-loading').style.display = 'none';
+    $('main-header').style.display = '';
+    renderHome();
+  }
+
+  function showError(msg) {
+    $('scr-loading').style.display = 'none';
+    $('error-msg').textContent      = msg;
+    $('scr-error').style.display    = 'flex';
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+})();
 </script>
 </body>
 </html>
