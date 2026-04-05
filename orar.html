@@ -151,6 +151,52 @@ body {
 .block-dot.done { background:var(--green); box-shadow:0 0 6px rgba(52,168,83,0.4); }
 .block-dot.active { background:var(--lvl-bold); box-shadow:0 0 8px var(--lvl-light); }
 
+/* ── Bloque bloqueado (Free) ── */
+.block-card.locked {
+  opacity:0.5; cursor:default;
+  filter:saturate(0.3);
+}
+.block-card.locked:active { transform:none; }
+.block-lock-overlay {
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(0,0,0,0.18); border-radius:14px;
+  font-size:1.4rem; pointer-events:none;
+}
+.block-badge.locked { background:var(--sec-bg); color:var(--text-dim); }
+
+/* ── Modal Premium (desde orar.html) ── */
+.premium-modal-overlay {
+  display:none; position:fixed; inset:0; z-index:300;
+  background:rgba(0,0,0,0.65);
+  align-items:flex-end; justify-content:center;
+}
+.premium-modal-overlay.open { display:flex; }
+.premium-modal-sheet {
+  background:var(--card); border-radius:24px 24px 0 0;
+  padding:28px 24px 44px; width:100%; max-width:480px;
+  text-align:center;
+}
+.premium-modal-icon { font-size:2.2rem; margin-bottom:10px; }
+.premium-modal-title {
+  font-size:1.1rem; font-weight:800; margin-bottom:6px;
+}
+.premium-modal-sub {
+  font-size:0.8rem; color:var(--text-soft); line-height:1.7;
+  margin-bottom:20px; max-width:280px; margin-left:auto; margin-right:auto;
+}
+.btn-premium-join {
+  display:block; width:100%; padding:14px;
+  background:var(--lvl-bold); border:none; border-radius:14px;
+  font-family:inherit; font-size:0.88rem; font-weight:700;
+  color:#fff; cursor:pointer; transition:opacity 0.2s; margin-bottom:10px;
+}
+.btn-premium-join:active { opacity:0.85; }
+.btn-premium-later {
+  background:none; border:none; font-family:inherit;
+  font-size:0.78rem; color:var(--text-dim); cursor:pointer; padding:8px;
+}
+
 .nivel-done-banner {
   margin:8px 18px 18px; padding:20px; border-radius:16px;
   background:linear-gradient(135deg,var(--green-soft),rgba(52,168,83,0.05));
@@ -518,6 +564,25 @@ body {
     <div class="block-grid" id="block-grid"></div>
   </div>
 
+  <!-- ═══ MODAL: PREMIUM (desde orar.html) ═══ -->
+  <div class="premium-modal-overlay" id="modal-premium-orar">
+    <div class="premium-modal-sheet">
+      <div class="premium-modal-icon">🔓</div>
+      <div class="premium-modal-title">Desbloquea este bloque</div>
+      <div class="premium-modal-sub">
+        Con el plan Free puedes orar los <strong>Misterios del día</strong>.<br>
+        Únete a Premium para elegir cualquier bloque cualquier día
+        y avanzar por todos los Mundos.
+      </div>
+      <button class="btn-premium-join" onclick="window.location.href='index.html#premium'">
+        Únete a Premium →
+      </button>
+      <button class="btn-premium-later" onclick="document.getElementById('modal-premium-orar').classList.remove('open')">
+        Ahora no
+      </button>
+    </div>
+  </div>
+
   <!-- ═══ PANTALLA: MICRO-LEARNING ═══ -->
   <div class="screen" id="scr-micro">
     <div class="micro-header">
@@ -663,6 +728,17 @@ body {
   const MUSIC_BASE   = 'https://pub-faed94e375aa443e846e07f81ef93274.r2.dev/';
   const AUDIO_BASE   = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/';
 
+
+  // ── Plan del usuario (se carga desde Firebase al init) ──
+  let USER_PLAN = 'free';   // 'free' | 'beta' | 'premium'
+  const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
+    authDomain: "cruzando-app.firebaseapp.com",
+    projectId: "cruzando-app",
+    storageBucket: "cruzando-app.firebasestorage.app",
+    messagingSenderId: "408196948528",
+    appId: "1:408196948528:web:de291e8afc969252e943f5"
+  };
   let restPoseIndex = 0;
   let orbitIndex    = 0;
 
@@ -1072,9 +1148,24 @@ body {
       if (!isCleared) allCleared = false;
 
       const isToday    = b === todayBlock && !isCleared;
-      const status     = isCleared ? 'cleared' : isInProg ? 'progress' : (isToday ? 'today' : 'pending');
-      const statusLabel= isCleared ? '✓ Completado' : isInProg ? 'En progreso' : (isToday ? 'Hoy' : 'Pendiente');
-      const extraClass = isCleared ? 'cleared' : isToday ? 'today' : isInProg ? 'current' : '';
+
+      // ── Control de acceso por plan ──────────────────────────────
+      // Free: solo puede orar el bloque del día en Mundo 1
+      const mundoId    = parseInt(NIVEL_ID.substring(0,2), 10);
+      const isLocked   = (USER_PLAN === 'free') && (!isToday || mundoId > 1);
+
+      const status     = isLocked  ? 'locked'   :
+                         isCleared ? 'cleared'  :
+                         isInProg  ? 'progress' :
+                         isToday   ? 'today'    : 'pending';
+      const statusLabel= isLocked  ? '🔒 Premium' :
+                         isCleared ? '✓ Completado' :
+                         isInProg  ? 'En progreso'  :
+                         isToday   ? 'Hoy'          : 'Pendiente';
+      const extraClass = isLocked  ? 'locked'  :
+                         isCleared ? 'cleared' :
+                         isToday   ? 'today'   :
+                         isInProg  ? 'current' : '';
       const hasMicro   = MICRO && MICRO.bloques && MICRO.bloques[b];
       const microReady = microDone[b];
 
@@ -1082,9 +1173,14 @@ body {
       card.className = 'block-card fade-in fade-in-d' + (bi+1) + ' ' + extraClass;
       card.onclick   = () => enterBlock(b);
 
-      // Indicador de micro si aplica
-      const microTag = hasMicro && !microReady
+      // Indicador de micro si aplica (solo si no está bloqueado)
+      const microTag = (!isLocked && hasMicro && !microReady)
         ? '<span style="font-size:0.62rem;padding:2px 8px;border-radius:10px;background:var(--lvl-ultra);color:var(--lvl-bold);font-weight:700;margin-left:6px">✦ Preparación</span>'
+        : '';
+
+      // Overlay de candado si está bloqueado
+      const lockOverlay = isLocked
+        ? '<div class="block-lock-overlay">🔒</div>'
         : '';
 
       card.innerHTML =
@@ -1096,10 +1192,11 @@ body {
         '<div class="block-subtitle">' + (DATA.subtitulos_bloque ? DATA.subtitulos_bloque[b] || '' : '') + '</div>' +
         '<div class="block-progress"><div class="block-dots">' +
           [0,1,2,3,4].map(i => {
-            const cls = prog[i] ? 'done' : (doneCount === i && !isCleared ? 'active' : '');
+            const cls = prog[i] ? 'done' : (doneCount === i && !isCleared && !isLocked ? 'active' : '');
             return '<div class="block-dot ' + cls + '"></div>';
           }).join('') +
-        '</div></div>';
+        '</div></div>' +
+        lockOverlay;
 
       grid.appendChild(card);
     });
@@ -1132,6 +1229,17 @@ body {
   // ENTRAR A UN BLOQUE → decide micro o directo
   // ════════════════════════════════
   function enterBlock(b) {
+    // ── Verificar acceso por plan ─────────────────────────────────
+    const todayBlock = DAY_BLOCKS[new Date().getDay()];
+    const mundoId    = parseInt(NIVEL_ID.substring(0,2), 10);
+    const isToday    = b === todayBlock && !(progress[b] && progress[b].every(x => x !== null));
+    const isLocked   = (USER_PLAN === 'free') && (!isToday || mundoId > 1);
+
+    if (isLocked) {
+      document.getElementById('modal-premium-orar').classList.add('open');
+      return;
+    }
+
     currentBlock = b;
     const prog   = progress[b] || [];
     const first  = prog.findIndex(x => x === null);
@@ -1734,6 +1842,44 @@ body {
     const loc  = window.location;
     const base = loc.origin + loc.pathname.substring(0, loc.pathname.lastIndexOf('/') + 1);
 
+    // ── Cargar plan del usuario desde Firebase ────────────────────
+    // Se hace en paralelo con los JSON para no retrasar la carga.
+    // Si Firebase no responde, el usuario queda en 'free' (seguro por defecto).
+    const planPromise = (async () => {
+      try {
+        const { initializeApp }    = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
+        const { getAuth, onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
+        const { getFirestore, doc, getDoc }   = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+
+        const fbApp = initializeApp(FIREBASE_CONFIG, 'orar');
+        const auth  = getAuth(fbApp);
+        const db    = getFirestore(fbApp);
+
+        return new Promise(resolve => {
+          // Timeout de seguridad: si Firebase tarda más de 4s, seguimos con 'free'
+          const timeout = setTimeout(() => resolve('free'), 4000);
+          onAuthStateChanged(auth, async (user) => {
+            clearTimeout(timeout);
+            if (!user) { resolve('free'); return; }
+            try {
+              const snap = await getDoc(doc(db, 'users', user.uid));
+              if (!snap.exists()) { resolve('free'); return; }
+              const data    = snap.data();
+              let plan      = data.plan || 'free';
+              // Verificar expiración de beta
+              if (plan === 'beta' && data.betaExpiresAt) {
+                const expires = data.betaExpiresAt.toDate ? data.betaExpiresAt.toDate() : new Date(data.betaExpiresAt);
+                if (new Date() > expires) plan = 'free';
+              }
+              resolve(plan);
+            } catch(e) { resolve('free'); }
+          });
+        });
+      } catch(e) {
+        return 'free'; // Firebase no disponible: modo offline seguro
+      }
+    })();
+
     // Cargar JSON principal
     try {
       const resp = await fetch(base + 'data/' + NIVEL_ID + '.json');
@@ -1749,6 +1895,9 @@ body {
       const resp = await fetch(base + 'data/' + NIVEL_ID + '-micro.json');
       if (resp.ok) MICRO = await resp.json();
     } catch(e) { /* sin micro, ok */ }
+
+    // Esperar el plan (ya debería estar listo si Firebase responde rápido)
+    USER_PLAN = await planPromise;
 
     loadProgress();
 
