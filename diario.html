@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1A0E04">
+<title>Mi Diario · CruzAndo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════════════
+   diario.html · CruzAndo App · Mi Diario de Reflexiones
+   ══════════════════════════════════════════════════════ */
+
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+
+:root {
+  --bg:        #1A0E04;
+  --bg2:       #120A02;
+  --card:      #2C1810;
+  --border:    #4A2E1A;
+  --text:      #F0E6DA;
+  --text-soft: #C4A882;
+  --text-dim:  #7A5C40;
+  --orange:    #FF7A00;
+  --green:     #4CAF7D;
+  --shadow:    rgba(0,0,0,0.4);
+
+  --goz: #D4A017;
+  --lum: #01BBE1;
+  --dol: #C0392B;
+  --glo: #8E44AD;
+}
+
+body.light {
+  --bg:        #F5F0E8;
+  --bg2:       #EDE5D8;
+  --card:      #FFFCF7;
+  --border:    #D9CFC4;
+  --text:      #2B2622;
+  --text-soft: #6B6259;
+  --text-dim:  #9B9389;
+  --shadow:    rgba(43,38,34,0.1);
+}
+
+html { font-size:18px; }
+body {
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.7;
+  min-height:100dvh;
+  -webkit-font-smoothing:antialiased;
+  transition:background 0.3s,color 0.3s;
+}
+
+.shell {
+  max-width:480px;
+  margin:0 auto;
+  min-height:100dvh;
+  position:relative;
+}
+
+/* ── HEADER ── */
+.header {
+  display:flex; align-items:center; gap:10px;
+  padding:14px 18px 12px;
+  position:sticky; top:0; z-index:50;
+  background:var(--bg);
+  border-bottom:1px solid var(--border);
+}
+
+.back-btn {
+  width:36px; height:36px; border-radius:50%;
+  border:1px solid var(--border);
+  background:var(--card);
+  cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  color:var(--text-soft);
+  transition:all 0.2s;
+  flex-shrink:0;
+  text-decoration:none;
+}
+.back-btn:active { transform:scale(0.92); }
+.back-btn svg { width:18px; height:18px; }
+
+.header-center { flex:1; min-width:0; }
+.header-title {
+  font-size:1.05rem; font-weight:700;
+  color:var(--orange);
+  line-height:1.2;
+}
+.header-sub {
+  font-size:0.72rem; color:var(--text-dim);
+  margin-top:1px;
+}
+
+.count-chip {
+  background:rgba(255,122,0,0.12);
+  border:1px solid rgba(255,122,0,0.3);
+  color:var(--orange);
+  font-size:0.72rem; font-weight:700;
+  padding:3px 10px; border-radius:20px;
+  flex-shrink:0;
+  display:none;
+}
+.count-chip.visible { display:block; }
+
+/* ── TOOLBAR (búsqueda + orden) ── */
+.toolbar {
+  padding:14px 18px 10px;
+  display:flex; flex-direction:column; gap:10px;
+  background:var(--bg);
+  position:sticky; top:65px; z-index:40;
+  border-bottom:1px solid var(--border);
+}
+
+.search-wrap {
+  position:relative;
+}
+.search-icon {
+  position:absolute; left:12px; top:50%; transform:translateY(-50%);
+  color:var(--text-dim); pointer-events:none;
+}
+.search-icon svg { width:16px; height:16px; }
+#searchInput {
+  width:100%; padding:10px 12px 10px 38px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  color:var(--text);
+  font-family:inherit; font-size:0.88rem;
+  outline:none;
+  transition:border-color 0.2s;
+}
+#searchInput::placeholder { color:var(--text-dim); }
+#searchInput:focus { border-color:var(--orange); }
+
+.clear-search {
+  position:absolute; right:10px; top:50%; transform:translateY(-50%);
+  width:22px; height:22px; border-radius:50%;
+  background:var(--text-dim);
+  border:none; cursor:pointer;
+  display:none; align-items:center; justify-content:center;
+  color:var(--bg); font-size:12px; font-weight:700;
+}
+.clear-search.visible { display:flex; }
+
+.sort-row {
+  display:flex; align-items:center; justify-content:space-between;
+}
+.sort-label {
+  font-size:0.75rem; color:var(--text-dim);
+}
+.sort-btn {
+  display:flex; align-items:center; gap:5px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:5px 12px;
+  color:var(--text-soft);
+  font-family:inherit; font-size:0.75rem; font-weight:600;
+  cursor:pointer;
+  transition:all 0.2s;
+}
+.sort-btn:active { transform:scale(0.95); }
+.sort-btn svg { width:14px; height:14px; transition:transform 0.3s; }
+.sort-btn.asc svg { transform:rotate(180deg); }
+
+/* ── PANTALLAS ── */
+.screen { display:none; }
+.screen.active { display:block; }
+
+/* ── AUTH GATE ── */
+#authScreen {
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  min-height:calc(100dvh - 65px);
+  padding:40px 24px;
+  text-align:center;
+  gap:20px;
+}
+.auth-icon {
+  width:72px; height:72px; border-radius:50%;
+  background:rgba(255,122,0,0.1);
+  border:2px solid rgba(255,122,0,0.25);
+  display:flex; align-items:center; justify-content:center;
+  font-size:2rem;
+}
+.auth-title {
+  font-family:'Lora',serif;
+  font-size:1.3rem; font-weight:600;
+  color:var(--text);
+  line-height:1.3;
+}
+.auth-sub {
+  font-size:0.83rem; color:var(--text-soft);
+  max-width:280px; line-height:1.6;
+}
+.auth-cta {
+  background:var(--orange);
+  color:#fff;
+  border:none; border-radius:14px;
+  padding:13px 28px;
+  font-family:inherit; font-size:0.9rem; font-weight:700;
+  cursor:pointer;
+  transition:all 0.2s;
+  text-decoration:none;
+  display:inline-block;
+}
+.auth-cta:active { transform:scale(0.96); opacity:0.9; }
+
+/* ── LOADING ── */
+#loadingScreen {
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  min-height:calc(100dvh - 130px);
+  gap:16px;
+}
+.spinner {
+  width:36px; height:36px;
+  border:3px solid var(--border);
+  border-top-color:var(--orange);
+  border-radius:50%;
+  animation:spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+.loading-text { font-size:0.82rem; color:var(--text-dim); }
+
+/* ── ESTADO VACÍO ── */
+#emptyScreen {
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  min-height:calc(100dvh - 130px);
+  padding:40px 28px;
+  text-align:center;
+  gap:16px;
+}
+.empty-icon {
+  font-size:3rem; opacity:0.6;
+}
+.empty-title {
+  font-family:'Lora',serif;
+  font-size:1.2rem; font-weight:600;
+  color:var(--text);
+  line-height:1.3;
+}
+.empty-sub {
+  font-size:0.82rem; color:var(--text-soft);
+  max-width:270px; line-height:1.65;
+}
+.empty-tag {
+  font-size:0.72rem; color:var(--orange);
+  font-weight:700; letter-spacing:0.5px;
+  font-style:italic;
+}
+
+/* ── ESTADO VACÍO DE BÚSQUEDA ── */
+#noResultsScreen {
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  padding:50px 28px;
+  text-align:center;
+  gap:12px;
+}
+#noResultsScreen .empty-icon { font-size:2.2rem; }
+#noResultsScreen .empty-sub { font-size:0.82rem; color:var(--text-dim); }
+
+/* ── LISTA DE TARJETAS ── */
+#listScreen {
+  padding:16px 18px 100px;
+  display:flex; flex-direction:column; gap:14px;
+}
+
+/* ── TARJETA DE REFLEXIÓN ── */
+.reflection-card {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  overflow:hidden;
+  transition:transform 0.15s, box-shadow 0.15s;
+  animation:fadeUp 0.35s ease both;
+}
+.reflection-card:active { transform:scale(0.99); }
+
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(10px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* tira de color según bloque */
+.card-stripe {
+  height:4px;
+  width:100%;
+}
+.stripe-gozosos  { background:var(--goz); }
+.stripe-luminosos{ background:var(--lum); }
+.stripe-dolorosos{ background:var(--dol); }
+.stripe-gloriosos{ background:var(--glo); }
+
+.card-body { padding:14px 16px 16px; }
+
+.card-meta {
+  display:flex; align-items:center;
+  flex-wrap:wrap; gap:6px;
+  margin-bottom:8px;
+}
+
+.card-nivel {
+  font-size:0.7rem; font-weight:700;
+  color:var(--text-dim);
+  text-transform:uppercase; letter-spacing:0.8px;
+}
+
+.card-bloque-chip {
+  font-size:0.68rem; font-weight:700;
+  padding:2px 9px; border-radius:20px;
+  letter-spacing:0.3px;
+}
+.chip-gozosos  { background:rgba(212,160,23,0.15); color:var(--goz); }
+.chip-luminosos{ background:rgba(1,187,225,0.15);  color:var(--lum); }
+.chip-dolorosos{ background:rgba(192,57,43,0.15);  color:var(--dol); }
+.chip-gloriosos{ background:rgba(142,68,173,0.15); color:var(--glo); }
+
+.card-misterio {
+  font-size:0.75rem; font-weight:600;
+  color:var(--text-soft);
+}
+
+.card-pregunta {
+  font-size:0.72rem;
+  color:var(--orange);
+  font-style:italic;
+  margin-bottom:8px;
+  display:flex; align-items:center; gap:5px;
+}
+.card-pregunta::before {
+  content:'';
+  display:inline-block;
+  width:3px; height:3px; border-radius:50%;
+  background:var(--orange); flex-shrink:0;
+}
+
+.card-text {
+  font-family:'Lora',serif;
+  font-size:0.88rem;
+  color:var(--text);
+  line-height:1.65;
+  border-left:2px solid var(--border);
+  padding-left:12px;
+  margin-bottom:10px;
+  word-break:break-word;
+}
+
+.card-text mark {
+  background:rgba(255,122,0,0.25);
+  color:inherit;
+  border-radius:2px;
+  padding:0 1px;
+}
+
+.card-date {
+  font-size:0.7rem;
+  color:var(--text-dim);
+  text-align:right;
+}
+
+/* ── SEPARADORES DE FECHA ── */
+.date-separator {
+  display:flex; align-items:center; gap:10px;
+  margin:4px 0 2px;
+}
+.date-separator-line {
+  flex:1; height:1px; background:var(--border);
+}
+.date-separator-label {
+  font-size:0.68rem; font-weight:700;
+  color:var(--text-dim);
+  text-transform:uppercase; letter-spacing:0.8px;
+  white-space:nowrap;
+}
+
+/* ── FOOTER DECORATIVO ── */
+.footer-frase {
+  text-align:center;
+  padding:28px 24px 40px;
+  font-size:0.78rem;
+  color:var(--text-dim);
+  font-style:italic;
+  display:none;
+}
+.footer-frase.visible { display:block; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ══ HEADER (siempre visible) ══ -->
+  <header class="header">
+    <button class="back-btn" id="backBtn" aria-label="Regresar" onclick="goBack()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </button>
+    <div class="header-center">
+      <div class="header-title">Mi Diario</div>
+      <div class="header-sub" id="headerSub">Reflexiones personales</div>
+    </div>
+    <div class="count-chip" id="countChip"></div>
+  </header>
+
+  <!-- ══ TOOLBAR — búsqueda + orden ══ -->
+  <div class="toolbar" id="toolbar" style="display:none">
+    <div class="search-wrap">
+      <span class="search-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      </span>
+      <input type="search" id="searchInput" placeholder="Buscar en mis reflexiones…" autocomplete="off" spellcheck="false">
+      <button class="clear-search" id="clearSearch" aria-label="Limpiar búsqueda">✕</button>
+    </div>
+    <div class="sort-row">
+      <span class="sort-label" id="sortLabel">Mostrando más recientes primero</span>
+      <button class="sort-btn" id="sortBtn" onclick="toggleSort()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <polyline points="19 12 12 19 5 12"/>
+        </svg>
+        <span id="sortBtnLabel">Más antiguas</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ PANTALLA: Auth Gate ══ -->
+  <div id="authScreen">
+    <div class="auth-icon">📖</div>
+    <p class="auth-title">Tu diario te espera</p>
+    <p class="auth-sub">Inicia sesión para ver tus reflexiones personales del camino.</p>
+    <button class="auth-cta" onclick="goBack()">← Regresar al inicio</button>
+  </div>
+
+  <!-- ══ PANTALLA: Cargando ══ -->
+  <div id="loadingScreen" style="display:none">
+    <div class="spinner"></div>
+    <p class="loading-text">Cargando tu diario…</p>
+  </div>
+
+  <!-- ══ PANTALLA: Sin reflexiones aún ══ -->
+  <div id="emptyScreen" style="display:none">
+    <div class="empty-icon">✍️</div>
+    <p class="empty-title">Tu diario está en blanco</p>
+    <p class="empty-sub">Cuando respondas las preguntas de meditación durante la oración, tus reflexiones aparecerán aquí.</p>
+    <p class="empty-tag">¡Goza el camino!</p>
+  </div>
+
+  <!-- ══ PANTALLA: Sin resultados de búsqueda ══ -->
+  <div id="noResultsScreen" style="display:none">
+    <div class="empty-icon">🔍</div>
+    <p class="empty-sub">No encontré reflexiones con ese texto.<br>Intenta con otras palabras.</p>
+  </div>
+
+  <!-- ══ PANTALLA: Lista de reflexiones ══ -->
+  <div id="listScreen" style="display:none"></div>
+
+  <!-- Frase de cierre -->
+  <p class="footer-frase" id="footerFrase">¡Goza el camino!</p>
+
+</div><!-- /.shell -->
+
+<!-- ══════════════════════════════════════════
+     FIREBASE SDK v10 (compat) vía CDN
+     ══════════════════════════════════════════ -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
+/* ════════════════════════════════════════════════════
+   CONFIGURACIÓN FIREBASE
+   ── Pega aquí tus valores del proyecto ──
+   ════════════════════════════════════════════════════ */
+const firebaseConfig = {
+  apiKey:            "TU_API_KEY",
+  authDomain:        "TU_AUTH_DOMAIN",
+  projectId:         "TU_PROJECT_ID",
+  storageBucket:     "TU_STORAGE_BUCKET",
+  messagingSenderId: "TU_MESSAGING_SENDER_ID",
+  appId:             "TU_APP_ID"
+};
+
+/* ════════════════════════════════════════════════════
+   CONSTANTES Y HELPERS
+   ════════════════════════════════════════════════════ */
+
+// Nombres de niveles (Mundo-Nivel → etiqueta)
+const NIVEL_NAMES = {
+  '0101':'Cruz 1-1: Males',      '0102':'Cruz 1-2: Pecado',
+  '0103':'Cruz 1-3: Conversión', '0104':'Cruz 1-4: Gracia',
+  '0201':'Emociones 2-1',        '0202':'Emociones 2-2',
+  '0203':'Emociones 2-3',        '0204':'Emociones 2-4',
+  '0301':'Mente 3-1',            '0302':'Mente 3-2',
+  '0303':'Mente 3-3',            '0304':'Mente 3-4',
+  '0401':'Corazón 4-1',          '0402':'Corazón 4-2',
+  '0403':'Corazón 4-3',          '0404':'Corazón 4-4',
+  '0501':'Relaciones 5-1',       '0502':'Relaciones 5-2',
+  '0503':'Relaciones 5-3',       '0504':'Relaciones 5-4',
+  '0601':'Amor 6-1',             '0602':'Amor 6-2',
+  '0603':'Amor 6-3',             '0604':'Amor 6-4',
+  '0701':'Tiempo 7-1',           '0702':'Tiempo 7-2',
+  '0703':'Tiempo 7-3',           '0704':'Tiempo 7-4',
+};
+
+const BLOQUE_NAMES = {
+  gozosos:   'Misterios Gozosos',
+  luminosos: 'Misterios Luminosos',
+  dolorosos: 'Misterios Dolorosos',
+  gloriosos: 'Misterios Gloriosos',
+};
+
+const PREGUNTA_NAMES = {
+  q0: 'Por María hacia Jesús',
+  q1: 'Desde el Hijo hacia el Padre',
+  q2: 'Hijos y hermanos en el Espíritu',
+};
+
+const MISTERIO_ORDINAL = ['Primer','Segundo','Tercer','Cuarto','Quinto'];
+
+const DIAS_ES   = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const MESES_ES  = ['enero','febrero','marzo','abril','mayo','junio',
+                   'julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+function formatDate(ts) {
+  if (!ts) return '';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return `${DIAS_ES[d.getDay()]} ${d.getDate()} de ${MESES_ES[d.getMonth()]}`;
+}
+
+function formatDateGroup(ts) {
+  if (!ts) return '';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  const hoy = new Date();
+  const ayer = new Date(hoy); ayer.setDate(hoy.getDate()-1);
+  if (d.toDateString() === hoy.toDateString())  return 'Hoy';
+  if (d.toDateString() === ayer.toDateString()) return 'Ayer';
+  return `${d.getDate()} de ${MESES_ES[d.getMonth()]}`;
+}
+
+// Escapa caracteres especiales para RegExp
+function escReg(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+}
+
+// Resalta coincidencias en texto
+function highlight(text, query) {
+  if (!query) return escapeHtml(text);
+  const re = new RegExp(`(${escReg(query)})`, 'gi');
+  return escapeHtml(text).replace(re,'<mark>$1</mark>');
+}
+
+function escapeHtml(s) {
+  return s
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#039;');
+}
+
+/* ════════════════════════════════════════════════════
+   ESTADO
+   ════════════════════════════════════════════════════ */
+let allReflections = [];    // array con todos los docs
+let sortAsc        = false; // false = recientes primero
+let currentQuery   = '';
+
+/* ════════════════════════════════════════════════════
+   NAVEGACIÓN
+   ════════════════════════════════════════════════════ */
+function goBack() {
+  // Respeta subdirectorio en GitHub Pages
+  const base = window.location.origin + window.location.pathname.replace(/\/diario\.html$/, '/');
+  window.location.href = base + 'index.html';
+}
+
+/* ════════════════════════════════════════════════════
+   RENDER
+   ════════════════════════════════════════════════════ */
+function renderList(items, query) {
+  const container = document.getElementById('listScreen');
+  const noRes     = document.getElementById('noResultsScreen');
+  const footer    = document.getElementById('footerFrase');
+
+  if (items.length === 0) {
+    container.style.display   = 'none';
+    noRes.style.display       = 'flex';
+    footer.classList.remove('visible');
+    return;
+  }
+  noRes.style.display = 'none';
+  container.style.display = 'flex';
+  footer.classList.add('visible');
+
+  let html = '';
+  let lastGroup = null;
+
+  items.forEach((r, idx) => {
+    // Separador de fecha
+    const grupo = formatDateGroup(r.confirmedAt);
+    if (grupo !== lastGroup) {
+      lastGroup = grupo;
+      html += `
+        <div class="date-separator">
+          <div class="date-separator-line"></div>
+          <span class="date-separator-label">${escapeHtml(grupo)}</span>
+          <div class="date-separator-line"></div>
+        </div>`;
+    }
+
+    const nivelLabel  = NIVEL_NAMES[r.nivelId] || `Nivel ${r.nivelId}`;
+    const bloqueLabel = BLOQUE_NAMES[r.bloque]  || r.bloque;
+    const misterioLabel = (MISTERIO_ORDINAL[r.misterioIdx] || `Misterio ${r.misterioIdx+1}`) + ' Misterio';
+    const pregLabel   = PREGUNTA_NAMES[`q${r.questionIdx}`] || '';
+    const dateLabel   = formatDate(r.confirmedAt);
+    const textHtml    = highlight(r.text || '', query);
+    const delay       = Math.min(idx * 40, 400);
+
+    html += `
+      <div class="reflection-card" style="animation-delay:${delay}ms">
+        <div class="card-stripe stripe-${r.bloque}"></div>
+        <div class="card-body">
+          <div class="card-meta">
+            <span class="card-nivel">${escapeHtml(nivelLabel)}</span>
+            <span class="card-bloque-chip chip-${r.bloque}">${escapeHtml(bloqueLabel)}</span>
+          </div>
+          <div class="card-misterio">${escapeHtml(misterioLabel)}</div>
+          <div class="card-pregunta">${escapeHtml(pregLabel)}</div>
+          <p class="card-text">${textHtml}</p>
+          <div class="card-date">${escapeHtml(dateLabel)}</div>
+        </div>
+      </div>`;
+  });
+
+  container.innerHTML = html;
+}
+
+/* ════════════════════════════════════════════════════
+   FILTRO Y ORDEN
+   ════════════════════════════════════════════════════ */
+function applyFilters() {
+  let items = [...allReflections];
+
+  // Filtro de búsqueda
+  if (currentQuery) {
+    const q = currentQuery.toLowerCase();
+    items = items.filter(r => (r.text||'').toLowerCase().includes(q));
+  }
+
+  // Orden
+  items.sort((a,b) => {
+    const ta = a.confirmedAt ? (a.confirmedAt.toDate ? a.confirmedAt.toDate().getTime() : new Date(a.confirmedAt).getTime()) : 0;
+    const tb = b.confirmedAt ? (b.confirmedAt.toDate ? b.confirmedAt.toDate().getTime() : new Date(b.confirmedAt).getTime()) : 0;
+    return sortAsc ? ta - tb : tb - ta;
+  });
+
+  renderList(items, currentQuery);
+}
+
+function toggleSort() {
+  sortAsc = !sortAsc;
+  const btn   = document.getElementById('sortBtn');
+  const label = document.getElementById('sortBtnLabel');
+  const info  = document.getElementById('sortLabel');
+  if (sortAsc) {
+    btn.classList.add('asc');
+    label.textContent = 'Más recientes';
+    info.textContent  = 'Mostrando más antiguas primero';
+  } else {
+    btn.classList.remove('asc');
+    label.textContent = 'Más antiguas';
+    info.textContent  = 'Mostrando más recientes primero';
+  }
+  applyFilters();
+}
+
+/* ════════════════════════════════════════════════════
+   BÚSQUEDA
+   ════════════════════════════════════════════════════ */
+document.getElementById('searchInput').addEventListener('input', function() {
+  currentQuery = this.value.trim();
+  const clearBtn = document.getElementById('clearSearch');
+  clearBtn.classList.toggle('visible', currentQuery.length > 0);
+  applyFilters();
+});
+
+document.getElementById('clearSearch').addEventListener('click', function() {
+  const inp = document.getElementById('searchInput');
+  inp.value = '';
+  currentQuery = '';
+  this.classList.remove('visible');
+  inp.focus();
+  applyFilters();
+});
+
+/* ════════════════════════════════════════════════════
+   MOSTRAR / OCULTAR PANTALLAS
+   ════════════════════════════════════════════════════ */
+function showScreen(name) {
+  const screens = ['authScreen','loadingScreen','emptyScreen','noResultsScreen','listScreen'];
+  screens.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  const target = document.getElementById(name);
+  if (target) target.style.display = 'flex';
+}
+
+/* ════════════════════════════════════════════════════
+   INICIALIZACIÓN FIREBASE
+   ════════════════════════════════════════════════════ */
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db   = firebase.firestore();
+
+// Hereda preferencia de modo oscuro/claro del index
+const savedTheme = localStorage.getItem('cruzando_theme');
+if (savedTheme === 'light') document.body.classList.add('light');
+
+auth.onAuthStateChanged(async (user) => {
+
+  if (!user) {
+    // Sin sesión → mostrar auth gate
+    document.getElementById('toolbar').style.display = 'none';
+    showScreen('authScreen');
+    return;
+  }
+
+  // Con sesión → cargar reflexiones
+  document.getElementById('toolbar').style.display = 'none';
+  showScreen('loadingScreen');
+  document.getElementById('listScreen').style.display = 'none';
+
+  try {
+    const snap = await db
+      .collection('users')
+      .doc(user.uid)
+      .collection('reflections')
+      .get();
+
+    allReflections = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    const total = allReflections.length;
+    const chip  = document.getElementById('countChip');
+    const sub   = document.getElementById('headerSub');
+
+    if (total === 0) {
+      document.getElementById('toolbar').style.display = 'none';
+      document.getElementById('loadingScreen').style.display = 'none';
+      document.getElementById('emptyScreen').style.display   = 'flex';
+      return;
+    }
+
+    // Hay reflexiones
+    chip.textContent = `${total} reflexión${total !== 1 ? 'es' : ''}`;
+    chip.classList.add('visible');
+    sub.textContent = `${total} reflexión${total !== 1 ? 'es' : ''} guardada${total !== 1 ? 's' : ''}`;
+
+    document.getElementById('toolbar').style.display = 'flex';
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('listScreen').style.display = 'flex';
+
+    applyFilters();
+
+  } catch (err) {
+    console.error('Error cargando reflexiones:', err);
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('authScreen').style.display    = 'flex';
+    document.querySelector('.auth-title').textContent = 'Error al cargar el diario';
+    document.querySelector('.auth-sub').textContent   = 'Ocurrió un problema al leer tus reflexiones. Intenta de nuevo.';
+  }
+});
+</script>
+</body>
+</html>
