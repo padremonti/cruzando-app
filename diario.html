@@ -496,7 +496,7 @@ body {
    ── Pega aquí tus valores del proyecto ──
    ════════════════════════════════════════════════════ */
 const firebaseConfig = {
-  apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
+ apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
     authDomain: "cruzando-app.firebaseapp.com",
     projectId: "cruzando-app",
     storageBucket: "cruzando-app.firebasestorage.app",
@@ -636,7 +636,9 @@ function renderList(items, query) {
     const bloqueLabel = BLOQUE_NAMES[r.bloque]  || r.bloque;
     const misterioLabel = (MISTERIO_ORDINAL[r.misterioIdx] || `Misterio ${r.misterioIdx+1}`) + ' Misterio';
     const pregLabel   = PREGUNTA_NAMES[`q${r.questionIdx}`] || '';
-    const pregText    = r.question || '';  // texto completo de la pregunta (campo nuevo)
+    const pregText    = r.question || '';
+    // Solo mostrar pregText si es diferente al label corto (reflexiones nuevas)
+    const showPregText = pregText && pregText !== pregLabel;
     const dateLabel   = formatDate(r.confirmedAt);
     const textHtml    = highlight(r.text || '', query);
     const delay       = Math.min(idx * 40, 400);
@@ -651,7 +653,7 @@ function renderList(items, query) {
           </div>
           <div class="card-misterio">${escapeHtml(misterioLabel)}</div>
           <div class="card-pregunta">${escapeHtml(pregLabel)}</div>
-          ${pregText ? `<p class="card-question-text">${highlight(pregText, query)}</p>` : ''}
+          ${showPregText ? `<p class="card-question-text">${highlight(pregText, query)}</p>` : ''}
           <p class="card-text">${textHtml}</p>
           <div class="card-date">${escapeHtml(dateLabel)}</div>
         </div>
