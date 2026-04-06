@@ -19,7 +19,7 @@
    ── Pega aquí tus valores del proyecto ──
    ════════════════════════════════════════════════════ */
 const firebaseConfig = {
- apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
+  apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
     authDomain: "cruzando-app.firebaseapp.com",
     projectId: "cruzando-app",
     storageBucket: "cruzando-app.firebasestorage.app",
@@ -1777,11 +1777,21 @@ body {
     $('scr-error').style.display = 'flex';
   }
 
-  // Arrancar
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
+  // Arrancar — esperar a que Firebase Auth confirme el estado de sesión
+  // antes de correr init(), para que _auth.currentUser no sea null
+  let _initDone = false;
+  function _startApp() {
+    if (_initDone) return;
+    _initDone = true;
     init();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      _auth.onAuthStateChanged(() => _startApp());
+    });
+  } else {
+    _auth.onAuthStateChanged(() => _startApp());
   }
 
 })();
