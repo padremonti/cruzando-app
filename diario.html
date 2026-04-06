@@ -354,6 +354,18 @@ body {
   word-break:break-word;
 }
 
+.card-question-text {
+  font-size:0.78rem;
+  color:var(--text-soft);
+  font-style:italic;
+  line-height:1.55;
+  margin-bottom:10px;
+  padding:8px 12px;
+  background:rgba(255,122,0,0.05);
+  border-radius:8px;
+  border-left:2px solid rgba(255,122,0,0.25);
+}
+
 .card-text mark {
   background:rgba(255,122,0,0.25);
   color:inherit;
@@ -484,12 +496,12 @@ body {
    ── Pega aquí tus valores del proyecto ──
    ════════════════════════════════════════════════════ */
 const firebaseConfig = {
-    apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
-    authDomain: "cruzando-app.firebaseapp.com",
-    projectId: "cruzando-app",
-    storageBucket: "cruzando-app.firebasestorage.app",
-    messagingSenderId: "408196948528",
-    appId: "1:408196948528:web:de291e8afc969252e943f5"
+  apiKey:            "TU_API_KEY",
+  authDomain:        "TU_AUTH_DOMAIN",
+  projectId:         "TU_PROJECT_ID",
+  storageBucket:     "TU_STORAGE_BUCKET",
+  messagingSenderId: "TU_MESSAGING_SENDER_ID",
+  appId:             "TU_APP_ID"
 };
 
 /* ════════════════════════════════════════════════════
@@ -624,6 +636,7 @@ function renderList(items, query) {
     const bloqueLabel = BLOQUE_NAMES[r.bloque]  || r.bloque;
     const misterioLabel = (MISTERIO_ORDINAL[r.misterioIdx] || `Misterio ${r.misterioIdx+1}`) + ' Misterio';
     const pregLabel   = PREGUNTA_NAMES[`q${r.questionIdx}`] || '';
+    const pregText    = r.question || '';  // texto completo de la pregunta (campo nuevo)
     const dateLabel   = formatDate(r.confirmedAt);
     const textHtml    = highlight(r.text || '', query);
     const delay       = Math.min(idx * 40, 400);
@@ -638,6 +651,7 @@ function renderList(items, query) {
           </div>
           <div class="card-misterio">${escapeHtml(misterioLabel)}</div>
           <div class="card-pregunta">${escapeHtml(pregLabel)}</div>
+          ${pregText ? `<p class="card-question-text">${highlight(pregText, query)}</p>` : ''}
           <p class="card-text">${textHtml}</p>
           <div class="card-date">${escapeHtml(dateLabel)}</div>
         </div>
