@@ -19,7 +19,7 @@
    ── Pega aquí tus valores del proyecto ──
    ════════════════════════════════════════════════════ */
 const firebaseConfig = {
-    apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
+  apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
     authDomain: "cruzando-app.firebaseapp.com",
     projectId: "cruzando-app",
     storageBucket: "cruzando-app.firebasestorage.app",
@@ -751,7 +751,7 @@ body {
   }
 
   // ── Guardar reflexión individual en Firestore ──────────────────
-  async function saveReflectionToFirestore(b, mi, qi, texto) {
+  async function saveReflectionToFirestore(b, mi, qi, texto, questionText) {
     try {
       const user = await new Promise(resolve => {
         const unsub = _auth.onAuthStateChanged(u => { unsub(); resolve(u); });
@@ -763,7 +763,7 @@ body {
         bloque:      b,
         misterioIdx: mi,
         questionIdx: qi,
-        question:    MED_LABELS[qi] || '',
+        question:    questionText || MED_LABELS[qi] || '',  // pregunta real del misterio
         text:        texto,
         confirmedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
@@ -1582,8 +1582,13 @@ body {
     medConfirmed[b][mi]['q' + qi] = true;
     saveProgress();
 
+    // Obtener el texto real de la pregunta desde el misterio actual
+    const misterio = DATA.misterios[b] && DATA.misterios[b][mi];
+    const questions = misterio ? parseMeditation(misterio.meditacion) : [];
+    const questionText = questions[qi] || MED_LABELS[qi] || '';
+
     // Guardar en Firestore (asíncrono, no bloquea UI)
-    saveReflectionToFirestore(b, mi, qi, val);
+    saveReflectionToFirestore(b, mi, qi, val, questionText);
 
     // Sonido suave (nota ascendente según pregunta)
     const freqs = [[523,659],[587,740],[659,880]];
