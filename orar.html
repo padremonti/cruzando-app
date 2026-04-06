@@ -19,7 +19,7 @@
    ── Pega aquí tus valores del proyecto ──
    ════════════════════════════════════════════════════ */
 const firebaseConfig = {
-    apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
+  apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
     authDomain: "cruzando-app.firebaseapp.com",
     projectId: "cruzando-app",
     storageBucket: "cruzando-app.firebasestorage.app",
@@ -565,9 +565,18 @@ body {
 
   <!-- ═══ HEADER (compartido) ═══ -->
   <header class="header" id="main-header" style="display:none">
-    <div>
-      <div class="header-title" id="h-title"></div>
-      <div class="header-sub" id="h-sub"></div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <!-- Botón Home → regresa al menú principal (index.html) -->
+      <button class="icon-btn" id="btn-home" title="Menú principal" onclick="goHome()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z"/>
+          <polyline points="9 21 9 12 15 12 15 21"/>
+        </svg>
+      </button>
+      <div>
+        <div class="header-title" id="h-title"></div>
+        <div class="header-sub" id="h-sub"></div>
+      </div>
     </div>
     <div class="header-actions">
       <!-- Display de metros -->
@@ -616,7 +625,15 @@ body {
   <div class="screen" id="scr-prayer">
     <div class="prayer-header fade-in">
       <div class="prayer-nav">
-        <button class="btn-ghost" id="btn-back-home">← Inicio</button>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button class="icon-btn" onclick="goHome()" title="Menú principal" style="width:32px;height:32px;flex-shrink:0;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z"/>
+              <polyline points="9 21 9 12 15 12 15 21"/>
+            </svg>
+          </button>
+          <button class="btn-ghost" id="btn-back-home">← Bloques</button>
+        </div>
         <span class="mystery-counter" id="prayer-counter"></span>
       </div>
       <div class="mystery-title" id="prayer-title"></div>
@@ -724,6 +741,14 @@ body {
   let audioEl = null;
   let audioPlaying = false;
   let currentAudioId = null;
+
+  // ── Navegación al menú principal ──
+  function goHome() {
+    stopAudio();
+    const base = window.location.origin
+      + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+    window.location.href = base + 'index.html';
+  }
 
   // ── Utilidades ──
   const $ = id => document.getElementById(id);
@@ -1787,6 +1812,8 @@ body {
       confirmReflection: confirmReflection,
       enterBlock: enterBlock,
     };
+    // goHome necesita estar en window directamente (usado en onclick del header)
+    window.goHome = goHome;
 
     // Render
     $('scr-loading').style.display = 'none';
