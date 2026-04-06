@@ -19,7 +19,7 @@
    ── Pega aquí tus valores del proyecto ──
    ════════════════════════════════════════════════════ */
 const firebaseConfig = {
-  apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
+    apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
     authDomain: "cruzando-app.firebaseapp.com",
     projectId: "cruzando-app",
     storageBucket: "cruzando-app.firebasestorage.app",
@@ -751,21 +751,25 @@ body {
   }
 
   // ── Guardar reflexión individual en Firestore ──────────────────
-  function saveReflectionToFirestore(b, mi, qi, texto) {
+  async function saveReflectionToFirestore(b, mi, qi, texto) {
     try {
-      const user = _auth.currentUser;
+      const user = await new Promise(resolve => {
+        const unsub = _auth.onAuthStateChanged(u => { unsub(); resolve(u); });
+      });
       if (!user) return;
       const docId = NIVEL_ID + '_' + b + '_' + mi + '_q' + qi;
-      _db.collection('users').doc(user.uid).collection('reflections').doc(docId).set({
+      await _db.collection('users').doc(user.uid).collection('reflections').doc(docId).set({
         nivelId:     NIVEL_ID,
         bloque:      b,
         misterioIdx: mi,
         questionIdx: qi,
-        question:    MED_LABELS[qi] || '',   // texto completo de la pregunta
+        question:    MED_LABELS[qi] || '',
         text:        texto,
         confirmedAt: firebase.firestore.FieldValue.serverTimestamp()
-      }).catch(e => console.warn('[CruzAndo] reflection save:', e.message));
-    } catch(e) { console.warn('[CruzAndo] saveReflection:', e.message); }
+      });
+    } catch(e) {
+      console.warn('[CruzAndo] saveReflection:', e.message);
+    }
   }
 
   // ── PERSISTENCIA — Firestore primero, localStorage como respaldo ──
@@ -787,17 +791,19 @@ body {
       localStorage.setItem(lsKey(), JSON.stringify({ ...payload, isDark }));
     } catch(e) {}
 
-    // 2. Firestore (asíncrono, no bloquea UI)
+    // 2. Firestore — obtener usuario en el momento de guardar
     try {
-      const user = _auth.currentUser;
-      if (user) {
-        await _db.collection('users').doc(user.uid)
-          .collection('progress').doc(NIVEL_ID)
-          .set({
-            ...payload,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
-      }
+      // Usar getIdToken() para forzar resolución del usuario actual
+      const user = await new Promise(resolve => {
+        const unsub = _auth.onAuthStateChanged(u => { unsub(); resolve(u); });
+      });
+      if (!user) return;
+      await _db.collection('users').doc(user.uid)
+        .collection('progress').doc(NIVEL_ID)
+        .set({
+          ...payload,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
     } catch(e) {
       console.warn('[CruzAndo] saveProgress Firestore:', e.message);
     }
@@ -809,7 +815,9 @@ body {
 
     // 1. Intentar Firestore
     try {
-      const user = _auth.currentUser;
+      const user = await new Promise(resolve => {
+        const unsub = _auth.onAuthStateChanged(u => { unsub(); resolve(u); });
+      });
       if (user) {
         const snap = await _db.collection('users').doc(user.uid)
           .collection('progress').doc(NIVEL_ID).get();
@@ -1726,7 +1734,9 @@ body {
 
     // Leer plan del usuario desde Firestore
     try {
-      const user = _auth.currentUser;
+      const user = await new Promise(resolve => {
+        const unsub = _auth.onAuthStateChanged(u => { unsub(); resolve(u); });
+      });
       if (user) {
         const snap = await _db.collection('users').doc(user.uid).get();
         if (snap.exists && snap.data().plan) {
