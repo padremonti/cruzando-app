@@ -19,12 +19,12 @@
    ── Pega aquí tus valores del proyecto ──
    ════════════════════════════════════════════════════ */
 const firebaseConfig = {
-    apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
-    authDomain: "cruzando-app.firebaseapp.com",
-    projectId: "cruzando-app",
-    storageBucket: "cruzando-app.firebasestorage.app",
-    messagingSenderId: "408196948528",
-    appId: "1:408196948528:web:de291e8afc969252e943f5"
+  apiKey:            "TU_API_KEY",
+  authDomain:        "TU_AUTH_DOMAIN",
+  projectId:         "TU_PROJECT_ID",
+  storageBucket:     "TU_STORAGE_BUCKET",
+  messagingSenderId: "TU_MESSAGING_SENDER_ID",
+  appId:             "TU_APP_ID"
 };
 firebase.initializeApp(firebaseConfig);
 const _db   = firebase.firestore();
@@ -690,6 +690,8 @@ body {
   // ── Estado global ──
   let DATA = null;
   let NIVEL_ID = null;
+  const MUSIC_BASE = 'https://pub-faed94e375aa443e846e07f81ef93274.r2.dev/';
+  const AUDIO_BASE = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/';
   let currentBlock = null;   // 'gozosos' | 'luminosos' | 'dolorosos' | 'gloriosos'
   let currentMystery = 0;    // 0-4 dentro del bloque
   let openSection = null;     // qué acordeón está abierto
@@ -733,6 +735,19 @@ body {
     const mundo = parseInt(id.substring(0,2), 10);
     const nivel = parseInt(id.substring(2,4), 10);
     return 'Nivel ' + mundo + '-' + nivel;
+  }
+
+  // ── Construir URLs de audio dinámicamente desde NIVEL_ID ───────
+  function contemplacionUrl(m) {
+    const mundo = parseInt(NIVEL_ID.substring(0,2), 10);
+    const nivel = parseInt(NIVEL_ID.substring(2,4), 10);
+    return AUDIO_BASE + mundo + '_' + nivel + '_' + m.numero + '.mp3';
+  }
+
+  function cantoUrl(m) {
+    const mundo = parseInt(NIVEL_ID.substring(0,2), 10);
+    const nivel = parseInt(NIVEL_ID.substring(2,4), 10);
+    return MUSIC_BASE + 'M_' + mundo + '_' + nivel + '_' + m.numero + '.mp3';
   }
 
   // ── Guardar reflexión individual en Firestore ──────────────────
@@ -1205,6 +1220,14 @@ body {
       const isTodayBlock = b === todayBlock;
       const isLocked = userPlan !== 'pro' && !isTodayBlock;
 
+      // Días en que cada bloque está disponible para Free
+      const FREE_DAYS = {
+        gozosos:   '🔒 Lunes y Sábado',
+        luminosos: '🔒 Jueves',
+        dolorosos: '🔒 Martes y Viernes',
+        gloriosos: '🔒 Miércoles y Domingo',
+      };
+
       const card = document.createElement('div');
       card.className = 'block-card fade-in fade-in-d' + (bi+1) + ' ' + extraClass + (isLocked ? ' locked' : '');
       card.onclick = isLocked ? null : () => enterBlock(b);
@@ -1212,7 +1235,7 @@ body {
       card.innerHTML =
         '<div class="block-card-top">' +
           '<span class="block-emoji">' + blockEmoji(b) + '</span>' +
-          '<span class="block-badge ' + (isLocked ? 'locked-badge' : status) + '">' + (isLocked ? '🔒 Solo hoy' : statusLabel) + '</span>' +
+          '<span class="block-badge ' + (isLocked ? 'locked-badge' : status) + '">' + (isLocked ? FREE_DAYS[b] : statusLabel) + '</span>' +
         '</div>' +
         '<div class="block-title" style="color:' + (isLocked ? 'var(--text-dim)' : blockColor(b)) + '">Misterios ' + BLOCK_NAMES[b] + '</div>' +
         '<div class="block-subtitle">' + (DATA.subtitulos_bloque ? DATA.subtitulos_bloque[b] || '' : '') + '</div>' +
@@ -1385,12 +1408,11 @@ body {
       return audioPlayerHTML('ap-rezar', 'Padrenuestro · 10 Avemarías · Gloria · Jaculatoria', src);
     }
     if (key === 'canto') {
-      const src = DATA.audio_canto || '';
-      if (src) return audioPlayerHTML('ap-canto', 'Canto contemplativo', src);
-      return '<div class="canto-box"><p>🕊️ Momento de silencio y canto contemplativo</p><span class="canto-hint">Tómate unos momentos para cantar, meditar o guardar silencio antes de continuar</span></div>';
+      const src = cantoUrl(m);
+      return audioPlayerHTML('ap-canto', 'Canto contemplativo', src);
     }
     if (key === 'contemplar') {
-      const src = m.audio_contemplacion || '';
+      const src = contemplacionUrl(m);
       let html = audioPlayerHTML('ap-contempl', 'Audio de la contemplación', src);
       html += '<div class="contempl-text">' + escHTML(m.contemplacion) + '</div>';
       return html;
