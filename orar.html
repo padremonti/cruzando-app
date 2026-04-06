@@ -154,6 +154,9 @@ body {
 .block-card:active { transform:scale(0.98); }
 .block-card.cleared { border-color:var(--green); }
 .block-card.current { border-color:var(--lvl-bold); box-shadow:0 2px 16px var(--lvl-ultra); }
+.block-card.locked  { opacity:0.5; cursor:default; }
+.block-badge.locked-badge { background:var(--sec-bg); color:var(--text-dim); }
+.block-locked-hint  { font-size:0.72rem; color:var(--text-dim); margin-top:8px; font-style:italic; }
 .block-card-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
 .block-emoji { font-size:1.6rem; }
 .block-badge {
@@ -694,6 +697,7 @@ body {
   let journal = {};           // { gozosos: { 0: {q0:'',q1:'',q2:''}, ... }, ... }
   let medConfirmed = {};      // { gozosos: { 0: {q0:true,q1:false,q2:false}, ... }, ... }
   let isDark = false;
+  let userPlan = 'free'; // 'free' | 'pro' — se carga desde Firestore al init
 
   // ── Gamificación ──
   let totalMeters = 0;
@@ -732,32 +736,20 @@ body {
   }
 
   // ── Guardar reflexión individual en Firestore ──────────────────
-  // Se llama de forma asíncrona desde confirmReflection().
-  // Si no hay sesión activa, silencia el error (localStorage ya guardó).
   function saveReflectionToFirestore(b, mi, qi, texto) {
     try {
       const user = _auth.currentUser;
-      if (!user) return; // sin sesión, omitir silenciosamente
-
-      // ID del documento: formato "0101_gozosos_0_q1"
+      if (!user) return;
       const docId = NIVEL_ID + '_' + b + '_' + mi + '_q' + qi;
-
-      _db.collection('users')
-         .doc(user.uid)
-         .collection('reflections')
-         .doc(docId)
-         .set({
-           nivelId:     NIVEL_ID,          // ej. "0101"
-           bloque:      b,                 // "gozosos" | "luminosos" | ...
-           misterioIdx: mi,                // 0-4
-           questionIdx: qi,                // 0-2
-           text:        texto,             // contenido de la reflexión
-           confirmedAt: firebase.firestore.FieldValue.serverTimestamp()
-         })
-        .catch(e => console.warn('[CruzAndo] Firestore reflection save:', e.message));
-    } catch(e) {
-      console.warn('[CruzAndo] saveReflectionToFirestore error:', e.message);
-    }
+      _db.collection('users').doc(user.uid).collection('reflections').doc(docId).set({
+        nivelId:     NIVEL_ID,
+        bloque:      b,
+        misterioIdx: mi,
+        questionIdx: qi,
+        text:        texto,
+        confirmedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).catch(e => console.warn('[CruzAndo] reflection save:', e.message));
+    } catch(e) { console.warn('[CruzAndo] saveReflection:', e.message); }
   }
 
   function saveProgress() {
@@ -1209,23 +1201,29 @@ body {
       const statusLabel = isCleared ? '✓ Completado' : isInProgress ? 'En progreso' : (isToday ? 'Hoy' : 'Pendiente');
       const extraClass = isCleared ? 'cleared' : isToday ? 'today' : isInProgress ? 'current' : '';
 
+      // Acceso para usuario Free: solo el bloque del día
+      const isTodayBlock = b === todayBlock;
+      const isLocked = userPlan !== 'pro' && !isTodayBlock;
+
       const card = document.createElement('div');
-      card.className = 'block-card fade-in fade-in-d' + (bi+1) + ' ' + extraClass;
-      card.onclick = () => enterBlock(b);
+      card.className = 'block-card fade-in fade-in-d' + (bi+1) + ' ' + extraClass + (isLocked ? ' locked' : '');
+      card.onclick = isLocked ? null : () => enterBlock(b);
 
       card.innerHTML =
         '<div class="block-card-top">' +
           '<span class="block-emoji">' + blockEmoji(b) + '</span>' +
-          '<span class="block-badge ' + status + '">' + statusLabel + '</span>' +
+          '<span class="block-badge ' + (isLocked ? 'locked-badge' : status) + '">' + (isLocked ? '🔒 Solo hoy' : statusLabel) + '</span>' +
         '</div>' +
-        '<div class="block-title" style="color:' + blockColor(b) + '">Misterios ' + BLOCK_NAMES[b] + '</div>' +
+        '<div class="block-title" style="color:' + (isLocked ? 'var(--text-dim)' : blockColor(b)) + '">Misterios ' + BLOCK_NAMES[b] + '</div>' +
         '<div class="block-subtitle">' + (DATA.subtitulos_bloque ? DATA.subtitulos_bloque[b] || '' : '') + '</div>' +
-        '<div class="block-progress"><div class="block-dots">' +
-          [0,1,2,3,4].map(i => {
-            const cls = prog[i] ? 'done' : (doneCount === i && !isCleared ? 'active' : '');
-            return '<div class="block-dot ' + cls + '"></div>';
-          }).join('') +
-        '</div></div>';
+        (isLocked
+          ? '<div class="block-locked-hint">Disponible con plan Pro, o el ' + BLOCK_DAYS[b].join('/') + '</div>'
+          : '<div class="block-progress"><div class="block-dots">' +
+              [0,1,2,3,4].map(i => {
+                const cls = prog[i] ? 'done' : (doneCount === i && !isCleared ? 'active' : '');
+                return '<div class="block-dot ' + cls + '"></div>';
+              }).join('') +
+            '</div></div>');
 
       grid.appendChild(card);
     });
@@ -1256,6 +1254,10 @@ body {
 
   // ── Entrar a un bloque ──
   function enterBlock(b) {
+    // Usuario free: solo puede entrar al bloque del día
+    const todayBlock = DAY_BLOCKS[new Date().getDay()];
+    if (userPlan !== 'pro' && b !== todayBlock) return;
+
     stopAudio();
     currentBlock = b;
     const prog = progress[b] || [];
@@ -1484,7 +1486,7 @@ body {
     medConfirmed[b][mi]['q' + qi] = true;
     saveProgress();
 
-    // Guardar reflexión en Firestore (asíncrono, no bloquea UI)
+    // Guardar en Firestore (asíncrono, no bloquea UI)
     saveReflectionToFirestore(b, mi, qi, val);
 
     // Sonido suave (nota ascendente según pregunta)
@@ -1633,6 +1635,17 @@ body {
       showError('No se pudo cargar data/' + NIVEL_ID + '.json. Verifica que el archivo exista.');
       return;
     }
+
+    // Leer plan del usuario desde Firestore
+    try {
+      const user = _auth.currentUser;
+      if (user) {
+        const snap = await _db.collection('users').doc(user.uid).get();
+        if (snap.exists && snap.data().plan) {
+          userPlan = snap.data().plan; // 'free' | 'pro'
+        }
+      }
+    } catch(e) { console.warn('[CruzAndo] plan load:', e.message); }
 
     // Cargar progreso
     loadProgress();
