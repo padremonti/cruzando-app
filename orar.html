@@ -19,7 +19,7 @@
    ── Pega aquí tus valores del proyecto ──
    ════════════════════════════════════════════════════ */
 const firebaseConfig = {
-  apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
+    apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
     authDomain: "cruzando-app.firebaseapp.com",
     projectId: "cruzando-app",
     storageBucket: "cruzando-app.firebasestorage.app",
@@ -1513,7 +1513,7 @@ body {
       const val = j['q' + qi] || '';
       const confirmed = mc['q' + qi] || false;
       const btnClass = 'med-confirm' + (confirmed ? ' done' : '');
-      const btnText = confirmed ? '✓ Reflexión guardada' : '📝 Guardar reflexión';
+      const btnText = confirmed ? '✏️ Actualizar reflexión' : '📝 Guardar reflexión';
       return '<div class="med-group">' +
         '<div class="med-label-row">' +
           '<div class="med-dot" style="background:' + MED_COLORS[qi] + '"></div>' +
@@ -1572,13 +1572,15 @@ body {
   function confirmReflection(b, mi, qi) {
     if (!medConfirmed[b]) medConfirmed[b] = {};
     if (!medConfirmed[b][mi]) medConfirmed[b][mi] = {};
-    if (medConfirmed[b][mi]['q' + qi]) return; // ya confirmado
 
     // Verificar que haya texto
     const j = journal[b] && journal[b][mi] ? journal[b][mi] : {};
     const val = j['q' + qi] || '';
     if (val.trim().length < 5) return; // muy corto, ignorar
 
+    const yaConfirmado = !!medConfirmed[b][mi]['q' + qi];
+
+    // Marcar como confirmado y guardar progreso
     medConfirmed[b][mi]['q' + qi] = true;
     saveProgress();
 
@@ -1587,25 +1589,31 @@ body {
     const questions = misterio ? parseMeditation(misterio.meditacion) : [];
     const questionText = questions[qi] || MED_LABELS[qi] || '';
 
-    // Guardar en Firestore (asíncrono, no bloquea UI)
+    // Guardar en Firestore siempre (primera vez o actualización)
     saveReflectionToFirestore(b, mi, qi, val, questionText);
 
     // Sonido suave (nota ascendente según pregunta)
     const freqs = [[523,659],[587,740],[659,880]];
     playNotes(freqs[qi] || freqs[0]);
 
-    // Visual: actualizar botón con glow
+    // Visual: actualizar botón
     const btn = document.getElementById('med-btn-' + qi);
     if (btn) {
       btn.className = 'med-confirm done glow';
-      btn.textContent = '✓ Reflexión guardada';
+      btn.textContent = yaConfirmado ? '✓ Reflexión actualizada' : '✓ Reflexión guardada';
+      // Volver a "Actualizar" después de 2 segundos
+      setTimeout(() => {
+        if (btn) btn.textContent = '✏️ Actualizar reflexión';
+      }, 2000);
     }
 
-    // GAMIFICACIÓN: Dar recompensa de 650m con Mariano descansando
-    const rewardKey = b + '_' + mi + '_q' + qi;
-    if (!reflectionRewards[rewardKey]) {
-      reflectionRewards[rewardKey] = true;
-      gainMeters(650, getNextRestPose());
+    // GAMIFICACIÓN: recompensa solo la primera vez
+    if (!yaConfirmado) {
+      const rewardKey = b + '_' + mi + '_q' + qi;
+      if (!reflectionRewards[rewardKey]) {
+        reflectionRewards[rewardKey] = true;
+        gainMeters(650, getNextRestPose());
+      }
     }
   }
 
