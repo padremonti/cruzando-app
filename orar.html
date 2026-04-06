@@ -768,38 +768,97 @@ body {
     } catch(e) { console.warn('[CruzAndo] saveReflection:', e.message); }
   }
 
-  function saveProgress() {
-    try { 
-      localStorage.setItem(lsKey(), JSON.stringify({ 
-        progress, 
-        journal, 
-        medConfirmed, 
-        isDark,
-        totalMeters,
-        reflectionRewards,
-        audioRewards
-      })); 
-    } catch(e){}
+  // ── PERSISTENCIA — Firestore primero, localStorage como respaldo ──
+
+  // Guarda en Firestore (fuente de verdad) + localStorage (respaldo offline)
+  async function saveProgress() {
+    const payload = {
+      progress,
+      journal,
+      medConfirmed,
+      totalMeters,
+      reflectionRewards,
+      audioRewards,
+      updatedAt: Date.now()
+    };
+
+    // 1. localStorage siempre (inmediato, sin await)
+    try {
+      localStorage.setItem(lsKey(), JSON.stringify({ ...payload, isDark }));
+    } catch(e) {}
+
+    // 2. Firestore (asíncrono, no bloquea UI)
+    try {
+      const user = _auth.currentUser;
+      if (user) {
+        await _db.collection('users').doc(user.uid)
+          .collection('progress').doc(NIVEL_ID)
+          .set({
+            ...payload,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+      }
+    } catch(e) {
+      console.warn('[CruzAndo] saveProgress Firestore:', e.message);
+    }
   }
-  function loadProgress() {
+
+  // Carga desde Firestore; si falla o no hay sesión, usa localStorage
+  async function loadProgress() {
+    let loaded = false;
+
+    // 1. Intentar Firestore
+    try {
+      const user = _auth.currentUser;
+      if (user) {
+        const snap = await _db.collection('users').doc(user.uid)
+          .collection('progress').doc(NIVEL_ID).get();
+        if (snap.exists) {
+          const d = snap.data();
+          if (d.progress)          progress          = d.progress;
+          if (d.journal)           journal            = d.journal;
+          if (d.medConfirmed)      medConfirmed       = d.medConfirmed;
+          if (typeof d.totalMeters === 'number') totalMeters = d.totalMeters;
+          if (d.reflectionRewards) reflectionRewards  = d.reflectionRewards;
+          if (d.audioRewards)      audioRewards       = d.audioRewards;
+          loaded = true;
+        }
+      }
+    } catch(e) {
+      console.warn('[CruzAndo] loadProgress Firestore:', e.message);
+    }
+
+    // 2. Fallback a localStorage si Firestore no devolvió datos
+    if (!loaded) {
+      try {
+        const raw = localStorage.getItem(lsKey());
+        if (raw) {
+          const d = JSON.parse(raw);
+          if (d.progress)          progress          = d.progress;
+          if (d.journal)           journal            = d.journal;
+          if (d.medConfirmed)      medConfirmed       = d.medConfirmed;
+          if (typeof d.totalMeters === 'number') totalMeters = d.totalMeters;
+          if (d.reflectionRewards) reflectionRewards  = d.reflectionRewards;
+          if (d.audioRewards)      audioRewards       = d.audioRewards;
+        }
+      } catch(e) {}
+    }
+
+    // isDark siempre desde localStorage (preferencia de UI, no progreso)
     try {
       const raw = localStorage.getItem(lsKey());
       if (raw) {
         const d = JSON.parse(raw);
-        if (d.progress) progress = d.progress;
-        if (d.journal) journal = d.journal;
-        if (d.medConfirmed) medConfirmed = d.medConfirmed;
         if (typeof d.isDark === 'boolean') isDark = d.isDark;
-        if (typeof d.totalMeters === 'number') totalMeters = d.totalMeters;
-        if (d.reflectionRewards) reflectionRewards = d.reflectionRewards;
-        if (d.audioRewards) audioRewards = d.audioRewards;
       }
-    } catch(e){}
+    } catch(e) {}
+
     // Inicializar estructura si no existe
     BLOCKS.forEach(b => {
       if (!progress[b]) progress[b] = [null,null,null,null,null];
-      if (!journal[b]) journal[b] = {};
+      if (!journal[b])  journal[b]  = {};
     });
+
     updateMetersDisplay();
   }
 
@@ -1009,7 +1068,13 @@ body {
     $('ico-sun').style.display = isDark ? 'none' : 'block';
     $('ico-moon').style.display = isDark ? 'block' : 'none';
     document.querySelector('meta[name="theme-color"]').content = isDark ? '#1A1714' : '#E6DED3';
-    saveProgress();
+    // isDark es preferencia de UI — solo localStorage, no Firestore
+    try {
+      const raw = localStorage.getItem(lsKey());
+      const d = raw ? JSON.parse(raw) : {};
+      d.isDark = isDark;
+      localStorage.setItem(lsKey(), JSON.stringify(d));
+    } catch(e) {}
   }
 
   // ── Sonidos de celebración ──
@@ -1670,8 +1735,8 @@ body {
       }
     } catch(e) { console.warn('[CruzAndo] plan load:', e.message); }
 
-    // Cargar progreso
-    loadProgress();
+    // Cargar progreso (desde Firestore o localStorage)
+    await loadProgress();
 
     // Aplicar dark mode
     if (isDark) {
