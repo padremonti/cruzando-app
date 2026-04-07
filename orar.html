@@ -19,7 +19,7 @@
    ── Pega aquí tus valores del proyecto ──
    ════════════════════════════════════════════════════ */
 const firebaseConfig = {
- apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
+   apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
     authDomain: "cruzando-app.firebaseapp.com",
     projectId: "cruzando-app",
     storageBucket: "cruzando-app.firebasestorage.app",
@@ -460,6 +460,7 @@ body {
 }
 .app-nav-item:active { opacity:0.7; }
 .app-nav-item.active { color:var(--lvl-bold); }
+.app-nav-item[disabled] { cursor:default; opacity:1; }
 .app-nav-icon {
   width:24px; height:24px; position:relative;
   display:flex; align-items:center; justify-content:center;
@@ -814,7 +815,7 @@ body {
 
   <!-- ═══ BOTTOM NAV BAR (Mejora 5) ═══ -->
   <nav class="app-nav" id="app-nav">
-    <button class="app-nav-item active" id="nav-orar" onclick="goHome()">
+    <button class="app-nav-item active" id="nav-orar" disabled>
       <div class="app-nav-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <line x1="12" y1="2" x2="12" y2="22"/>
@@ -888,7 +889,7 @@ body {
   let NIVEL_ID = null;
   const MUSIC_BASE = 'https://pub-faed94e375aa443e846e07f81ef93274.r2.dev/';
   const AUDIO_BASE = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/';
-  const IMAGE_BASE = 'https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev';
+  const IMAGE_BASE = 'https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev/';
   const BLOCK_COLORS = {
     gozosos:  '#D4A017',
     luminosos:'#01BBE1',
@@ -902,7 +903,8 @@ body {
   let journal = {};           // { gozosos: { 0: {q0:'',q1:'',q2:''}, ... }, ... }
   let medConfirmed = {};      // { gozosos: { 0: {q0:true,q1:false,q2:false}, ... }, ... }
   let isDark = false;
-  let userPlan = 'free'; // 'free' | 'pro' — se carga desde Firestore al init
+  let userPlan = 'free'; // 'free' | 'pro' | 'beta' — se carga desde Firestore al init
+  const isPremium = () => userPlan === 'pro' || userPlan === 'beta';
 
   // ── Gamificación ──
   let totalMeters = 0;
@@ -1519,7 +1521,7 @@ body {
 
       // Acceso para usuario Free: solo el bloque del día
       const isTodayBlock = b === todayBlock;
-      const isLocked = userPlan !== 'pro' && !isTodayBlock;
+      const isLocked = !isPremium() && !isTodayBlock;
 
       // Días en que cada bloque está disponible para Free
       const FREE_DAYS = {
@@ -1580,7 +1582,7 @@ body {
   function enterBlock(b) {
     // Usuario free: solo puede entrar al bloque del día
     const todayBlock = DAY_BLOCKS[new Date().getDay()];
-    if (userPlan !== 'pro' && b !== todayBlock) return;
+    if (!isPremium() && b !== todayBlock) return;
 
     stopAudio();
     currentBlock = b;
@@ -2019,7 +2021,7 @@ body {
       if (user) {
         const snap = await _db.collection('users').doc(user.uid).get();
         if (snap.exists && snap.data().plan) {
-          userPlan = snap.data().plan; // 'free' | 'pro'
+          userPlan = snap.data().plan; // 'free' | 'pro' | 'beta'
         }
       }
     } catch(e) { console.warn('[CruzAndo] plan load:', e.message); }
