@@ -362,21 +362,22 @@ body {
 .chip-gloriosos{ background:rgba(142,68,173,0.15); color:var(--glo); }
 
 .card-misterio {
-  font-size:0.75rem; font-weight:600;
+  font-size:1rem; font-weight:600;
   color:var(--text-soft);
 }
 
 .card-pregunta {
-  font-size:0.72rem;
+  font-family:'Crimson Pro', Georgia, serif;
+  font-size:1.15rem; font-weight:500;
   color:var(--orange);
   font-style:italic;
   margin-bottom:8px;
-  display:flex; align-items:center; gap:5px;
+  display:flex; align-items:center; gap:6px;
 }
 .card-pregunta::before {
   content:'';
   display:inline-block;
-  width:3px; height:3px; border-radius:50%;
+  width:4px; height:4px; border-radius:50%;
   background:var(--orange); flex-shrink:0;
 }
 
@@ -570,7 +571,7 @@ body {
    ── Pega aquí tus valores del proyecto ──
    ════════════════════════════════════════════════════ */
 const firebaseConfig = {
-apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
+ apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
     authDomain: "cruzando-app.firebaseapp.com",
     projectId: "cruzando-app",
     storageBucket: "cruzando-app.firebasestorage.app",
