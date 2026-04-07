@@ -1,0 +1,115 @@
+{
+  "nivel": "0101",
+  "cantos": {
+    "gozosos": [
+      {
+        "numero": 1,
+        "titulo": "Buena noticia",
+        "letra": "No fue fácil tu comienzo,\nno fue claro el porvenir;\nuna vida que se abre\nsin saber cómo seguir.\n\nLa sorpresa de María\nDios comenzó a habitar:\nNo le trajo incertidumbre,\nla llenó de eternidad.\n\nBuena noticia\nLos males pasan\nNo te rompen\nDios los habita\n\nCamina en medio de tu noche\nCon Él cruzas\nEn su Cruz está el camino\nBuena noticia\nEn su herida vive tu destino"
+      },
+      {
+        "numero": 2,
+        "titulo": "Buena noticia",
+        "letra": "Van de prisa por la sierra,\nsin promesas de llegar,\ncon el cuerpo ya cansado\ny el misterio por brotar.\n\nNo lo entienden, no lo explican,\npero algo vive ya:\ncuando el amor se comparte,\nDios se vuelve a derramar.\n\nBuena noticia\nLos males pasan\nNo te rompen\nDios los habita\nCamina en medio de tu noche\nCon Él cruzas\nEn su Cruz está el camino\nBuena noticia\nEn su herida vive tu destino"
+      },
+      {
+        "numero": 3,
+        "titulo": "Buena noticia",
+        "letra": "No hubo casa, no hubo espacio,\nno hubo sitio para Ti;\nen la noche más oscura\ndecidiste venir.\n\nLa pobreza no detuvo\nlo que el Padre quiso dar:\nen lo frágil de un pesebre\nnace el Reino sin igual.\n\nBuena noticia\nLos males pasan\nNo te rompen\nDios los habita\nCamina en medio de tu noche\nCon Él cruzas\nEn su Cruz está el camino\nBuena noticia\nEn su herida vive tu destino"
+      },
+      {
+        "numero": 4,
+        "titulo": "Buena noticia",
+        "letra": "Te presentan, te entregan,\nsin tener seguridad;\nuna espada ya se anuncia,\nnadie la puede evitar.\n\nNo comprenden el futuro,\nno lo pueden descifrar,\npero el alma que confía\naprende a soltar y amar.\n\nBuena noticia\nLos males pasan\nNo te rompen\nDios los habita\nCamina en medio de tu noche\nCon Él cruzas\nEn su Cruz está el camino\nBuena noticia\nEn su herida vive tu destino"
+      },
+      {
+        "numero": 5,
+        "titulo": "Buena noticia",
+        "letra": "Tres días de angustia y búsqueda,\nsin respuestas, sin control;\nel silencio también pesa\ncuando se esconde el Señor.\n\nPero en medio de la ausencia\nvuelve el rostro a aparecer:\nno se pierde quien lo busca,\nÉl se deja encontrar también.\n\nBuena noticia\nLos males pasan\nNo te rompen\nDios los habita\nCamina en medio de tu noche\nCon Él cruzas\nEn su Cruz está el camino\nBuena noticia\nEn su herida vive tu destino"
+      }
+    ],
+ 
+    "luminosos": [
+      {
+        "numero": 1,
+        "titulo": "Simplemente es realidad",
+        "letra": "Sumerge el cuerpo en el agua,\ncielo abierto al descender;\nuna voz llama en lo hondo:\n“Hijo amado, eres de Él”.\n\nY en lo simple de ese gesto\ntodo empieza a renacer;\nDios está en lo pequeño\ny te enseña a comprender.\n\n¡Buenas noticias!\nDios ilumina tu camino,\nEn lo pequeño\nya se asoma lo divino.\nSi no entiendes, si te pierdes,\nen su luz encontrarás \nque tu vida simplemente es realidad."
+      },
+      {
+        "numero": 2,
+        "titulo": "Simplemente es realidad",
+        "letra": "Cuando el vino se termina\ny la fiesta pierde voz,\nuna madre ve el detalle\ny lo entrega al corazón.\n\nNo hace ruido ni discurso,\nsolo invita a confiar;\ny en tinajas de lo simple\nVino Nuevo Dios dará\n\n¡Buenas noticias!\nDios ilumina tu camino,\nEn lo pequeño\nya se asoma lo divino.\nSi no entiendes, si te pierdes,\nen su luz encontrarás \nque tu vida simplemente es realidad."
+      },
+      {
+        "numero": 3,
+        "titulo": "Simplemente es realidad",
+        "letra": "No preguntes por razones\ndel dolor o del sufrir;\nno hay respuestas que lo expliquen,\nhay un bien por descubrir.\n\nY en las manos que bendicen\ncomienza a brillar la luz;\nno es castigo ni condena,\nesto es el Reino de Dios.\n\n¡Buenas noticias!\nDios ilumina tu camino,\nEn lo pequeño\nya se asoma lo divino.\nSi no entiendes, si te pierdes,\nen su luz encontrarás \nque tu vida simplemente es realidad."
+      },
+      {
+        "numero": 4,
+        "titulo": "Simplemente es realidad",
+        "letra": "En la cima todo es brillo,\nnadie sabe qué decir;\ncuando el cielo se revela\nno se alcanza a describir.\n\nY en el miedo y el asombro\nDios se deja contemplar;\nno hace falta comprenderlo,\nsolo basta con estar.\n\n¡Buenas noticias!\nDios ilumina tu camino,\nEn lo pequeño\nya se asoma lo divino.\nSi no entiendes, si te pierdes,\nen su luz encontrarás \nque tu vida simplemente es realidad."
+      },
+      {
+        "numero": 5,
+        "titulo": "Simplemente es realidad",
+        "letra": "En la mesa ya cercano,\nno hay distancia ni lugar;\nen el pan partido y dado\nDios se queda en el hogar.\n\nY en lo humano y cotidiano\ndecidió permanecer;\nlo infinito se hace simple\npara poder sostener.\n\n¡Buenas noticias!\nDios ilumina tu camino,\nEn lo pequeño\nya se asoma lo divino.\nSi no entiendes, si te pierdes,\nen su luz encontrarás \nque tu vida simplemente es realidad."
+      }
+    ],
+   
+       "dolorosos": [
+      {
+        "numero": 1,
+        "titulo": "Dios no huye",
+        "letra": "Siente el peso en el alma,\ntiembla el pecho al orar;\nno se esconde la angustia,\nse presenta ante su Abbá.\n\nY en la noche del huerto\ndonde todo es temblor,\naun sintiendo la muerte\ndice sí desde el dolor.\n\nBuena noticia\nDios no huye\ndel dolor,\nEn tu noche\npermanece\nsu amor.\n\nSi te quiebras\nÉl te habita\nmás y más,\nen Su herida\nse revela\ntu paz, tu paz."
+      },
+      {
+        "numero": 2,
+        "titulo": "Dios no huye",
+        "letra": "Golpe a golpe en su cuerpo,\ncada herida es de verdad;\nla piel grita en el silencio,\nno se puede escapar.\n\nY en su carne que sufre,\nsin dejar de sentir,\nal igual que tú sientes,\nDios acepta vivir.\n\nBuena noticia\nDios no huye\ndel dolor,\nEn tu noche\npermanece\nsu amor.\n\nSi te quiebras\nÉl te habita\nmás y más,\nen Su herida\nse revela\ntu paz, tu paz."
+      },
+      {
+        "numero": 3,
+        "titulo": "Dios no huye",
+        "letra": "Se burlaron de su rostro,\nno supieron quién es;\nlo vistieron de falso,\nlo trataron al revés.\n\nY en silencio sostiene\nlo que nadie logró ver:\nla verdad no se rompe\naunque la niegue la piel.\n\nBuena noticia\nDios no huye\ndel dolor,\nEn tu noche\npermanece\nsu amor.\n\nSi te quiebras\nÉl te habita\nmás y más,\nen Su herida\nse revela\ntu paz, tu paz."
+      },
+      {
+        "numero": 4,
+        "titulo": "Dios no huye",
+        "letra": "Paso a paso en la cuesta,\ntodo pesa al andar;\nno hay camino sin carga,\nno hay avance sin más.\n\nY al caer se levanta,\ny le ayuda Simón;\nporque no es debilidad\naceptar un favor.\n\nBuena noticia\nDios no huye\ndel dolor,\nEn tu noche\npermanece\nsu amor.\n\nSi te quiebras\nÉl te habita\nmás y más,\nen Su herida\nse revela\ntu paz, tu paz."
+      },
+      {
+        "numero": 5,
+        "titulo": "Dios no huye",
+        "letra": "Todo aliento se apaga,\ntodo llega al final;\nno se aferra a la vida,\nse abandona al amar.\n\nY en las manos del Padre\nentregó el corazón;\ny en la noche más honda\nya germina la luz.\n\nBuena noticia\nDios no huye\ndel dolor,\nEn tu noche\npermanece\nsu amor.\n\nSi te quiebras\nÉl te habita\nmás y más,\nen Su herida\nse revela\ntu paz, tu paz."
+      }
+    ],
+        "gloriosos": [
+      {
+        "numero": 1,
+        "titulo": "Por Él Cruzamos",
+        "letra": "Ayer lloraba en el camino,\npensando que todo acabó;\ncon el corazón dividido,\nsin saber dónde estabas, Señor.\n\nY en medio de mis preguntas\nte acercaste sin hacer ruido;\ncaminabas a mi lado\naunque yo no te había visto.\n\nCruzamos, con Él cruzamos,\nvivimos, por Él vivimos,\nsufrimos, con Él sufrimos,\nhumanos y peregrinos,\nhermanos resucitados."
+      },
+      {
+        "numero": 2,
+        "titulo": "Por Él Cruzamos",
+        "letra": "A veces dudo en lo bueno,\nme cuesta tanto creer;\ncuando todo es demasiado\npienso que no puede ser.\n\nPero Tú no te retiras\naunque tiemble el corazón;\nnos envías tal como estamos\na anunciar tu resurrección.\n\nCruzamos, con Él cruzamos,\nvivimos, por Él vivimos,\nsufrimos, con Él sufrimos,\nhumanos y peregrinos,\nhermanos resucitados."
+      },
+      {
+        "numero": 3,
+        "titulo": "Por Él Cruzamos",
+        "letra": "Cuando el fuego descendía\ny nadie lo comprendía,\nnos llamaron locos de alegría\npor vivir lo que no veían.\n\nY en medio de tanta duda\ndecidimos no callar:\nsi tu amor nos ha tocado\nno lo podemos guardar.\n\nCruzamos, con Él cruzamos,\nvivimos, por Él vivimos,\nsufrimos, con Él sufrimos,\nhumanos y peregrinos,\nhermanos resucitados."
+      },
+      {
+        "numero": 4,
+        "titulo": "Por Él Cruzamos",
+        "letra": "No termina en esta tierra\nlo que Tú hiciste en mí;\naunque el cuerpo se desgaste\ntu promesa sigue aquí.\n\nY la historia no se apaga,\nni la vida acaba en cruz;\nporque todo lo que entregas\nresucita en tu luz.\n\nCruzamos, con Él cruzamos,\nvivimos, por Él vivimos,\nsufrimos, con Él sufrimos,\nhumanos y peregrinos,\nhermanos resucitados."
+      },
+      {
+        "numero": 5,
+        "titulo": "Por Él Cruzamos",
+        "letra": "Y hoy camino con otros\nque también dijeron sí;\nno estamos solos en esto,\nsomos pueblo que aprendió a vivir.\n\nSi caemos, nos levantas,\nsi dudamos, sigues tú;\ny en la mesa compartida\nreconocemos tu luz.\n\nCruzamos, con Él cruzamos,\nvivimos, por Él vivimos,\nsufrimos, con Él sufrimos,\nhumanos y peregrinos,\nhermanos resucitados."
+      }
+    ]
+  }
+}
