@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#1A0E04">
 <title>Talleres · CruzAndo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,600;1,400&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
 <style>
 /* ══════════════════════════════════════════════════════
    sanar.html · CruzAndo App · Talleres de Sanación
@@ -53,7 +53,41 @@ body {
   transition:background 0.3s,color 0.3s;
 }
 
-.shell { max-width:480px; margin:0 auto; min-height:100dvh; }
+.shell { max-width:480px; margin:0 auto; min-height:100dvh; padding-bottom:72px; }
+
+/* ── Bottom nav bar ── */
+.app-nav {
+  position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+  width:100%; max-width:480px; z-index:80;
+  background:var(--bg); border-top:1px solid var(--border);
+  display:flex; align-items:stretch;
+  padding-bottom:env(safe-area-inset-bottom, 0px);
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+}
+.app-nav-item {
+  flex:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:4px; padding:10px 4px 12px;
+  background:none; border:none; cursor:pointer;
+  font-family:inherit; text-decoration:none;
+  color:var(--text-dim); transition:color 0.2s;
+  -webkit-tap-highlight-color:transparent;
+}
+.app-nav-item:active { opacity:0.7; }
+.app-nav-item.active { color:var(--orange); }
+.app-nav-item[disabled] { cursor:default; opacity:1; }
+.app-nav-icon {
+  width:24px; height:24px; position:relative;
+  display:flex; align-items:center; justify-content:center;
+}
+.app-nav-item.active .app-nav-icon::before {
+  content:''; position:absolute; inset:-5px;
+  background:rgba(255,122,0,0.12); border-radius:10px;
+}
+.app-nav-label {
+  font-size:0.6rem; font-weight:600; letter-spacing:0.4px;
+  text-transform:uppercase;
+}
 
 /* ── HEADER ── */
 .header {
@@ -96,7 +130,7 @@ body {
   font-size:2.2rem;
 }
 .gate-title {
-  font-family:'Lora',serif; font-size:1.3rem; font-weight:600;
+  font-family:'Crimson Pro',serif; font-size:1.7rem; font-weight:600;
   color:var(--text); line-height:1.3;
 }
 .gate-sub { font-size:0.83rem; color:var(--text-soft); max-width:280px; line-height:1.65; }
@@ -146,9 +180,9 @@ body {
 }
 @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.4)} }
 .hero h1 {
-  font-family:'Lora',serif;
-  font-size:1.35rem; font-weight:600;
-  color:var(--text); line-height:1.3; margin-bottom:6px;
+  font-family:'Crimson Pro',serif;
+  font-size:1.9rem; font-weight:600;
+  color:var(--text); line-height:1.25; margin-bottom:6px;
 }
 .hero p { font-size:0.82rem; color:var(--text-soft); line-height:1.6; }
 
@@ -256,8 +290,8 @@ body {
 /* ── INFO DEL TALLER ── */
 .taller-body { padding:14px 16px 16px; }
 .taller-titulo {
-  font-family:'Lora',serif;
-  font-size:0.97rem; font-weight:600;
+  font-family:'Crimson Pro',serif;
+  font-size:1.35rem; font-weight:600;
   color:var(--text); line-height:1.3;
   margin-bottom:5px;
 }
@@ -319,8 +353,8 @@ body {
 }
 .empty-icon { font-size:2.8rem; opacity:0.5; }
 .empty-title {
-  font-family:'Lora',serif;
-  font-size:1.1rem; font-weight:600; color:var(--text);
+  font-family:'Crimson Pro',serif;
+  font-size:1.6rem; font-weight:600; color:var(--text);
 }
 .empty-sub { font-size:0.82rem; color:var(--text-soft); max-width:260px; line-height:1.6; }
 </style>
@@ -331,12 +365,6 @@ body {
 
   <!-- ══ HEADER ══ -->
   <header class="header">
-    <button class="back-btn" aria-label="Regresar" onclick="goBack()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-           stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="15 18 9 12 15 6"/>
-      </svg>
-    </button>
     <div class="header-center">
       <div class="header-title">Talleres de Sanación</div>
       <div class="header-sub" id="headerSub">Contenido para miembros</div>
@@ -346,9 +374,9 @@ body {
   <!-- ══ PANTALLA: Sin sesión ══ -->
   <div class="pant" id="pantAuth">
     <div class="gate-icon">🎓</div>
-    <p class="gate-title">Inicia sesión para ver los talleres</p>
-    <p class="gate-sub">Estos talleres son exclusivos para peregrinos registrados en CruzAndo.</p>
-    <button class="cta-btn" onclick="goBack()">← Regresar al inicio</button>
+    <p class="gate-title">Tu sanación te está esperando</p>
+    <p class="gate-sub">Accede a los talleres con tu cuenta CruzAndo. El camino ya empezó.</p>
+    <button class="cta-btn" onclick="goTo('index.html')">Iniciar sesión</button>
   </div>
 
   <!-- ══ PANTALLA: Cargando ══ -->
@@ -357,13 +385,12 @@ body {
     <p class="loading-text">Cargando talleres…</p>
   </div>
 
-  <!-- ══ PANTALLA: Sin membresía ══ -->
+  <!-- ══ PANTALLA: Sin membresía (ya no se usa — free ve catálogo bloqueado) ══ -->
   <div class="pant" id="pantNoMem">
     <div class="gate-icon">🔒</div>
-    <p class="gate-title">Contenido para miembros Pro</p>
-    <p class="gate-sub">Los talleres de video están disponibles con la membresía CruzAndo Pro. ¡Goza el camino!</p>
-    <button class="cta-btn" onclick="goBack()">← Regresar al inicio</button>
-    <button class="cta-btn outline" onclick="goBack()">Ver planes</button>
+    <p class="gate-title">Estos talleres son para ti</p>
+    <p class="gate-sub">Sube a CruzAndo Pro y desbloquea todos los talleres de sanación. ¡Goza el camino!</p>
+    <button class="cta-btn" onclick="goTo('index.html')">Ver planes Pro</button>
   </div>
 
   <!-- ══ CONTENIDO PRINCIPAL ══ -->
@@ -382,7 +409,49 @@ body {
     <!-- Categorías se renderizan aquí -->
     <div class="categorias" id="categoriasContainer"></div>
 
-  </div>
+  </div><!-- /#mainContent -->
+
+  <!-- ══ BOTTOM NAV BAR ══ -->
+  <nav class="app-nav">
+    <button class="app-nav-item" onclick="goTo('orar.html')">
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="2" x2="12" y2="22"/>
+          <line x1="4" y1="9" x2="20" y2="9"/>
+        </svg>
+      </div>
+      <span class="app-nav-label">Orar</span>
+    </button>
+    <button class="app-nav-item" onclick="goTo('diario.html')">
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/>
+          <path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/>
+        </svg>
+      </div>
+      <span class="app-nav-label">Diario</span>
+    </button>
+    <button class="app-nav-item active" disabled>
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s-8-5.5-8-11a8 8 0 0116 0c0 5.5-8 11-8 11z"/>
+          <path d="M9 11h6M12 8v6"/>
+        </svg>
+      </div>
+      <span class="app-nav-label">Sanar</span>
+    </button>
+    <button class="app-nav-item" onclick="goTo('index.html')">
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/>
+          <rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+      </div>
+      <span class="app-nav-label">Inicio</span>
+    </button>
+  </nav>
 
 </div><!-- /.shell -->
 
@@ -430,6 +499,12 @@ function goBack() {
   const base = window.location.origin
     + window.location.pathname.replace(/\/sanar\.html$/, '/');
   window.location.href = base + 'index.html';
+}
+
+function goTo(page) {
+  const base = window.location.origin
+    + window.location.pathname.replace(/\/sanar\.html$/, '/');
+  window.location.href = base + page;
 }
 
 /* ════════════════════════════════════════════════════
@@ -533,7 +608,7 @@ function renderCategorias(categorias, tieneMem) {
       const lockOverlay = !tieneMem ? `
         <div class="lock-overlay">
           <span class="lock-icon">🔒</span>
-          <span class="lock-text">Solo miembros Pro</span>
+          <span class="lock-text">Disponible con Plan Pro</span>
         </div>` : '';
 
       html += `
@@ -599,15 +674,25 @@ mostrarPant('pantLoading');
 auth.onAuthStateChanged(async (user) => {
 
   if (!user) {
-    mostrarPant('pantAuth');
+    // Sin sesión — cargar talleres igual pero todos bloqueados
+    try {
+      const snap = await db.collection('talleres').orderBy('orden', 'asc').get();
+      const categorias = snap.docs.map(d => d.data());
+      mostrarPant('main');
+      document.getElementById('headerSub').textContent = 'Inicia sesión para acceder';
+      renderCategorias(categorias, false);
+    } catch(err) {
+      mostrarPant('pantAuth');
+    }
     return;
   }
 
   try {
-    // 1. Leer membresía del usuario
+    // 1. Leer plan del usuario
     const userDoc  = await db.collection('users').doc(user.uid).get();
     const userData = userDoc.exists ? userDoc.data() : {};
-    const tieneMem = userData.membresia === true;
+    const plan     = userData.plan || '';
+    const tieneMem = plan === 'pro' || plan === 'beta';
 
     // 2. Leer todas las categorías de talleres
     const snap = await db.collection('talleres')
@@ -619,8 +704,8 @@ auth.onAuthStateChanged(async (user) => {
     // 3. Actualizar header
     const sub = document.getElementById('headerSub');
     sub.textContent = tieneMem
-      ? `Hola, peregrino · Plan Pro`
-      : `Usuario free · Contenido bloqueado`;
+      ? `Bienvenido, peregrino · Plan ${plan.charAt(0).toUpperCase() + plan.slice(1)}`
+      : `Hazte miembro Pro para desbloquear`;
 
     // 4. Mostrar contenido
     mostrarPant('main');
@@ -630,7 +715,7 @@ auth.onAuthStateChanged(async (user) => {
     console.error('Error cargando talleres:', err);
     mostrarPant('pantAuth');
     document.querySelector('#pantAuth .gate-title').textContent = 'Error al cargar talleres';
-    document.querySelector('#pantAuth .gate-sub').textContent   =
+    document.querySelector('#pantAuth .gate-sub').textContent =
       'Ocurrió un problema. Intenta recargar la página.';
   }
 
