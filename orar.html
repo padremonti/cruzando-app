@@ -1030,30 +1030,37 @@ body {
       progress,
       journal,
       medConfirmed,
-      totalMeters,
       reflectionRewards,
       audioRewards,
       updatedAt: Date.now()
     };
 
-    // 1. localStorage siempre (inmediato, sin await)
+    // 1. localStorage — progreso del nivel
     try {
       localStorage.setItem(lsKey(), JSON.stringify({ ...payload, isDark }));
     } catch(e) {}
 
-    // 2. Firestore — obtener usuario en el momento de guardar
+    // 2. localStorage — metros globales (clave separada)
     try {
-      // Usar getIdToken() para forzar resolución del usuario actual
+      localStorage.setItem('cruzando_total_metros', String(totalMeters));
+    } catch(e) {}
+
+    // 3. Firestore — progreso del nivel (sin totalMeters)
+    try {
       const user = await new Promise(resolve => {
         const unsub = _auth.onAuthStateChanged(u => { unsub(); resolve(u); });
       });
       if (!user) return;
+      // Guardar progreso del nivel
       await _db.collection('users').doc(user.uid)
         .collection('progress').doc(NIVEL_ID)
         .set({
           ...payload,
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
+      // Guardar metros globales en el documento raíz del usuario
+      await _db.collection('users').doc(user.uid)
+        .set({ totalMeters }, { merge: true });
     } catch(e) {
       console.warn('[CruzAndo] saveProgress Firestore:', e.message);
     }
@@ -1069,17 +1076,23 @@ body {
         const unsub = _auth.onAuthStateChanged(u => { unsub(); resolve(u); });
       });
       if (user) {
-        const snap = await _db.collection('users').doc(user.uid)
-          .collection('progress').doc(NIVEL_ID).get();
-        if (snap.exists) {
-          const d = snap.data();
+        // Cargar progreso del nivel y metros globales en paralelo
+        const [snapNivel, snapUser] = await Promise.all([
+          _db.collection('users').doc(user.uid).collection('progress').doc(NIVEL_ID).get(),
+          _db.collection('users').doc(user.uid).get()
+        ]);
+        if (snapNivel.exists) {
+          const d = snapNivel.data();
           if (d.progress)          progress          = d.progress;
           if (d.journal)           journal            = d.journal;
           if (d.medConfirmed)      medConfirmed       = d.medConfirmed;
-          if (typeof d.totalMeters === 'number') totalMeters = d.totalMeters;
           if (d.reflectionRewards) reflectionRewards  = d.reflectionRewards;
           if (d.audioRewards)      audioRewards       = d.audioRewards;
           loaded = true;
+        }
+        // Metros globales desde documento raíz del usuario
+        if (snapUser.exists && typeof snapUser.data().totalMeters === 'number') {
+          totalMeters = snapUser.data().totalMeters;
         }
       }
     } catch(e) {
@@ -1095,12 +1108,17 @@ body {
           if (d.progress)          progress          = d.progress;
           if (d.journal)           journal            = d.journal;
           if (d.medConfirmed)      medConfirmed       = d.medConfirmed;
-          if (typeof d.totalMeters === 'number') totalMeters = d.totalMeters;
           if (d.reflectionRewards) reflectionRewards  = d.reflectionRewards;
           if (d.audioRewards)      audioRewards       = d.audioRewards;
         }
       } catch(e) {}
     }
+
+    // Metros globales desde localStorage (clave separada, independiente del nivel)
+    try {
+      const m = localStorage.getItem('cruzando_total_metros');
+      if (m !== null && !isNaN(Number(m))) totalMeters = Number(m);
+    } catch(e) {}
 
     // isDark siempre desde localStorage (preferencia de UI, no progreso)
     try {
@@ -1972,8 +1990,8 @@ body {
     }
     if (hasNext && isDone) {
       html += '<button class="btn btn-primary" onclick="window._ca.goMystery(' + (mi+1) + ')">Siguiente →</button>';
-    } else if (!isDone) {
-      // No mostrar "siguiente" hasta completar con Amén
+    } else if (mi === 4 && isDone) {
+      html += '<button class="btn btn-primary" onclick="window._ca.backToBlocks()">← Ver Misterios</button>';
     }
     nav.innerHTML = html;
   }
@@ -2093,6 +2111,7 @@ body {
       onMedInput: onMedInput,
       confirmReflection: confirmReflection,
       enterBlock: enterBlock,
+      backToBlocks: () => { stopAudio(); renderHome(); },
     };
     // goHome necesita estar en window directamente (usado en onclick del header)
     window.goHome = goHome;
