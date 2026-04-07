@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#1A0E04">
 <title>Mi Diario · CruzAndo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,600;1,400;1,600&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
 <style>
 /* ══════════════════════════════════════════════════════
    diario.html · CruzAndo App · Mi Diario de Reflexiones
@@ -61,6 +61,43 @@ body {
   margin:0 auto;
   min-height:100dvh;
   position:relative;
+  padding-bottom:72px;
+}
+
+/* ── Bottom nav bar ── */
+.app-nav {
+  position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+  width:100%; max-width:480px; z-index:80;
+  background:var(--bg); border-top:1px solid var(--border);
+  display:flex; align-items:stretch;
+  padding-bottom:env(safe-area-inset-bottom, 0px);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+.app-nav-item {
+  flex:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:4px; padding:10px 4px 12px;
+  background:none; border:none; cursor:pointer;
+  font-family:inherit; text-decoration:none;
+  color:var(--text-dim); transition:color 0.2s;
+  -webkit-tap-highlight-color:transparent;
+}
+.app-nav-item:active { opacity:0.7; }
+.app-nav-item.active { color:var(--orange); }
+.app-nav-item[disabled] { cursor:default; opacity:1; }
+.app-nav-icon {
+  width:24px; height:24px; position:relative;
+  display:flex; align-items:center; justify-content:center;
+}
+.app-nav-item.active .app-nav-icon::before {
+  content:''; position:absolute; inset:-5px;
+  background:rgba(255,122,0,0.12);
+  border-radius:10px;
+}
+.app-nav-label {
+  font-size:0.6rem; font-weight:600; letter-spacing:0.4px;
+  text-transform:uppercase;
 }
 
 /* ── HEADER ── */
@@ -190,8 +227,8 @@ body {
   font-size:2rem;
 }
 .auth-title {
-  font-family:'Lora',serif;
-  font-size:1.3rem; font-weight:600;
+  font-family:'Crimson Pro',serif;
+  font-size:1.6rem; font-weight:600;
   color:var(--text);
   line-height:1.3;
 }
@@ -242,8 +279,8 @@ body {
   font-size:3rem; opacity:0.6;
 }
 .empty-title {
-  font-family:'Lora',serif;
-  font-size:1.2rem; font-weight:600;
+  font-family:'Crimson Pro',serif;
+  font-size:1.6rem; font-weight:600;
   color:var(--text);
   line-height:1.3;
 }
@@ -344,10 +381,10 @@ body {
 }
 
 .card-text {
-  font-family:'Lora',serif;
-  font-size:0.88rem;
+  font-family:'Crimson Pro',serif;
+  font-size:22px; font-weight:500;
   color:var(--text);
-  line-height:1.65;
+  line-height:1.7;
   border-left:2px solid var(--border);
   padding-left:12px;
   margin-bottom:10px;
@@ -412,11 +449,6 @@ body {
 
   <!-- ══ HEADER (siempre visible) ══ -->
   <header class="header">
-    <button class="back-btn" id="backBtn" aria-label="Regresar" onclick="goBack()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="15 18 9 12 15 6"/>
-      </svg>
-    </button>
     <div class="header-center">
       <div class="header-title">Mi Diario</div>
       <div class="header-sub" id="headerSub">Reflexiones personales</div>
@@ -481,6 +513,48 @@ body {
   <!-- Frase de cierre -->
   <p class="footer-frase" id="footerFrase">¡Goza el camino!</p>
 
+  <!-- ══ BOTTOM NAV BAR ══ -->
+  <nav class="app-nav">
+    <button class="app-nav-item" onclick="goTo('orar.html')">
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="2" x2="12" y2="22"/>
+          <line x1="4" y1="9" x2="20" y2="9"/>
+        </svg>
+      </div>
+      <span class="app-nav-label">Orar</span>
+    </button>
+    <button class="app-nav-item active" disabled>
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/>
+          <path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/>
+        </svg>
+      </div>
+      <span class="app-nav-label">Diario</span>
+    </button>
+    <button class="app-nav-item" onclick="goTo('sanar.html')">
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s-8-5.5-8-11a8 8 0 0116 0c0 5.5-8 11-8 11z"/>
+          <path d="M9 11h6M12 8v6"/>
+        </svg>
+      </div>
+      <span class="app-nav-label">Sanar</span>
+    </button>
+    <button class="app-nav-item" onclick="goTo('index.html')">
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/>
+          <rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+      </div>
+      <span class="app-nav-label">Inicio</span>
+    </button>
+  </nav>
+
 </div><!-- /.shell -->
 
 <!-- ══════════════════════════════════════════
@@ -496,7 +570,7 @@ body {
    ── Pega aquí tus valores del proyecto ──
    ════════════════════════════════════════════════════ */
 const firebaseConfig = {
- apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
+apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
     authDomain: "cruzando-app.firebaseapp.com",
     projectId: "cruzando-app",
     storageBucket: "cruzando-app.firebasestorage.app",
@@ -596,6 +670,11 @@ function goBack() {
   // Respeta subdirectorio en GitHub Pages
   const base = window.location.origin + window.location.pathname.replace(/\/diario\.html$/, '/');
   window.location.href = base + 'index.html';
+}
+
+function goTo(page) {
+  const base = window.location.origin + window.location.pathname.replace(/\/diario\.html$/, '/');
+  window.location.href = base + page;
 }
 
 /* ════════════════════════════════════════════════════
