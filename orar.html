@@ -19,7 +19,7 @@
    ── Pega aquí tus valores del proyecto ──
    ════════════════════════════════════════════════════ */
 const firebaseConfig = {
-   apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
+  apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
     authDomain: "cruzando-app.firebaseapp.com",
     projectId: "cruzando-app",
     storageBucket: "cruzando-app.firebasestorage.app",
@@ -315,7 +315,7 @@ body {
 }
 .evangelio-text {
   font-family:'Cormorant Garamond', Georgia, serif;
-  font-size:1.15rem; line-height:1.85; color:var(--text);
+  font-size:1.15rem; font-weight:500; line-height:1.85; color:var(--text);
 }
 .evangelio-ref { font-size:0.78rem; color:var(--text-dim); text-align:right; margin-top:12px; font-style:italic; }
 
@@ -366,6 +366,19 @@ body {
 }
 .canto-box p { font-size:0.88rem; color:var(--text); font-style:italic; line-height:1.7; }
 .canto-box .canto-hint { font-size:0.78rem; color:var(--text-dim); margin-top:8px; display:block; }
+
+.canto-letra {
+  margin-top:16px; padding:16px 18px;
+  background:var(--sec-bg); border-radius:12px;
+  font-family:'Cormorant Garamond', Georgia, serif;
+  font-size:1.05rem; font-weight:500; line-height:1.9;
+  color:var(--text); white-space:pre-line; text-align:left;
+}
+.canto-letra-titulo {
+  font-size:0.65rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:1px; color:var(--lvl-bold);
+  margin-bottom:10px; display:block;
+}
 
 /* ── Contemplación texto ── */
 .contempl-text {
@@ -886,6 +899,7 @@ body {
 
   // ── Estado global ──
   let DATA = null;
+  let CANTOS_DATA = null;
   let NIVEL_ID = null;
   const MUSIC_BASE = 'https://pub-faed94e375aa443e846e07f81ef93274.r2.dev/';
   const AUDIO_BASE = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/';
@@ -1751,7 +1765,19 @@ body {
     }
     if (key === 'canto') {
       const src = cantoUrl(m);
-      return audioPlayerHTML('ap-canto', 'Canto contemplativo', src);
+      let html = audioPlayerHTML('ap-canto', 'Canto contemplativo', src);
+      // Letra del canto desde CANTOS_DATA
+      if (CANTOS_DATA && CANTOS_DATA.cantos && CANTOS_DATA.cantos[b]) {
+        const cantoObj = CANTOS_DATA.cantos[b].find(c => c.numero === m.numero);
+        if (cantoObj && cantoObj.letra) {
+          html +=
+            '<div class="canto-letra">' +
+              '<span class="canto-letra-titulo">🎵 Letra</span>' +
+              escHTML(cantoObj.letra) +
+            '</div>';
+        }
+      }
+      return html;
     }
     if (key === 'contemplar') {
       const src = contemplacionUrl(m);
@@ -2001,7 +2027,7 @@ body {
       return;
     }
 
-    // Cargar JSON (ruta relativa al directorio del HTML)
+    // Cargar JSON principal + cantos en paralelo
     const loc = window.location;
     const base = loc.origin + loc.pathname.substring(0, loc.pathname.lastIndexOf('/') + 1);
     try {
@@ -2012,6 +2038,12 @@ body {
       showError('No se pudo cargar data/' + NIVEL_ID + '.json. Verifica que el archivo exista.');
       return;
     }
+
+    // Cargar cantos (silencioso — no bloquea si no existe)
+    try {
+      const resp = await fetch(base + 'data/' + NIVEL_ID + '-cantos.json');
+      if (resp.ok) CANTOS_DATA = await resp.json();
+    } catch(e) {}
 
     // Leer plan del usuario desde Firestore
     try {
@@ -2056,6 +2088,7 @@ body {
     };
     // goHome necesita estar en window directamente (usado en onclick del header)
     window.goHome = goHome;
+  window.goTo   = goTo;
 
     // Render
     $('scr-loading').style.display = 'none';
