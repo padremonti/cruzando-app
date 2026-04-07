@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#E6DED3">
 <title>CruzAndo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
 <!-- Firebase SDK v10 (compat) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -314,8 +314,8 @@ body {
   display:flex; align-items:center; gap:6px;
 }
 .evangelio-text {
-  font-family:'Cormorant Garamond', Georgia, serif;
-  font-size:1.15rem; font-weight:500; line-height:1.85; color:var(--text);
+  font-family:'Crimson Pro', Georgia, serif;
+  font-size:26px; font-weight:500; line-height:1.7; color:var(--text);
 }
 .evangelio-ref { font-size:0.78rem; color:var(--text-dim); text-align:right; margin-top:12px; font-style:italic; }
 
@@ -370,9 +370,10 @@ body {
 .canto-letra {
   margin-top:16px; padding:16px 18px;
   background:var(--sec-bg); border-radius:12px;
-  font-family:'Cormorant Garamond', Georgia, serif;
-  font-size:1.05rem; font-weight:500; line-height:1.9;
+  font-family:'Crimson Pro', Georgia, serif;
+  font-size:25px; font-weight:400; line-height:1.85;
   color:var(--text); white-space:pre-line; text-align:left;
+  font-style:italic;
 }
 .canto-letra-titulo {
   font-size:0.65rem; font-weight:700; text-transform:uppercase;
@@ -384,7 +385,8 @@ body {
 .contempl-text {
   margin-top:14px; padding:16px 18px; background:var(--sec-bg);
   border-radius:14px; border-left:3px solid var(--lvl-soft);
-  font-size:0.92rem; line-height:1.9; white-space:pre-line;
+  font-family:'Crimson Pro', Georgia, serif;
+  font-size:26px; font-weight:500; line-height:1.7; white-space:pre-line;
 }
 
 /* ── Meditación ── */
@@ -1765,17 +1767,18 @@ body {
     }
     if (key === 'canto') {
       const src = cantoUrl(m);
-      let html = audioPlayerHTML('ap-canto', 'Canto contemplativo', src);
-      // Letra del canto desde CANTOS_DATA
+      let cantoObj = null;
       if (CANTOS_DATA && CANTOS_DATA.cantos && CANTOS_DATA.cantos[b]) {
-        const cantoObj = CANTOS_DATA.cantos[b].find(c => c.numero === m.numero);
-        if (cantoObj && cantoObj.letra) {
-          html +=
-            '<div class="canto-letra">' +
-              '<span class="canto-letra-titulo">🎵 Letra</span>' +
-              escHTML(cantoObj.letra) +
-            '</div>';
-        }
+        cantoObj = CANTOS_DATA.cantos[b].find(c => c.numero === m.numero);
+      }
+      const label = cantoObj && cantoObj.titulo ? cantoObj.titulo : 'Canto contemplativo';
+      let html = audioPlayerHTML('ap-canto', label, src);
+      if (cantoObj && cantoObj.letra) {
+        html +=
+          '<div class="canto-letra">' +
+            '<span class="canto-letra-titulo">🎵 Letra</span>' +
+            escHTML(cantoObj.letra) +
+          '</div>';
       }
       return html;
     }
