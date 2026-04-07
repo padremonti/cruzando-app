@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#E6DED3">
 <title>CruzAndo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
 <!-- Firebase SDK v10 (compat) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -19,7 +19,7 @@
    ── Pega aquí tus valores del proyecto ──
    ════════════════════════════════════════════════════ */
 const firebaseConfig = {
-  apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
+ apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
     authDomain: "cruzando-app.firebaseapp.com",
     projectId: "cruzando-app",
     storageBucket: "cruzando-app.firebasestorage.app",
@@ -89,6 +89,20 @@ body {
   min-height:100dvh;
   -webkit-font-smoothing:antialiased;
   transition:background 0.4s,color 0.4s;
+  /* ── Mejora 2: Risograph V4 light — grano + doble tinta naranja/rojo ── */
+  background-image:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/></filter><rect width='200' height='200' filter='url(%23n)' opacity='0.08'/></svg>"),
+    linear-gradient(135deg, rgba(192,57,43,0.07) 0%, rgba(255,122,0,0.06) 60%, transparent 100%);
+  background-size: 200px 200px, 100% 100%;
+  background-blend-mode: multiply, normal;
+}
+.dark body {
+  /* ── Mejora 2: Risograph V3 dark — grano + halo naranja inferior izquierdo ── */
+  background-image:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/></filter><rect width='200' height='200' filter='url(%23n)' opacity='0.07'/></svg>"),
+    radial-gradient(ellipse at 20% 85%, rgba(255,122,0,0.11) 0%, transparent 55%);
+  background-size: 200px 200px, 100% 100%;
+  background-blend-mode: screen, normal;
 }
 
 /* ── Layout ── */
@@ -114,7 +128,11 @@ body {
 
 /* ── Pantalla de Inicio: Tarjetas de Bloques ── */
 .home-intro { padding:24px 18px 12px; text-align:center; }
-.home-intro h1 { font-size:1.35rem; font-weight:800; color:var(--text); margin-bottom:4px; }
+.home-intro h1 {
+  font-family:'Cormorant Garamond', Georgia, serif;
+  font-size:1.9rem; font-weight:600; color:var(--text); margin-bottom:4px;
+  line-height:1.15; letter-spacing:0.01em;
+}
 .home-intro p { font-size:0.82rem; color:var(--text-dim); }
 
 /* ── Banner Misterios del Día ── */
@@ -142,8 +160,19 @@ body {
 .today-banner-arrow { color:var(--lvl-bold); font-size:1.2rem; font-weight:700; }
 .today-banner h3 { font-size:1.1rem; font-weight:800; margin-bottom:3px; }
 .today-banner-days { font-size:0.72rem; color:var(--text-dim); }
-.block-card.today { border-color:var(--lvl-soft); background:linear-gradient(135deg,rgba(var(--lvl-light-rgb,255,207,162),0.35),var(--card)); }
-.dark .block-card.today { background:linear-gradient(135deg,rgba(var(--lvl-bold-rgb,255,122,0),0.1),var(--card)); }
+/* ── Mejora 4: Bloque del día dramático ── */
+@keyframes todayPulse {
+  0%,100% { box-shadow:0 0 0 0 rgba(var(--lvl-bold-rgb,255,122,0),0.55), 0 2px 16px var(--lvl-ultra); }
+  50%      { box-shadow:0 0 0 5px rgba(var(--lvl-bold-rgb,255,122,0),0),   0 4px 24px rgba(var(--lvl-bold-rgb,255,122,0),0.2); }
+}
+.block-card.today {
+  border-color:var(--lvl-bold);
+  background:radial-gradient(ellipse at top right, rgba(var(--lvl-bold-rgb,255,122,0),0.22) 0%, rgba(var(--lvl-light-rgb,255,207,162),0.12) 40%, var(--card) 75%);
+  animation:slideUp 0.55s cubic-bezier(0.34,1.72,0.64,1) both, todayPulse 2.4s ease-in-out 0.6s infinite;
+}
+.dark .block-card.today {
+  background:radial-gradient(ellipse at top right, rgba(var(--lvl-bold-rgb,255,122,0),0.28) 0%, rgba(var(--lvl-bold-rgb,255,122,0),0.10) 45%, var(--card) 75%);
+}
 
 .block-grid { display:flex; flex-direction:column; gap:14px; padding:8px 18px 24px; }
 .block-card {
@@ -201,12 +230,74 @@ body {
 .btn-ghost { background:transparent; color:var(--text-soft); padding:10px 14px; font-size:0.82rem; }
 .btn-block { width:100%; }
 
-/* ── Pantalla de Oración ── */
+/* ── Mejora 6: Hero image ── */
+.mystery-hero {
+  position:relative; width:100%;
+  aspect-ratio:3/4; overflow:hidden;
+  background:var(--card);
+}
+.mystery-hero-img {
+  width:100%; height:100%; object-fit:cover;
+  display:block;
+  animation:fadeIn 0.5s ease both;
+}
+.mystery-hero-placeholder {
+  width:100%; height:100%;
+  display:flex; align-items:center; justify-content:center;
+  opacity:0.18;
+}
+.mystery-hero-placeholder svg { width:64px; height:64px; }
+.mystery-hero-gradient {
+  position:absolute; inset:0;
+  background:linear-gradient(
+    to top,
+    rgba(10,7,5,0.88) 0%,
+    rgba(10,7,5,0.45) 35%,
+    transparent 65%
+  );
+}
+.mystery-hero-text {
+  position:absolute; bottom:0; left:0; right:0;
+  padding:28px 20px 18px;
+}
+.mystery-hero-counter {
+  font-size:0.65rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:1.2px; color:rgba(230,222,211,0.65);
+  margin-bottom:6px;
+}
+.mystery-hero-title {
+  font-family:'Cormorant Garamond', Georgia, serif;
+  font-size:2rem; font-weight:600; line-height:1.1;
+  letter-spacing:0.01em; color:#E6DED3;
+  text-shadow:0 2px 12px rgba(0,0,0,0.5);
+}
+.mystery-hero-subtitle {
+  font-family:'Cormorant Garamond', Georgia, serif;
+  font-size:1.05rem; font-weight:400; font-style:italic;
+  color:rgba(230,222,211,0.7); margin-top:4px;
+}
+
+/* Ocultar prayer-header en modo hero — el título vive en el hero */
+.has-hero .prayer-header .mystery-title,
+.has-hero .prayer-header .mystery-subtitle { display:none; }
+.has-hero .prayer-header {
+  padding:10px 18px 6px;
+}
+
+/* ── Pantalla de Oración (pre-hero) ── */
 .prayer-header { padding:16px 18px 10px; }
 .prayer-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
 .mystery-counter { font-size:0.72rem; font-weight:600; color:var(--text-dim); letter-spacing:1px; text-transform:uppercase; }
-.mystery-title { font-size:1.15rem; font-weight:800; margin-bottom:2px; }
-.mystery-subtitle { font-size:0.82rem; color:var(--text-soft); font-style:italic; }
+.mystery-title {
+  font-family:'Cormorant Garamond', Georgia, serif;
+  font-size:1.75rem; font-weight:600; line-height:1.15;
+  letter-spacing:0.01em; margin-bottom:4px;
+}
+.mystery-subtitle {
+  font-family:'Cormorant Garamond', Georgia, serif;
+  font-size:1.05rem; font-weight:400;
+  font-style:italic; color:var(--text-soft);
+}
 
 /* Cuentas del rosario (cadena de 5) */
 .mystery-beads { padding:0 18px 14px; }
@@ -222,7 +313,10 @@ body {
   letter-spacing:1.2px; color:var(--lvl-bold); margin-bottom:10px;
   display:flex; align-items:center; gap:6px;
 }
-.evangelio-text { font-size:0.95rem; line-height:1.85; color:var(--text); }
+.evangelio-text {
+  font-family:'Cormorant Garamond', Georgia, serif;
+  font-size:1.15rem; line-height:1.85; color:var(--text);
+}
 .evangelio-ref { font-size:0.78rem; color:var(--text-dim); text-align:right; margin-top:12px; font-style:italic; }
 
 /* ── Acordeón ── */
@@ -338,11 +432,47 @@ body {
 .done-text { font-size:0.82rem; font-weight:600; color:var(--green); }
 .done-date { font-size:0.72rem; color:var(--text-dim); }
 
-/* ── Navegación inferior ── */
+/* ── Navegación de prayer (botones Siguiente/Anterior) ── */
 .bottom-nav {
   padding:14px 18px 28px; display:flex; gap:10px;
 }
 .bottom-nav .btn { flex:1; }
+
+/* ── Mejora 5: Bottom nav bar fija ── */
+.shell { padding-bottom:72px; }
+.app-nav {
+  position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+  width:100%; max-width:480px; z-index:80;
+  background:var(--bg); border-top:1px solid var(--border);
+  display:flex; align-items:stretch;
+  padding-bottom:env(safe-area-inset-bottom, 0px);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+.app-nav-item {
+  flex:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:4px; padding:10px 4px 12px;
+  background:none; border:none; cursor:pointer;
+  font-family:inherit; text-decoration:none;
+  color:var(--text-dim); transition:color 0.2s;
+  -webkit-tap-highlight-color:transparent;
+}
+.app-nav-item:active { opacity:0.7; }
+.app-nav-item.active { color:var(--lvl-bold); }
+.app-nav-icon {
+  width:24px; height:24px; position:relative;
+  display:flex; align-items:center; justify-content:center;
+}
+.app-nav-item.active .app-nav-icon::before {
+  content:''; position:absolute; inset:-5px;
+  background:rgba(var(--lvl-bold-rgb,255,122,0),0.12);
+  border-radius:10px;
+}
+.app-nav-label {
+  font-size:0.6rem; font-weight:600; letter-spacing:0.4px;
+  text-transform:uppercase;
+}
 
 /* ── Pantalla de celebración de bloque ── */
 .celebration-screen { text-align:center; padding:40px 24px; }
@@ -358,7 +488,10 @@ body {
   justify-content:center; font-size:4rem;
   box-shadow:0 8px 32px var(--shadow);
 }
-.celebration-title { font-size:1.3rem; font-weight:800; margin-bottom:8px; }
+.celebration-title {
+  font-family:'Cormorant Garamond', Georgia, serif;
+  font-size:1.9rem; font-weight:600; margin-bottom:8px; line-height:1.15;
+}
 .celebration-sub { font-size:0.88rem; color:var(--text-soft); margin-bottom:24px; line-height:1.7; }
 
 /* ── Error / Loading ── */
@@ -384,9 +517,27 @@ body {
   100% { transform:translateY(100vh) rotate(720deg); opacity:0; }
 }
 
-/* ── Fade in ── */
-@keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+/* ── Mejora 3: Spring slide-up — cubic-bezier expresivo ── */
+@keyframes fadeIn  { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+@keyframes slideUp { from { opacity:0; transform:translateY(22px) scale(0.98); } to { opacity:1; transform:translateY(0) scale(1); } }
+
+/* Elementos genéricos: fade suave original */
 .fade-in { animation:fadeIn 0.4s ease both; }
+
+/* Tarjetas de bloque (1): spring expresivo con stagger */
+.block-card.fade-in    { animation:slideUp 0.55s cubic-bezier(0.34,1.72,0.64,1) both; }
+.block-card.fade-in-d1 { animation-delay:0.05s; }
+.block-card.fade-in-d2 { animation-delay:0.12s; }
+.block-card.fade-in-d3 { animation-delay:0.19s; }
+.block-card.fade-in-d4 { animation-delay:0.26s; }
+
+/* Evangelio (2): spring con delay heredado */
+.evangelio-box.fade-in { animation:slideUp 0.55s cubic-bezier(0.34,1.72,0.64,1) both; }
+
+/* Prayer header / mystery-title (3): spring más lento, contemplativo */
+.prayer-header.fade-in { animation:slideUp 0.65s cubic-bezier(0.34,1.72,0.64,1) both; }
+
+/* Delays genéricos */
 .fade-in-d1 { animation-delay:0.08s; }
 .fade-in-d2 { animation-delay:0.16s; }
 .fade-in-d3 { animation-delay:0.24s; }
@@ -565,18 +716,9 @@ body {
 
   <!-- ═══ HEADER (compartido) ═══ -->
   <header class="header" id="main-header" style="display:none">
-    <div style="display:flex;align-items:center;gap:10px;">
-      <!-- Botón Home → regresa al menú principal (index.html) -->
-      <button class="icon-btn" id="btn-home" title="Menú principal" onclick="goHome()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z"/>
-          <polyline points="9 21 9 12 15 12 15 21"/>
-        </svg>
-      </button>
-      <div>
-        <div class="header-title" id="h-title"></div>
-        <div class="header-sub" id="h-sub"></div>
-      </div>
+    <div>
+      <div class="header-title" id="h-title"></div>
+      <div class="header-sub" id="h-sub"></div>
     </div>
     <div class="header-actions">
       <!-- Display de metros -->
@@ -625,20 +767,15 @@ body {
   <div class="screen" id="scr-prayer">
     <div class="prayer-header fade-in">
       <div class="prayer-nav">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <button class="icon-btn" onclick="goHome()" title="Menú principal" style="width:32px;height:32px;flex-shrink:0;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z"/>
-              <polyline points="9 21 9 12 15 12 15 21"/>
-            </svg>
-          </button>
-          <button class="btn-ghost" id="btn-back-home">← Bloques</button>
-        </div>
         <span class="mystery-counter" id="prayer-counter"></span>
       </div>
       <div class="mystery-title" id="prayer-title"></div>
       <div class="mystery-subtitle" id="prayer-subtitle"></div>
     </div>
+
+    <!-- Hero image (Mejora 6) -->
+    <div id="mystery-hero"></div>
+
     <div class="mystery-beads" id="prayer-dots"></div>
 
     <!-- Evangelio -->
@@ -675,6 +812,48 @@ body {
     <div class="meters-float" id="meters-float-text"></div>
   </div>
 
+  <!-- ═══ BOTTOM NAV BAR (Mejora 5) ═══ -->
+  <nav class="app-nav" id="app-nav">
+    <button class="app-nav-item active" id="nav-orar" onclick="goHome()">
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="2" x2="12" y2="22"/>
+          <line x1="4" y1="9" x2="20" y2="9"/>
+        </svg>
+      </div>
+      <span class="app-nav-label">Orar</span>
+    </button>
+    <button class="app-nav-item" id="nav-diario" onclick="goTo('diario.html')">
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/>
+          <path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/>
+        </svg>
+      </div>
+      <span class="app-nav-label">Diario</span>
+    </button>
+    <button class="app-nav-item" id="nav-sanar" onclick="goTo('sanar.html')">
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s-8-5.5-8-11a8 8 0 0116 0c0 5.5-8 11-8 11z"/>
+          <path d="M9 11h6M12 8v6"/>
+        </svg>
+      </div>
+      <span class="app-nav-label">Sanar</span>
+    </button>
+    <button class="app-nav-item" id="nav-inicio" onclick="goTo('index.html')">
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/>
+          <rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+      </div>
+      <span class="app-nav-label">Inicio</span>
+    </button>
+  </nav>
+
   <!-- Mariano Grand Celebration (pantalla completa al completar bloque) -->
   <div class="mariano-grand-overlay" id="mariano-grand-overlay" style="display:none">
     <div class="mariano-grand-container">
@@ -709,6 +888,13 @@ body {
   let NIVEL_ID = null;
   const MUSIC_BASE = 'https://pub-faed94e375aa443e846e07f81ef93274.r2.dev/';
   const AUDIO_BASE = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/';
+  const IMAGE_BASE = 'https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev';
+  const BLOCK_COLORS = {
+    gozosos:  '#D4A017',
+    luminosos:'#01BBE1',
+    dolorosos:'#C0392B',
+    gloriosos:'#8E44AD'
+  };
   let currentBlock = null;   // 'gozosos' | 'luminosos' | 'dolorosos' | 'gloriosos'
   let currentMystery = 0;    // 0-4 dentro del bloque
   let openSection = null;     // qué acordeón está abierto
@@ -750,6 +936,16 @@ body {
     window.location.href = base + 'index.html';
   }
 
+  // ── Navegación a otras secciones (bottom nav) ──
+  function goTo(page) {
+    stopAudio();
+    const base = window.location.origin
+      + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+    window.location.href = base + page;
+  }
+  window._ca = window._ca || {};
+  window._ca.goTo = goTo;
+
   // ── Utilidades ──
   const $ = id => document.getElementById(id);
   const show = id => { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); $(id).classList.add('active'); };
@@ -773,6 +969,12 @@ body {
     const mundo = parseInt(NIVEL_ID.substring(0,2), 10);
     const nivel = parseInt(NIVEL_ID.substring(2,4), 10);
     return MUSIC_BASE + 'M_' + mundo + '_' + nivel + '_' + m.numero + '.mp3';
+  }
+
+  function imagenUrl(m) {
+    const mundo = parseInt(NIVEL_ID.substring(0,2), 10);
+    const nivel  = parseInt(NIVEL_ID.substring(2,4), 10);
+    return IMAGE_BASE + 'P_' + mundo + '_' + nivel + '_' + m.numero + '.webp';
   }
 
   // ── Guardar reflexión individual en Firestore ──────────────────
@@ -1391,6 +1593,42 @@ body {
   }
 
   // ── Render: Pantalla de Oración ──
+  // ── Hero image (Mejora 6) ──────────────────────────────────────
+  function renderHero(b, m) {
+    const container = $('mystery-hero');
+    const scr = $('scr-prayer');
+    const blockColor = BLOCK_COLORS[b] || '#FF7A00';
+    const counter = ORDS[currentMystery] + ' Misterio ' + BTYPES[b];
+    const url = imagenUrl(m);
+
+    // Placeholder SVG (cruz fina del bloque)
+    const placeholder =
+      '<div class="mystery-hero-placeholder" style="background:' + blockColor + '20;">' +
+        '<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+          '<rect x="46" y="5" width="8" height="90" fill="' + blockColor + '"/>' +
+          '<rect x="5" y="42" width="90" height="8" fill="' + blockColor + '"/>' +
+        '</svg>' +
+      '</div>';
+
+    // Construir hero con imagen — fallback a placeholder si 404
+    container.innerHTML =
+      '<div class="mystery-hero">' +
+        '<img class="mystery-hero-img" id="hero-img" src="' + url + '" alt="' + m.titulo + '" ' +
+          'onerror="this.style.display=\'none\';document.getElementById(\'hero-ph\').style.display=\'\'">' +
+        '<div id="hero-ph" style="display:none;width:100%;height:100%;position:absolute;inset:0;">' +
+          placeholder +
+        '</div>' +
+        '<div class="mystery-hero-gradient"></div>' +
+        '<div class="mystery-hero-text">' +
+          '<div class="mystery-hero-counter">' + counter + '</div>' +
+          '<div class="mystery-hero-title">' + m.titulo + '</div>' +
+          (m.subtitulo ? '<div class="mystery-hero-subtitle">' + m.subtitulo + '</div>' : '') +
+        '</div>' +
+      '</div>';
+
+    scr.classList.add('has-hero');
+  }
+
   function renderPrayer() {
     const b = currentBlock;
     const mi = currentMystery;
@@ -1401,10 +1639,13 @@ body {
     $('h-title').textContent = 'CruzAndo';
     $('h-sub').textContent = nivelLabel(DATA.tema.id) + ' · ' + BLOCK_NAMES[b];
 
-    // Counter
+    // Counter (visible en hero — el prayer-header solo lo muestra en fallback)
     $('prayer-counter').textContent = ORDS[mi] + ' Misterio ' + BTYPES[b];
     $('prayer-title').textContent = m.titulo;
     $('prayer-subtitle').textContent = m.subtitulo || '';
+
+    // Hero image
+    renderHero(b, m);
 
     // Beads (rosary chain)
     const dots = $('prayer-dots');
@@ -1798,7 +2039,6 @@ body {
 
     // Event listeners
     $('btn-dark').onclick = toggleDark;
-    $('btn-back-home').onclick = () => { stopAudio(); renderHome(); };
 
     // API global para onclick en HTML
     window._ca = {
