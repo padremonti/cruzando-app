@@ -394,11 +394,15 @@ body {
 .med-label-row { display:flex; align-items:center; gap:7px; margin-bottom:6px; }
 .med-dot { width:7px; height:7px; border-radius:50%; }
 .med-label-text { font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; }
-.med-question { font-size:0.92rem; line-height:1.7; margin-bottom:10px; }
+.med-question {
+  font-family:'Crimson Pro', Georgia, serif;
+  font-size:24px; font-weight:500; line-height:1.7; margin-bottom:10px;
+}
 .journal-area {
-  width:100%; min-height:100px; padding:14px; border-radius:12px;
+  width:100%; min-height:120px; padding:14px; border-radius:12px;
   border:1.5px solid var(--border); background:var(--input-bg);
-  font-family:inherit; font-size:0.88rem; line-height:1.6;
+  font-family:'Crimson Pro', Georgia, serif;
+  font-size:22px; font-weight:400; line-height:1.7;
   color:var(--text); resize:vertical; transition:border-color 0.3s;
 }
 .journal-area:focus { outline:none; border-color:var(--lvl-soft); }
@@ -425,7 +429,8 @@ body {
 /* ── Intercesión ── */
 .interc-text {
   padding:18px; background:var(--lvl-ultra); border-radius:14px;
-  font-size:0.92rem; line-height:1.85; white-space:pre-line;
+  font-family:'Crimson Pro', Georgia, serif;
+  font-size:26px; font-weight:500; line-height:1.7; white-space:pre-line;
 }
 .amen-btn {
   display:block; width:100%; margin-top:14px; padding:16px;
