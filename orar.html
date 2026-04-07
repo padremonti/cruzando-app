@@ -230,6 +230,106 @@ body {
 .btn-ghost { background:transparent; color:var(--text-soft); padding:10px 14px; font-size:0.82rem; }
 .btn-block { width:100%; }
 
+/* ── Micro-aprendizaje ── */
+.micro-screen { padding:0 18px 40px; }
+.micro-header { padding:16px 0 10px; display:flex; align-items:center; justify-content:space-between; }
+.micro-label {
+  font-size:0.65rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:1.2px; color:var(--lvl-bold);
+}
+.micro-sub {
+  font-family:'Crimson Pro', Georgia, serif;
+  font-size:1.2rem; font-weight:600; color:var(--text); margin-top:2px;
+}
+.micro-progress { display:flex; gap:6px; margin-bottom:16px; }
+.micro-dot { height:5px; border-radius:3px; background:var(--border); transition:all 0.4s ease; }
+.micro-dot.done { background:var(--green); }
+.micro-dot.active { background:var(--lvl-bold); }
+.micro-card {
+  background:var(--card); border-radius:20px; padding:28px 22px;
+  border:1.5px solid var(--border);
+  animation:slideUp 0.45s cubic-bezier(0.34,1.72,0.64,1) both;
+  min-height:220px; display:flex; flex-direction:column; justify-content:space-between;
+}
+.micro-card-emoji { font-size:2.2rem; margin-bottom:14px; }
+.micro-card-titulo {
+  font-family:'Crimson Pro', Georgia, serif;
+  font-size:1.55rem; font-weight:600; color:var(--lvl-bold); line-height:1.2; margin-bottom:12px;
+}
+.micro-card-contenido {
+  font-family:'Crimson Pro', Georgia, serif;
+  font-size:1.25rem; font-weight:400; line-height:1.75; color:var(--text); flex:1;
+}
+.micro-card-footer {
+  display:flex; justify-content:space-between; align-items:center;
+  margin-top:20px; padding-top:14px; border-top:1px solid var(--border);
+}
+.micro-card-count { font-size:0.68rem; font-weight:600; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.8px; }
+.micro-q-card {
+  background:var(--card); border-radius:20px; padding:24px 22px;
+  border:1.5px solid var(--border);
+  animation:slideUp 0.45s cubic-bezier(0.34,1.72,0.64,1) both;
+}
+.micro-q-label {
+  font-size:0.65rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:1.2px; color:var(--lvl-bold); margin-bottom:14px;
+}
+.micro-q-texto {
+  font-family:'Crimson Pro', Georgia, serif;
+  font-size:1.4rem; font-weight:500; line-height:1.55; color:var(--text); margin-bottom:20px;
+}
+.micro-option {
+  width:100%; padding:14px 16px; border-radius:14px;
+  border:1.5px solid var(--border); background:var(--sec-bg);
+  font-family:'Crimson Pro', Georgia, serif;
+  font-size:1.2rem; font-weight:400; line-height:1.4;
+  color:var(--text); cursor:pointer; text-align:left;
+  display:flex; align-items:center; gap:12px;
+  transition:all 0.25s; margin-bottom:10px;
+}
+.micro-option.selected { border-color:var(--lvl-bold); background:var(--lvl-ultra); }
+.micro-option.dimmed { opacity:0.4; cursor:default; pointer-events:none; }
+.micro-option-circle {
+  width:22px; height:22px; border-radius:50%; flex-shrink:0;
+  border:1.5px solid var(--border); background:transparent;
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; color:#fff; font-weight:700; transition:all 0.25s;
+}
+.micro-option.selected .micro-option-circle { background:var(--lvl-bold); border-color:var(--lvl-bold); }
+.micro-eco {
+  margin-top:16px; padding:14px 16px;
+  background:var(--lvl-ultra); border-radius:14px; border-left:3px solid var(--lvl-soft);
+  font-family:'Crimson Pro', Georgia, serif;
+  font-size:1.15rem; font-weight:400; font-style:italic;
+  color:var(--text); line-height:1.6;
+  animation:fadeIn 0.4s ease both;
+  display:flex; align-items:flex-start; gap:10px;
+}
+.micro-eco-emoji { font-size:1.3rem; flex-shrink:0; }
+.micro-final {
+  text-align:center; padding:40px 0;
+  animation:slideUp 0.55s cubic-bezier(0.34,1.72,0.64,1) both;
+}
+.micro-final-cross {
+  margin:0 auto 24px; display:flex; align-items:center; justify-content:center;
+  width:64px; height:64px;
+}
+.micro-final-titulo {
+  font-family:'Crimson Pro', Georgia, serif;
+  font-size:1.8rem; font-weight:600; color:var(--text); line-height:1.2; margin-bottom:12px;
+}
+.micro-final-sub {
+  font-family:'Crimson Pro', Georgia, serif;
+  font-size:1.2rem; color:var(--text-soft); line-height:1.65;
+  margin:0 auto 28px; max-width:300px;
+}
+.micro-metros-chip {
+  display:inline-flex; align-items:center; gap:6px; padding:7px 16px; border-radius:20px;
+  background:var(--green-soft); color:var(--green); font-size:0.82rem; font-weight:700; margin-bottom:28px;
+}
+.micro-nav { display:flex; gap:10px; margin-top:20px; }
+.micro-nav .btn { flex:1; }
+
 /* ── Mejora 6: Hero image ── */
 .mystery-hero {
   position:relative; width:100%;
@@ -784,6 +884,21 @@ body {
     <div id="nivel-done-wrap" style="display:none"></div>
   </div>
 
+  <!-- ═══ PANTALLA MICRO-APRENDIZAJE ═══ -->
+  <div class="screen" id="scr-micro">
+    <div class="micro-screen">
+      <div class="micro-header">
+        <div>
+          <div class="micro-label" id="micro-label">Prepara tu corazón</div>
+          <div class="micro-sub" id="micro-sub"></div>
+        </div>
+      </div>
+      <div class="micro-progress" id="micro-progress"></div>
+      <div id="micro-content"></div>
+      <div class="micro-nav" id="micro-nav"></div>
+    </div>
+  </div>
+
   <!-- ═══ PANTALLA DE ORACIÓN ═══ -->
   <div class="screen" id="scr-prayer">
     <div class="prayer-header fade-in">
@@ -907,6 +1022,7 @@ body {
   // ── Estado global ──
   let DATA = null;
   let CANTOS_DATA = null;
+  let MICRO_DATA = null;
   let NIVEL_ID = null;
   const MUSIC_BASE = 'https://pub-faed94e375aa443e846e07f81ef93274.r2.dev/';
   const AUDIO_BASE = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/';
@@ -923,6 +1039,7 @@ body {
   let progress = {};          // { gozosos: [ts,ts,null,null,null], ... }
   let journal = {};           // { gozosos: { 0: {q0:'',q1:'',q2:''}, ... }, ... }
   let medConfirmed = {};      // { gozosos: { 0: {q0:true,q1:false,q2:false}, ... }, ... }
+  let microDone = {};          // { gozosos: true, luminosos: false, ... }
   let isDark = false;
   let userPlan = 'free'; // 'free' | 'pro' | 'beta' — se carga desde Firestore al init
   const isPremium = () => userPlan === 'pro' || userPlan === 'beta';
@@ -1030,6 +1147,7 @@ body {
       progress,
       journal,
       medConfirmed,
+      microDone,
       reflectionRewards,
       audioRewards,
       updatedAt: Date.now()
@@ -1086,6 +1204,7 @@ body {
           if (d.progress)          progress          = d.progress;
           if (d.journal)           journal            = d.journal;
           if (d.medConfirmed)      medConfirmed       = d.medConfirmed;
+          if (d.microDone)         microDone          = d.microDone;
           if (d.reflectionRewards) reflectionRewards  = d.reflectionRewards;
           if (d.audioRewards)      audioRewards       = d.audioRewards;
           loaded = true;
@@ -1108,6 +1227,7 @@ body {
           if (d.progress)          progress          = d.progress;
           if (d.journal)           journal            = d.journal;
           if (d.medConfirmed)      medConfirmed       = d.medConfirmed;
+          if (d.microDone)         microDone          = d.microDone;
           if (d.reflectionRewards) reflectionRewards  = d.reflectionRewards;
           if (d.audioRewards)      audioRewards       = d.audioRewards;
         }
@@ -1370,6 +1490,37 @@ body {
       });
     } catch(e){}
   }
+
+  function playBubble() {
+    try {
+      const ac = new (window.AudioContext || window.webkitAudioContext)();
+      const now = ac.currentTime;
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(150, now);
+      o.frequency.exponentialRampToValueAtTime(580, now + 0.055);
+      o.frequency.exponentialRampToValueAtTime(220, now + 0.14);
+      g.gain.setValueAtTime(0, now);
+      g.gain.linearRampToValueAtTime(0.15, now + 0.012);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+      o.connect(g); g.connect(ac.destination);
+      o.start(now); o.stop(now + 0.2);
+    } catch(e){}
+  }
+
+  function playSoftTap() {
+    try {
+      const ac = new (window.AudioContext || window.webkitAudioContext)();
+      const now = ac.currentTime;
+      const bSz = ac.sampleRate * 0.03, buf = ac.createBuffer(1, bSz, ac.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < bSz; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bSz * 0.15));
+      const s = ac.createBufferSource(); s.buffer = buf;
+      const f = ac.createBiquadFilter(); f.type = 'lowpass'; f.frequency.setValueAtTime(600, now);
+      const gn = ac.createGain(); gn.gain.setValueAtTime(0.22, now); gn.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+      s.connect(f); f.connect(gn); gn.connect(ac.destination); s.start(now); s.stop(now + 0.1);
+    } catch(e){}
+  }
   const MELODIES = [
     [440,554,659],
     [523,659,784],
@@ -1625,12 +1776,157 @@ body {
 
     stopAudio();
     currentBlock = b;
+
+    // Mostrar micro-aprendizaje si no se ha completado y hay datos
+    if (!microDone[b] && MICRO_DATA && MICRO_DATA.bloques && MICRO_DATA.bloques[b]) {
+      renderMicro(b);
+      return;
+    }
+
     const prog = progress[b] || [];
-    // Ir al primer misterio no completado, o al primero si todos están completados
     const first = prog.findIndex(x => x === null);
     currentMystery = first >= 0 ? first : 0;
     openSection = null;
     renderPrayer();
+  }
+
+  // ── Micro-aprendizaje ──────────────────────────────────────────
+  function renderMicro(b) {
+    const bloque = MICRO_DATA.bloques[b];
+    const tarjetas = bloque.tarjetas || [];
+    const preguntas = bloque.preguntas || [];
+    const total = tarjetas.length + preguntas.length;
+    let step = 0;
+    let seleccion = null;  // opción seleccionada en pregunta actual
+
+    const blockColor = BLOCK_COLORS[b] || '#FF7A00';
+
+    // Actualizar header
+    $('micro-label').textContent = 'Prepara tu corazón · ' + BLOCK_NAMES[b];
+    $('micro-sub').textContent = bloque.subtitulo || '';
+
+    function renderDots() {
+      const wrap = $('micro-progress');
+      let html = '';
+      for (let i = 0; i < total; i++) {
+        const cls = i < step ? 'done' : i === step ? 'active' : '';
+        const w = i === step ? '24px' : '8px';
+        html += '<div class="micro-dot ' + cls + '" style="width:' + w + '"></div>';
+      }
+      wrap.innerHTML = html;
+    }
+
+    function renderStep() {
+      seleccion = null;
+      renderDots();
+      const content = $('micro-content');
+      const nav = $('micro-nav');
+
+      // Pantalla final
+      if (step >= total) {
+        content.innerHTML =
+          '<div class="micro-final">' +
+            '<div class="micro-final-cross">' +
+              '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="48" height="48"' +
+              ' style="filter:drop-shadow(0 0 8px ' + blockColor + '80)">' +
+                '<rect x="46" y="5" width="8" height="90" fill="' + blockColor + '"/>' +
+                '<rect x="5" y="42" width="90" height="8" fill="' + blockColor + '"/>' +
+              '</svg>' +
+            '</div>' +
+            '<div class="micro-final-titulo">Tu corazón está preparado</div>' +
+            '<div class="micro-final-sub">Entra a los Misterios ' + BLOCK_NAMES[b] + '. Reza sin prisa. Lo que necesitas ya lo traes contigo.</div>' +
+            '<div class="micro-metros-chip">🚶‍♂️ +25m al peregrino</div>' +
+          '</div>';
+        nav.innerHTML = '<button class="btn btn-primary btn-block" id="micro-btn-orar">Comenzar a rezar →</button>';
+        $('micro-btn-orar').onclick = () => {
+          // Marcar micro como completado y dar metros
+          microDone[b] = true;
+          totalMeters += 25;
+          updateMetersDisplay();
+          saveProgress();
+          // Ir al primer misterio
+          const prog = progress[b] || [];
+          const first = prog.findIndex(x => x === null);
+          currentMystery = first >= 0 ? first : 0;
+          openSection = null;
+          renderPrayer();
+        };
+        playNotes([392, 523, 659]);
+        return;
+      }
+
+      // Tarjeta informativa
+      if (step < tarjetas.length) {
+        const t = tarjetas[step];
+        content.innerHTML =
+          '<div class="micro-card">' +
+            '<div>' +
+              '<div class="micro-card-emoji">' + escHTML(t.emoji) + '</div>' +
+              '<div class="micro-card-titulo">' + escHTML(t.titulo) + '</div>' +
+              '<div class="micro-card-contenido">' + escHTML(t.contenido) + '</div>' +
+            '</div>' +
+            '<div class="micro-card-footer">' +
+              '<span class="micro-card-count">Tarjeta ' + (step + 1) + ' de ' + tarjetas.length + '</span>' +
+            '</div>' +
+          '</div>';
+        nav.innerHTML =
+          (step > 0 ? '<button class="btn btn-outline" id="micro-prev">← Anterior</button>' : '') +
+          '<button class="btn btn-primary" id="micro-next">' +
+            (step === tarjetas.length - 1 ? 'Prepara tu corazón →' : 'Siguiente →') +
+          '</button>';
+        if ($('micro-prev')) $('micro-prev').onclick = () => { step--; renderStep(); };
+        $('micro-next').onclick = () => { step++; renderStep(); playBubble(); };
+        return;
+      }
+
+      // Pregunta de apropiación
+      const pi = step - tarjetas.length;
+      const p = preguntas[pi];
+      content.innerHTML =
+        '<div class="micro-q-card" id="micro-q">' +
+          '<div class="micro-q-label">✦ ' + (pi + 1) + ' de ' + preguntas.length + '</div>' +
+          '<div class="micro-q-texto">' + escHTML(p.pregunta) + '</div>' +
+          p.opciones.map((o, oi) =>
+            '<button class="micro-option" id="micro-opt-' + oi + '" onclick="window._ca.microPick(' + oi + ')">' +
+              '<span class="micro-option-circle" id="micro-circ-' + oi + '"></span>' +
+              escHTML(o.texto) +
+            '</button>'
+          ).join('') +
+          '<div id="micro-eco" style="display:none"></div>' +
+        '</div>';
+      nav.innerHTML = '<button class="btn btn-primary" id="micro-next-q" style="display:none">' +
+        (pi === preguntas.length - 1 ? 'Estoy listo →' : 'Siguiente →') +
+        '</button>';
+
+      window._ca.microPick = (oi) => {
+        if (seleccion !== null) return;
+        seleccion = oi;
+        const o = p.opciones[oi];
+        // Actualizar estilos
+        p.opciones.forEach((_, i) => {
+          const btn = $('micro-opt-' + i);
+          const circ = $('micro-circ-' + i);
+          if (i === oi) { btn.classList.add('selected'); circ.textContent = '✓'; }
+          else { btn.classList.add('dimmed'); }
+        });
+        // Mostrar eco
+        const eco = $('micro-eco');
+        eco.innerHTML =
+          '<div class="micro-eco">' +
+            '<span class="micro-eco-emoji">' + escHTML(o.emoji) + '</span>' +
+            escHTML(o.eco) +
+          '</div>';
+        eco.style.display = '';
+        // Mostrar botón siguiente
+        $('micro-next-q').style.display = '';
+        playSoftTap();
+      };
+
+      $('micro-next-q').onclick = () => { step++; renderStep(); playBubble(); };
+    }
+
+    show('scr-micro');
+    renderStep();
   }
 
   // ── Render: Pantalla de Oración ──
@@ -2065,10 +2361,14 @@ body {
       return;
     }
 
-    // Cargar cantos (silencioso — no bloquea si no existe)
+    // Cargar cantos y micro en paralelo (silenciosos — no bloquean si no existen)
     try {
-      const resp = await fetch(base + 'data/' + NIVEL_ID + '-cantos.json');
-      if (resp.ok) CANTOS_DATA = await resp.json();
+      const [rCantos, rMicro] = await Promise.all([
+        fetch(base + 'data/' + NIVEL_ID + '-cantos.json'),
+        fetch(base + 'data/' + NIVEL_ID + '-micro.json')
+      ]);
+      if (rCantos.ok) CANTOS_DATA = await rCantos.json();
+      if (rMicro.ok)  MICRO_DATA  = await rMicro.json();
     } catch(e) {}
 
     // Leer plan del usuario desde Firestore
