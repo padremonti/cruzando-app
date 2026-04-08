@@ -89,9 +89,18 @@ body {
   color:var(--text-dim); transition:color 0.2s;
   -webkit-tap-highlight-color:transparent;
 }
-.app-nav-item:active { opacity:0.7; }
+.app-nav-item:active { opacity:1; }
 .app-nav-item.active { color:var(--orange); }
 .app-nav-item[disabled] { cursor:default; opacity:1; }
+@keyframes navSpring {
+  0%   { transform:scale(1); }
+  35%  { transform:scale(0.78); }
+  65%  { transform:scale(1.18); }
+  82%  { transform:scale(0.95); }
+  100% { transform:scale(1); }
+}
+.app-nav-item.tapped .app-nav-icon { animation:navSpring 0.38s cubic-bezier(0.34,1.72,0.64,1) both; }
+.app-nav-item.tapped { color:var(--orange); }
 .app-nav-icon {
   width:24px; height:24px; position:relative;
   display:flex; align-items:center; justify-content:center;
@@ -634,7 +643,7 @@ body {
 
   <!-- ═══ BOTTOM NAV BAR ═══ -->
   <nav class="app-nav" id="app-nav" style="display:none">
-    <button class="app-nav-item" onclick="navigateTo('orar.html?c=' + (window.currentNivelId || '0101'))">
+    <button class="app-nav-item" onclick="navTap(this); navigateTo('orar.html?c=' + (window.currentNivelId || '0101'))">
       <div class="app-nav-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <line x1="12" y1="2" x2="12" y2="22"/>
@@ -643,7 +652,7 @@ body {
       </div>
       <span class="app-nav-label">Orar</span>
     </button>
-    <button class="app-nav-item" onclick="navigateTo('diario.html')">
+    <button class="app-nav-item" onclick="navTap(this); navigateTo('diario.html')">
       <div class="app-nav-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/>
@@ -652,7 +661,7 @@ body {
       </div>
       <span class="app-nav-label">Diario</span>
     </button>
-    <button class="app-nav-item" onclick="navigateTo('sanar.html')">
+    <button class="app-nav-item" onclick="navTap(this); navigateTo('sanar.html')">
       <div class="app-nav-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 22s-8-5.5-8-11a8 8 0 0116 0c0 5.5-8 11-8 11z"/>
@@ -1133,6 +1142,37 @@ function playTap() {
   } catch(e) {}
 }
 window.playTap = playTap;
+
+// ── Sonido + animación bottom nav ────────────────────────────────
+window._navChord = 0;
+var NAV_CHORDS = [[523,659,784],[659,784,988],[784,988,1175],[587,740,880]];
+function playNavChord() {
+  try {
+    var ac = new (window.AudioContext || window.webkitAudioContext)();
+    var now = ac.currentTime;
+    var notes = NAV_CHORDS[window._navChord % 4]; window._navChord++;
+    var master = ac.createGain();
+    master.gain.setValueAtTime(0, now);
+    master.gain.linearRampToValueAtTime(0.07, now + 0.018);
+    master.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+    master.connect(ac.destination);
+    notes.forEach(function(freq, j) {
+      var o = ac.createOscillator(), g = ac.createGain();
+      o.type = j === 0 ? 'sine' : 'triangle';
+      o.frequency.value = freq; g.gain.value = j === 0 ? 0.8 : 0.5;
+      o.connect(g); g.connect(master);
+      o.start(now + j * 0.012); o.stop(now + 0.45);
+    });
+  } catch(e) {}
+}
+function navTap(el) {
+  playNavChord();
+  el.classList.remove('tapped');
+  void el.offsetWidth;
+  el.classList.add('tapped');
+  setTimeout(function() { el.classList.remove('tapped'); }, 400);
+}
+window.navTap = navTap;
 
 </script>
 </body>
