@@ -798,7 +798,7 @@ function checkBetaExpiry(userData) {
 function renderHome(userData) {
   // Plan
   currentPlan = checkBetaExpiry(userData);
-  window.currentNivelId = currentNivelId = getCurrentNivel();
+  window.currentNivelId = currentNivelId; // ya calculado desde Firestore
   // Mostrar bottom nav
   var nav = document.getElementById('app-nav');
   if (nav) nav.style.display = '';
@@ -823,8 +823,7 @@ function renderHome(userData) {
   var subEl = document.getElementById('greeting-sub');
   if (subEl) subEl.textContent = todayLabel();
 
-  // Nivel activo
-  currentNivelId = getCurrentNivel();
+  // Nivel activo — ya calculado desde Firestore en onAuthStateChanged
   var mundo = parseInt(currentNivelId.substring(0,2), 10);
   var nivel  = parseInt(currentNivelId.substring(2,4), 10);
   var tagEl = document.getElementById('orar-nivel-tag');
@@ -877,6 +876,44 @@ async function ensureUserDoc(user, extraData) {
   }
 }
 
+// ── Determinar nivel activo desde Firestore ───────────────────────
+// Orden de todos los niveles del itinerario
+var NIVELES_ORDER = [
+  '0101','0102','0103','0104',
+  '0201','0202','0203','0204',
+  '0301','0302','0303','0304',
+  '0401','0402','0403','0404',
+  '0501','0502','0503','0504',
+  '0601','0602','0603','0604',
+  '0701','0702','0703','0704'
+];
+var BLOCKS = ['gozosos','luminosos','dolorosos','gloriosos'];
+
+async function getCurrentNivelFromFirestore(user) {
+  try {
+    // Cargar todos los documentos de progreso del usuario en paralelo
+    var snaps = await Promise.all(
+      NIVELES_ORDER.map(function(id) {
+        return getDoc(doc(db, 'users', user.uid, 'progress', id));
+      })
+    );
+    for (var i = 0; i < snaps.length; i++) {
+      if (!snaps[i].exists()) return NIVELES_ORDER[i]; // primer nivel sin datos = activo
+      var d = snaps[i].data();
+      if (!d.progress) return NIVELES_ORDER[i];
+      var allDone = BLOCKS.every(function(b) {
+        return d.progress[b] && d.progress[b].every(function(x) { return x !== null; });
+      });
+      if (!allDone) return NIVELES_ORDER[i]; // primer nivel incompleto = activo
+    }
+    // Todos completados — devolver el último
+    return NIVELES_ORDER[NIVELES_ORDER.length - 1];
+  } catch(e) {
+    console.warn('[CruzAndo] getCurrentNivelFromFirestore:', e);
+    return getCurrentNivel(); // fallback a localStorage
+  }
+}
+
 // ── Mostrar pantalla ──────────────────────────────────────────────
 function showScreen(name) {
   document.getElementById('scr-loading').style.display = 'none';
@@ -891,6 +928,9 @@ onAuthStateChanged(auth, async function(user) {
   if (user) {
     currentUser = user;
     var userData = await ensureUserDoc(user);
+    // Determinar nivel activo desde Firestore antes de renderizar
+    currentNivelId = await getCurrentNivelFromFirestore(user);
+    window.currentNivelId = currentNivelId;
     renderHome(userData);
     showScreen('home');
   } else {
