@@ -7,7 +7,7 @@
 <meta name="description" content="CruzAndo — Reza y contempla los 20 Misterios del Santo Rosario en un itinerario de formación espiritual. Peregrinar la vida con María hacia Jesucristo.">
 <title>CruzAndo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600;700&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
 
@@ -69,7 +69,41 @@ body {
   -webkit-font-smoothing:antialiased;
   transition:background 0.35s, color 0.35s;
 }
-.shell { max-width:480px; margin:0 auto; min-height:100dvh; position:relative; overflow:hidden; }
+.shell { max-width:480px; margin:0 auto; min-height:100dvh; position:relative; overflow:hidden; padding-bottom:72px; }
+
+/* ── Bottom nav bar ── */
+.app-nav {
+  position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+  width:100%; max-width:480px; z-index:100;
+  background:var(--bg); border-top:1px solid var(--border);
+  display:flex; align-items:stretch;
+  padding-bottom:env(safe-area-inset-bottom, 0px);
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+}
+.app-nav-item {
+  flex:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:4px; padding:10px 4px 12px;
+  background:none; border:none; cursor:pointer;
+  font-family:inherit; text-decoration:none;
+  color:var(--text-dim); transition:color 0.2s;
+  -webkit-tap-highlight-color:transparent;
+}
+.app-nav-item:active { opacity:0.7; }
+.app-nav-item.active { color:var(--orange); }
+.app-nav-item[disabled] { cursor:default; opacity:1; }
+.app-nav-icon {
+  width:24px; height:24px; position:relative;
+  display:flex; align-items:center; justify-content:center;
+}
+.app-nav-item.active .app-nav-icon::before {
+  content:''; position:absolute; inset:-5px;
+  background:rgba(255,122,0,0.12); border-radius:10px;
+}
+.app-nav-label {
+  font-size:0.6rem; font-weight:600; letter-spacing:0.4px;
+  text-transform:uppercase;
+}
 .bg-glow {
   position:fixed; top:-20%; left:50%; transform:translateX(-50%);
   width:700px; height:700px; pointer-events:none; z-index:0;
@@ -150,8 +184,8 @@ body {
 }
 #scr-login.active { display:flex; }
 .login-cruz { width:52px; height:52px; opacity:0.85; margin-bottom:8px; }
-.login-title { font-family:'Lora',serif; font-size:1.4rem; font-weight:600; margin-bottom:4px; }
-.login-sub { font-size:0.78rem; color:var(--text-soft); max-width:260px; line-height:1.7; margin-bottom:12px; }
+.login-title { font-family:'Crimson Pro',serif; font-size:1.9rem; font-weight:600; margin-bottom:4px; }
+.login-sub { font-size:1rem; color:var(--text-soft); max-width:260px; line-height:1.7; margin-bottom:12px; font-family:'Crimson Pro',serif; }
 .btn-login-google {
   display:flex; align-items:center; justify-content:center; gap:10px;
   width:100%; max-width:300px; padding:14px 20px;
@@ -182,7 +216,7 @@ body {
   max-height:92dvh; overflow-y:auto;
 }
 .modal-title {
-  font-family:'Lora',serif; font-size:1.1rem; font-weight:600;
+  font-family:'Crimson Pro',serif; font-size:1.5rem; font-weight:600;
   margin-bottom:20px; text-align:center;
 }
 .modal-input {
@@ -214,7 +248,7 @@ body {
 }
 .premium-header-icon { font-size:2rem; margin-bottom:8px; }
 .premium-header-title {
-  font-family:'Lora',serif; font-size:1.2rem; font-weight:600; margin-bottom:4px;
+  font-family:'Crimson Pro',serif; font-size:1.55rem; font-weight:600; margin-bottom:4px;
 }
 .premium-header-sub { font-size:0.75rem; color:var(--text-soft); line-height:1.6; }
 .premium-plans { display:flex; flex-direction:column; gap:10px; margin-bottom:20px; }
@@ -279,7 +313,7 @@ body {
 /* ── Saludo ── */
 .greeting-section { padding:20px 20px 12px; position:relative; z-index:1; }
 .greeting-label { font-size:0.68rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:1.2px; margin-bottom:4px; }
-.greeting-name { font-family:'Lora',serif; font-size:1.3rem; font-weight:600; line-height:1.3; margin-bottom:4px; }
+.greeting-name { font-family:'Crimson Pro',serif; font-size:1.75rem; font-weight:600; line-height:1.2; margin-bottom:4px; }
 .greeting-name em { color:var(--orange-soft); font-style:normal; }
 .greeting-sub { font-size:0.72rem; color:var(--text-dim); }
 
@@ -304,7 +338,7 @@ body {
   text-transform:uppercase; color:var(--orange-soft);
   background:rgba(255,122,0,0.1); border-radius:6px; padding:3px 8px;
 }
-.orar-titulo { font-family:'Lora',serif; font-size:1.6rem; font-weight:600; color:var(--orange); margin-bottom:10px; }
+.orar-titulo { font-family:'Crimson Pro',serif; font-size:1.9rem; font-weight:600; color:var(--orange); margin-bottom:10px; }
 .orar-sep { height:1px; background:rgba(255,122,0,0.12); margin-bottom:12px; }
 .bloques-progress { display:flex; flex-direction:column; gap:7px; }
 .bloque-row { display:flex; align-items:center; gap:8px; }
@@ -323,15 +357,15 @@ body {
   color:var(--orange-soft); opacity:0.25; position:absolute; top:10px; left:14px;
 }
 .verse-label { font-size:0.62rem; text-transform:uppercase; letter-spacing:1.2px; color:var(--text-dim); margin-bottom:6px; position:relative; }
-.verse-text { font-family:'Lora',serif; font-size:0.82rem; font-style:italic; line-height:1.75; color:var(--text-soft); position:relative; }
+.verse-text { font-family:'Crimson Pro',serif; font-size:1.15rem; font-weight:500; font-style:italic; line-height:1.75; color:var(--text-soft); position:relative; }
 .verse-ref { font-size:0.65rem; color:var(--text-dim); margin-top:8px; text-align:right; position:relative; }
 .modulo-sanar { background:linear-gradient(145deg,#1E1206,#160D04); border-color:rgba(255,122,0,0.09); }
 .modulo-diario { background:linear-gradient(145deg,#1A1006,#130B03); border-color:rgba(255,122,0,0.06); }
 .modulo-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
 .modulo-icon-wrap { font-size:1.1rem; }
 .modulo-badge { font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.7px; color:var(--text-dim); background:rgba(255,255,255,0.04); border-radius:6px; padding:2px 7px; }
-.modulo-titulo { font-family:'Lora',serif; font-size:1.05rem; font-weight:600; margin-bottom:5px; }
-.modulo-desc { font-size:0.7rem; color:var(--text-dim); line-height:1.6; margin-bottom:10px; }
+.modulo-titulo { font-family:'Crimson Pro',serif; font-size:1.35rem; font-weight:600; margin-bottom:5px; }
+.modulo-desc { font-size:0.82rem; color:var(--text-dim); line-height:1.6; margin-bottom:10px; }
 .modulo-footer { display:flex; align-items:center; justify-content:space-between; }
 .modulo-meta { font-size:0.66rem; color:var(--text-dim); display:flex; align-items:center; gap:5px; }
 .modulo-cta { font-size:0.72rem; font-weight:700; color:var(--text-soft); display:flex; align-items:center; gap:4px; transition:gap 0.2s; }
@@ -527,7 +561,7 @@ body {
     <section class="modulos-section">
       <div class="modulos-grid">
 
-        <div class="modulo-card modulo-orar anim-in" onclick="navigateTo(getOrarUrl(), event)">
+        <div class="modulo-card modulo-orar anim-in" onclick="playTap(); navigateTo(getOrarUrl(), event)">
           <div class="orar-header">
             <span class="orar-nivel-tag" id="orar-nivel-tag">Nivel 1-1</span>
           </div>
@@ -564,7 +598,7 @@ body {
           <div class="verse-ref">— Mateo 16:25 (DHH)</div>
         </div>
 
-        <div class="modulo-card modulo-sanar anim-in" onclick="navigateTo('sanar.html', event)">
+        <div class="modulo-card modulo-sanar anim-in" onclick="playTap(); navigateTo('sanar.html', event)">
           <div class="modulo-top">
             <div class="modulo-icon-wrap">🌿</div>
             <span class="modulo-badge">Ejercicios</span>
@@ -577,7 +611,7 @@ body {
           </div>
         </div>
 
-        <div class="modulo-card modulo-diario anim-in" onclick="navigateTo('diario.html', event)">
+        <div class="modulo-card modulo-diario anim-in" onclick="playTap(); navigateTo('diario.html', event)">
           <div class="modulo-top">
             <div class="modulo-icon-wrap">📓</div>
             <span class="modulo-badge">Mis logros</span>
@@ -602,6 +636,48 @@ body {
       </div>
     </section>
   </div>
+
+  <!-- ═══ BOTTOM NAV BAR ═══ -->
+  <nav class="app-nav" id="app-nav" style="display:none">
+    <button class="app-nav-item" onclick="navigateTo('orar.html?c=' + (window.currentNivelId || '0101'))">
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="2" x2="12" y2="22"/>
+          <line x1="4" y1="9" x2="20" y2="9"/>
+        </svg>
+      </div>
+      <span class="app-nav-label">Orar</span>
+    </button>
+    <button class="app-nav-item" onclick="navigateTo('diario.html')">
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/>
+          <path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/>
+        </svg>
+      </div>
+      <span class="app-nav-label">Diario</span>
+    </button>
+    <button class="app-nav-item" onclick="navigateTo('sanar.html')">
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s-8-5.5-8-11a8 8 0 0116 0c0 5.5-8 11-8 11z"/>
+          <path d="M9 11h6M12 8v6"/>
+        </svg>
+      </div>
+      <span class="app-nav-label">Sanar</span>
+    </button>
+    <button class="app-nav-item active" disabled>
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/>
+          <rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+      </div>
+      <span class="app-nav-label">Inicio</span>
+    </button>
+  </nav>
 
   <div class="nav-overlay" id="nav-overlay"></div>
 </div>
@@ -698,6 +774,10 @@ function getProgreso(nivelId) {
   try { return JSON.parse(localStorage.getItem('cruzando_nivel_' + nivelId)); } catch(e) { return null; }
 }
 function getTotalMetros() {
+  // Primero buscar la clave global (nueva arquitectura)
+  var global = localStorage.getItem('cruzando_total_metros');
+  if (global !== null && !isNaN(Number(global))) return Number(global);
+  // Fallback: sumar de niveles individuales (arquitectura antigua)
   var t = 0;
   Object.keys(localStorage).filter(function(k) { return k.startsWith('cruzando_nivel_'); }).forEach(function(k) {
     try { var d = JSON.parse(localStorage.getItem(k)); if (d && typeof d.totalMeters === 'number') t += d.totalMeters; } catch(e) {}
@@ -718,6 +798,10 @@ function checkBetaExpiry(userData) {
 function renderHome(userData) {
   // Plan
   currentPlan = checkBetaExpiry(userData);
+  window.currentNivelId = currentNivelId = getCurrentNivel();
+  // Mostrar bottom nav
+  var nav = document.getElementById('app-nav');
+  if (nav) nav.style.display = '';
   var chipEl = document.getElementById('plan-chip');
   if (chipEl) {
     chipEl.textContent = currentPlan === 'premium' ? 'Premium' : currentPlan === 'beta' ? 'Beta' : 'Free';
@@ -971,6 +1055,26 @@ window.navigateTo = function(url, e) {
   if (ov) { ov.classList.add('fade-out'); setTimeout(function() { window.location.href = url; }, 380); }
   else window.location.href = url;
 };
+// ── Sonido tap — Acorde suave (C) ────────────────────────────────
+function playTap() {
+  try {
+    var ac = new (window.AudioContext || window.webkitAudioContext)();
+    var now = ac.currentTime;
+    var master = ac.createGain();
+    master.gain.setValueAtTime(0, now);
+    master.gain.linearRampToValueAtTime(0.07, now + 0.02);
+    master.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+    master.connect(ac.destination);
+    [523, 659].forEach(function(freq) {
+      var o = ac.createOscillator(), g = ac.createGain();
+      o.type = 'sine'; o.frequency.value = freq;
+      g.gain.value = 0.7;
+      o.connect(g); g.connect(master);
+      o.start(now); o.stop(now + 0.45);
+    });
+  } catch(e) {}
+}
+window.playTap = playTap;
 
 </script>
 </body>
