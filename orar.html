@@ -2530,12 +2530,9 @@ try {
   if (rMicro.ok)  MICRO_DATA  = await rMicro.json();
 } catch(e) {}
 
-// Leer plan del usuario desde Firestore
-let currentUser = null;
+// Usuario ya resuelto por _startApp — usar currentUser directamente
+const currentUser = _auth.currentUser;
 try {
-  currentUser = await new Promise(resolve => {
-    const unsub = _auth.onAuthStateChanged(u => { unsub(); resolve(u); });
-  });
   if (currentUser) {
     const snap = await _db.collection('users').doc(currentUser.uid).get();
     if (snap.exists && snap.data().plan) {
