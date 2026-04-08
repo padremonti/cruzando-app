@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1A0E04">
+<title>Mapa del Camino · CruzAndo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+
+:root {
+  --bg:        #1A0E04;
+  --bg2:       #120A02;
+  --card:      #2C1810;
+  --border:    #4A2E1A;
+  --text:      #F0E6DA;
+  --text-soft: #C4A882;
+  --text-dim:  #7A5C40;
+  --orange:    #FF7A00;
+  --green:     #4CAF7D;
+}
+body.light {
+  --bg:        #E6DED3;
+  --bg2:       #D9CFC4;
+  --card:      #FFFCF7;
+  --border:    #D0C4B8;
+  --text:      #2B1A0E;
+  --text-soft: #6B5040;
+  --text-dim:  #9B8878;
+}
+
+html { font-size:18px; }
+body {
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--bg); color:var(--text);
+  line-height:1.6; min-height:100dvh;
+  -webkit-font-smoothing:antialiased;
+  transition:background 0.35s, color 0.35s;
+}
+.shell { max-width:480px; margin:0 auto; min-height:100dvh; padding-bottom:72px; }
+
+/* ── Header ── */
+.header {
+  position:sticky; top:0; z-index:50;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 20px 12px;
+  background:var(--bg); border-bottom:1px solid var(--border);
+}
+.header-title {
+  font-family:'Crimson Pro',serif;
+  font-size:1.3rem; font-weight:600; color:var(--text);
+}
+.header-sub { font-size:0.65rem; color:var(--text-dim); margin-top:1px; text-transform:uppercase; letter-spacing:0.8px; }
+.icon-btn {
+  width:36px; height:36px; border-radius:50%;
+  background:var(--card); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; color:var(--text-soft); transition:all 0.2s; flex-shrink:0;
+}
+.icon-btn:active { transform:scale(0.92); }
+
+/* ── Mapa ── */
+.map-wrap { padding:20px 18px 8px; }
+
+.mundo-sec { margin-bottom:28px; }
+.mundo-lbl {
+  display:flex; align-items:center; gap:10px; margin-bottom:14px;
+}
+.mundo-line { flex:1; height:1px; background:var(--border); }
+.mundo-name {
+  font-size:0.6rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:1px; white-space:nowrap;
+}
+
+.nivel-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+.nodo {
+  aspect-ratio:1; border-radius:50%;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  cursor:pointer; transition:all 0.18s; border:2.5px solid;
+  -webkit-tap-highlight-color:transparent;
+}
+.nodo:active { transform:scale(0.91); }
+.nodo.sel { transform:scale(1.1); }
+.nodo.done { opacity:0.55; }
+.nodo.done::after {
+  content:''; position:absolute;
+}
+.nodo-wrap { position:relative; }
+.done-check {
+  position:absolute; top:-3px; right:-3px;
+  width:18px; height:18px; border-radius:50%;
+  background:var(--green); border:2px solid var(--bg);
+  display:flex; align-items:center; justify-content:center;
+  font-size:9px; color:#fff; font-weight:700; z-index:1;
+}
+.nodo-num {
+  font-family:'Crimson Pro',serif; font-weight:600;
+  font-size:clamp(1rem,5vw,1.5rem);
+  line-height:1; text-align:center;
+}
+.nodo-elem {
+  font-size:0.48rem; font-weight:600; text-align:center;
+  margin-top:3px; padding:0 4px; line-height:1.2;
+  text-transform:uppercase; letter-spacing:0.3px;
+  opacity:0.7;
+}
+
+/* ── Panel de confirmación ── */
+.confirm {
+  display:none; margin:0 18px 24px;
+  background:var(--card); border-radius:18px;
+  padding:22px 20px; border:1.5px solid var(--border);
+}
+.confirm.vis { display:block; animation:slideUp 0.35s cubic-bezier(0.34,1.56,0.64,1) both; }
+@keyframes slideUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+
+.c-num {
+  font-size:0.65rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:1.2px; margin-bottom:8px;
+}
+.c-elem {
+  font-family:'Crimson Pro',serif;
+  font-size:2rem; font-weight:600; color:var(--text);
+  line-height:1.1; margin-bottom:4px;
+}
+.c-mundo {
+  font-family:'Crimson Pro',serif;
+  font-size:1.2rem; font-weight:400; font-style:italic;
+  color:var(--text-soft); margin-bottom:20px; line-height:1.2;
+}
+.c-btn {
+  width:100%; padding:15px; border:none; border-radius:13px;
+  font-family:'Inter',sans-serif; font-size:0.9rem; font-weight:700;
+  color:#1A0E04; cursor:pointer; transition:opacity 0.2s;
+}
+.c-btn:active { opacity:0.85; }
+.c-cancel {
+  display:block; width:100%; margin-top:10px; padding:8px;
+  background:none; border:none; font-family:'Inter',sans-serif;
+  font-size:0.75rem; color:var(--text-dim); cursor:pointer; text-align:center;
+}
+
+/* ── Bottom nav ── */
+.app-nav {
+  position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+  width:100%; max-width:480px; z-index:80;
+  background:var(--bg); border-top:1px solid var(--border);
+  display:flex; align-items:stretch;
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+}
+.app-nav-item {
+  flex:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:4px; padding:10px 4px 12px;
+  background:none; border:none; cursor:pointer;
+  font-family:inherit; text-decoration:none;
+  color:var(--text-dim); transition:color 0.2s;
+  -webkit-tap-highlight-color:transparent;
+}
+.app-nav-item:active { opacity:0.7; }
+.app-nav-item.active { color:var(--orange); }
+.app-nav-item[disabled] { cursor:default; opacity:1; }
+.app-nav-icon {
+  width:24px; height:24px; position:relative;
+  display:flex; align-items:center; justify-content:center;
+}
+.app-nav-item.active .app-nav-icon::before {
+  content:''; position:absolute; inset:-5px;
+  background:rgba(255,122,0,0.12); border-radius:10px;
+}
+.app-nav-label { font-size:0.6rem; font-weight:600; letter-spacing:0.4px; text-transform:uppercase; }
+
+/* ── Spinner ── */
+.spinner-wrap { display:flex; align-items:center; justify-content:center; min-height:60dvh; }
+.spinner {
+  width:32px; height:32px; border:3px solid var(--border);
+  border-top-color:var(--orange); border-radius:50%;
+  animation:spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- Header -->
+  <header class="header">
+    <div>
+      <div class="header-title">Mapa del Camino</div>
+      <div class="header-sub">Elige un nivel para cruzar</div>
+    </div>
+    <button class="icon-btn" id="btn-dark" onclick="toggleDark()" title="Cambiar tema">
+      <svg id="ico-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      <svg id="ico-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+    </button>
+  </header>
+
+  <!-- Mapa -->
+  <div class="map-wrap" id="map-wrap">
+    <div class="spinner-wrap"><div class="spinner"></div></div>
+  </div>
+
+  <!-- Panel de confirmación -->
+  <div class="confirm" id="confirm">
+    <div class="c-num" id="c-num"></div>
+    <div class="c-elem" id="c-elem"></div>
+    <div class="c-mundo" id="c-mundo"></div>
+    <button class="c-btn" id="c-btn">Ir a este nivel →</button>
+    <button class="c-cancel" onclick="cancelSel()">Cancelar</button>
+  </div>
+
+  <!-- Bottom nav -->
+  <nav class="app-nav">
+    <button class="app-nav-item" onclick="goTo('orar.html')">
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="2" x2="12" y2="22"/><line x1="4" y1="9" x2="20" y2="9"/>
+        </svg>
+      </div>
+      <span class="app-nav-label">Orar</span>
+    </button>
+    <button class="app-nav-item" onclick="goTo('diario.html')">
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/>
+          <path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/>
+        </svg>
+      </div>
+      <span class="app-nav-label">Diario</span>
+    </button>
+    <button class="app-nav-item" onclick="goTo('sanar.html')">
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s-8-5.5-8-11a8 8 0 0116 0c0 5.5-8 11-8 11z"/>
+          <path d="M9 11h6M12 8v6"/>
+        </svg>
+      </div>
+      <span class="app-nav-label">Sanar</span>
+    </button>
+    <button class="app-nav-item active" disabled>
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/>
+          <rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+      </div>
+      <span class="app-nav-label">Inicio</span>
+    </button>
+  </nav>
+
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
+/* ── Firebase ── */
+const firebaseConfig = {
+  apiKey:            "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
+  authDomain:        "cruzando-app.firebaseapp.com",
+  projectId:         "cruzando-app",
+  storageBucket:     "cruzando-app.firebasestorage.app",
+  messagingSenderId: "408196948528",
+  appId:             "1:408196948528:web:de291e8afc969252e943f5"
+};
+firebase.initializeApp(firebaseConfig);
+const _db   = firebase.firestore();
+const _auth = firebase.auth();
+
+/* ── Tema ── */
+var isLight = localStorage.getItem('ca_home_light') === '1';
+function applyTheme(light) {
+  document.body.classList.toggle('light', light);
+  document.getElementById('ico-sun').style.display  = light ? 'none'  : 'block';
+  document.getElementById('ico-moon').style.display = light ? 'block' : 'none';
+  document.querySelector('meta[name="theme-color"]').content = light ? '#E6DED3' : '#1A0E04';
+  localStorage.setItem('ca_home_light', light ? '1' : '0');
+}
+function toggleDark() { isLight = !isLight; applyTheme(isLight); }
+if (isLight) applyTheme(true);
+
+/* ── Navegación ── */
+function goTo(page) {
+  var base = window.location.origin + window.location.pathname.replace(/\/world\.html$/, '/');
+  window.location.href = base + page;
+}
+
+/* ── Datos de niveles ── */
+var MUNDOS = [
+  { nombre:'CruzAndo la Cruz',    bold:'#FF7A00', bg:'rgba(255,122,0,0.12)',    niveles:[
+    {id:'0101',num:'1-1',elem:'Males'},       {id:'0102',num:'1-2',elem:'Pecado'},
+    {id:'0103',num:'1-3',elem:'Conversión'},  {id:'0104',num:'1-4',elem:'Gracia'}
+  ]},
+  { nombre:'CruzAndo Emociones',  bold:'#FF9A8A', bg:'rgba(255,154,138,0.12)', niveles:[
+    {id:'0201',num:'2-1',elem:'Sensaciones'}, {id:'0202',num:'2-2',elem:'Sentimientos'},
+    {id:'0203',num:'2-3',elem:'Gustos'},      {id:'0204',num:'2-4',elem:'Deseos'}
+  ]},
+  { nombre:'CruzAndo la Mente',   bold:'#A276F4', bg:'rgba(89,0,255,0.12)',    niveles:[
+    {id:'0301',num:'3-1',elem:'Imaginación'}, {id:'0302',num:'3-2',elem:'Memoria'},
+    {id:'0303',num:'3-3',elem:'Razón'},       {id:'0304',num:'3-4',elem:'Intenciones'}
+  ]},
+  { nombre:'CruzAndo el Corazón', bold:'#EDC800', bg:'rgba(237,200,0,0.12)',   niveles:[
+    {id:'0401',num:'4-1',elem:'Necesidad'},   {id:'0402',num:'4-2',elem:'Placer'},
+    {id:'0403',num:'4-3',elem:'Requiero'},    {id:'0404',num:'4-4',elem:'Gozo'}
+  ]},
+  { nombre:'CruzAndo Relaciones', bold:'#10BF58', bg:'rgba(16,191,88,0.12)',   niveles:[
+    {id:'0501',num:'5-1',elem:'Dependencia'}, {id:'0502',num:'5-2',elem:'Vínculo'},
+    {id:'0503',num:'5-3',elem:'Pertenencia'}, {id:'0504',num:'5-4',elem:'Comunión'}
+  ]},
+  { nombre:'CruzAndo el Amor',    bold:'#FF2663', bg:'rgba(255,38,99,0.12)',   niveles:[
+    {id:'0601',num:'6-1',elem:'Afecto'},      {id:'0602',num:'6-2',elem:'Amistad'},
+    {id:'0603',num:'6-3',elem:'Querer'},      {id:'0604',num:'6-4',elem:'Caridad'}
+  ]},
+  { nombre:'CruzAndo el Tiempo',  bold:'#3EF7BE', bg:'rgba(62,247,190,0.12)',  niveles:[
+    {id:'0701',num:'7-1',elem:'Curiosidad'},  {id:'0702',num:'7-2',elem:'Interés'},
+    {id:'0703',num:'7-3',elem:'Problemas'},   {id:'0704',num:'7-4',elem:'Asombro'}
+  ]}
+];
+
+var selId = null;
+var completedIds = {};
+
+/* ── Detectar niveles completados desde Firestore ── */
+async function loadCompleted(user) {
+  try {
+    var allIds = MUNDOS.reduce(function(acc, m) {
+      return acc.concat(m.niveles.map(function(n) { return n.id; }));
+    }, []);
+    var snaps = await Promise.all(allIds.map(function(id) {
+      return _db.collection('users').doc(user.uid).collection('progress').doc(id).get();
+    }));
+    var BLOCKS = ['gozosos','luminosos','dolorosos','gloriosos'];
+    snaps.forEach(function(snap, i) {
+      if (!snap.exists) return;
+      var d = snap.data();
+      if (!d.progress) return;
+      var allDone = BLOCKS.every(function(b) {
+        return d.progress[b] && d.progress[b].every(function(x) { return x !== null; });
+      });
+      if (allDone) completedIds[allIds[i]] = true;
+    });
+  } catch(e) {
+    console.warn('[CruzAndo] loadCompleted:', e.message);
+  }
+}
+
+/* ── Render del mapa ── */
+function renderMap() {
+  var html = '';
+  MUNDOS.forEach(function(m) {
+    html += '<div class="mundo-sec">';
+    html += '<div class="mundo-lbl"><div class="mundo-line"></div>';
+    html += '<span class="mundo-name" style="color:' + m.bold + '">' + m.nombre + '</span>';
+    html += '<div class="mundo-line"></div></div>';
+    html += '<div class="nivel-grid">';
+    m.niveles.forEach(function(n) {
+      var done = completedIds[n.id];
+      html += '<div class="nodo-wrap" style="position:relative">';
+      html += '<div class="nodo' + (done ? ' done' : '') + '" id="n-' + n.id + '" ';
+      html += 'style="background:' + m.bg + ';border-color:' + m.bold + (done ? 'AA' : '55') + ';" ';
+      html += 'onclick="pick(\'' + n.id + '\',\'' + n.num + '\',\'' + n.elem.replace(/'/g,"\\'") + '\',\'' + m.nombre.replace(/'/g,"\\'") + '\',\'' + m.bold + '\')">';
+      html += '<div class="nodo-num" style="color:' + m.bold + '">' + n.num + '</div>';
+      html += '<div class="nodo-elem" style="color:' + m.bold + '">' + n.elem + '</div>';
+      html += '</div>';
+      if (done) html += '<div class="done-check">✓</div>';
+      html += '</div>';
+    });
+    html += '</div></div>';
+  });
+  document.getElementById('map-wrap').innerHTML = html;
+}
+
+/* ── Selección ── */
+function pick(id, num, elem, mundo, color) {
+  if (selId) {
+    var prev = document.getElementById('n-' + selId);
+    if (prev) prev.classList.remove('sel');
+  }
+  if (selId === id) {
+    selId = null;
+    document.getElementById('confirm').classList.remove('vis');
+    return;
+  }
+  selId = id;
+  var el = document.getElementById('n-' + id);
+  if (el) { el.classList.add('sel'); el.style.boxShadow = '0 0 0 4px ' + color + '33'; }
+  document.getElementById('c-num').textContent = 'Nivel ' + num;
+  document.getElementById('c-num').style.color = color;
+  document.getElementById('c-elem').textContent = elem;
+  document.getElementById('c-mundo').textContent = mundo;
+  document.getElementById('c-btn').style.background = color;
+  document.getElementById('c-btn').onclick = function() { goTo('orar.html?c=' + id); };
+  document.getElementById('confirm').classList.add('vis');
+  setTimeout(function() {
+    document.getElementById('confirm').scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }, 100);
+}
+
+function cancelSel() {
+  if (selId) {
+    var el = document.getElementById('n-' + selId);
+    if (el) { el.classList.remove('sel'); el.style.boxShadow = ''; }
+  }
+  selId = null;
+  document.getElementById('confirm').classList.remove('vis');
+}
+
+/* ── Init ── */
+_auth.onAuthStateChanged(async function(user) {
+  if (user) {
+    await loadCompleted(user);
+  }
+  renderMap();
+});
+</script>
+</body>
+</html>
