@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -40,70 +39,70 @@ const _auth = firebase.auth();
 *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
 
 :root {
-/* ── Neutros Light ── */
-–bg: #E6DED3;
-–card: #FFFCF7;
-–border: #D9D1C7;
-–text: #2B2622;
-–text-soft: #6B6259;
-–text-dim: #9B9389;
-–input-bg: #FFFCF7;
-–sec-bg: #F5F0E8;
-–shadow: rgba(43,38,34,0.08);
-–green: #34A853;
-–green-soft: rgba(52,168,83,0.12);
-/* ── Paleta del nivel (se sobreescriben desde JS) ── */
-–lvl-bold: #FF7A00;
-–lvl-base: #FF7F09;
-–lvl-soft: #F69C49;
-–lvl-mist: #FFA34E;
-–lvl-light: #FFCFA2;
-–lvl-ultra: rgba(255,122,0,0.07);
-/* ── Bloques ── */
-–goz-color: #D4A017;
-–lum-color: #01BBE1;
-–dol-color: #C0392B;
-–glo-color: #8E44AD;
-/* ── Brand ── */
-–brand: #01BBE1;
+  /* ── Neutros Light ── */
+  --bg: #E6DED3;
+  --card: #FFFCF7;
+  --border: #D9D1C7;
+  --text: #2B2622;
+  --text-soft: #6B6259;
+  --text-dim: #9B9389;
+  --input-bg: #FFFCF7;
+  --sec-bg: #F5F0E8;
+  --shadow: rgba(43,38,34,0.08);
+  --green: #34A853;
+  --green-soft: rgba(52,168,83,0.12);
+  /* ── Paleta del nivel (se sobreescriben desde JS) ── */
+  --lvl-bold: #FF7A00;
+  --lvl-base: #FF7F09;
+  --lvl-soft: #F69C49;
+  --lvl-mist: #FFA34E;
+  --lvl-light: #FFCFA2;
+  --lvl-ultra: rgba(255,122,0,0.07);
+  /* ── Bloques ── */
+  --goz-color: #D4A017;
+  --lum-color: #01BBE1;
+  --dol-color: #C0392B;
+  --glo-color: #8E44AD;
+  /* ── Brand ── */
+  --brand: #01BBE1;
 }
 
 .dark {
-–bg: #1A1714;
-–card: #252119;
-–border: #3A3530;
-–text: #E6DED3;
-–text-soft: #B8A898;
-–text-dim: #786858;
-–input-bg: #2A2520;
-–sec-bg: #1E1B16;
-–shadow: rgba(0,0,0,0.3);
-–green-soft: rgba(52,168,83,0.18);
+  --bg: #1A1714;
+  --card: #252119;
+  --border: #3A3530;
+  --text: #E6DED3;
+  --text-soft: #B8A898;
+  --text-dim: #786858;
+  --input-bg: #2A2520;
+  --sec-bg: #1E1B16;
+  --shadow: rgba(0,0,0,0.3);
+  --green-soft: rgba(52,168,83,0.18);
 }
 
 html { font-size:18px; }
 body {
-font-family:‘Inter’,system-ui,sans-serif;
-background:var(–bg);
-color:var(–text);
-line-height:1.7;
-min-height:100dvh;
--webkit-font-smoothing:antialiased;
-transition:background 0.4s,color 0.4s;
-/* ── Mejora 2: Risograph V4 light — grano + doble tinta naranja/rojo ── */
-background-image:
-url(“data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/></filter><rect width='200' height='200' filter='url(%23n)' opacity='0.08'/></svg>”),
-linear-gradient(135deg, rgba(192,57,43,0.07) 0%, rgba(255,122,0,0.06) 60%, transparent 100%);
-background-size: 200px 200px, 100% 100%;
-background-blend-mode: multiply, normal;
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.7;
+  min-height:100dvh;
+  -webkit-font-smoothing:antialiased;
+  transition:background 0.4s,color 0.4s;
+  /* ── Mejora 2: Risograph V4 light — grano + doble tinta naranja/rojo ── */
+  background-image:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/></filter><rect width='200' height='200' filter='url(%23n)' opacity='0.08'/></svg>"),
+    linear-gradient(135deg, rgba(192,57,43,0.07) 0%, rgba(255,122,0,0.06) 60%, transparent 100%);
+  background-size: 200px 200px, 100% 100%;
+  background-blend-mode: multiply, normal;
 }
 .dark body {
-/* ── Mejora 2: Risograph V3 dark — grano + halo naranja inferior izquierdo ── */
-background-image:
-url(“data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/></filter><rect width='200' height='200' filter='url(%23n)' opacity='0.07'/></svg>”),
-radial-gradient(ellipse at 20% 85%, rgba(255,122,0,0.11) 0%, transparent 55%);
-background-size: 200px 200px, 100% 100%;
-background-blend-mode: screen, normal;
+  /* ── Mejora 2: Risograph V3 dark — grano + halo naranja inferior izquierdo ── */
+  background-image:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/></filter><rect width='200' height='200' filter='url(%23n)' opacity='0.07'/></svg>"),
+    radial-gradient(ellipse at 20% 85%, rgba(255,122,0,0.11) 0%, transparent 55%);
+  background-size: 200px 200px, 100% 100%;
+  background-blend-mode: screen, normal;
 }
 
 /* ── Layout ── */
@@ -113,343 +112,343 @@ background-blend-mode: screen, normal;
 
 /* ── Header ── */
 .header {
-display:flex; align-items:center; justify-content:space-between;
-padding:14px 18px 10px; position:sticky; top:0; z-index:50;
-background:var(–bg); border-bottom:1px solid var(–border);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 18px 10px; position:sticky; top:0; z-index:50;
+  background:var(--bg); border-bottom:1px solid var(--border);
 }
-.header-title { font-size:1.05rem; font-weight:700; color:var(–lvl-bold); }
-.header-sub { font-size:0.72rem; color:var(–text-dim); margin-top:1px; }
+.header-title { font-size:1.05rem; font-weight:700; color:var(--lvl-bold); }
+.header-sub { font-size:0.72rem; color:var(--text-dim); margin-top:1px; }
 .header-actions { display:flex; gap:8px; align-items:center; }
 .icon-btn {
-width:36px; height:36px; border-radius:50%; border:1px solid var(–border);
-background:var(–card); cursor:pointer; display:flex; align-items:center;
-justify-content:center; color:var(–text-soft); transition:all 0.2s;
+  width:36px; height:36px; border-radius:50%; border:1px solid var(--border);
+  background:var(--card); cursor:pointer; display:flex; align-items:center;
+  justify-content:center; color:var(--text-soft); transition:all 0.2s;
 }
 .icon-btn:active { transform:scale(0.92); }
 
 /* ── Pantalla de Inicio: Tarjetas de Bloques ── */
 .home-intro { padding:28px 18px 14px; text-align:center; }
 .home-intro h1 {
-font-family:‘Inter’, sans-serif;
-font-size:0.62rem; font-weight:700; color:var(–text-dim);
-text-transform:uppercase; letter-spacing:2px; margin-bottom:6px;
+  font-family:'Inter', sans-serif;
+  font-size:0.62rem; font-weight:700; color:var(--text-dim);
+  text-transform:uppercase; letter-spacing:2px; margin-bottom:6px;
 }
 .home-intro .nivel-heading {
-font-family:‘Crimson Pro’, Georgia, serif;
-font-size:1.1rem; font-weight:500; color:var(–lvl-bold);
-line-height:1.2; margin-bottom:6px; letter-spacing:0.5px;
+  font-family:'Crimson Pro', Georgia, serif;
+  font-size:1.1rem; font-weight:500; color:var(--lvl-bold);
+  line-height:1.2; margin-bottom:6px; letter-spacing:0.5px;
 }
 .home-intro .elemento-heading {
-font-family:‘Crimson Pro’, Georgia, serif;
-font-size:2.8rem; font-weight:600; color:var(–text);
-line-height:1.05; letter-spacing:-0.01em;
+  font-family:'Crimson Pro', Georgia, serif;
+  font-size:2.8rem; font-weight:600; color:var(--text);
+  line-height:1.05; letter-spacing:-0.01em;
 }
 
 /* ── Banner Misterios del Día ── */
 .today-banner {
-margin:0 18px 16px; padding:16px 20px; border-radius:16px;
-background:linear-gradient(135deg,rgba(var(–lvl-light-rgb,255,207,162),0.55),rgba(255,245,232,0.7));
-border:2px solid var(–lvl-bold);
-box-shadow:0 3px 16px rgba(var(–lvl-bold-rgb,255,122,0),0.1);
-cursor:pointer; transition:all 0.25s;
+  margin:0 18px 16px; padding:16px 20px; border-radius:16px;
+  background:linear-gradient(135deg,rgba(var(--lvl-light-rgb,255,207,162),0.55),rgba(255,245,232,0.7));
+  border:2px solid var(--lvl-bold);
+  box-shadow:0 3px 16px rgba(var(--lvl-bold-rgb,255,122,0),0.1);
+  cursor:pointer; transition:all 0.25s;
 }
 .dark .today-banner {
-background:linear-gradient(135deg,rgba(var(–lvl-bold-rgb,255,122,0),0.15),rgba(var(–lvl-bold-rgb,255,122,0),0.05));
+  background:linear-gradient(135deg,rgba(var(--lvl-bold-rgb,255,122,0),0.15),rgba(var(--lvl-bold-rgb,255,122,0),0.05));
 }
 .today-banner:active { transform:scale(0.98); }
 .today-banner-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
 .today-banner-label {
-font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:1px;
-color:var(–lvl-bold); display:flex; align-items:center; gap:6px;
+  font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:1px;
+  color:var(--lvl-bold); display:flex; align-items:center; gap:6px;
 }
 .today-pulse {
-width:8px; height:8px; border-radius:50%; background:var(–lvl-bold);
-animation:pulse 2s ease-in-out infinite;
+  width:8px; height:8px; border-radius:50%; background:var(--lvl-bold);
+  animation:pulse 2s ease-in-out infinite;
 }
 @keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.5; transform:scale(1.4); } }
-.today-banner-arrow { color:var(–lvl-bold); font-size:1.2rem; font-weight:700; }
+.today-banner-arrow { color:var(--lvl-bold); font-size:1.2rem; font-weight:700; }
 .today-banner h3 { font-size:1.1rem; font-weight:800; margin-bottom:3px; }
-.today-banner-days { font-size:0.72rem; color:var(–text-dim); }
+.today-banner-days { font-size:0.72rem; color:var(--text-dim); }
 /* ── Mejora 4: Bloque del día dramático ── */
 @keyframes todayPulse {
-0%,100% { box-shadow:0 0 0 0 rgba(var(–lvl-bold-rgb,255,122,0),0.55), 0 2px 16px var(–lvl-ultra); }
-50%      { box-shadow:0 0 0 5px rgba(var(–lvl-bold-rgb,255,122,0),0),   0 4px 24px rgba(var(–lvl-bold-rgb,255,122,0),0.2); }
+  0%,100% { box-shadow:0 0 0 0 rgba(var(--lvl-bold-rgb,255,122,0),0.55), 0 2px 16px var(--lvl-ultra); }
+  50%      { box-shadow:0 0 0 5px rgba(var(--lvl-bold-rgb,255,122,0),0),   0 4px 24px rgba(var(--lvl-bold-rgb,255,122,0),0.2); }
 }
 .block-card.today {
-border-color:var(–lvl-bold);
-background:radial-gradient(ellipse at top right, rgba(var(–lvl-bold-rgb,255,122,0),0.22) 0%, rgba(var(–lvl-light-rgb,255,207,162),0.12) 40%, var(–card) 75%);
-animation:slideUp 0.55s cubic-bezier(0.34,1.72,0.64,1) both, todayPulse 2.4s ease-in-out 0.6s infinite;
+  border-color:var(--lvl-bold);
+  background:radial-gradient(ellipse at top right, rgba(var(--lvl-bold-rgb,255,122,0),0.22) 0%, rgba(var(--lvl-light-rgb,255,207,162),0.12) 40%, var(--card) 75%);
+  animation:slideUp 0.55s cubic-bezier(0.34,1.72,0.64,1) both, todayPulse 2.4s ease-in-out 0.6s infinite;
 }
 .dark .block-card.today {
-background:radial-gradient(ellipse at top right, rgba(var(–lvl-bold-rgb,255,122,0),0.28) 0%, rgba(var(–lvl-bold-rgb,255,122,0),0.10) 45%, var(–card) 75%);
+  background:radial-gradient(ellipse at top right, rgba(var(--lvl-bold-rgb,255,122,0),0.28) 0%, rgba(var(--lvl-bold-rgb,255,122,0),0.10) 45%, var(--card) 75%);
 }
 
 .block-grid { display:flex; flex-direction:column; gap:14px; padding:8px 18px 24px; }
 .block-card {
-background:var(–card); border-radius:16px; padding:18px 20px;
-border:2px solid var(–border); cursor:pointer;
-transition:all 0.25s; position:relative; overflow:hidden;
+  background:var(--card); border-radius:16px; padding:18px 20px;
+  border:2px solid var(--border); cursor:pointer;
+  transition:all 0.25s; position:relative; overflow:hidden;
 }
 .block-card:active { transform:scale(0.98); }
-.block-card.cleared { border-color:var(–green); }
-.block-card.current { border-color:var(–lvl-bold); box-shadow:0 2px 16px var(–lvl-ultra); }
+.block-card.cleared { border-color:var(--green); }
+.block-card.current { border-color:var(--lvl-bold); box-shadow:0 2px 16px var(--lvl-ultra); }
 .block-card.locked  { opacity:0.5; cursor:default; }
-.block-badge.locked-badge { background:var(–sec-bg); color:var(–text-dim); }
-.block-locked-hint  { font-size:0.72rem; color:var(–text-dim); margin-top:8px; font-style:italic; }
+.block-badge.locked-badge { background:var(--sec-bg); color:var(--text-dim); }
+.block-locked-hint  { font-size:0.72rem; color:var(--text-dim); margin-top:8px; font-style:italic; }
 .block-card-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
 .block-emoji { font-size:1.6rem; }
 .block-badge {
-font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.8px;
-padding:3px 10px; border-radius:20px;
+  font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.8px;
+  padding:3px 10px; border-radius:20px;
 }
-.block-badge.pending { background:var(–sec-bg); color:var(–text-dim); }
-.block-badge.progress { background:var(–lvl-ultra); color:var(–lvl-bold); }
-.block-badge.cleared { background:var(–green-soft); color:var(–green); }
-.block-badge.today { background:var(–lvl-bold); color:#fff; }
+.block-badge.pending { background:var(--sec-bg); color:var(--text-dim); }
+.block-badge.progress { background:var(--lvl-ultra); color:var(--lvl-bold); }
+.block-badge.cleared { background:var(--green-soft); color:var(--green); }
+.block-badge.today { background:var(--lvl-bold); color:#fff; }
 .block-title { font-size:1.05rem; font-weight:700; margin-bottom:2px; }
-.block-subtitle { font-size:0.78rem; color:var(–text-soft); font-style:italic; }
+.block-subtitle { font-size:0.78rem; color:var(--text-soft); font-style:italic; }
 .block-progress { margin-top:12px; }
 .block-dots { display:flex; gap:6px; }
 .block-dot {
-width:10px; height:10px; border-radius:50%;
-background:var(–border); transition:all 0.3s;
+  width:10px; height:10px; border-radius:50%;
+  background:var(--border); transition:all 0.3s;
 }
-.block-dot.done { background:var(–green); box-shadow:0 0 6px rgba(52,168,83,0.4); }
-.block-dot.active { background:var(–lvl-bold); box-shadow:0 0 8px var(–lvl-light); }
+.block-dot.done { background:var(--green); box-shadow:0 0 6px rgba(52,168,83,0.4); }
+.block-dot.active { background:var(--lvl-bold); box-shadow:0 0 8px var(--lvl-light); }
 
 /* ── Banner de nivel completado ── */
 .nivel-done-banner {
-margin:8px 18px 18px; padding:20px; border-radius:16px;
-background:linear-gradient(135deg,var(–green-soft),rgba(52,168,83,0.05));
-border:2px solid var(–green); text-align:center;
+  margin:8px 18px 18px; padding:20px; border-radius:16px;
+  background:linear-gradient(135deg,var(--green-soft),rgba(52,168,83,0.05));
+  border:2px solid var(--green); text-align:center;
 }
-.nivel-done-banner h3 { font-size:1.1rem; color:var(–green); margin-bottom:6px; }
-.nivel-done-banner p { font-size:0.82rem; color:var(–text-soft); margin-bottom:14px; }
+.nivel-done-banner h3 { font-size:1.1rem; color:var(--green); margin-bottom:6px; }
+.nivel-done-banner p { font-size:0.82rem; color:var(--text-soft); margin-bottom:14px; }
 
 /* ── Botones ── */
 .btn {
-display:inline-flex; align-items:center; justify-content:center; gap:8px;
-padding:14px 28px; border-radius:14px; border:none; cursor:pointer;
-font-family:inherit; font-size:0.88rem; font-weight:700;
-transition:all 0.2s; letter-spacing:0.3px;
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding:14px 28px; border-radius:14px; border:none; cursor:pointer;
+  font-family:inherit; font-size:0.88rem; font-weight:700;
+  transition:all 0.2s; letter-spacing:0.3px;
 }
 .btn:active { transform:scale(0.96); }
-.btn-primary { background:var(–lvl-bold); color:#fff; box-shadow:0 4px 14px rgba(0,0,0,0.15); }
-.btn-green { background:var(–green); color:#fff; }
-.btn-outline { background:transparent; border:2px solid var(–border); color:var(–text-soft); }
-.btn-ghost { background:transparent; color:var(–text-soft); padding:10px 14px; font-size:0.82rem; }
+.btn-primary { background:var(--lvl-bold); color:#fff; box-shadow:0 4px 14px rgba(0,0,0,0.15); }
+.btn-green { background:var(--green); color:#fff; }
+.btn-outline { background:transparent; border:2px solid var(--border); color:var(--text-soft); }
+.btn-ghost { background:transparent; color:var(--text-soft); padding:10px 14px; font-size:0.82rem; }
 .btn-block { width:100%; }
 
 /* ── Micro-aprendizaje ── */
 .micro-screen { padding:0 18px 40px; }
 .micro-header { padding:16px 0 10px; display:flex; align-items:center; justify-content:space-between; }
 .micro-label {
-font-size:0.65rem; font-weight:700; text-transform:uppercase;
-letter-spacing:1.2px; color:var(–lvl-bold);
+  font-size:0.65rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:1.2px; color:var(--lvl-bold);
 }
 .micro-sub {
-font-family:‘Crimson Pro’, Georgia, serif;
-font-size:1.2rem; font-weight:600; color:var(–text); margin-top:2px;
+  font-family:'Crimson Pro', Georgia, serif;
+  font-size:1.2rem; font-weight:600; color:var(--text); margin-top:2px;
 }
 .micro-progress { display:flex; gap:6px; margin-bottom:16px; }
-.micro-dot { height:5px; border-radius:3px; background:var(–border); transition:all 0.4s ease; }
-.micro-dot.done { background:var(–green); }
-.micro-dot.active { background:var(–lvl-bold); }
+.micro-dot { height:5px; border-radius:3px; background:var(--border); transition:all 0.4s ease; }
+.micro-dot.done { background:var(--green); }
+.micro-dot.active { background:var(--lvl-bold); }
 .micro-card {
-background:var(–card); border-radius:20px; padding:28px 22px;
-border:1.5px solid var(–border);
-animation:slideUp 0.45s cubic-bezier(0.34,1.72,0.64,1) both;
-min-height:220px; display:flex; flex-direction:column; justify-content:space-between;
+  background:var(--card); border-radius:20px; padding:28px 22px;
+  border:1.5px solid var(--border);
+  animation:slideUp 0.45s cubic-bezier(0.34,1.72,0.64,1) both;
+  min-height:220px; display:flex; flex-direction:column; justify-content:space-between;
 }
 .micro-card-emoji { font-size:2.2rem; margin-bottom:14px; }
 .micro-card-titulo {
-font-family:‘Crimson Pro’, Georgia, serif;
-font-size:1.55rem; font-weight:600; color:var(–lvl-bold); line-height:1.2; margin-bottom:12px;
+  font-family:'Crimson Pro', Georgia, serif;
+  font-size:1.55rem; font-weight:600; color:var(--lvl-bold); line-height:1.2; margin-bottom:12px;
 }
 .micro-card-contenido {
-font-family:‘Crimson Pro’, Georgia, serif;
-font-size:1.25rem; font-weight:400; line-height:1.75; color:var(–text); flex:1;
+  font-family:'Crimson Pro', Georgia, serif;
+  font-size:1.25rem; font-weight:400; line-height:1.75; color:var(--text); flex:1;
 }
 .micro-card-footer {
-display:flex; justify-content:space-between; align-items:center;
-margin-top:20px; padding-top:14px; border-top:1px solid var(–border);
+  display:flex; justify-content:space-between; align-items:center;
+  margin-top:20px; padding-top:14px; border-top:1px solid var(--border);
 }
-.micro-card-count { font-size:0.68rem; font-weight:600; color:var(–text-dim); text-transform:uppercase; letter-spacing:0.8px; }
+.micro-card-count { font-size:0.68rem; font-weight:600; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.8px; }
 .micro-q-card {
-background:var(–card); border-radius:20px; padding:24px 22px;
-border:1.5px solid var(–border);
-animation:slideUp 0.45s cubic-bezier(0.34,1.72,0.64,1) both;
+  background:var(--card); border-radius:20px; padding:24px 22px;
+  border:1.5px solid var(--border);
+  animation:slideUp 0.45s cubic-bezier(0.34,1.72,0.64,1) both;
 }
 .micro-q-label {
-font-size:0.65rem; font-weight:700; text-transform:uppercase;
-letter-spacing:1.2px; color:var(–lvl-bold); margin-bottom:14px;
+  font-size:0.65rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:1.2px; color:var(--lvl-bold); margin-bottom:14px;
 }
 .micro-q-texto {
-font-family:‘Crimson Pro’, Georgia, serif;
-font-size:1.4rem; font-weight:500; line-height:1.55; color:var(–text); margin-bottom:20px;
+  font-family:'Crimson Pro', Georgia, serif;
+  font-size:1.4rem; font-weight:500; line-height:1.55; color:var(--text); margin-bottom:20px;
 }
 .micro-option {
-width:100%; padding:14px 16px; border-radius:14px;
-border:1.5px solid var(–border); background:var(–sec-bg);
-font-family:‘Crimson Pro’, Georgia, serif;
-font-size:1.2rem; font-weight:400; line-height:1.4;
-color:var(–text); cursor:pointer; text-align:left;
-display:flex; align-items:center; gap:12px;
-transition:all 0.25s; margin-bottom:10px;
+  width:100%; padding:14px 16px; border-radius:14px;
+  border:1.5px solid var(--border); background:var(--sec-bg);
+  font-family:'Crimson Pro', Georgia, serif;
+  font-size:1.2rem; font-weight:400; line-height:1.4;
+  color:var(--text); cursor:pointer; text-align:left;
+  display:flex; align-items:center; gap:12px;
+  transition:all 0.25s; margin-bottom:10px;
 }
-.micro-option.selected { border-color:var(–lvl-bold); background:var(–lvl-ultra); }
+.micro-option.selected { border-color:var(--lvl-bold); background:var(--lvl-ultra); }
 .micro-option.dimmed { opacity:0.4; cursor:default; pointer-events:none; }
 .micro-option-circle {
-width:22px; height:22px; border-radius:50%; flex-shrink:0;
-border:1.5px solid var(–border); background:transparent;
-display:flex; align-items:center; justify-content:center;
-font-size:11px; color:#fff; font-weight:700; transition:all 0.25s;
+  width:22px; height:22px; border-radius:50%; flex-shrink:0;
+  border:1.5px solid var(--border); background:transparent;
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; color:#fff; font-weight:700; transition:all 0.25s;
 }
-.micro-option.selected .micro-option-circle { background:var(–lvl-bold); border-color:var(–lvl-bold); }
+.micro-option.selected .micro-option-circle { background:var(--lvl-bold); border-color:var(--lvl-bold); }
 .micro-eco {
-margin-top:16px; padding:14px 16px;
-background:var(–lvl-ultra); border-radius:14px; border-left:3px solid var(–lvl-soft);
-font-family:‘Crimson Pro’, Georgia, serif;
-font-size:1.15rem; font-weight:400; font-style:italic;
-color:var(–text); line-height:1.6;
-animation:fadeIn 0.4s ease both;
-display:flex; align-items:flex-start; gap:10px;
+  margin-top:16px; padding:14px 16px;
+  background:var(--lvl-ultra); border-radius:14px; border-left:3px solid var(--lvl-soft);
+  font-family:'Crimson Pro', Georgia, serif;
+  font-size:1.15rem; font-weight:400; font-style:italic;
+  color:var(--text); line-height:1.6;
+  animation:fadeIn 0.4s ease both;
+  display:flex; align-items:flex-start; gap:10px;
 }
 .micro-eco-emoji { font-size:1.3rem; flex-shrink:0; }
 .micro-final {
-text-align:center; padding:40px 0;
-animation:slideUp 0.55s cubic-bezier(0.34,1.72,0.64,1) both;
+  text-align:center; padding:40px 0;
+  animation:slideUp 0.55s cubic-bezier(0.34,1.72,0.64,1) both;
 }
 .micro-final-cross {
-margin:0 auto 24px; display:flex; align-items:center; justify-content:center;
-width:64px; height:64px;
+  margin:0 auto 24px; display:flex; align-items:center; justify-content:center;
+  width:64px; height:64px;
 }
 .micro-final-titulo {
-font-family:‘Crimson Pro’, Georgia, serif;
-font-size:1.8rem; font-weight:600; color:var(–text); line-height:1.2; margin-bottom:12px;
+  font-family:'Crimson Pro', Georgia, serif;
+  font-size:1.8rem; font-weight:600; color:var(--text); line-height:1.2; margin-bottom:12px;
 }
 .micro-final-sub {
-font-family:‘Crimson Pro’, Georgia, serif;
-font-size:1.2rem; color:var(–text-soft); line-height:1.65;
-margin:0 auto 28px; max-width:300px;
+  font-family:'Crimson Pro', Georgia, serif;
+  font-size:1.2rem; color:var(--text-soft); line-height:1.65;
+  margin:0 auto 28px; max-width:300px;
 }
 .micro-metros-chip {
-display:inline-flex; align-items:center; gap:6px; padding:7px 16px; border-radius:20px;
-background:var(–green-soft); color:var(–green); font-size:0.82rem; font-weight:700; margin-bottom:28px;
+  display:inline-flex; align-items:center; gap:6px; padding:7px 16px; border-radius:20px;
+  background:var(--green-soft); color:var(--green); font-size:0.82rem; font-weight:700; margin-bottom:28px;
 }
 .micro-nav { display:flex; gap:10px; margin-top:20px; }
 .micro-nav .btn { flex:1; }
 
 /* ── Mejora 6: Hero image ── */
 .mystery-hero {
-position:relative; width:100%;
-aspect-ratio:3/4; overflow:hidden;
-background:var(–card);
+  position:relative; width:100%;
+  aspect-ratio:3/4; overflow:hidden;
+  background:var(--card);
 }
 .mystery-hero-img {
-width:100%; height:100%; object-fit:cover;
-display:block;
-animation:fadeIn 0.5s ease both;
+  width:100%; height:100%; object-fit:cover;
+  display:block;
+  animation:fadeIn 0.5s ease both;
 }
 .mystery-hero-placeholder {
-width:100%; height:100%;
-display:flex; align-items:center; justify-content:center;
-opacity:0.18;
+  width:100%; height:100%;
+  display:flex; align-items:center; justify-content:center;
+  opacity:0.18;
 }
 .mystery-hero-placeholder svg { width:64px; height:64px; }
 .mystery-hero-gradient {
-position:absolute; inset:0;
-background:linear-gradient(
-to top,
-rgba(10,7,5,0.88) 0%,
-rgba(10,7,5,0.45) 35%,
-transparent 65%
-);
+  position:absolute; inset:0;
+  background:linear-gradient(
+    to top,
+    rgba(10,7,5,0.88) 0%,
+    rgba(10,7,5,0.45) 35%,
+    transparent 65%
+  );
 }
 .mystery-hero-text {
-position:absolute; bottom:0; left:0; right:0;
-padding:28px 20px 18px;
+  position:absolute; bottom:0; left:0; right:0;
+  padding:28px 20px 18px;
 }
 .mystery-hero-counter {
-font-size:0.65rem; font-weight:700; text-transform:uppercase;
-letter-spacing:1.2px; color:rgba(230,222,211,0.65);
-margin-bottom:6px;
+  font-size:0.65rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:1.2px; color:rgba(230,222,211,0.65);
+  margin-bottom:6px;
 }
 .mystery-hero-title {
-font-family:‘Cormorant Garamond’, Georgia, serif;
-font-size:2rem; font-weight:600; line-height:1.1;
-letter-spacing:0.01em; color:#E6DED3;
-text-shadow:0 2px 12px rgba(0,0,0,0.5);
+  font-family:'Cormorant Garamond', Georgia, serif;
+  font-size:2rem; font-weight:600; line-height:1.1;
+  letter-spacing:0.01em; color:#E6DED3;
+  text-shadow:0 2px 12px rgba(0,0,0,0.5);
 }
 .mystery-hero-subtitle {
-font-family:‘Cormorant Garamond’, Georgia, serif;
-font-size:1.05rem; font-weight:400; font-style:italic;
-color:rgba(230,222,211,0.7); margin-top:4px;
+  font-family:'Cormorant Garamond', Georgia, serif;
+  font-size:1.05rem; font-weight:400; font-style:italic;
+  color:rgba(230,222,211,0.7); margin-top:4px;
 }
 
 /* Ocultar prayer-header en modo hero — el título vive en el hero */
 .has-hero .prayer-header .mystery-title,
 .has-hero .prayer-header .mystery-subtitle { display:none; }
 .has-hero .prayer-header {
-padding:10px 18px 6px;
+  padding:10px 18px 6px;
 }
 
 /* ── Tarjeta Elegir nivel ── */
 .nivel-switch-card {
-margin:0 18px 28px;
-padding:16px 18px;
-background:var(–card); border-radius:16px;
-border:1.5px solid var(–border);
-display:flex; align-items:center; justify-content:space-between;
-cursor:pointer; transition:all 0.2s;
--webkit-tap-highlight-color:transparent;
+  margin:0 18px 28px;
+  padding:16px 18px;
+  background:var(--card); border-radius:16px;
+  border:1.5px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+  cursor:pointer; transition:all 0.2s;
+  -webkit-tap-highlight-color:transparent;
 }
-.nivel-switch-card:active { transform:scale(0.98); border-color:var(–lvl-soft); }
+.nivel-switch-card:active { transform:scale(0.98); border-color:var(--lvl-soft); }
 .nivel-switch-left { display:flex; align-items:center; gap:12px; }
 .nivel-switch-icon {
-width:38px; height:38px; border-radius:10px;
-background:var(–lvl-ultra); border:1px solid var(–lvl-soft);
-display:flex; align-items:center; justify-content:center;
-flex-shrink:0;
+  width:38px; height:38px; border-radius:10px;
+  background:var(--lvl-ultra); border:1px solid var(--lvl-soft);
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
 }
 .nivel-switch-title {
-font-family:‘Crimson Pro’, Georgia, serif;
-font-size:1.1rem; font-weight:600; color:var(–text);
+  font-family:'Crimson Pro', Georgia, serif;
+  font-size:1.1rem; font-weight:600; color:var(--text);
 }
-.nivel-switch-sub { font-size:0.68rem; color:var(–text-dim); margin-top:1px; }
-.nivel-switch-arrow { color:var(–text-dim); font-size:1.1rem; }
+.nivel-switch-sub { font-size:0.68rem; color:var(--text-dim); margin-top:1px; }
+.nivel-switch-arrow { color:var(--text-dim); font-size:1.1rem; }
 .prep-btn-wrap { padding:14px 18px 4px; }
 .prep-btn {
-width:100%; padding:18px 20px; border-radius:16px;
-border:none;
-background:linear-gradient(135deg, var(–lvl-bold) 0%, var(–lvl-soft) 100%);
-font-family:‘Crimson Pro’, Georgia, serif;
-font-size:1.4rem; font-weight:600;
-color:#fff; cursor:pointer; text-align:left;
-display:flex; align-items:center; justify-content:space-between; gap:12px;
-transition:all 0.2s;
-box-shadow:0 4px 18px rgba(var(–lvl-bold-rgb,255,122,0),0.35);
+  width:100%; padding:18px 20px; border-radius:16px;
+  border:none;
+  background:linear-gradient(135deg, var(--lvl-bold) 0%, var(--lvl-soft) 100%);
+  font-family:'Crimson Pro', Georgia, serif;
+  font-size:1.4rem; font-weight:600;
+  color:#fff; cursor:pointer; text-align:left;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  transition:all 0.2s;
+  box-shadow:0 4px 18px rgba(var(--lvl-bold-rgb,255,122,0),0.35);
 }
 .prep-btn:active { transform:scale(0.97); opacity:0.92; }
 .prep-btn-label {
-font-size:0.62rem; font-weight:700; text-transform:uppercase;
-letter-spacing:1px; opacity:0.85; margin-bottom:4px; display:block;
-font-family:‘Inter’,sans-serif;
+  font-size:0.62rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:1px; opacity:0.85; margin-bottom:4px; display:block;
+  font-family:'Inter',sans-serif;
 }
 
 /* ── Pantalla de Oración (pre-hero) ── */
 .prayer-header { padding:16px 18px 10px; }
 .prayer-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
-.mystery-counter { font-size:0.72rem; font-weight:600; color:var(–text-dim); letter-spacing:1px; text-transform:uppercase; }
+.mystery-counter { font-size:0.72rem; font-weight:600; color:var(--text-dim); letter-spacing:1px; text-transform:uppercase; }
 .mystery-title {
-font-family:‘Cormorant Garamond’, Georgia, serif;
-font-size:1.75rem; font-weight:600; line-height:1.15;
-letter-spacing:0.01em; margin-bottom:4px;
+  font-family:'Cormorant Garamond', Georgia, serif;
+  font-size:1.75rem; font-weight:600; line-height:1.15;
+  letter-spacing:0.01em; margin-bottom:4px;
 }
 .mystery-subtitle {
-font-family:‘Cormorant Garamond’, Georgia, serif;
-font-size:1.05rem; font-weight:400;
-font-style:italic; color:var(–text-soft);
+  font-family:'Cormorant Garamond', Georgia, serif;
+  font-size:1.05rem; font-weight:400;
+  font-style:italic; color:var(--text-soft);
 }
 
 /* Cuentas del rosario (cadena de 5) */
@@ -458,88 +457,88 @@ font-style:italic; color:var(–text-soft);
 
 /* ── Evangelio ── */
 .evangelio-box {
-margin:0 18px 14px; padding:20px; border-radius:16px;
-background:var(–card); border-left:4px solid var(–lvl-soft);
+  margin:0 18px 14px; padding:20px; border-radius:16px;
+  background:var(--card); border-left:4px solid var(--lvl-soft);
 }
 .evangelio-label {
-font-size:0.68rem; font-weight:700; text-transform:uppercase;
-letter-spacing:1.2px; color:var(–lvl-bold); margin-bottom:10px;
-display:flex; align-items:center; gap:6px;
+  font-size:0.68rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:1.2px; color:var(--lvl-bold); margin-bottom:10px;
+  display:flex; align-items:center; gap:6px;
 }
 .evangelio-text {
-font-family:‘Crimson Pro’, Georgia, serif;
-font-size:26px; font-weight:500; line-height:1.7; color:var(–text);
+  font-family:'Crimson Pro', Georgia, serif;
+  font-size:26px; font-weight:500; line-height:1.7; color:var(--text);
 }
-.evangelio-ref { font-size:0.78rem; color:var(–text-dim); text-align:right; margin-top:12px; font-style:italic; }
+.evangelio-ref { font-size:0.78rem; color:var(--text-dim); text-align:right; margin-top:12px; font-style:italic; }
 
 /* ── Acordeón ── */
 .accordion { margin:0 18px 10px; }
-.acc-item { background:var(–card); border-radius:14px; margin-bottom:10px; overflow:hidden; border:1.5px solid var(–border); transition:border-color 0.3s; }
-.acc-item.open { border-color:var(–lvl-soft); }
+.acc-item { background:var(--card); border-radius:14px; margin-bottom:10px; overflow:hidden; border:1.5px solid var(--border); transition:border-color 0.3s; }
+.acc-item.open { border-color:var(--lvl-soft); }
 .acc-trigger {
-width:100%; display:flex; align-items:center; justify-content:space-between;
-padding:14px 18px; background:none; border:none; cursor:pointer;
-font-family:inherit; color:var(–text); transition:background 0.2s;
+  width:100%; display:flex; align-items:center; justify-content:space-between;
+  padding:14px 18px; background:none; border:none; cursor:pointer;
+  font-family:inherit; color:var(--text); transition:background 0.2s;
 }
-.acc-trigger:active { background:var(–sec-bg); }
+.acc-trigger:active { background:var(--sec-bg); }
 .acc-trigger-left { display:flex; align-items:center; gap:10px; }
 .acc-icon {
-width:32px; height:32px; border-radius:10px;
-display:flex; align-items:center; justify-content:center;
-font-size:1rem;
+  width:32px; height:32px; border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1rem;
 }
 .acc-label { font-size:0.88rem; font-weight:600; }
-.acc-chevron { transition:transform 0.3s; color:var(–text-dim); }
+.acc-chevron { transition:transform 0.3s; color:var(--text-dim); }
 .acc-item.open .acc-chevron { transform:rotate(180deg); }
 .acc-body { max-height:0; overflow:hidden; transition:max-height 0.4s ease; }
 .acc-body-inner { padding:0 18px 18px; }
 
 /* ── Audio Player ── */
 .audio-player {
-display:flex; align-items:center; gap:12px; padding:12px 16px;
-background:var(–sec-bg); border-radius:12px;
+  display:flex; align-items:center; gap:12px; padding:12px 16px;
+  background:var(--sec-bg); border-radius:12px;
 }
 .play-btn {
-width:44px; height:44px; border-radius:50%; border:none;
-background:var(–lvl-bold); color:#fff; cursor:pointer;
-display:flex; align-items:center; justify-content:center;
-flex-shrink:0; transition:all 0.2s;
+  width:44px; height:44px; border-radius:50%; border:none;
+  background:var(--lvl-bold); color:#fff; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; transition:all 0.2s;
 }
 .play-btn:active { transform:scale(0.9); }
 .audio-info { flex:1; min-width:0; }
-.audio-label { font-size:0.75rem; color:var(–text-soft); margin-bottom:4px; }
-.audio-bar-wrap { width:100%; height:5px; background:var(–border); border-radius:3px; cursor:pointer; position:relative; }
-.audio-bar-fill { height:100%; border-radius:3px; background:var(–lvl-bold); transition:width 0.1s linear; }
-.audio-time { font-size:0.68rem; color:var(–text-dim); margin-top:3px; display:flex; justify-content:space-between; }
+.audio-label { font-size:0.75rem; color:var(--text-soft); margin-bottom:4px; }
+.audio-bar-wrap { width:100%; height:5px; background:var(--border); border-radius:3px; cursor:pointer; position:relative; }
+.audio-bar-fill { height:100%; border-radius:3px; background:var(--lvl-bold); transition:width 0.1s linear; }
+.audio-time { font-size:0.68rem; color:var(--text-dim); margin-top:3px; display:flex; justify-content:space-between; }
 
 /* ── Canto ── */
 .canto-box {
-padding:18px; background:var(–lvl-ultra); border-radius:14px;
-border-left:3px solid var(–lvl-soft); text-align:center;
+  padding:18px; background:var(--lvl-ultra); border-radius:14px;
+  border-left:3px solid var(--lvl-soft); text-align:center;
 }
-.canto-box p { font-size:0.88rem; color:var(–text); font-style:italic; line-height:1.7; }
-.canto-box .canto-hint { font-size:0.78rem; color:var(–text-dim); margin-top:8px; display:block; }
+.canto-box p { font-size:0.88rem; color:var(--text); font-style:italic; line-height:1.7; }
+.canto-box .canto-hint { font-size:0.78rem; color:var(--text-dim); margin-top:8px; display:block; }
 
 .canto-letra {
-margin-top:16px; padding:16px 18px;
-background:var(–sec-bg); border-radius:12px;
-font-family:‘Crimson Pro’, Georgia, serif;
-font-size:25px; font-weight:400; line-height:1.85;
-color:var(–text); white-space:pre-line; text-align:left;
-font-style:italic;
+  margin-top:16px; padding:16px 18px;
+  background:var(--sec-bg); border-radius:12px;
+  font-family:'Crimson Pro', Georgia, serif;
+  font-size:25px; font-weight:400; line-height:1.85;
+  color:var(--text); white-space:pre-line; text-align:left;
+  font-style:italic;
 }
 .canto-letra-titulo {
-font-size:0.65rem; font-weight:700; text-transform:uppercase;
-letter-spacing:1px; color:var(–lvl-bold);
-margin-bottom:10px; display:block;
+  font-size:0.65rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:1px; color:var(--lvl-bold);
+  margin-bottom:10px; display:block;
 }
 
 /* ── Contemplación texto ── */
 .contempl-text {
-margin-top:14px; padding:16px 18px; background:var(–sec-bg);
-border-radius:14px; border-left:3px solid var(–lvl-soft);
-font-family:‘Crimson Pro’, Georgia, serif;
-font-size:26px; font-weight:500; line-height:1.7; white-space:pre-line;
+  margin-top:14px; padding:16px 18px; background:var(--sec-bg);
+  border-radius:14px; border-left:3px solid var(--lvl-soft);
+  font-family:'Crimson Pro', Georgia, serif;
+  font-size:26px; font-weight:500; line-height:1.7; white-space:pre-line;
 }
 
 /* ── Meditación ── */
@@ -548,156 +547,156 @@ font-size:26px; font-weight:500; line-height:1.7; white-space:pre-line;
 .med-dot { width:7px; height:7px; border-radius:50%; }
 .med-label-text { font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; }
 .med-question {
-font-family:‘Crimson Pro’, Georgia, serif;
-font-size:24px; font-weight:500; line-height:1.7; margin-bottom:10px;
+  font-family:'Crimson Pro', Georgia, serif;
+  font-size:24px; font-weight:500; line-height:1.7; margin-bottom:10px;
 }
 .journal-area {
-width:100%; min-height:120px; padding:14px; border-radius:12px;
-border:1.5px solid var(–border); background:var(–input-bg);
-font-family:‘Crimson Pro’, Georgia, serif;
-font-size:22px; font-weight:400; line-height:1.7;
-color:var(–text); resize:vertical; transition:border-color 0.3s;
+  width:100%; min-height:120px; padding:14px; border-radius:12px;
+  border:1.5px solid var(--border); background:var(--input-bg);
+  font-family:'Crimson Pro', Georgia, serif;
+  font-size:22px; font-weight:400; line-height:1.7;
+  color:var(--text); resize:vertical; transition:border-color 0.3s;
 }
-.journal-area:focus { outline:none; border-color:var(–lvl-soft); }
-.journal-area::placeholder { color:var(–text-dim); }
+.journal-area:focus { outline:none; border-color:var(--lvl-soft); }
+.journal-area::placeholder { color:var(--text-dim); }
 .med-confirm {
-display:flex; align-items:center; justify-content:center; gap:6px;
-width:100%; margin-top:8px; padding:10px; border-radius:10px;
-border:1.5px solid var(–border); background:var(–sec-bg);
-font-family:inherit; font-size:0.78rem; font-weight:600;
-color:var(–text-soft); cursor:pointer; transition:all 0.3s;
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  width:100%; margin-top:8px; padding:10px; border-radius:10px;
+  border:1.5px solid var(--border); background:var(--sec-bg);
+  font-family:inherit; font-size:0.78rem; font-weight:600;
+  color:var(--text-soft); cursor:pointer; transition:all 0.3s;
 }
 .med-confirm:active { transform:scale(0.96); }
 .med-confirm.done {
-background:var(–green-soft); border-color:var(–green);
-color:var(–green); cursor:default;
+  background:var(--green-soft); border-color:var(--green);
+  color:var(--green); cursor:default;
 }
 @keyframes medGlow {
-0% { box-shadow:0 0 0 0 rgba(52,168,83,0.4); }
-70% { box-shadow:0 0 0 10px rgba(52,168,83,0); }
-100% { box-shadow:0 0 0 0 rgba(52,168,83,0); }
+  0% { box-shadow:0 0 0 0 rgba(52,168,83,0.4); }
+  70% { box-shadow:0 0 0 10px rgba(52,168,83,0); }
+  100% { box-shadow:0 0 0 0 rgba(52,168,83,0); }
 }
 .med-confirm.glow { animation:medGlow 0.6s ease; }
 
 /* ── Intercesión ── */
 .interc-text {
-padding:18px; background:var(–lvl-ultra); border-radius:14px;
-font-family:‘Crimson Pro’, Georgia, serif;
-font-size:26px; font-weight:500; line-height:1.7; white-space:pre-line;
+  padding:18px; background:var(--lvl-ultra); border-radius:14px;
+  font-family:'Crimson Pro', Georgia, serif;
+  font-size:26px; font-weight:500; line-height:1.7; white-space:pre-line;
 }
 .amen-btn {
-display:block; width:100%; margin-top:14px; padding:16px;
-border-radius:14px; border:none; cursor:pointer;
-font-family:inherit; font-size:1rem; font-weight:800;
-background:var(–lvl-bold); color:#fff; letter-spacing:1px;
-transition:all 0.2s; box-shadow:0 4px 16px rgba(0,0,0,0.12);
+  display:block; width:100%; margin-top:14px; padding:16px;
+  border-radius:14px; border:none; cursor:pointer;
+  font-family:inherit; font-size:1rem; font-weight:800;
+  background:var(--lvl-bold); color:#fff; letter-spacing:1px;
+  transition:all 0.2s; box-shadow:0 4px 16px rgba(0,0,0,0.12);
 }
 .amen-btn:active { transform:scale(0.96); }
-.amen-btn.done { background:var(–green); }
+.amen-btn.done { background:var(--green); }
 
 /* ── Completado de misterio ── */
 .mystery-done-bar {
-margin:12px 18px; padding:14px 18px; border-radius:14px;
-background:var(–green-soft); border:1.5px solid rgba(52,168,83,0.2);
-display:flex; align-items:center; gap:10px;
+  margin:12px 18px; padding:14px 18px; border-radius:14px;
+  background:var(--green-soft); border:1.5px solid rgba(52,168,83,0.2);
+  display:flex; align-items:center; gap:10px;
 }
-.done-check { color:var(–green); font-size:1.2rem; }
-.done-text { font-size:0.82rem; font-weight:600; color:var(–green); }
-.done-date { font-size:0.72rem; color:var(–text-dim); }
+.done-check { color:var(--green); font-size:1.2rem; }
+.done-text { font-size:0.82rem; font-weight:600; color:var(--green); }
+.done-date { font-size:0.72rem; color:var(--text-dim); }
 
 /* ── Navegación de prayer (botones Siguiente/Anterior) ── */
 .bottom-nav {
-padding:14px 18px 28px; display:flex; gap:10px;
+  padding:14px 18px 28px; display:flex; gap:10px;
 }
 .bottom-nav .btn { flex:1; }
 
 /* ── Mejora 5: Bottom nav bar fija ── */
 .shell { padding-bottom:72px; }
 .app-nav {
-position:fixed; bottom:0; left:50%; transform:translateX(-50%);
-width:100%; max-width:480px; z-index:80;
-background:var(–bg); border-top:1px solid var(–border);
-display:flex; align-items:stretch;
-padding-bottom:env(safe-area-inset-bottom, 0px);
-backdrop-filter:blur(12px);
--webkit-backdrop-filter:blur(12px);
+  position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+  width:100%; max-width:480px; z-index:80;
+  background:var(--bg); border-top:1px solid var(--border);
+  display:flex; align-items:stretch;
+  padding-bottom:env(safe-area-inset-bottom, 0px);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
 }
 .app-nav-item {
-flex:1; display:flex; flex-direction:column;
-align-items:center; justify-content:center;
-gap:4px; padding:10px 4px 12px;
-background:none; border:none; cursor:pointer;
-font-family:inherit; text-decoration:none;
-color:var(–text-dim); transition:color 0.2s;
--webkit-tap-highlight-color:transparent;
+  flex:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:4px; padding:10px 4px 12px;
+  background:none; border:none; cursor:pointer;
+  font-family:inherit; text-decoration:none;
+  color:var(--text-dim); transition:color 0.2s;
+  -webkit-tap-highlight-color:transparent;
 }
 .app-nav-item:active { opacity:1; }
-.app-nav-item.active { color:var(–lvl-bold); }
+.app-nav-item.active { color:var(--lvl-bold); }
 .app-nav-item[disabled] { cursor:default; opacity:1; }
 @keyframes navSpring {
-0%   { transform:scale(1); }
-35%  { transform:scale(0.78); }
-65%  { transform:scale(1.18); }
-82%  { transform:scale(0.95); }
-100% { transform:scale(1); }
+  0%   { transform:scale(1); }
+  35%  { transform:scale(0.78); }
+  65%  { transform:scale(1.18); }
+  82%  { transform:scale(0.95); }
+  100% { transform:scale(1); }
 }
 .app-nav-item.tapped .app-nav-icon { animation:navSpring 0.38s cubic-bezier(0.34,1.72,0.64,1) both; }
-.app-nav-item.tapped { color:var(–lvl-bold); }
+.app-nav-item.tapped { color:var(--lvl-bold); }
 .app-nav-icon {
-width:24px; height:24px; position:relative;
-display:flex; align-items:center; justify-content:center;
+  width:24px; height:24px; position:relative;
+  display:flex; align-items:center; justify-content:center;
 }
 .app-nav-item.active .app-nav-icon::before {
-content:’’; position:absolute; inset:-5px;
-background:rgba(var(–lvl-bold-rgb,255,122,0),0.12);
-border-radius:10px;
+  content:''; position:absolute; inset:-5px;
+  background:rgba(var(--lvl-bold-rgb,255,122,0),0.12);
+  border-radius:10px;
 }
 .app-nav-label {
-font-size:0.6rem; font-weight:600; letter-spacing:0.4px;
-text-transform:uppercase;
+  font-size:0.6rem; font-weight:600; letter-spacing:0.4px;
+  text-transform:uppercase;
 }
 
 /* ── Pantalla de celebración de bloque ── */
 .celebration-screen { text-align:center; padding:40px 24px; }
 .maria-img {
-width:200px; height:200px; border-radius:50%; object-fit:cover;
-border:4px solid var(–lvl-soft); margin:0 auto 24px;
-box-shadow:0 8px 32px var(–shadow);
+  width:200px; height:200px; border-radius:50%; object-fit:cover;
+  border:4px solid var(--lvl-soft); margin:0 auto 24px;
+  box-shadow:0 8px 32px var(--shadow);
 }
 .maria-placeholder {
-width:200px; height:200px; border-radius:50%; margin:0 auto 24px;
-background:linear-gradient(135deg,var(–lvl-ultra),var(–lvl-light));
-border:4px solid var(–lvl-soft); display:flex; align-items:center;
-justify-content:center; font-size:4rem;
-box-shadow:0 8px 32px var(–shadow);
+  width:200px; height:200px; border-radius:50%; margin:0 auto 24px;
+  background:linear-gradient(135deg,var(--lvl-ultra),var(--lvl-light));
+  border:4px solid var(--lvl-soft); display:flex; align-items:center;
+  justify-content:center; font-size:4rem;
+  box-shadow:0 8px 32px var(--shadow);
 }
 .celebration-title {
-font-family:‘Cormorant Garamond’, Georgia, serif;
-font-size:1.9rem; font-weight:600; margin-bottom:8px; line-height:1.15;
+  font-family:'Cormorant Garamond', Georgia, serif;
+  font-size:1.9rem; font-weight:600; margin-bottom:8px; line-height:1.15;
 }
-.celebration-sub { font-size:0.88rem; color:var(–text-soft); margin-bottom:24px; line-height:1.7; }
+.celebration-sub { font-size:0.88rem; color:var(--text-soft); margin-bottom:24px; line-height:1.7; }
 
 /* ── Error / Loading ── */
 .loading-screen, .error-screen {
-display:flex; flex-direction:column; align-items:center; justify-content:center;
-min-height:80dvh; padding:40px 24px; text-align:center;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  min-height:80dvh; padding:40px 24px; text-align:center;
 }
 .spinner {
-width:40px; height:40px; border:3px solid var(–border);
-border-top-color:var(–lvl-bold); border-radius:50%;
-animation:spin 0.8s linear infinite; margin-bottom:18px;
+  width:40px; height:40px; border:3px solid var(--border);
+  border-top-color:var(--lvl-bold); border-radius:50%;
+  animation:spin 0.8s linear infinite; margin-bottom:18px;
 }
 @keyframes spin { to { transform:rotate(360deg); } }
 
 /* ── Celebración animada ── */
 .confetti-container { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:999; }
 .confetti-piece {
-position:absolute; width:8px; height:8px; border-radius:2px;
-animation:confettiFall 2.5s ease-out forwards;
+  position:absolute; width:8px; height:8px; border-radius:2px;
+  animation:confettiFall 2.5s ease-out forwards;
 }
 @keyframes confettiFall {
-0% { transform:translateY(-20px) rotate(0deg); opacity:1; }
-100% { transform:translateY(100vh) rotate(720deg); opacity:0; }
+  0% { transform:translateY(-20px) rotate(0deg); opacity:1; }
+  100% { transform:translateY(100vh) rotate(720deg); opacity:0; }
 }
 
 /* ── Mejora 3: Spring slide-up — cubic-bezier expresivo ── */
@@ -727,110 +726,110 @@ animation:confettiFall 2.5s ease-out forwards;
 .fade-in-d4 { animation-delay:0.32s; }
 
 /* ══════════════════════════════════════════════════════
-GAMIFICACIÓN: Lux + Mariano + Metros
-══════════════════════════════════════════════════════ */
+   GAMIFICACIÓN: Lux + Mariano + Metros
+   ══════════════════════════════════════════════════════ */
 
 /* ── Lux (cruz guía en header) ── */
 .lux-container {
-position:relative; width:36px; height:36px;
-display:flex; align-items:center; justify-content:center;
+  position:relative; width:36px; height:36px;
+  display:flex; align-items:center; justify-content:center;
 }
 .lux-svg {
-width:24px; height:24px;
-filter:drop-shadow(0 0 2px #FFFCF7);
-animation:luxBreathe 3s ease-in-out infinite;
+  width:24px; height:24px;
+  filter:drop-shadow(0 0 2px #FFFCF7);
+  animation:luxBreathe 3s ease-in-out infinite;
 }
 .lux-svg.shine { animation:luxBreathe 3s ease-in-out infinite, luxShine 0.6s ease-out; }
 .lux-svg.spin { animation:luxSpin 2s linear; }
 
 @keyframes luxBreathe {
-0%,100% { transform:scale(1); opacity:0.9; }
-50% { transform:scale(1.08); opacity:1; }
+  0%,100% { transform:scale(1); opacity:0.9; }
+  50% { transform:scale(1.08); opacity:1; }
 }
 @keyframes luxShine {
-0%,100% { filter:drop-shadow(0 0 2px #FFFCF7); }
-50% { filter:drop-shadow(0 0 16px #FFFCF7); }
+  0%,100% { filter:drop-shadow(0 0 2px #FFFCF7); }
+  50% { filter:drop-shadow(0 0 16px #FFFCF7); }
 }
 @keyframes luxSpin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
 
 /* Partículas de Lux */
 .lux-particle {
-position:absolute; width:4px; height:4px; border-radius:50%;
-background:#FFFCF7; left:50%; top:50%; opacity:0.8;
-animation:luxParticleFly 1.5s ease-out forwards;
-pointer-events:none;
+  position:absolute; width:4px; height:4px; border-radius:50%;
+  background:#FFFCF7; left:50%; top:50%; opacity:0.8;
+  animation:luxParticleFly 1.5s ease-out forwards;
+  pointer-events:none;
 }
 @keyframes luxParticleFly {
-0% { transform:translate(0,0) scale(1); opacity:0.8; }
-100% { transform:translate(var(–x),var(–y)) scale(0); opacity:0; }
+  0% { transform:translate(0,0) scale(1); opacity:0.8; }
+  100% { transform:translate(var(--x),var(--y)) scale(0); opacity:0; }
 }
 
 /* ── Display de metros ── */
 .meters-display {
-display:flex; align-items:center; gap:6px;
-background:var(–sec-bg); padding:6px 12px; border-radius:12px;
-border:1.5px solid var(–border);
+  display:flex; align-items:center; gap:6px;
+  background:var(--sec-bg); padding:6px 12px; border-radius:12px;
+  border:1.5px solid var(--border);
 }
-.meters-display span { font-size:0.82rem; font-weight:700; color:var(–lvl-bold); }
+.meters-display span { font-size:0.82rem; font-weight:700; color:var(--lvl-bold); }
 
 /* ── Mariano Slide-in Overlay ── */
 .mariano-overlay {
-position:fixed; top:0; right:0; bottom:0; width:100%;
-pointer-events:none; z-index:90;
-display:flex; align-items:center; justify-content:flex-end;
-padding-right:20px;
+  position:fixed; top:0; right:0; bottom:0; width:100%;
+  pointer-events:none; z-index:90;
+  display:flex; align-items:center; justify-content:flex-end;
+  padding-right:20px;
 }
 .mariano-slide {
-width:182px; height:auto;
-animation:marianoSlide 2.5s ease-in-out;
+  width:182px; height:auto;
+  animation:marianoSlide 2.5s ease-in-out;
 }
 @keyframes marianoSlide {
-0% { transform:translateX(200px); opacity:0; }
-30% { transform:translateX(0); opacity:1; }
-70% { transform:translateX(0); opacity:1; }
-100% { transform:translateX(200px); opacity:0; }
+  0% { transform:translateX(200px); opacity:0; }
+  30% { transform:translateX(0); opacity:1; }
+  70% { transform:translateX(0); opacity:1; }
+  100% { transform:translateX(200px); opacity:0; }
 }
 
 .meters-float {
-position:absolute; top:50%; right:220px;
-font-size:1rem; font-weight:800; color:var(–green);
-text-shadow:0 2px 8px rgba(52,168,83,0.4);
-animation:metersFloat 2.5s ease-out;
+  position:absolute; top:50%; right:220px;
+  font-size:1rem; font-weight:800; color:var(--green);
+  text-shadow:0 2px 8px rgba(52,168,83,0.4);
+  animation:metersFloat 2.5s ease-out;
 }
 .meters-float .extra-badge {
-display:block; font-size:0.58rem; font-weight:800;
-letter-spacing:1.5px; text-transform:uppercase;
-color:#FFD700; text-shadow:0 1px 6px rgba(255,215,0,0.5);
-margin-bottom:2px;
+  display:block; font-size:0.58rem; font-weight:800;
+  letter-spacing:1.5px; text-transform:uppercase;
+  color:#FFD700; text-shadow:0 1px 6px rgba(255,215,0,0.5);
+  margin-bottom:2px;
 }
 @keyframes metersFloat {
-0% { transform:translateY(0); opacity:0; }
-30% { opacity:1; }
-70% { opacity:1; }
-100% { transform:translateY(-40px); opacity:0; }
+  0% { transform:translateY(0); opacity:0; }
+  30% { opacity:1; }
+  70% { opacity:1; }
+  100% { transform:translateY(-40px); opacity:0; }
 }
 
 /* ── Mariano Grand Celebration ── */
 .mariano-grand-overlay {
-position:fixed; inset:0;
-background:rgba(0,0,0,0.5);
-display:flex; align-items:center; justify-content:center;
-z-index:101; pointer-events:none;
+  position:fixed; inset:0;
+  background:rgba(0,0,0,0.5);
+  display:flex; align-items:center; justify-content:center;
+  z-index:101; pointer-events:none;
 }
 .mariano-grand-container { position:relative; width:260px; height:260px; }
 .mariano-grand {
-width:260px; height:auto; margin-bottom:20px;
-animation:popScale 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+  width:260px; height:auto; margin-bottom:20px;
+  animation:popScale 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
 }
 @keyframes popScale {
-0% { transform:scale(0); opacity:0; }
-60% { transform:scale(1.1); opacity:1; }
-100% { transform:scale(1); opacity:1; }
+  0% { transform:scale(0); opacity:0; }
+  60% { transform:scale(1.1); opacity:1; }
+  100% { transform:scale(1); opacity:1; }
 }
 
 .mariano-grand-lux {
-position:absolute; top:50%; left:50%;
-transform:translate(-50%, -50%);
+  position:absolute; top:50%; left:50%;
+  transform:translate(-50%, -50%);
 }
 .mariano-grand-lux svg { width:32px; height:32px; }
 .mariano-grand-lux.orbit1 svg { animation:luxOrbit1 3s ease-in-out infinite; }
@@ -839,54 +838,53 @@ transform:translate(-50%, -50%);
 .mariano-grand-lux.orbit4 svg { animation:luxOrbit4 3s ease-in-out infinite; }
 
 @keyframes luxOrbit1 {
-0% { transform:rotate(0deg) translateX(120px) rotate(0deg) scale(1); }
-25% { transform:rotate(90deg) translateX(120px) rotate(-90deg) scale(1.5); }
-50% { transform:rotate(180deg) translateX(120px) rotate(-180deg) scale(1); }
-75% { transform:rotate(270deg) translateX(120px) rotate(-270deg) scale(1.5); }
-100% { transform:rotate(360deg) translateX(120px) rotate(-360deg) scale(1); }
+  0% { transform:rotate(0deg) translateX(120px) rotate(0deg) scale(1); }
+  25% { transform:rotate(90deg) translateX(120px) rotate(-90deg) scale(1.5); }
+  50% { transform:rotate(180deg) translateX(120px) rotate(-180deg) scale(1); }
+  75% { transform:rotate(270deg) translateX(120px) rotate(-270deg) scale(1.5); }
+  100% { transform:rotate(360deg) translateX(120px) rotate(-360deg) scale(1); }
 }
 @keyframes luxOrbit2 {
-0% { transform:rotate(45deg) translateX(120px) rotate(-45deg) scale(1); }
-25% { transform:rotate(135deg) translateX(120px) rotate(-135deg) scale(1.6); }
-50% { transform:rotate(225deg) translateX(120px) rotate(-225deg) scale(1); }
-75% { transform:rotate(315deg) translateX(120px) rotate(-315deg) scale(1.6); }
-100% { transform:rotate(405deg) translateX(120px) rotate(-405deg) scale(1); }
+  0% { transform:rotate(45deg) translateX(120px) rotate(-45deg) scale(1); }
+  25% { transform:rotate(135deg) translateX(120px) rotate(-135deg) scale(1.6); }
+  50% { transform:rotate(225deg) translateX(120px) rotate(-225deg) scale(1); }
+  75% { transform:rotate(315deg) translateX(120px) rotate(-315deg) scale(1.6); }
+  100% { transform:rotate(405deg) translateX(120px) rotate(-405deg) scale(1); }
 }
 @keyframes luxOrbit3 {
-0% { transform:rotate(0deg) translateX(120px) rotate(0deg) scale(1.3); }
-33% { transform:rotate(120deg) translateX(120px) rotate(-120deg) scale(1); }
-66% { transform:rotate(240deg) translateX(120px) rotate(-240deg) scale(1.7); }
-100% { transform:rotate(360deg) translateX(120px) rotate(-360deg) scale(1.3); }
+  0% { transform:rotate(0deg) translateX(120px) rotate(0deg) scale(1.3); }
+  33% { transform:rotate(120deg) translateX(120px) rotate(-120deg) scale(1); }
+  66% { transform:rotate(240deg) translateX(120px) rotate(-240deg) scale(1.7); }
+  100% { transform:rotate(360deg) translateX(120px) rotate(-360deg) scale(1.3); }
 }
 @keyframes luxOrbit4 {
-0% { transform:rotate(90deg) translateX(120px) rotate(-90deg) scale(1.2); }
-20% { transform:rotate(162deg) translateX(120px) rotate(-162deg) scale(1.5); }
-40% { transform:rotate(234deg) translateX(120px) rotate(-234deg) scale(1); }
-60% { transform:rotate(306deg) translateX(120px) rotate(-306deg) scale(1.6); }
-80% { transform:rotate(378deg) translateX(120px) rotate(-378deg) scale(1.1); }
-100% { transform:rotate(450deg) translateX(120px) rotate(-450deg) scale(1.2); }
+  0% { transform:rotate(90deg) translateX(120px) rotate(-90deg) scale(1.2); }
+  20% { transform:rotate(162deg) translateX(120px) rotate(-162deg) scale(1.5); }
+  40% { transform:rotate(234deg) translateX(120px) rotate(-234deg) scale(1); }
+  60% { transform:rotate(306deg) translateX(120px) rotate(-306deg) scale(1.6); }
+  80% { transform:rotate(378deg) translateX(120px) rotate(-378deg) scale(1.1); }
+  100% { transform:rotate(450deg) translateX(120px) rotate(-450deg) scale(1.2); }
 }
 
 .mariano-grand-meters {
-text-align:center; color:#fff; font-size:1.55rem; font-weight:800;
-text-shadow:0 4px 16px rgba(0,0,0,0.5); margin-top:20px;
+  text-align:center; color:#fff; font-size:1.55rem; font-weight:800;
+  text-shadow:0 4px 16px rgba(0,0,0,0.5); margin-top:20px;
 }
 .mariano-grand-text {
-text-align:center; color:#fff; font-size:1rem; margin-top:8px;
-text-shadow:0 2px 8px rgba(0,0,0,0.5);
+  text-align:center; color:#fff; font-size:1rem; margin-top:8px;
+  text-shadow:0 2px 8px rgba(0,0,0,0.5);
 }
 
 /* Confetti para grand celebration */
 .grand-confetti {
-position:fixed; width:8px; height:8px; border-radius:50%;
-animation:confettiFall 2.5s ease-out forwards;
-pointer-events:none;
+  position:fixed; width:8px; height:8px; border-radius:50%;
+  animation:confettiFall 2.5s ease-out forwards;
+  pointer-events:none;
 }
 
 /* Responsivo */
 @media(max-width:380px) { html { font-size:16px; } }
 </style>
-
 </head>
 <body>
 <div class="shell" id="app">
@@ -897,7 +895,6 @@ pointer-events:none;
   </div>
 
   <!-- Error -->
-
   <div class="error-screen" id="scr-error" style="display:none">
     <div style="font-size:3rem;margin-bottom:16px">📿</div>
     <h2 style="font-size:1.1rem;margin-bottom:8px">No se encontró el nivel</h2>
@@ -906,7 +903,6 @@ pointer-events:none;
   </div>
 
   <!-- ═══ HEADER (compartido) ═══ -->
-
   <header class="header" id="main-header" style="display:none">
     <div>
       <div class="header-title" id="h-title"></div>
@@ -945,7 +941,6 @@ pointer-events:none;
   </header>
 
   <!-- ═══ PANTALLA INICIO ═══ -->
-
   <div class="screen" id="scr-home">
     <div class="home-intro fade-in">
       <h1 id="home-title"></h1>
@@ -975,7 +970,6 @@ pointer-events:none;
   </div>
 
   <!-- ═══ PANTALLA MICRO-APRENDIZAJE ═══ -->
-
   <div class="screen" id="scr-micro">
     <div class="micro-screen">
       <div class="micro-header">
@@ -991,7 +985,6 @@ pointer-events:none;
   </div>
 
   <!-- ═══ PANTALLA DE ORACIÓN ═══ -->
-
   <div class="screen" id="scr-prayer">
     <div class="prayer-header fade-in">
       <div class="prayer-nav">
@@ -1001,36 +994,32 @@ pointer-events:none;
       <div class="mystery-subtitle" id="prayer-subtitle"></div>
     </div>
 
-```
-<!-- Botón preparación opcional (solo primer misterio, si ya hizo el micro) -->
-<div id="prep-btn-wrap" style="display:none"></div>
+    <!-- Botón preparación opcional (solo primer misterio, si ya hizo el micro) -->
+    <div id="prep-btn-wrap" style="display:none"></div>
 
-<!-- Hero image (Mejora 6) -->
-<div id="mystery-hero"></div>
+    <!-- Hero image (Mejora 6) -->
+    <div id="mystery-hero"></div>
 
-<div class="mystery-beads" id="prayer-dots"></div>
+    <div class="mystery-beads" id="prayer-dots"></div>
 
-<!-- Evangelio -->
-<div class="evangelio-box fade-in fade-in-d1" id="evangelio-box">
-  <div class="evangelio-label">📖 Evangelio</div>
-  <div class="evangelio-text" id="ev-text"></div>
-  <div class="evangelio-ref" id="ev-ref"></div>
-</div>
+    <!-- Evangelio -->
+    <div class="evangelio-box fade-in fade-in-d1" id="evangelio-box">
+      <div class="evangelio-label">📖 Evangelio</div>
+      <div class="evangelio-text" id="ev-text"></div>
+      <div class="evangelio-ref" id="ev-ref"></div>
+    </div>
 
-<!-- Acordeón -->
-<div class="accordion" id="accordion"></div>
+    <!-- Acordeón -->
+    <div class="accordion" id="accordion"></div>
 
-<!-- Completado -->
-<div id="mystery-done-wrap" style="display:none"></div>
+    <!-- Completado -->
+    <div id="mystery-done-wrap" style="display:none"></div>
 
-<!-- Navegación inferior -->
-<div class="bottom-nav" id="bottom-nav"></div>
-```
-
+    <!-- Navegación inferior -->
+    <div class="bottom-nav" id="bottom-nav"></div>
   </div>
 
   <!-- ═══ PANTALLA CELEBRACIÓN BLOQUE ═══ -->
-
   <div class="screen" id="scr-celebration">
     <div class="celebration-screen fade-in">
       <div class="maria-placeholder" id="maria-container">🙏</div>
@@ -1041,16 +1030,13 @@ pointer-events:none;
   </div>
 
   <!-- ═══ OVERLAYS DE MARIANO ═══ -->
-
   <!-- Mariano Slide-in (aparece al ganar metros) -->
-
   <div class="mariano-overlay" id="mariano-overlay" style="display:none">
     <img id="mariano-slide-img" class="mariano-slide" alt="Mariano">
     <div class="meters-float" id="meters-float-text"></div>
   </div>
 
   <!-- ═══ BOTTOM NAV BAR (Mejora 5) ═══ -->
-
   <nav class="app-nav" id="app-nav">
     <button class="app-nav-item active" id="nav-orar" disabled>
       <div class="app-nav-icon">
@@ -1093,7 +1079,6 @@ pointer-events:none;
   </nav>
 
   <!-- Mariano Grand Celebration (pantalla completa al completar bloque) -->
-
   <div class="mariano-grand-overlay" id="mariano-grand-overlay" style="display:none">
     <div class="mariano-grand-container">
       <img id="mariano-grand-img" class="mariano-grand" alt="Mariano celebrando">
@@ -2278,345 +2263,319 @@ pointer-events:none;
         '<p class="med-question">' + escHTML(q) + '</p>' +
         '<textarea class="journal-area" id="med-ta-' + qi + '" placeholder="Escribe tu reflexión…" ' +
           'oninput="window._ca.onMedInput(\'' + b + '\',' + mi + ',' + qi + ',this.value)">' + escHTML(val) + '</textarea>' +
-
-```
-    '<button class="' + btnClass + '" id="med-btn-' + qi + '" onclick="window._ca.confirmReflection(\'' + b + '\',' + mi + ',' + qi + ')">' + btnText + '</button>' +
-  '</div>';
-}).join('');
-```
-
-}
-
-function parseMeditation(text) {
-if (!text) return [’’,’’,’’];
-// Intentar separar por las 3 etiquetas
-const labels = MED_LABELS;
-const parts = [];
-let remaining = text;
-for (let i = 0; i < labels.length; i++) {
-const idx = remaining.indexOf(labels[i]);
-if (idx >= 0) {
-if (i > 0 && parts.length < i) parts.push(remaining.substring(0, idx).trim());
-remaining = remaining.substring(idx + labels[i].length);
-// Quitar : inicial si hay
-remaining = remaining.replace(/^\s*:\s*/, ‘’);
-}
-}
-if (remaining.trim()) parts.push(remaining.trim());
-
-```
-// Si no se pudo parsear con labels, intentar por líneas
-if (parts.length < 3) {
-  const lines = text.split('\n').filter(l => l.trim());
-  return [lines[0] || '', lines[1] || '', lines[2] || ''];
-}
-return parts.length >= 3 ? parts.slice(0,3) : [...parts, ...Array(3-parts.length).fill('')];
-```
-
-}
-
-function saveJournal(b, mi, qi, val) {
-if (!journal[b]) journal[b] = {};
-if (!journal[b][mi]) journal[b][mi] = {};
-journal[b][mi][‘q’ + qi] = val;
-saveProgress();
-}
-
-function onMedInput(b, mi, qi, val) {
-saveJournal(b, mi, qi, val);
-// Auto-trigger a los 140 caracteres si no está confirmado aún
-if (!medConfirmed[b]) medConfirmed[b] = {};
-if (!medConfirmed[b][mi]) medConfirmed[b][mi] = {};
-if (!medConfirmed[b][mi][‘q’ + qi] && val.length >= 140) {
-confirmReflection(b, mi, qi);
-}
-}
-
-function confirmReflection(b, mi, qi) {
-if (!medConfirmed[b]) medConfirmed[b] = {};
-if (!medConfirmed[b][mi]) medConfirmed[b][mi] = {};
-
-```
-// Verificar que haya texto
-const j = journal[b] && journal[b][mi] ? journal[b][mi] : {};
-const val = j['q' + qi] || '';
-if (val.trim().length < 5) return; // muy corto, ignorar
-
-const yaConfirmado = !!medConfirmed[b][mi]['q' + qi];
-
-// Marcar como confirmado y guardar progreso
-medConfirmed[b][mi]['q' + qi] = true;
-saveProgress();
-
-// Obtener el texto real de la pregunta desde el misterio actual
-const misterio = DATA.misterios[b] && DATA.misterios[b][mi];
-const questions = misterio ? parseMeditation(misterio.meditacion) : [];
-const questionText = questions[qi] || MED_LABELS[qi] || '';
-
-// Guardar en Firestore siempre (primera vez o actualización)
-saveReflectionToFirestore(b, mi, qi, val, questionText);
-
-// Sonido suave (nota ascendente según pregunta)
-const freqs = [[523,659],[587,740],[659,880]];
-playNotes(freqs[qi] || freqs[0]);
-
-// Visual: actualizar botón
-const btn = document.getElementById('med-btn-' + qi);
-if (btn) {
-  btn.className = 'med-confirm done glow';
-  btn.textContent = yaConfirmado ? '✓ Reflexión actualizada' : '✓ Reflexión guardada';
-  // Volver a "Actualizar" después de 2 segundos
-  setTimeout(() => {
-    if (btn) btn.textContent = '✏️ Actualizar reflexión';
-  }, 2000);
-}
-
-// GAMIFICACIÓN: primera vez = metros completos + EXTRA; repetición = mitad
-if (!yaConfirmado) {
-  const rewardKey = b + '_' + mi + '_q' + qi;
-  const isFirst = !reflectionRewards[rewardKey];
-  if (isFirst) reflectionRewards[rewardKey] = true;
-  gainMeters(650, getNextRestPose(), isFirst);
-}
-```
-
-}
-
-function toggleSection(key) {
-openSection = openSection === key ? null : key;
-renderAccordion(currentBlock, currentMystery, DATA.misterios[currentBlock][currentMystery]);
-}
-
-// ── Completar misterio ──
-function completeMystery() {
-const b = currentBlock;
-const mi = currentMystery;
-if (progress[b][mi]) return; // ya completado
-
-```
-progress[b][mi] = Date.now();
-saveProgress();
-
-// Celebración del misterio
-const variant = BLOCKS.indexOf(b) * 5 + mi;
-celebrationSound(variant);
-
-// Checar si el bloque está completo
-const allDone = progress[b].every(x => x !== null);
-if (allDone) {
-  // Celebración de bloque completo
-  setTimeout(() => {
-    showConfetti();
-    showCelebration(b);
-  }, 600);
-} else {
-  // Auto-avanzar al siguiente misterio
-  renderPrayer();
-  if (mi < 4) {
-    setTimeout(() => {
-      currentMystery = mi + 1;
-      openSection = null;
-      stopAudio();
-      renderPrayer();
-    }, 800);
+        '<button class="' + btnClass + '" id="med-btn-' + qi + '" onclick="window._ca.confirmReflection(\'' + b + '\',' + mi + ',' + qi + ')">' + btnText + '</button>' +
+      '</div>';
+    }).join('');
   }
-}
-```
 
-}
+  function parseMeditation(text) {
+    if (!text) return ['','',''];
+    // Intentar separar por las 3 etiquetas
+    const labels = MED_LABELS;
+    const parts = [];
+    let remaining = text;
+    for (let i = 0; i < labels.length; i++) {
+      const idx = remaining.indexOf(labels[i]);
+      if (idx >= 0) {
+        if (i > 0 && parts.length < i) parts.push(remaining.substring(0, idx).trim());
+        remaining = remaining.substring(idx + labels[i].length);
+        // Quitar : inicial si hay
+        remaining = remaining.replace(/^\s*:\s*/, '');
+      }
+    }
+    if (remaining.trim()) parts.push(remaining.trim());
 
-// ── Bottom Nav ──
-function renderBottomNav(b, mi) {
-const nav = $(‘bottom-nav’);
-const hasPrev = mi > 0;
-const hasNext = mi < 4;
-const isDone = progress[b][mi];
+    // Si no se pudo parsear con labels, intentar por líneas
+    if (parts.length < 3) {
+      const lines = text.split('\n').filter(l => l.trim());
+      return [lines[0] || '', lines[1] || '', lines[2] || ''];
+    }
+    return parts.length >= 3 ? parts.slice(0,3) : [...parts, ...Array(3-parts.length).fill('')];
+  }
 
-```
-let html = '';
-if (hasPrev) {
-  html += '<button class="btn btn-outline" onclick="window._ca.goMystery(' + (mi-1) + ')">← Anterior</button>';
-}
-if (hasNext && isDone) {
-  html += '<button class="btn btn-primary" onclick="window._ca.goMystery(' + (mi+1) + ')">Siguiente →</button>';
-} else if (mi === 4 && isDone) {
-  html += '<button class="btn btn-primary" onclick="window._ca.backToBlocks()">← Ver Misterios</button>';
-}
-nav.innerHTML = html;
-```
+  function saveJournal(b, mi, qi, val) {
+    if (!journal[b]) journal[b] = {};
+    if (!journal[b][mi]) journal[b][mi] = {};
+    journal[b][mi]['q' + qi] = val;
+    saveProgress();
+  }
 
-}
-
-function goMystery(i) {
-currentMystery = i;
-openSection = null;
-stopAudio();
-renderPrayer();
-}
-
-// ── Celebración de bloque ──
-function showCelebration(b) {
-// PRIMERO: Celebración grand de Mariano (pantalla completa, 3.5s)
-showMarianoGrandCelebration();
-
-```
-// DESPUÉS: Pantalla de celebración tradicional
-setTimeout(() => {
-  const blockName = BLOCK_NAMES[b];
-  const maria = 'img/maria_' + b + '.webp';
-
-  const container = $('maria-container');
-  const img = new Image();
-  img.onload = () => {
-    container.outerHTML = '<img class="maria-img" id="maria-container" src="' + maria + '" alt="Virgen María">';
-  };
-  img.onerror = () => {
-    container.innerHTML = '🙏';
-  };
-  img.src = maria;
-
-  $('celeb-title').textContent = '¡Misterios ' + blockName + ' completados!';
-  $('celeb-sub').textContent = 'Has contemplado los cinco Misterios ' + blockName + ' de este nivel. Que María siga acompañándote en el camino.';
-  $('btn-celeb-home').onclick = () => {
-    stopAudio();
-    renderHome();
-  };
-
-  show('scr-celebration');
-  celebrationSound(BLOCKS.indexOf(b));
-}, 3500); // Esperar a que termine Mariano Grand
-```
-
-}
-
-// ── Escape HTML ──
-function escHTML(s) {
-if (!s) return ‘’;
-return s.replace(/&/g,’&’).replace(/</g,’<’).replace(/>/g,’>’).replace(/\n/g,’<br>’);
-}
-
-// ── Iniciar ──
-async function init(currentUser) {
-// Leer ID desde URL
-const params = new URLSearchParams(window.location.search);
-NIVEL_ID = params.get(‘c’) || ‘0101’;
-
-```
-// Validar formato 4 dígitos
-if (!/^\d{4}$/.test(NIVEL_ID)) {
-  showError('ID inválido: ' + NIVEL_ID + '. Usa un código de 4 dígitos (ej. 0101).');
-  return;
-}
-
-// Cargar JSON principal
-const loc = window.location;
-const base = loc.origin + loc.pathname.substring(0, loc.pathname.lastIndexOf('/') + 1);
-try {
-  const resp = await fetch(base + 'data/' + NIVEL_ID + '.json');
-  if (!resp.ok) throw new Error('HTTP ' + resp.status);
-  DATA = await resp.json();
-} catch(e) {
-  showError('No se pudo cargar data/' + NIVEL_ID + '.json. Verifica que el archivo exista.');
-  return;
-}
-
-// Cargar cantos y micro en paralelo (silenciosos)
-try {
-  const [rCantos, rMicro] = await Promise.all([
-    fetch(base + 'data/' + NIVEL_ID + '-cantos.json'),
-    fetch(base + 'data/' + NIVEL_ID + '-micro.json')
-  ]);
-  if (rCantos.ok) CANTOS_DATA = await rCantos.json();
-  if (rMicro.ok)  MICRO_DATA  = await rMicro.json();
-} catch(e) {}
-
-// Leer plan del usuario (currentUser viene de onAuthStateChanged)
-try {
-  if (currentUser) {
-    const snap = await _db.collection('users').doc(currentUser.uid).get();
-    if (snap.exists && snap.data().plan) {
-      userPlan = snap.data().plan;
+  function onMedInput(b, mi, qi, val) {
+    saveJournal(b, mi, qi, val);
+    // Auto-trigger a los 140 caracteres si no está confirmado aún
+    if (!medConfirmed[b]) medConfirmed[b] = {};
+    if (!medConfirmed[b][mi]) medConfirmed[b][mi] = {};
+    if (!medConfirmed[b][mi]['q' + qi] && val.length >= 140) {
+      confirmReflection(b, mi, qi);
     }
   }
-} catch(e) { console.warn('[CruzAndo] plan load:', e.message); }
 
-// Cargar progreso
-await loadProgress(currentUser);
+  function confirmReflection(b, mi, qi) {
+    if (!medConfirmed[b]) medConfirmed[b] = {};
+    if (!medConfirmed[b][mi]) medConfirmed[b][mi] = {};
 
-// Aplicar dark mode
-if (isDark) {
-  document.body.classList.add('dark');
-  $('ico-sun').style.display = 'none';
-  $('ico-moon').style.display = 'block';
-}
+    // Verificar que haya texto
+    const j = journal[b] && journal[b][mi] ? journal[b][mi] : {};
+    const val = j['q' + qi] || '';
+    if (val.trim().length < 5) return; // muy corto, ignorar
 
-// Aplicar paleta
-applyPalette();
+    const yaConfirmado = !!medConfirmed[b][mi]['q' + qi];
 
-// Event listeners
-$('btn-dark').onclick = toggleDark;
+    // Marcar como confirmado y guardar progreso
+    medConfirmed[b][mi]['q' + qi] = true;
+    saveProgress();
 
-// API global para onclick en HTML
-window._ca = {
-  toggleAudio: toggleAudio,
-  seekAudio: seekAudio,
-  toggleSection: toggleSection,
-  completeMystery: completeMystery,
-  goMystery: goMystery,
-  saveJournal: saveJournal,
-  onMedInput: onMedInput,
-  confirmReflection: confirmReflection,
-  enterBlock: enterBlock,
-  backToBlocks: () => { stopAudio(); renderHome(); },
-  reDoMicro: () => { stopAudio(); renderMicro(currentBlock); },
-};
-// goHome necesita estar en window directamente (usado en onclick del header)
-window.goHome = goHome;
-```
+    // Obtener el texto real de la pregunta desde el misterio actual
+    const misterio = DATA.misterios[b] && DATA.misterios[b][mi];
+    const questions = misterio ? parseMeditation(misterio.meditacion) : [];
+    const questionText = questions[qi] || MED_LABELS[qi] || '';
 
-window.goTo   = goTo;
+    // Guardar en Firestore siempre (primera vez o actualización)
+    saveReflectionToFirestore(b, mi, qi, val, questionText);
 
-```
-// Render
-$('scr-loading').style.display = 'none';
-$('main-header').style.display = '';
-renderHome();
-```
+    // Sonido suave (nota ascendente según pregunta)
+    const freqs = [[523,659],[587,740],[659,880]];
+    playNotes(freqs[qi] || freqs[0]);
 
-}
+    // Visual: actualizar botón
+    const btn = document.getElementById('med-btn-' + qi);
+    if (btn) {
+      btn.className = 'med-confirm done glow';
+      btn.textContent = yaConfirmado ? '✓ Reflexión actualizada' : '✓ Reflexión guardada';
+      // Volver a "Actualizar" después de 2 segundos
+      setTimeout(() => {
+        if (btn) btn.textContent = '✏️ Actualizar reflexión';
+      }, 2000);
+    }
 
-function showError(msg) {
-$(‘scr-loading’).style.display = ‘none’;
-$(‘error-msg’).textContent = msg;
-$(‘scr-error’).style.display = ‘flex’;
-}
+    // GAMIFICACIÓN: primera vez = metros completos + EXTRA; repetición = mitad
+    if (!yaConfirmado) {
+      const rewardKey = b + '_' + mi + '_q' + qi;
+      const isFirst = !reflectionRewards[rewardKey];
+      if (isFirst) reflectionRewards[rewardKey] = true;
+      gainMeters(650, getNextRestPose(), isFirst);
+    }
+  }
 
-// Arrancar — onAuthStateChanged pasa el usuario resuelto directamente
-let _initDone = false;
-function _startApp(user) {
-if (_initDone) return;
-_initDone = true;
-init(user);
-}
+  function toggleSection(key) {
+    openSection = openSection === key ? null : key;
+    renderAccordion(currentBlock, currentMystery, DATA.misterios[currentBlock][currentMystery]);
+  }
 
-// Timeout de seguridad: si Firebase no responde en 6s, arrancar sin usuario
-const _authTimeout = setTimeout(() => {
-if (!_initDone) {
-console.warn(’[CruzAndo] Firebase auth timeout — arrancando sin usuario’);
-_startApp(null);
-}
-}, 6000);
+  // ── Completar misterio ──
+  function completeMystery() {
+    const b = currentBlock;
+    const mi = currentMystery;
+    if (progress[b][mi]) return; // ya completado
 
-if (document.readyState === ‘loading’) {
-document.addEventListener(‘DOMContentLoaded’, () => {
-_auth.onAuthStateChanged(u => { clearTimeout(_authTimeout); _startApp(u); });
-});
-} else {
-_auth.onAuthStateChanged(u => { clearTimeout(_authTimeout); _startApp(u); });
-}
+    progress[b][mi] = Date.now();
+    saveProgress();
+
+    // Celebración del misterio
+    const variant = BLOCKS.indexOf(b) * 5 + mi;
+    celebrationSound(variant);
+
+    // Checar si el bloque está completo
+    const allDone = progress[b].every(x => x !== null);
+    if (allDone) {
+      // Celebración de bloque completo
+      setTimeout(() => {
+        showConfetti();
+        showCelebration(b);
+      }, 600);
+    } else {
+      // Auto-avanzar al siguiente misterio
+      renderPrayer();
+      if (mi < 4) {
+        setTimeout(() => {
+          currentMystery = mi + 1;
+          openSection = null;
+          stopAudio();
+          renderPrayer();
+        }, 800);
+      }
+    }
+  }
+
+  // ── Bottom Nav ──
+  function renderBottomNav(b, mi) {
+    const nav = $('bottom-nav');
+    const hasPrev = mi > 0;
+    const hasNext = mi < 4;
+    const isDone = progress[b][mi];
+
+    let html = '';
+    if (hasPrev) {
+      html += '<button class="btn btn-outline" onclick="window._ca.goMystery(' + (mi-1) + ')">← Anterior</button>';
+    }
+    if (hasNext && isDone) {
+      html += '<button class="btn btn-primary" onclick="window._ca.goMystery(' + (mi+1) + ')">Siguiente →</button>';
+    } else if (mi === 4 && isDone) {
+      html += '<button class="btn btn-primary" onclick="window._ca.backToBlocks()">← Ver Misterios</button>';
+    }
+    nav.innerHTML = html;
+  }
+
+  function goMystery(i) {
+    currentMystery = i;
+    openSection = null;
+    stopAudio();
+    renderPrayer();
+  }
+
+  // ── Celebración de bloque ──
+  function showCelebration(b) {
+    // PRIMERO: Celebración grand de Mariano (pantalla completa, 3.5s)
+    showMarianoGrandCelebration();
+
+    // DESPUÉS: Pantalla de celebración tradicional
+    setTimeout(() => {
+      const blockName = BLOCK_NAMES[b];
+      const maria = 'img/maria_' + b + '.webp';
+
+      const container = $('maria-container');
+      const img = new Image();
+      img.onload = () => {
+        container.outerHTML = '<img class="maria-img" id="maria-container" src="' + maria + '" alt="Virgen María">';
+      };
+      img.onerror = () => {
+        container.innerHTML = '🙏';
+      };
+      img.src = maria;
+
+      $('celeb-title').textContent = '¡Misterios ' + blockName + ' completados!';
+      $('celeb-sub').textContent = 'Has contemplado los cinco Misterios ' + blockName + ' de este nivel. Que María siga acompañándote en el camino.';
+      $('btn-celeb-home').onclick = () => {
+        stopAudio();
+        renderHome();
+      };
+
+      show('scr-celebration');
+      celebrationSound(BLOCKS.indexOf(b));
+    }, 3500); // Esperar a que termine Mariano Grand
+  }
+
+  // ── Escape HTML ──
+  function escHTML(s) {
+    if (!s) return '';
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  }
+
+  // ── Iniciar ──
+  async function init(currentUser) {
+    // Leer ID desde URL
+    const params = new URLSearchParams(window.location.search);
+    NIVEL_ID = params.get('c') || '0101';
+
+    // Validar formato 4 dígitos
+    if (!/^\d{4}$/.test(NIVEL_ID)) {
+      showError('ID inválido: ' + NIVEL_ID + '. Usa un código de 4 dígitos (ej. 0101).');
+      return;
+    }
+
+    // Cargar JSON principal
+    const loc = window.location;
+    const base = loc.origin + loc.pathname.substring(0, loc.pathname.lastIndexOf('/') + 1);
+    try {
+      const resp = await fetch(base + 'data/' + NIVEL_ID + '.json');
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      DATA = await resp.json();
+    } catch(e) {
+      showError('No se pudo cargar data/' + NIVEL_ID + '.json. Verifica que el archivo exista.');
+      return;
+    }
+
+    // Cargar cantos y micro en paralelo (silenciosos)
+    try {
+      const [rCantos, rMicro] = await Promise.all([
+        fetch(base + 'data/' + NIVEL_ID + '-cantos.json'),
+        fetch(base + 'data/' + NIVEL_ID + '-micro.json')
+      ]);
+      if (rCantos.ok) CANTOS_DATA = await rCantos.json();
+      if (rMicro.ok)  MICRO_DATA  = await rMicro.json();
+    } catch(e) {}
+
+    // Leer plan del usuario (currentUser viene de onAuthStateChanged)
+    try {
+      if (currentUser) {
+        const snap = await _db.collection('users').doc(currentUser.uid).get();
+        if (snap.exists && snap.data().plan) {
+          userPlan = snap.data().plan;
+        }
+      }
+    } catch(e) { console.warn('[CruzAndo] plan load:', e.message); }
+
+    // Cargar progreso
+    await loadProgress(currentUser);
+
+    // Aplicar dark mode
+    if (isDark) {
+      document.body.classList.add('dark');
+      $('ico-sun').style.display = 'none';
+      $('ico-moon').style.display = 'block';
+    }
+
+    // Aplicar paleta
+    applyPalette();
+
+    // Event listeners
+    $('btn-dark').onclick = toggleDark;
+
+    // API global para onclick en HTML
+    window._ca = {
+      toggleAudio: toggleAudio,
+      seekAudio: seekAudio,
+      toggleSection: toggleSection,
+      completeMystery: completeMystery,
+      goMystery: goMystery,
+      saveJournal: saveJournal,
+      onMedInput: onMedInput,
+      confirmReflection: confirmReflection,
+      enterBlock: enterBlock,
+      backToBlocks: () => { stopAudio(); renderHome(); },
+      reDoMicro: () => { stopAudio(); renderMicro(currentBlock); },
+    };
+    // goHome necesita estar en window directamente (usado en onclick del header)
+    window.goHome = goHome;
+  window.goTo   = goTo;
+
+    // Render
+    $('scr-loading').style.display = 'none';
+    $('main-header').style.display = '';
+    renderHome();
+  }
+
+  function showError(msg) {
+    $('scr-loading').style.display = 'none';
+    $('error-msg').textContent = msg;
+    $('scr-error').style.display = 'flex';
+  }
+
+  // Arrancar — onAuthStateChanged pasa el usuario resuelto directamente
+  let _initDone = false;
+  function _startApp(user) {
+    if (_initDone) return;
+    _initDone = true;
+    init(user);
+  }
+
+  // Timeout de seguridad: si Firebase no responde en 6s, arrancar sin usuario
+  const _authTimeout = setTimeout(() => {
+    if (!_initDone) {
+      console.warn('[CruzAndo] Firebase auth timeout — arrancando sin usuario');
+      _startApp(null);
+    }
+  }, 6000);
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      _auth.onAuthStateChanged(u => { clearTimeout(_authTimeout); _startApp(u); });
+    });
+  } else {
+    _auth.onAuthStateChanged(u => { clearTimeout(_authTimeout); _startApp(u); });
+  }
 
 })();
 </script>
-
 </body>
 </html>
