@@ -86,6 +86,16 @@ body {
 .nodo:active { transform:scale(0.91); }
 .nodo.sel { transform:scale(1.1); }
 .nodo.done { opacity:0.55; }
+.nodo.locked {
+  background:rgba(255,255,255,0.03) !important;
+  border-color:rgba(255,255,255,0.08) !important;
+  cursor:default; pointer-events:none;
+}
+.nodo.locked .nodo-num { color:rgba(255,255,255,0.15) !important; }
+.nodo.locked .nodo-elem { color:rgba(255,255,255,0.1) !important; }
+body.light .nodo.locked { background:rgba(0,0,0,0.04) !important; border-color:rgba(0,0,0,0.08) !important; }
+body.light .nodo.locked .nodo-num { color:rgba(0,0,0,0.15) !important; }
+body.light .nodo.locked .nodo-elem { color:rgba(0,0,0,0.1) !important; }
 .nodo.done::after {
   content:''; position:absolute;
 }
@@ -162,9 +172,18 @@ body {
   color:var(--text-dim); transition:color 0.2s;
   -webkit-tap-highlight-color:transparent;
 }
-.app-nav-item:active { opacity:0.7; }
+.app-nav-item:active { opacity:1; }
 .app-nav-item.active { color:var(--orange); }
 .app-nav-item[disabled] { cursor:default; opacity:1; }
+@keyframes navSpring {
+  0%   { transform:scale(1); }
+  35%  { transform:scale(0.78); }
+  65%  { transform:scale(1.18); }
+  82%  { transform:scale(0.95); }
+  100% { transform:scale(1); }
+}
+.app-nav-item.tapped .app-nav-icon { animation:navSpring 0.38s cubic-bezier(0.34,1.72,0.64,1) both; }
+.app-nav-item.tapped { color:var(--orange); }
 .app-nav-icon {
   width:24px; height:24px; position:relative;
   display:flex; align-items:center; justify-content:center;
@@ -216,7 +235,7 @@ body {
 
   <!-- Bottom nav -->
   <nav class="app-nav">
-    <button class="app-nav-item" onclick="goTo('orar.html')">
+    <button class="app-nav-item" onclick="navTap(this); goTo('orar.html')">
       <div class="app-nav-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <line x1="12" y1="2" x2="12" y2="22"/><line x1="4" y1="9" x2="20" y2="9"/>
@@ -224,7 +243,7 @@ body {
       </div>
       <span class="app-nav-label">Orar</span>
     </button>
-    <button class="app-nav-item" onclick="goTo('diario.html')">
+    <button class="app-nav-item" onclick="navTap(this); goTo('diario.html')">
       <div class="app-nav-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/>
@@ -233,7 +252,7 @@ body {
       </div>
       <span class="app-nav-label">Diario</span>
     </button>
-    <button class="app-nav-item" onclick="goTo('sanar.html')">
+    <button class="app-nav-item" onclick="navTap(this); goTo('sanar.html')">
       <div class="app-nav-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 22s-8-5.5-8-11a8 8 0 0116 0c0 5.5-8 11-8 11z"/>
@@ -294,6 +313,35 @@ function goTo(page) {
   window.location.href = base + page;
 }
 
+window._navChord = 0;
+function playNavChord() {
+  var CHORDS = [[523,659,784],[659,784,988],[784,988,1175],[587,740,880]];
+  try {
+    var ac = new (window.AudioContext || window.webkitAudioContext)();
+    var now = ac.currentTime;
+    var notes = CHORDS[window._navChord % 4]; window._navChord++;
+    var master = ac.createGain();
+    master.gain.setValueAtTime(0, now);
+    master.gain.linearRampToValueAtTime(0.07, now + 0.018);
+    master.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+    master.connect(ac.destination);
+    notes.forEach(function(freq, j) {
+      var o = ac.createOscillator(), g = ac.createGain();
+      o.type = j === 0 ? 'sine' : 'triangle';
+      o.frequency.value = freq; g.gain.value = j === 0 ? 0.8 : 0.5;
+      o.connect(g); g.connect(master);
+      o.start(now + j * 0.012); o.stop(now + 0.45);
+    });
+  } catch(e) {}
+}
+function navTap(el) {
+  playNavChord();
+  el.classList.remove('tapped');
+  void el.offsetWidth;
+  el.classList.add('tapped');
+  setTimeout(function() { el.classList.remove('tapped'); }, 400);
+}
+
 /* ── Datos de niveles ── */
 var MUNDOS = [
   { nombre:'CruzAndo la Cruz',    bold:'#FF7A00', bg:'rgba(255,122,0,0.12)',    niveles:[
@@ -328,14 +376,24 @@ var MUNDOS = [
 
 var selId = null;
 var completedIds = {};
+var activeNivelId = null;
+var userPlan = 'free';
 
-/* ── Detectar niveles completados desde Firestore ── */
-async function loadCompleted(user) {
+/* ── Orden lineal de todos los niveles ── */
+var ALL_NIVELES = MUNDOS.reduce(function(acc, m) {
+  return acc.concat(m.niveles.map(function(n) { return n.id; }));
+}, []);
+
+/* ── Cargar progreso y plan desde Firestore ── */
+async function loadUserData(user) {
   try {
-    var allIds = MUNDOS.reduce(function(acc, m) {
-      return acc.concat(m.niveles.map(function(n) { return n.id; }));
-    }, []);
-    var snaps = await Promise.all(allIds.map(function(id) {
+    // Plan del usuario
+    var userSnap = await _db.collection('users').doc(user.uid).get();
+    if (userSnap.exists && userSnap.data().plan) {
+      userPlan = userSnap.data().plan; // 'free' | 'beta' | 'pro'
+    }
+    // Progreso de todos los niveles en paralelo
+    var snaps = await Promise.all(ALL_NIVELES.map(function(id) {
       return _db.collection('users').doc(user.uid).collection('progress').doc(id).get();
     }));
     var BLOCKS = ['gozosos','luminosos','dolorosos','gloriosos'];
@@ -346,32 +404,63 @@ async function loadCompleted(user) {
       var allDone = BLOCKS.every(function(b) {
         return d.progress[b] && d.progress[b].every(function(x) { return x !== null; });
       });
-      if (allDone) completedIds[allIds[i]] = true;
+      if (allDone) completedIds[ALL_NIVELES[i]] = true;
     });
+    // Nivel activo = primer nivel no completado
+    activeNivelId = ALL_NIVELES.find(function(id) { return !completedIds[id]; }) || ALL_NIVELES[ALL_NIVELES.length - 1];
   } catch(e) {
-    console.warn('[CruzAndo] loadCompleted:', e.message);
+    console.warn('[CruzAndo] loadUserData:', e.message);
+    activeNivelId = '0101';
   }
+}
+
+/* ── Determinar si un nivel está disponible ── */
+function isAvailable(id) {
+  // Beta y pro tienen acceso a todos los niveles anteriores e igual al activo
+  // Free: solo el nivel activo
+  var idx = ALL_NIVELES.indexOf(id);
+  var activeIdx = ALL_NIVELES.indexOf(activeNivelId || '0101');
+  if (userPlan === 'pro' || userPlan === 'beta') {
+    return idx <= activeIdx; // todos los que ya llegó o completó
+  }
+  return id === activeNivelId; // free: solo el activo
 }
 
 /* ── Render del mapa ── */
 function renderMap() {
   var html = '';
   MUNDOS.forEach(function(m) {
+    // El nombre del mundo siempre en color — da overview del itinerario
     html += '<div class="mundo-sec">';
     html += '<div class="mundo-lbl"><div class="mundo-line"></div>';
     html += '<span class="mundo-name" style="color:' + m.bold + '">' + m.nombre + '</span>';
     html += '<div class="mundo-line"></div></div>';
     html += '<div class="nivel-grid">';
     m.niveles.forEach(function(n) {
-      var done = completedIds[n.id];
+      var done      = !!completedIds[n.id];
+      var available = isAvailable(n.id);
+      var isActive  = n.id === activeNivelId;
+      var locked    = !available;
+
       html += '<div class="nodo-wrap" style="position:relative">';
-      html += '<div class="nodo' + (done ? ' done' : '') + '" id="n-' + n.id + '" ';
-      html += 'style="background:' + m.bg + ';border-color:' + m.bold + (done ? 'AA' : '55') + ';" ';
-      html += 'onclick="pick(\'' + n.id + '\',\'' + n.num + '\',\'' + n.elem.replace(/'/g,"\\'") + '\',\'' + m.nombre.replace(/'/g,"\\'") + '\',\'' + m.bold + '\')">';
-      html += '<div class="nodo-num" style="color:' + m.bold + '">' + n.num + '</div>';
-      html += '<div class="nodo-elem" style="color:' + m.bold + '">' + n.elem + '</div>';
-      html += '</div>';
-      if (done) html += '<div class="done-check">✓</div>';
+
+      if (locked) {
+        // Neutro — sin color, sin click
+        html += '<div class="nodo locked" id="n-' + n.id + '">';
+        html += '<div class="nodo-num">' + n.num + '</div>';
+        html += '<div class="nodo-elem">' + n.elem + '</div>';
+        html += '</div>';
+      } else {
+        var borderOpacity = done ? 'AA' : isActive ? 'FF' : '66';
+        var glow = isActive ? ';box-shadow:0 0 0 3px ' + m.bold + '33' : '';
+        html += '<div class="nodo' + (done ? ' done' : '') + (isActive ? ' active-node' : '') + '" id="n-' + n.id + '" ';
+        html += 'style="background:' + m.bg + ';border-color:' + m.bold + borderOpacity + glow + ';" ';
+        html += 'onclick="pick(\'' + n.id + '\',\'' + n.num + '\',\'' + n.elem.replace(/'/g,"\\'") + '\',\'' + m.nombre.replace(/'/g,"\\'") + '\',\'' + m.bold + '\')">';
+        html += '<div class="nodo-num" style="color:' + m.bold + '">' + n.num + '</div>';
+        html += '<div class="nodo-elem" style="color:' + m.bold + '">' + n.elem + '</div>';
+        html += '</div>';
+        if (done) html += '<div class="done-check">✓</div>';
+      }
       html += '</div>';
     });
     html += '</div></div>';
@@ -383,7 +472,7 @@ function renderMap() {
 function pick(id, num, elem, mundo, color) {
   if (selId) {
     var prev = document.getElementById('n-' + selId);
-    if (prev) prev.classList.remove('sel');
+    if (prev) { prev.classList.remove('sel'); prev.style.boxShadow = ''; }
   }
   if (selId === id) {
     selId = null;
@@ -417,7 +506,9 @@ function cancelSel() {
 /* ── Init ── */
 _auth.onAuthStateChanged(async function(user) {
   if (user) {
-    await loadCompleted(user);
+    await loadUserData(user);
+  } else {
+    activeNivelId = '0101'; // sin sesión: solo primer nivel visible
   }
   renderMap();
 });
