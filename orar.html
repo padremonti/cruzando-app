@@ -408,17 +408,24 @@ body {
 }
 .nivel-switch-sub { font-size:0.68rem; color:var(--text-dim); margin-top:1px; }
 .nivel-switch-arrow { color:var(--text-dim); font-size:1.1rem; }
-.prep-btn-wrap { padding:8px 18px 0; }
+.prep-btn-wrap { padding:14px 18px 4px; }
 .prep-btn {
-  width:100%; padding:11px 16px; border-radius:12px;
-  border:1.5px solid var(--border); background:transparent;
+  width:100%; padding:18px 20px; border-radius:16px;
+  border:none;
+  background:linear-gradient(135deg, var(--lvl-bold) 0%, var(--lvl-soft) 100%);
   font-family:'Crimson Pro', Georgia, serif;
-  font-size:1rem; font-weight:500; font-style:italic;
-  color:var(--text-dim); cursor:pointer;
-  display:flex; align-items:center; justify-content:center; gap:8px;
+  font-size:1.4rem; font-weight:600;
+  color:#fff; cursor:pointer; text-align:left;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
   transition:all 0.2s;
+  box-shadow:0 4px 18px rgba(var(--lvl-bold-rgb,255,122,0),0.35);
 }
-.prep-btn:active { transform:scale(0.97); border-color:var(--lvl-soft); color:var(--lvl-bold); }
+.prep-btn:active { transform:scale(0.97); opacity:0.92; }
+.prep-btn-label {
+  font-size:0.62rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:1px; opacity:0.85; margin-bottom:4px; display:block;
+  font-family:'Inter',sans-serif;
+}
 
 /* ── Pantalla de Oración (pre-hero) ── */
 .prayer-header { padding:16px 18px 10px; }
@@ -962,13 +969,13 @@ body {
       <div class="mystery-subtitle" id="prayer-subtitle"></div>
     </div>
 
+    <!-- Botón preparación opcional (solo primer misterio, si ya hizo el micro) -->
+    <div id="prep-btn-wrap" style="display:none"></div>
+
     <!-- Hero image (Mejora 6) -->
     <div id="mystery-hero"></div>
 
     <div class="mystery-beads" id="prayer-dots"></div>
-
-    <!-- Botón preparación opcional (solo primer misterio, si ya hizo el micro) -->
-    <div id="prep-btn-wrap" style="display:none"></div>
 
     <!-- Evangelio -->
     <div class="evangelio-box fade-in fade-in-d1" id="evangelio-box">
@@ -2047,7 +2054,11 @@ body {
       prepWrap.innerHTML =
         '<div class="prep-btn-wrap">' +
           '<button class="prep-btn" onclick="window._ca.reDoMicro()">' +
-            '✦ Preparación · ' + (MICRO_DATA.bloques[b].subtitulo || BLOCK_NAMES[b]) +
+            '<div>' +
+              '<span class="prep-btn-label">✦ Preparación</span>' +
+              (MICRO_DATA.bloques[b].subtitulo || BLOCK_NAMES[b]) +
+            '</div>' +
+            '<span style="font-size:1.8rem;opacity:0.9">→</span>' +
           '</button>' +
         '</div>';
     } else {
@@ -2126,11 +2137,11 @@ body {
   function renderAccordion(b, mi, m) {
     const acc = $('accordion');
     const sections = [
-      { key:'rezar', icon:'📿', label:'Rezar este Misterio', bgVar:'--lvl-ultra' },
-      { key:'canto', icon:'🎵', label:'Canto', bgVar:'--lvl-ultra' },
-      { key:'contemplar', icon:'👁️', label:'Contemplar', bgVar:'--lvl-ultra' },
-      { key:'meditar', icon:'✏️', label:'Meditar y escribir', bgVar:'--lvl-ultra' },
-      { key:'intercesion', icon:'🙏', label:'Intercesión', bgVar:'--lvl-ultra' },
+      { key:'contemplar', icon:'👁️', label:'Contemplar',          bgVar:'--lvl-ultra' },
+      { key:'rezar',      icon:'📿', label:'Rezar este Misterio', bgVar:'--lvl-ultra' },
+      { key:'canto',      icon:'🎵', label:'Canto',               bgVar:'--lvl-ultra' },
+      { key:'meditar',    icon:'✏️', label:'Meditar y escribir',  bgVar:'--lvl-ultra' },
+      { key:'intercesion',icon:'🙏', label:'Súplica',             bgVar:'--lvl-ultra' },
     ];
 
     acc.innerHTML = sections.map(s => {
