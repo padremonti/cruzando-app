@@ -334,18 +334,17 @@ body {
 }
 .orar-header { margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; }
 .orar-nivel-tag {
-  font-size:0.65rem; font-weight:700; letter-spacing:0.8px;
-  text-transform:uppercase; color:var(--orange-soft);
-  background:rgba(255,122,0,0.1); border-radius:6px; padding:3px 8px;
+  font-family:'Crimson Pro',serif;
+  font-size:1.3rem; font-weight:600; letter-spacing:0.3px;
+  color:var(--orange-soft);
 }
 .orar-titulo { font-family:'Crimson Pro',serif; font-size:1.9rem; font-weight:600; color:var(--orange); margin-bottom:10px; }
 .orar-sep { height:1px; background:rgba(255,122,0,0.12); margin-bottom:12px; }
-.bloques-progress { display:flex; flex-direction:column; gap:7px; }
+.bloques-progress { display:flex; flex-direction:column; gap:10px; }
 .bloque-row { display:flex; align-items:center; gap:8px; }
-.bloque-name { font-size:0.7rem; font-weight:600; min-width:72px; }
-.bloque-bar-wrap { flex:1; height:5px; border-radius:3px; background:rgba(255,255,255,0.07); }
-.bloque-bar-fill { height:100%; border-radius:3px; transition:width 0.6s ease; }
-.bloque-count { font-size:0.65rem; color:var(--text-dim); min-width:28px; text-align:right; }
+.bloque-name { font-size:0.68rem; font-weight:600; min-width:72px; }
+.bloque-rosario { flex:1; display:flex; align-items:center; }
+.bloque-rosario svg { width:100%; height:22px; }
 .verse-card {
   grid-column:1 / -1;
   background:linear-gradient(135deg, #211508 0%, #1C1005 100%);
@@ -357,7 +356,7 @@ body {
   color:var(--orange-soft); opacity:0.25; position:absolute; top:10px; left:14px;
 }
 .verse-label { font-size:0.62rem; text-transform:uppercase; letter-spacing:1.2px; color:var(--text-dim); margin-bottom:6px; position:relative; }
-.verse-text { font-family:'Crimson Pro',serif; font-size:1.15rem; font-weight:500; font-style:italic; line-height:1.75; color:var(--text-soft); position:relative; }
+.verse-text { font-family:'Crimson Pro',serif; font-size:26px; font-weight:500; font-style:italic; line-height:1.7; color:var(--text-soft); position:relative; }
 .verse-ref { font-size:0.65rem; color:var(--text-dim); margin-top:8px; text-align:right; position:relative; }
 .modulo-sanar { background:linear-gradient(145deg,#1E1206,#160D04); border-color:rgba(255,122,0,0.09); }
 .modulo-diario { background:linear-gradient(145deg,#1A1006,#130B03); border-color:rgba(255,122,0,0.06); }
@@ -570,23 +569,19 @@ body {
           <div class="bloques-progress">
             <div class="bloque-row">
               <span class="bloque-name" style="color:#D4A017">Gozosos</span>
-              <div class="bloque-bar-wrap"><div class="bloque-bar-fill" id="bar-gozosos" style="width:0%;background:#D4A017"></div></div>
-              <span class="bloque-count" id="cnt-gozosos">0/5</span>
+              <div class="bloque-rosario" id="ros-gozosos"></div>
             </div>
             <div class="bloque-row">
               <span class="bloque-name" style="color:#01BBE1">Luminosos</span>
-              <div class="bloque-bar-wrap"><div class="bloque-bar-fill" id="bar-luminosos" style="width:0%;background:#01BBE1"></div></div>
-              <span class="bloque-count" id="cnt-luminosos">0/5</span>
+              <div class="bloque-rosario" id="ros-luminosos"></div>
             </div>
             <div class="bloque-row">
               <span class="bloque-name" style="color:#C0392B">Dolorosos</span>
-              <div class="bloque-bar-wrap"><div class="bloque-bar-fill" id="bar-dolorosos" style="width:0%;background:#C0392B"></div></div>
-              <span class="bloque-count" id="cnt-dolorosos">0/5</span>
+              <div class="bloque-rosario" id="ros-dolorosos"></div>
             </div>
             <div class="bloque-row">
               <span class="bloque-name" style="color:#8E44AD">Gloriosos</span>
-              <div class="bloque-bar-wrap"><div class="bloque-bar-fill" id="bar-gloriosos" style="width:0%;background:#8E44AD"></div></div>
-              <span class="bloque-count" id="cnt-gloriosos">0/5</span>
+              <div class="bloque-rosario" id="ros-gloriosos"></div>
             </div>
           </div>
         </div>
@@ -832,13 +827,36 @@ function renderHome(userData) {
   // Barras de bloques
   var data   = getProgreso(currentNivelId);
   var blocks = ['gozosos','luminosos','dolorosos','gloriosos'];
+  var BLOQUE_COLORS = { gozosos:'#D4A017', luminosos:'#01BBE1', dolorosos:'#C0392B', gloriosos:'#8E44AD' };
   blocks.forEach(function(b) {
     var arr  = (data && data.progress && data.progress[b]) ? data.progress[b] : [null,null,null,null,null];
     var done = arr.filter(function(x) { return x !== null; }).length;
-    var bar  = document.getElementById('bar-' + b);
-    var cnt  = document.getElementById('cnt-' + b);
-    if (bar) bar.style.width = (done / 5 * 100) + '%';
-    if (cnt) cnt.textContent = done + '/5';
+    var color = BLOQUE_COLORS[b] || '#FF7A00';
+    var borderC = 'rgba(255,255,255,0.12)';
+    var ros = document.getElementById('ros-' + b);
+    if (!ros) return;
+    // SVG cadena de 5 círculos — igual que orar.html
+    var cx = [14, 38, 62, 86, 110];
+    var svg = '<svg viewBox="0 0 124 22" xmlns="http://www.w3.org/2000/svg">';
+    // Línea de fondo
+    svg += '<line x1="14" y1="11" x2="110" y2="11" stroke="' + borderC + '" stroke-width="1.5" stroke-linecap="round"/>';
+    // Línea de progreso
+    if (done > 0) {
+      svg += '<line x1="14" y1="11" x2="' + cx[done-1] + '" y2="11" stroke="' + color + '" stroke-width="1.5" stroke-linecap="round"/>';
+    }
+    // Círculos
+    for (var i = 0; i < 5; i++) {
+      if (arr[i]) {
+        svg += '<circle cx="' + cx[i] + '" cy="11" r="8" fill="' + color + '"/>';
+      } else if (i === done) {
+        svg += '<circle cx="' + cx[i] + '" cy="11" r="8" fill="none" stroke="' + color + '" stroke-width="1.8"/>';
+        svg += '<circle cx="' + cx[i] + '" cy="11" r="3" fill="' + color + '" opacity="0.5"/>';
+      } else {
+        svg += '<circle cx="' + cx[i] + '" cy="11" r="8" fill="none" stroke="' + borderC + '" stroke-width="1.2"/>';
+      }
+    }
+    svg += '</svg>';
+    ros.innerHTML = svg;
   });
 
   // Metros
