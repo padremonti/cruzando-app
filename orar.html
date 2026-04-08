@@ -797,6 +797,12 @@ font-size:1rem; font-weight:800; color:var(–green);
 text-shadow:0 2px 8px rgba(52,168,83,0.4);
 animation:metersFloat 2.5s ease-out;
 }
+.meters-float .extra-badge {
+display:block; font-size:0.58rem; font-weight:800;
+letter-spacing:1.5px; text-transform:uppercase;
+color:#FFD700; text-shadow:0 1px 6px rgba(255,215,0,0.5);
+margin-bottom:2px;
+}
 @keyframes metersFloat {
 0% { transform:translateY(0); opacity:0; }
 30% { opacity:1; }
@@ -1515,47 +1521,31 @@ pointer-events:none;
   }
 
   // ── Ganar metros (Mariano aparece) ──
-  function gainMeters(meters, pose) {
-    console.log('gainMeters llamado:', meters, pose);
-    totalMeters += meters;
-    console.log('Total metros ahora:', totalMeters);
+  function gainMeters(meters, pose, isFirst = true) {
+    const award = isFirst ? meters : Math.floor(meters / 2);
+    totalMeters += award;
     updateMetersDisplay();
     saveProgress();
-
-    // Lux brilla
     luxShine();
-
-    // Sonido recompensante
     playRewardSound();
-
-    // Mariano aparece
-    showMarianoSlide(meters, pose);
+    showMarianoSlide(award, pose, isFirst);
   }
 
   // ── Mostrar Mariano slide-in ──
-  function showMarianoSlide(meters, pose) {
-    console.log('showMarianoSlide llamado:', meters, pose);
+  function showMarianoSlide(meters, pose, isFirst = true) {
     const overlay = $('mariano-overlay');
     const img = $('mariano-slide-img');
     const text = $('meters-float-text');
-    
-    console.log('Elementos encontrados:', {overlay, img, text});
-    
-    if (!overlay || !img || !text) {
-      console.error('Faltan elementos del overlay de Mariano');
-      return;
-    }
+    if (!overlay || !img || !text) return;
 
-    const imageUrl = MARIANO_BASE + 'mariano-' + pose + '.png';
-    console.log('Cargando imagen:', imageUrl);
-    
-    img.src = imageUrl;
-    text.textContent = '+' + meters.toLocaleString('es-MX') + 'm';
-    
+    img.src = MARIANO_BASE + 'mariano-' + pose + '.png';
+    text.innerHTML = (isFirst
+      ? '<span class="extra-badge">✦ EXTRA</span>'
+      : '') +
+      '+' + meters.toLocaleString('es-MX') + 'm';
+
     overlay.style.display = 'flex';
-    setTimeout(() => {
-      overlay.style.display = 'none';
-    }, 2500);
+    setTimeout(() => { overlay.style.display = 'none'; }, 2500);
   }
 
   // ── Celebración grand (Mariano + Lux + Confetti) ──
@@ -1741,32 +1731,22 @@ pointer-events:none;
         const rewardKey = currentBlock + '_' + currentMystery + '_' + playerId;
         console.log('RewardKey:', rewardKey, 'Ya existe?', !!audioRewards[rewardKey]);
         
-        if (!audioRewards[rewardKey]) {
-          audioRewards[rewardKey] = true;
-          
+        const isFirstAudio = !audioRewards[rewardKey];
+        if (isFirstAudio) audioRewards[rewardKey] = true;
+
           // Determinar metros y pose según tipo de audio
           let meters, pose;
           if (playerId.includes('rezar')) {
-            meters = 1200;
-            pose = 'walking';
-            console.log('Detectado: REZAR');
+            meters = 1200; pose = 'walking';
           } else if (playerId.includes('contempl')) {
-            meters = 800;
-            pose = 'contemplative';
-            console.log('Detectado: CONTEMPLACIÓN');
+            meters = 800; pose = 'contemplative';
           } else if (playerId.includes('canto')) {
-            meters = 600;
-            pose = 'happy';
-            console.log('Detectado: CANTO');
+            meters = 600; pose = 'happy';
           }
-          
+
           if (meters && pose) {
-            console.log('Llamando gainMeters:', meters, pose);
-            gainMeters(meters, pose);
-          } else {
-            console.log('NO se detectó tipo de audio válido');
+            gainMeters(meters, pose, isFirstAudio);
           }
-        }
       });
     }
     audioEl.play().then(() => {
@@ -1985,15 +1965,19 @@ pointer-events:none;
             '</div>' +
             '<div class="micro-final-titulo">Tu corazón está preparado</div>' +
             '<div class="micro-final-sub">Entra a los Misterios ' + BLOCK_NAMES[b] + '. Reza sin prisa. Lo que necesitas ya lo traes contigo.</div>' +
-            '<div class="micro-metros-chip">🚶‍♂️ +25m al peregrino</div>' +
+            '<div class="micro-metros-chip">🚶‍♂️ +600m al peregrino</div>' +
           '</div>';
         nav.innerHTML = '<button class="btn btn-primary btn-block" id="micro-btn-orar">Comenzar a rezar →</button>';
         $('micro-btn-orar').onclick = () => {
-          // Marcar micro como completado y dar metros
+          const isFirstMicro = !microDone[b];
           microDone[b] = true;
-          totalMeters += 600;
+          const microAward = isFirstMicro ? 600 : 300;
+          totalMeters += microAward;
           updateMetersDisplay();
           saveProgress();
+          // Mostrar Mariano con EXTRA si es primera vez
+          showMarianoSlide(microAward, 'happy', isFirstMicro);
+          playRewardSound();
           // Ir al primer misterio
           const prog = progress[b] || [];
           const first = prog.findIndex(x => x === null);
@@ -2400,13 +2384,12 @@ if (btn) {
   }, 2000);
 }
 
-// GAMIFICACIÓN: recompensa solo la primera vez
+// GAMIFICACIÓN: primera vez = metros completos + EXTRA; repetición = mitad
 if (!yaConfirmado) {
   const rewardKey = b + '_' + mi + '_q' + qi;
-  if (!reflectionRewards[rewardKey]) {
-    reflectionRewards[rewardKey] = true;
-    gainMeters(650, getNextRestPose());
-  }
+  const isFirst = !reflectionRewards[rewardKey];
+  if (isFirst) reflectionRewards[rewardKey] = true;
+  gainMeters(650, getNextRestPose(), isFirst);
 }
 ```
 
