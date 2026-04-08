@@ -128,13 +128,22 @@ justify-content:center; color:var(–text-soft); transition:all 0.2s;
 .icon-btn:active { transform:scale(0.92); }
 
 /* ── Pantalla de Inicio: Tarjetas de Bloques ── */
-.home-intro { padding:24px 18px 12px; text-align:center; }
+.home-intro { padding:28px 18px 14px; text-align:center; }
 .home-intro h1 {
-font-family:‘Cormorant Garamond’, Georgia, serif;
-font-size:1.9rem; font-weight:600; color:var(–text); margin-bottom:4px;
-line-height:1.15; letter-spacing:0.01em;
+font-family:‘Inter’, sans-serif;
+font-size:0.62rem; font-weight:700; color:var(–text-dim);
+text-transform:uppercase; letter-spacing:2px; margin-bottom:6px;
 }
-.home-intro p { font-size:0.82rem; color:var(–text-dim); }
+.home-intro .nivel-heading {
+font-family:‘Crimson Pro’, Georgia, serif;
+font-size:1.1rem; font-weight:500; color:var(–lvl-bold);
+line-height:1.2; margin-bottom:6px; letter-spacing:0.5px;
+}
+.home-intro .elemento-heading {
+font-family:‘Crimson Pro’, Georgia, serif;
+font-size:2.8rem; font-weight:600; color:var(–text);
+line-height:1.05; letter-spacing:-0.01em;
+}
 
 /* ── Banner Misterios del Día ── */
 .today-banner {
@@ -788,6 +797,12 @@ font-size:1rem; font-weight:800; color:var(–green);
 text-shadow:0 2px 8px rgba(52,168,83,0.4);
 animation:metersFloat 2.5s ease-out;
 }
+.meters-float .extra-badge {
+display:block; font-size:0.58rem; font-weight:800;
+letter-spacing:1.5px; text-transform:uppercase;
+color:#FFD700; text-shadow:0 1px 6px rgba(255,215,0,0.5);
+margin-bottom:2px;
+}
 @keyframes metersFloat {
 0% { transform:translateY(0); opacity:0; }
 30% { opacity:1; }
@@ -934,7 +949,8 @@ pointer-events:none;
   <div class="screen" id="scr-home">
     <div class="home-intro fade-in">
       <h1 id="home-title"></h1>
-      <p id="home-element"></p>
+      <div class="nivel-heading" id="home-nivel"></div>
+      <div class="elemento-heading" id="home-element"></div>
     </div>
     <div id="nivel-done-wrap" style="display:none"></div>
     <div id="today-banner-wrap"></div>
@@ -1245,9 +1261,7 @@ pointer-events:none;
   // ── Guardar reflexión individual en Firestore ──────────────────
   async function saveReflectionToFirestore(b, mi, qi, texto, questionText) {
     try {
-      const user = await new Promise(resolve => {
-        const unsub = _auth.onAuthStateChanged(u => { unsub(); resolve(u); });
-      });
+      const user = _auth.currentUser;
       if (!user) return;
       const docId = NIVEL_ID + '_' + b + '_' + mi + '_q' + qi;
       await _db.collection('users').doc(user.uid).collection('reflections').doc(docId).set({
@@ -1255,7 +1269,7 @@ pointer-events:none;
         bloque:      b,
         misterioIdx: mi,
         questionIdx: qi,
-        question:    questionText || MED_LABELS[qi] || '',  // pregunta real del misterio
+        question:    questionText || MED_LABELS[qi] || '',
         text:        texto,
         confirmedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
@@ -1290,18 +1304,14 @@ pointer-events:none;
 
     // 3. Firestore — progreso del nivel (sin totalMeters)
     try {
-      const user = await new Promise(resolve => {
-        const unsub = _auth.onAuthStateChanged(u => { unsub(); resolve(u); });
-      });
+      const user = _auth.currentUser;
       if (!user) return;
-      // Guardar progreso del nivel
       await _db.collection('users').doc(user.uid)
         .collection('progress').doc(NIVEL_ID)
         .set({
           ...payload,
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-      // Guardar metros globales en el documento raíz del usuario
       await _db.collection('users').doc(user.uid)
         .set({ totalMeters }, { merge: true });
     } catch(e) {
@@ -1310,20 +1320,17 @@ pointer-events:none;
   }
 
   // Carga desde Firestore; si falla o no hay sesión, usa localStorage
-  async function loadProgress() {
+  async function loadProgress(user) {
     let loaded = false;
 
-    // 1. Intentar Firestore
-    try {
-      const user = await new Promise(resolve => {
-        const unsub = _auth.onAuthStateChanged(u => { unsub(); resolve(u); });
-      });
-      if (user) {
-        // Cargar progreso del nivel y metros globales en paralelo
+    // 1. Firestore — fuente de verdad (solo si hay usuario)
+    if (user) {
+      try {
         const [snapNivel, snapUser] = await Promise.all([
           _db.collection('users').doc(user.uid).collection('progress').doc(NIVEL_ID).get(),
           _db.collection('users').doc(user.uid).get()
         ]);
+
         if (snapNivel.exists) {
           const d = snapNivel.data();
           if (d.progress)          progress          = d.progress;
@@ -1334,16 +1341,27 @@ pointer-events:none;
           if (d.audioRewards)      audioRewards       = d.audioRewards;
           loaded = true;
         }
-        // Metros globales desde documento raíz del usuario
+
+        // Metros globales — Firestore es fuente de verdad
         if (snapUser.exists && typeof snapUser.data().totalMeters === 'number') {
           totalMeters = snapUser.data().totalMeters;
+          try { localStorage.setItem('cruzando_total_metros', String(totalMeters)); } catch(e) {}
+        } else {
+          // Migrar desde localStorage si Firestore no tiene metros
+          try {
+            const m = localStorage.getItem('cruzando_total_metros');
+            if (m !== null && !isNaN(Number(m)) && Number(m) > 0) {
+              totalMeters = Number(m);
+              _db.collection('users').doc(user.uid).set({ totalMeters }, { merge: true }).catch(() => {});
+            }
+          } catch(e) {}
         }
+      } catch(e) {
+        console.warn('[CruzAndo] loadProgress Firestore:', e.message);
       }
-    } catch(e) {
-      console.warn('[CruzAndo] loadProgress Firestore:', e.message);
     }
 
-    // 2. Fallback a localStorage si Firestore no devolvió datos
+    // 2. Fallback a localStorage si Firestore no devolvió datos del nivel
     if (!loaded) {
       try {
         const raw = localStorage.getItem(lsKey());
@@ -1357,13 +1375,12 @@ pointer-events:none;
           if (d.audioRewards)      audioRewards       = d.audioRewards;
         }
       } catch(e) {}
+      // Metros desde localStorage como último recurso
+      try {
+        const m = localStorage.getItem('cruzando_total_metros');
+        if (m !== null && !isNaN(Number(m))) totalMeters = Number(m);
+      } catch(e) {}
     }
-
-    // Metros globales desde localStorage (clave separada, independiente del nivel)
-    try {
-      const m = localStorage.getItem('cruzando_total_metros');
-      if (m !== null && !isNaN(Number(m))) totalMeters = Number(m);
-    } catch(e) {}
 
     // isDark siempre desde localStorage (preferencia de UI, no progreso)
     try {
@@ -1491,47 +1508,31 @@ pointer-events:none;
   }
 
   // ── Ganar metros (Mariano aparece) ──
-  function gainMeters(meters, pose) {
-    console.log('gainMeters llamado:', meters, pose);
-    totalMeters += meters;
-    console.log('Total metros ahora:', totalMeters);
+  function gainMeters(meters, pose, isFirst = true) {
+    const award = isFirst ? meters : Math.floor(meters / 2);
+    totalMeters += award;
     updateMetersDisplay();
     saveProgress();
-
-    // Lux brilla
     luxShine();
-
-    // Sonido recompensante
     playRewardSound();
-
-    // Mariano aparece
-    showMarianoSlide(meters, pose);
+    showMarianoSlide(award, pose, isFirst);
   }
 
   // ── Mostrar Mariano slide-in ──
-  function showMarianoSlide(meters, pose) {
-    console.log('showMarianoSlide llamado:', meters, pose);
+  function showMarianoSlide(meters, pose, isFirst = true) {
     const overlay = $('mariano-overlay');
     const img = $('mariano-slide-img');
     const text = $('meters-float-text');
-    
-    console.log('Elementos encontrados:', {overlay, img, text});
-    
-    if (!overlay || !img || !text) {
-      console.error('Faltan elementos del overlay de Mariano');
-      return;
-    }
+    if (!overlay || !img || !text) return;
 
-    const imageUrl = MARIANO_BASE + 'mariano-' + pose + '.png';
-    console.log('Cargando imagen:', imageUrl);
-    
-    img.src = imageUrl;
-    text.textContent = '+' + meters.toLocaleString('es-MX') + 'm';
-    
+    img.src = MARIANO_BASE + 'mariano-' + pose + '.png';
+    text.innerHTML = (isFirst
+      ? '<span class="extra-badge">✦ EXTRA</span>'
+      : '') +
+      '+' + meters.toLocaleString('es-MX') + 'm';
+
     overlay.style.display = 'flex';
-    setTimeout(() => {
-      overlay.style.display = 'none';
-    }, 2500);
+    setTimeout(() => { overlay.style.display = 'none'; }, 2500);
   }
 
   // ── Celebración grand (Mariano + Lux + Confetti) ──
@@ -1717,32 +1718,22 @@ pointer-events:none;
         const rewardKey = currentBlock + '_' + currentMystery + '_' + playerId;
         console.log('RewardKey:', rewardKey, 'Ya existe?', !!audioRewards[rewardKey]);
         
-        if (!audioRewards[rewardKey]) {
-          audioRewards[rewardKey] = true;
-          
+        const isFirstAudio = !audioRewards[rewardKey];
+        if (isFirstAudio) audioRewards[rewardKey] = true;
+
           // Determinar metros y pose según tipo de audio
           let meters, pose;
           if (playerId.includes('rezar')) {
-            meters = 1200;
-            pose = 'walking';
-            console.log('Detectado: REZAR');
+            meters = 1200; pose = 'walking';
           } else if (playerId.includes('contempl')) {
-            meters = 800;
-            pose = 'contemplative';
-            console.log('Detectado: CONTEMPLACIÓN');
+            meters = 800; pose = 'contemplative';
           } else if (playerId.includes('canto')) {
-            meters = 100;
-            pose = 'happy';
-            console.log('Detectado: CANTO');
+            meters = 600; pose = 'happy';
           }
-          
+
           if (meters && pose) {
-            console.log('Llamando gainMeters:', meters, pose);
-            gainMeters(meters, pose);
-          } else {
-            console.log('NO se detectó tipo de audio válido');
+            gainMeters(meters, pose, isFirstAudio);
           }
-        }
       });
     }
     audioEl.play().then(() => {
@@ -1790,8 +1781,9 @@ pointer-events:none;
     $('main-header').style.display = '';
     $('h-title').textContent = 'CruzAndo';
     $('h-sub').textContent = nivelLabel(DATA.tema.id) + ': ' + DATA.elemento;
-    $('home-title').textContent = DATA.tema.mundo_nombre;
-    $('home-element').textContent = nivelLabel(DATA.tema.id) + ': ' + DATA.elemento;
+    $('home-title').textContent = DATA.tema.mundo_nombre || '';
+    $('home-nivel').textContent = nivelLabel(DATA.tema.id);
+    $('home-element').textContent = DATA.elemento || '';
 
     const grid = $('block-grid');
     grid.innerHTML = '';
@@ -1960,15 +1952,19 @@ pointer-events:none;
             '</div>' +
             '<div class="micro-final-titulo">Tu corazón está preparado</div>' +
             '<div class="micro-final-sub">Entra a los Misterios ' + BLOCK_NAMES[b] + '. Reza sin prisa. Lo que necesitas ya lo traes contigo.</div>' +
-            '<div class="micro-metros-chip">🚶‍♂️ +25m al peregrino</div>' +
+            '<div class="micro-metros-chip">🚶‍♂️ +600m al peregrino</div>' +
           '</div>';
         nav.innerHTML = '<button class="btn btn-primary btn-block" id="micro-btn-orar">Comenzar a rezar →</button>';
         $('micro-btn-orar').onclick = () => {
-          // Marcar micro como completado y dar metros
+          const isFirstMicro = !microDone[b];
           microDone[b] = true;
-          totalMeters += 25;
+          const microAward = isFirstMicro ? 600 : 300;
+          totalMeters += microAward;
           updateMetersDisplay();
           saveProgress();
+          // Mostrar Mariano con EXTRA si es primera vez
+          showMarianoSlide(microAward, 'happy', isFirstMicro);
+          playRewardSound();
           // Ir al primer misterio
           const prog = progress[b] || [];
           const first = prog.findIndex(x => x === null);
@@ -2375,13 +2371,12 @@ if (btn) {
   }, 2000);
 }
 
-// GAMIFICACIÓN: recompensa solo la primera vez
+// GAMIFICACIÓN: primera vez = metros completos + EXTRA; repetición = mitad
 if (!yaConfirmado) {
   const rewardKey = b + '_' + mi + '_q' + qi;
-  if (!reflectionRewards[rewardKey]) {
-    reflectionRewards[rewardKey] = true;
-    gainMeters(650, getNextRestPose());
-  }
+  const isFirst = !reflectionRewards[rewardKey];
+  if (isFirst) reflectionRewards[rewardKey] = true;
+  gainMeters(650, getNextRestPose(), isFirst);
 }
 ```
 
@@ -2501,7 +2496,7 @@ return s.replace(/&/g,’&’).replace(/</g,’<’).replace(/>/g,’>’).repla
 }
 
 // ── Iniciar ──
-async function init() {
+async function init(currentUser) {
 // Leer ID desde URL
 const params = new URLSearchParams(window.location.search);
 NIVEL_ID = params.get(‘c’) || ‘0101’;
@@ -2513,7 +2508,7 @@ if (!/^\d{4}$/.test(NIVEL_ID)) {
   return;
 }
 
-// Cargar JSON principal + cantos en paralelo
+// Cargar JSON principal
 const loc = window.location;
 const base = loc.origin + loc.pathname.substring(0, loc.pathname.lastIndexOf('/') + 1);
 try {
@@ -2525,7 +2520,7 @@ try {
   return;
 }
 
-// Cargar cantos y micro en paralelo (silenciosos — no bloquean si no existen)
+// Cargar cantos y micro en paralelo (silenciosos)
 try {
   const [rCantos, rMicro] = await Promise.all([
     fetch(base + 'data/' + NIVEL_ID + '-cantos.json'),
@@ -2535,21 +2530,18 @@ try {
   if (rMicro.ok)  MICRO_DATA  = await rMicro.json();
 } catch(e) {}
 
-// Leer plan del usuario desde Firestore
+// Leer plan del usuario (currentUser viene de onAuthStateChanged)
 try {
-  const user = await new Promise(resolve => {
-    const unsub = _auth.onAuthStateChanged(u => { unsub(); resolve(u); });
-  });
-  if (user) {
-    const snap = await _db.collection('users').doc(user.uid).get();
+  if (currentUser) {
+    const snap = await _db.collection('users').doc(currentUser.uid).get();
     if (snap.exists && snap.data().plan) {
-      userPlan = snap.data().plan; // 'free' | 'pro' | 'beta'
+      userPlan = snap.data().plan;
     }
   }
 } catch(e) { console.warn('[CruzAndo] plan load:', e.message); }
 
-// Cargar progreso (desde Firestore o localStorage)
-await loadProgress();
+// Cargar progreso
+await loadProgress(currentUser);
 
 // Aplicar dark mode
 if (isDark) {
@@ -2599,21 +2591,20 @@ $(‘error-msg’).textContent = msg;
 $(‘scr-error’).style.display = ‘flex’;
 }
 
-// Arrancar — esperar a que Firebase Auth confirme el estado de sesión
-// antes de correr init(), para que _auth.currentUser no sea null
+// Arrancar — onAuthStateChanged pasa el usuario resuelto directamente
 let _initDone = false;
-function _startApp() {
+function _startApp(user) {
 if (_initDone) return;
 _initDone = true;
-init();
+init(user);
 }
 
 if (document.readyState === ‘loading’) {
 document.addEventListener(‘DOMContentLoaded’, () => {
-_auth.onAuthStateChanged(() => _startApp());
+_auth.onAuthStateChanged(u => _startApp(u));
 });
 } else {
-_auth.onAuthStateChanged(() => _startApp());
+_auth.onAuthStateChanged(u => _startApp(u));
 }
 
 })();
