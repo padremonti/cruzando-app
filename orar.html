@@ -1261,9 +1261,7 @@ pointer-events:none;
   // ── Guardar reflexión individual en Firestore ──────────────────
   async function saveReflectionToFirestore(b, mi, qi, texto, questionText) {
     try {
-      const user = await new Promise(resolve => {
-        const unsub = _auth.onAuthStateChanged(u => { unsub(); resolve(u); });
-      });
+      const user = _auth.currentUser;
       if (!user) return;
       const docId = NIVEL_ID + '_' + b + '_' + mi + '_q' + qi;
       await _db.collection('users').doc(user.uid).collection('reflections').doc(docId).set({
@@ -1271,7 +1269,7 @@ pointer-events:none;
         bloque:      b,
         misterioIdx: mi,
         questionIdx: qi,
-        question:    questionText || MED_LABELS[qi] || '',  // pregunta real del misterio
+        question:    questionText || MED_LABELS[qi] || '',
         text:        texto,
         confirmedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
@@ -1306,18 +1304,14 @@ pointer-events:none;
 
     // 3. Firestore — progreso del nivel (sin totalMeters)
     try {
-      const user = await new Promise(resolve => {
-        const unsub = _auth.onAuthStateChanged(u => { unsub(); resolve(u); });
-      });
+      const user = _auth.currentUser;
       if (!user) return;
-      // Guardar progreso del nivel
       await _db.collection('users').doc(user.uid)
         .collection('progress').doc(NIVEL_ID)
         .set({
           ...payload,
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-      // Guardar metros globales en el documento raíz del usuario
       await _db.collection('users').doc(user.uid)
         .set({ totalMeters }, { merge: true });
     } catch(e) {
@@ -1326,21 +1320,17 @@ pointer-events:none;
   }
 
   // Carga desde Firestore; si falla o no hay sesión, usa localStorage
-  async function loadProgress() {
+  async function loadProgress(user) {
     let loaded = false;
 
-    // 1. Intentar Firestore — fuente de verdad
-    try {
-      const user = await new Promise(resolve => {
-        const unsub = _auth.onAuthStateChanged(u => { unsub(); resolve(u); });
-      });
-      if (user) {
+    // 1. Firestore — fuente de verdad (solo si hay usuario)
+    if (user) {
+      try {
         const [snapNivel, snapUser] = await Promise.all([
           _db.collection('users').doc(user.uid).collection('progress').doc(NIVEL_ID).get(),
           _db.collection('users').doc(user.uid).get()
         ]);
 
-        // Progreso del nivel
         if (snapNivel.exists) {
           const d = snapNivel.data();
           if (d.progress)          progress          = d.progress;
@@ -1353,25 +1343,22 @@ pointer-events:none;
         }
 
         // Metros globales — Firestore es fuente de verdad
-        // Si existe en Firestore, usar ese valor (ignora localStorage)
         if (snapUser.exists && typeof snapUser.data().totalMeters === 'number') {
           totalMeters = snapUser.data().totalMeters;
-          // Sincronizar localStorage con el valor correcto de Firestore
           try { localStorage.setItem('cruzando_total_metros', String(totalMeters)); } catch(e) {}
         } else {
-          // No hay metros en Firestore aún — intentar migrar desde localStorage
+          // Migrar desde localStorage si Firestore no tiene metros
           try {
             const m = localStorage.getItem('cruzando_total_metros');
             if (m !== null && !isNaN(Number(m)) && Number(m) > 0) {
               totalMeters = Number(m);
-              // Subir a Firestore para que quede registrado
               _db.collection('users').doc(user.uid).set({ totalMeters }, { merge: true }).catch(() => {});
             }
           } catch(e) {}
         }
+      } catch(e) {
+        console.warn('[CruzAndo] loadProgress Firestore:', e.message);
       }
-    } catch(e) {
-      console.warn('[CruzAndo] loadProgress Firestore:', e.message);
     }
 
     // 2. Fallback a localStorage si Firestore no devolvió datos del nivel
@@ -1388,7 +1375,7 @@ pointer-events:none;
           if (d.audioRewards)      audioRewards       = d.audioRewards;
         }
       } catch(e) {}
-      // Si no hay metros en Firestore, leer de localStorage como último recurso
+      // Metros desde localStorage como último recurso
       try {
         const m = localStorage.getItem('cruzando_total_metros');
         if (m !== null && !isNaN(Number(m))) totalMeters = Number(m);
@@ -2544,20 +2531,21 @@ try {
 } catch(e) {}
 
 // Leer plan del usuario desde Firestore
+let currentUser = null;
 try {
-  const user = await new Promise(resolve => {
+  currentUser = await new Promise(resolve => {
     const unsub = _auth.onAuthStateChanged(u => { unsub(); resolve(u); });
   });
-  if (user) {
-    const snap = await _db.collection('users').doc(user.uid).get();
+  if (currentUser) {
+    const snap = await _db.collection('users').doc(currentUser.uid).get();
     if (snap.exists && snap.data().plan) {
-      userPlan = snap.data().plan; // 'free' | 'pro' | 'beta'
+      userPlan = snap.data().plan;
     }
   }
 } catch(e) { console.warn('[CruzAndo] plan load:', e.message); }
 
-// Cargar progreso (desde Firestore o localStorage)
-await loadProgress();
+// Cargar progreso pasando el usuario ya resuelto
+await loadProgress(currentUser);
 
 // Aplicar dark mode
 if (isDark) {
