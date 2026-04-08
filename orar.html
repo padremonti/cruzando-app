@@ -16,7 +16,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script>
 /* ════════════════════════════════════════════════════
-   CONFIGURACIÓN FIREBASE  .
+   CONFIGURACIÓN FIREBASE
    ── Pega aquí tus valores del proyecto ──
    ════════════════════════════════════════════════════ */
 const firebaseConfig = {
@@ -128,22 +128,13 @@ justify-content:center; color:var(–text-soft); transition:all 0.2s;
 .icon-btn:active { transform:scale(0.92); }
 
 /* ── Pantalla de Inicio: Tarjetas de Bloques ── */
-.home-intro { padding:28px 18px 14px; text-align:center; }
+.home-intro { padding:24px 18px 12px; text-align:center; }
 .home-intro h1 {
-font-family:‘Inter’, sans-serif;
-font-size:0.62rem; font-weight:700; color:var(–text-dim);
-text-transform:uppercase; letter-spacing:2px; margin-bottom:6px;
+font-family:‘Cormorant Garamond’, Georgia, serif;
+font-size:1.9rem; font-weight:600; color:var(–text); margin-bottom:4px;
+line-height:1.15; letter-spacing:0.01em;
 }
-.home-intro .nivel-heading {
-font-family:‘Crimson Pro’, Georgia, serif;
-font-size:1.1rem; font-weight:500; color:var(–lvl-bold);
-line-height:1.2; margin-bottom:6px; letter-spacing:0.5px;
-}
-.home-intro .elemento-heading {
-font-family:‘Crimson Pro’, Georgia, serif;
-font-size:2.8rem; font-weight:600; color:var(–text);
-line-height:1.05; letter-spacing:-0.01em;
-}
+.home-intro p { font-size:0.82rem; color:var(–text-dim); }
 
 /* ── Banner Misterios del Día ── */
 .today-banner {
@@ -797,12 +788,6 @@ font-size:1rem; font-weight:800; color:var(–green);
 text-shadow:0 2px 8px rgba(52,168,83,0.4);
 animation:metersFloat 2.5s ease-out;
 }
-.meters-float .extra-badge {
-display:block; font-size:0.58rem; font-weight:800;
-letter-spacing:1.5px; text-transform:uppercase;
-color:#FFD700; text-shadow:0 1px 6px rgba(255,215,0,0.5);
-margin-bottom:2px;
-}
 @keyframes metersFloat {
 0% { transform:translateY(0); opacity:0; }
 30% { opacity:1; }
@@ -949,8 +934,7 @@ pointer-events:none;
   <div class="screen" id="scr-home">
     <div class="home-intro fade-in">
       <h1 id="home-title"></h1>
-      <div class="nivel-heading" id="home-nivel"></div>
-      <div class="elemento-heading" id="home-element"></div>
+      <p id="home-element"></p>
     </div>
     <div id="nivel-done-wrap" style="display:none"></div>
     <div id="today-banner-wrap"></div>
@@ -1261,7 +1245,9 @@ pointer-events:none;
   // ── Guardar reflexión individual en Firestore ──────────────────
   async function saveReflectionToFirestore(b, mi, qi, texto, questionText) {
     try {
-      const user = _auth.currentUser;
+      const user = await new Promise(resolve => {
+        const unsub = _auth.onAuthStateChanged(u => { unsub(); resolve(u); });
+      });
       if (!user) return;
       const docId = NIVEL_ID + '_' + b + '_' + mi + '_q' + qi;
       await _db.collection('users').doc(user.uid).collection('reflections').doc(docId).set({
@@ -1269,7 +1255,7 @@ pointer-events:none;
         bloque:      b,
         misterioIdx: mi,
         questionIdx: qi,
-        question:    questionText || MED_LABELS[qi] || '',
+        question:    questionText || MED_LABELS[qi] || '',  // pregunta real del misterio
         text:        texto,
         confirmedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
@@ -1304,14 +1290,18 @@ pointer-events:none;
 
     // 3. Firestore — progreso del nivel (sin totalMeters)
     try {
-      const user = _auth.currentUser;
+      const user = await new Promise(resolve => {
+        const unsub = _auth.onAuthStateChanged(u => { unsub(); resolve(u); });
+      });
       if (!user) return;
+      // Guardar progreso del nivel
       await _db.collection('users').doc(user.uid)
         .collection('progress').doc(NIVEL_ID)
         .set({
           ...payload,
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
+      // Guardar metros globales en el documento raíz del usuario
       await _db.collection('users').doc(user.uid)
         .set({ totalMeters }, { merge: true });
     } catch(e) {
@@ -1320,17 +1310,20 @@ pointer-events:none;
   }
 
   // Carga desde Firestore; si falla o no hay sesión, usa localStorage
-  async function loadProgress(user) {
+  async function loadProgress() {
     let loaded = false;
 
-    // 1. Firestore — fuente de verdad (solo si hay usuario)
-    if (user) {
-      try {
+    // 1. Intentar Firestore
+    try {
+      const user = await new Promise(resolve => {
+        const unsub = _auth.onAuthStateChanged(u => { unsub(); resolve(u); });
+      });
+      if (user) {
+        // Cargar progreso del nivel y metros globales en paralelo
         const [snapNivel, snapUser] = await Promise.all([
           _db.collection('users').doc(user.uid).collection('progress').doc(NIVEL_ID).get(),
           _db.collection('users').doc(user.uid).get()
         ]);
-
         if (snapNivel.exists) {
           const d = snapNivel.data();
           if (d.progress)          progress          = d.progress;
@@ -1341,27 +1334,16 @@ pointer-events:none;
           if (d.audioRewards)      audioRewards       = d.audioRewards;
           loaded = true;
         }
-
-        // Metros globales — Firestore es fuente de verdad
+        // Metros globales desde documento raíz del usuario
         if (snapUser.exists && typeof snapUser.data().totalMeters === 'number') {
           totalMeters = snapUser.data().totalMeters;
-          try { localStorage.setItem('cruzando_total_metros', String(totalMeters)); } catch(e) {}
-        } else {
-          // Migrar desde localStorage si Firestore no tiene metros
-          try {
-            const m = localStorage.getItem('cruzando_total_metros');
-            if (m !== null && !isNaN(Number(m)) && Number(m) > 0) {
-              totalMeters = Number(m);
-              _db.collection('users').doc(user.uid).set({ totalMeters }, { merge: true }).catch(() => {});
-            }
-          } catch(e) {}
         }
-      } catch(e) {
-        console.warn('[CruzAndo] loadProgress Firestore:', e.message);
       }
+    } catch(e) {
+      console.warn('[CruzAndo] loadProgress Firestore:', e.message);
     }
 
-    // 2. Fallback a localStorage si Firestore no devolvió datos del nivel
+    // 2. Fallback a localStorage si Firestore no devolvió datos
     if (!loaded) {
       try {
         const raw = localStorage.getItem(lsKey());
@@ -1375,12 +1357,13 @@ pointer-events:none;
           if (d.audioRewards)      audioRewards       = d.audioRewards;
         }
       } catch(e) {}
-      // Metros desde localStorage como último recurso
-      try {
-        const m = localStorage.getItem('cruzando_total_metros');
-        if (m !== null && !isNaN(Number(m))) totalMeters = Number(m);
-      } catch(e) {}
     }
+
+    // Metros globales desde localStorage (clave separada, independiente del nivel)
+    try {
+      const m = localStorage.getItem('cruzando_total_metros');
+      if (m !== null && !isNaN(Number(m))) totalMeters = Number(m);
+    } catch(e) {}
 
     // isDark siempre desde localStorage (preferencia de UI, no progreso)
     try {
@@ -1508,31 +1491,47 @@ pointer-events:none;
   }
 
   // ── Ganar metros (Mariano aparece) ──
-  function gainMeters(meters, pose, isFirst = true) {
-    const award = isFirst ? meters : Math.floor(meters / 2);
-    totalMeters += award;
+  function gainMeters(meters, pose) {
+    console.log('gainMeters llamado:', meters, pose);
+    totalMeters += meters;
+    console.log('Total metros ahora:', totalMeters);
     updateMetersDisplay();
     saveProgress();
+
+    // Lux brilla
     luxShine();
+
+    // Sonido recompensante
     playRewardSound();
-    showMarianoSlide(award, pose, isFirst);
+
+    // Mariano aparece
+    showMarianoSlide(meters, pose);
   }
 
   // ── Mostrar Mariano slide-in ──
-  function showMarianoSlide(meters, pose, isFirst = true) {
+  function showMarianoSlide(meters, pose) {
+    console.log('showMarianoSlide llamado:', meters, pose);
     const overlay = $('mariano-overlay');
     const img = $('mariano-slide-img');
     const text = $('meters-float-text');
-    if (!overlay || !img || !text) return;
+    
+    console.log('Elementos encontrados:', {overlay, img, text});
+    
+    if (!overlay || !img || !text) {
+      console.error('Faltan elementos del overlay de Mariano');
+      return;
+    }
 
-    img.src = MARIANO_BASE + 'mariano-' + pose + '.png';
-    text.innerHTML = (isFirst
-      ? '<span class="extra-badge">✦ EXTRA</span>'
-      : '') +
-      '+' + meters.toLocaleString('es-MX') + 'm';
-
+    const imageUrl = MARIANO_BASE + 'mariano-' + pose + '.png';
+    console.log('Cargando imagen:', imageUrl);
+    
+    img.src = imageUrl;
+    text.textContent = '+' + meters.toLocaleString('es-MX') + 'm';
+    
     overlay.style.display = 'flex';
-    setTimeout(() => { overlay.style.display = 'none'; }, 2500);
+    setTimeout(() => {
+      overlay.style.display = 'none';
+    }, 2500);
   }
 
   // ── Celebración grand (Mariano + Lux + Confetti) ──
@@ -1718,22 +1717,32 @@ pointer-events:none;
         const rewardKey = currentBlock + '_' + currentMystery + '_' + playerId;
         console.log('RewardKey:', rewardKey, 'Ya existe?', !!audioRewards[rewardKey]);
         
-        const isFirstAudio = !audioRewards[rewardKey];
-        if (isFirstAudio) audioRewards[rewardKey] = true;
-
+        if (!audioRewards[rewardKey]) {
+          audioRewards[rewardKey] = true;
+          
           // Determinar metros y pose según tipo de audio
           let meters, pose;
           if (playerId.includes('rezar')) {
-            meters = 1200; pose = 'walking';
+            meters = 1200;
+            pose = 'walking';
+            console.log('Detectado: REZAR');
           } else if (playerId.includes('contempl')) {
-            meters = 800; pose = 'contemplative';
+            meters = 800;
+            pose = 'contemplative';
+            console.log('Detectado: CONTEMPLACIÓN');
           } else if (playerId.includes('canto')) {
-            meters = 600; pose = 'happy';
+            meters = 100;
+            pose = 'happy';
+            console.log('Detectado: CANTO');
           }
-
+          
           if (meters && pose) {
-            gainMeters(meters, pose, isFirstAudio);
+            console.log('Llamando gainMeters:', meters, pose);
+            gainMeters(meters, pose);
+          } else {
+            console.log('NO se detectó tipo de audio válido');
           }
+        }
       });
     }
     audioEl.play().then(() => {
@@ -1781,9 +1790,8 @@ pointer-events:none;
     $('main-header').style.display = '';
     $('h-title').textContent = 'CruzAndo';
     $('h-sub').textContent = nivelLabel(DATA.tema.id) + ': ' + DATA.elemento;
-    $('home-title').textContent = DATA.tema.mundo_nombre || '';
-    $('home-nivel').textContent = nivelLabel(DATA.tema.id);
-    $('home-element').textContent = DATA.elemento || '';
+    $('home-title').textContent = DATA.tema.mundo_nombre;
+    $('home-element').textContent = nivelLabel(DATA.tema.id) + ': ' + DATA.elemento;
 
     const grid = $('block-grid');
     grid.innerHTML = '';
@@ -1952,19 +1960,15 @@ pointer-events:none;
             '</div>' +
             '<div class="micro-final-titulo">Tu corazón está preparado</div>' +
             '<div class="micro-final-sub">Entra a los Misterios ' + BLOCK_NAMES[b] + '. Reza sin prisa. Lo que necesitas ya lo traes contigo.</div>' +
-            '<div class="micro-metros-chip">🚶‍♂️ +600m al peregrino</div>' +
+            '<div class="micro-metros-chip">🚶‍♂️ +25m al peregrino</div>' +
           '</div>';
         nav.innerHTML = '<button class="btn btn-primary btn-block" id="micro-btn-orar">Comenzar a rezar →</button>';
         $('micro-btn-orar').onclick = () => {
-          const isFirstMicro = !microDone[b];
+          // Marcar micro como completado y dar metros
           microDone[b] = true;
-          const microAward = isFirstMicro ? 600 : 300;
-          totalMeters += microAward;
+          totalMeters += 25;
           updateMetersDisplay();
           saveProgress();
-          // Mostrar Mariano con EXTRA si es primera vez
-          showMarianoSlide(microAward, 'happy', isFirstMicro);
-          playRewardSound();
           // Ir al primer misterio
           const prog = progress[b] || [];
           const first = prog.findIndex(x => x === null);
@@ -2371,12 +2375,13 @@ if (btn) {
   }, 2000);
 }
 
-// GAMIFICACIÓN: primera vez = metros completos + EXTRA; repetición = mitad
+// GAMIFICACIÓN: recompensa solo la primera vez
 if (!yaConfirmado) {
   const rewardKey = b + '_' + mi + '_q' + qi;
-  const isFirst = !reflectionRewards[rewardKey];
-  if (isFirst) reflectionRewards[rewardKey] = true;
-  gainMeters(650, getNextRestPose(), isFirst);
+  if (!reflectionRewards[rewardKey]) {
+    reflectionRewards[rewardKey] = true;
+    gainMeters(650, getNextRestPose());
+  }
 }
 ```
 
@@ -2530,19 +2535,21 @@ try {
   if (rMicro.ok)  MICRO_DATA  = await rMicro.json();
 } catch(e) {}
 
-// Usuario ya resuelto por _startApp — usar currentUser directamente
-const currentUser = _auth.currentUser;
+// Leer plan del usuario desde Firestore
 try {
-  if (currentUser) {
-    const snap = await _db.collection('users').doc(currentUser.uid).get();
+  const user = await new Promise(resolve => {
+    const unsub = _auth.onAuthStateChanged(u => { unsub(); resolve(u); });
+  });
+  if (user) {
+    const snap = await _db.collection('users').doc(user.uid).get();
     if (snap.exists && snap.data().plan) {
-      userPlan = snap.data().plan;
+      userPlan = snap.data().plan; // 'free' | 'pro' | 'beta'
     }
   }
 } catch(e) { console.warn('[CruzAndo] plan load:', e.message); }
 
-// Cargar progreso pasando el usuario ya resuelto
-await loadProgress(currentUser);
+// Cargar progreso (desde Firestore o localStorage)
+await loadProgress();
 
 // Aplicar dark mode
 if (isDark) {
