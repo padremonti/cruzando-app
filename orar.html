@@ -1755,7 +1755,7 @@ pointer-events:none;
             pose = 'contemplative';
             console.log('Detectado: CONTEMPLACIÓN');
           } else if (playerId.includes('canto')) {
-            meters = 100;
+            meters = 600;
             pose = 'happy';
             console.log('Detectado: CANTO');
           }
@@ -1991,7 +1991,7 @@ pointer-events:none;
         $('micro-btn-orar').onclick = () => {
           // Marcar micro como completado y dar metros
           microDone[b] = true;
-          totalMeters += 25;
+          totalMeters += 600;
           updateMetersDisplay();
           saveProgress();
           // Ir al primer misterio
