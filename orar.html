@@ -2599,12 +2599,20 @@ _initDone = true;
 init(user);
 }
 
+// Timeout de seguridad: si Firebase no responde en 6s, arrancar sin usuario
+const _authTimeout = setTimeout(() => {
+if (!_initDone) {
+console.warn(’[CruzAndo] Firebase auth timeout — arrancando sin usuario’);
+_startApp(null);
+}
+}, 6000);
+
 if (document.readyState === ‘loading’) {
 document.addEventListener(‘DOMContentLoaded’, () => {
-_auth.onAuthStateChanged(u => _startApp(u));
+_auth.onAuthStateChanged(u => { clearTimeout(_authTimeout); _startApp(u); });
 });
 } else {
-_auth.onAuthStateChanged(u => _startApp(u));
+_auth.onAuthStateChanged(u => { clearTimeout(_authTimeout); _startApp(u); });
 }
 
 })();
