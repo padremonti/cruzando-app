@@ -159,12 +159,12 @@
         {
           "emoji": "🔍",
           "titulo": "No todo dolor nace igual",
-          "contenido": "Los males son límites que nadie eligió. El pecado, en cambio, hiere desde una libertad mal usada."
+          "contenido": "Los males inevitables como enfermedades naturales, vejez, mortalidad, accidentes y otros son límites que nadie eligió. El pecado, en cambio, hiere desde una libertad mal usada."
         },
         {
           "emoji": "🤝",
           "titulo": "Dios no mira desde lejos",
-          "contenido": "En Cristo, Dios entra en el dolor humano. No contempla tu sufrimiento desde fuera, sino desde dentro."
+          "contenido": "En Cristo, Dios entra en el dolor humano. No contempla tu sufrimiento desde fuera, sino desde dentro, asumiendo ser también mortal, frágil, expuesto."
         },
         {
           "emoji": "🪵",
@@ -189,7 +189,7 @@
           ]
         },
         {
-          "pregunta": "¿Te ha costado distinguir entre mal inevitable y culpa personal?",
+          "pregunta": "¿Te ha costado distinguir entre mal inevitable —ej. accidente, enfermedad, defecto físico, etc.— y culpa personal?",
           "opciones": [
             {
               "texto": "Sí, a veces lo confundo.",
