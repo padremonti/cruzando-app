@@ -1155,7 +1155,7 @@ import {
 
 // ── FIREBASE CONFIG (pegar aquí tu config) ──
 const firebaseConfig = {
-   apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
+  apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
     authDomain: "cruzando-app.firebaseapp.com",
     projectId: "cruzando-app",
     storageBucket: "cruzando-app.firebasestorage.app",
@@ -1856,6 +1856,16 @@ function toggleTheme() {
 // BGM — Música de fondo
 // ════════════════════════════════════════════
 
+// ── Web Audio API para control preciso de ganancia del BGM ──
+let bgmAudioCtx  = null;
+let bgmSource    = null;
+let bgmGainNode  = null;
+let bgmFadeTimer = null;
+
+function bgmClearFade() {
+  if (bgmFadeTimer) { clearTimeout(bgmFadeTimer); bgmFadeTimer = null; }
+}
+
 function bgmInit() {
   if (!currentSession) return;
   const { nivel, cuaderno } = currentSession;
@@ -1863,74 +1873,96 @@ function bgmInit() {
 
   bgmEl = new Audio(url);
   bgmEl.loop = true;
-  bgmEl.volume = BGM_VOL;
+  bgmEl.crossOrigin = 'anonymous';
   bgmLoaded = false;
 
   bgmEl.onerror = () => {
     console.warn('BGM no encontrado:', url);
     bgmEl = null;
   };
+
   bgmEl.oncanplaythrough = () => {
+    if (bgmLoaded) return; // evitar doble setup
     bgmLoaded = true;
-    // Arrancar desde el inicio — incluyendo la Bienvenida
+
+    // Crear contexto Web Audio y conectar GainNode
+    try {
+      bgmAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      bgmSource   = bgmAudioCtx.createMediaElementSource(bgmEl);
+      bgmGainNode = bgmAudioCtx.createGain();
+      bgmGainNode.gain.value = 0; // arrancar en silencio
+      bgmSource.connect(bgmGainNode);
+      bgmGainNode.connect(bgmAudioCtx.destination);
+    } catch(e) {
+      // Fallback: usar .volume nativo si Web Audio falla
+      console.warn('Web Audio API no disponible, usando volume nativo');
+      bgmGainNode = null;
+    }
+
     if (bgmEnabled && !isCanto(currentTrack)) {
       bgmResume();
     }
   };
 }
 
-// Almacenar el intervalo de fade activo para poder cancelarlo
-let bgmFadeInterval = null;
-
-function bgmClearFade() {
-  if (bgmFadeInterval) {
-    clearInterval(bgmFadeInterval);
-    bgmFadeInterval = null;
+function bgmSetGain(value) {
+  // Controla ganancia vía Web Audio si disponible, o .volume nativo
+  if (bgmGainNode) {
+    bgmGainNode.gain.value = Math.max(0, Math.min(1, value));
+  } else if (bgmEl) {
+    bgmEl.volume = Math.max(0, Math.min(1, value));
   }
+}
+
+function bgmGetGain() {
+  if (bgmGainNode) return bgmGainNode.gain.value;
+  if (bgmEl) return bgmEl.volume;
+  return 0;
+}
+
+function bgmFadeTo(target, durationMs, onDone) {
+  bgmClearFade();
+  if (!bgmEl) return;
+  const steps    = 30;
+  const interval = durationMs / steps;
+  const start    = bgmGetGain();
+  const delta    = (target - start) / steps;
+  let   step     = 0;
+
+  function tick() {
+    step++;
+    const val = start + delta * step;
+    bgmSetGain(step < steps ? val : target);
+    if (step < steps) {
+      bgmFadeTimer = setTimeout(tick, interval);
+    } else {
+      bgmFadeTimer = null;
+      if (onDone) onDone();
+    }
+  }
+  tick();
 }
 
 function bgmPause() {
-  bgmClearFade(); // cancelar cualquier fade previo
+  bgmClearFade();
   if (!bgmEl) return;
-  if (bgmEl.volume === 0 || bgmEl.paused) {
-    // Ya está silenciado — solo asegurar pausa
-    bgmEl.pause();
-    return;
-  }
-  const startVol = bgmEl.volume;
-  const step = startVol / 20;
-  bgmFadeInterval = setInterval(() => {
-    if (!bgmEl) { bgmClearFade(); return; }
-    const next = bgmEl.volume - step;
-    if (next <= 0) {
-      bgmEl.volume = 0;
-      bgmEl.pause();
-      bgmClearFade();
-    } else {
-      bgmEl.volume = next;
-    }
-  }, 20);
+  bgmFadeTo(0, 400, () => {
+    if (bgmEl) bgmEl.pause();
+  });
 }
 
 function bgmResume() {
-  bgmClearFade(); // cancelar cualquier fade previo
+  bgmClearFade();
   if (!bgmEl || !bgmEnabled) return;
+
+  // Reanudar contexto si fue suspendido (política autoplay)
+  if (bgmAudioCtx && bgmAudioCtx.state === 'suspended') {
+    bgmAudioCtx.resume().catch(() => {});
+  }
   if (bgmEl.paused) {
     bgmEl.play().catch(() => {});
   }
-  bgmEl.volume = 0;
-  const target = BGM_VOL;
-  const step = target / 25;
-  bgmFadeInterval = setInterval(() => {
-    if (!bgmEl) { bgmClearFade(); return; }
-    const next = bgmEl.volume + step;
-    if (next >= target) {
-      bgmEl.volume = target;
-      bgmClearFade();
-    } else {
-      bgmEl.volume = next;
-    }
-  }, 20);
+  bgmFadeTo(BGM_VOL, 600);
 }
 
 function bgmStop() {
@@ -1941,7 +1973,13 @@ function bgmStop() {
     bgmEl.onerror = null;
     bgmEl = null;
   }
-  bgmLoaded = false;
+  if (bgmAudioCtx) {
+    bgmAudioCtx.close().catch(() => {});
+    bgmAudioCtx = null;
+  }
+  bgmSource   = null;
+  bgmGainNode = null;
+  bgmLoaded   = false;
 }
 
 function bgmToggle() {
