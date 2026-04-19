@@ -1155,7 +1155,7 @@ import {
 
 // ── FIREBASE CONFIG (pegar aquí tu config) ──
 const firebaseConfig = {
-  apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
+   apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
     authDomain: "cruzando-app.firebaseapp.com",
     projectId: "cruzando-app",
     storageBucket: "cruzando-app.firebasestorage.app",
@@ -1187,7 +1187,7 @@ const AUDIO_FOLDERS = {
 };
 const BGM_BASE = R2_BASE + '/BGM/';
 const NUM_SEGS  = 9;   // segmentos visuales en la barra de progreso
-const BGM_VOL   = 0.14; // volumen de la música de fondo (0.0 – 1.0)
+const BGM_VOL   = 0.07; // volumen de la música de fondo (0.0 – 1.0)
 
 const BLOCKS     = ['gozosos','luminosos','dolorosos','gloriosos'];
 const BLOCK_NAMES = { gozosos:'Gozoso', luminosos:'Luminoso', dolorosos:'Doloroso', gloriosos:'Glorioso' };
@@ -1724,7 +1724,7 @@ function goTrack(idx) {
   const track = playlist[idx];
 
   // BGM: silencio en Bienvenida (START) y Canto; activo desde UBIBLE en adelante
-  if (track.folder === 'start' || isCanto(idx)) {
+  if (isCanto(idx)) {
     bgmPause();
   } else {
     bgmResume();
@@ -1872,48 +1872,69 @@ function bgmInit() {
   };
   bgmEl.oncanplaythrough = () => {
     bgmLoaded = true;
-    // No arranca en Bienvenida (seg:0 = START); arranca desde UBIBLE en adelante
-    // goTrack llamará bgmResume() cuando llegue a UBIBLE
+    // Arrancar desde el inicio — incluyendo la Bienvenida
+    if (bgmEnabled && !isCanto(currentTrack)) {
+      bgmResume();
+    }
   };
 }
 
+// Almacenar el intervalo de fade activo para poder cancelarlo
+let bgmFadeInterval = null;
+
+function bgmClearFade() {
+  if (bgmFadeInterval) {
+    clearInterval(bgmFadeInterval);
+    bgmFadeInterval = null;
+  }
+}
+
 function bgmPause() {
+  bgmClearFade(); // cancelar cualquier fade previo
   if (!bgmEl) return;
-  // Fade out suave: bajar volumen en 400ms y luego pausar
-  const step = bgmEl.volume / 20;
-  const fade = setInterval(() => {
-    if (!bgmEl) { clearInterval(fade); return; }
-    if (bgmEl.volume > step) {
-      bgmEl.volume = Math.max(0, bgmEl.volume - step);
-    } else {
+  if (bgmEl.volume === 0 || bgmEl.paused) {
+    // Ya está silenciado — solo asegurar pausa
+    bgmEl.pause();
+    return;
+  }
+  const startVol = bgmEl.volume;
+  const step = startVol / 20;
+  bgmFadeInterval = setInterval(() => {
+    if (!bgmEl) { bgmClearFade(); return; }
+    const next = bgmEl.volume - step;
+    if (next <= 0) {
       bgmEl.volume = 0;
       bgmEl.pause();
-      clearInterval(fade);
+      bgmClearFade();
+    } else {
+      bgmEl.volume = next;
     }
   }, 20);
 }
 
 function bgmResume() {
+  bgmClearFade(); // cancelar cualquier fade previo
   if (!bgmEl || !bgmEnabled) return;
   if (bgmEl.paused) {
     bgmEl.play().catch(() => {});
   }
-  // Fade in suave: subir volumen hasta BGM_VOL en 600ms
   bgmEl.volume = 0;
   const target = BGM_VOL;
-  const step = target / 30;
-  const fade = setInterval(() => {
-    if (!bgmEl) { clearInterval(fade); return; }
-    if (bgmEl.volume < target - step) {
-      bgmEl.volume = Math.min(target, bgmEl.volume + step);
-    } else {
+  const step = target / 25;
+  bgmFadeInterval = setInterval(() => {
+    if (!bgmEl) { bgmClearFade(); return; }
+    const next = bgmEl.volume + step;
+    if (next >= target) {
       bgmEl.volume = target;
-      clearInterval(fade);
+      bgmClearFade();
+    } else {
+      bgmEl.volume = next;
     }
   }, 20);
 }
 
 function bgmStop() {
+  bgmClearFade();
   if (bgmEl) {
     bgmEl.pause();
     bgmEl.oncanplaythrough = null;
