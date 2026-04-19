@@ -1043,7 +1043,7 @@ import {
 
 // ── FIREBASE CONFIG (pegar aquí tu config) ──
 const firebaseConfig = {
-   apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
+      apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
     authDomain: "cruzando-app.firebaseapp.com",
     projectId: "cruzando-app",
     storageBucket: "cruzando-app.firebasestorage.app",
@@ -1074,6 +1074,7 @@ const AUDIO_FOLDERS = {
   bye:    R2_BASE + '/audio/bye/'
 };
 const BGM_BASE = R2_BASE + '/audio/BGM/';
+const NUM_SEGS = 9;  // segmentos visuales en la barra de progreso
 
 const BLOCKS     = ['gozosos','luminosos','dolorosos','gloriosos'];
 const BLOCK_NAMES = { gozosos:'Gozoso', luminosos:'Luminoso', dolorosos:'Doloroso', gloriosos:'Glorioso' };
@@ -1397,8 +1398,6 @@ async function buildSession() {
          : AUDIO_FOLDERS[t.folder] + t.file
   }));
 
-  // Número de segmentos visuales únicos (0-7 = 8 segmentos)
-  const NUM_SEGS = 9;
 
   currentSession = { nivel: n, cuaderno: c, misterio: m, block, blockIdx, mysteryData, playlist };
   sessionMeters = 0;
