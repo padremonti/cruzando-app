@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#1A1714">
@@ -205,95 +206,91 @@ body {
 }
 
 /* ── Hero con imagen y degradados estilo Hallow ── */
+/* ── Hero: layout vertical — título arriba, imagen completa, subtítulo abajo ── */
 .hero {
+  width: 100%;
+  flex-shrink: 0;
+  background: var(--bg);
+}
+
+/* Banda superior: badge + nombre oficial */
+.hero-top-label {
+  padding: 16px 20px 12px;
+  text-align: center;
+  background: var(--bg);
+}
+.hero-mystery-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--lvl-soft);
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: var(--card);
+}
+.hero-mystery-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--lvl-bold);
+  flex-shrink: 0;
+}
+
+/* Imagen completa — sin recorte */
+.hero-img-wrap {
   position: relative;
   width: 100%;
-  height: 54vw;
-  max-height: 300px;
-  min-height: 200px;
-  overflow: hidden;
-  flex-shrink: 0;
+  background: #111;
 }
 .hero-img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
+  height: auto;
   display: block;
+  object-fit: contain;
 }
 .hero-img-placeholder {
   width: 100%;
-  height: 100%;
+  aspect-ratio: 1 / 1;
   background: linear-gradient(160deg, #2A2520 0%, #1A1714 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 4rem;
 }
-/* Degradado superior */
+/* Degradado sutil arriba y abajo de la imagen */
 .hero-grad-top {
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 45%;
-  background: linear-gradient(to bottom, rgba(15,12,10,0.85) 0%, transparent 100%);
+  height: 30%;
+  background: linear-gradient(to bottom, rgba(15,12,10,0.45) 0%, transparent 100%);
   pointer-events: none;
 }
-/* Degradado inferior */
 .hero-grad-bottom {
   position: absolute;
   bottom: 0; left: 0; right: 0;
-  height: 55%;
-  background: linear-gradient(to top, rgba(15,12,10,0.92) 0%, transparent 100%);
+  height: 30%;
+  background: linear-gradient(to top, rgba(15,12,10,0.45) 0%, transparent 100%);
   pointer-events: none;
 }
-/* Texto superior del hero */
-.hero-top-label {
-  position: absolute;
-  top: 14px; left: 0; right: 0;
-  text-align: center;
-  z-index: 5;
-  pointer-events: none;
-}
-.hero-mystery-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: rgba(255,255,255,0.9);
-  background: rgba(0,0,0,0.35);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  padding: 5px 14px;
-  border-radius: 20px;
-  border: 1px solid rgba(255,255,255,0.12);
-}
-.hero-mystery-dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--lvl-bold);
-}
-/* Texto inferior del hero — subtítulo contemplativo */
+
+/* Banda inferior: subtítulo contemplativo + referencia */
 .hero-bottom-text {
-  position: absolute;
-  bottom: 12px; left: 20px; right: 20px;
-  z-index: 5;
-  pointer-events: none;
+  padding: 12px 20px 14px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
 }
 .hero-subtitle {
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 1.55rem;
+  font-size: 1.35rem;
   font-weight: 600;
   font-style: italic;
-  color: #fff;
-  line-height: 1.25;
-  text-shadow: 0 2px 12px rgba(0,0,0,0.5);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  color: var(--text);
+  line-height: 1.3;
+  margin-bottom: 4px;
 }
 
 /* ── Controles debajo del hero ── */
@@ -750,7 +747,7 @@ body {
 /* ── Botón esquina — dark/settings ── */
 .corner-btn {
   position: absolute;
-  top: 14px; right: 14px;
+  top: 12px; right: 12px;
   width: 34px; height: 34px;
   background: rgba(0,0,0,0.4);
   backdrop-filter: blur(8px);
@@ -869,14 +866,10 @@ body {
   <!-- ═══ PANTALLA: SESIÓN DIARIA ═══ -->
   <div class="screen" id="scr-session">
 
-    <!-- Hero -->
+    <!-- Hero: layout vertical -->
     <div class="hero">
-      <div class="hero-img-placeholder" id="hero-placeholder">🕊️</div>
-      <img class="hero-img" id="hero-img" alt="" style="display:none" crossorigin="anonymous">
-      <!-- Degradados -->
-      <div class="hero-grad-top"></div>
-      <div class="hero-grad-bottom"></div>
-      <!-- Badge superior: ordinal + nombre oficial del Catálogo -->
+
+      <!-- Banda superior: ordinal + nombre oficial -->
       <div class="hero-top-label">
         <span class="hero-mystery-badge">
           <span class="hero-mystery-dot" id="mystery-dot"></span>
@@ -884,22 +877,30 @@ body {
         </span>
         <div class="hero-mystery-official" id="mystery-official-name"></div>
       </div>
-      <!-- Inferior: subtítulo contemplativo + referencia bíblica -->
+
+      <!-- Imagen completa -->
+      <div class="hero-img-wrap">
+        <div class="hero-img-placeholder" id="hero-placeholder">🕊️</div>
+        <img class="hero-img" id="hero-img" alt="" style="display:none" crossorigin="anonymous">
+        <div class="hero-grad-top"></div>
+        <div class="hero-grad-bottom"></div>
+        <!-- Botón BGM (sobre imagen, esquina izquierda) -->
+        <button class="corner-btn" id="btn-bgm" style="left:12px; right:auto; top:12px;" title="Silenciar música de fondo">
+          <svg class="bgm-on" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+          <svg class="bgm-off" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
+        </button>
+        <!-- Botón logout (sobre imagen, esquina derecha) -->
+        <button class="corner-btn" id="btn-logout" style="top:12px;" title="Salir">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
+
+      <!-- Banda inferior: subtítulo contemplativo + referencia -->
       <div class="hero-bottom-text">
         <div class="hero-subtitle" id="hero-subtitle"></div>
         <div class="hero-reference" id="hero-reference"></div>
       </div>
-      <!-- Botón BGM (esquina izquierda) -->
-      <button class="corner-btn" id="btn-bgm" style="left:14px; right:auto;" title="Silenciar música de fondo">
-        <!-- Nota musical (BGM activo) -->
-        <svg class="bgm-on" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-        <!-- Nota tachada (BGM muted) -->
-        <svg class="bgm-off" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
-      </button>
-      <!-- Botón logout esquina derecha -->
-      <button class="corner-btn" id="btn-logout" title="Salir">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      </button>
+
     </div>
 
     <!-- Controles -->
@@ -1043,7 +1044,7 @@ import {
 
 // ── FIREBASE CONFIG (pegar aquí tu config) ──
 const firebaseConfig = {
-      apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
+   apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
     authDomain: "cruzando-app.firebaseapp.com",
     projectId: "cruzando-app",
     storageBucket: "cruzando-app.firebasestorage.app",
@@ -1064,16 +1065,16 @@ const googleProvider = new GoogleAuthProvider();
 const R2_BASE   = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev';
 const IMG_BASE  = 'https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev/';
 const AUDIO_FOLDERS = {
-  start:  R2_BASE + '/audio/start/',
-  ubible: R2_BASE + '/audio/ubible/',
-  cont:   R2_BASE + '/audio/cont/',
-  rezo:   R2_BASE + '/audio/global/',
-  music:  'https://pub-faed94e375aa443e846e07f81ef93274.r2.dev/audio/music/',
-  q:      R2_BASE + '/audio/q/',
-  pray:   R2_BASE + '/audio/pray/',
-  bye:    R2_BASE + '/audio/bye/'
+  start:  R2_BASE + '/start/',
+  ubible: R2_BASE + '/ubible/',
+  cont:   R2_BASE + '/cont/',
+  rezo:   R2_BASE + '/global/',
+  music:  'https://pub-faed94e375aa443e846e07f81ef93274.r2.dev/music/',
+  q:      R2_BASE + '/q/',
+  pray:   R2_BASE + '/pray/',
+  bye:    R2_BASE + '/bye/'
 };
-const BGM_BASE = R2_BASE + '/audio/BGM/';
+const BGM_BASE = R2_BASE + '/BGM/';
 const NUM_SEGS = 9;  // segmentos visuales en la barra de progreso
 
 const BLOCKS     = ['gozosos','luminosos','dolorosos','gloriosos'];
