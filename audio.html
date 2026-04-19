@@ -1,0 +1,1975 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1A1714">
+<title>CruzAndo · Sesión Diaria</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+
+<style>
+/* ══════════════════════════════════════════════
+   CruzAndo · Sesión Diaria · audio.html
+   Módulo experimental standalone
+   ══════════════════════════════════════════════ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #1A1714;
+  --card:      #252119;
+  --border:    #3A3530;
+  --text:      #E6DED3;
+  --text-soft: #B8A898;
+  --text-dim:  #786858;
+  --sec-bg:    #1E1B16;
+  --shadow:    rgba(0,0,0,0.4);
+  --green:     #34A853;
+  --green-soft:rgba(52,168,83,0.18);
+  /* Paleta nivel — se sobreescribe desde JS */
+  --lvl-bold:  #FF7A00;
+  --lvl-soft:  #F69C49;
+  --lvl-light: #FFCFA2;
+  --lvl-ultra: rgba(255,122,0,0.10);
+  /* Colores bloques */
+  --goz-color: #D4A017;
+  --lum-color: #01BBE1;
+  --dol-color: #C0392B;
+  --glo-color: #8E44AD;
+}
+
+html { font-size: 16px; }
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ── Shell ── */
+.shell {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  position: relative;
+}
+
+/* ── Screens ── */
+.screen { display: none; }
+.screen.active { display: flex; flex-direction: column; min-height: 100dvh; }
+
+/* ══════════════════════════════════════════════
+   PANTALLA: LOGIN
+   ══════════════════════════════════════════════ */
+#scr-login {
+  align-items: center;
+  justify-content: center;
+  padding: 40px 28px;
+  background: var(--bg);
+  text-align: center;
+}
+.login-logo {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 2.8rem;
+  font-weight: 600;
+  color: var(--lvl-bold);
+  letter-spacing: -1px;
+  margin-bottom: 6px;
+}
+.login-subtitle {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 48px;
+}
+.login-form { width: 100%; max-width: 340px; text-align: left; }
+.login-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+  display: block;
+}
+.login-input {
+  width: 100%;
+  padding: 14px 18px;
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s;
+  margin-bottom: 16px;
+}
+.login-input:focus { border-color: var(--lvl-bold); }
+.btn-login {
+  width: 100%;
+  padding: 15px;
+  background: var(--lvl-bold);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  margin-bottom: 14px;
+}
+.btn-login:active { transform: scale(0.97); }
+.btn-login:disabled { opacity: 0.5; cursor: not-allowed; }
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0 14px;
+}
+.divider-line { flex: 1; height: 1px; background: var(--border); }
+.divider-text { font-size: 0.72rem; color: var(--text-dim); }
+.btn-google {
+  width: 100%;
+  padding: 14px;
+  background: var(--card);
+  color: var(--text);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: border-color 0.2s, transform 0.15s;
+}
+.btn-google:active { transform: scale(0.97); }
+.btn-google:hover { border-color: var(--text-dim); }
+.login-error {
+  margin-top: 14px;
+  padding: 12px 16px;
+  background: rgba(192,57,43,0.15);
+  border: 1px solid rgba(192,57,43,0.3);
+  border-radius: 10px;
+  font-size: 0.82rem;
+  color: #e74c3c;
+  display: none;
+}
+
+/* ══════════════════════════════════════════════
+   PANTALLA: LOADING
+   ══════════════════════════════════════════════ */
+#scr-loading {
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  text-align: center;
+}
+.loading-logo {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: var(--lvl-bold);
+  margin-bottom: 8px;
+}
+.loading-msg { font-size: 0.82rem; color: var(--text-dim); margin-top: 6px; }
+.spinner {
+  width: 36px; height: 36px;
+  border: 3px solid var(--border);
+  border-top-color: var(--lvl-bold);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+  margin: 0 auto 20px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ══════════════════════════════════════════════
+   PANTALLA: SESIÓN PRINCIPAL
+   ══════════════════════════════════════════════ */
+#scr-session {
+  flex-direction: column;
+  background: var(--bg);
+  min-height: 100dvh;
+  position: relative;
+}
+
+/* ── Hero con imagen y degradados estilo Hallow ── */
+.hero {
+  position: relative;
+  width: 100%;
+  height: 54vw;
+  max-height: 300px;
+  min-height: 200px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+.hero-img-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(160deg, #2A2520 0%, #1A1714 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+}
+/* Degradado superior */
+.hero-grad-top {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 45%;
+  background: linear-gradient(to bottom, rgba(15,12,10,0.85) 0%, transparent 100%);
+  pointer-events: none;
+}
+/* Degradado inferior */
+.hero-grad-bottom {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 55%;
+  background: linear-gradient(to top, rgba(15,12,10,0.92) 0%, transparent 100%);
+  pointer-events: none;
+}
+/* Texto superior del hero */
+.hero-top-label {
+  position: absolute;
+  top: 14px; left: 0; right: 0;
+  text-align: center;
+  z-index: 5;
+  pointer-events: none;
+}
+.hero-mystery-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: rgba(255,255,255,0.9);
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+.hero-mystery-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--lvl-bold);
+}
+/* Texto inferior del hero — subtítulo contemplativo */
+.hero-bottom-text {
+  position: absolute;
+  bottom: 12px; left: 20px; right: 20px;
+  z-index: 5;
+  pointer-events: none;
+}
+.hero-subtitle {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.55rem;
+  font-weight: 600;
+  font-style: italic;
+  color: #fff;
+  line-height: 1.25;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── Controles debajo del hero ── */
+.session-controls {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 18px 20px 24px;
+  gap: 0;
+}
+
+/* Sección actual */
+.section-label-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.section-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--lvl-soft);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.section-pulse {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--lvl-bold);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(1.4); }
+}
+.section-time {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Barra de progreso de playlist */
+.playlist-progress {
+  display: flex;
+  gap: 3px;
+  margin-bottom: 18px;
+}
+.playlist-seg {
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--border);
+  overflow: hidden;
+  transition: background 0.3s;
+}
+.playlist-seg.done { background: var(--lvl-bold); }
+.playlist-seg.active { background: var(--border); }
+.playlist-seg.active .playlist-seg-fill {
+  height: 100%;
+  background: var(--lvl-bold);
+  border-radius: 2px;
+  transition: width 0.3s linear;
+}
+.playlist-seg-fill { width: 0%; }
+
+/* Controles principales */
+.main-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  margin-bottom: 22px;
+}
+.ctrl-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, transform 0.15s;
+  padding: 6px;
+  border-radius: 50%;
+  -webkit-tap-highlight-color: transparent;
+}
+.ctrl-btn:active { transform: scale(0.88); color: var(--text); }
+.ctrl-btn-primary {
+  width: 62px; height: 62px;
+  background: var(--lvl-bold);
+  color: #fff;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 4px 20px rgba(var(--lvl-bold-rgb, 255,122,0), 0.4);
+  -webkit-tap-highlight-color: transparent;
+}
+.ctrl-btn-primary:active { transform: scale(0.93); }
+
+/* Barra de progreso del audio actual */
+.audio-progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.audio-progress-bar {
+  flex: 1;
+  height: 4px;
+  background: var(--border);
+  border-radius: 3px;
+  cursor: pointer;
+  position: relative;
+  overflow: visible;
+}
+.audio-progress-fill {
+  height: 100%;
+  background: var(--lvl-bold);
+  border-radius: 3px;
+  width: 0%;
+  transition: width 0.1s linear;
+  position: relative;
+}
+.audio-progress-fill::after {
+  content: '';
+  position: absolute;
+  right: -5px; top: -4px;
+  width: 12px; height: 12px;
+  background: var(--lvl-bold);
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.audio-progress-bar:hover .audio-progress-fill::after { opacity: 1; }
+.audio-time {
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Metros ganados */
+.meters-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 0;
+}
+.meters-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  background: var(--lvl-ultra);
+  border: 1px solid rgba(var(--lvl-bold-rgb,255,122,0), 0.25);
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--lvl-soft);
+}
+.meters-icon { font-size: 0.9rem; }
+
+/* Botón de completar sesión */
+.btn-complete {
+  width: 100%;
+  padding: 15px;
+  background: var(--green);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  margin-top: 16px;
+  display: none;
+}
+.btn-complete.visible { display: block; }
+.btn-complete:active { transform: scale(0.97); }
+
+/* ── Botón flotante de preguntas ── */
+.fab-questions {
+  position: fixed;
+  bottom: 32px;
+  right: 20px;
+  width: 52px; height: 52px;
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  z-index: 100;
+  transition: transform 0.2s, background 0.2s, border-color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.fab-questions:active { transform: scale(0.92); }
+.fab-questions.has-answers {
+  background: var(--lvl-ultra);
+  border-color: var(--lvl-soft);
+}
+.fab-badge {
+  position: absolute;
+  top: -4px; right: -4px;
+  width: 16px; height: 16px;
+  background: var(--lvl-bold);
+  border-radius: 50%;
+  font-size: 0.58rem;
+  font-weight: 800;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  display: none;
+}
+.fab-badge.visible { display: flex; }
+
+/* ── Notificación de metros ganados ── */
+.meters-toast {
+  position: fixed;
+  bottom: 96px;
+  right: 20px;
+  padding: 8px 16px;
+  background: var(--card);
+  border: 1.5px solid var(--lvl-soft);
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--lvl-soft);
+  z-index: 200;
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: opacity 0.25s, transform 0.25s;
+}
+.meters-toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ══════════════════════════════════════════════
+   MODAL: PREGUNTAS DE MEDITACIÓN
+   ══════════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10,8,6,0.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 300;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 0;
+}
+.modal-overlay.open { display: flex; }
+
+.modal-sheet {
+  width: 100%;
+  max-width: 480px;
+  background: var(--card);
+  border-radius: 20px 20px 0 0;
+  border-top: 1.5px solid var(--border);
+  padding: 0 0 env(safe-area-inset-bottom, 0);
+  max-height: 85dvh;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.32s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0.7; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.modal-handle {
+  width: 36px; height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 12px auto 0;
+  flex-shrink: 0;
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px 12px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+}
+.modal-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--text-dim);
+}
+.modal-saved {
+  font-size: 0.72rem;
+  color: var(--green);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.modal-saved.show { opacity: 1; }
+.modal-close {
+  width: 28px; height: 28px;
+  background: var(--sec-bg);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-soft);
+  transition: background 0.2s;
+}
+.modal-close:active { background: var(--border); }
+
+.modal-body {
+  overflow-y: auto;
+  flex: 1;
+  padding: 16px 20px 24px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.question-group {
+  margin-bottom: 22px;
+}
+.question-label-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.question-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.question-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.question-text {
+  font-size: 0.9rem;
+  color: var(--text-soft);
+  line-height: 1.65;
+  margin-bottom: 10px;
+  font-style: italic;
+}
+.question-textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 12px 14px;
+  background: var(--sec-bg);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.question-textarea:focus { border-color: var(--lvl-soft); }
+.question-meters {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  margin-top: 5px;
+  text-align: right;
+  min-height: 14px;
+  transition: color 0.3s;
+}
+.question-meters.earned { color: var(--lvl-soft); }
+
+/* ══════════════════════════════════════════════
+   PANTALLA: COMPLETADO
+   ══════════════════════════════════════════════ */
+#scr-complete {
+  align-items: center;
+  justify-content: center;
+  padding: 40px 28px;
+  text-align: center;
+  background: var(--bg);
+  flex-direction: column;
+  gap: 0;
+}
+.complete-icon {
+  font-size: 3.5rem;
+  margin-bottom: 20px;
+  animation: scaleIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes scaleIn {
+  from { transform: scale(0.3); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+.complete-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 10px;
+  line-height: 1.2;
+}
+.complete-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-soft);
+  line-height: 1.7;
+  margin-bottom: 28px;
+  max-width: 300px;
+}
+.complete-meters {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--lvl-bold);
+  margin-bottom: 28px;
+}
+.btn-next-session {
+  width: 100%;
+  max-width: 320px;
+  padding: 15px;
+  background: var(--lvl-bold);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  margin-bottom: 12px;
+}
+.btn-next-session:active { transform: scale(0.97); }
+
+/* ══════════════════════════════════════════════
+   UTILIDADES COMUNES
+   ══════════════════════════════════════════════ */
+.fade-in { animation: fadeIn 0.4s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* ── Botón esquina — dark/settings ── */
+.corner-btn {
+  position: absolute;
+  top: 14px; right: 14px;
+  width: 34px; height: 34px;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,0.8);
+  z-index: 10;
+  transition: background 0.2s;
+}
+.corner-btn:active { background: rgba(0,0,0,0.6); }
+.corner-btn.muted { opacity: 0.55; }
+
+/* ── Tab bar inferior — navegación común webapp ── */
+.bottom-nav-bar {
+  position: fixed;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  background: var(--card);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 8px 0 env(safe-area-inset-bottom, 10px);
+  z-index: 90;
+}
+.nav-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 18px;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--text-dim);
+  transition: color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  border: none;
+  background: none;
+  font-family: 'Inter', sans-serif;
+}
+.nav-tab.active { color: var(--lvl-bold); }
+.nav-tab:active { color: var(--text-soft); }
+.nav-tab svg { width: 22px; height: 22px; }
+.nav-tab-label {
+  font-size: 0.6rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+/* Compensar espacio del nav bar */
+#scr-session .session-controls { padding-bottom: 80px; }
+#scr-complete { padding-bottom: 80px; }
+
+/* ── Hero nombre oficial del misterio (línea debajo del ordinal) ── */
+.hero-mystery-official {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.75);
+  font-style: italic;
+  margin-top: 4px;
+  text-align: center;
+  padding: 0 24px;
+  line-height: 1.3;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.6);
+}
+/* Referencia bíblica en el degradado inferior */
+.hero-reference {
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.55);
+  margin-top: 4px;
+  letter-spacing: 0.5px;
+  font-style: normal;
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ═══ PANTALLA: LOADING ═══ -->
+  <div class="screen active" id="scr-loading">
+    <div class="spinner"></div>
+    <div class="loading-logo">CruzAndo</div>
+    <div class="loading-msg" id="loading-msg">Iniciando…</div>
+  </div>
+
+  <!-- ═══ PANTALLA: LOGIN ═══ -->
+  <div class="screen" id="scr-login">
+    <div class="login-logo">CruzAndo</div>
+    <div class="login-subtitle">Sesión Diaria</div>
+    <div class="login-form">
+      <label class="login-label" for="inp-email">Correo electrónico</label>
+      <input class="login-input" type="email" id="inp-email" placeholder="tu@correo.com" autocomplete="email">
+      <label class="login-label" for="inp-pass">Contraseña</label>
+      <input class="login-input" type="password" id="inp-pass" placeholder="••••••••" autocomplete="current-password">
+      <button class="btn-login" id="btn-email-login">Entrar</button>
+      <div class="divider">
+        <div class="divider-line"></div>
+        <span class="divider-text">o continúa con</span>
+        <div class="divider-line"></div>
+      </div>
+      <button class="btn-google" id="btn-google-login">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Google
+      </button>
+      <div class="login-error" id="login-error"></div>
+    </div>
+  </div>
+
+  <!-- ═══ PANTALLA: SESIÓN DIARIA ═══ -->
+  <div class="screen" id="scr-session">
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero-img-placeholder" id="hero-placeholder">🕊️</div>
+      <img class="hero-img" id="hero-img" alt="" style="display:none" crossorigin="anonymous">
+      <!-- Degradados -->
+      <div class="hero-grad-top"></div>
+      <div class="hero-grad-bottom"></div>
+      <!-- Badge superior: ordinal + nombre oficial del Catálogo -->
+      <div class="hero-top-label">
+        <span class="hero-mystery-badge">
+          <span class="hero-mystery-dot" id="mystery-dot"></span>
+          <span id="mystery-badge-text">Cargando…</span>
+        </span>
+        <div class="hero-mystery-official" id="mystery-official-name"></div>
+      </div>
+      <!-- Inferior: subtítulo contemplativo + referencia bíblica -->
+      <div class="hero-bottom-text">
+        <div class="hero-subtitle" id="hero-subtitle"></div>
+        <div class="hero-reference" id="hero-reference"></div>
+      </div>
+      <!-- Botón BGM (esquina izquierda) -->
+      <button class="corner-btn" id="btn-bgm" style="left:14px; right:auto;" title="Silenciar música de fondo">
+        <!-- Nota musical (BGM activo) -->
+        <svg class="bgm-on" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        <!-- Nota tachada (BGM muted) -->
+        <svg class="bgm-off" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
+      </button>
+      <!-- Botón logout esquina derecha -->
+      <button class="corner-btn" id="btn-logout" title="Salir">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+
+    <!-- Controles -->
+    <div class="session-controls">
+
+      <!-- Sección actual + tiempo -->
+      <div class="section-label-wrap">
+        <div class="section-label">
+          <span class="section-pulse" id="section-pulse"></span>
+          <span id="section-name">Cargando…</span>
+        </div>
+        <span class="section-time" id="section-time">0:00 / 0:00</span>
+      </div>
+
+      <!-- Barra de progreso playlist (8 segmentos) -->
+      <div class="playlist-progress" id="playlist-progress"></div>
+
+      <!-- Barra de progreso del track actual -->
+      <div class="audio-progress-wrap">
+        <span class="audio-time" id="time-current">0:00</span>
+        <div class="audio-progress-bar" id="progress-bar">
+          <div class="audio-progress-fill" id="progress-fill"></div>
+        </div>
+        <span class="audio-time" id="time-duration">0:00</span>
+      </div>
+
+      <!-- Controles principales -->
+      <div class="main-controls">
+        <button class="ctrl-btn" id="btn-prev" title="Anterior sección">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg>
+        </button>
+        <button class="ctrl-btn-primary" id="btn-play-pause">
+          <svg id="ico-play" width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <svg id="ico-pause" width="26" height="26" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+        </button>
+        <button class="ctrl-btn" id="btn-next" title="Siguiente sección">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+        </button>
+      </div>
+
+      <!-- Metros acumulados sesión -->
+      <div class="meters-row">
+        <div class="meters-chip">
+          <span class="meters-icon">🥾</span>
+          <span id="session-meters-display">0m esta sesión</span>
+        </div>
+      </div>
+
+      <!-- Botón completar sesión (aparece al terminar playlist) -->
+      <button class="btn-complete" id="btn-complete">
+        ✓ Completar sesión · +1,200m
+      </button>
+
+    </div>
+  </div>
+
+  <!-- ═══ PANTALLA: COMPLETADO ═══ -->
+  <div class="screen" id="scr-complete">
+    <div class="complete-icon">🙏</div>
+    <h2 class="complete-title" id="complete-title">Misterio completado</h2>
+    <p class="complete-subtitle" id="complete-subtitle">Has contemplado este misterio en profundidad. El camino continúa.</p>
+    <div class="complete-meters" id="complete-meters">+0m</div>
+    <button class="btn-next-session" id="btn-next-mystery">Siguiente misterio →</button>
+  </div>
+
+
+<!-- ── Tab bar inferior ── -->
+<nav class="bottom-nav-bar" id="bottom-nav-bar">
+  <a class="nav-tab active" href="audio.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+    <span class="nav-tab-label">Orar</span>
+  </a>
+  <a class="nav-tab" href="diario.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    <span class="nav-tab-label">Diario</span>
+  </a>
+  <a class="nav-tab" href="sanar.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    <span class="nav-tab-label">Sanar</span>
+  </a>
+  <a class="nav-tab" href="index.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span class="nav-tab-label">Inicio</span>
+  </a>
+</nav>
+</div><!-- /shell -->
+
+<!-- ── Botón flotante de preguntas ── -->
+<button class="fab-questions" id="fab-questions" title="Preguntas de meditación" style="display:none">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  <span class="fab-badge" id="fab-badge">3</span>
+</button>
+
+<!-- ── Toast metros ── -->
+<div class="meters-toast" id="meters-toast"></div>
+
+<!-- ── Modal: Preguntas de meditación ── -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title">Meditación</span>
+      <span class="modal-saved" id="modal-saved">✓ guardado</span>
+      <button class="modal-close" id="modal-close">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="modal-body">
+      <!-- Se genera dinámicamente -->
+    </div>
+  </div>
+</div>
+
+<!-- ── Firebase SDK ── -->
+<script type="module">
+/* ══════════════════════════════════════════════
+   CruzAndo · Sesión Diaria · audio.html
+   Módulo experimental standalone
+   ══════════════════════════════════════════════ */
+
+// ────────────────────────────────────────────
+// FIREBASE CONFIG — reemplazar con tu config
+// ────────────────────────────────────────────
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+  onAuthStateChanged,
+  signOut
+} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  increment
+} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+// ── FIREBASE CONFIG (pegar aquí tu config) ──
+const firebaseConfig = {
+  apiKey: "REEMPLAZAR",
+  authDomain: "REEMPLAZAR",
+  projectId: "REEMPLAZAR",
+  storageBucket: "REEMPLAZAR",
+  messagingSenderId: "REEMPLAZAR",
+  appId: "REEMPLAZAR"
+};
+// ────────────────────────────────────────────
+
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+const googleProvider = new GoogleAuthProvider();
+
+// ════════════════════════════════════════════
+// CONSTANTES
+// ════════════════════════════════════════════
+
+const R2_BASE   = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev';
+const IMG_BASE  = 'https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev/';
+const AUDIO_FOLDERS = {
+  start:  R2_BASE + '/audio/start/',
+  ubible: R2_BASE + '/audio/ubible/',
+  cont:   R2_BASE + '/audio/cont/',
+  rezo:   R2_BASE + '/audio/global/',
+  music:  'https://pub-faed94e375aa443e846e07f81ef93274.r2.dev/audio/music/',
+  q:      R2_BASE + '/audio/q/',
+  pray:   R2_BASE + '/audio/pray/',
+  bye:    R2_BASE + '/audio/bye/'
+};
+const BGM_BASE = R2_BASE + '/audio/BGM/';
+
+const BLOCKS     = ['gozosos','luminosos','dolorosos','gloriosos'];
+const BLOCK_NAMES = { gozosos:'Gozoso', luminosos:'Luminoso', dolorosos:'Doloroso', gloriosos:'Glorioso' };
+// Nombres oficiales del Catecismo de la Iglesia Católica
+const OFFICIAL_NAMES = {
+  gozosos: [
+    'La encarnación del Hijo de Dios',
+    'La visitación de Nuestra Señora a su prima Santa Isabel',
+    'El nacimiento del Hijo de Dios',
+    'La Presentación de Jesús en el templo',
+    'El Niño Jesús perdido y hallado en el templo'
+  ],
+  luminosos: [
+    'El Bautismo de Jesús en el Jordán',
+    'La autorrevelación de Jesús en las bodas de Caná',
+    'El anuncio del Reino de Dios invitando a la conversión',
+    'La Transfiguración',
+    'La Institución de la Eucaristía'
+  ],
+  dolorosos: [
+    'La Oración de Jesús en el Huerto',
+    'La Flagelación del Señor',
+    'La Coronación de espinas',
+    'Jesús con la Cruz a cuestas camino del Calvario',
+    'La Crucifixión y Muerte de Nuestro Señor'
+  ],
+  gloriosos: [
+    'La Resurrección del Hijo de Dios',
+    'La Ascensión del Señor a los Cielos',
+    'La Venida del Espíritu Santo sobre los Apóstoles',
+    'La Asunción de Nuestra Señora a los Cielos',
+    'La Coronación de la Santísima Virgen como Reina de Cielos y Tierra'
+  ]
+};
+
+const ORDS       = ['Primer','Segundo','Tercer','Cuarto','Quinto',
+                    'Sexto','Séptimo','Octavo','Noveno','Décimo',
+                    '11º','12º','13º','14º','15º','16º','17º','18º','19º','20º'];
+
+// Misterios del día por día de semana (domingo=0)
+const DAY_BLOCKS = { 0:'gloriosos', 1:'gozosos', 2:'dolorosos', 3:'gloriosos', 4:'luminosos', 5:'dolorosos', 6:'gozosos' };
+
+// Colores por bloque
+const BLOCK_COLORS = {
+  gozosos:  { bold:'#D4A017', dot:'🌟' },
+  luminosos:{ bold:'#01BBE1', dot:'✨' },
+  dolorosos:{ bold:'#C0392B', dot:'✝️' },
+  gloriosos:{ bold:'#8E44AD', dot:'👑' }
+};
+
+// Labels de preguntas
+const Q_LABELS = ['Por María hacia Jesús','Desde el Hijo hacia el Padre','Hijos y hermanos en el Espíritu'];
+const Q_COLORS = ['#FF7A00','#C0392B','#27AE60'];
+
+// Metros
+const METERS_SESSION   = 1200;
+const METERS_Q_FIRST   = 650;
+const METERS_Q_UPDATE  = 200;
+
+// ════════════════════════════════════════════
+// ESTADO GLOBAL
+// ════════════════════════════════════════════
+
+let currentUser      = null;
+let audioProgress    = null;  // { nivel:1, cuaderno:1, misterio:1, firstAnswered:[f,f,f] }
+let currentData      = null;  // JSON del nivel/cuaderno
+let currentSession   = null;  // { nivel, cuaderno, misterio, block, mysteryData, playlist }
+let sessionMeters    = 0;
+let sessionCompleted = false;
+
+// Audio principal
+let audioEl        = null;
+let currentTrack   = -1;  // índice en playlist
+let isPlaying      = false;
+let autosaveTimer  = null;
+
+// BGM — música de fondo
+let bgmEl          = null;   // elemento <audio> del BGM
+let bgmEnabled     = true;   // el usuario puede silenciarlo
+let bgmLoaded      = false;  // ya se intentó cargar
+const BGM_TRACK_IDX = 4;     // índice de "Canto" en la playlist (0-based)
+
+// Respuestas locales (para debounce)
+let localAnswers   = { 0:'', 1:'', 2:'' };
+
+// ════════════════════════════════════════════
+// UTILIDADES
+// ════════════════════════════════════════════
+
+const $ = id => document.getElementById(id);
+const fmtTime = s => {
+  if (!s || isNaN(s)) return '0:00';
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return m + ':' + (sec < 10 ? '0' : '') + sec;
+};
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+}
+
+function setMsg(msg) {
+  $('loading-msg').textContent = msg;
+}
+
+function showToast(text) {
+  const t = $('meters-toast');
+  t.textContent = text;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function applyBlockColor(block) {
+  const c = BLOCK_COLORS[block] || BLOCK_COLORS.gozosos;
+  document.documentElement.style.setProperty('--lvl-bold', c.bold);
+  const rgb = c.bold.replace('#','').match(/.{2}/g).map(h=>parseInt(h,16)).join(',');
+  document.documentElement.style.setProperty('--lvl-bold-rgb', rgb);
+  document.documentElement.style.setProperty('--lvl-soft', c.bold);
+  document.documentElement.style.setProperty('--lvl-ultra', `rgba(${rgb},0.10)`);
+  $('mystery-dot').style.background = c.bold;
+}
+
+// ════════════════════════════════════════════
+// FIREBASE — AUTH
+// ════════════════════════════════════════════
+
+function initAuth() {
+  onAuthStateChanged(auth, async user => {
+    if (user) {
+      currentUser = user;
+      await loadUserAndStart();
+    } else {
+      currentUser = null;
+      show('scr-login');
+    }
+  });
+}
+
+$('btn-email-login').onclick = async () => {
+  const email = $('inp-email').value.trim();
+  const pass  = $('inp-pass').value;
+  if (!email || !pass) return;
+  $('btn-email-login').disabled = true;
+  $('btn-email-login').textContent = 'Entrando…';
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch(e) {
+    showLoginError('Correo o contraseña incorrectos.');
+    $('btn-email-login').disabled = false;
+    $('btn-email-login').textContent = 'Entrar';
+  }
+};
+
+$('btn-google-login').onclick = async () => {
+  try {
+    await signInWithPopup(auth, googleProvider);
+  } catch(e) {
+    showLoginError('No se pudo iniciar con Google.');
+  }
+};
+
+$('btn-logout').onclick = async () => {
+  stopAudio();
+  bgmStop();
+  await signOut(auth);
+};
+
+function showLoginError(msg) {
+  const el = $('login-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+// ════════════════════════════════════════════
+// FIREBASE — PROGRESO
+// ════════════════════════════════════════════
+
+async function loadUserAndStart() {
+  show('scr-loading');
+  setMsg('Cargando tu camino…');
+
+  const uid = currentUser.uid;
+
+  // Leer audioProgress
+  try {
+    const snap = await getDoc(doc(db, 'users', uid, 'audioProgress', 'current'));
+    if (snap.exists()) {
+      audioProgress = snap.data();
+    } else {
+      // Primer uso: iniciar en 1-1-1
+      audioProgress = {
+        nivel: 1, cuaderno: 1, misterio: 1,
+        firstAnswered: [false, false, false],
+        history: []
+      };
+      await setDoc(doc(db, 'users', uid, 'audioProgress', 'current'), audioProgress);
+    }
+  } catch(e) {
+    console.error('Error cargando progreso:', e);
+    audioProgress = { nivel: 1, cuaderno: 1, misterio: 1, firstAnswered:[false,false,false], history:[] };
+  }
+
+  await buildSession();
+}
+
+async function saveAudioProgress() {
+  if (!currentUser) return;
+  try {
+    await setDoc(
+      doc(db, 'users', currentUser.uid, 'audioProgress', 'current'),
+      audioProgress,
+      { merge: true }
+    );
+  } catch(e) { console.error(e); }
+}
+
+async function addMetersToFirestore(meters) {
+  if (!currentUser) return;
+  try {
+    await updateDoc(doc(db, 'users', currentUser.uid), {
+      totalMeters: increment(meters)
+    });
+  } catch(e) {
+    // Si el doc no existe, créalo
+    try {
+      await setDoc(doc(db, 'users', currentUser.uid), { totalMeters: meters }, { merge: true });
+    } catch(e2) { console.error(e2); }
+  }
+}
+
+async function saveReflection(qi, text) {
+  if (!currentUser || !currentSession) return;
+  const { nivel, cuaderno, misterio } = currentSession;
+  const key = `${nivel}_${cuaderno}_${misterio}`;
+  try {
+    await setDoc(
+      doc(db, 'users', currentUser.uid, 'reflections', key),
+      { [`q${qi}`]: text, updatedAt: Date.now() },
+      { merge: true }
+    );
+  } catch(e) { console.error(e); }
+}
+
+async function loadReflections() {
+  if (!currentUser || !currentSession) return { q0:'', q1:'', q2:'' };
+  const { nivel, cuaderno, misterio } = currentSession;
+  const key = `${nivel}_${cuaderno}_${misterio}`;
+  try {
+    const snap = await getDoc(doc(db, 'users', currentUser.uid, 'reflections', key));
+    if (snap.exists()) return snap.data();
+  } catch(e) {}
+  return { q0:'', q1:'', q2:'' };
+}
+
+// ════════════════════════════════════════════
+// CONSTRUIR SESIÓN
+// ════════════════════════════════════════════
+
+async function buildSession() {
+  const { nivel, cuaderno, misterio } = audioProgress;
+  setMsg(`Preparando Nivel ${nivel}-${cuaderno}, Misterio ${misterio}…`);
+
+  // Construir ID de nivel (ej. 0101)
+  const nivelId = String(nivel).padStart(2,'0') + String(cuaderno).padStart(2,'0');
+
+  // Cargar JSON del cuaderno
+  try {
+    const base = location.origin + location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1);
+    const resp = await fetch(base + 'data/' + nivelId + '.json');
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    currentData = await resp.json();
+  } catch(e) {
+    // Fallback: si no hay JSON, crear sesión con placeholders
+    currentData = null;
+    console.warn('No se encontró JSON para', nivelId);
+  }
+
+  // Determinar bloque (misterios del día o según posición 1-20)
+  // Misterios 1-5 = gozosos, 6-10 = luminosos, 11-15 = dolorosos, 16-20 = gloriosos
+  const m = misterio; // 1-20
+  let block, blockIdx;
+  if      (m <= 5)  { block = 'gozosos';   blockIdx = m - 1; }
+  else if (m <= 10) { block = 'luminosos';  blockIdx = m - 6; }
+  else if (m <= 15) { block = 'dolorosos';  blockIdx = m - 11; }
+  else              { block = 'gloriosos';  blockIdx = m - 16; }
+
+  // Datos del misterio desde JSON
+  let mysteryData = null;
+  if (currentData && currentData.misterios && currentData.misterios[block]) {
+    mysteryData = currentData.misterios[block][blockIdx] || null;
+  }
+
+  // Construir playlist
+  // Las Preguntas se expanden en 6 tracks (QA·silencio·QB·silencio·QC·silencio)
+  // agrupados visualmente como un solo segmento en la barra.
+  const n = nivel, c = cuaderno;
+  const silencioUrl = AUDIO_FOLDERS['rezo'] + 'silencio.mp3'; // /audio/global/silencio.mp3
+  const playlist = [
+    { label:'Bienvenida',      file:`START_${n}_${c}_${m}.mp3`,  folder:'start',  seg:0 },
+    { label:'Camino y Palabra',file:`UBIBLE_${n}_${c}_${m}.mp3`, folder:'ubible', seg:1 },
+    { label:'Contemplación',   file:`CONT_${n}_${c}_${m}.mp3`,   folder:'cont',   seg:2 },
+    { label:'Rezo',            file:`rezo.mp3`,                   folder:'rezo',   seg:3 },
+    { label:'Canto',           file:`M_${n}_${c}_${m}.mp3`,      folder:'music',  seg:4 },
+    // ── Separador de Meditación (seg visual propio = seg:5) ──
+    { label:'Meditación',      file:'meditacion.mp3',             folder:'rezo',   seg:5 },
+    // ── Bloque de Preguntas (6 sub-tracks, segmento visual único = seg:6) ──
+    { label:'Preguntas',       file:`QA_${n}_${c}_${m}.mp3`,     folder:'q',      seg:6, qIdx:0 },
+    { label:'Preguntas',       file:'silencio.mp3',               folder:'rezo',   seg:6, silence:true },
+    { label:'Preguntas',       file:`QB_${n}_${c}_${m}.mp3`,     folder:'q',      seg:6, qIdx:1 },
+    { label:'Preguntas',       file:'silencio.mp3',               folder:'rezo',   seg:6, silence:true },
+    { label:'Preguntas',       file:`QC_${n}_${c}_${m}.mp3`,     folder:'q',      seg:6, qIdx:2 },
+    { label:'Preguntas',       file:'silencio.mp3',               folder:'rezo',   seg:6, silence:true },
+    // ── Continúa ──
+    { label:'Oración final',   file:`PRAY_${n}_${c}_${m}.mp3`,   folder:'pray',   seg:7 },
+    { label:'Despedida',       file:`BYE_${n}_${c}_${m}.mp3`,    folder:'bye',    seg:8 }
+  ].map(t => ({
+    ...t,
+    url: t.folder === 'rezo' && t.file === 'silencio.mp3'
+         ? silencioUrl
+         : AUDIO_FOLDERS[t.folder] + t.file
+  }));
+
+  // Número de segmentos visuales únicos (0-7 = 8 segmentos)
+  const NUM_SEGS = 9;
+
+  currentSession = { nivel: n, cuaderno: c, misterio: m, block, blockIdx, mysteryData, playlist };
+  sessionMeters = 0;
+  sessionCompleted = false;
+
+  renderSession();
+  show('scr-session');
+}
+
+// ════════════════════════════════════════════
+// RENDER SESIÓN
+// ════════════════════════════════════════════
+
+function renderSession() {
+  const { nivel, cuaderno, misterio, block, blockIdx, mysteryData, playlist } = currentSession;
+
+  // Color de bloque
+  applyBlockColor(block);
+
+  // Badge superior: ordinal + tipo
+  const ord = ORDS[misterio - 1] || misterio + 'º';
+  const blockName = BLOCK_NAMES[block] || block;
+  $('mystery-badge-text').textContent = `${ord} Misterio ${blockName}`;
+
+  // Nombre oficial del Catecismo
+  const officialName = OFFICIAL_NAMES[block] ? OFFICIAL_NAMES[block][blockIdx] || '' : '';
+  $('mystery-official-name').textContent = officialName;
+
+  // Subtítulo (nombre temático del cuaderno/misterio) — degradado inferior
+  const subtitle = mysteryData ? (mysteryData.subtitulo || mysteryData.titulo || '') : `Misterio ${misterio}`;
+  $('hero-subtitle').textContent = subtitle;
+
+  // Referencia bíblica — solo la cita, no el texto completo
+  const ref = mysteryData ? (mysteryData.referencia || '') : '';
+  $('hero-reference').textContent = ref;
+
+  // Imagen
+  const imgUrl = `${IMG_BASE}P_${nivel}_${cuaderno}_${misterio}.webp`;
+  const heroImg = $('hero-img');
+  heroImg.onload = () => {
+    heroImg.style.display = 'block';
+    $('hero-placeholder').style.display = 'none';
+  };
+  heroImg.onerror = () => {
+    heroImg.style.display = 'none';
+    $('hero-placeholder').style.display = 'flex';
+    $('hero-placeholder').textContent = BLOCK_COLORS[block]?.dot || '🕊️';
+  };
+  heroImg.src = imgUrl;
+
+  // Inicializar progress bars: 8 segmentos visuales (no uno por track)
+  const container = $('playlist-progress');
+  container.innerHTML = Array.from({length: NUM_SEGS}, (_, i) =>
+    `<div class="playlist-seg" id="pseg-${i}"><div class="playlist-seg-fill" id="pseg-fill-${i}"></div></div>`
+  ).join('');
+
+  // Sección inicial
+  updateSectionDisplay(-1);
+
+  // FAB preguntas — visible siempre en sesión
+  $('fab-questions').style.display = 'flex';
+
+  // Eventos controles
+  $('btn-play-pause').onclick = togglePlayPause;
+  $('btn-prev').onclick       = () => goTrack(currentTrack - 1);
+  $('btn-next').onclick       = () => goTrack(currentTrack + 1);
+  $('btn-complete').onclick   = completeSession;
+
+  // Progress bar click
+  $('progress-bar').onclick = e => {
+    if (!audioEl || !audioEl.duration) return;
+    const rect = $('progress-bar').getBoundingClientRect();
+    const ratio = (e.clientX - rect.left) / rect.width;
+    audioEl.currentTime = ratio * audioEl.duration;
+  };
+
+  // FAB y modal
+  $('fab-questions').onclick = openModal;
+  $('modal-close').onclick   = closeModal;
+  $('modal-overlay').onclick = e => { if (e.target === $('modal-overlay')) closeModal(); };
+
+  // Btn next mystery (pantalla completado)
+  $('btn-next-mystery').onclick = advanceAndRestart;
+
+  // Botón BGM
+  const btnBgm = $('btn-bgm');
+  if (btnBgm) btnBgm.onclick = bgmToggle;
+
+  // Iniciar BGM de fondo
+  bgmInit();
+
+  // Arrancar reproducción automáticamente
+  startPlaylist();
+}
+
+// ════════════════════════════════════════════
+// REPRODUCTOR
+// ════════════════════════════════════════════
+
+function startPlaylist() {
+  goTrack(0);
+}
+
+function isCanto(idx) {
+  const { playlist } = currentSession;
+  return playlist && playlist[idx] && playlist[idx].folder === 'music';
+}
+
+// Progreso acumulado dentro del bloque de Preguntas (seg 6)
+// Para animar la barra del segmento 5 de forma continua a través de 6 sub-tracks
+function getSegProgress(trackIdx) {
+  const { playlist } = currentSession;
+  const track = playlist[trackIdx];
+  if (!track || track.seg !== 5) return null;
+  // Sub-tracks del seg 5: índices en playlist donde seg===5
+  const qTracks = playlist.map((t,i) => t.seg === 6 ? i : -1).filter(i => i >= 0);
+  const posInGroup = qTracks.indexOf(trackIdx); // 0-5
+  const total = qTracks.length; // 6
+  return { posInGroup, total };
+}
+
+function goTrack(idx) {
+  const { playlist } = currentSession;
+  if (idx < 0 || idx >= playlist.length) return;
+
+  stopAudio();
+  currentTrack = idx;
+  updateSectionDisplay(idx);
+
+  const track = playlist[idx];
+
+  // BGM: pausar solo en Canto; durante Preguntas y Silencio sigue sonando
+  if (isCanto(idx)) {
+    bgmPause();
+  } else {
+    bgmResume();
+  }
+
+  audioEl = new Audio(track.url);
+
+  audioEl.onerror = () => {
+    console.warn('Audio no encontrado:', track.url);
+    markSegProgress(idx, 100);
+    if (isCanto(idx)) bgmResume();
+    goTrack(idx + 1);
+  };
+
+  audioEl.ontimeupdate = () => {
+    if (!audioEl.duration) return;
+    const pct = (audioEl.currentTime / audioEl.duration) * 100;
+    $('progress-fill').style.width = pct + '%';
+    $('time-current').textContent = fmtTime(audioEl.currentTime);
+    $('time-duration').textContent = fmtTime(audioEl.duration);
+    $('section-time').textContent  = fmtTime(audioEl.currentTime) + ' / ' + fmtTime(audioEl.duration);
+
+    // Barra del segmento visual
+    const gp = getSegProgress(idx);
+    if (gp) {
+      // Segmento de Preguntas: progreso continuo a través de los 6 sub-tracks
+      const segPct = ((gp.posInGroup + pct / 100) / gp.total) * 100;
+      const fill = $('pseg-fill-' + track.seg);
+      if (fill) fill.style.width = segPct + '%';
+    } else {
+      const fill = $('pseg-fill-' + track.seg);
+      if (fill) fill.style.width = pct + '%';
+    }
+  };
+
+  audioEl.onended = () => {
+    if (isCanto(idx)) bgmResume();
+    // Marcar segmento visual como done solo al terminar el ÚLTIMO sub-track del grupo
+    const gp = getSegProgress(idx);
+    if (gp) {
+      if (gp.posInGroup === gp.total - 1) markSegDone(track.seg); // seg:6
+      // si no es el último, la barra continúa animándose — no marcar done aún
+    } else {
+      markSegDone(track.seg);
+    }
+    if (idx + 1 < playlist.length) {
+      goTrack(idx + 1);
+    } else {
+      onPlaylistEnded();
+    }
+  };
+
+  audioEl.oncanplaythrough = () => {
+    audioEl.play().then(() => {
+      isPlaying = true;
+      updatePlayPauseBtn();
+    }).catch(e => {
+      console.warn('Autoplay bloqueado:', e);
+      isPlaying = false;
+      updatePlayPauseBtn();
+    });
+  };
+
+  // Marcar segmento visual como activo (solo si no está ya done)
+  const segEl = $('pseg-' + track.seg);
+  if (segEl && !segEl.classList.contains('done')) segEl.classList.add('active');
+}
+
+function markSegProgress(trackIdx, pct) {
+  const { playlist } = currentSession;
+  const track = playlist[trackIdx];
+  if (!track) return;
+  const fill = $('pseg-fill-' + track.seg);
+  if (fill) fill.style.width = pct + '%';
+}
+
+function stopAudio() {
+  if (audioEl) {
+    audioEl.pause();
+    audioEl.onended = null;
+    audioEl.onerror = null;
+    audioEl.ontimeupdate = null;
+    audioEl.oncanplaythrough = null;
+    audioEl = null;
+  }
+  isPlaying = false;
+  updatePlayPauseBtn();
+  $('progress-fill').style.width = '0%';
+  $('time-current').textContent = '0:00';
+  $('time-duration').textContent = '0:00';
+}
+
+// ════════════════════════════════════════════
+// BGM — Música de fondo
+// ════════════════════════════════════════════
+
+function bgmInit() {
+  if (!currentSession) return;
+  const { nivel, cuaderno } = currentSession;
+  const url = `${BGM_BASE}BGM_${nivel}_${cuaderno}.mp3`;
+
+  bgmEl = new Audio(url);
+  bgmEl.loop = true;
+  bgmEl.volume = 0.28;   // sutil, no compite con la voz
+  bgmLoaded = false;
+
+  bgmEl.onerror = () => {
+    console.warn('BGM no encontrado:', url);
+    bgmEl = null;
+  };
+  bgmEl.oncanplaythrough = () => {
+    bgmLoaded = true;
+    // Arrancar sólo si no estamos en el Canto
+    if (bgmEnabled && !isCanto(currentTrack)) {
+      bgmEl.play().catch(() => {});
+    }
+  };
+}
+
+function bgmPause() {
+  if (!bgmEl) return;
+  // Fade out suave: bajar volumen en 400ms y luego pausar
+  const step = bgmEl.volume / 20;
+  const fade = setInterval(() => {
+    if (!bgmEl) { clearInterval(fade); return; }
+    if (bgmEl.volume > step) {
+      bgmEl.volume = Math.max(0, bgmEl.volume - step);
+    } else {
+      bgmEl.volume = 0;
+      bgmEl.pause();
+      clearInterval(fade);
+    }
+  }, 20);
+}
+
+function bgmResume() {
+  if (!bgmEl || !bgmEnabled) return;
+  if (bgmEl.paused) {
+    bgmEl.play().catch(() => {});
+  }
+  // Fade in suave: subir volumen hasta 0.28 en 600ms
+  bgmEl.volume = 0;
+  const target = 0.28;
+  const step = target / 30;
+  const fade = setInterval(() => {
+    if (!bgmEl) { clearInterval(fade); return; }
+    if (bgmEl.volume < target - step) {
+      bgmEl.volume = Math.min(target, bgmEl.volume + step);
+    } else {
+      bgmEl.volume = target;
+      clearInterval(fade);
+    }
+  }, 20);
+}
+
+function bgmStop() {
+  if (bgmEl) {
+    bgmEl.pause();
+    bgmEl.oncanplaythrough = null;
+    bgmEl.onerror = null;
+    bgmEl = null;
+  }
+  bgmLoaded = false;
+}
+
+function bgmToggle() {
+  bgmEnabled = !bgmEnabled;
+  const btn = $('btn-bgm');
+  if (bgmEnabled) {
+    btn.classList.remove('muted');
+    bgmResume();
+  } else {
+    btn.classList.add('muted');
+    bgmPause();
+  }
+  updateBgmBtn();
+}
+
+function updateBgmBtn() {
+  const btn = $('btn-bgm');
+  if (!btn) return;
+  btn.title = bgmEnabled ? 'Silenciar música de fondo' : 'Activar música de fondo';
+  // Ícono: nota musical si activo, tachada si muted
+  btn.querySelector('.bgm-on').style.display  = bgmEnabled ? 'block' : 'none';
+  btn.querySelector('.bgm-off').style.display = bgmEnabled ? 'none'  : 'block';
+}
+
+function togglePlayPause() {
+  if (!audioEl) {
+    if (currentTrack < 0) startPlaylist();
+    return;
+  }
+  if (isPlaying) {
+    audioEl.pause();
+    isPlaying = false;
+  } else {
+    audioEl.play().then(() => { isPlaying = true; }).catch(()=>{});
+    isPlaying = true;
+  }
+  updatePlayPauseBtn();
+}
+
+function updatePlayPauseBtn() {
+  $('ico-play').style.display  = isPlaying ? 'none' : 'block';
+  $('ico-pause').style.display = isPlaying ? 'block' : 'none';
+}
+
+function updateSectionDisplay(idx) {
+  const { playlist } = currentSession;
+  if (idx < 0 || idx >= playlist.length) {
+    $('section-name').textContent = idx < 0 ? 'Listo para comenzar' : 'Sesión completada';
+    $('section-pulse').style.animationPlayState = 'paused';
+    return;
+  }
+  const track = playlist[idx];
+  // Para sub-tracks de Preguntas con silencio, mostrar solo "Preguntas"
+  // (sin sub-etiquetas — la barra lo dice todo)
+  $('section-name').textContent = track.label;
+  $('section-pulse').style.animationPlayState = 'running';
+}
+
+function markSegDone(segIdx) {
+  // segIdx = índice del segmento VISUAL (0-7), no del track
+  const seg = $('pseg-' + segIdx);
+  if (seg) {
+    seg.classList.remove('active');
+    seg.classList.add('done');
+    const fill = $('pseg-fill-' + segIdx);
+    if (fill) fill.style.width = '100%';
+  }
+}
+
+function onPlaylistEnded() {
+  isPlaying = false;
+  updatePlayPauseBtn();
+  updateSectionDisplay(currentSession.playlist.length);
+  $('btn-complete').classList.add('visible');
+  $('section-pulse').style.animationPlayState = 'paused';
+}
+
+// ════════════════════════════════════════════
+// COMPLETAR SESIÓN
+// ════════════════════════════════════════════
+
+async function completeSession() {
+  if (sessionCompleted) return;
+  sessionCompleted = true;
+
+  stopAudio();
+  bgmStop();
+
+  const metersEarned = METERS_SESSION;
+  sessionMeters += metersEarned;
+
+  await addMetersToFirestore(metersEarned);
+  $('session-meters-display').textContent = `${sessionMeters.toLocaleString('es-MX')}m esta sesión`;
+
+  // Registrar en historial
+  const { nivel, cuaderno, misterio } = currentSession;
+  if (!audioProgress.history) audioProgress.history = [];
+  audioProgress.history.push({ n:nivel, c:cuaderno, m:misterio, completedAt: Date.now() });
+
+  // Pantalla completado
+  $('complete-title').textContent = currentSession.mysteryData?.titulo || `Misterio ${misterio}`;
+  $('complete-subtitle').textContent = `Nivel ${nivel}-${cuaderno} · ${ORDS[misterio-1]} Misterio ${BLOCK_NAMES[currentSession.block]}`;
+  $('complete-meters').textContent = `+${sessionMeters.toLocaleString('es-MX')}m`;
+
+  show('scr-complete');
+  $('fab-questions').style.display = 'none';
+}
+
+async function advanceAndRestart() {
+  // Calcular siguiente misterio
+  let { nivel, cuaderno, misterio } = audioProgress;
+  misterio++;
+  if (misterio > 20) {
+    misterio = 1;
+    cuaderno++;
+    if (cuaderno > 4) {
+      cuaderno = 1;
+      nivel++;
+    }
+  }
+  audioProgress.nivel    = nivel;
+  audioProgress.cuaderno = cuaderno;
+  audioProgress.misterio = misterio;
+  audioProgress.firstAnswered = [false, false, false];
+
+  await saveAudioProgress();
+  await loadUserAndStart();
+}
+
+// ════════════════════════════════════════════
+// MODAL DE PREGUNTAS
+// ════════════════════════════════════════════
+
+async function openModal() {
+  const existing = await loadReflections();
+  localAnswers[0] = existing.q0 || '';
+  localAnswers[1] = existing.q1 || '';
+  localAnswers[2] = existing.q2 || '';
+
+  const { mysteryData } = currentSession;
+  const questions = parseQuestions(mysteryData?.meditacion || '');
+
+  const body = $('modal-body');
+  body.innerHTML = Q_LABELS.map((label, i) => `
+    <div class="question-group">
+      <div class="question-label-row">
+        <div class="question-dot" style="background:${Q_COLORS[i]}"></div>
+        <span class="question-label" style="color:${Q_COLORS[i]}">${label}</span>
+      </div>
+      <p class="question-text">${escHTML(questions[i] || '')}</p>
+      <textarea
+        class="question-textarea"
+        id="q-ta-${i}"
+        placeholder="Escribe tu reflexión…"
+        rows="3"
+      >${escHTML(localAnswers[i])}</textarea>
+      <div class="question-meters" id="q-meters-${i}"></div>
+    </div>
+  `).join('');
+
+  // Eventos con debounce
+  [0,1,2].forEach(i => {
+    const ta = $(`q-ta-${i}`);
+    if (!ta) return;
+    ta.addEventListener('input', () => onAnswerInput(i, ta.value));
+  });
+
+  $('modal-overlay').classList.add('open');
+  updateFabBadge();
+}
+
+function closeModal() {
+  // Guardado final forzado
+  forceSaveAll();
+  $('modal-overlay').classList.remove('open');
+}
+
+function onAnswerInput(qi, value) {
+  localAnswers[qi] = value;
+  clearTimeout(autosaveTimer);
+  autosaveTimer = setTimeout(() => autoSave(qi, value), 2000);
+}
+
+async function autoSave(qi, value) {
+  if (!value.trim()) return;
+  await saveReflection(qi, value);
+  showSavedIndicator();
+  await awardQuestionMeters(qi, value);
+}
+
+async function forceSaveAll() {
+  clearTimeout(autosaveTimer);
+  for (let i = 0; i < 3; i++) {
+    if (localAnswers[i].trim()) {
+      await saveReflection(i, localAnswers[i]);
+      await awardQuestionMeters(i, localAnswers[i]);
+    }
+  }
+  showSavedIndicator();
+  updateFabBadge();
+}
+
+async function awardQuestionMeters(qi, value) {
+  if (!value.trim()) return;
+  const wasFirst = !audioProgress.firstAnswered[qi];
+  if (wasFirst) {
+    audioProgress.firstAnswered[qi] = true;
+    await saveAudioProgress();
+    const earned = METERS_Q_FIRST;
+    sessionMeters += earned;
+    await addMetersToFirestore(earned);
+    $('session-meters-display').textContent = `${sessionMeters.toLocaleString('es-MX')}m esta sesión`;
+    const el = $(`q-meters-${qi}`);
+    if (el) { el.textContent = `+${earned}m ganados`; el.classList.add('earned'); }
+    showToast(`+${earned}m · ${Q_LABELS[qi]}`);
+  } else {
+    // Actualización posterior
+    const el = $(`q-meters-${qi}`);
+    if (el && !el.classList.contains('earned')) {
+      el.textContent = `+${METERS_Q_UPDATE}m`;
+      el.classList.add('earned');
+      await addMetersToFirestore(METERS_Q_UPDATE);
+      sessionMeters += METERS_Q_UPDATE;
+      $('session-meters-display').textContent = `${sessionMeters.toLocaleString('es-MX')}m esta sesión`;
+    }
+  }
+}
+
+function showSavedIndicator() {
+  const el = $('modal-saved');
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+function updateFabBadge() {
+  const answered = [0,1,2].filter(i => localAnswers[i].trim()).length;
+  const badge = $('fab-badge');
+  if (answered > 0) {
+    badge.textContent = answered;
+    badge.classList.add('visible');
+    $('fab-questions').classList.add('has-answers');
+  } else {
+    badge.classList.remove('visible');
+    $('fab-questions').classList.remove('has-answers');
+  }
+}
+
+function parseQuestions(text) {
+  if (!text) return ['','',''];
+  const labels = ['Por María hacia Jesús:','Desde el Hijo hacia el Padre:','Hijos y hermanos en el Espíritu:'];
+  const out = [];
+  let remaining = text;
+  for (let i = 0; i < labels.length; i++) {
+    const idx = remaining.indexOf(labels[i]);
+    if (idx >= 0) {
+      if (i > 0) out.push(remaining.substring(0, idx).trim());
+      remaining = remaining.substring(idx + labels[i].length).trim();
+    }
+  }
+  out.push(remaining.trim());
+  while (out.length < 3) out.push('');
+  return out.slice(0,3);
+}
+
+function escHTML(s) {
+  if (!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+// ════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════
+
+initAuth();
+</script>
+
+</body>
+</html>
