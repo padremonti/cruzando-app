@@ -20,6 +20,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
+  /* ── Tema oscuro (default) ── */
   --bg:        #1A1714;
   --card:      #252119;
   --border:    #3A3530;
@@ -30,19 +31,33 @@
   --shadow:    rgba(0,0,0,0.4);
   --green:     #34A853;
   --green-soft:rgba(52,168,83,0.18);
-  /* Paleta nivel — se sobreescribe desde JS */
   --lvl-bold:  #FF7A00;
   --lvl-soft:  #F69C49;
   --lvl-light: #FFCFA2;
   --lvl-ultra: rgba(255,122,0,0.10);
-  /* Colores bloques */
   --goz-color: #D4A017;
   --lum-color: #01BBE1;
   --dol-color: #C0392B;
   --glo-color: #8E44AD;
+  /* RGB del bg para los degradados de imagen */
+  --bg-rgb:    26,23,20;
 }
 
-html { font-size: 16px; }
+/* ── Tema claro ── */
+body.light {
+  --bg:        #F5F0E8;
+  --card:      #FFFCF7;
+  --border:    #D9D1C7;
+  --text:      #2B2622;
+  --text-soft: #6B6259;
+  --text-dim:  #9B9389;
+  --sec-bg:    #EDE8DF;
+  --shadow:    rgba(43,38,34,0.10);
+  --green-soft:rgba(52,168,83,0.12);
+  --bg-rgb:    245,240,232;
+}
+
+html { font-size: 18px; }
 body {
   font-family: 'Inter', system-ui, sans-serif;
   background: var(--bg);
@@ -215,20 +230,39 @@ body {
 
 /* Banda superior: badge + nombre oficial */
 .hero-top-label {
-  padding: 16px 20px 12px;
-  text-align: center;
+  padding: 14px 20px 10px;
   background: var(--bg);
 }
+.hero-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.theme-toggle {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--card);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-soft);
+  transition: background 0.2s, border-color 0.2s;
+  flex-shrink: 0;
+}
+.theme-toggle:active { transform: scale(0.92); }
 .hero-mystery-badge {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  font-size: 0.72rem;
+  font-size: 0.82rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1.5px;
   color: var(--lvl-soft);
-  padding: 5px 14px;
+  padding: 6px 16px;
   border-radius: 20px;
   border: 1.5px solid var(--border);
   background: var(--card);
@@ -261,19 +295,25 @@ body {
   justify-content: center;
   font-size: 4rem;
 }
-/* Degradado sutil arriba y abajo de la imagen */
+/* Degradados que mezclan con el color de fondo */
 .hero-grad-top {
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 30%;
-  background: linear-gradient(to bottom, rgba(15,12,10,0.45) 0%, transparent 100%);
+  height: 38%;
+  background: linear-gradient(to bottom,
+    rgba(var(--bg-rgb), 1) 0%,
+    rgba(var(--bg-rgb), 0.6) 40%,
+    transparent 100%);
   pointer-events: none;
 }
 .hero-grad-bottom {
   position: absolute;
   bottom: 0; left: 0; right: 0;
-  height: 30%;
-  background: linear-gradient(to top, rgba(15,12,10,0.45) 0%, transparent 100%);
+  height: 38%;
+  background: linear-gradient(to top,
+    rgba(var(--bg-rgb), 1) 0%,
+    rgba(var(--bg-rgb), 0.6) 40%,
+    transparent 100%);
   pointer-events: none;
 }
 
@@ -285,12 +325,12 @@ body {
 }
 .hero-subtitle {
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 1.35rem;
+  font-size: 1.55rem;
   font-weight: 600;
   font-style: italic;
   color: var(--text);
   line-height: 1.3;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
 /* ── Controles debajo del hero ── */
@@ -307,13 +347,32 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 6px;
+}
+.section-perspective {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin-bottom: 10px;
+  padding-left: 2px;
+  animation: fadeIn 0.3s ease;
+}
+.perspective-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.perspective-label {
+  font-size: 0.95rem;
+  font-style: italic;
+  color: var(--text-soft);
+  line-height: 1.3;
 }
 .section-label {
-  font-size: 0.72rem;
+  font-size: 0.88rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
+  letter-spacing: 1.2px;
   color: var(--lvl-soft);
   display: flex;
   align-items: center;
@@ -330,7 +389,7 @@ body {
   50%       { opacity: 0.5; transform: scale(1.4); }
 }
 .section-time {
-  font-size: 0.72rem;
+  font-size: 0.82rem;
   color: var(--text-dim);
   font-variant-numeric: tabular-nums;
 }
@@ -455,7 +514,7 @@ body {
   background: var(--lvl-ultra);
   border: 1px solid rgba(var(--lvl-bold-rgb,255,122,0), 0.25);
   border-radius: 20px;
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--lvl-soft);
 }
@@ -483,26 +542,36 @@ body {
 /* ── Botón flotante de preguntas ── */
 .fab-questions {
   position: fixed;
-  bottom: 32px;
-  right: 20px;
-  width: 52px; height: 52px;
+  bottom: 88px;      /* por encima del tab bar */
+  right: 16px;
+  height: 52px;
+  padding: 0 18px 0 14px;
   background: var(--card);
   border: 1.5px solid var(--border);
-  border-radius: 50%;
+  border-radius: 26px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 8px;
   cursor: pointer;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.35);
   z-index: 100;
-  transition: transform 0.2s, background 0.2s, border-color 0.2s;
+  transition: transform 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.2s;
   -webkit-tap-highlight-color: transparent;
 }
-.fab-questions:active { transform: scale(0.92); }
+.fab-questions:active { transform: scale(0.94); }
 .fab-questions.has-answers {
   background: var(--lvl-ultra);
   border-color: var(--lvl-soft);
+  box-shadow: 0 4px 20px rgba(var(--lvl-bold-rgb,255,122,0), 0.25);
 }
+.fab-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-soft);
+  letter-spacing: 0.2px;
+}
+.fab-questions.has-answers .fab-label { color: var(--lvl-soft); }
 .fab-badge {
   position: absolute;
   top: -4px; right: -4px;
@@ -592,14 +661,14 @@ body {
   border-bottom: 1px solid var(--border);
 }
 .modal-title {
-  font-size: 0.82rem;
+  font-size: 0.95rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1.2px;
   color: var(--text-dim);
 }
 .modal-saved {
-  font-size: 0.72rem;
+  font-size: 0.85rem;
   color: var(--green);
   opacity: 0;
   transition: opacity 0.3s;
@@ -641,16 +710,17 @@ body {
   flex-shrink: 0;
 }
 .question-label {
-  font-size: 0.68rem;
+  font-size: 0.95rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  text-transform: none;
+  letter-spacing: 0;
+  font-style: italic;
 }
 .question-text {
-  font-size: 0.9rem;
+  font-size: 1.05rem;
   color: var(--text-soft);
-  line-height: 1.65;
-  margin-bottom: 10px;
+  line-height: 1.7;
+  margin-bottom: 12px;
   font-style: italic;
 }
 .question-textarea {
@@ -662,15 +732,15 @@ body {
   border-radius: 12px;
   color: var(--text);
   font-family: 'Inter', sans-serif;
-  font-size: 0.88rem;
-  line-height: 1.6;
+  font-size: 1rem;
+  line-height: 1.7;
   resize: vertical;
   outline: none;
   transition: border-color 0.2s;
 }
 .question-textarea:focus { border-color: var(--lvl-soft); }
 .question-meters {
-  font-size: 0.7rem;
+  font-size: 0.82rem;
   color: var(--text-dim);
   margin-top: 5px;
   text-align: right;
@@ -745,6 +815,7 @@ body {
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
 /* ── Botón esquina — dark/settings ── */
+/* Botón logout — sobre la imagen */
 .corner-btn {
   position: absolute;
   top: 12px; right: 12px;
@@ -763,7 +834,30 @@ body {
   transition: background 0.2s;
 }
 .corner-btn:active { background: rgba(0,0,0,0.6); }
-.corner-btn.muted { opacity: 0.55; }
+
+/* Botón BGM — píldora en la banda superior */
+.btn-bgm-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  cursor: pointer;
+  color: var(--text-soft);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: background 0.2s, border-color 0.2s, color 0.2s, opacity 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-bgm-pill:active { transform: scale(0.95); }
+.btn-bgm-pill.muted {
+  opacity: 0.5;
+  border-style: dashed;
+}
 
 /* ── Tab bar inferior — navegación común webapp ── */
 .bottom-nav-bar {
@@ -811,8 +905,8 @@ body {
 
 /* ── Hero nombre oficial del misterio (línea debajo del ordinal) ── */
 .hero-mystery-official {
-  font-size: 0.72rem;
-  color: rgba(255,255,255,0.75);
+  font-size: 0.88rem;
+  color: var(--text-soft);
   font-style: italic;
   margin-top: 4px;
   text-align: center;
@@ -869,12 +963,27 @@ body {
     <!-- Hero: layout vertical -->
     <div class="hero">
 
-      <!-- Banda superior: ordinal + nombre oficial -->
+      <!-- Banda superior: ordinal + nombre oficial + controles -->
       <div class="hero-top-label">
-        <span class="hero-mystery-badge">
-          <span class="hero-mystery-dot" id="mystery-dot"></span>
-          <span id="mystery-badge-text">Cargando…</span>
-        </span>
+        <div class="hero-top-row">
+          <span class="hero-mystery-badge">
+            <span class="hero-mystery-dot" id="mystery-dot"></span>
+            <span id="mystery-badge-text">Cargando…</span>
+          </span>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <!-- Botón BGM — píldora -->
+            <button class="btn-bgm-pill" id="btn-bgm" title="Música de fondo">
+              <svg class="bgm-on" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+              <svg class="bgm-off" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
+              <span class="bgm-text">Fondo</span>
+            </button>
+            <!-- Toggle tema -->
+            <button class="theme-toggle" id="btn-theme" title="Cambiar tema">
+              <svg id="ico-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+              <svg id="ico-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+            </button>
+          </div>
+        </div>
         <div class="hero-mystery-official" id="mystery-official-name"></div>
       </div>
 
@@ -884,11 +993,6 @@ body {
         <img class="hero-img" id="hero-img" alt="" style="display:none" crossorigin="anonymous">
         <div class="hero-grad-top"></div>
         <div class="hero-grad-bottom"></div>
-        <!-- Botón BGM (sobre imagen, esquina izquierda) -->
-        <button class="corner-btn" id="btn-bgm" style="left:12px; right:auto; top:12px;" title="Silenciar música de fondo">
-          <svg class="bgm-on" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-          <svg class="bgm-off" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
-        </button>
         <!-- Botón logout (sobre imagen, esquina derecha) -->
         <button class="corner-btn" id="btn-logout" style="top:12px;" title="Salir">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -913,6 +1017,11 @@ body {
           <span id="section-name">Cargando…</span>
         </div>
         <span class="section-time" id="section-time">0:00 / 0:00</span>
+      </div>
+      <!-- Perspectiva activa (visible solo en QA/QB/QC) -->
+      <div class="section-perspective" id="section-perspective" style="display:none">
+        <span class="perspective-dot" id="perspective-dot"></span>
+        <span class="perspective-label" id="perspective-label"></span>
       </div>
 
       <!-- Barra de progreso playlist (8 segmentos) -->
@@ -990,7 +1099,9 @@ body {
 
 <!-- ── Botón flotante de preguntas ── -->
 <button class="fab-questions" id="fab-questions" title="Preguntas de meditación" style="display:none">
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  <!-- lápiz SVG -->
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+  <span class="fab-label">Escribir</span>
   <span class="fab-badge" id="fab-badge">3</span>
 </button>
 
@@ -1069,13 +1180,14 @@ const AUDIO_FOLDERS = {
   ubible: R2_BASE + '/ubible/',
   cont:   R2_BASE + '/cont/',
   rezo:   R2_BASE + '/global/',
-  music:  'https://pub-faed94e375aa443e846e07f81ef93274.r2.dev/music/',
+  music:  'https://pub-faed94e375aa443e846e07f81ef93274.r2.dev/',
   q:      R2_BASE + '/q/',
   pray:   R2_BASE + '/pray/',
   bye:    R2_BASE + '/bye/'
 };
 const BGM_BASE = R2_BASE + '/BGM/';
-const NUM_SEGS = 9;  // segmentos visuales en la barra de progreso
+const NUM_SEGS  = 9;   // segmentos visuales en la barra de progreso
+const BGM_VOL   = 0.14; // volumen de la música de fondo (0.0 – 1.0)
 
 const BLOCKS     = ['gozosos','luminosos','dolorosos','gloriosos'];
 const BLOCK_NAMES = { gozosos:'Gozoso', luminosos:'Luminoso', dolorosos:'Doloroso', gloriosos:'Glorioso' };
@@ -1127,7 +1239,7 @@ const BLOCK_COLORS = {
 };
 
 // Labels de preguntas
-const Q_LABELS = ['Por María hacia Jesús','Desde el Hijo hacia el Padre','Hijos y hermanos en el Espíritu'];
+const Q_LABELS = ['Por María hacia Jesús:','Desde el Hijo hacia el Padre:','Hijos y hermanos en el Espíritu:'];
 const Q_COLORS = ['#FF7A00','#C0392B','#27AE60'];
 
 // Metros
@@ -1141,10 +1253,14 @@ const METERS_Q_UPDATE  = 200;
 
 let currentUser      = null;
 let audioProgress    = null;  // { nivel:1, cuaderno:1, misterio:1, firstAnswered:[f,f,f] }
+let userPlan         = 'free'; // 'free' | 'beta' | 'premium'
 let currentData      = null;  // JSON del nivel/cuaderno
 let currentSession   = null;  // { nivel, cuaderno, misterio, block, mysteryData, playlist }
 let sessionMeters    = 0;
 let sessionCompleted = false;
+
+// Tema
+let isDark = true;
 
 // Audio principal
 let audioEl        = null;
@@ -1204,6 +1320,7 @@ function applyBlockColor(block) {
 // ════════════════════════════════════════════
 
 function initAuth() {
+  initTheme();
   onAuthStateChanged(auth, async user => {
     if (user) {
       currentUser = user;
@@ -1260,13 +1377,27 @@ async function loadUserAndStart() {
 
   const uid = currentUser.uid;
 
+  // Leer plan del usuario
+  try {
+    const userSnap = await getDoc(doc(db, 'users', uid));
+    if (userSnap.exists()) {
+      const data = userSnap.data();
+      const plan = data.plan || 'free';
+      const betaExpiry = data.betaExpiresAt || 0;
+      const betaActive = plan === 'beta' && betaExpiry > Date.now();
+      userPlan = (plan === 'premium' || betaActive) ? 'premium' : 'free';
+    }
+  } catch(e) {
+    console.warn('No se pudo leer plan:', e);
+    userPlan = 'free';
+  }
+
   // Leer audioProgress
   try {
     const snap = await getDoc(doc(db, 'users', uid, 'audioProgress', 'current'));
     if (snap.exists()) {
       audioProgress = snap.data();
     } else {
-      // Primer uso: iniciar en 1-1-1
       audioProgress = {
         nivel: 1, cuaderno: 1, misterio: 1,
         firstAnswered: [false, false, false],
@@ -1279,7 +1410,58 @@ async function loadUserAndStart() {
     audioProgress = { nivel: 1, cuaderno: 1, misterio: 1, firstAnswered:[false,false,false], history:[] };
   }
 
+  // Verificar límite diario para usuarios free
+  if (userPlan === 'free' && hasSessionToday()) {
+    showDailyLimit();
+    return;
+  }
+
   await buildSession();
+}
+
+function hasSessionToday() {
+  if (!audioProgress || !audioProgress.history || !audioProgress.history.length) return false;
+  const last = audioProgress.history[audioProgress.history.length - 1];
+  if (!last || !last.completedAt) return false;
+  const lastDate = new Date(last.completedAt);
+  const today    = new Date();
+  return lastDate.getFullYear() === today.getFullYear() &&
+         lastDate.getMonth()    === today.getMonth()    &&
+         lastDate.getDate()     === today.getDate();
+}
+
+function showDailyLimit() {
+  // Calcular hora en que se desbloquea (mañana 00:00)
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(0, 0, 0, 0);
+  const hoursLeft = Math.ceil((tomorrow - Date.now()) / 3600000);
+
+  const el = $('scr-loading');
+  el.innerHTML = `
+    <div style="text-align:center; padding: 0 28px;">
+      <div style="font-size:2.8rem; margin-bottom:20px;">🙏</div>
+      <div style="font-family:'Cormorant Garamond',serif; font-size:1.8rem; font-weight:600;
+                  color:var(--text); margin-bottom:12px; line-height:1.3;">
+        Sesión de hoy completada
+      </div>
+      <p style="font-size:0.88rem; color:var(--text-soft); line-height:1.7; margin-bottom:28px; max-width:300px; margin-left:auto; margin-right:auto;">
+        Ya rezaste tu misterio de hoy. El camino se recorre paso a paso.<br><br>
+        Vuelve mañana para continuar.<br>
+        Nueva sesión disponible en <strong style="color:var(--lvl-bold);">${hoursLeft}h</strong>.
+      </p>
+      <p style="font-size:0.75rem; color:var(--text-dim); margin-bottom:24px;">
+        Con membresía Beta o Premium puedes avanzar sin límite diario.
+      </p>
+      <button onclick="signOut(getAuth()); location.reload();"
+        style="padding:13px 28px; background:var(--card); border:1.5px solid var(--border);
+               border-radius:12px; color:var(--text-soft); font-family:'Inter',sans-serif;
+               font-size:0.85rem; cursor:pointer;">
+        Salir
+      </button>
+    </div>
+  `;
+  show('scr-loading');
 }
 
 async function saveAudioProgress() {
@@ -1481,11 +1663,22 @@ function renderSession() {
   $('modal-overlay').onclick = e => { if (e.target === $('modal-overlay')) closeModal(); };
 
   // Btn next mystery (pantalla completado)
-  $('btn-next-mystery').onclick = advanceAndRestart;
+  // Texto del botón según plan
+  const btnNext = $('btn-next-mystery');
+  if (btnNext) {
+    btnNext.textContent = userPlan === 'free'
+      ? 'Volver mañana 🙏'
+      : 'Siguiente misterio →';
+    btnNext.onclick = advanceAndRestart;
+  }
 
   // Botón BGM
   const btnBgm = $('btn-bgm');
   if (btnBgm) btnBgm.onclick = bgmToggle;
+
+  // Botón tema
+  const btnTheme = $('btn-theme');
+  if (btnTheme) btnTheme.onclick = toggleTheme;
 
   // Iniciar BGM de fondo
   bgmInit();
@@ -1530,8 +1723,9 @@ function goTrack(idx) {
 
   const track = playlist[idx];
 
-  // BGM: pausar solo en Canto; durante Preguntas y Silencio sigue sonando
-  if (isCanto(idx)) {
+  // BGM: silencio en Bienvenida (START) y Canto; activo desde UBIBLE en adelante
+  const track = playlist[idx];
+  if (track.folder === 'start' || isCanto(idx)) {
     bgmPause();
   } else {
     bgmResume();
@@ -1578,7 +1772,10 @@ function goTrack(idx) {
       markSegDone(track.seg);
     }
     if (idx + 1 < playlist.length) {
-      goTrack(idx + 1);
+      const next = playlist[idx + 1];
+      // Delay de 2.3 segundos antes del BYE para no cortar el "Amén"
+      const delay = (next.folder === 'bye') ? 2300 : 0;
+      setTimeout(() => goTrack(idx + 1), delay);
     } else {
       onPlaylistEnded();
     }
@@ -1625,6 +1822,40 @@ function stopAudio() {
 }
 
 // ════════════════════════════════════════════
+// TEMA CLARO / OSCURO
+// ════════════════════════════════════════════
+
+function initTheme() {
+  // Leer preferencia guardada
+  try {
+    const saved = localStorage.getItem('cruzando_audio_theme');
+    if (saved === 'light') { isDark = false; }
+  } catch(e) {}
+  applyTheme();
+}
+
+function applyTheme() {
+  document.body.classList.toggle('light', !isDark);
+  // Actualizar --bg-rgb para los degradados de imagen
+  const bgRgb = isDark ? '26,23,20' : '245,240,232';
+  document.documentElement.style.setProperty('--bg-rgb', bgRgb);
+  // Íconos del toggle
+  const sun  = document.getElementById('ico-sun');
+  const moon = document.getElementById('ico-moon');
+  if (sun)  sun.style.display  = isDark ? 'block' : 'none';
+  if (moon) moon.style.display = isDark ? 'none'  : 'block';
+  // Meta theme-color
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.content = isDark ? '#1A1714' : '#F5F0E8';
+}
+
+function toggleTheme() {
+  isDark = !isDark;
+  applyTheme();
+  try { localStorage.setItem('cruzando_audio_theme', isDark ? 'dark' : 'light'); } catch(e) {}
+}
+
+// ════════════════════════════════════════════
 // BGM — Música de fondo
 // ════════════════════════════════════════════
 
@@ -1635,7 +1866,7 @@ function bgmInit() {
 
   bgmEl = new Audio(url);
   bgmEl.loop = true;
-  bgmEl.volume = 0.28;   // sutil, no compite con la voz
+  bgmEl.volume = BGM_VOL;
   bgmLoaded = false;
 
   bgmEl.onerror = () => {
@@ -1644,10 +1875,8 @@ function bgmInit() {
   };
   bgmEl.oncanplaythrough = () => {
     bgmLoaded = true;
-    // Arrancar sólo si no estamos en el Canto
-    if (bgmEnabled && !isCanto(currentTrack)) {
-      bgmEl.play().catch(() => {});
-    }
+    // No arranca en Bienvenida (seg:0 = START); arranca desde UBIBLE en adelante
+    // goTrack llamará bgmResume() cuando llegue a UBIBLE
   };
 }
 
@@ -1672,9 +1901,9 @@ function bgmResume() {
   if (bgmEl.paused) {
     bgmEl.play().catch(() => {});
   }
-  // Fade in suave: subir volumen hasta 0.28 en 600ms
+  // Fade in suave: subir volumen hasta BGM_VOL en 600ms
   bgmEl.volume = 0;
-  const target = 0.28;
+  const target = BGM_VOL;
   const step = target / 30;
   const fade = setInterval(() => {
     if (!bgmEl) { clearInterval(fade); return; }
@@ -1699,12 +1928,9 @@ function bgmStop() {
 
 function bgmToggle() {
   bgmEnabled = !bgmEnabled;
-  const btn = $('btn-bgm');
   if (bgmEnabled) {
-    btn.classList.remove('muted');
     bgmResume();
   } else {
-    btn.classList.add('muted');
     bgmPause();
   }
   updateBgmBtn();
@@ -1714,9 +1940,11 @@ function updateBgmBtn() {
   const btn = $('btn-bgm');
   if (!btn) return;
   btn.title = bgmEnabled ? 'Silenciar música de fondo' : 'Activar música de fondo';
-  // Ícono: nota musical si activo, tachada si muted
-  btn.querySelector('.bgm-on').style.display  = bgmEnabled ? 'block' : 'none';
-  btn.querySelector('.bgm-off').style.display = bgmEnabled ? 'none'  : 'block';
+  btn.classList.toggle('muted', !bgmEnabled);
+  const on  = btn.querySelector('.bgm-on');
+  const off = btn.querySelector('.bgm-off');
+  if (on)  on.style.display  = bgmEnabled ? 'inline-block' : 'none';
+  if (off) off.style.display = bgmEnabled ? 'none' : 'inline-block';
 }
 
 function togglePlayPause() {
@@ -1739,18 +1967,39 @@ function updatePlayPauseBtn() {
   $('ico-pause').style.display = isPlaying ? 'block' : 'none';
 }
 
+// Perspectivas por qIdx
+const Q_PERSPECTIVES = [
+  { label: 'Por María hacia Jesús:', color: '#FF7A00' },
+  { label: 'Desde el Hijo hacia el Padre:', color: '#C0392B' },
+  { label: 'Hijos y hermanos en el Espíritu:', color: '#27AE60' }
+];
+
 function updateSectionDisplay(idx) {
   const { playlist } = currentSession;
+  const perspWrap  = $('section-perspective');
+  const perspLabel = $('perspective-label');
+  const perspDot   = $('perspective-dot');
+
   if (idx < 0 || idx >= playlist.length) {
     $('section-name').textContent = idx < 0 ? 'Listo para comenzar' : 'Sesión completada';
     $('section-pulse').style.animationPlayState = 'paused';
+    if (perspWrap) perspWrap.style.display = 'none';
     return;
   }
+
   const track = playlist[idx];
-  // Para sub-tracks de Preguntas con silencio, mostrar solo "Preguntas"
-  // (sin sub-etiquetas — la barra lo dice todo)
   $('section-name').textContent = track.label;
   $('section-pulse').style.animationPlayState = 'running';
+
+  // Mostrar perspectiva solo en QA (qIdx:0), QB (qIdx:1), QC (qIdx:2)
+  if (typeof track.qIdx === 'number' && perspWrap) {
+    const p = Q_PERSPECTIVES[track.qIdx];
+    perspLabel.textContent   = p.label;
+    perspDot.style.background = p.color;
+    perspWrap.style.display  = 'flex';
+  } else {
+    if (perspWrap) perspWrap.style.display = 'none';
+  }
 }
 
 function markSegDone(segIdx) {
@@ -1804,6 +2053,12 @@ async function completeSession() {
 }
 
 async function advanceAndRestart() {
+  // Usuarios free: no pueden hacer otra sesión hoy
+  if (userPlan === 'free') {
+    showDailyLimit();
+    return;
+  }
+
   // Calcular siguiente misterio
   let { nivel, cuaderno, misterio } = audioProgress;
   misterio++;
@@ -1909,7 +2164,7 @@ async function awardQuestionMeters(qi, value) {
     $('session-meters-display').textContent = `${sessionMeters.toLocaleString('es-MX')}m esta sesión`;
     const el = $(`q-meters-${qi}`);
     if (el) { el.textContent = `+${earned}m ganados`; el.classList.add('earned'); }
-    showToast(`+${earned}m · ${Q_LABELS[qi]}`);
+    showToast(`+${earned}m · ${Q_LABELS[qi].replace(':','')}`);
   } else {
     // Actualización posterior
     const el = $(`q-meters-${qi}`);
