@@ -1155,7 +1155,7 @@ import {
 
 // ── FIREBASE CONFIG (pegar aquí tu config) ──
 const firebaseConfig = {
-   apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
+  apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
     authDomain: "cruzando-app.firebaseapp.com",
     projectId: "cruzando-app",
     storageBucket: "cruzando-app.firebasestorage.app",
@@ -1724,7 +1724,6 @@ function goTrack(idx) {
   const track = playlist[idx];
 
   // BGM: silencio en Bienvenida (START) y Canto; activo desde UBIBLE en adelante
-  const track = playlist[idx];
   if (track.folder === 'start' || isCanto(idx)) {
     bgmPause();
   } else {
@@ -1767,14 +1766,12 @@ function goTrack(idx) {
     const gp = getSegProgress(idx);
     if (gp) {
       if (gp.posInGroup === gp.total - 1) markSegDone(track.seg); // seg:6
-      // si no es el último, la barra continúa animándose — no marcar done aún
     } else {
       markSegDone(track.seg);
     }
     if (idx + 1 < playlist.length) {
-      const next = playlist[idx + 1];
       // Delay de 2.3 segundos antes del BYE para no cortar el "Amén"
-      const delay = (next.folder === 'bye') ? 2300 : 0;
+      const delay = (playlist[idx + 1].folder === 'bye') ? 2300 : 0;
       setTimeout(() => goTrack(idx + 1), delay);
     } else {
       onPlaylistEnded();
