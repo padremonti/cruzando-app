@@ -1462,7 +1462,7 @@ window._goToPrevMystery = () => {
   audioProgress.cuaderno = cuaderno;
   audioProgress.misterio = misterio;
   audioProgress.firstAnswered = [false, false, false];
-  saveAudioProgress();
+  await saveAudioProgress();
   sessionMeters = 0; sessionCompleted = false; currentTrack = -1;
   if (epilogoAudioEl) { epilogoAudioEl.pause(); epilogoAudioEl = null; }
   stopAudio(); bgmStop();
@@ -1472,7 +1472,10 @@ window._goToPrevMystery = () => {
 window.advanceAndRestart = () => advanceAndRestart();
 window.showDailyLimit    = () => showDailyLimit();
 
-window._repeatSession = () => {
+window._repeatSession = async () => {
+  if (epilogoAudioEl) { epilogoAudioEl.pause(); epilogoAudioEl = null; }
+  audioProgress.firstAnswered = [false, false, false];
+  await saveAudioProgress();
   sessionMeters = 0; sessionCompleted = false; currentTrack = -1;
   stopAudio(); bgmStop();
   show('scr-loading'); setMsg('Preparando sesión…');
@@ -2336,7 +2339,7 @@ async function completeSession() {
   const { nivel, cuaderno, misterio, block, blockIdx } = currentSession;
   if (!audioProgress.history) audioProgress.history = [];
   audioProgress.history.push({ n:nivel, c:cuaderno, m:misterio, completedAt: Date.now() });
-  saveAudioProgress();
+  await saveAudioProgress(); // guardar historial inmediatamente
 
   // Pantalla completado — datos básicos
   $('complete-title').textContent    = currentSession.mysteryData?.titulo || `Misterio ${misterio}`;
@@ -2404,11 +2407,11 @@ async function advanceAndRestart() {
   audioProgress.misterio      = misterio;
   audioProgress.firstAnswered = [false, false, false];
 
-  // Guardar en Firestore (sin esperar a que propague para no recargar datos viejos)
-  saveAudioProgress(); // fire-and-forget
+  // Guardar en Firestore y ESPERAR confirmación
+  // (garantiza que otros dispositivos leerán el progreso correcto)
+  await saveAudioProgress();
 
   // Construir nueva sesión directamente desde el estado en memoria
-  // sin pasar por loadUserAndStart (que volvería a leer Firestore)
   sessionMeters    = 0;
   sessionCompleted = false;
   $('fab-questions').style.display = 'flex';
