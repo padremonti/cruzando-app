@@ -1469,6 +1469,9 @@ window._goToPrevMystery = () => {
   show('scr-loading'); setMsg('Cargando misterio anterior…');
   setTimeout(() => buildSession(), 300);
 };
+window.advanceAndRestart = () => advanceAndRestart();
+window.showDailyLimit    = () => showDailyLimit();
+
 window._repeatSession = () => {
   sessionMeters = 0; sessionCompleted = false; currentTrack = -1;
   stopAudio(); bgmStop();
@@ -2353,11 +2356,11 @@ async function completeSession() {
   const s = 'width:100%;padding:15px;border-radius:14px;font-family:Inter,sans-serif;font-size:1rem;font-weight:700;cursor:pointer;margin-bottom:10px;display:block;';
   if (userPlan === 'free') {
     actions.innerHTML =
-      '<button onclick="showDailyLimit()" style="' + s + 'background:var(--lvl-bold);color:#fff;border:none;">Volver mañana 🙏</button>' +
+      '<button onclick="window.showDailyLimit()" style="' + s + 'background:var(--lvl-bold);color:#fff;border:none;">Volver mañana 🙏</button>' +
       '<button onclick="window._repeatSession()" style="' + s + 'background:var(--card);color:var(--text-soft);border:1.5px solid var(--border);">🔄 Repetir sesión</button>';
   } else {
     actions.innerHTML =
-      '<button onclick="advanceAndRestart()" style="' + s + 'background:var(--lvl-bold);color:#fff;border:none;">Siguiente misterio →</button>' +
+      '<button onclick="window.advanceAndRestart()" style="' + s + 'background:var(--lvl-bold);color:#fff;border:none;">Siguiente misterio →</button>' +
       '<button onclick="window._repeatSession()" style="' + s + 'background:var(--card);color:var(--text-soft);border:1.5px solid var(--border);">🔄 Repetir sesión</button>';
   }
 
