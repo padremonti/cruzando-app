@@ -1155,7 +1155,7 @@ import {
 
 // ── FIREBASE CONFIG (pegar aquí tu config) ──
 const firebaseConfig = {
-   apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
+ apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
     authDomain: "cruzando-app.firebaseapp.com",
     projectId: "cruzando-app",
     storageBucket: "cruzando-app.firebasestorage.app",
@@ -1392,8 +1392,9 @@ async function loadUserAndStart() {
       console.log('Plan detectado:', plan, '→ userPlan:', userPlan);
     }
   } catch(e) {
+    // Si no se puede leer el plan, asumir premium para no bloquear usuarios legítimos
     console.warn('No se pudo leer plan:', e);
-    userPlan = 'free';
+    userPlan = 'premium';
   }
 
   // Leer audioProgress
@@ -1414,7 +1415,8 @@ async function loadUserAndStart() {
     audioProgress = { nivel: 1, cuaderno: 1, misterio: 1, firstAnswered:[false,false,false], history:[] };
   }
 
-  // Verificar límite diario para usuarios free
+  // Solo usuarios free tienen límite de una sesión por día
+  console.log('userPlan al verificar límite:', userPlan);
   if (userPlan === 'free' && hasSessionToday()) {
     showDailyLimit();
     return;
@@ -2159,11 +2161,7 @@ function showComingSoon() {
 }
 
 async function advanceAndRestart() {
-  // Usuarios free: no pueden hacer otra sesión hoy
-  if (userPlan === 'free') {
-    showDailyLimit();
-    return;
-  }
+  // El límite diario se evalúa en loadUserAndStart según el plan
 
   // Calcular siguiente misterio
   let { nivel, cuaderno, misterio } = audioProgress;
