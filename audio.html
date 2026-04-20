@@ -1155,12 +1155,12 @@ import {
 
 // ── FIREBASE CONFIG (pegar aquí tu config) ──
 const firebaseConfig = {
-   apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
-    authDomain: "cruzando-app.firebaseapp.com",
-    projectId: "cruzando-app",
-    storageBucket: "cruzando-app.firebasestorage.app",
-    messagingSenderId: "408196948528",
-    appId: "1:408196948528:web:de291e8afc969252e943f5"
+  apiKey: "REEMPLAZAR",
+  authDomain: "REEMPLAZAR",
+  projectId: "REEMPLAZAR",
+  storageBucket: "REEMPLAZAR",
+  messagingSenderId: "REEMPLAZAR",
+  appId: "REEMPLAZAR"
 };
 // ────────────────────────────────────────────
 
@@ -1319,6 +1319,16 @@ function applyBlockColor(block) {
 // FIREBASE — AUTH
 // ════════════════════════════════════════════
 
+// Funciones globales para onclick en pantallas dinámicas
+window._logout        = () => signOut(auth).then(() => { location.href = 'index.html'; }).catch(() => { location.href = 'index.html'; });
+window._goHome        = () => { location.href = 'index.html'; };
+window._repeatSession = () => {
+  sessionMeters = 0; sessionCompleted = false; currentTrack = -1;
+  stopAudio(); bgmStop();
+  show('scr-loading'); setMsg('Preparando sesión…');
+  setTimeout(() => buildSession(), 300);
+};
+
 function initAuth() {
   initTheme();
   onAuthStateChanged(auth, async user => {
@@ -1414,13 +1424,8 @@ async function loadUserAndStart() {
     audioProgress = { nivel: 1, cuaderno: 1, misterio: 1, firstAnswered:[false,false,false], history:[] };
   }
 
-  // Solo usuarios free tienen límite de una sesión por día
-  console.log('userPlan al verificar límite:', userPlan);
-  if (userPlan === 'free' && hasSessionToday()) {
-    showDailyLimit();
-    return;
-  }
-
+  // Límite diario de free: se gestiona en el botón de completar sesión
+  console.log('userPlan:', userPlan, '| misterio:', audioProgress.nivel, audioProgress.cuaderno, audioProgress.misterio);
   await buildSession();
 }
 
@@ -1436,36 +1441,21 @@ function hasSessionToday() {
 }
 
 function showDailyLimit() {
-  // Calcular hora en que se desbloquea (mañana 00:00)
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   tomorrow.setHours(0, 0, 0, 0);
   const hoursLeft = Math.ceil((tomorrow - Date.now()) / 3600000);
-
-  const el = $('scr-loading');
-  el.innerHTML = `
-    <div style="text-align:center; padding: 0 28px;">
-      <div style="font-size:2.8rem; margin-bottom:20px;">🙏</div>
-      <div style="font-family:'Cormorant Garamond',serif; font-size:1.8rem; font-weight:600;
-                  color:var(--text); margin-bottom:12px; line-height:1.3;">
-        Sesión de hoy completada
-      </div>
-      <p style="font-size:0.88rem; color:var(--text-soft); line-height:1.7; margin-bottom:28px; max-width:300px; margin-left:auto; margin-right:auto;">
-        Ya rezaste tu misterio de hoy. El camino se recorre paso a paso.<br><br>
-        Vuelve mañana para continuar.<br>
-        Nueva sesión disponible en <strong style="color:var(--lvl-bold);">${hoursLeft}h</strong>.
-      </p>
-      <p style="font-size:0.75rem; color:var(--text-dim); margin-bottom:24px;">
-        Con membresía Beta o Premium puedes avanzar sin límite diario.
-      </p>
-      <button onclick="signOut(getAuth()); location.reload();"
-        style="padding:13px 28px; background:var(--card); border:1.5px solid var(--border);
-               border-radius:12px; color:var(--text-soft); font-family:'Inter',sans-serif;
-               font-size:0.85rem; cursor:pointer;">
-        Salir
-      </button>
-    </div>
-  `;
+  const s = 'padding:14px 0;border-radius:13px;font-family:Inter,sans-serif;font-size:1rem;font-weight:700;cursor:pointer;width:100%;max-width:280px;display:block;margin:0 auto 12px;';
+  $('scr-loading').innerHTML =
+    '<div style="text-align:center;padding:0 28px;width:100%;">' +
+    '<div style="font-size:2.8rem;margin-bottom:20px;">🙏</div>' +
+    '<div style="font-family:Cormorant Garamond,serif;font-size:1.9rem;font-weight:600;color:var(--text);margin-bottom:12px;line-height:1.3;">Sesión de hoy completada</div>' +
+    '<p style="font-size:1rem;color:var(--text-soft);line-height:1.75;margin-bottom:8px;max-width:300px;margin-left:auto;margin-right:auto;">Ya rezaste tu misterio de hoy.<br>El camino se recorre paso a paso.</p>' +
+    '<p style="font-size:1rem;color:var(--text-soft);line-height:1.75;margin-bottom:28px;max-width:300px;margin-left:auto;margin-right:auto;">Nueva sesión disponible en <strong style="color:var(--lvl-bold);">' + hoursLeft + 'h</strong>.</p>' +
+    '<p style="font-size:0.82rem;color:var(--text-dim);margin-bottom:24px;">Con membresía Beta o Premium puedes avanzar sin límite diario.</p>' +
+    '<button onclick="window._repeatSession()" style="' + s + 'background:var(--lvl-bold);color:#fff;border:none;">🔄 Repetir sesión</button>' +
+    '<button onclick="window._goHome()" style="' + s + 'background:var(--card);color:var(--text-soft);border:1.5px solid var(--border);">Ir al inicio</button>' +
+    '</div>';
   show('scr-loading');
 }
 
@@ -1671,10 +1661,13 @@ function renderSession() {
   // Texto del botón según plan
   const btnNext = $('btn-next-mystery');
   if (btnNext) {
-    btnNext.textContent = userPlan === 'free'
-      ? 'Volver mañana 🙏'
-      : 'Siguiente misterio →';
-    btnNext.onclick = advanceAndRestart;
+    if (userPlan === 'free') {
+      btnNext.textContent = 'Volver mañana 🙏';
+      btnNext.onclick = showDailyLimit;
+    } else {
+      btnNext.textContent = 'Siguiente misterio →';
+      btnNext.onclick = advanceAndRestart;
+    }
   }
 
   // Botón BGM
@@ -2141,13 +2134,13 @@ function showComingSoon() {
         Se publicará pronto.<br><br>
         Mientras tanto, puedes repetir los misterios anteriores.
       </p>
-      <button onclick="window.location.href='index.html'"
+      <button onclick="window._goHome()"
         style="padding:14px 32px; background:var(--lvl-bold); color:#fff;
                border:none; border-radius:14px; font-family:'Inter',sans-serif;
                font-size:1rem; font-weight:700; cursor:pointer; margin-bottom:12px; width:100%; max-width:280px; display:block; margin-left:auto; margin-right:auto;">
         Ir al inicio
       </button>
-      <button onclick="history.back()"
+      <button onclick="window._goHome()"
         style="padding:12px 32px; background:var(--card); color:var(--text-soft);
                border:1.5px solid var(--border); border-radius:14px;
                font-family:'Inter',sans-serif; font-size:0.9rem;
