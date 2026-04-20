@@ -1155,13 +1155,12 @@ import {
 
 // ── FIREBASE CONFIG (pegar aquí tu config) ──
 const firebaseConfig = {
- apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
+   apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
     authDomain: "cruzando-app.firebaseapp.com",
     projectId: "cruzando-app",
     storageBucket: "cruzando-app.firebasestorage.app",
     messagingSenderId: "408196948528",
     appId: "1:408196948528:web:de291e8afc969252e943f5"
-
 };
 // ────────────────────────────────────────────
 
@@ -2161,8 +2160,6 @@ function showComingSoon() {
 }
 
 async function advanceAndRestart() {
-  // El límite diario se evalúa en loadUserAndStart según el plan
-
   // Calcular siguiente misterio
   let { nivel, cuaderno, misterio } = audioProgress;
   misterio++;
@@ -2174,13 +2171,20 @@ async function advanceAndRestart() {
       nivel++;
     }
   }
-  audioProgress.nivel    = nivel;
-  audioProgress.cuaderno = cuaderno;
-  audioProgress.misterio = misterio;
+  audioProgress.nivel         = nivel;
+  audioProgress.cuaderno      = cuaderno;
+  audioProgress.misterio      = misterio;
   audioProgress.firstAnswered = [false, false, false];
 
-  await saveAudioProgress();
-  await loadUserAndStart();
+  // Guardar en Firestore (sin esperar a que propague para no recargar datos viejos)
+  saveAudioProgress(); // fire-and-forget
+
+  // Construir nueva sesión directamente desde el estado en memoria
+  // sin pasar por loadUserAndStart (que volvería a leer Firestore)
+  sessionMeters    = 0;
+  sessionCompleted = false;
+  $('fab-questions').style.display = 'flex';
+  await buildSession();
 }
 
 // ════════════════════════════════════════════
