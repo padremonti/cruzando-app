@@ -754,12 +754,107 @@ body {
    ══════════════════════════════════════════════ */
 #scr-complete {
   align-items: center;
-  justify-content: center;
-  padding: 40px 28px;
+  justify-content: flex-start;
+  padding: 40px 24px 100px;
   text-align: center;
   background: var(--bg);
   flex-direction: column;
   gap: 0;
+  overflow-y: auto;
+}
+
+/* ── Epílogo del canto ── */
+.epilogo-canto {
+  width: 100%;
+  max-width: 360px;
+  margin: 24px 0 20px;
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 18px;
+  overflow: hidden;
+  text-align: left;
+}
+.epilogo-canto-header {
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.epilogo-canto-titulo {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+}
+.epilogo-canto-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--lvl-soft);
+  background: var(--lvl-ultra);
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+/* Player del canto en epílogo */
+.epilogo-player {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.epilogo-play-btn {
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  background: var(--lvl-bold);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+  transition: transform 0.15s;
+}
+.epilogo-play-btn:active { transform: scale(0.92); }
+.epilogo-player-bar {
+  flex: 1;
+}
+.epilogo-bar-track {
+  width: 100%;
+  height: 4px;
+  background: var(--border);
+  border-radius: 3px;
+  cursor: pointer;
+  margin-bottom: 4px;
+}
+.epilogo-bar-fill {
+  height: 100%;
+  background: var(--lvl-bold);
+  border-radius: 3px;
+  width: 0%;
+  transition: width 0.1s linear;
+}
+.epilogo-bar-time {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+/* Letra del canto */
+.epilogo-letra {
+  padding: 16px 20px 20px;
+  font-size: 1rem;
+  line-height: 1.85;
+  color: var(--text-soft);
+  white-space: pre-line;
+  font-style: italic;
+  max-height: 320px;
+  overflow-y: auto;
 }
 .complete-icon {
   font-size: 3.5rem;
@@ -1072,7 +1167,28 @@ body {
     <h2 class="complete-title" id="complete-title">Misterio completado</h2>
     <p class="complete-subtitle" id="complete-subtitle">Has contemplado este misterio en profundidad. El camino continúa.</p>
     <div class="complete-meters" id="complete-meters">+0m</div>
-    <button class="btn-next-session" id="btn-next-mystery">Siguiente misterio →</button>
+    <!-- Epílogo: canto de la sesión -->
+    <div class="epilogo-canto" id="epilogo-canto" style="display:none">
+      <div class="epilogo-canto-header">
+        <span class="epilogo-canto-titulo" id="epilogo-titulo">—</span>
+        <span class="epilogo-canto-badge">Canto</span>
+      </div>
+      <div class="epilogo-player">
+        <button class="epilogo-play-btn" id="epilogo-play-btn">
+          <svg id="epilogo-ico-play" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <svg id="epilogo-ico-pause" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+        </button>
+        <div class="epilogo-player-bar">
+          <div class="epilogo-bar-track" id="epilogo-bar-track">
+            <div class="epilogo-bar-fill" id="epilogo-bar-fill"></div>
+          </div>
+          <div class="epilogo-bar-time" id="epilogo-bar-time">0:00 / 0:00</div>
+        </div>
+      </div>
+      <div class="epilogo-letra" id="epilogo-letra"></div>
+    </div>
+    <!-- Botones de acción -->
+    <div id="complete-actions" style="width:100%;max-width:320px;"></div>
   </div>
 
 
@@ -1264,6 +1380,8 @@ let isDark = true;
 
 // Audio principal
 let audioEl        = null;
+// Audio del epílogo (canto al final de sesión)
+let epilogoAudioEl = null;
 let currentTrack   = -1;  // índice en playlist
 let isPlaying      = false;
 let autosaveTimer  = null;
@@ -1322,6 +1440,24 @@ function applyBlockColor(block) {
 // Funciones globales para onclick en pantallas dinámicas
 window._logout        = () => signOut(auth).then(() => { location.href = 'index.html'; }).catch(() => { location.href = 'index.html'; });
 window._goHome        = () => { location.href = 'index.html'; };
+window._goToPrevMystery = () => {
+  let { nivel, cuaderno, misterio } = audioProgress;
+  misterio--;
+  if (misterio < 1) {
+    misterio = 20;
+    cuaderno--;
+    if (cuaderno < 1) { cuaderno = 4; nivel = Math.max(1, nivel - 1); }
+  }
+  audioProgress.nivel = nivel;
+  audioProgress.cuaderno = cuaderno;
+  audioProgress.misterio = misterio;
+  audioProgress.firstAnswered = [false, false, false];
+  saveAudioProgress();
+  sessionMeters = 0; sessionCompleted = false; currentTrack = -1;
+  stopAudio(); bgmStop();
+  show('scr-loading'); setMsg('Cargando misterio anterior…');
+  setTimeout(() => buildSession(), 300);
+};
 window._repeatSession = () => {
   sessionMeters = 0; sessionCompleted = false; currentTrack = -1;
   stopAudio(); bgmStop();
@@ -1554,29 +1690,37 @@ async function buildSession() {
   // agrupados visualmente como un solo segmento en la barra.
   const n = nivel, c = cuaderno;
   const silencioUrl = AUDIO_FOLDERS['rezo'] + 'silencio.mp3'; // /audio/global/silencio.mp3
+  const pausaUrl   = AUDIO_FOLDERS['rezo'] + 'pausa.mp3';
   const playlist = [
     { label:'Bienvenida',      file:`START_${n}_${c}_${m}.mp3`,  folder:'start',  seg:0 },
+    { label:'Bienvenida',      file:'pausa.mp3',                  folder:'rezo',   seg:0, silence:true },
     { label:'Camino y Palabra',file:`UBIBLE_${n}_${c}_${m}.mp3`, folder:'ubible', seg:1 },
+    { label:'Camino y Palabra',file:'pausa.mp3',                  folder:'rezo',   seg:1, silence:true },
     { label:'Contemplación',   file:`CONT_${n}_${c}_${m}.mp3`,   folder:'cont',   seg:2 },
+    { label:'Contemplación',   file:'pausa.mp3',                  folder:'rezo',   seg:2, silence:true },
     { label:'Rezo',            file:`rezo.mp3`,                   folder:'rezo',   seg:3 },
+    { label:'Rezo',            file:'pausa.mp3',                  folder:'rezo',   seg:3, silence:true },
     { label:'Canto',           file:`M_${n}_${c}_${m}.mp3`,      folder:'music',  seg:4 },
-    // ── Separador de Meditación (seg visual propio = seg:5) ──
+    { label:'Canto',           file:'pausa.mp3',                  folder:'rezo',   seg:4, silence:true },
+    // ── Separador de Meditación ──
     { label:'Meditación',      file:'meditacion.mp3',             folder:'rezo',   seg:5 },
-    // ── Bloque de Preguntas (6 sub-tracks, segmento visual único = seg:6) ──
+    { label:'Meditación',      file:'pausa.mp3',                  folder:'rezo',   seg:5, silence:true },
+    // ── Bloque de Preguntas ──
     { label:'Preguntas',       file:`QA_${n}_${c}_${m}.mp3`,     folder:'q',      seg:6, qIdx:0 },
     { label:'Preguntas',       file:'silencio.mp3',               folder:'rezo',   seg:6, silence:true },
     { label:'Preguntas',       file:`QB_${n}_${c}_${m}.mp3`,     folder:'q',      seg:6, qIdx:1 },
     { label:'Preguntas',       file:'silencio.mp3',               folder:'rezo',   seg:6, silence:true },
     { label:'Preguntas',       file:`QC_${n}_${c}_${m}.mp3`,     folder:'q',      seg:6, qIdx:2 },
     { label:'Preguntas',       file:'silencio.mp3',               folder:'rezo',   seg:6, silence:true },
-    // ── Continúa ──
+    // ── Oración final + pausa + Despedida ──
     { label:'Oración final',   file:`PRAY_${n}_${c}_${m}.mp3`,   folder:'pray',   seg:7 },
+    { label:'Oración final',   file:'pausa.mp3',                  folder:'rezo',   seg:7, silence:true },
     { label:'Despedida',       file:`BYE_${n}_${c}_${m}.mp3`,    folder:'bye',    seg:8 }
   ].map(t => ({
     ...t,
-    url: t.folder === 'rezo' && t.file === 'silencio.mp3'
-         ? silencioUrl
-         : AUDIO_FOLDERS[t.folder] + t.file
+    url: (t.folder === 'rezo' && t.file === 'silencio.mp3') ? silencioUrl
+       : (t.folder === 'rezo' && t.file === 'pausa.mp3')    ? pausaUrl
+       : AUDIO_FOLDERS[t.folder] + t.file
   }));
 
 
@@ -1662,23 +1806,7 @@ function renderSession() {
 
   // Btn next mystery (pantalla completado)
   // Texto del botón según plan
-  const btnNext = $('btn-next-mystery');
-  const btnRepeat = document.createElement('button');
-  btnRepeat.className = 'btn-next-session';
-  btnRepeat.style.cssText = 'background:var(--card);color:var(--text-soft);border:1.5px solid var(--border);margin-top:8px;';
-  btnRepeat.textContent = '🔄 Repetir este misterio';
-  btnRepeat.onclick = window._repeatSession;
-  if (btnNext) {
-    if (userPlan === 'free') {
-      btnNext.textContent = 'Volver mañana 🙏';
-      btnNext.onclick = showDailyLimit;
-      btnNext.after(btnRepeat);
-    } else {
-      btnNext.textContent = 'Siguiente misterio →';
-      btnNext.onclick = advanceAndRestart;
-      btnNext.after(btnRepeat);
-    }
-  }
+  // Botones de acción se generan dinámicamente en completeSession()
 
   // Botón BGM
   const btnBgm = $('btn-bgm');
@@ -1788,9 +1916,7 @@ function goTrack(idx) {
       markSegDone(track.seg);
     }
     if (idx + 1 < playlist.length) {
-      // Delay de 2.3 segundos antes del BYE para no cortar el "Amén"
-      const delay = (playlist[idx + 1].folder === 'bye') ? 2300 : 0;
-      setTimeout(() => goTrack(idx + 1), delay);
+      goTrack(idx + 1);
     } else {
       onPlaylistEnded();
     }
@@ -2099,6 +2225,75 @@ function onPlaylistEnded() {
 // COMPLETAR SESIÓN
 // ════════════════════════════════════════════
 
+// ── Cargar cantos del nivel ──
+let CANTOS_DATA = null;
+
+async function loadCantos(nivelId) {
+  if (CANTOS_DATA) return CANTOS_DATA;
+  try {
+    const base = location.origin + location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1);
+    const resp = await fetch(base + 'data/' + nivelId + '-cantos.json');
+    if (!resp.ok) return null;
+    CANTOS_DATA = await resp.json();
+    return CANTOS_DATA;
+  } catch(e) { return null; }
+}
+
+function getCanto(cantosData, block, blockIdx) {
+  if (!cantosData || !cantosData.cantos || !cantosData.cantos[block]) return null;
+  return cantosData.cantos[block][blockIdx] || null;
+}
+
+function renderEpilogo(canto, audioUrl) {
+  const wrap = $('epilogo-canto');
+  if (!canto) { wrap.style.display = 'none'; return; }
+
+  $('epilogo-titulo').textContent = canto.titulo;
+  $('epilogo-letra').textContent  = canto.letra;
+  wrap.style.display = '';
+
+  // Player del epílogo
+  if (epilogoAudioEl) { epilogoAudioEl.pause(); epilogoAudioEl = null; }
+  epilogoAudioEl = new Audio(audioUrl);
+
+  epilogoAudioEl.ontimeupdate = () => {
+    if (!epilogoAudioEl.duration) return;
+    const pct = (epilogoAudioEl.currentTime / epilogoAudioEl.duration) * 100;
+    $('epilogo-bar-fill').style.width = pct + '%';
+    $('epilogo-bar-time').textContent =
+      fmtTime(epilogoAudioEl.currentTime) + ' / ' + fmtTime(epilogoAudioEl.duration);
+  };
+  epilogoAudioEl.onended = () => {
+    $('epilogo-ico-play').style.display  = 'block';
+    $('epilogo-ico-pause').style.display = 'none';
+    $('epilogo-bar-fill').style.width = '0%';
+    epilogoAudioEl.currentTime = 0;
+  };
+  epilogoAudioEl.onerror = () => {
+    $('epilogo-play-btn').style.opacity = '0.4';
+    $('epilogo-play-btn').disabled = true;
+  };
+
+  $('epilogo-play-btn').onclick = () => {
+    if (!epilogoAudioEl) return;
+    if (epilogoAudioEl.paused) {
+      epilogoAudioEl.play().catch(() => {});
+      $('epilogo-ico-play').style.display  = 'none';
+      $('epilogo-ico-pause').style.display = 'block';
+    } else {
+      epilogoAudioEl.pause();
+      $('epilogo-ico-play').style.display  = 'block';
+      $('epilogo-ico-pause').style.display = 'none';
+    }
+  };
+
+  $('epilogo-bar-track').onclick = e => {
+    if (!epilogoAudioEl || !epilogoAudioEl.duration) return;
+    const rect = $('epilogo-bar-track').getBoundingClientRect();
+    epilogoAudioEl.currentTime = ((e.clientX - rect.left) / rect.width) * epilogoAudioEl.duration;
+  };
+}
+
 async function completeSession() {
   if (sessionCompleted) return;
   sessionCompleted = true;
@@ -2113,14 +2308,36 @@ async function completeSession() {
   $('session-meters-display').textContent = `${sessionMeters.toLocaleString('es-MX')}m esta sesión`;
 
   // Registrar en historial
-  const { nivel, cuaderno, misterio } = currentSession;
+  const { nivel, cuaderno, misterio, block, blockIdx } = currentSession;
   if (!audioProgress.history) audioProgress.history = [];
   audioProgress.history.push({ n:nivel, c:cuaderno, m:misterio, completedAt: Date.now() });
+  saveAudioProgress();
 
-  // Pantalla completado
-  $('complete-title').textContent = currentSession.mysteryData?.titulo || `Misterio ${misterio}`;
-  $('complete-subtitle').textContent = `Nivel ${nivel}-${cuaderno} · ${ORDS[misterio-1]} Misterio ${BLOCK_NAMES[currentSession.block]}`;
-  $('complete-meters').textContent = `+${sessionMeters.toLocaleString('es-MX')}m`;
+  // Pantalla completado — datos básicos
+  $('complete-title').textContent    = currentSession.mysteryData?.titulo || `Misterio ${misterio}`;
+  $('complete-subtitle').textContent = `Nivel ${nivel}-${cuaderno} · ${ORDS[misterio-1]} Misterio ${BLOCK_NAMES[block]}`;
+  $('complete-meters').textContent   = `+${sessionMeters.toLocaleString('es-MX')}m`;
+
+  // Cargar canto del epílogo
+  const nivelId   = String(nivel).padStart(2,'0') + String(cuaderno).padStart(2,'0');
+  CANTOS_DATA     = null; // forzar recarga si cambió de nivel
+  const cantosData = await loadCantos(nivelId);
+  const canto      = getCanto(cantosData, block, blockIdx);
+  const cantoUrl   = AUDIO_FOLDERS['music'] + `M_${nivel}_${cuaderno}_${misterio}.mp3`;
+  renderEpilogo(canto, cantoUrl);
+
+  // Botones de acción
+  const actions = $('complete-actions');
+  const s = 'width:100%;padding:15px;border-radius:14px;font-family:Inter,sans-serif;font-size:1rem;font-weight:700;cursor:pointer;margin-bottom:10px;display:block;';
+  if (userPlan === 'free') {
+    actions.innerHTML =
+      '<button onclick="showDailyLimit()" style="' + s + 'background:var(--lvl-bold);color:#fff;border:none;">Volver mañana 🙏</button>' +
+      '<button onclick="window._repeatSession()" style="' + s + 'background:var(--card);color:var(--text-soft);border:1.5px solid var(--border);">🔄 Repetir sesión</button>';
+  } else {
+    actions.innerHTML =
+      '<button onclick="advanceAndRestart()" style="' + s + 'background:var(--lvl-bold);color:#fff;border:none;">Siguiente misterio →</button>' +
+      '<button onclick="window._repeatSession()" style="' + s + 'background:var(--card);color:var(--text-soft);border:1.5px solid var(--border);">🔄 Repetir sesión</button>';
+  }
 
   show('scr-complete');
   $('fab-questions').style.display = 'none';
@@ -2130,39 +2347,22 @@ function showComingSoon() {
   stopAudio();
   bgmStop();
   const { nivel, cuaderno } = currentSession;
-  const el = $('scr-loading');
-  el.innerHTML = `
-    <div style="text-align:center; padding:0 28px;">
-      <div style="font-size:3rem; margin-bottom:20px;">🛤️</div>
-      <div style="font-family:'Cormorant Garamond',serif; font-size:1.8rem; font-weight:600;
-                  color:var(--text); margin-bottom:14px; line-height:1.3;">
-        Contenido en camino
-      </div>
-      <p style="font-size:1rem; color:var(--text-soft); line-height:1.75;
-                margin-bottom:28px; max-width:300px; margin-left:auto; margin-right:auto;">
-        El Nivel ${nivel}-${cuaderno} sigue en desarrollo.<br>
-        Se publicará pronto.<br><br>
-        Mientras tanto, puedes repetir los misterios anteriores.
-      </p>
-      <button onclick="window._goHome()"
-        style="padding:14px 32px; background:var(--lvl-bold); color:#fff;
-               border:none; border-radius:14px; font-family:'Inter',sans-serif;
-               font-size:1rem; font-weight:700; cursor:pointer; margin-bottom:12px; width:100%; max-width:280px; display:block; margin-left:auto; margin-right:auto;">
-        Ir al inicio
-      </button>
-      <button onclick="window._goHome()"
-        style="padding:12px 32px; background:var(--card); color:var(--text-soft);
-               border:1.5px solid var(--border); border-radius:14px;
-               font-family:'Inter',sans-serif; font-size:0.9rem;
-               font-weight:600; cursor:pointer; width:100%; max-width:280px; display:block; margin-left:auto; margin-right:auto;">
-        Regresar
-      </button>
-    </div>
-  `;
+  const s = 'padding:14px 0;border-radius:13px;font-family:Inter,sans-serif;font-size:1rem;font-weight:700;cursor:pointer;width:100%;max-width:280px;display:block;margin:0 auto 12px;';
+  $('scr-loading').innerHTML =
+    '<div style="text-align:center;padding:0 28px;width:100%;">' +
+    '<div style="font-size:3rem;margin-bottom:20px;">\u{1F6E4}\uFE0F</div>' +
+    '<div style="font-family:\'Cormorant Garamond\',serif;font-size:1.8rem;font-weight:600;color:var(--text);margin-bottom:14px;line-height:1.3;">Contenido en camino</div>' +
+    '<p style="font-size:1rem;color:var(--text-soft);line-height:1.75;margin-bottom:28px;max-width:300px;margin-left:auto;margin-right:auto;">' +
+    'El Nivel ' + nivel + '-' + cuaderno + ' sigue en desarrollo.<br>Se publicará pronto.<br><br>Mientras tanto, puedes rezar los misterios anteriores.</p>' +
+    '<button onclick="window._goToPrevMystery()" style="' + s + 'background:var(--lvl-bold);color:#fff;border:none;">← Misterio anterior</button>' +
+    '<button onclick="window._goHome()" style="' + s + 'background:var(--card);color:var(--text-soft);border:1.5px solid var(--border);">Ir al inicio</button>' +
+    '</div>';
   show('scr-loading');
 }
 
+
 async function advanceAndRestart() {
+  if (epilogoAudioEl) { epilogoAudioEl.pause(); epilogoAudioEl = null; }
   // Calcular siguiente misterio
   let { nivel, cuaderno, misterio } = audioProgress;
   misterio++;
