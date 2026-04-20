@@ -1438,18 +1438,13 @@ function applyBlockColor(block) {
 // ════════════════════════════════════════════
 
 // Funciones globales para onclick en pantallas dinámicas
-window._logout        = () => signOut(auth).then(() => { location.href = 'index.html'; }).catch(() => { location.href = 'index.html'; });
-window._goHome        = () => { location.href = 'index.html'; };
-window._goToPrevMystery = () => {
-  console.log('_goToPrevMystery llamado. audioProgress:', JSON.stringify(audioProgress));
-  if (!audioProgress) {
-    console.warn('audioProgress es null — recargando app');
-    location.reload();
-    return;
-  }
-  // audioProgress ya apunta al misterio que falló (el nuevo)
-  // retrocedemos DOS pasos: uno para deshacer el avance, otro para ir al anterior
-  // — o simplemente retrocedemos uno desde el misterio actual
+window._logout = () => {
+  signOut(auth).then(() => { location.href = 'index.html'; }).catch(() => { location.href = 'index.html'; });
+};
+window._goHome = () => { location.href = 'index.html'; };
+
+window._goToPrevMystery = async () => {
+  if (!audioProgress) { location.reload(); return; }
   let { nivel, cuaderno, misterio } = audioProgress;
   misterio--;
   if (misterio < 1) {
@@ -1457,20 +1452,17 @@ window._goToPrevMystery = () => {
     cuaderno--;
     if (cuaderno < 1) { cuaderno = 4; nivel = Math.max(1, nivel - 1); }
   }
-  console.log('Yendo a misterio:', nivel, cuaderno, misterio);
   audioProgress.nivel = nivel;
   audioProgress.cuaderno = cuaderno;
   audioProgress.misterio = misterio;
   audioProgress.firstAnswered = [false, false, false];
   await saveAudioProgress();
-  sessionMeters = 0; sessionCompleted = false; currentTrack = -1;
   if (epilogoAudioEl) { epilogoAudioEl.pause(); epilogoAudioEl = null; }
+  sessionMeters = 0; sessionCompleted = false; currentTrack = -1;
   stopAudio(); bgmStop();
   show('scr-loading'); setMsg('Cargando misterio anterior…');
   setTimeout(() => buildSession(), 300);
 };
-window.advanceAndRestart = () => advanceAndRestart();
-window.showDailyLimit    = () => showDailyLimit();
 
 window._repeatSession = async () => {
   if (epilogoAudioEl) { epilogoAudioEl.pause(); epilogoAudioEl = null; }
@@ -1481,6 +1473,23 @@ window._repeatSession = async () => {
   show('scr-loading'); setMsg('Preparando sesión…');
   setTimeout(() => buildSession(), 300);
 };
+
+window.advanceAndRestart = async () => {
+  if (epilogoAudioEl) { epilogoAudioEl.pause(); epilogoAudioEl = null; }
+  let { nivel, cuaderno, misterio } = audioProgress;
+  misterio++;
+  if (misterio > 20) { misterio = 1; cuaderno++; if (cuaderno > 4) { cuaderno = 1; nivel++; } }
+  audioProgress.nivel = nivel;
+  audioProgress.cuaderno = cuaderno;
+  audioProgress.misterio = misterio;
+  audioProgress.firstAnswered = [false, false, false];
+  await saveAudioProgress();
+  sessionMeters = 0; sessionCompleted = false;
+  $('fab-questions').style.display = 'flex';
+  await buildSession();
+};
+
+window.showDailyLimit = () => showDailyLimit();
 
 function initAuth() {
   initTheme();
@@ -2390,32 +2399,7 @@ function showComingSoon() {
 
 
 async function advanceAndRestart() {
-  if (epilogoAudioEl) { epilogoAudioEl.pause(); epilogoAudioEl = null; }
-  // Calcular siguiente misterio
-  let { nivel, cuaderno, misterio } = audioProgress;
-  misterio++;
-  if (misterio > 20) {
-    misterio = 1;
-    cuaderno++;
-    if (cuaderno > 4) {
-      cuaderno = 1;
-      nivel++;
-    }
-  }
-  audioProgress.nivel         = nivel;
-  audioProgress.cuaderno      = cuaderno;
-  audioProgress.misterio      = misterio;
-  audioProgress.firstAnswered = [false, false, false];
-
-  // Guardar en Firestore y ESPERAR confirmación
-  // (garantiza que otros dispositivos leerán el progreso correcto)
-  await saveAudioProgress();
-
-  // Construir nueva sesión directamente desde el estado en memoria
-  sessionMeters    = 0;
-  sessionCompleted = false;
-  $('fab-questions').style.display = 'flex';
-  await buildSession();
+  return window.advanceAndRestart();
 }
 
 // ════════════════════════════════════════════
