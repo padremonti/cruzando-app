@@ -1253,7 +1253,7 @@ const METERS_Q_UPDATE  = 200;
 
 let currentUser      = null;
 let audioProgress    = null;  // { nivel:1, cuaderno:1, misterio:1, firstAnswered:[f,f,f] }
-let userPlan         = 'free'; // 'free' | 'beta' | 'premium'
+let userPlan         = 'premium'; // default premium; free solo si explícitamente confirmado
 let currentData      = null;  // JSON del nivel/cuaderno
 let currentSession   = null;  // { nivel, cuaderno, misterio, block, mysteryData, playlist }
 let sessionMeters    = 0;
@@ -1388,22 +1388,25 @@ async function loadUserAndStart() {
   const uid = currentUser.uid;
 
   // Leer plan del usuario
+  userPlan = 'premium'; // asumir premium hasta confirmar lo contrario
   try {
     const userSnap = await getDoc(doc(db, 'users', uid));
     if (userSnap.exists()) {
       const data = userSnap.data();
-      const plan = data.plan || 'free';
-      // Beta: acceso completo si plan==='beta' (con o sin betaExpiresAt)
-      // Premium: plan==='premium' o plan==='pro'
-      const betaExpiry = data.betaExpiresAt || 0;
-      const betaActive = plan === 'beta' && (betaExpiry === 0 || betaExpiry > Date.now());
-      userPlan = (plan === 'premium' || plan === 'pro' || betaActive) ? 'premium' : 'free';
-      console.log('Plan detectado:', plan, '→ userPlan:', userPlan);
+      const plan = (data.plan || '').toLowerCase().trim();
+      console.log('Firestore plan field:', plan);
+      // Solo asignar free si el plan es explícitamente vacío o 'free'
+      if (plan === 'free' || plan === '') {
+        userPlan = 'free';
+      } else {
+        userPlan = 'premium'; // beta, pro, premium → todos tienen acceso completo
+      }
+      console.log('userPlan asignado:', userPlan);
+    } else {
+      console.warn('Documento users/uid no encontrado — asumiendo premium');
     }
   } catch(e) {
-    // Si no se puede leer el plan, asumir premium para no bloquear usuarios legítimos
-    console.warn('No se pudo leer plan:', e);
-    userPlan = 'premium';
+    console.warn('Error leyendo plan (asumiendo premium):', e.message);
   }
 
   // Leer audioProgress
@@ -1660,13 +1663,20 @@ function renderSession() {
   // Btn next mystery (pantalla completado)
   // Texto del botón según plan
   const btnNext = $('btn-next-mystery');
+  const btnRepeat = document.createElement('button');
+  btnRepeat.className = 'btn-next-session';
+  btnRepeat.style.cssText = 'background:var(--card);color:var(--text-soft);border:1.5px solid var(--border);margin-top:8px;';
+  btnRepeat.textContent = '🔄 Repetir este misterio';
+  btnRepeat.onclick = window._repeatSession;
   if (btnNext) {
     if (userPlan === 'free') {
       btnNext.textContent = 'Volver mañana 🙏';
       btnNext.onclick = showDailyLimit;
+      btnNext.after(btnRepeat);
     } else {
       btnNext.textContent = 'Siguiente misterio →';
       btnNext.onclick = advanceAndRestart;
+      btnNext.after(btnRepeat);
     }
   }
 
