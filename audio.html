@@ -1155,12 +1155,13 @@ import {
 
 // ── FIREBASE CONFIG (pegar aquí tu config) ──
 const firebaseConfig = {
-  apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
+   apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
     authDomain: "cruzando-app.firebaseapp.com",
     projectId: "cruzando-app",
     storageBucket: "cruzando-app.firebasestorage.app",
     messagingSenderId: "408196948528",
     appId: "1:408196948528:web:de291e8afc969252e943f5"
+
 };
 // ────────────────────────────────────────────
 
@@ -1187,7 +1188,7 @@ const AUDIO_FOLDERS = {
 };
 const BGM_BASE = R2_BASE + '/BGM/';
 const NUM_SEGS  = 9;   // segmentos visuales en la barra de progreso
-const BGM_VOL   = 0.14; // volumen de la música de fondo (0.0 – 1.0)
+const BGM_VOL   = 0.07; // volumen de la música de fondo (0.0 – 1.0)
 
 const BLOCKS     = ['gozosos','luminosos','dolorosos','gloriosos'];
 const BLOCK_NAMES = { gozosos:'Gozoso', luminosos:'Luminoso', dolorosos:'Doloroso', gloriosos:'Glorioso' };
@@ -1383,9 +1384,12 @@ async function loadUserAndStart() {
     if (userSnap.exists()) {
       const data = userSnap.data();
       const plan = data.plan || 'free';
+      // Beta: acceso completo si plan==='beta' (con o sin betaExpiresAt)
+      // Premium: plan==='premium' o plan==='pro'
       const betaExpiry = data.betaExpiresAt || 0;
-      const betaActive = plan === 'beta' && betaExpiry > Date.now();
-      userPlan = (plan === 'premium' || betaActive) ? 'premium' : 'free';
+      const betaActive = plan === 'beta' && (betaExpiry === 0 || betaExpiry > Date.now());
+      userPlan = (plan === 'premium' || plan === 'pro' || betaActive) ? 'premium' : 'free';
+      console.log('Plan detectado:', plan, '→ userPlan:', userPlan);
     }
   } catch(e) {
     console.warn('No se pudo leer plan:', e);
@@ -1734,9 +1738,19 @@ function goTrack(idx) {
 
   audioEl.onerror = () => {
     console.warn('Audio no encontrado:', track.url);
+    // Si falla el START (primer track), el nivel no está publicado aún
+    if (track.folder === 'start') {
+      showComingSoon();
+      return;
+    }
     markSegProgress(idx, 100);
     if (isCanto(idx)) bgmResume();
-    goTrack(idx + 1);
+    // Si quedan tracks, avanzar; si no, terminar
+    if (idx + 1 < currentSession.playlist.length) {
+      goTrack(idx + 1);
+    } else {
+      onPlaylistEnded();
+    }
   };
 
   audioEl.ontimeupdate = () => {
@@ -2106,6 +2120,42 @@ async function completeSession() {
 
   show('scr-complete');
   $('fab-questions').style.display = 'none';
+}
+
+function showComingSoon() {
+  stopAudio();
+  bgmStop();
+  const { nivel, cuaderno } = currentSession;
+  const el = $('scr-loading');
+  el.innerHTML = `
+    <div style="text-align:center; padding:0 28px;">
+      <div style="font-size:3rem; margin-bottom:20px;">🛤️</div>
+      <div style="font-family:'Cormorant Garamond',serif; font-size:1.8rem; font-weight:600;
+                  color:var(--text); margin-bottom:14px; line-height:1.3;">
+        Contenido en camino
+      </div>
+      <p style="font-size:1rem; color:var(--text-soft); line-height:1.75;
+                margin-bottom:28px; max-width:300px; margin-left:auto; margin-right:auto;">
+        El Nivel ${nivel}-${cuaderno} sigue en desarrollo.<br>
+        Se publicará pronto.<br><br>
+        Mientras tanto, puedes repetir los misterios anteriores.
+      </p>
+      <button onclick="window.location.href='index.html'"
+        style="padding:14px 32px; background:var(--lvl-bold); color:#fff;
+               border:none; border-radius:14px; font-family:'Inter',sans-serif;
+               font-size:1rem; font-weight:700; cursor:pointer; margin-bottom:12px; width:100%; max-width:280px; display:block; margin-left:auto; margin-right:auto;">
+        Ir al inicio
+      </button>
+      <button onclick="history.back()"
+        style="padding:12px 32px; background:var(--card); color:var(--text-soft);
+               border:1.5px solid var(--border); border-radius:14px;
+               font-family:'Inter',sans-serif; font-size:0.9rem;
+               font-weight:600; cursor:pointer; width:100%; max-width:280px; display:block; margin-left:auto; margin-right:auto;">
+        Regresar
+      </button>
+    </div>
+  `;
+  show('scr-loading');
 }
 
 async function advanceAndRestart() {
