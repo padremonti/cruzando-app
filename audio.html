@@ -1441,6 +1441,15 @@ function applyBlockColor(block) {
 window._logout        = () => signOut(auth).then(() => { location.href = 'index.html'; }).catch(() => { location.href = 'index.html'; });
 window._goHome        = () => { location.href = 'index.html'; };
 window._goToPrevMystery = () => {
+  console.log('_goToPrevMystery llamado. audioProgress:', JSON.stringify(audioProgress));
+  if (!audioProgress) {
+    console.warn('audioProgress es null — recargando app');
+    location.reload();
+    return;
+  }
+  // audioProgress ya apunta al misterio que falló (el nuevo)
+  // retrocedemos DOS pasos: uno para deshacer el avance, otro para ir al anterior
+  // — o simplemente retrocedemos uno desde el misterio actual
   let { nivel, cuaderno, misterio } = audioProgress;
   misterio--;
   if (misterio < 1) {
@@ -1448,12 +1457,14 @@ window._goToPrevMystery = () => {
     cuaderno--;
     if (cuaderno < 1) { cuaderno = 4; nivel = Math.max(1, nivel - 1); }
   }
+  console.log('Yendo a misterio:', nivel, cuaderno, misterio);
   audioProgress.nivel = nivel;
   audioProgress.cuaderno = cuaderno;
   audioProgress.misterio = misterio;
   audioProgress.firstAnswered = [false, false, false];
   saveAudioProgress();
   sessionMeters = 0; sessionCompleted = false; currentTrack = -1;
+  if (epilogoAudioEl) { epilogoAudioEl.pause(); epilogoAudioEl = null; }
   stopAudio(); bgmStop();
   show('scr-loading'); setMsg('Cargando misterio anterior…');
   setTimeout(() => buildSession(), 300);
@@ -1781,6 +1792,12 @@ function renderSession() {
 
   // Sección inicial
   updateSectionDisplay(-1);
+
+  // Limpiar pantalla de completado para evitar acumulación de botones
+  const actionsDiv = $('complete-actions');
+  if (actionsDiv) actionsDiv.innerHTML = '';
+  const epilogoDiv = $('epilogo-canto');
+  if (epilogoDiv) epilogoDiv.style.display = 'none';
 
   // FAB preguntas — visible siempre en sesión
   $('fab-questions').style.display = 'flex';
@@ -2217,7 +2234,8 @@ function onPlaylistEnded() {
   isPlaying = false;
   updatePlayPauseBtn();
   updateSectionDisplay(currentSession.playlist.length);
-  $('btn-complete').classList.add('visible');
+  const btnC = $('btn-complete');
+  if (btnC) { btnC.disabled = false; btnC.classList.add('visible'); }
   $('section-pulse').style.animationPlayState = 'paused';
 }
 
@@ -2297,6 +2315,10 @@ function renderEpilogo(canto, audioUrl) {
 async function completeSession() {
   if (sessionCompleted) return;
   sessionCompleted = true;
+
+  // Deshabilitar el botón para evitar doble pulsación
+  const btnC = $('btn-complete');
+  if (btnC) { btnC.disabled = true; btnC.classList.remove('visible'); }
 
   stopAudio();
   bgmStop();
