@@ -1443,37 +1443,49 @@ window._logout = () => {
 };
 window._goHome = () => { location.href = 'index.html'; };
 
-let _prevMysteryBusy = false; // guard contra doble pulsación
+let _prevMysteryBusy = false;
 window._goToPrevMystery = async () => {
   if (_prevMysteryBusy) return;
   _prevMysteryBusy = true;
-
-  if (!audioProgress) { location.reload(); return; }
-
-  let { nivel, cuaderno, misterio } = audioProgress;
-  misterio--;
-  if (misterio < 1) {
-    misterio = 20;
-    cuaderno--;
-    if (cuaderno < 1) { cuaderno = 4; nivel = Math.max(1, nivel - 1); }
-  }
-  audioProgress.nivel    = nivel;
-  audioProgress.cuaderno = cuaderno;
-  audioProgress.misterio = misterio;
-  audioProgress.firstAnswered = [false, false, false];
-
-  await saveAudioProgress();
-
-  if (epilogoAudioEl) { epilogoAudioEl.pause(); epilogoAudioEl = null; }
-  sessionMeters = 0; sessionCompleted = false; currentTrack = -1;
-  stopAudio(); bgmStop();
   show('scr-loading'); setMsg('Cargando misterio anterior…');
 
-  // Usar loadUserAndStart para reinicializar todo correctamente
-  // (buildSession sola no recarga el JSON del cuaderno si cambió)
-  await loadUserAndStart(true); // true = no releer audioProgress, usar el de memoria
+  try {
+    if (!audioProgress) { location.reload(); return; }
 
-  _prevMysteryBusy = false;
+    let { nivel, cuaderno, misterio } = audioProgress;
+    misterio--;
+    if (misterio < 1) {
+      misterio = 20; cuaderno--;
+      if (cuaderno < 1) { cuaderno = 4; nivel = Math.max(1, nivel - 1); }
+    }
+    audioProgress.nivel    = nivel;
+    audioProgress.cuaderno = cuaderno;
+    audioProgress.misterio = misterio;
+    audioProgress.firstAnswered = [false, false, false];
+
+    console.log('Retrocediendo a:', nivel, cuaderno, misterio);
+    await saveAudioProgress();
+
+    if (epilogoAudioEl) { epilogoAudioEl.pause(); epilogoAudioEl = null; }
+    sessionMeters = 0; sessionCompleted = false; currentTrack = -1;
+    stopAudio(); bgmStop();
+
+    // Recargar JSON del cuaderno si es diferente al actual
+    const nivelId = String(nivel).padStart(2,'0') + String(cuaderno).padStart(2,'0');
+    const base = location.origin + location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1);
+    try {
+      const resp = await fetch(base + 'data/' + nivelId + '.json');
+      if (resp.ok) currentData = await resp.json();
+    } catch(e) { console.warn('No se pudo recargar JSON:', e); }
+
+    await buildSession();
+  } catch(e) {
+    console.error('Error en _goToPrevMystery:', e);
+    setMsg('Error al cargar. Recargando…');
+    setTimeout(() => location.reload(), 1500);
+  } finally {
+    _prevMysteryBusy = false;
+  }
 };
 
 window._repeatSession = async () => {
