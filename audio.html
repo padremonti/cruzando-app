@@ -1161,6 +1161,16 @@ body {
     </div>
   </div>
 
+  <!-- ═══ PANTALLA: CONTENIDO EN CAMINO ═══ -->
+  <div class="screen" id="scr-coming-soon">
+    <div id="coming-soon-body" style="text-align:center;padding:60px 28px 0;width:100%;"></div>
+  </div>
+
+  <!-- ═══ PANTALLA: LÍMITE DIARIO ═══ -->
+  <div class="screen" id="scr-daily-limit">
+    <div id="daily-limit-body" style="text-align:center;padding:60px 28px 0;width:100%;"></div>
+  </div>
+
   <!-- ═══ PANTALLA: COMPLETADO ═══ -->
   <div class="screen" id="scr-complete">
     <div class="complete-icon">🙏</div>
@@ -1413,7 +1423,8 @@ function show(id) {
 }
 
 function setMsg(msg) {
-  $('loading-msg').textContent = msg;
+  const el = $('loading-msg');
+  if (el) el.textContent = msg;
 }
 
 function showToast(text) {
@@ -1637,8 +1648,7 @@ function showDailyLimit() {
   tomorrow.setHours(0, 0, 0, 0);
   const hoursLeft = Math.ceil((tomorrow - Date.now()) / 3600000);
   const s = 'padding:14px 0;border-radius:13px;font-family:Inter,sans-serif;font-size:1rem;font-weight:700;cursor:pointer;width:100%;max-width:280px;display:block;margin:0 auto 12px;';
-  $('scr-loading').innerHTML =
-    '<div style="text-align:center;padding:0 28px;width:100%;">' +
+  $('coming-soon-body').innerHTML =
     '<div style="font-size:2.8rem;margin-bottom:20px;">🙏</div>' +
     '<div style="font-family:Cormorant Garamond,serif;font-size:1.9rem;font-weight:600;color:var(--text);margin-bottom:12px;line-height:1.3;">Sesión de hoy completada</div>' +
     '<p style="font-size:1rem;color:var(--text-soft);line-height:1.75;margin-bottom:8px;max-width:300px;margin-left:auto;margin-right:auto;">Ya rezaste tu misterio de hoy.<br>El camino se recorre paso a paso.</p>' +
@@ -1647,7 +1657,7 @@ function showDailyLimit() {
     '<button onclick="window._repeatSession()" style="' + s + 'background:var(--lvl-bold);color:#fff;border:none;">🔄 Repetir sesión</button>' +
     '<button onclick="window._goHome()" style="' + s + 'background:var(--card);color:var(--text-soft);border:1.5px solid var(--border);">Ir al inicio</button>' +
     '</div>';
-  show('scr-loading');
+  show('scr-daily-limit');
 }
 
 async function saveAudioProgress() {
@@ -2411,8 +2421,7 @@ function showComingSoon() {
   bgmStop();
   const { nivel, cuaderno } = currentSession;
   const s = 'padding:14px 0;border-radius:13px;font-family:Inter,sans-serif;font-size:1rem;font-weight:700;cursor:pointer;width:100%;max-width:280px;display:block;margin:0 auto 12px;';
-  $('scr-loading').innerHTML =
-    '<div style="text-align:center;padding:0 28px;width:100%;">' +
+  $('coming-soon-body').innerHTML =
     '<div style="font-size:3rem;margin-bottom:20px;">\u{1F6E4}\uFE0F</div>' +
     '<div style="font-family:\'Cormorant Garamond\',serif;font-size:1.8rem;font-weight:600;color:var(--text);margin-bottom:14px;line-height:1.3;">Contenido en camino</div>' +
     '<p style="font-size:1rem;color:var(--text-soft);line-height:1.75;margin-bottom:28px;max-width:300px;margin-left:auto;margin-right:auto;">' +
@@ -2420,7 +2429,7 @@ function showComingSoon() {
     '<button onclick="window._goToPrevMystery()" style="' + s + 'background:var(--lvl-bold);color:#fff;border:none;">← Misterio anterior</button>' +
     '<button onclick="window._goHome()" style="' + s + 'background:var(--card);color:var(--text-soft);border:1.5px solid var(--border);">Ir al inicio</button>' +
     '</div>';
-  show('scr-loading');
+  show('scr-coming-soon');
 }
 
 
@@ -2575,5 +2584,7 @@ function escHTML(s) {
 initAuth();
 </script>
 
+</body>
+</script>
 </body>
 </html>
