@@ -1312,7 +1312,7 @@ const AUDIO_FOLDERS = {
   bye:    R2_BASE + '/bye/'
 };
 const BGM_BASE = R2_BASE + '/BGM/';
-const NUM_SEGS  = 9;   // segmentos visuales en la barra de progreso
+const NUM_SEGS  = 10;  // segmentos visuales en la barra de progreso
 const BGM_VOL   = 0.07; // volumen de la música de fondo (0.0 – 1.0)
 
 const BLOCKS     = ['gozosos','luminosos','dolorosos','gloriosos'];
@@ -1754,30 +1754,33 @@ async function buildSession() {
   const silencioUrl = AUDIO_FOLDERS['rezo'] + 'silencio.mp3'; // /audio/global/silencio.mp3
   const pausaUrl   = AUDIO_FOLDERS['rezo'] + 'pausa.mp3';
   const playlist = [
-    { label:'Bienvenida',      file:`START_${n}_${c}_${m}.mp3`,  folder:'start',  seg:0 },
-    { label:'Bienvenida',      file:'pausa.mp3',                  folder:'rezo',   seg:0, silence:true },
-    { label:'Camino y Palabra',file:`UBIBLE_${n}_${c}_${m}.mp3`, folder:'ubible', seg:1 },
-    { label:'Camino y Palabra',file:'pausa.mp3',                  folder:'rezo',   seg:1, silence:true },
-    { label:'Contemplación',   file:`CONT_${n}_${c}_${m}.mp3`,   folder:'cont',   seg:2 },
-    { label:'Contemplación',   file:'pausa.mp3',                  folder:'rezo',   seg:2, silence:true },
-    { label:'Rezo',            file:`rezo.mp3`,                   folder:'rezo',   seg:3 },
-    { label:'Rezo',            file:'pausa.mp3',                  folder:'rezo',   seg:3, silence:true },
-    { label:'Canto',           file:`M_${n}_${c}_${m}.mp3`,      folder:'music',  seg:4 },
-    { label:'Canto',           file:'pausa.mp3',                  folder:'rezo',   seg:4, silence:true },
+    // ── Introducción: En el nombre del Padre... ──
+    { label:'Introducción',    file:'ennombre.mp3',               folder:'rezo',   seg:0 },
+    { label:'Introducción',    file:'pausa.mp3',                  folder:'rezo',   seg:0, silence:true },
+    { label:'Bienvenida',      file:`START_${n}_${c}_${m}.mp3`,  folder:'start',  seg:1 },
+    { label:'Bienvenida',      file:'pausa.mp3',                  folder:'rezo',   seg:1, silence:true },
+    { label:'Camino y Palabra',file:`UBIBLE_${n}_${c}_${m}.mp3`, folder:'ubible', seg:2 },
+    { label:'Camino y Palabra',file:'pausa.mp3',                  folder:'rezo',   seg:2, silence:true },
+    { label:'Contemplación',   file:`CONT_${n}_${c}_${m}.mp3`,   folder:'cont',   seg:3 },
+    { label:'Contemplación',   file:'pausa.mp3',                  folder:'rezo',   seg:3, silence:true },
+    { label:'Rezo',            file:`rezo.mp3`,                   folder:'rezo',   seg:4 },
+    { label:'Rezo',            file:'pausa.mp3',                  folder:'rezo',   seg:4, silence:true },
+    { label:'Canto',           file:`M_${n}_${c}_${m}.mp3`,      folder:'music',  seg:5 },
+    { label:'Canto',           file:'pausa.mp3',                  folder:'rezo',   seg:5, silence:true },
     // ── Separador de Meditación ──
-    { label:'Meditación',      file:'meditacion.mp3',             folder:'rezo',   seg:5 },
-    { label:'Meditación',      file:'pausa.mp3',                  folder:'rezo',   seg:5, silence:true },
+    { label:'Meditación',      file:'meditacion.mp3',             folder:'rezo',   seg:6 },
+    { label:'Meditación',      file:'pausa.mp3',                  folder:'rezo',   seg:6, silence:true },
     // ── Bloque de Preguntas ──
-    { label:'Preguntas',       file:`QA_${n}_${c}_${m}.mp3`,     folder:'q',      seg:6, qIdx:0 },
-    { label:'Preguntas',       file:'silencio.mp3',               folder:'rezo',   seg:6, silence:true },
-    { label:'Preguntas',       file:`QB_${n}_${c}_${m}.mp3`,     folder:'q',      seg:6, qIdx:1 },
-    { label:'Preguntas',       file:'silencio.mp3',               folder:'rezo',   seg:6, silence:true },
-    { label:'Preguntas',       file:`QC_${n}_${c}_${m}.mp3`,     folder:'q',      seg:6, qIdx:2 },
-    { label:'Preguntas',       file:'silencio.mp3',               folder:'rezo',   seg:6, silence:true },
+    { label:'Preguntas',       file:`QA_${n}_${c}_${m}.mp3`,     folder:'q',      seg:7, qIdx:0 },
+    { label:'Preguntas',       file:'silencio.mp3',               folder:'rezo',   seg:7, silence:true },
+    { label:'Preguntas',       file:`QB_${n}_${c}_${m}.mp3`,     folder:'q',      seg:7, qIdx:1 },
+    { label:'Preguntas',       file:'silencio.mp3',               folder:'rezo',   seg:7, silence:true },
+    { label:'Preguntas',       file:`QC_${n}_${c}_${m}.mp3`,     folder:'q',      seg:7, qIdx:2 },
+    { label:'Preguntas',       file:'silencio.mp3',               folder:'rezo',   seg:7, silence:true },
     // ── Oración final + pausa + Despedida ──
-    { label:'Oración final',   file:`PRAY_${n}_${c}_${m}.mp3`,   folder:'pray',   seg:7 },
-    { label:'Oración final',   file:'pausa.mp3',                  folder:'rezo',   seg:7, silence:true },
-    { label:'Despedida',       file:`BYE_${n}_${c}_${m}.mp3`,    folder:'bye',    seg:8 }
+    { label:'Oración final',   file:`PRAY_${n}_${c}_${m}.mp3`,   folder:'pray',   seg:8 },
+    { label:'Oración final',   file:'pausa.mp3',                  folder:'rezo',   seg:8, silence:true },
+    { label:'Despedida',       file:`BYE_${n}_${c}_${m}.mp3`,    folder:'bye',    seg:9 }
   ].map(t => ({
     ...t,
     url: (t.folder === 'rezo' && t.file === 'silencio.mp3') ? silencioUrl
@@ -1855,8 +1858,14 @@ function renderSession() {
 
   // Eventos controles
   $('btn-play-pause').onclick = togglePlayPause;
-  $('btn-prev').onclick       = () => goTrack(currentTrack - 1);
-  $('btn-next').onclick       = () => goTrack(currentTrack + 1);
+  $('btn-prev').onclick = () => {
+    const prev = prevRealTrack(currentTrack);
+    if (prev >= 0) goTrack(prev);
+  };
+  $('btn-next').onclick = () => {
+    const next = nextRealTrack(currentTrack);
+    if (next >= 0) goTrack(next);
+  };
   $('btn-complete').onclick   = completeSession;
 
   // Progress bar click
@@ -1904,6 +1913,23 @@ function isCanto(idx) {
   return playlist && playlist[idx] && playlist[idx].folder === 'music';
 }
 
+// Saltar tracks de pausa/silencio — para controles ⏮⏭
+function nextRealTrack(idx) {
+  const { playlist } = currentSession;
+  let next = idx + 1;
+  while (next < playlist.length && playlist[next].silence) next++;
+  return next < playlist.length ? next : -1;
+}
+
+function prevRealTrack(idx) {
+  const { playlist } = currentSession;
+  let prev = idx - 1;
+  while (prev >= 0 && playlist[prev].silence) prev--;
+  // Si el track actual ya es real, retroceder al anterior real
+  // Si el track anterior real ya completó, ir al que le precede
+  return prev >= 0 ? prev : -1;
+}
+
 // Progreso acumulado dentro del bloque de Preguntas (seg 6)
 // Para animar la barra del segmento 5 de forma continua a través de 6 sub-tracks
 function getSegProgress(trackIdx) {
@@ -1911,7 +1937,7 @@ function getSegProgress(trackIdx) {
   const track = playlist[trackIdx];
   if (!track || track.seg !== 5) return null;
   // Sub-tracks del seg 5: índices en playlist donde seg===5
-  const qTracks = playlist.map((t,i) => t.seg === 6 ? i : -1).filter(i => i >= 0);
+  const qTracks = playlist.map((t,i) => t.seg === 7 ? i : -1).filter(i => i >= 0);
   const posInGroup = qTracks.indexOf(trackIdx); // 0-5
   const total = qTracks.length; // 6
   return { posInGroup, total };
@@ -1923,15 +1949,17 @@ function goTrack(idx) {
 
   stopAudio();
   currentTrack = idx;
-  updateSectionDisplay(idx);
 
   const track = playlist[idx];
 
-  // BGM: silencio en Bienvenida (START) y Canto; activo desde UBIBLE en adelante
-  if (isCanto(idx)) {
-    bgmPause();
-  } else {
-    bgmResume();
+  // Tracks de pausa/silencio: reproducir sin actualizar UI ni BGM
+  if (!track.silence) {
+    updateSectionDisplay(idx);
+    if (isCanto(idx)) {
+      bgmPause();
+    } else {
+      bgmResume();
+    }
   }
 
   audioEl = new Audio(track.url);
@@ -1954,7 +1982,7 @@ function goTrack(idx) {
   };
 
   audioEl.ontimeupdate = () => {
-    if (!audioEl.duration) return;
+    if (!audioEl.duration || track.silence) return;
     const pct = (audioEl.currentTime / audioEl.duration) * 100;
     $('progress-fill').style.width = pct + '%';
     $('time-current').textContent = fmtTime(audioEl.currentTime);
@@ -1964,7 +1992,6 @@ function goTrack(idx) {
     // Barra del segmento visual
     const gp = getSegProgress(idx);
     if (gp) {
-      // Segmento de Preguntas: progreso continuo a través de los 6 sub-tracks
       const segPct = ((gp.posInGroup + pct / 100) / gp.total) * 100;
       const fill = $('pseg-fill-' + track.seg);
       if (fill) fill.style.width = segPct + '%';
@@ -1975,13 +2002,15 @@ function goTrack(idx) {
   };
 
   audioEl.onended = () => {
-    if (isCanto(idx)) bgmResume();
-    // Marcar segmento visual como done solo al terminar el ÚLTIMO sub-track del grupo
-    const gp = getSegProgress(idx);
-    if (gp) {
-      if (gp.posInGroup === gp.total - 1) markSegDone(track.seg); // seg:6
-    } else {
-      markSegDone(track.seg);
+    if (!track.silence) {
+      if (isCanto(idx)) bgmResume();
+      // Marcar segmento visual como done
+      const gp = getSegProgress(idx);
+      if (gp) {
+        if (gp.posInGroup === gp.total - 1) markSegDone(track.seg);
+      } else {
+        markSegDone(track.seg);
+      }
     }
     if (idx + 1 < playlist.length) {
       goTrack(idx + 1);
@@ -2001,9 +2030,11 @@ function goTrack(idx) {
     });
   };
 
-  // Marcar segmento visual como activo (solo si no está ya done)
-  const segEl = $('pseg-' + track.seg);
-  if (segEl && !segEl.classList.contains('done')) segEl.classList.add('active');
+  // Marcar segmento visual como activo (solo si no es silence y no está ya done)
+  if (!track.silence) {
+    const segEl = $('pseg-' + track.seg);
+    if (segEl && !segEl.classList.contains('done')) segEl.classList.add('active');
+  }
 }
 
 function markSegProgress(trackIdx, pct) {
