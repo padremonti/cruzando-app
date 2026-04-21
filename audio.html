@@ -1443,8 +1443,13 @@ window._logout = () => {
 };
 window._goHome = () => { location.href = 'index.html'; };
 
+let _prevMysteryBusy = false; // guard contra doble pulsación
 window._goToPrevMystery = async () => {
+  if (_prevMysteryBusy) return;
+  _prevMysteryBusy = true;
+
   if (!audioProgress) { location.reload(); return; }
+
   let { nivel, cuaderno, misterio } = audioProgress;
   misterio--;
   if (misterio < 1) {
@@ -1452,16 +1457,23 @@ window._goToPrevMystery = async () => {
     cuaderno--;
     if (cuaderno < 1) { cuaderno = 4; nivel = Math.max(1, nivel - 1); }
   }
-  audioProgress.nivel = nivel;
+  audioProgress.nivel    = nivel;
   audioProgress.cuaderno = cuaderno;
   audioProgress.misterio = misterio;
   audioProgress.firstAnswered = [false, false, false];
+
   await saveAudioProgress();
+
   if (epilogoAudioEl) { epilogoAudioEl.pause(); epilogoAudioEl = null; }
   sessionMeters = 0; sessionCompleted = false; currentTrack = -1;
   stopAudio(); bgmStop();
   show('scr-loading'); setMsg('Cargando misterio anterior…');
-  setTimeout(() => buildSession(), 300);
+
+  // Usar loadUserAndStart para reinicializar todo correctamente
+  // (buildSession sola no recarga el JSON del cuaderno si cambió)
+  await loadUserAndStart(true); // true = no releer audioProgress, usar el de memoria
+
+  _prevMysteryBusy = false;
 };
 
 window._repeatSession = async () => {
@@ -1543,7 +1555,7 @@ function showLoginError(msg) {
 // FIREBASE — PROGRESO
 // ════════════════════════════════════════════
 
-async function loadUserAndStart() {
+async function loadUserAndStart(skipProgressRead = false) {
   show('scr-loading');
   setMsg('Cargando tu camino…');
 
@@ -1571,22 +1583,24 @@ async function loadUserAndStart() {
     console.warn('Error leyendo plan (asumiendo premium):', e.message);
   }
 
-  // Leer audioProgress
-  try {
-    const snap = await getDoc(doc(db, 'users', uid, 'audioProgress', 'current'));
-    if (snap.exists()) {
-      audioProgress = snap.data();
-    } else {
-      audioProgress = {
-        nivel: 1, cuaderno: 1, misterio: 1,
-        firstAnswered: [false, false, false],
-        history: []
-      };
-      await setDoc(doc(db, 'users', uid, 'audioProgress', 'current'), audioProgress);
+  // Leer audioProgress (omitir si ya está en memoria y skipProgressRead=true)
+  if (!skipProgressRead) {
+    try {
+      const snap = await getDoc(doc(db, 'users', uid, 'audioProgress', 'current'));
+      if (snap.exists()) {
+        audioProgress = snap.data();
+      } else {
+        audioProgress = {
+          nivel: 1, cuaderno: 1, misterio: 1,
+          firstAnswered: [false, false, false],
+          history: []
+        };
+        await setDoc(doc(db, 'users', uid, 'audioProgress', 'current'), audioProgress);
+      }
+    } catch(e) {
+      console.error('Error cargando progreso:', e);
+      if (!audioProgress) audioProgress = { nivel: 1, cuaderno: 1, misterio: 1, firstAnswered:[false,false,false], history:[] };
     }
-  } catch(e) {
-    console.error('Error cargando progreso:', e);
-    audioProgress = { nivel: 1, cuaderno: 1, misterio: 1, firstAnswered:[false,false,false], history:[] };
   }
 
   // Límite diario de free: se gestiona en el botón de completar sesión
