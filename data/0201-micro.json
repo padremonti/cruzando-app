@@ -1,0 +1,296 @@
+{
+  "id": "0201",
+  "nivel": "CruzAndo Emociones",
+  "cuaderno": "Sensaciones",
+  "tension_vertebral": "Mi cuerpo es el primer lugar donde Dios me encuentra",
+  "bloques": {
+    "gozosos": {
+      "subtitulo": "El Verbo se hace carne",
+      "tarjetas": [
+        {
+          "emoji": "👁️",
+          "titulo": "El cuerpo percibe primero",
+          "contenido": "Antes de que pienses, juzgues o decidas, algo ya llegó a ti: una sensación. El cuerpo recibe el mundo antes de que la mente lo procese."
+        },
+        {
+          "emoji": "👣",
+          "titulo": "El camino también es oración",
+          "contenido": "María caminó presurosa hacia las montañas cargando alegría y misterio. Las sensaciones del trayecto —el sol, el polvo, el viento— eran parte de lo que llevaba."
+        },
+        {
+          "emoji": "🌾",
+          "titulo": "Dios nació sin filtros",
+          "contenido": "El Hijo de Dios se Encarnó, es decir, asumió en su ser todo lo que humanamente, materialmente, somos: con frío, con hambre, con necesidad de calor. Ninguna sensación humana quedó fuera de lo que Dios quiso asumir."
+        },
+        {
+          "emoji": "🤲",
+          "titulo": "El cuerpo reconoce antes de entender",
+          "contenido": "Simeón reconoció a Dios en sus brazos antes de poder explicarlo. Hay certezas que llegan a través del cuerpo, no a pesar de él."
+        }
+      ],
+      "preguntas": [
+        {
+          "pregunta": "¿Tu cuerpo alguna vez te avisó algo importante antes de que lo entendieras?",
+          "opciones": [
+            {
+              "texto": "Sí, pero no siempre le hago caso.",
+              "emoji": "👂",
+              "eco": "Aprender a escucharlo es parte del camino."
+            },
+            {
+              "texto": "Suelo percibir y entender casi al mismo tiempo.",
+              "emoji": "💡",
+              "eco": "Esa sintonía es un regalo que vale cuidar."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Qué sensaciones te acercan a Dios o te hacen sentir en paz?",
+          "opciones": [
+            {
+              "texto": "Sonidos, lugares o momentos del día.",
+              "emoji": "🌅",
+              "eco": "Esos anclajes sensoriales son válidos en la oración."
+            },
+            {
+              "texto": "El silencio y la quietud del cuerpo.",
+              "emoji": "🕊️",
+              "eco": "Ese silencio también tiene textura propia."
+            }
+          ]
+        },
+        {
+          "pregunta": "Al comenzar este bloque, ¿qué quieres traer a la oración?",
+          "opciones": [
+            {
+              "texto": "Una sensación que no he sabido nombrar.",
+              "emoji": "🌫️",
+              "eco": "Traerla sin nombre ya es empezar."
+            },
+            {
+              "texto": "Gratitud por lo que el cuerpo me ha dado.",
+              "emoji": "🙏",
+              "eco": "Esa gratitud abre la oración desde adentro."
+            }
+          ]
+        }
+      ]
+    },
+    "luminosos": {
+      "subtitulo": "Dios entra por los sentidos",
+      "tarjetas": [
+        {
+          "emoji": "💧",
+          "titulo": "Tu cuerpo bautizado lleva una marca",
+          "contenido": "El cuerpo de Jesús —mojado, luminoso, con el agua escurriéndose— fue el lugar donde el Padre se complació. Tu cuerpo bautizado lleva esa misma marca imborrable."
+        },
+        {
+          "emoji": "🍷",
+          "titulo": "Dios cuida el gozo sensorial",
+          "contenido": "El primer milagro de Jesús no fue sanar ni resucitar. Fue garantizar que la fiesta continuara. Dios intervino en una boda para que hubiera más vino, signo de su bendición; y el sabor del vino era muy bueno."
+        },
+        {
+          "emoji": "👂",
+          "titulo": "Dios llega a través de los sentidos",
+          "contenido": "Jesús predicó caminando, tocando, mirando a los ojos. El Reino se anuncia sensorialmente, en contacto directo con la piel, la voz y los ojos de la gente que sufre."
+        },
+        {
+          "emoji": "✨",
+          "titulo": "Lo que los ojos no pueden sostener",
+          "contenido": "En el Tabor, los discípulos cayeron al suelo ante una luz que sus ojos no podían aguantar. Nuestros sentidos no pueden soportar ver a Dios directamente, por eso, Dios envió a su Hijo como mediador, para que lo escuchemos y veamos."
+        }
+      ],
+      "preguntas": [
+        {
+          "pregunta": "¿Por qué sentido te llega más fácilmente la presencia de Dios?",
+          "opciones": [
+            {
+              "texto": "La palabra escuchada o la música.",
+              "emoji": "🎵",
+              "eco": "El oído también es puerta de lo sagrado."
+            },
+            {
+              "texto": "El silencio, la naturaleza o el contacto.",
+              "emoji": "🌿",
+              "eco": "El cuerpo quieto también sabe rezar."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Has aprendido a separar el placer sensorial de la experiencia espiritual?",
+          "opciones": [
+            {
+              "texto": "Sí, casi siempre los veo como cosas distintas.",
+              "emoji": "🪞",
+              "eco": "El milagro de Caná te sugiere que no tienen por qué estarlo."
+            },
+            {
+              "texto": "Los siento conectados con frecuencia.",
+              "emoji": "🌊",
+              "eco": "Esa conexión es un don que bien vale explorar."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Cómo llegas a la oración en este bloque luminoso?",
+          "opciones": [
+            {
+              "texto": "Con ganas de descubrir cómo Dios me toca.",
+              "emoji": "🕯️",
+              "eco": "Esa apertura ya es disposición real."
+            },
+            {
+              "texto": "Con algo concreto que quiero ofrecer.",
+              "emoji": "☀️",
+              "eco": "Ese ofrecimiento tiene peso espiritual."
+            }
+          ]
+        }
+      ]
+    },
+    "dolorosos": {
+      "subtitulo": "Sentir sin huir",
+      "tarjetas": [
+        {
+          "emoji": "🌿",
+          "titulo": "Presente en lo insoportable",
+          "contenido": "En Getsemaní, Jesús no huyó ni se distrajo. Estuvo completamente presente en una sensación insoportable. El cuerpo angustiado y la oración activa, al mismo tiempo."
+        },
+        {
+          "emoji": "🩹",
+          "titulo": "La sensibilidad es un don y una exposición",
+          "contenido": "Las mismas terminaciones nerviosas que perciban el abrazo también perciben las heridas. Jesús asumió esa condición hasta el final."
+        },
+        {
+          "emoji": "👑",
+          "titulo": "La herida y la humillación son distintas",
+          "contenido": "La herida física duele, pero la humillación afecta algo más profundo: la imagen que uno tiene de sí mismo, la dignidad que el cuerpo porta. Jesús sintió estas dos ofensas."
+        },
+        {
+          "emoji": "🖐️",
+          "titulo": "Un toque de ternura en el camino",
+          "contenido": "En el Via Crucis, una mujer limpió el rostro de Jesús. Un gesto táctil, pequeño, humano. En el camino más oscuro, el contacto que dice: te veo, no eres invisible."
+        }
+      ],
+      "preguntas": [
+        {
+          "pregunta": "¿Hay sensaciones físicas de angustia que sueles ignorar o suprimir?",
+          "opciones": [
+            {
+              "texto": "Sí, intento seguir adelante sin atenderlas.",
+              "emoji": "⚡",
+              "eco": "Quedarse presente en ellas también es oración."
+            },
+            {
+              "texto": "Trato de escucharlas antes de actuar.",
+              "emoji": "🌱",
+              "eco": "Esa disposición ya es sabiduría corporal."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Hay algo que llevas cargando en el cuerpo que todavía no has nombrado?",
+          "opciones": [
+            {
+              "texto": "Sí, hay tensión o peso que reconozco.",
+              "emoji": "🪨",
+              "eco": "Nombrarlo ante Cristo ya aligera algo ese peso."
+            },
+            {
+              "texto": "He ido soltando lo que cargaba.",
+              "emoji": "🍃",
+              "eco": "Ese soltar también es gracia concreta."
+            }
+          ]
+        },
+        {
+          "pregunta": "Al entrar en este bloque, ¿qué necesitas más?",
+          "opciones": [
+            {
+              "texto": "Que alguien limpie el polvo de mi camino.",
+              "emoji": "💜",
+              "eco": "Puedes pedir esa ternura en la oración."
+            },
+            {
+              "texto": "Fuerza para seguir cargando sin quedarme.",
+              "emoji": "🌄",
+              "eco": "Esa fuerza puede ser pedida y recibida."
+            }
+          ]
+        }
+      ]
+    },
+    "gloriosos": {
+      "subtitulo": "El cuerpo será eterno",
+      "tarjetas": [
+        {
+          "emoji": "🌅",
+          "titulo": "La Resurrección no borró el cuerpo",
+          "contenido": "Jesús resucitó con un cuerpo. No como espíritu puro. La materia, la carne, todo lo que has vivido en este cuerpo tiene valor eterno."
+        },
+        {
+          "emoji": "👀",
+          "titulo": "Al cuerpo le duele la ausencia",
+          "contenido": "Los discípulos siguieron mirando al cielo, aunque ya no había nada que ver. El cuerpo registra las despedidas y las pérdidas antes de que el duelo encuentre palabras."
+        },
+        {
+          "emoji": "🔥",
+          "titulo": "El Espíritu llega al cuerpo",
+          "contenido": "Pentecostés no fue una experiencia abstracta. Fue viento, fuego y lenguas. El Espíritu Santo llegó de una manera que el cuerpo registró antes de que la mente lo procesara."
+        },
+        {
+          "emoji": "🌟",
+          "titulo": "Tu cuerpo está destinado a la gloria",
+          "contenido": "María sube al cielo siendo lo que siempre fue: una mujer con un cuerpo que sintió, sufrió, amó y envejeció. Ese cuerpo, con toda su historia sensorial, entra en la gloria."
+        }
+      ],
+      "preguntas": [
+        {
+          "pregunta": "¿Tuviste alguna pérdida o duelo, y algo de tu cuerpo se quedó paralizado, sin saber cómo moverse?",
+          "opciones": [
+            {
+              "texto": "Sí, y todavía la llevo.",
+              "emoji": "❤️‍🩹",
+              "eco": "Ora, desde ese duelo, y encontrarás alivio."
+            },
+            {
+              "texto": "No, que yo lo sepa aún.",
+              "emoji": "🌠",
+              "eco": "Crecer, envejecer, o cambiar incluyen siempre algún tipo de duelo ."
+            }
+          ]
+        },
+        {
+          "pregunta": "¿Tratas tu cuerpo como algo que merece cuidado, o como algo que hay que aguantar?",
+          "opciones": [
+            {
+              "texto": "Más bien le exijo, sin escucharlo mucho.",
+              "emoji": "⚙️",
+              "eco": "La gracia divina te invita a cambiar eso."
+            },
+            {
+              "texto": "Intento cuidarlo y escucharlo.",
+              "emoji": "🌻",
+              "eco": "Ese cuidado ya es una forma de oración."
+            }
+          ]
+        },
+        {
+          "pregunta": "Al orar estos Misterios del Rosario, ¿qué sensación quieres llevar contigo?",
+          "opciones": [
+            {
+              "texto": "El deseo de habitar mejor mi cuerpo.",
+              "emoji": "🕊️",
+              "eco": "Ese deseo ya apunta hacia adelante."
+            },
+            {
+              "texto": "La gratitud por un cuerpo que sintió, vivió y vive.",
+              "emoji": "🙏",
+              "eco": "Esa gratitud es fruto verdadero."
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

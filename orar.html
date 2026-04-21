@@ -1097,6 +1097,7 @@ body {
   </div>
 </div>
 
+<script src="utils.js"></script>
 <script>
 /* ══════════════════════════════════════════════════════
    CruzAndo App · Vanilla JS · Cero dependencias
@@ -1129,8 +1130,8 @@ body {
   let medConfirmed = {};      // { gozosos: { 0: {q0:true,q1:false,q2:false}, ... }, ... }
   let microDone = {};          // { gozosos: true, luminosos: false, ... }
   let isDark = false;
-  let userPlan = 'free'; // 'free' | 'pro' | 'beta' — se carga desde Firestore al init
-  const isPremium = () => userPlan === 'pro' || userPlan === 'beta';
+  let userPlan = 'free'; // 'free' | 'beta' | 'premium' — se carga desde Firestore al init
+  const isPremium = () => userPlan !== 'free';
 
   // ── Gamificación ──
   let totalMeters = 0;
@@ -1368,6 +1369,13 @@ body {
     }
 
     // isDark siempre desde localStorage (preferencia de UI, no progreso)
+    // Primero: key compartida entre todas las páginas
+    try {
+      const shared = localStorage.getItem('cruzando_theme');
+      if (shared === 'dark')  isDark = true;
+      if (shared === 'light') isDark = false;
+    } catch(e) {}
+    // Luego: preferencia específica del nivel (tiene prioridad si existe)
     try {
       const raw = localStorage.getItem(lsKey());
       if (raw) {
@@ -1576,6 +1584,7 @@ body {
     $('ico-moon').style.display = isDark ? 'block' : 'none';
     document.querySelector('meta[name="theme-color"]').content = isDark ? '#1A1714' : '#E6DED3';
     // isDark es preferencia de UI — solo localStorage, no Firestore
+    try { localStorage.setItem('cruzando_theme', isDark ? 'dark' : 'light'); } catch(e) {}
     try {
       const raw = localStorage.getItem(lsKey());
       const d = raw ? JSON.parse(raw) : {};
@@ -2499,8 +2508,8 @@ body {
     try {
       if (currentUser) {
         const snap = await _db.collection('users').doc(currentUser.uid).get();
-        if (snap.exists && snap.data().plan) {
-          userPlan = snap.data().plan;
+        if (snap.exists) {
+          userPlan = resolvePlan(snap.data()); // 'free' | 'beta' | 'premium'
         }
       }
     } catch(e) { console.warn('[CruzAndo] plan load:', e.message); }

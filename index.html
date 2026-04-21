@@ -213,6 +213,27 @@ body {
 }
 .btn-login-email:active { transform:scale(0.97); }
 
+/* ── Preferencias — toggles ── */
+.pref-toggle-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:15px 0; border-bottom:1px solid var(--border);
+}
+.pref-toggle-row:last-of-type { border-bottom:none; }
+.pref-toggle-label { font-size:0.88rem; font-weight:600; color:var(--text); margin-bottom:2px; }
+.pref-toggle-sub   { font-size:0.72rem; color:var(--text-dim); }
+.pref-toggle {
+  width:44px; height:26px; border-radius:13px; flex-shrink:0; margin-left:16px;
+  background:var(--border); border:none; cursor:pointer; position:relative;
+  transition:background 0.25s; -webkit-tap-highlight-color:transparent;
+}
+.pref-toggle::after {
+  content:''; position:absolute; top:3px; left:3px;
+  width:20px; height:20px; border-radius:50%; background:#fff;
+  transition:transform 0.25s; box-shadow:0 1px 3px rgba(0,0,0,0.3);
+}
+.pref-toggle.on { background:var(--orange); }
+.pref-toggle.on::after { transform:translateX(18px); }
+
 /* ── Modal base ── */
 .modal-overlay {
   display:none; position:fixed; inset:0; z-index:200;
@@ -462,6 +483,39 @@ body {
     </button>
   </div>
 
+  <!-- ═══ MODAL PREFERENCIAS ═══ -->
+  <div class="modal-overlay" id="modal-prefs" onclick="if(event.target===this)closePrefs()">
+    <div class="modal-sheet">
+      <div class="modal-title">Preferencias</div>
+
+      <div class="pref-toggle-row">
+        <div>
+          <div class="pref-toggle-label">Tema oscuro</div>
+          <div class="pref-toggle-sub">Cambia el aspecto visual de la app</div>
+        </div>
+        <button class="pref-toggle" id="pref-toggle-theme" onclick="prefToggleTheme()"></button>
+      </div>
+
+      <div class="pref-toggle-row">
+        <div>
+          <div class="pref-toggle-label">Música de fondo en modo audio</div>
+          <div class="pref-toggle-sub">Acompaña la sesión con música ambiental</div>
+        </div>
+        <button class="pref-toggle" id="pref-toggle-bgm" onclick="prefToggleBgm()"></button>
+      </div>
+
+      <div class="pref-toggle-row">
+        <div>
+          <div class="pref-toggle-label">Micro-aprendizaje en modo audio</div>
+          <div class="pref-toggle-sub">Prepara tu corazón antes del primer misterio de cada bloque</div>
+        </div>
+        <button class="pref-toggle" id="pref-toggle-micro" onclick="prefToggleMicro()"></button>
+      </div>
+
+      <button class="btn-modal-close" onclick="closePrefs()" style="margin-top:20px">Cerrar</button>
+    </div>
+  </div>
+
   <!-- ═══ MODAL EMAIL ═══ -->
   <div class="modal-overlay" id="modal-email">
     <div class="modal-sheet">
@@ -551,6 +605,9 @@ body {
         <span id="plan-chip" class="plan-chip-free">Free</span>
         <button class="dark-toggle" id="btn-dark" onclick="toggleDark()" title="Cambiar modo">
           <div class="dark-toggle-knob" id="toggle-knob">🌙</div>
+        </button>
+        <button class="icon-btn" id="btn-prefs" onclick="openPrefs()" title="Preferencias">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
         </button>
         <button class="icon-btn" id="btn-perfil" title="Mi perfil">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
@@ -686,6 +743,7 @@ body {
   <div class="nav-overlay" id="nav-overlay"></div>
 </div>
 
+<script src="utils.js"></script>
 <script type="module">
 // ── Firebase SDK ──────────────────────────────────────────────────
 import { initializeApp }           from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
@@ -732,16 +790,46 @@ let selectedPlan   = 'anual';
 let codeApplied    = null;   // null | 'beta' | 'discount'
 
 // ── Tema ──────────────────────────────────────────────────────────
-var isLight = localStorage.getItem('ca_home_light') === '1';
+var isLight = localStorage.getItem('cruzando_theme') === 'light';
 function applyTheme(light) {
   document.body.classList.toggle('light', light);
   var k = document.getElementById('toggle-knob');
   if (k) k.textContent = light ? '☀️' : '🌙';
   document.querySelector('meta[name="theme-color"]').content = light ? '#E6DED3' : '#1A0E04';
-  localStorage.setItem('ca_home_light', light ? '1' : '0');
+  localStorage.setItem('cruzando_theme', light ? 'light' : 'dark');
 }
 window.toggleDark = function() { isLight = !isLight; applyTheme(isLight); };
 if (isLight) applyTheme(true);
+
+// ── Preferencias ──────────────────────────────────────────────────
+function getPrefs() {
+  try { return JSON.parse(localStorage.getItem('cruzando_prefs') || '{}'); } catch(e) { return {}; }
+}
+function setPrefs(p) {
+  try { localStorage.setItem('cruzando_prefs', JSON.stringify(p)); } catch(e) {}
+}
+window.openPrefs = function() {
+  var p = getPrefs();
+  document.getElementById('pref-toggle-theme').classList.toggle('on', !isLight);
+  document.getElementById('pref-toggle-bgm').classList.toggle('on', p.bgm !== false);
+  document.getElementById('pref-toggle-micro').classList.toggle('on', p.microInAudio !== false);
+  document.getElementById('modal-prefs').classList.add('open');
+};
+window.closePrefs = function() {
+  document.getElementById('modal-prefs').classList.remove('open');
+};
+window.prefToggleTheme = function() {
+  isLight = !isLight; applyTheme(isLight);
+  document.getElementById('pref-toggle-theme').classList.toggle('on', !isLight);
+};
+window.prefToggleBgm = function() {
+  var p = getPrefs(); p.bgm = p.bgm === false ? true : false; setPrefs(p);
+  document.getElementById('pref-toggle-bgm').classList.toggle('on', p.bgm !== false);
+};
+window.prefToggleMicro = function() {
+  var p = getPrefs(); p.microInAudio = p.microInAudio === false ? true : false; setPrefs(p);
+  document.getElementById('pref-toggle-micro').classList.toggle('on', p.microInAudio !== false);
+};
 
 // ── Helpers de fecha ─────────────────────────────────────────────
 function greetingTime() {
@@ -789,19 +877,10 @@ function getTotalMetros() {
   return t;
 }
 
-// ── Verificar beta expirado ───────────────────────────────────────
-function checkBetaExpiry(userData) {
-  if (userData.plan !== 'beta') return userData.plan;
-  if (!userData.betaExpiresAt) return 'free';
-  var expires = userData.betaExpiresAt.toDate ? userData.betaExpiresAt.toDate() : new Date(userData.betaExpiresAt);
-  if (new Date() > expires) return 'free'; // beta expirado → cae a free
-  return 'beta';
-}
-
 // ── Renderizar home ───────────────────────────────────────────────
 function renderHome(userData) {
   // Plan
-  currentPlan = checkBetaExpiry(userData);
+  currentPlan = resolvePlan(userData);
   window.currentNivelId = currentNivelId; // ya calculado desde Firestore
   // Mostrar bottom nav
   var nav = document.getElementById('app-nav');
@@ -868,8 +947,11 @@ function renderHome(userData) {
     ros.innerHTML = svg;
   });
 
-  // Metros
-  var totalM   = getTotalMetros();
+  // Metros — Firestore es la fuente de verdad (audio.html escribe ahí con increment);
+  // localStorage cubre a orar.html que sí lo actualiza localmente.
+  // Math.max cubre el edge case de escritura fallida en cualquiera de los dos.
+  var fsMeters = (userData && typeof userData.totalMeters === 'number') ? userData.totalMeters : 0;
+  var totalM   = Math.max(fsMeters, getTotalMetros());
   var metrosEl = document.getElementById('metros-display');
   if (metrosEl) metrosEl.textContent = totalM.toLocaleString('es-MX') + 'm';
   var diarioEl = document.getElementById('diario-metros');

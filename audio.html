@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#1A1714">
 <title>CruzAndo · Sesión Diaria</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
 
 <style>
 /* ══════════════════════════════════════════════
@@ -954,44 +954,47 @@ body {
   border-style: dashed;
 }
 
-/* ── Tab bar inferior — navegación común webapp ── */
-.bottom-nav-bar {
-  position: fixed;
-  bottom: 0; left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 480px;
-  background: var(--card);
-  border-top: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  padding: 8px 0 env(safe-area-inset-bottom, 10px);
-  z-index: 90;
+/* ── Bottom nav bar (estándar CruzAndo) ── */
+.app-nav {
+  position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+  width:100%; max-width:480px; z-index:90;
+  background:var(--bg); border-top:1px solid var(--border);
+  display:flex; align-items:stretch;
+  padding-bottom:env(safe-area-inset-bottom, 0px);
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
 }
-.nav-tab {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  padding: 4px 18px;
-  cursor: pointer;
-  text-decoration: none;
-  color: var(--text-dim);
-  transition: color 0.2s;
-  -webkit-tap-highlight-color: transparent;
-  border: none;
-  background: none;
-  font-family: 'Inter', sans-serif;
+.app-nav-item {
+  flex:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:4px; padding:10px 4px 12px;
+  background:none; border:none; cursor:pointer;
+  font-family:inherit; text-decoration:none;
+  color:var(--text-dim); transition:color 0.2s;
+  -webkit-tap-highlight-color:transparent;
 }
-.nav-tab.active { color: var(--lvl-bold); }
-.nav-tab:active { color: var(--text-soft); }
-.nav-tab svg { width: 22px; height: 22px; }
-.nav-tab-label {
-  font-size: 0.6rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
+.app-nav-item:active { opacity:1; }
+.app-nav-item.active { color:var(--lvl-bold); }
+.app-nav-item[disabled] { cursor:default; opacity:1; }
+@keyframes navSpring {
+  0%   { transform:scale(1); }
+  35%  { transform:scale(0.78); }
+  65%  { transform:scale(1.18); }
+  82%  { transform:scale(0.95); }
+  100% { transform:scale(1); }
+}
+.app-nav-item.tapped .app-nav-icon { animation:navSpring 0.38s cubic-bezier(0.34,1.72,0.64,1) both; }
+.app-nav-item.tapped { color:var(--lvl-bold); }
+.app-nav-icon {
+  width:24px; height:24px; position:relative;
+  display:flex; align-items:center; justify-content:center;
+}
+.app-nav-item.active .app-nav-icon::before {
+  content:''; position:absolute; inset:-5px;
+  background:rgba(255,122,0,0.12); border-radius:10px;
+}
+.app-nav-label {
+  font-size:0.6rem; font-weight:600; letter-spacing:0.4px;
+  text-transform:uppercase;
 }
 
 /* Compensar espacio del nav bar */
@@ -1016,6 +1019,128 @@ body {
   margin-top: 4px;
   letter-spacing: 0.5px;
   font-style: normal;
+}
+
+/* ══ Micro-aprendizaje (audio.html) ══════════════════════════════ */
+#scr-micro { overflow-y: auto; }
+.micro-screen { padding: 0 18px 100px; }
+.micro-header {
+  padding: 18px 0 12px; display: flex; align-items: center; justify-content: space-between;
+}
+.micro-label {
+  font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1.2px; color: var(--lvl-bold);
+}
+.micro-sub {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1.2rem; font-weight: 600; color: var(--text); margin-top: 2px;
+}
+.micro-progress { display: flex; gap: 6px; margin-bottom: 16px; }
+.micro-dot { height: 5px; border-radius: 3px; background: var(--border); transition: all 0.4s ease; }
+.micro-dot.done { background: var(--green); }
+.micro-dot.active { background: var(--lvl-bold); }
+.micro-card {
+  background: var(--card); border-radius: 20px; padding: 28px 22px;
+  border: 1.5px solid var(--border); animation: slideUp 0.4s ease both;
+  min-height: 200px; display: flex; flex-direction: column; justify-content: space-between;
+}
+.micro-card-emoji  { font-size: 2.2rem; margin-bottom: 14px; }
+.micro-card-titulo {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1.55rem; font-weight: 600; color: var(--lvl-bold); line-height: 1.2; margin-bottom: 12px;
+}
+.micro-card-contenido {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1.2rem; font-weight: 400; line-height: 1.75; color: var(--text); flex: 1;
+}
+.micro-card-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border);
+}
+.micro-card-count { font-size: 0.68rem; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.8px; }
+.micro-q-card {
+  background: var(--card); border-radius: 20px; padding: 24px 22px;
+  border: 1.5px solid var(--border); animation: slideUp 0.45s cubic-bezier(0.34,1.72,0.64,1) both;
+}
+.micro-q-label {
+  font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1.2px; color: var(--lvl-bold); margin-bottom: 14px;
+}
+.micro-q-texto {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1.35rem; font-weight: 500; line-height: 1.55; color: var(--text); margin-bottom: 20px;
+}
+.micro-option {
+  width: 100%; padding: 13px 16px; border-radius: 14px;
+  border: 1.5px solid var(--border); background: transparent;
+  color: var(--text); font-family: inherit; font-size: 0.88rem;
+  cursor: pointer; text-align: left; display: flex; align-items: center; gap: 10px;
+  transition: all 0.2s; margin-bottom: 10px;
+}
+.micro-option.selected { border-color: var(--lvl-bold); background: rgba(255,122,0,0.07); }
+.micro-option.dimmed  { opacity: 0.4; cursor: default; pointer-events: none; }
+.micro-option-circle {
+  width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+  border: 1.5px solid var(--border); background: transparent; font-size: 0.75rem;
+  display: flex; align-items: center; justify-content: center; color: var(--lvl-bold);
+}
+.micro-eco {
+  margin-top: 10px; padding: 12px 14px; border-radius: 12px;
+  background: rgba(255,122,0,0.06); border: 1px solid rgba(255,122,0,0.15);
+  font-family: 'Crimson Pro', Georgia, serif; font-size: 1.05rem; color: var(--text-soft);
+  display: flex; align-items: flex-start; gap: 8px;
+}
+.micro-eco-emoji { font-size: 1.3rem; flex-shrink: 0; margin-top: 1px; }
+.micro-final {
+  text-align: center; padding: 40px 0 20px;
+}
+.micro-final-cross { margin-bottom: 24px; }
+.micro-final-titulo {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1.6rem; font-weight: 600; color: var(--text); margin-bottom: 10px;
+}
+.micro-final-sub {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1.1rem; color: var(--text-soft); line-height: 1.6; margin-bottom: 20px;
+}
+.micro-metros-chip {
+  display: inline-block; padding: 6px 14px; border-radius: 20px;
+  background: rgba(76,175,125,0.12); color: var(--green);
+  font-size: 0.78rem; font-weight: 700; margin-bottom: 24px;
+}
+.micro-nav { margin-top: 18px; display: flex; flex-direction: column; gap: 10px; }
+.micro-btn-primary {
+  width: 100%; padding: 15px; border-radius: 14px;
+  background: var(--lvl-bold); color: #fff; border: none;
+  font-family: inherit; font-size: 0.95rem; font-weight: 700; cursor: pointer;
+  transition: opacity 0.2s; -webkit-tap-highlight-color: transparent;
+}
+.micro-btn-primary:active { opacity: 0.85; }
+.micro-btn-outline {
+  width: 100%; padding: 13px; border-radius: 14px;
+  background: transparent; color: var(--text-soft);
+  border: 1.5px solid var(--border); font-family: inherit; font-size: 0.88rem;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+
+/* ── Botón de Preparación (ya completado el micro) ── */
+.prep-btn-wrap { padding: 12px 0 4px; }
+.prep-btn {
+  width: 100%; padding: 16px 20px; border-radius: 16px;
+  background: var(--card); border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  cursor: pointer; text-align: left; color: var(--text);
+  font-family: inherit; -webkit-tap-highlight-color: transparent;
+  transition: border-color 0.2s;
+}
+.prep-btn:active { border-color: var(--lvl-bold); }
+.prep-btn-label {
+  font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--lvl-bold); display: block; margin-bottom: 2px;
+}
+.prep-btn-name {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1.05rem; font-weight: 500; color: var(--text-soft);
 }
 </style>
 </head>
@@ -1049,6 +1174,21 @@ body {
         Google
       </button>
       <div class="login-error" id="login-error"></div>
+    </div>
+  </div>
+
+  <!-- ═══ PANTALLA: MICRO-APRENDIZAJE ═══ -->
+  <div class="screen" id="scr-micro">
+    <div class="micro-screen">
+      <div class="micro-header">
+        <div>
+          <div class="micro-label" id="micro-label">Prepara tu corazón</div>
+          <div class="micro-sub"  id="micro-sub"></div>
+        </div>
+      </div>
+      <div class="micro-progress" id="micro-progress"></div>
+      <div id="micro-content"></div>
+      <div class="micro-nav" id="micro-nav"></div>
     </div>
   </div>
 
@@ -1105,6 +1245,9 @@ body {
     <!-- Controles -->
     <div class="session-controls">
 
+      <!-- Botón de Preparación (solo en primer misterio de bloque, cuando micro ya fue completado) -->
+      <div id="prep-btn-wrap" style="display:none"></div>
+
       <!-- Sección actual + tiempo -->
       <div class="section-label-wrap">
         <div class="section-label">
@@ -1155,7 +1298,7 @@ body {
 
       <!-- Botón completar sesión (aparece al terminar playlist) -->
       <button class="btn-complete" id="btn-complete">
-        ✓ Completar sesión · +1,200m
+        ✓ Completar sesión
       </button>
 
     </div>
@@ -1202,24 +1345,46 @@ body {
   </div>
 
 
-<!-- ── Tab bar inferior ── -->
-<nav class="bottom-nav-bar" id="bottom-nav-bar">
-  <a class="nav-tab active" href="audio.html">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
-    <span class="nav-tab-label">Orar</span>
-  </a>
-  <a class="nav-tab" href="diario.html">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-    <span class="nav-tab-label">Diario</span>
-  </a>
-  <a class="nav-tab" href="sanar.html">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-    <span class="nav-tab-label">Sanar</span>
-  </a>
-  <a class="nav-tab" href="index.html">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-    <span class="nav-tab-label">Inicio</span>
-  </a>
+<!-- ── Bottom nav bar ── -->
+<nav class="app-nav">
+  <button class="app-nav-item active" disabled>
+    <div class="app-nav-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="2" x2="12" y2="22"/>
+        <line x1="4" y1="9" x2="20" y2="9"/>
+      </svg>
+    </div>
+    <span class="app-nav-label">Orar</span>
+  </button>
+  <button class="app-nav-item" onclick="navTap(this); goTo('diario.html')">
+    <div class="app-nav-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/>
+        <path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/>
+      </svg>
+    </div>
+    <span class="app-nav-label">Diario</span>
+  </button>
+  <button class="app-nav-item" onclick="navTap(this); goTo('sanar.html')">
+    <div class="app-nav-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s-8-5.5-8-11a8 8 0 0116 0c0 5.5-8 11-8 11z"/>
+        <path d="M9 11h6M12 8v6"/>
+      </svg>
+    </div>
+    <span class="app-nav-label">Sanar</span>
+  </button>
+  <button class="app-nav-item" onclick="navTap(this); goTo('index.html')">
+    <div class="app-nav-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7" rx="1"/>
+        <rect x="14" y="3" width="7" height="7" rx="1"/>
+        <rect x="3" y="14" width="7" height="7" rx="1"/>
+        <rect x="14" y="14" width="7" height="7" rx="1"/>
+      </svg>
+    </div>
+    <span class="app-nav-label">Inicio</span>
+  </button>
 </nav>
 </div><!-- /shell -->
 
@@ -1252,6 +1417,7 @@ body {
 </div>
 
 <!-- ── Firebase SDK ── -->
+<script src="utils.js"></script>
 <script type="module">
 /* ══════════════════════════════════════════════
    CruzAndo · Sesión Diaria · audio.html
@@ -1276,7 +1442,8 @@ import {
   getDoc,
   setDoc,
   updateDoc,
-  increment
+  increment,
+  serverTimestamp
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 // ── FIREBASE CONFIG (pegar aquí tu config) ──
@@ -1368,10 +1535,25 @@ const BLOCK_COLORS = {
 const Q_LABELS = ['Por María hacia Jesús:','Desde el Hijo hacia el Padre:','Hijos y hermanos en el Espíritu:'];
 const Q_COLORS = ['#FF7A00','#C0392B','#27AE60'];
 
-// Metros
-const METERS_SESSION   = 1200;
-const METERS_Q_FIRST   = 650;
-const METERS_Q_UPDATE  = 200;
+// Metros — progresivos por sección
+const METERS_SECTION = {
+  ubible:       { meters: 200, label: 'Camino y Palabra' },
+  cont:         { meters: 200, label: 'Contemplación'    },
+  rezo_seg4:    { meters: 800, label: 'Rezo'             },
+  q_0:          { meters: 150, label: 'Primera pregunta'  },
+  q_1:          { meters: 150, label: 'Segunda pregunta'  },
+  q_2:          { meters: 150, label: 'Tercera pregunta'  },
+};
+const METERS_EPILOGO_CANTO = 200;
+const METERS_Q_FIRST       = 650;
+const METERS_Q_UPDATE      = Math.floor(650 / 2); // 325 — igual que orar.html
+const METERS_BLOCK_BONUS   = 1000;
+const METERS_MICRO         = 600;  // metros al completar micro en audio
+
+// Preferencias del usuario (localStorage)
+function getPrefs() {
+  try { return JSON.parse(localStorage.getItem('cruzando_prefs') || '{}'); } catch(e) { return {}; }
+}
 
 // ════════════════════════════════════════════
 // ESTADO GLOBAL
@@ -1383,6 +1565,9 @@ let userPlan         = 'premium'; // default premium; free solo si explícitamen
 let currentData      = null;  // JSON del nivel/cuaderno
 let currentSession   = null;  // { nivel, cuaderno, misterio, block, mysteryData, playlist }
 let sessionMeters    = 0;
+let sectionRewards   = new Set(); // secciones que ya dieron metros esta sesión (evita doble-award)
+let microData        = null;  // {id}-micro.json del cuaderno actual
+let blockMicroDone   = false; // si el micro del bloque actual ya fue completado
 let sessionCompleted = false;
 
 // Tema
@@ -1398,7 +1583,7 @@ let autosaveTimer  = null;
 
 // BGM — música de fondo
 let bgmEl          = null;   // elemento <audio> del BGM
-let bgmEnabled     = true;   // el usuario puede silenciarlo
+let bgmEnabled     = getPrefs().bgm !== false;  // respeta la preferencia del usuario
 let bgmLoaded      = false;  // ya se intentó cargar
 const BGM_TRACK_IDX = 4;     // índice de "Canto" en la playlist (0-based)
 
@@ -1478,7 +1663,7 @@ window._goToPrevMystery = async () => {
     await saveAudioProgress();
 
     if (epilogoAudioEl) { epilogoAudioEl.pause(); epilogoAudioEl = null; }
-    sessionMeters = 0; sessionCompleted = false; currentTrack = -1;
+    sessionMeters = 0; sectionRewards = new Set(); sessionCompleted = false; currentTrack = -1;
     stopAudio(); bgmStop();
 
     // Recargar JSON del cuaderno si es diferente al actual
@@ -1519,7 +1704,7 @@ window.advanceAndRestart = async () => {
   audioProgress.misterio = misterio;
   audioProgress.firstAnswered = [false, false, false];
   await saveAudioProgress();
-  sessionMeters = 0; sessionCompleted = false;
+  sessionMeters = 0; sectionRewards = new Set(); sessionCompleted = false;
   $('fab-questions').style.display = 'flex';
   await buildSession();
 };
@@ -1578,6 +1763,21 @@ function showLoginError(msg) {
 // FIREBASE — PROGRESO
 // ════════════════════════════════════════════
 
+// Primer misterio (1-20) no completado en el nivel/cuaderno dado,
+// según el historial de la sesión de audio. Si todos están hechos, devuelve 1.
+function getFirstUncompletedMisterio(nivel, cuaderno) {
+  if (!audioProgress || !audioProgress.history) return 1;
+  const done = new Set(
+    audioProgress.history
+      .filter(h => h.n === nivel && h.c === cuaderno)
+      .map(h => h.m)
+  );
+  for (let m = 1; m <= 20; m++) {
+    if (!done.has(m)) return m;
+  }
+  return 1;
+}
+
 async function loadUserAndStart(skipProgressRead = false) {
   show('scr-loading');
   setMsg('Cargando tu camino…');
@@ -1585,20 +1785,11 @@ async function loadUserAndStart(skipProgressRead = false) {
   const uid = currentUser.uid;
 
   // Leer plan del usuario
-  userPlan = 'premium'; // asumir premium hasta confirmar lo contrario
+  userPlan = 'premium'; // default premium; se corrige tras leer Firestore
   try {
     const userSnap = await getDoc(doc(db, 'users', uid));
     if (userSnap.exists()) {
-      const data = userSnap.data();
-      const plan = (data.plan || '').toLowerCase().trim();
-      console.log('Firestore plan field:', plan);
-      // Solo asignar free si el plan es explícitamente vacío o 'free'
-      if (plan === 'free' || plan === '') {
-        userPlan = 'free';
-      } else {
-        userPlan = 'premium'; // beta, pro, premium → todos tienen acceso completo
-      }
-      console.log('userPlan asignado:', userPlan);
+      userPlan = resolvePlan(userSnap.data()); // 'free' | 'beta' | 'premium'
     } else {
       console.warn('Documento users/uid no encontrado — asumiendo premium');
     }
@@ -1626,7 +1817,22 @@ async function loadUserAndStart(skipProgressRead = false) {
     }
   }
 
-  // Límite diario de free: se gestiona en el botón de completar sesión
+  // Si viene ?c=0101 desde world.html, respetar el nivel/cuaderno solicitado
+  const urlParam = new URLSearchParams(location.search).get('c');
+  if (urlParam && /^\d{4}$/.test(urlParam)) {
+    const urlNivel    = parseInt(urlParam.substring(0, 2), 10);
+    const urlCuaderno = parseInt(urlParam.substring(2, 4), 10);
+    if (urlNivel >= 1 && urlNivel <= 7 && urlCuaderno >= 1 && urlCuaderno <= 4) {
+      if (audioProgress.nivel !== urlNivel || audioProgress.cuaderno !== urlCuaderno) {
+        audioProgress.nivel         = urlNivel;
+        audioProgress.cuaderno      = urlCuaderno;
+        audioProgress.misterio      = getFirstUncompletedMisterio(urlNivel, urlCuaderno);
+        audioProgress.firstAnswered = [false, false, false];
+        await saveAudioProgress();
+      }
+    }
+  }
+
   console.log('userPlan:', userPlan, '| misterio:', audioProgress.nivel, audioProgress.cuaderno, audioProgress.misterio);
   await buildSession();
 }
@@ -1648,7 +1854,7 @@ function showDailyLimit() {
   tomorrow.setHours(0, 0, 0, 0);
   const hoursLeft = Math.ceil((tomorrow - Date.now()) / 3600000);
   const s = 'padding:14px 0;border-radius:13px;font-family:Inter,sans-serif;font-size:1rem;font-weight:700;cursor:pointer;width:100%;max-width:280px;display:block;margin:0 auto 12px;';
-  $('coming-soon-body').innerHTML =
+  $('daily-limit-body').innerHTML =
     '<div style="font-size:2.8rem;margin-bottom:20px;">🙏</div>' +
     '<div style="font-family:Cormorant Garamond,serif;font-size:1.9rem;font-weight:600;color:var(--text);margin-bottom:12px;line-height:1.3;">Sesión de hoy completada</div>' +
     '<p style="font-size:1rem;color:var(--text-soft);line-height:1.75;margin-bottom:8px;max-width:300px;margin-left:auto;margin-right:auto;">Ya rezaste tu misterio de hoy.<br>El camino se recorre paso a paso.</p>' +
@@ -1671,6 +1877,46 @@ async function saveAudioProgress() {
   } catch(e) { console.error(e); }
 }
 
+// Escribe el slot del misterio completado en progress/{nivelId},
+// el mismo formato que lee world.html e index.html (orar.html lo escribe también aquí).
+async function syncToOrarProgress(nivel, cuaderno, misterio) {
+  if (!currentUser) return;
+
+  // Mapear misterio 1-20 → bloque + índice dentro del bloque
+  let block, blockIdx;
+  if      (misterio <= 5)  { block = 'gozosos';   blockIdx = misterio - 1; }
+  else if (misterio <= 10) { block = 'luminosos';  blockIdx = misterio - 6; }
+  else if (misterio <= 15) { block = 'dolorosos';  blockIdx = misterio - 11; }
+  else                     { block = 'gloriosos';  blockIdx = misterio - 16; }
+
+  const nivelId = String(nivel).padStart(2, '0') + String(cuaderno).padStart(2, '0');
+  const ref = doc(db, 'users', currentUser.uid, 'progress', nivelId);
+
+  try {
+    const snap = await getDoc(ref);
+    const EMPTY_BLOCK = [null, null, null, null, null];
+    const ALL_BLOCKS  = ['gozosos', 'luminosos', 'dolorosos', 'gloriosos'];
+
+    // Partir del progreso existente para no sobreescribir lo que orar.html ya marcó
+    let prog = {};
+    ALL_BLOCKS.forEach(b => { prog[b] = EMPTY_BLOCK.slice(); });
+
+    if (snap.exists()) {
+      const existing = snap.data().progress || {};
+      ALL_BLOCKS.forEach(b => {
+        if (Array.isArray(existing[b]) && existing[b].length === 5) {
+          prog[b] = existing[b].slice();
+        }
+      });
+    }
+
+    prog[block][blockIdx] = Date.now();
+    await setDoc(ref, { progress: prog }, { merge: true });
+  } catch(e) {
+    console.warn('[CruzAndo] syncToOrarProgress:', e);
+  }
+}
+
 async function addMetersToFirestore(meters) {
   if (!currentUser) return;
   try {
@@ -1685,14 +1931,27 @@ async function addMetersToFirestore(meters) {
   }
 }
 
+// Etiquetas de preguntas (igual que diario.html / orar.html)
+const Q_QUESTION_KEYS = ['Por María hacia Jesús:', 'Desde el Hijo hacia el Padre:', 'Hijos y hermanos en el Espíritu:'];
+
 async function saveReflection(qi, text) {
   if (!currentUser || !currentSession) return;
-  const { nivel, cuaderno, misterio } = currentSession;
-  const key = `${nivel}_${cuaderno}_${misterio}`;
+  const { nivel, cuaderno, block, blockIdx, mysteryData } = currentSession;
+  const nivelId  = String(nivel).padStart(2,'0') + String(cuaderno).padStart(2,'0');
+  const docId    = `${nivelId}_${block}_${blockIdx}_q${qi}`;
+  const questions = parseQuestions(mysteryData?.meditacion || '');
   try {
     await setDoc(
-      doc(db, 'users', currentUser.uid, 'reflections', key),
-      { [`q${qi}`]: text, updatedAt: Date.now() },
+      doc(db, 'users', currentUser.uid, 'reflections', docId),
+      {
+        nivelId,
+        bloque:      block,
+        misterioIdx: blockIdx,
+        questionIdx: qi,
+        question:    questions[qi] || Q_QUESTION_KEYS[qi] || '',
+        text,
+        confirmedAt: serverTimestamp()
+      },
       { merge: true }
     );
   } catch(e) { console.error(e); }
@@ -1700,13 +1959,35 @@ async function saveReflection(qi, text) {
 
 async function loadReflections() {
   if (!currentUser || !currentSession) return { q0:'', q1:'', q2:'' };
-  const { nivel, cuaderno, misterio } = currentSession;
-  const key = `${nivel}_${cuaderno}_${misterio}`;
-  try {
-    const snap = await getDoc(doc(db, 'users', currentUser.uid, 'reflections', key));
-    if (snap.exists()) return snap.data();
-  } catch(e) {}
-  return { q0:'', q1:'', q2:'' };
+  const { nivel, cuaderno, block, blockIdx } = currentSession;
+  const nivelId = String(nivel).padStart(2,'0') + String(cuaderno).padStart(2,'0');
+  const result  = { q0:'', q1:'', q2:'' };
+
+  // Leer el formato de orar.html (un doc por pregunta) — fuente de verdad para diario.html
+  await Promise.all([0,1,2].map(async qi => {
+    const docId = `${nivelId}_${block}_${blockIdx}_q${qi}`;
+    try {
+      const snap = await getDoc(doc(db, 'users', currentUser.uid, 'reflections', docId));
+      if (snap.exists()) result[`q${qi}`] = snap.data().text || '';
+    } catch(e) {}
+  }));
+
+  // Fallback: formato antiguo de audio.html (un doc con q0/q1/q2 por misterio)
+  if (!result.q0 && !result.q1 && !result.q2) {
+    const { misterio } = currentSession;
+    const oldKey = `${nivel}_${cuaderno}_${misterio}`;
+    try {
+      const snap = await getDoc(doc(db, 'users', currentUser.uid, 'reflections', oldKey));
+      if (snap.exists()) {
+        const d = snap.data();
+        result.q0 = d.q0 || '';
+        result.q1 = d.q1 || '';
+        result.q2 = d.q2 || '';
+      }
+    } catch(e) {}
+  }
+
+  return result;
 }
 
 // ════════════════════════════════════════════
@@ -1791,10 +2072,208 @@ async function buildSession() {
 
   currentSession = { nivel: n, cuaderno: c, misterio: m, block, blockIdx, mysteryData, playlist };
   sessionMeters = 0;
+  sectionRewards = new Set();
   sessionCompleted = false;
 
+  // ── Micro-aprendizaje: solo en el primer misterio de cada bloque (1, 6, 11, 16)
+  const isFirstOfBlock = (m === 1 || m === 6 || m === 11 || m === 16);
+  if (isFirstOfBlock && getPrefs().microInAudio !== false) {
+    // Cargar micro JSON
+    microData = null;
+    try {
+      const base = location.origin + location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1);
+      const resp = await fetch(base + 'data/' + nivelId + '-micro.json');
+      if (resp.ok) microData = await resp.json();
+    } catch(e) { console.warn('[CruzAndo] micro json:', e); }
+
+    // Leer microDone de Firestore
+    blockMicroDone = false;
+    if (microData && currentUser) {
+      try {
+        const snap = await getDoc(doc(db, 'users', currentUser.uid, 'progress', nivelId));
+        if (snap.exists()) {
+          const done = snap.data().microDone || {};
+          blockMicroDone = done[block] === true;
+        }
+      } catch(e) { console.warn('[CruzAndo] microDone read:', e); }
+    }
+
+    if (microData && microData.bloques && microData.bloques[block] && !blockMicroDone) {
+      // Micro no completado → mostrar pantalla de micro primero
+      renderMicroAudio(block, nivelId);
+      return;
+    }
+  }
+
+  // Micro ya completado (o no aplica) → iniciar player directamente
+  const showPrep = isFirstOfBlock && blockMicroDone
+    && microData && microData.bloques && microData.bloques[block];
+  startPlayerSession(showPrep ? block : null);
+}
+
+// ════════════════════════════════════════════
+// INICIO DEL PLAYER (post-micro o directo)
+// ════════════════════════════════════════════
+
+function startPlayerSession(prepBlock) {
   renderSession();
+
+  // Botón "Preparación" (solo si micro ya fue completado en este bloque)
+  const prepWrap = $('prep-btn-wrap');
+  if (prepBlock && microData && microData.bloques && microData.bloques[prepBlock]) {
+    const bloque = microData.bloques[prepBlock];
+    const nivelId = String(currentSession.nivel).padStart(2,'0') + String(currentSession.cuaderno).padStart(2,'0');
+    prepWrap.style.display = '';
+    prepWrap.innerHTML =
+      '<div class="prep-btn-wrap">' +
+        '<button class="prep-btn" id="btn-reado-micro">' +
+          '<div>' +
+            '<span class="prep-btn-label">✦ Preparación</span>' +
+            '<span class="prep-btn-name">' + (bloque.subtitulo || BLOCK_NAMES[prepBlock]) + '</span>' +
+          '</div>' +
+          '<span style="font-size:1.4rem;opacity:0.7">→</span>' +
+        '</button>' +
+      '</div>';
+    $('btn-reado-micro').onclick = () => {
+      stopAudio(); bgmStop();
+      renderMicroAudio(prepBlock, nivelId);
+    };
+  } else {
+    prepWrap.style.display = 'none';
+    prepWrap.innerHTML = '';
+  }
+
   show('scr-session');
+}
+
+// ════════════════════════════════════════════
+// MICRO-APRENDIZAJE EN AUDIO
+// ════════════════════════════════════════════
+
+function renderMicroAudio(b, nivelId) {
+  const bloque    = microData.bloques[b];
+  const tarjetas  = bloque.tarjetas  || [];
+  const preguntas = bloque.preguntas || [];
+  const total     = tarjetas.length + preguntas.length;
+  let step = 0;
+  let seleccion = null;
+
+  $('micro-label').textContent = 'Prepara tu corazón · ' + (BLOCK_NAMES[b] || b);
+  $('micro-sub').textContent   = bloque.subtitulo || '';
+
+  function renderDots() {
+    const wrap = $('micro-progress');
+    let html = '';
+    for (let i = 0; i < total; i++) {
+      const cls = i < step ? 'done' : i === step ? 'active' : '';
+      const w   = i === step ? '24px' : '8px';
+      html += `<div class="micro-dot ${cls}" style="width:${w};flex:${i === step ? '0 0 24px' : '1'}"></div>`;
+    }
+    wrap.innerHTML = html;
+  }
+
+  function renderStep() {
+    seleccion = null;
+    renderDots();
+    const content = $('micro-content');
+    const nav     = $('micro-nav');
+
+    // Pantalla final
+    if (step >= total) {
+      const blockColor = { gozosos:'#27AE60', luminosos:'#F4D03F', dolorosos:'#C0392B', gloriosos:'#8E44AD' }[b] || '#FF7A00';
+      content.innerHTML =
+        '<div class="micro-final">' +
+          '<div class="micro-final-cross">' +
+            '<svg viewBox="0 0 100 100" width="48" height="48" style="filter:drop-shadow(0 0 8px ' + blockColor + '80)">' +
+              '<rect x="46" y="5" width="8" height="90" fill="' + blockColor + '"/>' +
+              '<rect x="5" y="42" width="90" height="8" fill="' + blockColor + '"/>' +
+            '</svg>' +
+          '</div>' +
+          '<div class="micro-final-titulo">Tu corazón está preparado</div>' +
+          '<div class="micro-final-sub">Reza sin prisa. Lo que necesitas ya lo traes contigo.</div>' +
+          '<div class="micro-metros-chip">🚶 +' + METERS_MICRO + 'm al peregrino</div>' +
+        '</div>';
+      nav.innerHTML = '<button class="micro-btn-primary" id="micro-btn-comenzar">Comenzar sesión →</button>';
+      $('micro-btn-comenzar').onclick = async () => {
+        blockMicroDone = true;
+        await saveMicroDone(b, nivelId);
+        await addMetersToFirestore(METERS_MICRO);
+        sessionMeters += METERS_MICRO;
+        startPlayerSession(null);
+      };
+      return;
+    }
+
+    // Tarjeta informativa
+    if (step < tarjetas.length) {
+      const t = tarjetas[step];
+      content.innerHTML =
+        '<div class="micro-card">' +
+          '<div>' +
+            '<div class="micro-card-emoji">' + escHTML(t.emoji) + '</div>' +
+            '<div class="micro-card-titulo">' + escHTML(t.titulo) + '</div>' +
+            '<div class="micro-card-contenido">' + escHTML(t.contenido) + '</div>' +
+          '</div>' +
+          '<div class="micro-card-footer">' +
+            '<span class="micro-card-count">Tarjeta ' + (step + 1) + ' de ' + tarjetas.length + '</span>' +
+          '</div>' +
+        '</div>';
+      nav.innerHTML =
+        (step > 0 ? '<button class="micro-btn-outline" id="micro-prev">← Anterior</button>' : '') +
+        '<button class="micro-btn-primary" id="micro-next">' +
+          (step === tarjetas.length - 1 ? 'Prepara tu corazón →' : 'Siguiente →') +
+        '</button>';
+      if ($('micro-prev')) $('micro-prev').onclick = () => { step--; renderStep(); };
+      $('micro-next').onclick = () => { step++; renderStep(); };
+      return;
+    }
+
+    // Pregunta de apropiación
+    const pi = step - tarjetas.length;
+    const p  = preguntas[pi];
+    content.innerHTML =
+      '<div class="micro-q-card">' +
+        '<div class="micro-q-label">✦ ' + (pi + 1) + ' de ' + preguntas.length + '</div>' +
+        '<div class="micro-q-texto">' + escHTML(p.pregunta) + '</div>' +
+        p.opciones.map((o, oi) =>
+          '<button class="micro-option" id="micro-opt-' + oi + '">' +
+            '<span class="micro-option-circle" id="micro-circ-' + oi + '"></span>' +
+            escHTML(o.texto) +
+          '</button>'
+        ).join('') +
+        '<div id="micro-eco" style="display:none"></div>' +
+      '</div>';
+    nav.innerHTML = '<button class="micro-btn-primary" id="micro-next-q" style="display:none">' +
+      (pi === preguntas.length - 1 ? 'Estoy listo →' : 'Siguiente →') + '</button>';
+
+    p.opciones.forEach((o, oi) => {
+      $('micro-opt-' + oi).onclick = () => {
+        if (seleccion !== null) return;
+        seleccion = oi;
+        p.opciones.forEach((_, i) => {
+          if (i === oi) { $('micro-opt-' + i).classList.add('selected'); $('micro-circ-' + i).textContent = '✓'; }
+          else { $('micro-opt-' + i).classList.add('dimmed'); }
+        });
+        const eco = $('micro-eco');
+        eco.innerHTML =
+          '<div class="micro-eco"><span class="micro-eco-emoji">' + escHTML(o.emoji) + '</span>' + escHTML(o.eco) + '</div>';
+        eco.style.display = '';
+        $('micro-next-q').style.display = '';
+      };
+    });
+    $('micro-next-q').onclick = () => { step++; renderStep(); };
+  }
+
+  show('scr-micro');
+  renderStep();
+}
+
+async function saveMicroDone(block, nivelId) {
+  if (!currentUser) return;
+  try {
+    await setDoc(doc(db, 'users', currentUser.uid, 'progress', nivelId),
+      { microDone: { [block]: true } }, { merge: true });
+  } catch(e) { console.warn('[CruzAndo] saveMicroDone:', e); }
 }
 
 // ════════════════════════════════════════════
@@ -1908,6 +2387,23 @@ function startPlaylist() {
   goTrack(0);
 }
 
+// Otorgar metros al terminar una sección de audio (evita doble-award por re-escucha)
+async function awardSectionMeters(track) {
+  let key = null;
+  if      (track.folder === 'ubible')                          key = 'ubible';
+  else if (track.folder === 'cont')                            key = 'cont';
+  else if (track.folder === 'rezo' && track.seg === 4)         key = 'rezo_seg4';
+  else if (track.folder === 'q' && typeof track.qIdx === 'number') key = 'q_' + track.qIdx;
+  if (!key || sectionRewards.has(key)) return;
+  const def = METERS_SECTION[key];
+  if (!def) return;
+  sectionRewards.add(key);
+  sessionMeters += def.meters;
+  await addMetersToFirestore(def.meters);
+  $('session-meters-display').textContent = `${sessionMeters.toLocaleString('es-MX')}m esta sesión`;
+  showToast(`+${def.meters}m · ${def.label}`);
+}
+
 function isCanto(idx) {
   const { playlist } = currentSession;
   return playlist && playlist[idx] && playlist[idx].folder === 'music';
@@ -2011,6 +2507,8 @@ function goTrack(idx) {
       } else {
         markSegDone(track.seg);
       }
+      // Metros por sección completada
+      awardSectionMeters(track);
     }
     if (idx + 1 < playlist.length) {
       goTrack(idx + 1);
@@ -2068,8 +2566,9 @@ function stopAudio() {
 function initTheme() {
   // Leer preferencia guardada
   try {
-    const saved = localStorage.getItem('cruzando_audio_theme');
+    const saved = localStorage.getItem('cruzando_theme');
     if (saved === 'light') { isDark = false; }
+    else if (saved === 'dark') { isDark = true; }
   } catch(e) {}
   applyTheme();
 }
@@ -2092,7 +2591,7 @@ function applyTheme() {
 function toggleTheme() {
   isDark = !isDark;
   applyTheme();
-  try { localStorage.setItem('cruzando_audio_theme', isDark ? 'dark' : 'light'); } catch(e) {}
+  try { localStorage.setItem('cruzando_theme', isDark ? 'dark' : 'light'); } catch(e) {}
 }
 
 // ════════════════════════════════════════════
@@ -2368,6 +2867,14 @@ function renderEpilogo(canto, audioUrl) {
     $('epilogo-ico-pause').style.display = 'none';
     $('epilogo-bar-fill').style.width = '0%';
     epilogoAudioEl.currentTime = 0;
+    // Metros por escuchar el canto del epílogo completo
+    if (!sectionRewards.has('epilogo')) {
+      sectionRewards.add('epilogo');
+      sessionMeters += METERS_EPILOGO_CANTO;
+      addMetersToFirestore(METERS_EPILOGO_CANTO);
+      $('complete-meters').textContent = `+${sessionMeters.toLocaleString('es-MX')}m`;
+      showToast(`+${METERS_EPILOGO_CANTO}m · Canto escuchado`);
+    }
   };
   epilogoAudioEl.onerror = () => {
     $('epilogo-play-btn').style.opacity = '0.4';
@@ -2405,17 +2912,31 @@ async function completeSession() {
   stopAudio();
   bgmStop();
 
-  const metersEarned = METERS_SESSION;
-  sessionMeters += metersEarned;
-
-  await addMetersToFirestore(metersEarned);
-  $('session-meters-display').textContent = `${sessionMeters.toLocaleString('es-MX')}m esta sesión`;
-
   // Registrar en historial
   const { nivel, cuaderno, misterio, block, blockIdx } = currentSession;
   if (!audioProgress.history) audioProgress.history = [];
   audioProgress.history.push({ n:nivel, c:cuaderno, m:misterio, completedAt: Date.now() });
-  await saveAudioProgress(); // guardar historial inmediatamente
+
+  // Bonus de bloque: +1000m si se completaron los 5 misterios del bloque por primera vez
+  const BLOCK_RANGES = { gozosos:[1,5], luminosos:[6,10], dolorosos:[11,15], gloriosos:[16,20] };
+  const [bMin, bMax] = BLOCK_RANGES[block];
+  const doneInBlock = new Set(
+    (audioProgress.history).filter(h => h.n === nivel && h.c === cuaderno && h.m >= bMin && h.m <= bMax).map(h => h.m)
+  );
+  const blockBonuses = audioProgress.blockBonuses || {};
+  const bonusKey = `${nivel}_${cuaderno}_${block}`;
+  if (doneInBlock.size >= 5 && !blockBonuses[bonusKey]) {
+    blockBonuses[bonusKey] = true;
+    audioProgress.blockBonuses = blockBonuses;
+    sessionMeters += METERS_BLOCK_BONUS;
+    await addMetersToFirestore(METERS_BLOCK_BONUS);
+    setTimeout(() => showToast(`+${METERS_BLOCK_BONUS}m · ¡Bloque ${BLOCK_NAMES[block]} completado!`), 400);
+  }
+
+  await saveAudioProgress();
+  await syncToOrarProgress(nivel, cuaderno, misterio);
+
+  $('session-meters-display').textContent = `${sessionMeters.toLocaleString('es-MX')}m esta sesión`;
 
   // Pantalla completado — datos básicos
   $('complete-title').textContent    = currentSession.mysteryData?.titulo || `Misterio ${misterio}`;
@@ -2609,13 +3130,53 @@ function escHTML(s) {
 }
 
 // ════════════════════════════════════════════
+// NAVEGACIÓN — NAV BAR
+// ════════════════════════════════════════════
+
+function goTo(page) {
+  stopAudio();
+  bgmStop();
+  const base = location.origin + location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1);
+  location.href = base + page;
+}
+
+let _navChord = 0;
+function playNavChord() {
+  const CHORDS = [[523,659,784],[659,784,988],[784,988,1175],[587,740,880]];
+  try {
+    const ac    = new (window.AudioContext || window.webkitAudioContext)();
+    const now   = ac.currentTime;
+    const notes = CHORDS[_navChord % 4]; _navChord++;
+    const master = ac.createGain();
+    master.gain.setValueAtTime(0, now);
+    master.gain.linearRampToValueAtTime(0.07, now + 0.018);
+    master.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+    master.connect(ac.destination);
+    notes.forEach((freq, j) => {
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = j === 0 ? 'sine' : 'triangle';
+      o.frequency.value = freq; g.gain.value = j === 0 ? 0.8 : 0.5;
+      o.connect(g); g.connect(master);
+      o.start(now + j * 0.012); o.stop(now + 0.45);
+    });
+  } catch(e) {}
+}
+
+function navTap(el) {
+  playNavChord();
+  el.classList.remove('tapped');
+  void el.offsetWidth;
+  el.classList.add('tapped');
+  setTimeout(() => el.classList.remove('tapped'), 400);
+}
+window.navTap = navTap;
+
+// ════════════════════════════════════════════
 // INIT
 // ════════════════════════════════════════════
 
 initAuth();
 </script>
 
-</body>
-</script>
 </body>
 </html>

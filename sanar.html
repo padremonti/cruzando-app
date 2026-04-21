@@ -286,13 +286,13 @@ const _db   = firebase.firestore();
 const _auth = firebase.auth();
 
 /* ── Tema ── */
-var isLight = localStorage.getItem('ca_home_light') === '1';
+var isLight = localStorage.getItem('cruzando_theme') === 'light';
 function applyTheme(light) {
   document.body.classList.toggle('light', light);
   document.getElementById('ico-sun').style.display  = light ? 'none'  : 'block';
   document.getElementById('ico-moon').style.display = light ? 'block' : 'none';
   document.querySelector('meta[name="theme-color"]').content = light ? '#E6DED3' : '#1A0E04';
-  localStorage.setItem('ca_home_light', light ? '1' : '0');
+  localStorage.setItem('cruzando_theme', light ? 'light' : 'dark');
 }
 function toggleDark() { isLight = !isLight; applyTheme(isLight); }
 if (isLight) applyTheme(true);
