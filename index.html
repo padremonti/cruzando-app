@@ -1095,27 +1095,32 @@ var NIVELES_ORDER = [
 var BLOCKS = ['gozosos','luminosos','dolorosos','gloriosos'];
 
 async function getCurrentNivelFromFirestore(user) {
+  // 1. Bookmark explícito: el nivel que el usuario visitó por última vez (audio o libro)
   try {
-    // Cargar todos los documentos de progreso del usuario en paralelo
+    var bookmark = localStorage.getItem('cruzando_current_nivel');
+    if (bookmark && /^\d{4}$/.test(bookmark)) return bookmark;
+  } catch(e) {}
+
+  // 2. Fallback: primer nivel incompleto (frontera de progreso)
+  try {
     var snaps = await Promise.all(
       NIVELES_ORDER.map(function(id) {
         return getDoc(doc(db, 'users', user.uid, 'progress', id));
       })
     );
     for (var i = 0; i < snaps.length; i++) {
-      if (!snaps[i].exists()) return NIVELES_ORDER[i]; // primer nivel sin datos = activo
+      if (!snaps[i].exists()) return NIVELES_ORDER[i];
       var d = snaps[i].data();
       if (!d.progress) return NIVELES_ORDER[i];
       var allDone = BLOCKS.every(function(b) {
         return d.progress[b] && d.progress[b].every(function(x) { return x !== null; });
       });
-      if (!allDone) return NIVELES_ORDER[i]; // primer nivel incompleto = activo
+      if (!allDone) return NIVELES_ORDER[i];
     }
-    // Todos completados — devolver el último
     return NIVELES_ORDER[NIVELES_ORDER.length - 1];
   } catch(e) {
     console.warn('[CruzAndo] getCurrentNivelFromFirestore:', e);
-    return getCurrentNivel(); // fallback a localStorage
+    return getCurrentNivel();
   }
 }
 

@@ -2428,7 +2428,7 @@ body {
     } else if (mi === 4 && isDone) {
       html += '<button class="btn btn-primary" onclick="window._ca.backToBlocks()">← Ver Misterios</button>';
     }
-    html += '<button class="btn-modo-switch" onclick="window._ca.goTo(\'audio.html?c=' + NIVEL_ID + '\')">🎧 Cambiar a audio</button>';
+    html += '<button class="btn-modo-switch" onclick="window.goTo(\'audio.html?c=' + NIVEL_ID + '\')">🎧 Cambiar a audio</button>';
     nav.innerHTML = html;
   }
 
@@ -2488,6 +2488,9 @@ body {
       showError('ID inválido: ' + NIVEL_ID + '. Usa un código de 4 dígitos (ej. 0101).');
       return;
     }
+
+    // Bookmark: "nivel actual" = el nivel que el usuario está orando ahora
+    try { localStorage.setItem('cruzando_current_nivel', NIVEL_ID); } catch(e) {}
 
     // Cargar JSON principal
     const loc = window.location;

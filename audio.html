@@ -1910,7 +1910,7 @@ async function loadUserAndStart(skipProgressRead = false) {
     }
   }
 
-  // Si viene ?c=0101 desde world.html, respetar el nivel/cuaderno solicitado
+  // Si viene ?c=0101 desde world.html / orar.html, respetar el nivel solicitado
   const urlParam = new URLSearchParams(location.search).get('c');
   if (urlParam && /^\d{4}$/.test(urlParam)) {
     const urlNivel    = parseInt(urlParam.substring(0, 2), 10);
@@ -1921,9 +1921,12 @@ async function loadUserAndStart(skipProgressRead = false) {
         audioProgress.cuaderno      = urlCuaderno;
         audioProgress.misterio      = getFirstUncompletedMisterio(urlNivel, urlCuaderno);
         audioProgress.firstAnswered = [false, false, false];
-        await saveAudioProgress();
+        // No guardamos en Firestore aquí: el bookmark se actualiza solo cuando
+        // el usuario completa algo, para no sobreescribir la posición de frontera.
       }
     }
+    // Bookmark cross-modo: guardar en localStorage el nivel que el usuario está usando
+    try { localStorage.setItem('cruzando_current_nivel', urlParam); } catch(e) {}
   }
 
   console.log('userPlan:', userPlan, '| misterio:', audioProgress.nivel, audioProgress.cuaderno, audioProgress.misterio);
