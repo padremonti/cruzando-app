@@ -587,10 +587,10 @@ body {
 .btn-complete:active { transform: scale(0.97); }
 
 .btn-modo-switch {
-  width: 100%; padding: 11px 0; border-radius: 12px;
+  width: 100%; padding: 15px 0; border-radius: 14px;
   border: 1.5px dashed var(--border); background: transparent;
-  color: var(--text-dim); font-size: 0.88rem; cursor: pointer;
-  margin-top: 10px; transition: opacity 0.2s;
+  color: var(--text-dim); font-size: 1rem; font-weight: 500; cursor: pointer;
+  margin-top: 12px; transition: opacity 0.2s;
 }
 .btn-modo-switch:active { opacity: 0.65; }
 
@@ -1369,6 +1369,9 @@ body {
 
       <!-- Cambiar a modo libro -->
       <button class="btn-modo-switch" id="btn-cambiar-libro">📖 Cambiar a libro</button>
+
+      <!-- Cambiar de nivel -->
+      <button class="btn-modo-switch" onclick="goTo('world.html')">🗺️ Cambiar de nivel</button>
 
     </div>
   </div>
