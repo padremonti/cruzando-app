@@ -586,6 +586,14 @@ body {
 .btn-complete.visible { display: block; }
 .btn-complete:active { transform: scale(0.97); }
 
+.btn-modo-switch {
+  width: 100%; padding: 11px 0; border-radius: 12px;
+  border: 1.5px dashed var(--border); background: transparent;
+  color: var(--text-dim); font-size: 0.88rem; cursor: pointer;
+  margin-top: 10px; transition: opacity 0.2s;
+}
+.btn-modo-switch:active { opacity: 0.65; }
+
 /* ── Botón flotante de preguntas ── */
 .fab-questions {
   position: fixed;
@@ -1358,6 +1366,9 @@ body {
       <button class="btn-complete" id="btn-complete">
         ✓ Completar sesión
       </button>
+
+      <!-- Cambiar a modo libro -->
+      <button class="btn-modo-switch" id="btn-cambiar-libro">📖 Cambiar a libro</button>
 
     </div>
   </div>
@@ -2508,6 +2519,10 @@ function renderSession() {
     if (next >= 0) goTrack(next);
   };
   $('btn-complete').onclick   = completeSession;
+  $('btn-cambiar-libro').onclick = () => {
+    const nId = String(audioProgress.nivel).padStart(2,'0') + String(audioProgress.cuaderno).padStart(2,'0');
+    goTo('orar.html?c=' + nId);
+  };
 
   // Progress bar click
   $('progress-bar').onclick = e => {
