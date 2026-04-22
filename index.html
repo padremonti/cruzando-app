@@ -409,6 +409,39 @@ body {
 }
 .btn-cambiar-nivel:active { background:var(--card); transform:scale(0.98); }
 
+/* ── Banner "Tu Camino" ── */
+.tu-camino-banner {
+  margin:0 18px 16px; padding:20px;
+  background:var(--card); border:1.5px solid var(--border);
+  border-radius:16px; animation:fadeIn 0.4s ease;
+}
+@keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+.tu-camino-titulo {
+  font-family:'Crimson Pro',Georgia,serif; font-size:1.4rem;
+  font-weight:600; color:var(--text); margin-bottom:14px;
+}
+.tu-camino-row {
+  display:flex; align-items:flex-start; gap:10px;
+  font-size:0.82rem; color:var(--text-soft); margin-bottom:7px; line-height:1.4;
+}
+.tu-camino-icon { font-size:1rem; flex-shrink:0; margin-top:1px; }
+.tu-camino-label { color:var(--text-dim); font-size:0.75rem; display:block; }
+.tu-camino-nombre { color:var(--text); font-weight:500; }
+.tu-camino-coord { color:var(--text-dim); font-size:0.72rem; }
+.tu-camino-btns { display:flex; flex-direction:column; gap:10px; margin-top:16px; }
+.tu-camino-btn-primary {
+  width:100%; padding:13px; border-radius:12px; border:none;
+  background:var(--lvl-bold); color:#fff; font-family:inherit;
+  font-size:0.9rem; font-weight:600; cursor:pointer; transition:opacity 0.2s;
+}
+.tu-camino-btn-primary:active { opacity:0.8; }
+.tu-camino-btn-secondary {
+  width:100%; padding:12px; border-radius:12px;
+  border:1.5px solid var(--border); background:var(--card);
+  color:var(--text-soft); font-family:inherit;
+  font-size:0.88rem; font-weight:500; cursor:pointer; transition:opacity 0.2s;
+}
+.tu-camino-btn-secondary:active { opacity:0.7; }
 /* ── Cantos (próximamente) ── */
 .modulo-cantos {
   background:linear-gradient(145deg,#1A1206,#130D04);
@@ -713,6 +746,9 @@ body {
         </div>
         <button class="btn-cambiar-nivel" onclick="playTap(); navigateTo('world.html', event)">Cambiar de nivel →</button>
       </div>
+
+      <!-- Banner "Tu Camino" — se inyecta por JS cuando bookmark ≠ progreso -->
+      <div id="tu-camino-wrap"></div>
 
       <div class="modulos-grid">
 
@@ -1094,6 +1130,49 @@ var NIVELES_ORDER = [
 ];
 var BLOCKS = ['gozosos','luminosos','dolorosos','gloriosos'];
 
+var OFFICIAL_NAMES = {
+  gozosos: [
+    'La encarnación del Hijo de Dios',
+    'La visitación de Nuestra Señora a su prima Santa Isabel',
+    'El nacimiento del Hijo de Dios',
+    'La Presentación de Jesús en el templo',
+    'El Niño Jesús perdido y hallado en el templo'
+  ],
+  luminosos: [
+    'El Bautismo de Jesús en el Jordán',
+    'La autorrevelación de Jesús en las bodas de Caná',
+    'El anuncio del Reino de Dios invitando a la conversión',
+    'La Transfiguración',
+    'La Institución de la Eucaristía'
+  ],
+  dolorosos: [
+    'La Oración de Jesús en el Huerto',
+    'La Flagelación del Señor',
+    'La Coronación de espinas',
+    'Jesús con la Cruz a cuestas camino del Calvario',
+    'La Crucifixión y Muerte de Nuestro Señor'
+  ],
+  gloriosos: [
+    'La Resurrección del Hijo de Dios',
+    'La Ascensión del Señor a los Cielos',
+    'La Venida del Espíritu Santo sobre los Apóstoles',
+    'La Asunción de Nuestra Señora a los Cielos',
+    'La Coronación de la Santísima Virgen como Reina de Cielos y Tierra'
+  ]
+};
+
+function getMysteryInfo(misterio) {
+  if (misterio <= 5)  return { block: 'gozosos',   idx: misterio - 1  };
+  if (misterio <= 10) return { block: 'luminosos',  idx: misterio - 6  };
+  if (misterio <= 15) return { block: 'dolorosos',  idx: misterio - 11 };
+  return                     { block: 'gloriosos',  idx: misterio - 16 };
+}
+
+function getMysteryName(misterio) {
+  var info = getMysteryInfo(misterio);
+  return OFFICIAL_NAMES[info.block][info.idx];
+}
+
 async function getCurrentNivelFromFirestore(user) {
   // 1. Bookmark explícito: el nivel que el usuario visitó por última vez (audio o libro)
   try {
@@ -1138,16 +1217,102 @@ onAuthStateChanged(auth, async function(user) {
   if (user) {
     currentUser = user;
     var userData = await ensureUserDoc(user);
-    // Determinar nivel activo desde Firestore antes de renderizar
-    currentNivelId = await getCurrentNivelFromFirestore(user);
+    // Cargar en paralelo: nivel actual + audioProgress + bookmark
+    var results = await Promise.all([
+      getCurrentNivelFromFirestore(user),
+      getDoc(doc(db, 'users', user.uid, 'audioProgress', 'current')).catch(function() { return null; }),
+      getDoc(doc(db, 'users', user.uid, 'bookmark', 'current')).catch(function() { return null; })
+    ]);
+    currentNivelId = results[0];
     window.currentNivelId = currentNivelId;
+    var audioProgressSnap = results[1];
+    var bookmarkSnap      = results[2];
     renderHome(userData);
     showScreen('home');
+    // Mostrar banner "Tu Camino" si bookmark difiere del frente lineal
+    var progreso  = (audioProgressSnap && audioProgressSnap.exists()) ? audioProgressSnap.data()  : null;
+    var bookmark  = (bookmarkSnap      && bookmarkSnap.exists())      ? bookmarkSnap.data()        : null;
+    renderTuCamino(bookmark, progreso, user);
   } else {
     currentUser = null;
     showScreen('login');
   }
 });
+
+// ── Banner "Tu Camino" ───────────────────────────────────────────
+function renderTuCamino(bookmark, progreso, user) {
+  var wrap = document.getElementById('tu-camino-wrap');
+  if (!wrap) return;
+
+  // No mostrar si no hay bookmark
+  if (!bookmark) { wrap.innerHTML = ''; return; }
+
+  // No mostrar si coinciden (misma posición)
+  if (progreso &&
+      bookmark.nivel     === progreso.nivel &&
+      bookmark.cuaderno  === progreso.cuaderno &&
+      bookmark.misterio  === progreso.misterio) {
+    wrap.innerHTML = ''; return;
+  }
+
+  var bkName  = getMysteryName(bookmark.misterio || 1);
+  var bkCoord = bookmark.nivel + '-' + bookmark.cuaderno + '-' + bookmark.misterio;
+  var prName  = progreso ? getMysteryName(progreso.misterio || 1) : null;
+  var prCoord = progreso ? (progreso.nivel + '-' + progreso.cuaderno + '-' + progreso.misterio) : null;
+
+  var prRow = prName ? (
+    '<div class="tu-camino-row">' +
+      '<span class="tu-camino-icon">🚶</span>' +
+      '<div><span class="tu-camino-label">Avance</span>' +
+        '<span class="tu-camino-nombre">' + prName + '</span> ' +
+        '<span class="tu-camino-coord">(' + prCoord + ')</span></div>' +
+    '</div>'
+  ) : '';
+
+  wrap.innerHTML =
+    '<div class="tu-camino-banner anim-in">' +
+      '<div class="tu-camino-titulo">Tu Camino</div>' +
+      '<div class="tu-camino-row">' +
+        '<span class="tu-camino-icon">' + (bookmark.modo === 'libro' ? '📖' : '🎧') + '</span>' +
+        '<div><span class="tu-camino-label">Última vez</span>' +
+          '<span class="tu-camino-nombre">' + bkName + '</span> ' +
+          '<span class="tu-camino-coord">(' + bkCoord + ')</span></div>' +
+      '</div>' +
+      prRow +
+      '<div class="tu-camino-btns">' +
+        '<button class="tu-camino-btn-primary" id="btn-tc-continuar">Continuar donde lo dejé</button>' +
+        (prName ? '<button class="tu-camino-btn-secondary" id="btn-tc-avance">Ir a mi avance</button>' : '') +
+      '</div>' +
+    '</div>';
+
+  // Botón: continuar en el bookmark
+  document.getElementById('btn-tc-continuar').onclick = function() {
+    playTap();
+    var nivelId = String(bookmark.nivel).padStart(2,'0') + String(bookmark.cuaderno).padStart(2,'0');
+    var modo = bookmark.modo === 'libro' ? 'orar' : 'audio';
+    var url = modo + '.html?c=' + nivelId + '&misterio=' + bookmark.misterio;
+    wrap.innerHTML = '';
+    navigateTo(url);
+  };
+
+  // Botón: ir al frente lineal (actualiza bookmark y navega)
+  var btnAvance = document.getElementById('btn-tc-avance');
+  if (btnAvance && progreso) {
+    btnAvance.onclick = async function() {
+      playTap();
+      // Actualizar bookmark en Firestore para que iguale al frente lineal
+      try {
+        await setDoc(doc(db, 'users', user.uid, 'bookmark', 'current'),
+          { nivel: progreso.nivel, cuaderno: progreso.cuaderno, misterio: progreso.misterio,
+            modo: 'audio', updatedAt: Date.now() },
+          { merge: true });
+      } catch(e) { console.warn('[bookmark]', e); }
+      wrap.innerHTML = '';
+      var nivelId = String(progreso.nivel).padStart(2,'0') + String(progreso.cuaderno).padStart(2,'0');
+      navigateTo('audio.html?c=' + nivelId + '&misterio=' + progreso.misterio);
+    };
+  }
+}
 
 // ── Login Google ──────────────────────────────────────────────────
 document.getElementById('btn-google').addEventListener('click', async function() {

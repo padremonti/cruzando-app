@@ -1895,15 +1895,29 @@ body {
     currentBlock = b;
     openSection = null;
 
+    const prog = progress[b] || [];
+    const first = prog.findIndex(x => x === null);
+    currentMystery = first >= 0 ? first : 0;
+
+    // Bookmark: registrar dónde está orando el usuario
+    const _user = _auth.currentUser;
+    if (_user && NIVEL_ID) {
+      const _mundo  = parseInt(NIVEL_ID.substring(0,2), 10);
+      const _cuad   = parseInt(NIVEL_ID.substring(2,4), 10);
+      const _BOFF   = { gozosos:0, luminosos:5, dolorosos:10, gloriosos:15 };
+      const _globalM = (_BOFF[b] || 0) + currentMystery + 1;
+      _db.collection('users').doc(_user.uid)
+        .collection('bookmark').doc('current')
+        .set({ nivel: _mundo, cuaderno: _cuad, misterio: _globalM, modo: 'libro', updatedAt: Date.now() }, { merge: true })
+        .catch(e => console.warn('[bookmark]', e));
+    }
+
     // Mostrar micro-aprendizaje si no se ha completado y hay datos
     if (!microDone[b] && MICRO_DATA && MICRO_DATA.bloques && MICRO_DATA.bloques[b]) {
       renderMicro(b);
       return;
     }
 
-    const prog = progress[b] || [];
-    const first = prog.findIndex(x => x === null);
-    currentMystery = first >= 0 ? first : 0;
     renderPrayer();
   }
 
@@ -2562,6 +2576,26 @@ body {
     $('scr-loading').style.display = 'none';
     $('main-header').style.display = '';
     renderHome();
+
+    // Si viene ?misterio= desde index.html (bookmark), navegar directo al misterio
+    const _mParam = parseInt(params.get('misterio'), 10);
+    if (!isNaN(_mParam) && _mParam >= 1 && _mParam <= 20) {
+      let _tBlock, _tIdx;
+      if      (_mParam <= 5)  { _tBlock = 'gozosos';   _tIdx = _mParam - 1;  }
+      else if (_mParam <= 10) { _tBlock = 'luminosos';  _tIdx = _mParam - 6;  }
+      else if (_mParam <= 15) { _tBlock = 'dolorosos';  _tIdx = _mParam - 11; }
+      else                    { _tBlock = 'gloriosos';  _tIdx = _mParam - 16; }
+      if (BLOCKS.includes(_tBlock)) {
+        currentBlock   = _tBlock;
+        currentMystery = _tIdx;
+        openSection    = null;
+        if (!microDone[_tBlock] && MICRO_DATA && MICRO_DATA.bloques && MICRO_DATA.bloques[_tBlock]) {
+          renderMicro(_tBlock);
+        } else {
+          renderPrayer();
+        }
+      }
+    }
   }
 
   function showError(msg) {

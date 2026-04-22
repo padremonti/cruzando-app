@@ -1964,6 +1964,20 @@ async function loadUserAndStart(skipProgressRead = false) {
     try { localStorage.setItem('cruzando_current_nivel', urlParam); } catch(e) {}
   }
 
+  // Si viene ?nivel=&cuaderno=&misterio= desde index.html (bookmark específico),
+  // sobrescribir audioProgress en memoria sin tocar Firestore
+  const _sp = new URLSearchParams(location.search);
+  const _pN = parseInt(_sp.get('nivel'), 10);
+  const _pC = parseInt(_sp.get('cuaderno'), 10);
+  const _pM = parseInt(_sp.get('misterio'), 10);
+  if (!isNaN(_pN) && !isNaN(_pC) && !isNaN(_pM) &&
+      _pN >= 1 && _pN <= 7 && _pC >= 1 && _pC <= 4 && _pM >= 1 && _pM <= 20) {
+    audioProgress.nivel    = _pN;
+    audioProgress.cuaderno = _pC;
+    audioProgress.misterio = _pM;
+    try { localStorage.setItem('cruzando_current_nivel', String(_pN).padStart(2,'0') + String(_pC).padStart(2,'0')); } catch(e) {}
+  }
+
   console.log('userPlan:', userPlan, '| misterio:', audioProgress.nivel, audioProgress.cuaderno, audioProgress.misterio);
   await buildSession();
 }
@@ -2599,6 +2613,14 @@ function renderSession() {
 // ════════════════════════════════════════════
 
 function startPlaylist() {
+  if (currentUser && currentSession) {
+    const { nivel, cuaderno, misterio } = currentSession;
+    setDoc(
+      doc(db, 'users', currentUser.uid, 'bookmark', 'current'),
+      { nivel, cuaderno, misterio, modo: 'audio', updatedAt: Date.now() },
+      { merge: true }
+    ).catch(e => console.warn('[bookmark]', e));
+  }
   goTrack(0);
 }
 
