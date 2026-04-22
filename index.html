@@ -446,9 +446,9 @@ body {
 .modulo-cantos {
   background:linear-gradient(145deg,#1A1206,#130D04);
   border-color:rgba(255,122,0,0.06);
-  opacity:0.45; cursor:default;
+  cursor:pointer;
 }
-.modulo-cantos:active { transform:none; }
+.modulo-cantos:active { transform:scale(0.98); }
 .verse-card {
   grid-column:1 / -1;
   background:linear-gradient(135deg, #211508 0%, #1C1005 100%);
@@ -772,15 +772,15 @@ body {
           </div>
         </div>
 
-        <div class="modulo-card modulo-cantos anim-in">
+        <div class="modulo-card modulo-cantos anim-in" id="cantos-card" onclick="playTap(); navigateTo('cantos.html', event)">
           <div class="modulo-top">
             <div class="modulo-icon-wrap">🎶</div>
-            <span class="modulo-badge">Próximamente</span>
+            <span class="modulo-badge" id="cantos-badge" style="display:none">¡NUEVOS!</span>
           </div>
           <div class="modulo-titulo">Cantos</div>
           <div class="modulo-desc">Letras y melodías para acompañar tu oración.</div>
           <div class="modulo-footer">
-            <span class="modulo-meta">✦ En desarrollo</span>
+            <span class="modulo-meta" id="cantos-meta">✦ Desbloquea al completar bloques</span>
           </div>
         </div>
 
@@ -830,6 +830,15 @@ body {
       </div>
       <span class="app-nav-label">Diario</span>
     </button>
+    <button class="app-nav-item" onclick="navTap(this); navigateTo('cantos.html')">
+      <div class="app-nav-icon" style="position:relative">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+        </svg>
+        <span id="cantos-nav-dot" style="display:none;position:absolute;top:-2px;right:-2px;width:7px;height:7px;background:#FF7A00;border-radius:50%;"></span>
+      </div>
+      <span class="app-nav-label">Cantos</span>
+    </button>
     <button class="app-nav-item" onclick="navTap(this); navigateTo('sanar.html')">
       <div class="app-nav-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -864,7 +873,7 @@ import { getAuth, onAuthStateChanged,
          signInWithEmailAndPassword,
          createUserWithEmailAndPassword,
          signOut }                 from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import { getFirestore, doc, getDoc,
+import { getFirestore, doc, getDoc, getDocs, collection,
          setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 // ── CONFIGURACIÓN FIREBASE ────────────────────────────────────────
@@ -1088,6 +1097,25 @@ function renderHome(userData) {
   if (metrosEl) metrosEl.textContent = totalM.toLocaleString('es-MX') + 'm';
   var diarioEl = document.getElementById('diario-metros');
   if (diarioEl) diarioEl.textContent = '🚶‍♂️ ' + totalM.toLocaleString('es-MX') + 'm';
+
+  // Cantos desbloqueados — revisar si hay nuevos y mostrar badge
+  if (currentUser) { checkCantosNuevos(currentUser.uid); }
+}
+
+async function checkCantosNuevos(uid) {
+  var SEEN_KEY = 'cruzando_cantos_seen_' + uid;
+  try {
+    var snap = await getDocs(collection(db, 'users', uid, 'unlockedCantos'));
+    var count = snap.size;
+    var seen  = parseInt(localStorage.getItem(SEEN_KEY) || '0', 10);
+    var hayNuevos = count > seen;
+    var badge  = document.getElementById('cantos-badge');
+    var dot    = document.getElementById('cantos-nav-dot');
+    var meta   = document.getElementById('cantos-meta');
+    if (badge)  badge.style.display  = (hayNuevos && count > 0) ? '' : 'none';
+    if (dot)    dot.style.display    = (hayNuevos && count > 0) ? '' : 'none';
+    if (meta && count > 0) meta.textContent = count + ' canto' + (count > 1 ? 's' : '') + ' desbloqueado' + (count > 1 ? 's' : '');
+  } catch(e) { console.warn('[cantos check]', e); }
 }
 
 // ── Crear doc de usuario en Firestore ────────────────────────────
