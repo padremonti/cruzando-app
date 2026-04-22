@@ -48,12 +48,10 @@
 .light .verse-card { background:linear-gradient(135deg, #FFFCF7 0%, #FFF3E8 100%); border-color:rgba(255,122,0,0.2); }
 .light .verse-ornament { color:var(--orange); }
 .light .bloque-bar-wrap { background:rgba(0,0,0,0.08); }
-.light .modulo-orar   { background:linear-gradient(145deg,#FFF0E0,#FFE4C8); border-color:rgba(255,122,0,0.28); }
 .light .modulo-sanar  { background:linear-gradient(145deg,#FFF4EA,#FAEADE); border-color:rgba(255,122,0,0.14); }
 .light .modulo-diario { background:linear-gradient(145deg,#F5EDE4,#EDE3D8); border-color:rgba(255,122,0,0.09); }
-.light .orar-titulo   { color:var(--orange); }
-.light .orar-sep      { background:rgba(255,122,0,0.18); }
-.light .orar-nivel-tag { background:rgba(255,122,0,0.08); }
+.light .modulo-cantos { background:linear-gradient(145deg,#F0EAE3,#EBE2D8); border-color:rgba(0,0,0,0.06); }
+.light .orar-modo-card { background:var(--card); border-color:var(--border); }
 .light .plan-chip-free { background:rgba(0,0,0,0.06); }
 .light .modal-sheet { background:var(--card); }
 .light .modal-input { background:var(--bg2); }
@@ -356,25 +354,68 @@ body {
   transition:transform 0.18s, box-shadow 0.18s;
 }
 .modulo-card:active { transform:scale(0.97); }
-.modulo-orar {
-  grid-column:1 / -1;
-  background:linear-gradient(145deg, #2C1400, #1E0D00);
-  border-color:rgba(255,122,0,0.35);
-  box-shadow:0 6px 28px rgba(255,122,0,0.1);
-}
-.orar-header { margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; }
+/* ── Sección de progreso Orar (fuera de tarjeta) ── */
+.orar-progress-section { padding:4px 4px 16px; }
 .orar-nivel-tag {
-  font-family:'Crimson Pro',serif;
-  font-size:1.3rem; font-weight:600; letter-spacing:0.3px;
-  color:var(--orange-soft);
+  font-size:0.65rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:1px; color:var(--text-dim); margin-bottom:6px;
 }
-.orar-titulo { font-family:'Crimson Pro',serif; font-size:1.9rem; font-weight:600; color:var(--orange); margin-bottom:10px; }
-.orar-sep { height:1px; background:rgba(255,122,0,0.12); margin-bottom:12px; }
-.bloques-progress { display:flex; flex-direction:column; gap:10px; }
+.orar-nivel-nombre {
+  font-family:'Crimson Pro',serif;
+  font-size:1.75rem; font-weight:600; color:var(--orange);
+  line-height:1.2; margin-bottom:16px;
+}
+.orar-bloques { display:flex; flex-direction:column; gap:10px; }
 .bloque-row { display:flex; align-items:center; gap:8px; }
 .bloque-name { font-size:0.68rem; font-weight:600; min-width:72px; }
 .bloque-rosario { flex:1; display:flex; align-items:center; }
 .bloque-rosario svg { width:100%; height:22px; }
+
+/* ── ¿Cómo quieres orar? ── */
+.orar-how-section { margin-bottom:16px; }
+.orar-how-title {
+  font-size:0.68rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:1px; color:var(--text-dim); margin-bottom:10px;
+}
+.orar-modos-grid {
+  display:grid; grid-template-columns:1fr 1fr 1fr;
+  gap:10px; margin-bottom:12px;
+}
+.orar-modo-card {
+  border-radius:16px; padding:14px 10px 12px;
+  background:var(--card); border:1px solid var(--border);
+  cursor:pointer; text-align:center; position:relative; overflow:hidden;
+  transition:transform 0.15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.orar-modo-card:active { transform:scale(0.95); }
+.orar-modo-icon { font-size:1.4rem; margin-bottom:6px; }
+.orar-modo-name { font-size:0.82rem; font-weight:700; color:var(--text); margin-bottom:3px; }
+.orar-modo-desc { font-size:0.63rem; color:var(--text-dim); line-height:1.4; }
+.orar-modo-disabled { cursor:default; opacity:0.4; }
+.orar-modo-disabled:active { transform:none; }
+.orar-modo-badge-coming {
+  position:absolute; top:0; right:0;
+  font-size:0.5rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:0.4px; background:var(--text-dim); color:var(--bg);
+  padding:2px 6px; border-radius:0 14px 0 8px;
+}
+.btn-cambiar-nivel {
+  width:100%; padding:11px;
+  background:transparent; border:1px dashed var(--border);
+  border-radius:12px; font-family:inherit; font-size:0.78rem;
+  font-weight:600; color:var(--text-dim); cursor:pointer;
+  transition:all 0.2s;
+}
+.btn-cambiar-nivel:active { background:var(--card); transform:scale(0.98); }
+
+/* ── Cantos (próximamente) ── */
+.modulo-cantos {
+  background:linear-gradient(145deg,#1A1206,#130D04);
+  border-color:rgba(255,122,0,0.06);
+  opacity:0.45; cursor:default;
+}
+.modulo-cantos:active { transform:none; }
 .verse-card {
   grid-column:1 / -1;
   background:linear-gradient(135deg, #211508 0%, #1C1005 100%);
@@ -624,33 +665,56 @@ body {
     </section>
 
     <section class="modulos-section">
-      <div class="modulos-grid">
 
-        <div class="modulo-card modulo-orar anim-in" onclick="playTap(); navigateTo(getOrarUrl(), event)">
-          <div class="orar-header">
-            <span class="orar-nivel-tag" id="orar-nivel-tag">Nivel 1-1</span>
+      <!-- ── Progreso actual (fuera de tarjeta) ── -->
+      <div class="orar-progress-section anim-in">
+        <div class="orar-nivel-tag" id="orar-nivel-tag">Nivel 1-1</div>
+        <div class="orar-nivel-nombre" id="orar-nivel-nombre">Cruz 1-1: Males</div>
+        <div class="orar-bloques">
+          <div class="bloque-row">
+            <span class="bloque-name" style="color:#D4A017">Gozosos</span>
+            <div class="bloque-rosario" id="ros-gozosos"></div>
           </div>
-          <div class="orar-titulo">Orar →</div>
-          <div class="orar-sep"></div>
-          <div class="bloques-progress">
-            <div class="bloque-row">
-              <span class="bloque-name" style="color:#D4A017">Gozosos</span>
-              <div class="bloque-rosario" id="ros-gozosos"></div>
-            </div>
-            <div class="bloque-row">
-              <span class="bloque-name" style="color:#01BBE1">Luminosos</span>
-              <div class="bloque-rosario" id="ros-luminosos"></div>
-            </div>
-            <div class="bloque-row">
-              <span class="bloque-name" style="color:#C0392B">Dolorosos</span>
-              <div class="bloque-rosario" id="ros-dolorosos"></div>
-            </div>
-            <div class="bloque-row">
-              <span class="bloque-name" style="color:#8E44AD">Gloriosos</span>
-              <div class="bloque-rosario" id="ros-gloriosos"></div>
-            </div>
+          <div class="bloque-row">
+            <span class="bloque-name" style="color:#01BBE1">Luminosos</span>
+            <div class="bloque-rosario" id="ros-luminosos"></div>
+          </div>
+          <div class="bloque-row">
+            <span class="bloque-name" style="color:#C0392B">Dolorosos</span>
+            <div class="bloque-rosario" id="ros-dolorosos"></div>
+          </div>
+          <div class="bloque-row">
+            <span class="bloque-name" style="color:#8E44AD">Gloriosos</span>
+            <div class="bloque-rosario" id="ros-gloriosos"></div>
           </div>
         </div>
+      </div>
+
+      <!-- ── ¿Cómo quieres orar? ── -->
+      <div class="orar-how-section anim-in">
+        <div class="orar-how-title">¿Cómo quieres orar?</div>
+        <div class="orar-modos-grid">
+          <div class="orar-modo-card" onclick="playTap(); navigateTo('audio.html?c='+(window.currentNivelId||'0101'), event)">
+            <div class="orar-modo-icon">🎧</div>
+            <div class="orar-modo-name">Audio</div>
+            <div class="orar-modo-desc">Misterio a misterio</div>
+          </div>
+          <div class="orar-modo-card" onclick="playTap(); navigateTo('orar.html?c='+(window.currentNivelId||'0101'), event)">
+            <div class="orar-modo-icon">📖</div>
+            <div class="orar-modo-name">Libro</div>
+            <div class="orar-modo-desc">Textos interactivos</div>
+          </div>
+          <div class="orar-modo-card orar-modo-disabled">
+            <div class="orar-modo-badge-coming">Próximo</div>
+            <div class="orar-modo-icon">📿</div>
+            <div class="orar-modo-name">Rezo</div>
+            <div class="orar-modo-desc">Rosario de hoy</div>
+          </div>
+        </div>
+        <button class="btn-cambiar-nivel" onclick="playTap(); navigateTo('world.html', event)">Cambiar de nivel →</button>
+      </div>
+
+      <div class="modulos-grid">
 
         <div class="verse-card anim-in" style="margin:0;">
           <span class="verse-ornament">"</span>
@@ -672,7 +736,19 @@ body {
           </div>
         </div>
 
-        <div class="modulo-card modulo-diario anim-in" onclick="playTap(); navigateTo('diario.html', event)">
+        <div class="modulo-card modulo-cantos anim-in">
+          <div class="modulo-top">
+            <div class="modulo-icon-wrap">🎶</div>
+            <span class="modulo-badge">Próximamente</span>
+          </div>
+          <div class="modulo-titulo">Cantos</div>
+          <div class="modulo-desc">Letras y melodías para acompañar tu oración.</div>
+          <div class="modulo-footer">
+            <span class="modulo-meta">✦ En desarrollo</span>
+          </div>
+        </div>
+
+        <div class="modulo-card modulo-diario anim-in" style="grid-column:1/-1" onclick="playTap(); navigateTo('diario.html', event)">
           <div class="modulo-top">
             <div class="modulo-icon-wrap">📓</div>
             <span class="modulo-badge">Mis logros</span>
@@ -781,6 +857,24 @@ const LAUNCH_DISCOUNT   = "LAUNCH50"; // código de 50% OFF lanzamiento
 const fbApp = initializeApp(FIREBASE_CONFIG);
 const auth  = getAuth(fbApp);
 const db    = getFirestore(fbApp);
+
+// ── Nombres de niveles ────────────────────────────────────────────
+var NIVEL_NAMES = {
+  '0101':'Cruz 1-1: Males',      '0102':'Cruz 1-2: Pecado',
+  '0103':'Cruz 1-3: Conversión', '0104':'Cruz 1-4: Gracia',
+  '0201':'Emociones 2-1',        '0202':'Emociones 2-2',
+  '0203':'Emociones 2-3',        '0204':'Emociones 2-4',
+  '0301':'Mente 3-1',            '0302':'Mente 3-2',
+  '0303':'Mente 3-3',            '0304':'Mente 3-4',
+  '0401':'Corazón 4-1',          '0402':'Corazón 4-2',
+  '0403':'Corazón 4-3',          '0404':'Corazón 4-4',
+  '0501':'Relaciones 5-1',       '0502':'Relaciones 5-2',
+  '0503':'Relaciones 5-3',       '0504':'Relaciones 5-4',
+  '0601':'Amor 6-1',             '0602':'Amor 6-2',
+  '0603':'Amor 6-3',             '0604':'Amor 6-4',
+  '0701':'Tiempo 7-1',           '0702':'Tiempo 7-2',
+  '0703':'Tiempo 7-3',           '0704':'Tiempo 7-4',
+};
 
 // ── Estado ────────────────────────────────────────────────────────
 let currentUser    = null;
@@ -910,7 +1004,9 @@ function renderHome(userData) {
   var mundo = parseInt(currentNivelId.substring(0,2), 10);
   var nivel  = parseInt(currentNivelId.substring(2,4), 10);
   var tagEl = document.getElementById('orar-nivel-tag');
-  if (tagEl) tagEl.textContent = 'Nivel ' + mundo + '-' + nivel + ' · En progreso';
+  if (tagEl) tagEl.textContent = 'Nivel ' + mundo + '-' + nivel;
+  var nombreEl = document.getElementById('orar-nivel-nombre');
+  if (nombreEl) nombreEl.textContent = NIVEL_NAMES[currentNivelId] || 'Nivel ' + mundo + '-' + nivel;
 
   // Barras de bloques
   var data   = getProgreso(currentNivelId);
@@ -1189,7 +1285,6 @@ document.getElementById('btn-premium-continuar').addEventListener('click', async
 });
 
 // ── Navegación ────────────────────────────────────────────────────
-window.getOrarUrl = function() { return 'orar.html?c=' + currentNivelId; };
 window.openModal  = function(id) { document.getElementById(id).classList.add('open'); };
 window.closeModal = function(id) { document.getElementById(id).classList.remove('open'); };
 window.navigateTo = function(url, e) {

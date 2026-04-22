@@ -582,6 +582,7 @@ body {
 <!-- ══════════════════════════════════════════
      FIREBASE SDK v10 (compat) vía CDN
      ══════════════════════════════════════════ -->
+<script src="utils.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -728,13 +729,15 @@ function navTap(el) {
   setTimeout(function() { el.classList.remove('tapped'); }, 400);
 }
 
-function toggleDark() {
-  const isLight = document.body.classList.toggle('light');
-  document.getElementById('ico-sun').style.display  = isLight ? 'none'  : 'block';
-  document.getElementById('ico-moon').style.display = isLight ? 'block' : 'none';
-  localStorage.setItem('cruzando_theme', isLight ? 'light' : 'dark');
-  document.querySelector('meta[name="theme-color"]').content = isLight ? '#F5F0E8' : '#1A0E04';
+var isLight = localStorage.getItem('cruzando_theme') === 'light';
+function applyTheme(light) {
+  document.body.classList.toggle('light', light);
+  document.getElementById('ico-sun').style.display  = light ? 'none'  : 'block';
+  document.getElementById('ico-moon').style.display = light ? 'block' : 'none';
+  document.querySelector('meta[name="theme-color"]').content = light ? '#E6DED3' : '#1A0E04';
+  localStorage.setItem('cruzando_theme', light ? 'light' : 'dark');
 }
+function toggleDark() { isLight = !isLight; applyTheme(isLight); }
 
 /* ════════════════════════════════════════════════════
    RENDER
@@ -879,13 +882,8 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db   = firebase.firestore();
 
-// Hereda preferencia de modo oscuro/claro del index
-const savedTheme = localStorage.getItem('cruzando_theme');
-if (savedTheme === 'light') {
-  document.body.classList.add('light');
-  document.getElementById('ico-sun').style.display  = 'none';
-  document.getElementById('ico-moon').style.display = 'block';
-}
+// Hereda preferencia de modo oscuro/claro
+applyTheme(isLight);
 
 auth.onAuthStateChanged(async (user) => {
 
