@@ -218,33 +218,53 @@ body {
   background: var(--bg);
   min-height: 100dvh;
   position: relative;
+  overflow: hidden;
 }
 
-/* ── Hero con imagen y degradados estilo Hallow ── */
-/* ── Hero: layout vertical — título arriba, imagen completa, subtítulo abajo ── */
+/* ── Fondo difuminado full-screen ── */
+.session-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+.session-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  filter: blur(18px) brightness(0.35);
+  transform: scale(1.1);
+  opacity: 0.9;
+}
+
+/* ── Hero compacto — imagen recortada con overlays ── */
 .hero {
+  position: relative;
+  z-index: 1;
   width: 100%;
   flex-shrink: 0;
-  background: var(--bg);
+  height: 38vw;
+  max-height: 200px;
+  min-height: 140px;
+  overflow: hidden;
+  border-radius: 0 0 20px 20px;
 }
-
-/* Banda superior: badge + nombre oficial */
-
-/* Imagen completa — sin recorte */
 .hero-img-wrap {
   position: relative;
   width: 100%;
-  background: #111;
+  height: 100%;
 }
 .hero-img {
   width: 100%;
-  height: auto;
+  height: 100%;
   display: block;
-  object-fit: contain;
+  object-fit: cover;
+  border-radius: 0 0 20px 20px;
 }
 .hero-img-placeholder {
   width: 100%;
-  aspect-ratio: 1 / 1;
+  height: 100%;
   background: linear-gradient(160deg, #2A2520 0%, #1A1714 100%);
   display: flex;
   align-items: center;
@@ -322,50 +342,54 @@ body {
   color: var(--text-soft); line-height: 1.4; max-width: 240px;
 }
 
-/* Degradados que mezclan con el color de fondo */
-.hero-grad-top {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 38%;
-  background: linear-gradient(to bottom,
-    rgba(var(--bg-rgb), 1) 0%,
-    rgba(var(--bg-rgb), 0.6) 40%,
-    transparent 100%);
-  pointer-events: none;
-}
+/* Degradado inferior — legibilidad del texto overlay */
 .hero-grad-bottom {
   position: absolute;
   bottom: 0; left: 0; right: 0;
-  height: 38%;
+  height: 55%;
   background: linear-gradient(to top,
-    rgba(var(--bg-rgb), 1) 0%,
-    rgba(var(--bg-rgb), 0.6) 40%,
+    rgba(0,0,0,0.72) 0%,
+    rgba(0,0,0,0.3) 60%,
     transparent 100%);
   pointer-events: none;
 }
 
-/* Banda inferior: subtítulo contemplativo + referencia */
-.hero-bottom-text {
-  padding: 12px 20px 14px;
-  background: var(--bg);
-  border-bottom: 1px solid var(--border);
+/* Texto sobre la imagen — esquina inferior */
+.hero-overlay-text {
+  position: absolute;
+  bottom: 10px;
+  left: 14px; right: 14px;
+  z-index: 5;
+  pointer-events: none;
 }
 .hero-subtitle {
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 1.9rem;
+  font-size: 1.3rem;
   font-weight: 600;
   font-style: italic;
-  color: var(--text);
-  line-height: 1.3;
-  margin-bottom: 6px;
+  color: #fff;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.7);
+  line-height: 1.2;
+}
+.hero-reference {
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.6);
+  margin-top: 2px;
 }
 
-/* ── Controles debajo del hero ── */
+/* ── Controles — glass sobre fondo difuminado ── */
 .session-controls {
+  position: relative;
+  z-index: 1;
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 18px 20px 24px;
+  padding: 12px 20px 16px;
+  background: rgba(var(--bg-rgb), 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 20px 20px 0 0;
+  margin-top: -20px;
   gap: 0;
 }
 
@@ -383,7 +407,7 @@ body {
   margin-bottom: 10px;
   padding-left: 2px;
   animation: fadeIn 0.3s ease;
-  min-height: 2rem;
+  min-height: 1.6rem;
 }
 .perspective-dot {
   width: 8px; height: 8px;
@@ -469,7 +493,7 @@ body {
 }
 .ctrl-btn:active { transform: scale(0.88); color: var(--text); }
 .ctrl-btn-primary {
-  width: 62px; height: 62px;
+  width: 52px; height: 52px;
   background: var(--lvl-bold);
   color: #fff;
   border-radius: 50%;
@@ -579,18 +603,18 @@ body {
 .fab-questions {
   position: static;
   width: 100%;
-  height: 56px;
+  height: 50px;
   padding: 0 18px 0 14px;
   background: var(--card);
   border: 1.5px solid var(--border);
-  border-radius: 14px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 700;
-  margin-top: 12px;
+  margin-top: 10px;
   transition: background 0.2s, border-color 0.2s;
   -webkit-tap-highlight-color: transparent;
 }
@@ -1231,13 +1255,16 @@ body {
   <!-- ═══ PANTALLA: SESIÓN DIARIA ═══ -->
   <div class="screen" id="scr-session">
 
-    <!-- Hero: layout vertical -->
-    <div class="hero">
+    <!-- Fondo difuminado full-screen -->
+    <div class="session-bg">
+      <img id="session-bg-img" alt="">
+    </div>
 
-      <!-- Imagen completa — botones BGM y tema como overlay -->
+    <!-- Hero compacto -->
+    <div class="hero">
       <div class="hero-img-wrap">
         <div class="hero-img-placeholder" id="hero-placeholder">🕊️</div>
-        <img class="hero-img" id="hero-img" alt="" style="display:none" crossorigin="anonymous">
+        <img class="hero-img" id="hero-img" alt="" style="display:none">
         <!-- Bienvenida visual: visible durante INTRO y START -->
         <div class="welcome-overlay" id="welcome-overlay">
           <div class="welcome-mundo-label" id="welcome-mundo-label">Cruzando la Cruz</div>
@@ -1257,7 +1284,6 @@ body {
           <div class="welcome-mystery-ord"      id="welcome-mystery-ord">Primer Misterio</div>
           <div class="welcome-mystery-official" id="welcome-mystery-official"></div>
         </div>
-        <div class="hero-grad-top"></div>
         <div class="hero-grad-bottom"></div>
         <!-- Waveform animado -->
         <div class="waveform-overlay" id="waveform-overlay"></div>
@@ -1271,14 +1297,12 @@ body {
           <svg id="ico-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
           <svg id="ico-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
         </button>
+        <!-- Subtítulo y referencia sobre la imagen -->
+        <div class="hero-overlay-text">
+          <div class="hero-subtitle" id="hero-subtitle"></div>
+          <div class="hero-reference" id="hero-reference"></div>
+        </div>
       </div>
-
-      <!-- Banda inferior: subtítulo contemplativo + referencia -->
-      <div class="hero-bottom-text">
-        <div class="hero-subtitle" id="hero-subtitle"></div>
-        <div class="hero-reference" id="hero-reference"></div>
-      </div>
-
     </div>
 
     <!-- Controles -->
@@ -1579,10 +1603,10 @@ const DAY_BLOCKS = { 0:'gloriosos', 1:'gozosos', 2:'dolorosos', 3:'gloriosos', 4
 
 // Colores por bloque
 const BLOCK_COLORS = {
-  gozosos:  { bold:'#D4A017', dot:'🌟' },
+  gozosos:  { bold:'#E8A0A0', dot:'🌟' },
   luminosos:{ bold:'#01BBE1', dot:'✨' },
   dolorosos:{ bold:'#C0392B', dot:'✝️' },
-  gloriosos:{ bold:'#FFFCF7', dot:'👑' }
+  gloriosos:{ bold:'#D4A017', dot:'👑' }
 };
 const MUNDO_NOMBRES = {
   1:'la Cruz', 2:'las Emociones', 3:'la Mente',
@@ -2479,6 +2503,8 @@ function renderSession() {
     $('hero-placeholder').textContent = BLOCK_COLORS[block]?.dot || '🕊️';
   };
   heroImg.src = imgUrl;
+  const bgImg = $('session-bg-img');
+  if (bgImg) bgImg.src = imgUrl;
 
   // Inicializar progress bars: 8 segmentos visuales (no uno por track)
   const container = $('playlist-progress');
