@@ -591,62 +591,7 @@ body {
 .btn-complete.visible { display: block; }
 .btn-complete:active { transform: scale(0.97); }
 
-.btn-modo-switch {
-  width: 100%; padding: 15px 0; border-radius: 14px;
-  border: 1.5px dashed var(--border); background: transparent;
-  color: var(--text-dim); font-size: 1rem; font-weight: 500; cursor: pointer;
-  margin-top: 12px; transition: opacity 0.2s;
-}
-.btn-modo-switch:active { opacity: 0.65; }
 
-/* ── Botón de preguntas — en flujo dentro de session-controls ── */
-.fab-questions {
-  position: static;
-  width: 100%;
-  height: 50px;
-  padding: 0 18px 0 14px;
-  background: var(--card);
-  border: 1.5px solid var(--border);
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: 700;
-  margin-top: 10px;
-  transition: background 0.2s, border-color 0.2s;
-  -webkit-tap-highlight-color: transparent;
-}
-.fab-questions:active { transform: scale(0.97); }
-.fab-questions.has-answers {
-  background: var(--lvl-ultra);
-  border-color: var(--lvl-soft);
-  box-shadow: 0 4px 20px rgba(var(--lvl-bold-rgb,255,122,0), 0.25);
-}
-.fab-label {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: var(--text-soft);
-  letter-spacing: 0.2px;
-}
-.fab-questions.has-answers .fab-label { color: var(--lvl-soft); }
-.fab-badge {
-  position: absolute;
-  top: -4px; right: -4px;
-  width: 16px; height: 16px;
-  background: var(--lvl-bold);
-  border-radius: 50%;
-  font-size: 0.58rem;
-  font-weight: 800;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  display: none;
-}
-.fab-badge.visible { display: flex; }
 
 /* ── Notificación de metros ganados ── */
 .meters-toast {
@@ -959,45 +904,6 @@ body {
 .fade-in { animation: fadeIn 0.4s ease; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
-/* ── Botón esquina — dark/settings ── */
-/* Botón logout — sobre la imagen */
-.corner-btn {
-  position: absolute;
-  top: 12px; right: 12px;
-  width: 34px; height: 34px;
-  background: rgba(0,0,0,0.4);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: rgba(255,255,255,0.8);
-  z-index: 10;
-  transition: background 0.2s;
-}
-.corner-btn:active { background: rgba(0,0,0,0.6); }
-
-/* Botón BGM — círculo sobre imagen */
-.btn-bgm-pill {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 34px; height: 34px;
-  background: rgba(0,0,0,0.4);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 50%;
-  cursor: pointer;
-  color: rgba(255,255,255,0.8);
-  transition: background 0.2s, opacity 0.2s;
-  -webkit-tap-highlight-color: transparent;
-}
-.btn-bgm-pill:active { transform: scale(0.92); }
-.btn-bgm-pill.muted { opacity: 0.45; }
 
 /* ── Bottom nav bar (estándar CruzAndo) ── */
 .app-nav {
@@ -1156,6 +1062,88 @@ body {
   cursor: pointer; -webkit-tap-highlight-color: transparent;
 }
 
+/* ── Overlay oscuro dinámico sobre la imagen del hero ── */
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.82);
+  z-index: 4;
+  transition: opacity 0.7s ease;
+  pointer-events: none;
+}
+.hero-overlay.revealed { opacity: 0; }
+
+/* Textos de identidad sobre el overlay oscuro */
+.hero-identity {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 12px 16px;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+.hero-identity.hidden { opacity: 0; }
+.hero-identity-nivel {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: rgba(255,255,255,0.55);
+  margin-bottom: 6px;
+}
+.hero-identity-misterio {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  font-style: italic;
+  color: #fff;
+  line-height: 1.3;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.6);
+  margin-bottom: 6px;
+}
+.hero-identity-bloque {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--lvl-bold);
+}
+
+/* ── Columnas de botones circulares sobre el hero ── */
+.hero-btn-col {
+  position: absolute;
+  top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 10;
+}
+.hero-btn-col.left  { left: 12px; }
+.hero-btn-col.right { right: 12px; }
+
+.hero-circle-btn {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.42);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.14);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,0.82);
+  transition: background 0.2s, opacity 0.2s, transform 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.hero-circle-btn:active { transform: scale(0.88); background: rgba(0,0,0,0.65); }
+.hero-circle-btn.muted  { opacity: 0.4; }
+
 /* ── Botón de Preparación (ya completado el micro) ── */
 .prep-btn-wrap { padding: 12px 0 4px; }
 .prep-btn {
@@ -1284,19 +1272,39 @@ body {
           <div class="welcome-mystery-ord"      id="welcome-mystery-ord">Primer Misterio</div>
           <div class="welcome-mystery-official" id="welcome-mystery-official"></div>
         </div>
+        <!-- Overlay oscuro + textos de identidad (visible en INTRO/START) -->
+        <div class="hero-overlay" id="hero-overlay"></div>
+        <div class="hero-identity" id="hero-identity">
+          <div class="hero-identity-nivel"   id="hero-identity-nivel"></div>
+          <div class="hero-identity-misterio" id="hero-identity-misterio"></div>
+          <div class="hero-identity-bloque"  id="hero-identity-bloque"></div>
+        </div>
         <div class="hero-grad-bottom"></div>
         <!-- Waveform animado -->
         <div class="waveform-overlay" id="waveform-overlay"></div>
-        <!-- Botón BGM (esquina superior izquierda) -->
-        <button class="btn-bgm-pill" id="btn-bgm" title="Música de fondo" style="position:absolute;top:12px;left:12px;z-index:10;">
-          <svg class="bgm-on" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-          <svg class="bgm-off" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
-        </button>
-        <!-- Toggle tema (esquina superior derecha) -->
-        <button class="corner-btn" id="btn-theme" title="Cambiar tema">
-          <svg id="ico-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-          <svg id="ico-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-        </button>
+        <!-- Columna izquierda: BGM + Libro -->
+        <div class="hero-btn-col left">
+          <button class="hero-circle-btn" id="btn-bgm" title="Música de fondo">
+            <svg class="bgm-on" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+            <svg class="bgm-off" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
+          </button>
+          <button class="hero-circle-btn" id="btn-libro" title="Cambiar a libro">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+          </button>
+        </div>
+        <!-- Columna derecha: Tema + Escribir + Nivel -->
+        <div class="hero-btn-col right">
+          <button class="hero-circle-btn" id="btn-theme" title="Cambiar tema">
+            <svg id="ico-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg id="ico-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+          </button>
+          <button class="hero-circle-btn" id="btn-escribir" title="Preguntas de meditación">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="hero-circle-btn" id="btn-nivel" title="Cambiar de nivel">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+          </button>
+        </div>
         <!-- Subtítulo y referencia sobre la imagen -->
         <div class="hero-overlay-text">
           <div class="hero-subtitle" id="hero-subtitle"></div>
@@ -1362,19 +1370,6 @@ body {
       <!-- Botón completar sesión (aparece al terminar playlist) -->
       <button class="btn-complete" id="btn-complete">
         ✓ Completar sesión
-      </button>
-
-      <!-- Cambiar a modo libro -->
-      <button class="btn-modo-switch" id="btn-cambiar-libro">📖 Cambiar a libro</button>
-
-      <!-- Cambiar de nivel -->
-      <button class="btn-modo-switch" onclick="goTo('world.html')">🗺️ Cambiar de nivel</button>
-
-      <!-- Botón de preguntas de meditación -->
-      <button class="fab-questions" id="fab-questions" title="Preguntas de meditación" style="display:none">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        <span class="fab-label">Escribir</span>
-        <span class="fab-badge" id="fab-badge">3</span>
       </button>
 
     </div>
@@ -1806,7 +1801,6 @@ window.advanceAndRestart = async () => {
   audioProgress.firstAnswered = [false, false, false];
   await saveAudioProgress();
   sessionMeters = 0; sectionRewards = new Set(); sessionCompleted = false;
-  $('fab-questions').style.display = 'flex';
   await buildSession();
 };
 
@@ -2390,8 +2384,6 @@ function playMicroIntroThenMicro(block, nivelId) {
   // Ocultar controles del player (aún no hay sesión activa)
   const controls = document.querySelector('#scr-session .session-controls');
   if (controls) controls.style.visibility = 'hidden';
-  const fab = $('fab-questions');
-  if (fab) fab.style.display = 'none';
   show('scr-session');
 
   const url = AUDIO_FOLDERS['rezo'] + 'micro_' + block + '.mp3';
@@ -2521,8 +2513,11 @@ function renderSession() {
   const epilogoDiv = $('epilogo-canto');
   if (epilogoDiv) epilogoDiv.style.display = 'none';
 
-  // FAB preguntas — visible siempre en sesión
-  $('fab-questions').style.display = 'flex';
+  // Poblar textos de identidad en el overlay oscuro
+  const nivelId = String(nivel).padStart(2,'0') + String(cuaderno).padStart(2,'0');
+  $('hero-identity-nivel').textContent    = `Nivel ${nivel}-${cuaderno} · ${ORDS[blockIdx] || (blockIdx+1+'º')} Misterio`;
+  $('hero-identity-misterio').textContent = subtitle || OFFICIAL_NAMES[block]?.[blockIdx] || '';
+  $('hero-identity-bloque').textContent   = BLOCK_FULL_NAMES[block] || block;
 
   // Eventos controles
   $('btn-play-pause').onclick = togglePlayPause;
@@ -2534,12 +2529,27 @@ function renderSession() {
     const next = nextRealTrack(currentTrack);
     if (next >= 0) goTrack(next);
   };
-  $('btn-complete').onclick   = completeSession;
-  $('btn-cambiar-libro').onclick = () => {
+  $('btn-complete').onclick = completeSession;
+
+  // Botones circulares del hero
+  const btnBgm = $('btn-bgm');
+  if (btnBgm) btnBgm.onclick = bgmToggle;
+
+  const btnTheme = $('btn-theme');
+  if (btnTheme) btnTheme.onclick = toggleTheme;
+
+  const btnLibro = $('btn-libro');
+  if (btnLibro) btnLibro.onclick = () => {
     const nId = String(audioProgress.nivel).padStart(2,'0') + String(audioProgress.cuaderno).padStart(2,'0');
-    const misterio = currentSession ? currentSession.misterio : audioProgress.misterio;
-    goTo('orar.html?c=' + nId + '&misterio=' + misterio);
+    const mis = currentSession ? currentSession.misterio : audioProgress.misterio;
+    goTo('orar.html?c=' + nId + '&misterio=' + mis);
   };
+
+  const btnNivel = $('btn-nivel');
+  if (btnNivel) btnNivel.onclick = () => goTo('world.html');
+
+  const btnEscribir = $('btn-escribir');
+  if (btnEscribir) btnEscribir.onclick = openModal;
 
   // Progress bar click
   $('progress-bar').onclick = e => {
@@ -2549,22 +2559,9 @@ function renderSession() {
     audioEl.currentTime = ratio * audioEl.duration;
   };
 
-  // FAB y modal
-  $('fab-questions').onclick = openModal;
+  // Modal
   $('modal-close').onclick   = closeModal;
   $('modal-overlay').onclick = e => { if (e.target === $('modal-overlay')) closeModal(); };
-
-  // Btn next mystery (pantalla completado)
-  // Texto del botón según plan
-  // Botones de acción se generan dinámicamente en completeSession()
-
-  // Botón BGM
-  const btnBgm = $('btn-bgm');
-  if (btnBgm) btnBgm.onclick = bgmToggle;
-
-  // Botón tema
-  const btnTheme = $('btn-theme');
-  if (btnTheme) btnTheme.onclick = toggleTheme;
 
   // Iniciar BGM de fondo
   bgmInit();
@@ -2972,8 +2969,8 @@ function updateBgmBtn() {
   btn.classList.toggle('muted', !bgmEnabled);
   const on  = btn.querySelector('.bgm-on');
   const off = btn.querySelector('.bgm-off');
-  if (on)  on.style.display  = bgmEnabled ? 'inline-block' : 'none';
-  if (off) off.style.display = bgmEnabled ? 'none' : 'inline-block';
+  if (on)  on.style.display  = bgmEnabled ? '' : 'none';
+  if (off) off.style.display = bgmEnabled ? 'none' : '';
 }
 
 function togglePlayPause() {
@@ -3010,13 +3007,17 @@ function updateSectionDisplay(idx) {
   const perspLabel = $('perspective-label');
   const perspDot   = $('perspective-dot');
   const wo         = $('welcome-overlay');
+  const heroOv     = $('hero-overlay');
+  const heroId     = $('hero-identity');
 
   if (idx < 0 || idx >= playlist.length) {
     $('section-name').textContent = idx < 0 ? 'Listo para comenzar' : 'Sesión completada';
     $('section-pulse').style.animationPlayState = 'paused';
     if (perspWrap) perspWrap.style.display = 'none';
-    // Visible al inicio (antes de comenzar), oculto al terminar
     if (wo) wo.classList.toggle('hidden', idx >= 0);
+    // Al inicio: mostrar overlay oscuro + identity; al final: revelar imagen
+    if (heroOv) heroOv.classList.toggle('revealed', idx >= 0);
+    if (heroId) heroId.classList.toggle('hidden', idx >= 0);
     return;
   }
 
@@ -3026,6 +3027,10 @@ function updateSectionDisplay(idx) {
 
   // Welcome overlay: visible en INTRO (seg 0) y START (seg 1); oculto desde UBIBLE en adelante
   if (wo) wo.classList.toggle('hidden', track.seg > 1);
+
+  // Hero overlay oscuro: visible en seg 0 (Intro) y seg 1 (Bienvenida); revelado desde seg 2 (UBIBLE)
+  if (heroOv) heroOv.classList.toggle('revealed', track.seg > 1);
+  if (heroId) heroId.classList.toggle('hidden', track.seg > 1);
 
   // Mostrar perspectiva solo en QA (qIdx:0), QB (qIdx:1), QC (qIdx:2)
   if (typeof track.qIdx === 'number' && perspWrap) {
@@ -3229,7 +3234,6 @@ async function completeSession() {
   }
 
   show('scr-complete');
-  $('fab-questions').style.display = 'none';
 }
 
 function showComingSoon() {
@@ -3359,16 +3363,11 @@ function showSavedIndicator() {
 }
 
 function updateFabBadge() {
+  // Botón de escribir: resaltar si hay respuestas
   const answered = [0,1,2].filter(i => localAnswers[i].trim()).length;
-  const badge = $('fab-badge');
-  if (answered > 0) {
-    badge.textContent = answered;
-    badge.classList.add('visible');
-    $('fab-questions').classList.add('has-answers');
-  } else {
-    badge.classList.remove('visible');
-    $('fab-questions').classList.remove('has-answers');
-  }
+  const btnEsc = $('btn-escribir');
+  if (btnEsc) btnEsc.style.background = answered > 0
+    ? 'rgba(var(--lvl-bold-rgb,255,122,0),0.55)' : '';
 }
 
 function parseQuestions(text) {
