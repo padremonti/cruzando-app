@@ -431,7 +431,7 @@ body {
 .tu-camino-btns { display:flex; flex-direction:column; gap:10px; margin-top:16px; }
 .tu-camino-btn-primary {
   width:100%; padding:13px; border-radius:12px; border:none;
-  background:var(--lvl-bold); color:#fff; font-family:inherit;
+  background:var(--orange); color:#fff; font-family:inherit;
   font-size:0.9rem; font-weight:600; cursor:pointer; transition:opacity 0.2s;
 }
 .tu-camino-btn-primary:active { opacity:0.8; }
@@ -1338,8 +1338,7 @@ function renderTuCamino(bookmark, progreso, user) {
           { merge: true });
       } catch(e) { console.warn('[bookmark]', e); }
       wrap.innerHTML = '';
-      var nivelId = String(progreso.nivel).padStart(2,'0') + String(progreso.cuaderno).padStart(2,'0');
-      navigateTo('audio.html?c=' + nivelId + '&misterio=' + progreso.misterio);
+      navigateTo('audio.html?nivel=' + progreso.nivel + '&cuaderno=' + progreso.cuaderno + '&misterio=' + progreso.misterio);
     };
   }
 }
