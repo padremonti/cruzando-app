@@ -2450,7 +2450,11 @@ body {
     } else if (mi === 4 && isDone) {
       html += '<button class="btn btn-primary" onclick="window._ca.backToBlocks()">← Ver Misterios</button>';
     }
-    html += '<button class="btn-modo-switch" onclick="window.goTo(\'audio.html?c=' + NIVEL_ID + '\')">🎧 Cambiar a audio</button>';
+    const _bOff = { gozosos:0, luminosos:5, dolorosos:10, gloriosos:15 };
+    const _gM   = (_bOff[b] || 0) + mi + 1;
+    const _niv  = parseInt(NIVEL_ID.substring(0,2), 10);
+    const _cua  = parseInt(NIVEL_ID.substring(2,4), 10);
+    html += '<button class="btn-modo-switch" onclick="window.goTo(\'audio.html?nivel=' + _niv + '&cuaderno=' + _cua + '&misterio=' + _gM + '\')">🎧 Cambiar a audio</button>';
     nav.innerHTML = html;
   }
 

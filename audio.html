@@ -2581,7 +2581,8 @@ function renderSession() {
   $('btn-complete').onclick   = completeSession;
   $('btn-cambiar-libro').onclick = () => {
     const nId = String(audioProgress.nivel).padStart(2,'0') + String(audioProgress.cuaderno).padStart(2,'0');
-    goTo('orar.html?c=' + nId);
+    const misterio = currentSession ? currentSession.misterio : audioProgress.misterio;
+    goTo('orar.html?c=' + nId + '&misterio=' + misterio);
   };
 
   // Progress bar click
