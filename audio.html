@@ -1924,7 +1924,12 @@ async function loadUserAndStart(skipProgressRead = false) {
   }
 
   console.log('userPlan:', userPlan, '| misterio:', audioProgress.nivel, audioProgress.cuaderno, audioProgress.misterio);
-  await buildSession();
+  try {
+    await buildSession();
+  } catch(e) {
+    console.error('[audio] buildSession error:', e);
+    setMsg('Error: ' + e.message);
+  }
 }
 
 function hasSessionToday() {
@@ -2198,6 +2203,7 @@ async function buildSession() {
   // Micro ya completado (o no aplica) → iniciar player directamente
   const showPrep = isFirstOfBlock && blockMicroDone
     && microData && microData.bloques && microData.bloques[block];
+  setMsg(`Iniciando sesión…`);
   startPlayerSession(showPrep ? block : null);
 }
 
@@ -2206,7 +2212,9 @@ async function buildSession() {
 // ════════════════════════════════════════════
 
 function startPlayerSession(prepBlock) {
+  setMsg('Renderizando sesión…');
   renderSession();
+  setMsg('Sesión lista…');
 
   // Botón "Preparación" (solo si micro ya fue completado en este bloque)
   const prepWrap = $('prep-btn-wrap');
