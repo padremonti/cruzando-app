@@ -1317,8 +1317,10 @@ function renderTuCamino(bookmark, progreso, user) {
   document.getElementById('btn-tc-continuar').onclick = function() {
     playTap();
     var nivelId = String(bookmark.nivel).padStart(2,'0') + String(bookmark.cuaderno).padStart(2,'0');
-    var modo = bookmark.modo === 'libro' ? 'orar' : 'audio';
-    var url = modo + '.html?c=' + nivelId + '&misterio=' + bookmark.misterio;
+    // orar.html lee ?misterio= directamente; audio.html necesita ?nivel=&cuaderno=&misterio= juntos
+    var url = bookmark.modo === 'libro'
+      ? 'orar.html?c=' + nivelId + '&misterio=' + bookmark.misterio
+      : 'audio.html?nivel=' + bookmark.nivel + '&cuaderno=' + bookmark.cuaderno + '&misterio=' + bookmark.misterio;
     wrap.innerHTML = '';
     navigateTo(url);
   };
