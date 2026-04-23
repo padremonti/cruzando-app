@@ -679,7 +679,8 @@ function highlight(text, query) {
 }
 
 function escapeHtml(s) {
-  return s
+  if (s == null) return '';
+  return String(s)
     .replace(/&/g,'&amp;')
     .replace(/</g,'&lt;')
     .replace(/>/g,'&gt;')
@@ -781,9 +782,9 @@ function renderList(items, query) {
         </div>`;
     }
 
-    const nivelLabel  = NIVEL_NAMES[r.nivelId] || `Nivel ${r.nivelId}`;
-    const bloqueLabel = BLOQUE_NAMES[r.bloque]  || r.bloque;
-    const misterioLabel = (MISTERIO_ORDINAL[r.misterioIdx] || `Misterio ${r.misterioIdx+1}`) + ' Misterio';
+    const nivelLabel  = NIVEL_NAMES[r.nivelId] || (r.nivelId ? `Nivel ${r.nivelId}` : '');
+    const bloqueLabel = BLOQUE_NAMES[r.bloque]  || r.bloque || '';
+    const misterioLabel = (MISTERIO_ORDINAL[r.misterioIdx] || (r.misterioIdx != null ? `Misterio ${r.misterioIdx+1}` : '')) + (r.misterioIdx != null ? ' Misterio' : '');
     const pregLabel   = PREGUNTA_NAMES[`q${r.questionIdx}`] || '';
     const pregText    = r.question || '';
     // Solo mostrar pregText si es diferente al label corto (reflexiones nuevas)
@@ -943,7 +944,7 @@ auth.onAuthStateChanged(async (user) => {
     document.getElementById('loadingScreen').style.display = 'none';
     document.getElementById('authScreen').style.display    = 'flex';
     document.querySelector('.auth-title').textContent = 'Error al cargar el diario';
-    document.querySelector('.auth-sub').textContent   = 'Ocurrió un problema al leer tus reflexiones. Intenta de nuevo.';
+    document.querySelector('.auth-sub').textContent = 'Ocurrió un problema al leer tus reflexiones. Intenta de nuevo.';
   }
 });
 </script>
