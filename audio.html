@@ -340,6 +340,16 @@ body {
   font-size: 1.1rem; font-weight: 500; font-style: italic;
   color: var(--text-soft); line-height: 1.4; max-width: 240px;
 }
+.welcome-tap-hint {
+  margin-top: 22px;
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 1.6px;
+  text-transform: uppercase; color: var(--lvl-soft);
+  animation: tapHintPulse 1.8s ease-in-out infinite;
+}
+@keyframes tapHintPulse {
+  0%, 100% { opacity: 0.45; }
+  50%       { opacity: 1; }
+}
 
 /* Degradados — fusionan imagen con fondo */
 .hero-grad-top {
@@ -1301,6 +1311,7 @@ body {
           <div class="welcome-mystery-sep"></div>
           <div class="welcome-mystery-ord"      id="welcome-mystery-ord">Primer Misterio</div>
           <div class="welcome-mystery-official" id="welcome-mystery-official"></div>
+          <div class="welcome-tap-hint" id="welcome-tap-hint">Toca para comenzar</div>
         </div>
         <!-- Overlay oscuro + textos de identidad (visible en INTRO/START) -->
         <div class="hero-overlay" id="hero-overlay"></div>
@@ -2600,8 +2611,14 @@ function renderSession() {
   // Waveform
   initWaveform();
 
-  // Arrancar reproducción automáticamente
-  startPlaylist();
+  // Esperar tap del usuario — política autoplay de Chrome
+  const _wo   = $('welcome-overlay');
+  const _hint = $('welcome-tap-hint');
+  if (_wo) _wo.onclick = () => {
+    _wo.onclick = null;
+    if (_hint) _hint.style.display = 'none';
+    startPlaylist();
+  };
 }
 
 // ════════════════════════════════════════════
@@ -2776,16 +2793,15 @@ function goTrack(idx) {
     }
   };
 
-  audioEl.oncanplaythrough = () => {
-    audioEl.play().then(() => {
-      isPlaying = true;
-      updatePlayPauseBtn();
-    }).catch(e => {
-      console.warn('Autoplay bloqueado:', e);
-      isPlaying = false;
-      updatePlayPauseBtn();
-    });
-  };
+  // play() directo — funciona dentro del gesto del usuario y para tracks sucesivos
+  audioEl.play().then(() => {
+    isPlaying = true;
+    updatePlayPauseBtn();
+  }).catch(e => {
+    console.warn('Autoplay bloqueado:', e);
+    isPlaying = false;
+    updatePlayPauseBtn();
+  });
 
   // Marcar segmento visual como activo (solo si no es silence y no está ya done)
   if (!track.silence) {
