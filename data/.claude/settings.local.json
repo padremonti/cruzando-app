@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c ' *)",
+      "Bash(python -c \"import ast; ast.parse\\(open\\('cruzando_tts_maker.py', encoding='utf-8'\\).read\\(\\)\\); print\\('Sintaxis OK'\\)\")"
+    ]
+  }
+}

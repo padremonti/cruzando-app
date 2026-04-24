@@ -826,102 +826,6 @@ def save_gestor_file(nivel_id: str, file_type: str, goz: str, lum: str, dol: str
 
 
 # -------------------------------------------------------------------
-# Gestor A — Visor/Editor por misterio
-# -------------------------------------------------------------------
-
-def _gestor_a_misterio_choices(data: dict, bloque: str) -> list:
-    misterios = data.get("misterios", {}).get(bloque, [])
-    return [
-        f"{m.get('numero', i+1)} — {m.get('titulo', '(sin título)')}"
-        for i, m in enumerate(misterios)
-    ]
-
-
-def gestor_a_load_data(nivel_id: str):
-    _empty = ("", "", "", "", "", "", "")
-    if not nivel_id.strip():
-        return (None, "Indica el ID del nivel.", gr.update(), gr.update(choices=[], value=None)) + _empty
-    filename = build_gestor_filename(nivel_id, "data")
-    path = Path(filename)
-    if not path.exists():
-        return (None, f"No encontré: {filename}", gr.update(), gr.update(choices=[], value=None)) + _empty
-    with open(path, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    choices = _gestor_a_misterio_choices(data, "gozosos")
-    return (
-        data,
-        f"Cargado: {filename}",
-        gr.update(value="Gozosos"),
-        gr.update(choices=choices, value=None),
-    ) + _empty
-
-
-def gestor_a_update_misterios(data, bloque_display: str):
-    _empty = ("", "", "", "", "", "", "")
-    if not data or not bloque_display:
-        return (gr.update(choices=[], value=None),) + _empty
-    choices = _gestor_a_misterio_choices(data, bloque_display.lower())
-    return (gr.update(choices=choices, value=None),) + _empty
-
-
-def gestor_a_load_misterio_fields(data, bloque_display: str, misterio_label: str):
-    if not data or not misterio_label:
-        return "", "", "", "", "", "", ""
-    bloque = bloque_display.lower() if bloque_display else "gozosos"
-    misterios = data.get("misterios", {}).get(bloque, [])
-    try:
-        num = int(misterio_label.split(" — ")[0].strip())
-    except (ValueError, IndexError):
-        return "", "", "", "", "", "", ""
-    m = next((x for x in misterios if x.get("numero") == num), None)
-    if not m:
-        return "", "", "", "", "", "", ""
-    return (
-        m.get("titulo", ""),
-        m.get("subtitulo", ""),
-        m.get("referencia", ""),
-        m.get("evangelio", ""),
-        m.get("contemplacion", ""),
-        m.get("meditacion", ""),
-        m.get("intercesion", ""),
-    )
-
-
-def gestor_a_save_misterio(nivel_id, bloque_display, misterio_label, data,
-                            titulo, subtitulo, referencia, evangelio,
-                            contemplacion, meditacion, intercesion):
-    if data is None:
-        return "Primero carga un archivo.", None
-    if not bloque_display or not misterio_label:
-        return "Selecciona un bloque y un misterio primero.", data
-    bloque = bloque_display.lower()
-    misterios = data.get("misterios", {}).get(bloque, [])
-    try:
-        num = int(misterio_label.split(" — ")[0].strip())
-    except (ValueError, IndexError):
-        return "No pude identificar el misterio seleccionado.", data
-    idx = next((i for i, m in enumerate(misterios) if m.get("numero") == num), None)
-    if idx is None:
-        return f"Misterio {num} no encontrado en el bloque '{bloque}'.", data
-    data["misterios"][bloque][idx].update({
-        "titulo":       titulo.strip()    if titulo       else "",
-        "subtitulo":    subtitulo.strip() if subtitulo    else "",
-        "referencia":   referencia.strip() if referencia  else "",
-        "evangelio":    evangelio         if evangelio    else "",
-        "contemplacion": contemplacion    if contemplacion else "",
-        "meditacion":   meditacion        if meditacion   else "",
-        "intercesion":  intercesion       if intercesion  else "",
-    })
-    filename = build_gestor_filename(nivel_id, "data")
-    try:
-        with open(Path(filename), "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
-        return f"Misterio {num} guardado correctamente en {filename}.", data
-    except Exception as e:
-        return f"Error al guardar: {e}", data
-
-
-# -------------------------------------------------------------------
 # Gestor B — Compilador de estructura vacía
 # -------------------------------------------------------------------
 
@@ -1416,41 +1320,27 @@ with gr.Blocks(
         with gr.Tab("Gestor JSON"):
             with gr.Tabs():
 
-                # --- Sub-tab A: Visor/Editor por misterio ---
+                # --- Sub-tab A: Visor/Editor por bloques ---
                 with gr.Tab("A — Visor/Editor"):
-                    gestor_a_data = gr.State(None)
-
-                    gr.Markdown("#### Paso 1 — Cargar archivo de datos")
+                    gr.Markdown("Carga un archivo y edita cada bloque por separado. Al guardar se valida el JSON de cada bloque.")
                     with gr.Row():
-                        gestor_a_id = gr.Textbox(label="ID del nivel", placeholder="0101", scale=2)
+                        gestor_a_type = gr.Radio(
+                            choices=["data", "micro", "cantos"],
+                            value="data",
+                            label="Tipo de archivo",
+                        )
+                        gestor_a_id = gr.Textbox(label="ID del nivel (ej. 0101)", placeholder="0101", scale=1)
                         gestor_a_load_btn = gr.Button("📂 Cargar", scale=0)
-                    gestor_a_status = gr.Textbox(label="Estado de carga", lines=1, interactive=False)
-
-                    gr.Markdown("#### Paso 2 — Elegir bloque")
-                    gestor_a_bloque = gr.Dropdown(
-                        choices=["Gozosos", "Luminosos", "Dolorosos", "Gloriosos"],
-                        value=None,
-                        label="Bloque de misterios",
-                    )
-
-                    gr.Markdown("#### Paso 3 — Elegir misterio")
-                    gestor_a_misterio = gr.Dropdown(
-                        choices=[],
-                        value=None,
-                        label="Misterio",
-                    )
-
-                    gr.Markdown("#### Paso 4 — Editar campos")
-                    gestor_a_titulo = gr.Textbox(label="Título", lines=1)
-                    gestor_a_subtitulo = gr.Textbox(label="Subtítulo", lines=1)
-                    gestor_a_referencia = gr.Textbox(label="Referencia bíblica", lines=1)
-                    gestor_a_evangelio = gr.Textbox(label="Evangelio", lines=7)
-                    gestor_a_contemplacion = gr.Textbox(label="Contemplación", lines=9)
-                    gestor_a_meditacion = gr.Textbox(label="Meditación", lines=6)
-                    gestor_a_intercesion = gr.Textbox(label="Intercesión", lines=4)
-
+                    gestor_a_status = gr.Textbox(label="Estado", lines=1)
+                    with gr.Accordion("Gozosos", open=True):
+                        gestor_a_goz = gr.Textbox(label="gozosos", lines=18, elem_id="gestor_block")
+                    with gr.Accordion("Luminosos", open=False):
+                        gestor_a_lum = gr.Textbox(label="luminosos", lines=18, elem_id="gestor_block")
+                    with gr.Accordion("Dolorosos", open=False):
+                        gestor_a_dol = gr.Textbox(label="dolorosos", lines=18, elem_id="gestor_block")
+                    with gr.Accordion("Gloriosos", open=False):
+                        gestor_a_glo = gr.Textbox(label="gloriosos", lines=18, elem_id="gestor_block")
                     gestor_a_save_btn = gr.Button("💾 Guardar cambios", variant="primary")
-                    gestor_a_save_status = gr.Textbox(label="Estado del guardado", lines=2, interactive=False)
 
                 # --- Sub-tab B: Compilador ---
                 with gr.Tab("B — Compilador"):
@@ -1587,42 +1477,15 @@ with gr.Blocks(
     # Event handlers — Gestor A
     # ----------------------------------------------------------------
     gestor_a_load_btn.click(
-        fn=gestor_a_load_data,
-        inputs=[gestor_a_id],
-        outputs=[
-            gestor_a_data, gestor_a_status, gestor_a_bloque, gestor_a_misterio,
-            gestor_a_titulo, gestor_a_subtitulo, gestor_a_referencia,
-            gestor_a_evangelio, gestor_a_contemplacion, gestor_a_meditacion, gestor_a_intercesion,
-        ],
-    )
-
-    gestor_a_bloque.change(
-        fn=gestor_a_update_misterios,
-        inputs=[gestor_a_data, gestor_a_bloque],
-        outputs=[
-            gestor_a_misterio,
-            gestor_a_titulo, gestor_a_subtitulo, gestor_a_referencia,
-            gestor_a_evangelio, gestor_a_contemplacion, gestor_a_meditacion, gestor_a_intercesion,
-        ],
-    )
-
-    gestor_a_misterio.change(
-        fn=gestor_a_load_misterio_fields,
-        inputs=[gestor_a_data, gestor_a_bloque, gestor_a_misterio],
-        outputs=[
-            gestor_a_titulo, gestor_a_subtitulo, gestor_a_referencia,
-            gestor_a_evangelio, gestor_a_contemplacion, gestor_a_meditacion, gestor_a_intercesion,
-        ],
+        fn=load_gestor_file,
+        inputs=[gestor_a_id, gestor_a_type],
+        outputs=[gestor_a_goz, gestor_a_lum, gestor_a_dol, gestor_a_glo, gestor_a_status],
     )
 
     gestor_a_save_btn.click(
-        fn=gestor_a_save_misterio,
-        inputs=[
-            gestor_a_id, gestor_a_bloque, gestor_a_misterio, gestor_a_data,
-            gestor_a_titulo, gestor_a_subtitulo, gestor_a_referencia,
-            gestor_a_evangelio, gestor_a_contemplacion, gestor_a_meditacion, gestor_a_intercesion,
-        ],
-        outputs=[gestor_a_save_status, gestor_a_data],
+        fn=save_gestor_file,
+        inputs=[gestor_a_id, gestor_a_type, gestor_a_goz, gestor_a_lum, gestor_a_dol, gestor_a_glo],
+        outputs=[gestor_a_status],
     )
 
     # ----------------------------------------------------------------
