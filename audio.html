@@ -357,11 +357,12 @@ body {
 .hero-grad-bottom {
   position: absolute;
   bottom: 0; left: 0; right: 0;
-  height: 45%;
+  height: 55%;
   background: linear-gradient(
     to top,
     rgba(var(--bg-rgb), 1) 0%,
-    rgba(var(--bg-rgb), 0.7) 50%,
+    rgba(var(--bg-rgb), 0.85) 30%,
+    rgba(var(--bg-rgb), 0.4) 55%,
     transparent 100%
   );
   pointer-events: none;
@@ -371,9 +372,9 @@ body {
 /* Texto sobre la imagen — esquina inferior */
 .hero-overlay-text {
   position: absolute;
-  bottom: 12px;
+  bottom: 20px;
   left: 16px; right: 16px;
-  z-index: 5;
+  z-index: 6;
   pointer-events: none;
 }
 .hero-subtitle {
@@ -777,8 +778,10 @@ body {
    PANTALLA: COMPLETADO
    ══════════════════════════════════════════════ */
 #scr-complete {
-  align-items: stretch;
+  display: flex;
   flex-direction: column;
+  height: 100dvh;
+  align-items: stretch;
   padding: 0;
   background: var(--bg);
   gap: 0;
@@ -789,12 +792,16 @@ body {
 .epilogo-canto {
   width: 100%;
   flex: 1;
+  min-height: 0;
   background: var(--card);
   border-bottom: 1px solid var(--border);
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   text-align: left;
 }
 .epilogo-canto-header {
+  flex-shrink: 0;
   padding: 16px 20px 12px;
   border-bottom: 1px solid var(--border);
   display: flex;
@@ -822,6 +829,7 @@ body {
 }
 /* Player del canto en epílogo */
 .epilogo-player {
+  flex-shrink: 0;
   padding: 14px 20px;
   border-bottom: 1px solid var(--border);
   display: flex;
@@ -867,13 +875,14 @@ body {
 }
 /* Letra del canto */
 .epilogo-letra {
-  padding: 16px 20px 24px;
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px 20px;
   font-size: 1rem;
   line-height: 1.85;
   color: var(--text-soft);
   white-space: pre-line;
   font-style: italic;
-  overflow-y: auto;
 }
 .epilogo-canto-titulo-wrap {
   flex: 1;
@@ -885,11 +894,10 @@ body {
   margin-top: 3px;
 }
 /* Zona inferior: metros + botones */
-.epilogo-controles {
+#complete-controls {
   flex-shrink: 0;
-  padding: 20px 24px 90px;
-  background: var(--card);
-  border-top: 1px solid var(--border);
+  padding: 10px 20px 12px;
+  background: var(--bg);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1434,7 +1442,7 @@ body {
       <div class="epilogo-letra" id="epilogo-letra"></div>
     </div>
     <!-- Zona inferior: metros + botones de acción -->
-    <div class="epilogo-controles" id="epilogo-controles">
+    <div id="complete-controls">
       <div class="complete-meters" id="complete-meters">+0m</div>
       <div id="complete-actions" style="width:100%;max-width:320px;"></div>
     </div>
