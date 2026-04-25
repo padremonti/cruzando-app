@@ -270,11 +270,15 @@ body{
 .hero-beads{margin-top:8px;pointer-events:auto}
 
 /* Botones circulares sobre la imagen */
-.hero-btn{position:absolute;top:14px;width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;color:rgba(230,222,211,0.85);cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);-webkit-tap-highlight-color:transparent;transition:background 0.2s;z-index:4}
+.hero-btn{position:absolute;top:14px;width:85px;height:85px;border-radius:50%;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;color:rgba(230,222,211,0.85);cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);-webkit-tap-highlight-color:transparent;transition:background 0.2s;z-index:4}
+.hero-btn svg{width:38px;height:38px}
 .hero-btn:active{background:rgba(0,0,0,0.55)}
 .hero-btn-left{left:14px}
 .hero-btn-right{right:14px}
 .hero-btn.bgm-on{background:rgba(255,122,0,0.5);border-color:rgba(255,122,0,0.7)}
+.hero-mystery-nav{position:absolute;bottom:16px;right:16px;display:flex;gap:8px;z-index:10}
+.hero-nav-btn{width:38px;height:38px;border-radius:50%;background:rgba(0,0,0,0.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.85);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:opacity 0.2s,transform 0.15s}
+.hero-nav-btn:active{transform:scale(0.88)}
 
 /* ══════════════════════════════════════
    ZONA B — Barra de herramientas
@@ -337,7 +341,7 @@ body{
 .q-textarea{width:100%;min-height:110px;max-height:35vh;resize:vertical;overflow-y:auto;padding:14px;background:var(--sec-bg);border:1.5px solid var(--border);border-radius:12px;color:var(--text);font-family:'Crimson Pro',Georgia,serif;font-size:30px;line-height:1.7}
 .q-textarea:focus{border-color:var(--lvl-soft);outline:none}
 .q-saved{font-size:0.72rem;color:var(--green);margin-top:5px;min-height:26px}
-.amen-btn{display:block;width:100%;margin-top:20px;padding:16px;border-radius:14px;border:none;cursor:pointer;font-family:inherit;font-size:1rem;font-weight:800;background:var(--lvl-bold);color:#fff;letter-spacing:1px;transition:all 0.2s;box-shadow:0 4px 16px rgba(0,0,0,0.12)}
+.amen-btn{display:block;width:100%;margin-top:24px;padding:18px;border-radius:16px;border:none;cursor:pointer;font-family:'Cormorant Garamond',Georgia,serif;font-size:1.6rem;font-weight:600;background:var(--lvl-bold);color:#fff;letter-spacing:1px;transition:all 0.2s;box-shadow:0 4px 16px rgba(0,0,0,0.12)}
 .amen-btn:active{transform:scale(0.96)}
 .amen-btn.done{background:var(--green)}
 .mystery-done-pill{display:flex;align-items:center;gap:10px;padding:14px 16px;background:var(--green-soft);border-radius:14px;border:1.5px solid rgba(52,168,83,0.2);margin-top:20px}
@@ -478,6 +482,20 @@ body{
         <svg id="theme-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
         <svg id="theme-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
       </button>
+
+      <!-- Navegación ← → entre misterios -->
+      <div class="hero-mystery-nav">
+        <button class="hero-nav-btn" id="btn-prev-mystery">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </button>
+        <button class="hero-nav-btn" id="btn-next-mystery">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
+      </div>
 
       <!-- Popup bottom sheet -->
       <div class="tool-popup" id="tool-popup">
@@ -691,6 +709,46 @@ let libro=null, bgmEl=null, bgmOn=true;
 let totalM=0;
 let ans={0:'',1:'',2:''}, ansT={}, firstAns={0:false,1:false,2:false};
 let awd=new Set();
+let currentGlobalMystery=1;
+
+/* ─── MYSTERY NAV HELPERS ─── */
+const BLOCK_START={gozosos:1,luminosos:6,dolorosos:11,gloriosos:16};
+function getMysteryBlock(n){
+  if(n<=5)  return{block:'gozosos',  idx:n-1};
+  if(n<=10) return{block:'luminosos',idx:n-6};
+  if(n<=15) return{block:'dolorosos',idx:n-11};
+  return          {block:'gloriosos',idx:n-16};
+}
+function loadMystery(block,idx){blk=block;bIdx=idx;renderSession();}
+function updateNavBtns(){
+  const prev=$('btn-prev-mystery'),next=$('btn-next-mystery');
+  if(prev) prev.style.opacity=currentGlobalMystery>1 ?'1':'0.3';
+  if(next) next.style.opacity=currentGlobalMystery<20?'1':'0.3';
+}
+function goPrevMystery(){
+  if(currentGlobalMystery<=1) return;
+  const{block,idx}=getMysteryBlock(--currentGlobalMystery);
+  loadMystery(block,idx);
+}
+function goNextMystery(){
+  if(currentGlobalMystery>=20) return;
+  const{block,idx}=getMysteryBlock(++currentGlobalMystery);
+  loadMystery(block,idx);
+}
+async function markMysteryComplete(block,idx){
+  const prev=blk,prevIdx=bIdx;
+  blk=block;bIdx=idx;
+  await completeMystery();
+  blk=prev;bIdx=prevIdx;
+}
+function showAdvanceLevelPrompt(){
+  $('celeb-title').textContent='¡Veinte Misterios completados!';
+  $('celeb-sub').textContent='Has rezado los 20 misterios de este cuaderno. ¡Magnífico camino!';
+  $('btn-celeb-home').onclick=()=>{
+    location.href=location.origin+location.pathname.substring(0,location.pathname.lastIndexOf('/')+1)+'orar.html?c='+nivelId;
+  };
+  show('scr-celebration');
+}
 
 /* ─── UTILS ─── */
 const $=id=>document.getElementById(id);
@@ -943,6 +1001,7 @@ function renderSession(){
   $('main-header').style.display='none';
   awd=new Set();tool=null;
   ans={0:'',1:'',2:''};firstAns={0:false,1:false,2:false};
+  currentGlobalMystery=mNum(blk,bIdx);
 
   const md=mData(blk,bIdx),m=mNum(blk,bIdx);
   const hi=$('hero-img');
@@ -965,6 +1024,7 @@ function renderSession(){
   closeToolPopup();
   initVP();
   show('scr-orar');
+  updateNavBtns();
   if(bgmOn)startBgm();
 }
 
@@ -1021,7 +1081,19 @@ function populatePopup(t){
       loadRefs().then(r=>{[0,1,2].forEach(qi=>{const ta=$('qta'+qi);if(ta){ta.value=r[qi]||'';ans[qi]=ta.value;firstAns[qi]=!!ta.value;}});});
       break;
     case 'suplica':
-      bd.innerHTML=`<p class="popup-text">${esc(md?.intercesion||'Súplica no disponible')}</p>`;
+      bd.innerHTML=`<p class="popup-text">${esc(md?.intercesion||'Súplica no disponible')}</p>`+
+        `<button class="amen-btn" id="btn-amen">Amén</button>`;
+      $('btn-amen').onclick=async()=>{
+        await markMysteryComplete(blk,bIdx);
+        if(currentGlobalMystery<20){
+          currentGlobalMystery++;
+          const{block,idx}=getMysteryBlock(currentGlobalMystery);
+          loadMystery(block,idx);
+          closeToolPopup();
+        }else{
+          showAdvanceLevelPrompt();
+        }
+      };
       break;
   }
 }
@@ -1173,9 +1245,11 @@ function initSwipe(){
 }
 function initBtns(){
   document.querySelectorAll('.tool-btn').forEach(b=>b.onclick=()=>openToolPopup(b.dataset.tool));
-  if($('btn-dark'))$('btn-dark').onclick=toggleTheme;
-  if($('btn-bgm'))$('btn-bgm').onclick=toggleBgm;
-  if($('btn-theme'))$('btn-theme').onclick=toggleTheme;
+  if($('btn-dark'))        $('btn-dark').onclick=toggleTheme;
+  if($('btn-bgm'))         $('btn-bgm').onclick=toggleBgm;
+  if($('btn-theme'))       $('btn-theme').onclick=toggleTheme;
+  if($('btn-prev-mystery'))$('btn-prev-mystery').onclick=goPrevMystery;
+  if($('btn-next-mystery'))$('btn-next-mystery').onclick=goNextMystery;
 }
 
 bgmOn=prefs().bgm!==false;
