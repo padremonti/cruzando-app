@@ -1277,6 +1277,16 @@ function initSwipe(){
   let sy=0;const pp=$('tool-popup');
   pp.addEventListener('touchstart',e=>{sy=e.touches[0].clientY;},{passive:true});
   pp.addEventListener('touchend',e=>{if(e.changedTouches[0].clientY-sy>60)closeToolPopup();},{passive:true});
+
+  let hx=0,hy=0;const hero=$('misterio-hero');
+  hero.addEventListener('touchstart',e=>{hx=e.touches[0].clientX;hy=e.touches[0].clientY;},{passive:true});
+  hero.addEventListener('touchend',e=>{
+    const dx=e.changedTouches[0].clientX-hx;
+    const dy=e.changedTouches[0].clientY-hy;
+    if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)*1.5){
+      if(dx<0)goNextMystery();else goPrevMystery();
+    }
+  },{passive:true});
 }
 function initBtns(){
   document.querySelectorAll('.tool-btn').forEach(b=>b.onclick=()=>openToolPopup(b.dataset.tool));
