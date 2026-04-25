@@ -788,14 +788,25 @@ body {
    PANTALLA: COMPLETADO
    ══════════════════════════════════════════════ */
 #scr-complete {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
   display: flex;
   flex-direction: column;
-  height: 100dvh;
-  align-items: stretch;
-  padding: 0;
   background: var(--bg);
-  gap: 0;
   overflow: hidden;
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+#scr-complete.open {
+  transform: translateY(0);
+}
+.epilogo-handle {
+  width: 40px; height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 10px auto 4px;
+  flex-shrink: 0;
 }
 
 /* ── Epílogo del canto ── */
@@ -1427,8 +1438,9 @@ body {
     <div id="daily-limit-body" style="text-align:center;padding:60px 28px 0;width:100%;"></div>
   </div>
 
-  <!-- ═══ PANTALLA: COMPLETADO ═══ -->
-  <div class="screen" id="scr-complete">
+  <!-- ═══ OVERLAY: EPÍLOGO / COMPLETADO ═══ -->
+  <div id="scr-complete">
+    <div class="epilogo-handle"></div>
     <!-- Zona superior: canto del epílogo -->
     <div class="epilogo-canto" id="epilogo-canto" style="display:none">
       <div class="epilogo-canto-header">
@@ -1823,6 +1835,7 @@ window._goToPrevMystery = async () => {
 };
 
 window._repeatSession = async () => {
+  closeEpilogo();
   if (epilogoAudioEl) { epilogoAudioEl.pause(); epilogoAudioEl = null; }
   audioProgress.firstAnswered = [false, false, false];
   await saveAudioProgress();
@@ -1833,6 +1846,7 @@ window._repeatSession = async () => {
 };
 
 window.advanceAndRestart = async () => {
+  closeEpilogo();
   if (epilogoAudioEl) { epilogoAudioEl.pause(); epilogoAudioEl = null; }
   let { nivel, cuaderno, misterio } = audioProgress;
   misterio++;
@@ -3280,7 +3294,12 @@ async function completeSession() {
       '<button onclick="window._repeatSession()" style="' + s + 'background:var(--card);color:var(--text-soft);border:1.5px solid var(--border);">🔄 Repetir sesión</button>';
   }
 
-  show('scr-complete');
+  $('scr-complete').classList.add('open');
+  $('fab-questions') && ($('fab-questions').style.display = 'none');
+}
+
+function closeEpilogo() {
+  $('scr-complete').classList.remove('open');
 }
 
 function showComingSoon() {
@@ -3485,6 +3504,14 @@ window.goTo   = goTo;
 // ════════════════════════════════════════════
 // INIT
 // ════════════════════════════════════════════
+
+// Swipe down on epilogo overlay to close
+(function(){
+  const ep = $('scr-complete');
+  let sy = 0;
+  ep.addEventListener('touchstart', e => { sy = e.touches[0].clientY; }, { passive: true });
+  ep.addEventListener('touchend', e => { if (e.changedTouches[0].clientY - sy > 80) closeEpilogo(); }, { passive: true });
+})();
 
 initAuth();
 </script>

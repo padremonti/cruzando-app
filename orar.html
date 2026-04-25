@@ -26,10 +26,8 @@ const _db   = firebase.firestore();
 const _auth = firebase.auth();
 </script>
 <style>
-/* ── Reset ── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
-/* ── Variables ── */
 :root{
   --bg:#E6DED3;--card:#FFFCF7;--border:#D9D1C7;
   --text:#2B2622;--text-soft:#6B6259;--text-dim:#9B9389;
@@ -39,15 +37,15 @@ const _auth = firebase.auth();
   --lvl-mist:#FFA34E;--lvl-light:#FFCFA2;--lvl-ultra:rgba(255,122,0,0.07);
   --goz-color:#D4A017;--lum-color:#01BBE1;--dol-color:#C0392B;--glo-color:#8E44AD;
   --brand:#01BBE1;
+  --bg-rgb:230,222,211;
 }
 .dark{
   --bg:#1A1714;--card:#252119;--border:#3A3530;
   --text:#E6DED3;--text-soft:#B8A898;--text-dim:#786858;
   --input-bg:#2A2520;--sec-bg:#1E1B16;--shadow:rgba(0,0,0,0.3);
   --green-soft:rgba(52,168,83,0.18);
+  --bg-rgb:26,23,20;
 }
-
-/* ── Base ── */
 html{font-size:18px}
 body{
   font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);
@@ -56,20 +54,18 @@ body{
   background-image:
     url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/></filter><rect width='200' height='200' filter='url(%23n)' opacity='0.08'/></svg>"),
     linear-gradient(135deg,rgba(192,57,43,0.07) 0%,rgba(255,122,0,0.06) 60%,transparent 100%);
-  background-size:200px 200px,100% 100%;
-  background-blend-mode:multiply,normal;
+  background-size:200px 200px,100% 100%;background-blend-mode:multiply,normal;
 }
 .dark body{
   background-image:
     url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/></filter><rect width='200' height='200' filter='url(%23n)' opacity='0.07'/></svg>"),
     radial-gradient(ellipse at 20% 85%,rgba(255,122,0,0.11) 0%,transparent 55%);
-  background-size:200px 200px,100% 100%;
-  background-blend-mode:screen,normal;
+  background-size:200px 200px,100% 100%;background-blend-mode:screen,normal;
 }
 .shell{max-width:480px;margin:0 auto;min-height:100dvh;position:relative;padding-bottom:72px}
 .screen{display:none}
 .screen.active{display:block}
-#scr-session.active{display:flex;flex-direction:column;height:100dvh;overflow:hidden}
+#scr-orar.active{display:flex;flex-direction:column;height:100dvh;overflow:hidden;padding-bottom:calc(52px + env(safe-area-inset-bottom,0px))}
 
 /* ── Header (home + micro) ── */
 .header{
@@ -87,71 +83,32 @@ body{
 }
 .icon-btn:active{transform:scale(0.92)}
 
-/* ── Home screen ── */
+/* ── Home ── */
 .home-intro{padding:28px 18px 14px;text-align:center}
-.home-intro h1{
-  font-family:'Inter',sans-serif;font-size:0.62rem;font-weight:700;color:var(--text-dim);
-  text-transform:uppercase;letter-spacing:2px;margin-bottom:6px;
-}
-.home-intro .nivel-heading{
-  font-family:'Crimson Pro',Georgia,serif;font-size:1.1rem;font-weight:500;
-  color:var(--lvl-bold);line-height:1.2;margin-bottom:6px;letter-spacing:0.5px;
-}
-.home-intro .elemento-heading{
-  font-family:'Crimson Pro',Georgia,serif;font-size:2.8rem;font-weight:600;
-  color:var(--text);line-height:1.05;letter-spacing:-0.01em;
-}
-.today-banner{
-  margin:0 18px 16px;padding:16px 20px;border-radius:16px;
-  background:linear-gradient(135deg,rgba(255,207,162,0.55),rgba(255,245,232,0.7));
-  border:2px solid var(--lvl-bold);
-  box-shadow:0 3px 16px rgba(255,122,0,0.1);
-  cursor:pointer;transition:all 0.25s;
-}
-.dark .today-banner{
-  background:linear-gradient(135deg,rgba(255,122,0,0.15),rgba(255,122,0,0.05));
-}
+.home-intro h1{font-family:'Inter',sans-serif;font-size:0.62rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px}
+.home-intro .nivel-heading{font-family:'Crimson Pro',Georgia,serif;font-size:1.1rem;font-weight:500;color:var(--lvl-bold);line-height:1.2;margin-bottom:6px;letter-spacing:0.5px}
+.home-intro .elemento-heading{font-family:'Crimson Pro',Georgia,serif;font-size:2.8rem;font-weight:600;color:var(--text);line-height:1.05;letter-spacing:-0.01em}
+.today-banner{margin:0 18px 16px;padding:16px 20px;border-radius:16px;background:linear-gradient(135deg,rgba(255,207,162,0.55),rgba(255,245,232,0.7));border:2px solid var(--lvl-bold);box-shadow:0 3px 16px rgba(255,122,0,0.1);cursor:pointer;transition:all 0.25s}
+.dark .today-banner{background:linear-gradient(135deg,rgba(255,122,0,0.15),rgba(255,122,0,0.05))}
 .today-banner:active{transform:scale(0.98)}
 .today-banner-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.today-banner-label{
-  font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;
-  color:var(--lvl-bold);display:flex;align-items:center;gap:6px;
-}
-.today-pulse{
-  width:8px;height:8px;border-radius:50%;background:var(--lvl-bold);
-  animation:pulse 2s ease-in-out infinite;
-}
+.today-banner-label{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--lvl-bold);display:flex;align-items:center;gap:6px}
+.today-pulse{width:8px;height:8px;border-radius:50%;background:var(--lvl-bold);animation:pulse 2s ease-in-out infinite}
 .today-banner-arrow{color:var(--lvl-bold);font-size:1.2rem;font-weight:700}
 .today-banner h3{font-size:1.1rem;font-weight:800;margin-bottom:3px}
 .today-banner-days{font-size:0.72rem;color:var(--text-dim)}
 .block-grid{display:flex;flex-direction:column;gap:14px;padding:8px 18px 24px}
-.block-card{
-  background:var(--card);border-radius:16px;padding:18px 20px;
-  border:2px solid var(--border);cursor:pointer;transition:all 0.25s;
-  position:relative;overflow:hidden;
-}
+.block-card{background:var(--card);border-radius:16px;padding:18px 20px;border:2px solid var(--border);cursor:pointer;transition:all 0.25s;position:relative;overflow:hidden}
 .block-card:active{transform:scale(0.98)}
 .block-card.cleared{border-color:var(--green)}
 .block-card.current{border-color:var(--lvl-bold);box-shadow:0 2px 16px var(--lvl-ultra)}
 .block-card.locked{opacity:0.5;cursor:default}
-@keyframes todayPulse{
-  0%,100%{box-shadow:0 0 0 0 rgba(255,122,0,0.55),0 2px 16px var(--lvl-ultra)}
-  50%{box-shadow:0 0 0 5px rgba(255,122,0,0),0 4px 24px rgba(255,122,0,0.2)}
-}
-.block-card.today{
-  border-color:var(--lvl-bold);
-  background:radial-gradient(ellipse at top right,rgba(255,122,0,0.22) 0%,rgba(255,207,162,0.12) 40%,var(--card) 75%);
-  animation:slideUp 0.55s cubic-bezier(0.34,1.72,0.64,1) both,todayPulse 2.4s ease-in-out 0.6s infinite;
-}
-.dark .block-card.today{
-  background:radial-gradient(ellipse at top right,rgba(255,122,0,0.28) 0%,rgba(255,122,0,0.10) 45%,var(--card) 75%);
-}
+@keyframes todayPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,122,0,0.55),0 2px 16px var(--lvl-ultra)}50%{box-shadow:0 0 0 5px rgba(255,122,0,0),0 4px 24px rgba(255,122,0,0.2)}}
+.block-card.today{border-color:var(--lvl-bold);background:radial-gradient(ellipse at top right,rgba(255,122,0,0.22) 0%,rgba(255,207,162,0.12) 40%,var(--card) 75%);animation:slideUp 0.55s cubic-bezier(0.34,1.72,0.64,1) both,todayPulse 2.4s ease-in-out 0.6s infinite}
+.dark .block-card.today{background:radial-gradient(ellipse at top right,rgba(255,122,0,0.28) 0%,rgba(255,122,0,0.10) 45%,var(--card) 75%)}
 .block-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
 .block-emoji{font-size:1.6rem}
-.block-badge{
-  font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;
-  padding:3px 10px;border-radius:20px;
-}
+.block-badge{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;padding:3px 10px;border-radius:20px}
 .block-badge.pending{background:var(--sec-bg);color:var(--text-dim)}
 .block-badge.progress{background:var(--lvl-ultra);color:var(--lvl-bold)}
 .block-badge.cleared{background:var(--green-soft);color:var(--green)}
@@ -165,45 +122,26 @@ body{
 .block-dot.done{background:var(--green);box-shadow:0 0 6px rgba(52,168,83,0.4)}
 .block-dot.active{background:var(--lvl-bold);box-shadow:0 0 8px var(--lvl-light)}
 .block-locked-hint{font-size:0.72rem;color:var(--text-dim);margin-top:8px;font-style:italic}
-.nivel-done-banner{
-  margin:8px 18px 18px;padding:20px;border-radius:16px;
-  background:linear-gradient(135deg,var(--green-soft),rgba(52,168,83,0.05));
-  border:2px solid var(--green);text-align:center;
-}
+.nivel-done-banner{margin:8px 18px 18px;padding:20px;border-radius:16px;background:linear-gradient(135deg,var(--green-soft),rgba(52,168,83,0.05));border:2px solid var(--green);text-align:center}
 .nivel-done-banner h3{font-size:1.1rem;color:var(--green);margin-bottom:6px}
 .nivel-done-banner p{font-size:0.82rem;color:var(--text-soft);margin-bottom:14px}
-.nivel-switch-card{
-  margin:0 18px 28px;padding:16px 18px;background:var(--card);border-radius:16px;
-  border:1.5px solid var(--border);display:flex;align-items:center;
-  justify-content:space-between;cursor:pointer;transition:all 0.2s;
-  -webkit-tap-highlight-color:transparent;
-}
+.nivel-switch-card{margin:0 18px 28px;padding:16px 18px;background:var(--card);border-radius:16px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:all 0.2s;-webkit-tap-highlight-color:transparent}
 .nivel-switch-card:active{transform:scale(0.98);border-color:var(--lvl-soft)}
 .nivel-switch-left{display:flex;align-items:center;gap:12px}
-.nivel-switch-icon{
-  width:38px;height:38px;border-radius:10px;background:var(--lvl-ultra);
-  border:1px solid var(--lvl-soft);display:flex;align-items:center;
-  justify-content:center;flex-shrink:0;
-}
+.nivel-switch-icon{width:38px;height:38px;border-radius:10px;background:var(--lvl-ultra);border:1px solid var(--lvl-soft);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .nivel-switch-title{font-family:'Crimson Pro',Georgia,serif;font-size:1.1rem;font-weight:600;color:var(--text)}
 .nivel-switch-sub{font-size:0.68rem;color:var(--text-dim);margin-top:1px}
 .nivel-switch-arrow{color:var(--text-dim);font-size:1.1rem}
 
 /* ── Botones ── */
-.btn{
-  display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  padding:14px 28px;border-radius:14px;border:none;cursor:pointer;
-  font-family:inherit;font-size:0.88rem;font-weight:700;
-  transition:all 0.2s;letter-spacing:0.3px;
-}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 28px;border-radius:14px;border:none;cursor:pointer;font-family:inherit;font-size:0.88rem;font-weight:700;transition:all 0.2s;letter-spacing:0.3px}
 .btn:active{transform:scale(0.96)}
 .btn-primary{background:var(--lvl-bold);color:#fff;box-shadow:0 4px 14px rgba(0,0,0,0.15)}
 .btn-green{background:var(--green);color:#fff}
 .btn-outline{background:transparent;border:2px solid var(--border);color:var(--text-soft)}
-.btn-ghost{background:transparent;color:var(--text-soft);padding:10px 14px;font-size:0.82rem}
 .btn-block{width:100%}
 
-/* ── Micro-aprendizaje ── */
+/* ── Micro ── */
 .micro-screen{padding:0 18px 40px}
 .micro-header{padding:16px 0 10px;display:flex;align-items:center;justify-content:space-between}
 .micro-label{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--lvl-bold)}
@@ -212,175 +150,71 @@ body{
 .micro-dot{height:5px;border-radius:3px;background:var(--border);transition:all 0.4s ease}
 .micro-dot.done{background:var(--green)}
 .micro-dot.active{background:var(--lvl-bold)}
-.micro-card{
-  background:var(--card);border-radius:20px;padding:28px 22px;
-  border:1.5px solid var(--border);
-  animation:slideUp 0.45s cubic-bezier(0.34,1.72,0.64,1) both;
-  min-height:220px;display:flex;flex-direction:column;justify-content:space-between;
-}
+.micro-card{background:var(--card);border-radius:20px;padding:28px 22px;border:1.5px solid var(--border);animation:slideUp 0.45s cubic-bezier(0.34,1.72,0.64,1) both;min-height:220px;display:flex;flex-direction:column;justify-content:space-between}
 .micro-card-emoji{font-size:2.2rem;margin-bottom:14px}
-.micro-card-titulo{
-  font-family:'Crimson Pro',Georgia,serif;font-size:1.55rem;font-weight:600;
-  color:var(--lvl-bold);line-height:1.2;margin-bottom:12px;
-}
-.micro-card-contenido{
-  font-family:'Crimson Pro',Georgia,serif;font-size:1.25rem;font-weight:400;
-  line-height:1.75;color:var(--text);flex:1;
-}
-.micro-card-footer{
-  display:flex;justify-content:space-between;align-items:center;
-  margin-top:20px;padding-top:14px;border-top:1px solid var(--border);
-}
+.micro-card-titulo{font-family:'Crimson Pro',Georgia,serif;font-size:1.55rem;font-weight:600;color:var(--lvl-bold);line-height:1.2;margin-bottom:12px}
+.micro-card-contenido{font-family:'Crimson Pro',Georgia,serif;font-size:1.25rem;font-weight:400;line-height:1.75;color:var(--text);flex:1}
+.micro-card-footer{display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-top:14px;border-top:1px solid var(--border)}
 .micro-card-count{font-size:0.68rem;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.8px}
-.micro-q-card{
-  background:var(--card);border-radius:20px;padding:24px 22px;
-  border:1.5px solid var(--border);
-  animation:slideUp 0.45s cubic-bezier(0.34,1.72,0.64,1) both;
-}
+.micro-q-card{background:var(--card);border-radius:20px;padding:24px 22px;border:1.5px solid var(--border);animation:slideUp 0.45s cubic-bezier(0.34,1.72,0.64,1) both}
 .micro-q-label{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--lvl-bold);margin-bottom:14px}
-.micro-q-texto{
-  font-family:'Crimson Pro',Georgia,serif;font-size:1.4rem;font-weight:500;
-  line-height:1.55;color:var(--text);margin-bottom:20px;
-}
-.micro-option{
-  width:100%;padding:14px 16px;border-radius:14px;border:1.5px solid var(--border);
-  background:var(--sec-bg);font-family:'Crimson Pro',Georgia,serif;
-  font-size:1.2rem;font-weight:400;line-height:1.4;color:var(--text);cursor:pointer;
-  text-align:left;display:flex;align-items:center;gap:12px;
-  transition:all 0.25s;margin-bottom:10px;
-}
+.micro-q-texto{font-family:'Crimson Pro',Georgia,serif;font-size:1.4rem;font-weight:500;line-height:1.55;color:var(--text);margin-bottom:20px}
+.micro-option{width:100%;padding:14px 16px;border-radius:14px;border:1.5px solid var(--border);background:var(--sec-bg);font-family:'Crimson Pro',Georgia,serif;font-size:1.2rem;font-weight:400;line-height:1.4;color:var(--text);cursor:pointer;text-align:left;display:flex;align-items:center;gap:12px;transition:all 0.25s;margin-bottom:10px}
 .micro-option.selected{border-color:var(--lvl-bold);background:var(--lvl-ultra)}
 .micro-option.dimmed{opacity:0.4;cursor:default;pointer-events:none}
-.micro-option-circle{
-  width:22px;height:22px;border-radius:50%;flex-shrink:0;
-  border:1.5px solid var(--border);background:transparent;
-  display:flex;align-items:center;justify-content:center;
-  font-size:11px;color:#fff;font-weight:700;transition:all 0.25s;
-}
+.micro-option-circle{width:22px;height:22px;border-radius:50%;flex-shrink:0;border:1.5px solid var(--border);background:transparent;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:700;transition:all 0.25s}
 .micro-option.selected .micro-option-circle{background:var(--lvl-bold);border-color:var(--lvl-bold)}
-.micro-eco{
-  margin-top:16px;padding:14px 16px;background:var(--lvl-ultra);border-radius:14px;
-  border-left:3px solid var(--lvl-soft);font-family:'Crimson Pro',Georgia,serif;
-  font-size:1.15rem;font-weight:400;font-style:italic;color:var(--text);line-height:1.6;
-  animation:fadeIn 0.4s ease both;display:flex;align-items:flex-start;gap:10px;
-}
+.micro-eco{margin-top:16px;padding:14px 16px;background:var(--lvl-ultra);border-radius:14px;border-left:3px solid var(--lvl-soft);font-family:'Crimson Pro',Georgia,serif;font-size:1.15rem;font-weight:400;font-style:italic;color:var(--text);line-height:1.6;animation:fadeIn 0.4s ease both;display:flex;align-items:flex-start;gap:10px}
 .micro-eco-emoji{font-size:1.3rem;flex-shrink:0}
 .micro-final{text-align:center;padding:40px 0;animation:slideUp 0.55s cubic-bezier(0.34,1.72,0.64,1) both}
 .micro-final-cross{margin:0 auto 24px;display:flex;align-items:center;justify-content:center;width:64px;height:64px}
-.micro-final-titulo{
-  font-family:'Crimson Pro',Georgia,serif;font-size:1.8rem;font-weight:600;
-  color:var(--text);line-height:1.2;margin-bottom:12px;
-}
-.micro-final-sub{
-  font-family:'Crimson Pro',Georgia,serif;font-size:1.2rem;color:var(--text-soft);
-  line-height:1.65;margin:0 auto 28px;max-width:300px;
-}
-.micro-metros-chip{
-  display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:20px;
-  background:var(--green-soft);color:var(--green);font-size:0.82rem;font-weight:700;margin-bottom:28px;
-}
+.micro-final-titulo{font-family:'Crimson Pro',Georgia,serif;font-size:1.8rem;font-weight:600;color:var(--text);line-height:1.2;margin-bottom:12px}
+.micro-final-sub{font-family:'Crimson Pro',Georgia,serif;font-size:1.2rem;color:var(--text-soft);line-height:1.65;margin:0 auto 28px;max-width:300px}
+.micro-metros-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:20px;background:var(--green-soft);color:var(--green);font-size:0.82rem;font-weight:700;margin-bottom:28px}
 .micro-nav{display:flex;gap:10px;margin-top:20px}
 .micro-nav .btn{flex:1}
 
 /* ── Celebración ── */
 .celebration-screen{text-align:center;padding:40px 24px}
-.maria-img{
-  width:200px;height:200px;border-radius:50%;object-fit:cover;
-  border:4px solid var(--lvl-soft);margin:0 auto 24px;
-  box-shadow:0 8px 32px var(--shadow);
-}
-.maria-placeholder{
-  width:200px;height:200px;border-radius:50%;margin:0 auto 24px;
-  background:linear-gradient(135deg,var(--lvl-ultra),var(--lvl-light));
-  border:4px solid var(--lvl-soft);display:flex;align-items:center;
-  justify-content:center;font-size:4rem;box-shadow:0 8px 32px var(--shadow);
-}
-.celebration-title{
-  font-family:'Cormorant Garamond',Georgia,serif;font-size:1.9rem;font-weight:600;
-  margin-bottom:8px;line-height:1.15;
-}
+.maria-img{width:200px;height:200px;border-radius:50%;object-fit:cover;border:4px solid var(--lvl-soft);margin:0 auto 24px;box-shadow:0 8px 32px var(--shadow)}
+.maria-placeholder{width:200px;height:200px;border-radius:50%;margin:0 auto 24px;background:linear-gradient(135deg,var(--lvl-ultra),var(--lvl-light));border:4px solid var(--lvl-soft);display:flex;align-items:center;justify-content:center;font-size:4rem;box-shadow:0 8px 32px var(--shadow)}
+.celebration-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.9rem;font-weight:600;margin-bottom:8px;line-height:1.15}
 .celebration-sub{font-size:0.88rem;color:var(--text-soft);margin-bottom:24px;line-height:1.7}
 
 /* ── Loading / Error ── */
-.loading-screen,.error-screen{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  min-height:80dvh;padding:40px 24px;text-align:center;
-}
-.spinner{
-  width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--lvl-bold);
-  border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:18px;
-}
+.loading-screen,.error-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80dvh;padding:40px 24px;text-align:center}
+.spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--lvl-bold);border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:18px}
 
 /* ── Confetti ── */
 .confetti-container{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:999}
-.confetti-piece{
-  position:absolute;width:8px;height:8px;border-radius:2px;
-  animation:confettiFall 2.5s ease-out forwards;
-}
-.grand-confetti{
-  position:fixed;width:8px;height:8px;border-radius:50%;
-  animation:confettiFall 2.5s ease-out forwards;pointer-events:none;
-}
+.confetti-piece{position:absolute;width:8px;height:8px;border-radius:2px;animation:confettiFall 2.5s ease-out forwards}
+.grand-confetti{position:fixed;width:8px;height:8px;border-radius:50%;animation:confettiFall 2.5s ease-out forwards;pointer-events:none}
 
 /* ── Animaciones ── */
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(1.4)}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 @keyframes slideUp{from{opacity:0;transform:translateY(22px) scale(0.98)}to{opacity:1;transform:translateY(0) scale(1)}}
-@keyframes confettiFall{
-  0%{transform:translateY(-20px) rotate(0deg);opacity:1}
-  100%{transform:translateY(100vh) rotate(720deg);opacity:0}
-}
-@keyframes fadeInOut{
-  0%{opacity:0;transform:translateX(-50%) translateY(-4px)}
-  15%{opacity:1;transform:translateX(-50%) translateY(0)}
-  80%{opacity:1}
-  100%{opacity:0}
-}
-@keyframes navSpring{
-  0%{transform:scale(1)}35%{transform:scale(0.78)}
-  65%{transform:scale(1.18)}82%{transform:scale(0.95)}100%{transform:scale(1)}
-}
+@keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+@keyframes fadeInOut{0%{opacity:0;transform:translateX(-50%) translateY(-4px)}15%{opacity:1;transform:translateX(-50%) translateY(0)}80%{opacity:1}100%{opacity:0}}
+@keyframes navSpring{0%{transform:scale(1)}35%{transform:scale(0.78)}65%{transform:scale(1.18)}82%{transform:scale(0.95)}100%{transform:scale(1)}}
 .fade-in{animation:fadeIn 0.4s ease both}
 .block-card.fade-in{animation:slideUp 0.55s cubic-bezier(0.34,1.72,0.64,1) both}
 .block-card.fade-in-d1{animation-delay:0.05s}
 .block-card.fade-in-d2{animation-delay:0.12s}
 .block-card.fade-in-d3{animation-delay:0.19s}
 .block-card.fade-in-d4{animation-delay:0.26s}
-.fade-in-d1{animation-delay:0.08s}
-.fade-in-d2{animation-delay:0.16s}
-.fade-in-d3{animation-delay:0.24s}
-.fade-in-d4{animation-delay:0.32s}
 
 /* ── Bottom nav ── */
-.shell{padding-bottom:72px}
-.app-nav{
-  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
-  width:100%;max-width:480px;z-index:80;
-  background:var(--bg);border-top:1px solid var(--border);
-  display:flex;align-items:stretch;
-  padding-bottom:env(safe-area-inset-bottom,0px);
-  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-}
-.app-nav-item{
-  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:4px;padding:10px 4px 12px;background:none;border:none;cursor:pointer;
-  font-family:inherit;text-decoration:none;color:var(--text-dim);transition:color 0.2s;
-  -webkit-tap-highlight-color:transparent;
-}
+.app-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:80;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:stretch;padding-bottom:env(safe-area-inset-bottom,0px);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.app-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:10px 4px 12px;background:none;border:none;cursor:pointer;font-family:inherit;text-decoration:none;color:var(--text-dim);transition:color 0.2s;-webkit-tap-highlight-color:transparent}
 .app-nav-item:active{opacity:1}
 .app-nav-item.active{color:var(--lvl-bold)}
 .app-nav-item[disabled]{cursor:default;opacity:1}
 .app-nav-item.tapped .app-nav-icon{animation:navSpring 0.38s cubic-bezier(0.34,1.72,0.64,1) both}
 .app-nav-item.tapped{color:var(--lvl-bold)}
-.app-nav-icon{
-  width:24px;height:24px;position:relative;
-  display:flex;align-items:center;justify-content:center;
-}
-.app-nav-item.active .app-nav-icon::before{
-  content:'';position:absolute;inset:-5px;
-  background:rgba(255,122,0,0.12);border-radius:10px;
-}
+.app-nav-icon{width:24px;height:24px;position:relative;display:flex;align-items:center;justify-content:center}
+.app-nav-item.active .app-nav-icon::before{content:'';position:absolute;inset:-5px;background:rgba(255,122,0,0.12);border-radius:10px}
 .app-nav-label{font-size:0.6rem;font-weight:600;letter-spacing:0.4px;text-transform:uppercase}
 
 /* ── Gamificación ── */
@@ -389,281 +223,140 @@ body{
 .lux-svg.shine{animation:luxBreathe 3s ease-in-out infinite,luxShine 0.6s ease-out}
 .lux-svg.spin{animation:luxSpin 2s linear}
 @keyframes luxBreathe{0%,100%{transform:scale(1);opacity:0.9}50%{transform:scale(1.08);opacity:1}}
-@keyframes luxShine{
-  0%,100%{filter:drop-shadow(0 0 2px #FFFCF7)}
-  50%{filter:drop-shadow(0 0 16px #FFFCF7)}
-}
+@keyframes luxShine{0%,100%{filter:drop-shadow(0 0 2px #FFFCF7)}50%{filter:drop-shadow(0 0 16px #FFFCF7)}}
 @keyframes luxSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-.lux-particle{
-  position:absolute;width:4px;height:4px;border-radius:50%;
-  background:#FFFCF7;left:50%;top:50%;opacity:0.8;
-  animation:luxParticleFly 1.5s ease-out forwards;pointer-events:none;
-}
-@keyframes luxParticleFly{
-  0%{transform:translate(0,0) scale(1);opacity:0.8}
-  100%{transform:translate(var(--x),var(--y)) scale(0);opacity:0}
-}
-.meters-display{
-  display:flex;align-items:center;gap:6px;background:var(--sec-bg);
-  padding:6px 12px;border-radius:12px;border:1.5px solid var(--border);
-}
+.lux-particle{position:absolute;width:4px;height:4px;border-radius:50%;background:#FFFCF7;left:50%;top:50%;opacity:0.8;animation:luxParticleFly 1.5s ease-out forwards;pointer-events:none}
+@keyframes luxParticleFly{0%{transform:translate(0,0) scale(1);opacity:0.8}100%{transform:translate(var(--x),var(--y)) scale(0);opacity:0}}
+.meters-display{display:flex;align-items:center;gap:6px;background:var(--sec-bg);padding:6px 12px;border-radius:12px;border:1.5px solid var(--border)}
 .meters-display span{font-size:0.82rem;font-weight:700;color:var(--lvl-bold)}
-.mariano-overlay{
-  position:fixed;top:0;right:0;bottom:0;width:100%;pointer-events:none;z-index:90;
-  display:flex;align-items:center;justify-content:flex-end;padding-right:20px;
-}
+.mariano-overlay{position:fixed;top:0;right:0;bottom:0;width:100%;pointer-events:none;z-index:90;display:flex;align-items:center;justify-content:flex-end;padding-right:20px}
 .mariano-slide{width:182px;height:auto;animation:marianoSlide 2.5s ease-in-out}
-@keyframes marianoSlide{
-  0%{transform:translateX(200px);opacity:0}30%{transform:translateX(0);opacity:1}
-  70%{transform:translateX(0);opacity:1}100%{transform:translateX(200px);opacity:0}
-}
-.meters-float{
-  position:absolute;top:50%;right:220px;font-size:1rem;font-weight:800;color:var(--green);
-  text-shadow:0 2px 8px rgba(52,168,83,0.4);animation:metersFloat 2.5s ease-out;
-}
-.meters-float .extra-badge{
-  display:block;font-size:0.58rem;font-weight:800;letter-spacing:1.5px;
-  text-transform:uppercase;color:#FFD700;text-shadow:0 1px 6px rgba(255,215,0,0.5);margin-bottom:2px;
-}
-@keyframes metersFloat{
-  0%{transform:translateY(0);opacity:0}30%{opacity:1}
-  70%{opacity:1}100%{transform:translateY(-40px);opacity:0}
-}
-.mariano-grand-overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,0.5);
-  display:flex;align-items:center;justify-content:center;z-index:101;pointer-events:none;
-}
+@keyframes marianoSlide{0%{transform:translateX(200px);opacity:0}30%{transform:translateX(0);opacity:1}70%{transform:translateX(0);opacity:1}100%{transform:translateX(200px);opacity:0}}
+.meters-float{position:absolute;top:50%;right:220px;font-size:1rem;font-weight:800;color:var(--green);text-shadow:0 2px 8px rgba(52,168,83,0.4);animation:metersFloat 2.5s ease-out}
+.meters-float .extra-badge{display:block;font-size:0.58rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#FFD700;text-shadow:0 1px 6px rgba(255,215,0,0.5);margin-bottom:2px}
+@keyframes metersFloat{0%{transform:translateY(0);opacity:0}30%{opacity:1}70%{opacity:1}100%{transform:translateY(-40px);opacity:0}}
+.mariano-grand-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:101;pointer-events:none}
 .mariano-grand-container{position:relative;width:260px;height:260px}
-.mariano-grand{
-  width:260px;height:auto;margin-bottom:20px;
-  animation:popScale 0.6s cubic-bezier(0.68,-0.55,0.265,1.55) forwards;
-}
-@keyframes popScale{
-  0%{transform:scale(0);opacity:0}60%{transform:scale(1.1);opacity:1}
-  100%{transform:scale(1);opacity:1}
-}
+.mariano-grand{width:260px;height:auto;margin-bottom:20px;animation:popScale 0.6s cubic-bezier(0.68,-0.55,0.265,1.55) forwards}
+@keyframes popScale{0%{transform:scale(0);opacity:0}60%{transform:scale(1.1);opacity:1}100%{transform:scale(1);opacity:1}}
 .mariano-grand-lux{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
 .mariano-grand-lux svg{width:32px;height:32px}
 .mariano-grand-lux.orbit1 svg{animation:luxOrbit1 3s ease-in-out infinite}
 .mariano-grand-lux.orbit2 svg{animation:luxOrbit2 3s ease-in-out infinite}
 .mariano-grand-lux.orbit3 svg{animation:luxOrbit3 3s ease-in-out infinite}
 .mariano-grand-lux.orbit4 svg{animation:luxOrbit4 3s ease-in-out infinite}
-@keyframes luxOrbit1{
-  0%{transform:rotate(0deg) translateX(120px) rotate(0deg) scale(1)}
-  25%{transform:rotate(90deg) translateX(120px) rotate(-90deg) scale(1.5)}
-  50%{transform:rotate(180deg) translateX(120px) rotate(-180deg) scale(1)}
-  75%{transform:rotate(270deg) translateX(120px) rotate(-270deg) scale(1.5)}
-  100%{transform:rotate(360deg) translateX(120px) rotate(-360deg) scale(1)}
-}
-@keyframes luxOrbit2{
-  0%{transform:rotate(45deg) translateX(120px) rotate(-45deg) scale(1)}
-  25%{transform:rotate(135deg) translateX(120px) rotate(-135deg) scale(1.6)}
-  50%{transform:rotate(225deg) translateX(120px) rotate(-225deg) scale(1)}
-  75%{transform:rotate(315deg) translateX(120px) rotate(-315deg) scale(1.6)}
-  100%{transform:rotate(405deg) translateX(120px) rotate(-405deg) scale(1)}
-}
-@keyframes luxOrbit3{
-  0%{transform:rotate(0deg) translateX(120px) rotate(0deg) scale(1.3)}
-  33%{transform:rotate(120deg) translateX(120px) rotate(-120deg) scale(1)}
-  66%{transform:rotate(240deg) translateX(120px) rotate(-240deg) scale(1.7)}
-  100%{transform:rotate(360deg) translateX(120px) rotate(-360deg) scale(1.3)}
-}
-@keyframes luxOrbit4{
-  0%{transform:rotate(90deg) translateX(120px) rotate(-90deg) scale(1.2)}
-  20%{transform:rotate(162deg) translateX(120px) rotate(-162deg) scale(1.5)}
-  40%{transform:rotate(234deg) translateX(120px) rotate(-234deg) scale(1)}
-  60%{transform:rotate(306deg) translateX(120px) rotate(-306deg) scale(1.6)}
-  80%{transform:rotate(378deg) translateX(120px) rotate(-378deg) scale(1.1)}
-  100%{transform:rotate(450deg) translateX(120px) rotate(-450deg) scale(1.2)}
-}
-.mariano-grand-meters{
-  text-align:center;color:#fff;font-size:1.55rem;font-weight:800;
-  text-shadow:0 4px 16px rgba(0,0,0,0.5);margin-top:20px;
-}
+@keyframes luxOrbit1{0%{transform:rotate(0deg) translateX(120px) rotate(0deg) scale(1)}25%{transform:rotate(90deg) translateX(120px) rotate(-90deg) scale(1.5)}50%{transform:rotate(180deg) translateX(120px) rotate(-180deg) scale(1)}75%{transform:rotate(270deg) translateX(120px) rotate(-270deg) scale(1.5)}100%{transform:rotate(360deg) translateX(120px) rotate(-360deg) scale(1)}}
+@keyframes luxOrbit2{0%{transform:rotate(45deg) translateX(120px) rotate(-45deg) scale(1)}25%{transform:rotate(135deg) translateX(120px) rotate(-135deg) scale(1.6)}50%{transform:rotate(225deg) translateX(120px) rotate(-225deg) scale(1)}75%{transform:rotate(315deg) translateX(120px) rotate(-315deg) scale(1.6)}100%{transform:rotate(405deg) translateX(120px) rotate(-405deg) scale(1)}}
+@keyframes luxOrbit3{0%{transform:rotate(0deg) translateX(120px) rotate(0deg) scale(1.3)}33%{transform:rotate(120deg) translateX(120px) rotate(-120deg) scale(1)}66%{transform:rotate(240deg) translateX(120px) rotate(-240deg) scale(1.7)}100%{transform:rotate(360deg) translateX(120px) rotate(-360deg) scale(1.3)}}
+@keyframes luxOrbit4{0%{transform:rotate(90deg) translateX(120px) rotate(-90deg) scale(1.2)}20%{transform:rotate(162deg) translateX(120px) rotate(-162deg) scale(1.5)}40%{transform:rotate(234deg) translateX(120px) rotate(-234deg) scale(1)}60%{transform:rotate(306deg) translateX(120px) rotate(-306deg) scale(1.6)}80%{transform:rotate(378deg) translateX(120px) rotate(-378deg) scale(1.1)}100%{transform:rotate(450deg) translateX(120px) rotate(-450deg) scale(1.2)}}
+.mariano-grand-meters{text-align:center;color:#fff;font-size:1.55rem;font-weight:800;text-shadow:0 4px 16px rgba(0,0,0,0.5);margin-top:20px}
 .mariano-grand-text{text-align:center;color:#fff;font-size:1rem;margin-top:8px;text-shadow:0 2px 8px rgba(0,0,0,0.5)}
 
 /* ══════════════════════════════════════
-   SESSION SCREEN — nuevo diseño
+   ZONA A — Hero del Misterio
    ══════════════════════════════════════ */
+.misterio-hero{flex:1;min-height:0;position:relative;overflow:hidden;background:#1A1714}
+.misterio-hero-img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block}
+.hero-placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0.18}
+.misterio-hero-grad{
+  position:absolute;bottom:0;left:0;right:0;height:55%;
+  background:linear-gradient(to top,rgba(var(--bg-rgb),1) 0%,rgba(var(--bg-rgb),0.75) 40%,transparent 100%);
+  pointer-events:none;z-index:2;
+}
+.misterio-hero-text{position:absolute;bottom:16px;left:18px;right:18px;z-index:3;pointer-events:none}
+.misterio-bloque-label{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--lvl-bold);margin-bottom:4px}
+.misterio-titulo{font-family:'Cormorant Garamond',Georgia,serif;font-size:2rem;font-weight:600;color:#fff;line-height:1.15;text-shadow:0 2px 12px rgba(0,0,0,0.5);margin-bottom:4px}
+.misterio-subtitulo{font-family:'Cormorant Garamond',Georgia,serif;font-size:1rem;font-style:italic;color:rgba(255,255,255,0.75);text-shadow:0 1px 6px rgba(0,0,0,0.5)}
+.hero-beads{margin-top:8px;pointer-events:auto}
 
-/* ── Hero ── */
-.session-hero{
-  position:relative;flex:none;height:40dvh;
-  overflow:hidden;background:#1A1714;
-}
-.hero-img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block}
-.hero-placeholder{
-  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0.18;
-}
-.hero-gradient{
-  position:absolute;inset:0;
-  background:linear-gradient(to top,rgba(10,7,5,0.92) 0%,rgba(10,7,5,0.45) 40%,transparent 70%);
-}
-.hero-text{position:absolute;bottom:0;left:0;right:0;padding:20px 20px 12px}
-.hero-counter{
-  font-size:0.58rem;font-weight:700;text-transform:uppercase;
-  letter-spacing:1.5px;color:rgba(230,222,211,0.6);margin-bottom:4px;
-}
-.hero-title{
-  font-family:'Cormorant Garamond',Georgia,serif;font-size:1.65rem;font-weight:600;
-  line-height:1.1;letter-spacing:0.01em;color:#E6DED3;text-shadow:0 2px 12px rgba(0,0,0,0.5);
-}
-.hero-subtitle{
-  font-family:'Cormorant Garamond',Georgia,serif;font-size:0.95rem;font-weight:400;
-  font-style:italic;color:rgba(230,222,211,0.65);margin-top:2px;
-}
-.hero-beads{margin-top:8px}
-.hero-btn{
-  position:absolute;top:14px;width:34px;height:34px;border-radius:50%;
-  background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.18);
-  display:flex;align-items:center;justify-content:center;
-  color:rgba(230,222,211,0.85);cursor:pointer;
-  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-  -webkit-tap-highlight-color:transparent;transition:background 0.2s;
-}
+/* Botones circulares sobre la imagen */
+.hero-btn{position:absolute;top:14px;width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;color:rgba(230,222,211,0.85);cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);-webkit-tap-highlight-color:transparent;transition:background 0.2s;z-index:4}
 .hero-btn:active{background:rgba(0,0,0,0.55)}
 .hero-btn-left{left:14px}
 .hero-btn-right{right:14px}
 .hero-btn.bgm-on{background:rgba(255,122,0,0.5);border-color:rgba(255,122,0,0.7)}
 
-/* ── Tools bar ── */
+/* ══════════════════════════════════════
+   ZONA B — Barra de herramientas
+   ══════════════════════════════════════ */
 .tools-bar{
+  flex-shrink:0;height:72px;
   display:flex;justify-content:space-around;align-items:center;
-  padding:8px 6px;background:var(--card);border-bottom:1px solid var(--border);
-  flex-shrink:0;position:relative;
+  padding:8px 12px;
+  background:var(--tools-bar-bg,var(--card));
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  position:relative;z-index:10;
 }
-.tool-btn{
-  display:flex;flex-direction:column;align-items:center;gap:3px;
-  padding:6px 8px;border:none;background:none;cursor:pointer;
-  border-radius:10px;color:var(--text-dim);transition:background 0.2s,color 0.2s;
-  -webkit-tap-highlight-color:transparent;min-width:42px;
-}
-.tool-btn.active{background:var(--lvl-ultra);color:var(--lvl-bold)}
-.tool-btn svg{width:20px;height:20px}
-.tool-label{font-size:0.54rem;font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+.tool-btn{display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:0}
+.tool-btn-circle{width:42px;height:42px;border-radius:50%;border:2px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;color:var(--text-dim);transition:background 0.2s,border-color 0.2s,color 0.2s,transform 0.15s}
+.tool-btn.active .tool-btn-circle{background:var(--lvl-bold);border-color:var(--lvl-bold);color:#fff}
+.tool-btn:active .tool-btn-circle{transform:scale(0.92)}
+.tool-label{font-size:0.55rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-dim)}
+.tool-btn.active .tool-label{color:var(--lvl-bold)}
 
-/* ── Cards container ── */
-.cards-container{flex:1;min-height:0;overflow:hidden;position:relative;background:var(--bg)}
-.cards-empty-state{
-  position:absolute;inset:0;display:flex;align-items:center;
-  justify-content:center;pointer-events:none;
+/* ══════════════════════════════════════
+   POPUP — Bottom sheet sobre zona A
+   ══════════════════════════════════════ */
+.tool-popup{
+  position:absolute;bottom:0;left:0;right:0;top:0;
+  background:var(--bg);
+  border-radius:20px 20px 0 0;
+  transform:translateY(100%);
+  transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);
+  z-index:20;
+  display:flex;flex-direction:column;overflow:hidden;
 }
-.cards-empty-text{font-size:0.82rem;color:var(--text-dim);font-style:italic;letter-spacing:0.5px}
+.tool-popup.open{transform:translateY(0)}
+.tool-popup-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px 12px;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.popup-title{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-dim)}
+.popup-close-btn,.popup-voice-btn{
+  width:34px;height:34px;border-radius:50%;background:var(--sec-bg);
+  border:1.5px solid var(--border);display:flex;align-items:center;
+  justify-content:center;cursor:pointer;color:var(--text-soft);
+  -webkit-tap-highlight-color:transparent;transition:background 0.15s;
+  flex-shrink:0;
+}
+.popup-close-btn:active,.popup-voice-btn:active{background:var(--border)}
+.popup-voice-btn.playing{background:var(--lvl-ultra);border-color:var(--lvl-bold);color:var(--lvl-bold)}
+.tool-popup-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 20px 24px;font-size:1.05rem;line-height:1.85;color:var(--text)}
 
-/* ── Cards ── */
-.card{
-  position:absolute;inset:0;display:flex;flex-direction:column;
-  background:var(--bg);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);overflow:hidden;
-}
-.card.hidden-right{transform:translateX(100%)}
-.card.hidden-left{transform:translateX(-100%)}
-.card.active{transform:translateX(0)}
-.card-header-strip{height:54px;flex-shrink:0;position:relative;background:var(--bg)}
-.card-scroll-content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 20px 80px}
-.card-close-btn{
-  position:absolute;top:11px;left:16px;width:32px;height:32px;border-radius:50%;
-  background:var(--sec-bg);border:1.5px solid var(--border);
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;color:var(--text-dim);z-index:10;transition:background 0.15s;
-  -webkit-tap-highlight-color:transparent;
-}
-.card-close-btn:active{background:var(--border)}
-.card-voice-btn{
-  position:absolute;top:9px;right:16px;width:36px;height:36px;border-radius:50%;
-  background:var(--card);border:1.5px solid var(--border);
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;color:var(--text-soft);z-index:10;transition:background 0.2s,border-color 0.2s;
-  -webkit-tap-highlight-color:transparent;
-}
-.card-voice-btn:active{transform:scale(0.9)}
-.card-voice-btn.playing{background:var(--lvl-ultra);border-color:var(--lvl-bold);color:var(--lvl-bold)}
-.card-label{
-  font-size:0.66rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;
-  color:var(--text-dim);margin-bottom:12px;
-}
-.card-body-text{
-  font-family:'Crimson Pro',Georgia,serif;font-size:1.15rem;line-height:1.85;color:var(--text);
-}
-.card-reference{font-size:0.75rem;color:var(--text-dim);font-style:italic;margin-top:10px}
-.card-song-title{
-  font-family:'Cormorant Garamond',Georgia,serif;font-size:1.4rem;font-weight:600;
-  color:var(--text);margin-bottom:14px;
-}
-.card-lyrics{white-space:pre-line;font-style:italic}
-.card-question-text{
-  font-family:'Crimson Pro',Georgia,serif;font-size:1.15rem;font-weight:500;
-  line-height:1.6;color:var(--text);margin-bottom:14px;
-}
-
-/* ── Sub-cards (Escribir) ── */
-.sub-card{
-  position:absolute;top:54px;left:0;right:0;bottom:0;
-  overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 20px 80px;
-  background:var(--bg);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);
-}
-.sub-card.hidden-right{transform:translateX(100%)}
-.sub-card.hidden-left{transform:translateX(-100%)}
-.sub-card.active{transform:translateX(0)}
-.card-textarea{
-  width:100%;min-height:120px;max-height:40vh;resize:vertical;overflow-y:auto;
-  padding:14px;background:var(--sec-bg);border:1.5px solid var(--border);
-  border-radius:12px;color:var(--text);font-family:'Inter',sans-serif;
-  font-size:0.95rem;line-height:1.7;-webkit-overflow-scrolling:touch;
-}
-.card-textarea:focus{border-color:var(--lvl-soft);outline:none}
-.card-save-indicator{font-size:0.75rem;color:var(--green);margin-top:6px;min-height:18px}
-.amen-btn-card{
-  display:block;width:100%;margin-top:20px;padding:16px;border-radius:14px;
-  border:none;cursor:pointer;font-family:inherit;font-size:1rem;font-weight:800;
-  background:var(--lvl-bold);color:#fff;letter-spacing:1px;
-  transition:all 0.2s;box-shadow:0 4px 16px rgba(0,0,0,0.12);
-}
-.amen-btn-card:active{transform:scale(0.96)}
-.amen-btn-card.done{background:var(--green)}
-.mystery-done-inline{
-  display:flex;align-items:center;gap:10px;padding:14px 16px;
-  background:var(--green-soft);border-radius:14px;border:1.5px solid rgba(52,168,83,0.2);
-  margin-top:20px;
-}
-.mystery-done-inline .done-check{color:var(--green);font-size:1.2rem}
-.mystery-done-inline .done-text{font-size:0.82rem;font-weight:600;color:var(--green)}
-.mystery-done-inline .done-date{font-size:0.72rem;color:var(--text-dim)}
+/* Contenido del popup */
+.popup-text{font-family:'Crimson Pro',Georgia,serif;font-size:1.12rem;line-height:1.85;color:var(--text)}
+.popup-reference{font-size:0.75rem;color:var(--text-dim);font-style:italic;margin-top:10px}
+.popup-song-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.4rem;font-weight:600;color:var(--text);margin-bottom:14px}
+.popup-lyrics{white-space:pre-line;font-style:italic;font-family:'Crimson Pro',Georgia,serif;font-size:1.05rem;line-height:1.85;color:var(--text)}
+.q-block{margin-bottom:24px}
+.q-label{font-size:0.66rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
+.q-question{font-family:'Crimson Pro',Georgia,serif;font-size:1.08rem;font-weight:500;line-height:1.6;color:var(--text-soft);font-style:italic;margin-bottom:10px}
+.q-textarea{width:100%;min-height:100px;max-height:35vh;resize:vertical;overflow-y:auto;padding:12px;background:var(--sec-bg);border:1.5px solid var(--border);border-radius:12px;color:var(--text);font-family:'Inter',sans-serif;font-size:0.92rem;line-height:1.7}
+.q-textarea:focus{border-color:var(--lvl-soft);outline:none}
+.q-saved{font-size:0.72rem;color:var(--green);margin-top:5px;min-height:16px}
+.amen-btn{display:block;width:100%;margin-top:20px;padding:16px;border-radius:14px;border:none;cursor:pointer;font-family:inherit;font-size:1rem;font-weight:800;background:var(--lvl-bold);color:#fff;letter-spacing:1px;transition:all 0.2s;box-shadow:0 4px 16px rgba(0,0,0,0.12)}
+.amen-btn:active{transform:scale(0.96)}
+.amen-btn.done{background:var(--green)}
+.mystery-done-pill{display:flex;align-items:center;gap:10px;padding:14px 16px;background:var(--green-soft);border-radius:14px;border:1.5px solid rgba(52,168,83,0.2);margin-top:20px}
+.mystery-done-pill .done-check{color:var(--green);font-size:1.2rem}
+.mystery-done-pill .done-txt{font-size:0.82rem;font-weight:600;color:var(--green)}
+.mystery-done-pill .done-date{font-size:0.72rem;color:var(--text-dim)}
 
 /* ── Voice player flotante ── */
-.voice-player{
-  position:fixed;
-  bottom:calc(64px + env(safe-area-inset-bottom,0px));
-  left:16px;right:16px;
-  background:var(--card);border:1.5px solid var(--border);border-radius:16px;
-  padding:12px 20px;z-index:200;
-  box-shadow:0 -4px 20px rgba(0,0,0,0.3);
-  animation:slideUp 0.25s ease;
-}
+.voice-player{position:fixed;bottom:calc(64px + env(safe-area-inset-bottom,0px));left:16px;right:16px;background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:12px 20px;z-index:200;box-shadow:0 -4px 20px rgba(0,0,0,0.3);animation:slideUp 0.25s ease}
 .voice-player-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 .voice-player-tool{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--lvl-bold)}
 .voice-player-controls{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.vp-btn{
-  background:none;border:none;cursor:pointer;color:var(--text-soft);
-  display:flex;flex-direction:column;align-items:center;font-size:0.65rem;gap:2px;
-  padding:6px;border-radius:8px;transition:background 0.15s;font-family:inherit;
-}
+.vp-btn{background:none;border:none;cursor:pointer;color:var(--text-soft);display:flex;flex-direction:column;align-items:center;font-size:0.65rem;gap:2px;padding:6px;border-radius:8px;transition:background 0.15s;font-family:inherit}
 .vp-btn:active{background:var(--border)}
-.vp-main{
-  width:44px;height:44px;background:var(--lvl-bold);color:#fff;border-radius:50%;
-  font-size:1.1rem;padding:0;justify-content:center;
-}
-.vp-speed{
-  background:var(--sec-bg);border:1px solid var(--border);border-radius:8px;
-  color:var(--text);font-size:0.78rem;padding:4px 6px;cursor:pointer;
-}
+.vp-main{width:44px;height:44px;background:var(--lvl-bold);color:#fff;border-radius:50%;font-size:1.1rem;padding:0;justify-content:center}
+.vp-speed{background:var(--sec-bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.78rem;padding:4px 6px;cursor:pointer}
 
 /* ── Onboarding tip ── */
-.onboarding-tip{
-  position:absolute;bottom:-40px;left:50%;transform:translateX(-50%);
-  background:rgba(0,0,0,0.78);color:#fff;padding:7px 16px;border-radius:20px;
-  font-size:0.78rem;font-weight:600;pointer-events:none;z-index:50;
-  white-space:nowrap;animation:fadeInOut 3s ease forwards;
-}
+.onboarding-tip{position:absolute;bottom:-40px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.78);color:#fff;padding:7px 16px;border-radius:20px;font-size:0.78rem;font-weight:600;pointer-events:none;z-index:50;white-space:nowrap;animation:fadeInOut 3s ease forwards}
 
 @media(max-width:380px){html{font-size:16px}}
 </style>
@@ -693,8 +386,7 @@ body{
     </div>
     <div class="header-actions">
       <div class="meters-display" id="meters-display">
-        <span>🚶‍♂️</span>
-        <span id="meters-value">0m</span>
+        <span>🚶‍♂️</span><span id="meters-value">0m</span>
       </div>
       <div class="lux-container" id="lux-container">
         <svg class="lux-svg" id="lux-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -756,225 +448,112 @@ body{
     </div>
   </div>
 
-  <!-- ═══ SESIÓN DE ORACIÓN (nuevo diseño) ═══ -->
-  <div class="screen" id="scr-session">
+  <!-- ═══ ORACIÓN — 3 zonas ═══ -->
+  <div class="screen" id="scr-orar">
 
-    <!-- Hero -->
-    <div class="session-hero" id="session-hero">
-      <img class="hero-img" id="hero-img" src="" alt="">
+    <!-- Zona A: Hero + Popup -->
+    <div class="misterio-hero" id="misterio-hero">
+      <img class="misterio-hero-img" id="hero-img" src="" alt="">
       <div class="hero-placeholder" id="hero-ph" style="display:none">
-        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" width="64" height="64">
+        <svg viewBox="0 0 100 100" width="64" height="64" fill="none">
           <rect x="46" y="5" width="8" height="90" fill="rgba(230,222,211,0.3)"/>
           <rect x="5" y="42" width="90" height="8" fill="rgba(230,222,211,0.3)"/>
         </svg>
       </div>
-      <div class="hero-gradient" id="hero-gradient"></div>
-      <div class="hero-text">
-        <div class="hero-counter" id="hero-counter"></div>
-        <div class="hero-title" id="hero-title-text"></div>
-        <div class="hero-subtitle" id="hero-subtitle-text"></div>
+      <div class="misterio-hero-grad" id="hero-grad"></div>
+      <div class="misterio-hero-text">
+        <div class="misterio-bloque-label" id="hero-bloque-label"></div>
+        <div class="misterio-titulo" id="hero-titulo"></div>
+        <div class="misterio-subtitulo" id="hero-subtitulo"></div>
         <div class="hero-beads" id="hero-beads"></div>
       </div>
-      <!-- BGM button (izq) -->
+      <!-- Botones hero -->
       <button class="hero-btn hero-btn-left" id="btn-bgm" title="BGM">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
           <path d="M15.54 8.46a5 5 0 010 7.07"/>
         </svg>
       </button>
-      <!-- Tema button (der) -->
       <button class="hero-btn hero-btn-right" id="btn-theme" title="Tema">
         <svg id="theme-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
         <svg id="theme-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
       </button>
-    </div>
 
-    <!-- Barra de 6 herramientas -->
+      <!-- Popup bottom sheet -->
+      <div class="tool-popup" id="tool-popup">
+        <div class="tool-popup-header">
+          <button class="popup-close-btn" id="popup-close">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+          <span class="popup-title" id="popup-title"></span>
+          <button class="popup-voice-btn" id="popup-voice-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+              <path d="M19.07 4.93a10 10 0 010 14.14"/>
+              <path d="M15.54 8.46a5 5 0 010 7.07"/>
+            </svg>
+          </button>
+        </div>
+        <div class="tool-popup-body" id="tool-popup-body"></div>
+      </div>
+    </div><!-- /misterio-hero -->
+
+    <!-- Zona B: Barra de herramientas -->
     <div class="tools-bar" id="tools-bar">
-      <button class="tool-btn" id="tool-palabra" data-tool="palabra">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/>
-          <path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/>
-        </svg>
-        <span class="tool-label">Palabra</span>
+      <button class="tool-btn" data-tool="palabra">
+        <div class="tool-btn-circle">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/>
+            <path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/>
+          </svg>
+        </div>
+        <span class="tool-label">Pal</span>
       </button>
-      <button class="tool-btn" id="tool-contemplar" data-tool="contemplar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-          <circle cx="12" cy="12" r="3"/>
-        </svg>
-        <span class="tool-label">Contem.</span>
+      <button class="tool-btn" data-tool="contemplar">
+        <div class="tool-btn-circle">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </div>
+        <span class="tool-label">Con</span>
       </button>
-      <button class="tool-btn" id="tool-rezo" data-tool="rezo">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="12" y1="2" x2="12" y2="22"/>
-          <line x1="4" y1="9" x2="20" y2="9"/>
-        </svg>
+      <button class="tool-btn" data-tool="rezo">
+        <div class="tool-btn-circle">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="2" x2="12" y2="22"/><line x1="4" y1="9" x2="20" y2="9"/>
+          </svg>
+        </div>
         <span class="tool-label">Rezo</span>
       </button>
-      <button class="tool-btn" id="tool-canto" data-tool="canto">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 18V5l12-2v13"/>
-          <circle cx="6" cy="18" r="3"/>
-          <circle cx="18" cy="16" r="3"/>
-        </svg>
+      <button class="tool-btn" data-tool="canto">
+        <div class="tool-btn-circle">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+          </svg>
+        </div>
         <span class="tool-label">Canto</span>
       </button>
-      <button class="tool-btn" id="tool-escribir" data-tool="escribir">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-          <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
-        </svg>
-        <span class="tool-label">Escribir</span>
+      <button class="tool-btn" data-tool="escribir">
+        <div class="tool-btn-circle">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+        </div>
+        <span class="tool-label">Esc</span>
       </button>
-      <button class="tool-btn" id="tool-suplica" data-tool="suplica">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
-        </svg>
-        <span class="tool-label">Súplica</span>
+      <button class="tool-btn" data-tool="suplica">
+        <div class="tool-btn-circle">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+          </svg>
+        </div>
+        <span class="tool-label">Súp</span>
       </button>
     </div>
-
-    <!-- Cards container -->
-    <div class="cards-container" id="cards-container">
-      <div class="cards-empty-state" id="cards-empty-state">
-        <p class="cards-empty-text">Elige cómo orar</p>
-      </div>
-
-      <!-- Tarjeta 1: Palabra -->
-      <div class="card hidden-right" id="card-palabra">
-        <div class="card-header-strip">
-          <button class="card-close-btn" data-close>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-          <button class="card-voice-btn" data-tool="palabra">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-              <path d="M19.07 4.93a10 10 0 010 14.14"/>
-              <path d="M15.54 8.46a5 5 0 010 7.07"/>
-            </svg>
-          </button>
-        </div>
-        <div class="card-scroll-content">
-          <div class="card-label">La Palabra</div>
-          <div class="card-body-text" id="card-ubible-text"></div>
-          <div class="card-reference" id="card-ubible-ref"></div>
-        </div>
-      </div>
-
-      <!-- Tarjeta 2: Contemplar -->
-      <div class="card hidden-right" id="card-contemplar">
-        <div class="card-header-strip">
-          <button class="card-close-btn" data-close>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-          <button class="card-voice-btn" data-tool="contemplar">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-              <path d="M19.07 4.93a10 10 0 010 14.14"/>
-              <path d="M15.54 8.46a5 5 0 010 7.07"/>
-            </svg>
-          </button>
-        </div>
-        <div class="card-scroll-content">
-          <div class="card-label">Contemplación</div>
-          <div class="card-body-text" id="card-cont-text"></div>
-        </div>
-      </div>
-
-      <!-- Tarjeta 3: Rezo -->
-      <div class="card hidden-right" id="card-rezo">
-        <div class="card-header-strip">
-          <button class="card-close-btn" data-close>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-          <button class="card-voice-btn" data-tool="rezo">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-              <path d="M19.07 4.93a10 10 0 010 14.14"/>
-              <path d="M15.54 8.46a5 5 0 010 7.07"/>
-            </svg>
-          </button>
-        </div>
-        <div class="card-scroll-content">
-          <div class="card-label">Rezo</div>
-          <div class="card-body-text">
-            Padre Nuestro, que estás en el cielo…<br><br>
-            Dios te salve, María, llena eres de gracia…<br><br>
-            Gloria al Padre, y al Hijo, y al Espíritu Santo…
-          </div>
-        </div>
-      </div>
-
-      <!-- Tarjeta 4: Canto -->
-      <div class="card hidden-right" id="card-canto">
-        <div class="card-header-strip">
-          <button class="card-close-btn" data-close>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-          <button class="card-voice-btn" data-tool="canto">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-              <path d="M19.07 4.93a10 10 0 010 14.14"/>
-              <path d="M15.54 8.46a5 5 0 010 7.07"/>
-            </svg>
-          </button>
-        </div>
-        <div class="card-scroll-content">
-          <div class="card-label">Canto</div>
-          <div class="card-song-title" id="card-canto-titulo"></div>
-          <div class="card-body-text card-lyrics" id="card-canto-letra"></div>
-        </div>
-      </div>
-
-      <!-- Tarjeta 5: Escribir (3 sub-tarjetas) -->
-      <div class="card hidden-right" id="card-escribir">
-        <div class="card-header-strip">
-          <button class="card-close-btn" data-close>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-        </div>
-        <div class="sub-card active" id="sub-q0">
-          <div class="card-label" style="color:#FF7A00">Por María hacia Jesús</div>
-          <p class="card-question-text" id="q-text-0"></p>
-          <textarea class="card-textarea" id="q-ta-0" placeholder="Escribe tu reflexión…"></textarea>
-          <div class="card-save-indicator" id="q-saved-0"></div>
-        </div>
-        <div class="sub-card hidden-right" id="sub-q1">
-          <div class="card-label" style="color:#C0392B">Desde el Hijo hacia el Padre</div>
-          <p class="card-question-text" id="q-text-1"></p>
-          <textarea class="card-textarea" id="q-ta-1" placeholder="Escribe tu reflexión…"></textarea>
-          <div class="card-save-indicator" id="q-saved-1"></div>
-        </div>
-        <div class="sub-card hidden-right" id="sub-q2">
-          <div class="card-label" style="color:#27AE60">Hijos y hermanos en el Espíritu</div>
-          <p class="card-question-text" id="q-text-2"></p>
-          <textarea class="card-textarea" id="q-ta-2" placeholder="Escribe tu reflexión…"></textarea>
-          <div class="card-save-indicator" id="q-saved-2"></div>
-        </div>
-      </div>
-
-      <!-- Tarjeta 6: Súplica -->
-      <div class="card hidden-right" id="card-suplica">
-        <div class="card-header-strip">
-          <button class="card-close-btn" data-close>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-          <button class="card-voice-btn" data-tool="suplica">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-              <path d="M19.07 4.93a10 10 0 010 14.14"/>
-              <path d="M15.54 8.46a5 5 0 010 7.07"/>
-            </svg>
-          </button>
-        </div>
-        <div class="card-scroll-content">
-          <div class="card-label">Súplica</div>
-          <div class="card-body-text" id="card-pray-text"></div>
-          <div id="suplica-action"></div>
-        </div>
-      </div>
-    </div><!-- /cards-container -->
 
     <!-- Voice player flotante -->
     <div class="voice-player" id="voice-player" style="display:none">
@@ -995,7 +574,7 @@ body{
       </div>
     </div>
 
-  </div><!-- /scr-session -->
+  </div><!-- /scr-orar -->
 
   <!-- ═══ CELEBRACIÓN ═══ -->
   <div class="screen" id="scr-celebration">
@@ -1023,7 +602,7 @@ body{
       </div>
       <span class="app-nav-label">Orar</span>
     </button>
-    <button class="app-nav-item" id="nav-diario" onclick="navTap(this);goTo('diario.html')">
+    <button class="app-nav-item" onclick="navTap(this);goTo('diario.html')">
       <div class="app-nav-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/>
@@ -1032,7 +611,7 @@ body{
       </div>
       <span class="app-nav-label">Diario</span>
     </button>
-    <button class="app-nav-item" id="nav-cantos" onclick="navTap(this);goTo('cantos.html')">
+    <button class="app-nav-item" onclick="navTap(this);goTo('cantos.html')">
       <div class="app-nav-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
@@ -1040,7 +619,7 @@ body{
       </div>
       <span class="app-nav-label">Cantos</span>
     </button>
-    <button class="app-nav-item" id="nav-sanar" onclick="navTap(this);goTo('sanar.html')">
+    <button class="app-nav-item" onclick="navTap(this);goTo('sanar.html')">
       <div class="app-nav-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 22s-8-5.5-8-11a8 8 0 0116 0c0 5.5-8 11-8 11z"/>
@@ -1049,7 +628,7 @@ body{
       </div>
       <span class="app-nav-label">Sanar</span>
     </button>
-    <button class="app-nav-item" id="nav-inicio" onclick="navTap(this);goTo('index.html')">
+    <button class="app-nav-item" onclick="navTap(this);goTo('index.html')">
       <div class="app-nav-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
@@ -1063,7 +642,7 @@ body{
   <!-- Mariano grand celebration -->
   <div class="mariano-grand-overlay" id="mariano-grand-overlay" style="display:none">
     <div class="mariano-grand-container">
-      <img id="mariano-grand-img" class="mariano-grand" alt="Mariano celebrando">
+      <img id="mariano-grand-img" class="mariano-grand" alt="Mariano">
       <div class="mariano-grand-lux" id="mariano-grand-lux">
         <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
           <g filter="url(#luxGlow)">
@@ -1082,998 +661,528 @@ body{
 
 <script src="utils.js"></script>
 <script>
-(function() {
-  'use strict';
+(function(){
+'use strict';
 
-  // ── Buckets R2 ──
-  const R2_BASE   = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev';
-  const MUSIC_BASE= 'https://pub-faed94e375aa443e846e07f81ef93274.r2.dev';
-  const IMG_BASE  = 'https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev';
-  const MARIANO_BASE = 'https://padremonti.github.io/cruzando-app/assets/mariano/';
+/* ─── CONSTANTS ─── */
+const R2   = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev';
+const IMGB = 'https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev/';
+const MUSB = 'https://pub-faed94e375aa443e846e07f81ef93274.r2.dev/';
 
-  // ── Constantes ──
-  const BLOCKS      = ['gozosos','luminosos','dolorosos','gloriosos'];
-  const BLOCK_NAMES = { gozosos:'Gozosos', luminosos:'Luminosos', dolorosos:'Dolorosos', gloriosos:'Gloriosos' };
-  const BLOCK_COLORS= { gozosos:'#E8A0A0', luminosos:'#01BBE1', dolorosos:'#C0392B', gloriosos:'#D4A017' };
-  const ORDS        = ['Primer','Segundo','Tercer','Cuarto','Quinto'];
-  const BTYPES      = { gozosos:'Gozoso', luminosos:'Luminoso', dolorosos:'Doloroso', gloriosos:'Glorioso' };
-  const MED_LABELS  = ['Por María hacia Jesús','Desde el Hijo hacia el Padre','Hijos y hermanos en el Espíritu'];
-  const DAY_BLOCKS  = { 0:'gloriosos', 1:'gozosos', 2:'dolorosos', 3:'gloriosos', 4:'luminosos', 5:'dolorosos', 6:'gozosos' };
-  const REST_POSES  = ['rest-staff','rest-sitting','rest-rock','rest-tree'];
-  const TOOLS       = ['palabra','contemplar','rezo','canto','escribir','suplica'];
-  const TOOL_LABELS = { palabra:'Palabra', contemplar:'Contemplación', rezo:'Rezo', canto:'Canto', suplica:'Súplica' };
+const BLOCKS = ['gozosos','luminosos','dolorosos','gloriosos'];
+const BN  = {gozosos:'Gozosos',luminosos:'Luminosos',dolorosos:'Dolorosos',gloriosos:'Gloriosos'};
+const BFN = {gozosos:'Misterios Gozosos',luminosos:'Misterios Luminosos',dolorosos:'Misterios Dolorosos',gloriosos:'Misterios Gloriosos'};
+const BEM = {gozosos:'🌟',luminosos:'✨',dolorosos:'✝️',gloriosos:'👑'};
+const BCL = {gozosos:'#D4A017',luminosos:'#01BBE1',dolorosos:'#C0392B',gloriosos:'#8E44AD'};
+const BFM = {gozosos:1,luminosos:6,dolorosos:11,gloriosos:16};
+const TBG = {gozosos:'rgba(232,160,160,0.18)',luminosos:'rgba(1,187,225,0.15)',dolorosos:'rgba(192,57,43,0.15)',gloriosos:'rgba(212,160,23,0.15)'};
+const TN  = {palabra:'La Palabra',contemplar:'Contemplar',rezo:'Rezo',canto:'Canto',escribir:'Escribir',suplica:'Súplica'};
+const QL  = ['Por María hacia Jesús:','Desde el Hijo hacia el Padre:','Hijos y hermanos en el Espíritu:'];
+const QC  = ['#FF7A00','#C0392B','#27AE60'];
+const MR_REZO=1200, MR_CONT=800, MR_CANTO=600, MR_QF=650, MR_QU=325, MR_BNS=1000, MR_MICRO=600;
 
-  // ── Estado global ──
-  let DATA = null, CANTOS_DATA = null, MICRO_DATA = null, NIVEL_ID = null;
-  let currentBlock = null, currentMystery = 0;
-  let progress = {}, journal = {}, medConfirmed = {}, microDone = {};
-  let reflectionRewards = {}, audioRewards = {};
-  let isDark = false, userPlan = 'free';
-  let totalMeters = 0, restPoseIndex = 0, orbitIndex = 0;
-  let currentTool  = null, currentSubQ = 0;
-  let currentVoiceTool = null;
-  let _writingDebounceTimers = {};
-  const isPremium = () => userPlan !== 'free';
+/* ─── STATE ─── */
+let usr=null, data=null, cantoJ=null, microJ=null;
+let microDone=false, prog=null;
+let nivelId='0101', nivel=1, cua=1;
+let blk=null, bIdx=0;
+let tool=null;
+let libro=null, bgmEl=null, bgmOn=true;
+let totalM=0;
+let ans={0:'',1:'',2:''}, ansT={}, firstAns={0:false,1:false,2:false};
+let awd=new Set();
 
-  // ── Voice player ──
-  const libroAudio = new Audio();
+/* ─── UTILS ─── */
+const $=id=>document.getElementById(id);
+const esc=s=>s?s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'):'';
+const prefs=()=>{try{return JSON.parse(localStorage.getItem('cruzando_prefs')||'{}');}catch(e){return{};}};
+const mNum=(b,i)=>BFM[b]+i;
+const mData=(b,i)=>data?.misterios?.[b]?.[i]||null;
 
-  // ── Utilidades DOM ──
-  const $ = id => document.getElementById(id);
-  function show(id) {
-    document.querySelectorAll('.screen').forEach(s => {
-      s.classList.remove('active');
-      if (s.id === 'scr-session') s.style.display = 'none';
-    });
-    const el = $(id);
-    if (id === 'scr-session') {
-      el.style.display = 'flex';
-    }
-    el.classList.add('active');
-  }
-  const lsKey = () => 'cruzando_nivel_' + NIVEL_ID;
-  function nivelLabel(id) {
-    return 'Nivel ' + parseInt(id.substring(0,2),10) + '-' + parseInt(id.substring(2,4),10);
-  }
-  function escHTML(s) {
-    if (!s) return '';
-    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
-  }
+function show(id){
+  const ld=$('scr-loading'); if(ld) ld.style.display='none';
+  const er=$('scr-error'); if(er) er.style.display='none';
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el=$(id); if(el) el.classList.add('active');
+}
+function showLoading(){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const ld=$('scr-loading'); if(ld) ld.style.display='flex';
+  const er=$('scr-error'); if(er) er.style.display='none';
+}
+function showError(msg){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const ld=$('scr-loading'); if(ld) ld.style.display='none';
+  const er=$('scr-error'); if(er){er.style.display='flex'; const em=$('error-msg'); if(em&&msg) em.textContent=msg;}
+}
 
-  // ── URLs de assets ──
-  function imagenUrl(m) {
-    const n = parseInt(NIVEL_ID.substring(0,2),10);
-    const c = parseInt(NIVEL_ID.substring(2,4),10);
-    return IMG_BASE + '/P_' + n + '_' + c + '_' + m.numero + '.webp';
-  }
-  function toolAudioUrl(tool) {
-    const n = parseInt(NIVEL_ID.substring(0,2),10);
-    const c = parseInt(NIVEL_ID.substring(2,4),10);
-    const m = DATA.misterios[currentBlock][currentMystery];
-    const map = {
-      palabra:    R2_BASE + '/ubible/UBIBLE_' + n + '_' + c + '_' + m.numero + '.mp3',
-      contemplar: R2_BASE + '/cont/CONT_'    + n + '_' + c + '_' + m.numero + '.mp3',
-      rezo:       R2_BASE + '/global/rezo.mp3',
-      canto:      MUSIC_BASE + '/M_' + n + '_' + c + '_' + m.numero + '.mp3',
-      suplica:    R2_BASE + '/pray/PRAY_' + n + '_' + c + '_' + m.numero + '.mp3',
-    };
-    return map[tool] || null;
-  }
+/* ─── THEME ─── */
+function initTheme(){applyTheme(localStorage.getItem('cruzando_theme')||'dark');}
+function applyTheme(t){
+  document.body.classList.toggle('dark',t==='dark');
+  document.body.classList.toggle('light',t!=='dark');
+  localStorage.setItem('cruzando_theme',t);
+  ['theme-sun','ico-sun'].forEach(id=>{const e=$(id);if(e)e.style.display=t==='dark'?'':'none';});
+  ['theme-moon','ico-moon'].forEach(id=>{const e=$(id);if(e)e.style.display=t==='dark'?'none':'';});
+}
+function toggleTheme(){applyTheme(localStorage.getItem('cruzando_theme')==='dark'?'light':'dark');}
 
-  // ── Navegación ──
-  function goTo(page) {
-    stopAudio();
-    const base = location.origin + location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1);
-    location.href = base + page;
-  }
-  window.goTo = goTo;
+/* ─── NAV ─── */
+function goTo(pg){
+  if(libro){libro.pause();libro.src='';}
+  if(bgmEl) bgmEl.pause();
+  location.href=location.origin+location.pathname.substring(0,location.pathname.lastIndexOf('/')+1)+pg;
+}
+let _nc=0;
+function playNavChord(){
+  const CH=[[523,659,784],[659,784,988],[784,988,1175],[587,740,880]];
+  try{
+    const ac=new(window.AudioContext||window.webkitAudioContext)(),now=ac.currentTime,notes=CH[_nc++%4];
+    const mg=ac.createGain();mg.gain.setValueAtTime(0,now);mg.gain.linearRampToValueAtTime(0.07,now+0.018);mg.gain.exponentialRampToValueAtTime(0.001,now+0.4);mg.connect(ac.destination);
+    notes.forEach((f,j)=>{const o=ac.createOscillator(),g=ac.createGain();o.type=j?'triangle':'sine';o.frequency.value=f;g.gain.value=j?0.5:0.8;o.connect(g);g.connect(mg);o.start(now+j*0.012);o.stop(now+0.45);});
+  }catch(e){}
+}
+function navTap(el){playNavChord();el.classList.remove('tapped');void el.offsetWidth;el.classList.add('tapped');setTimeout(()=>el.classList.remove('tapped'),400);}
+window.navTap=navTap; window.goTo=goTo;
 
-  let _navChord = 0;
-  const NAV_CHORDS = [[523,659,784],[659,784,988],[784,988,1175],[587,740,880]];
-  function playNavChord() {
-    try {
-      const ac = new (window.AudioContext || window.webkitAudioContext)();
-      const now = ac.currentTime;
-      const notes = NAV_CHORDS[_navChord++ % 4];
-      const master = ac.createGain();
-      master.gain.setValueAtTime(0,now);
-      master.gain.linearRampToValueAtTime(0.07,now+0.018);
-      master.gain.exponentialRampToValueAtTime(0.001,now+0.4);
-      master.connect(ac.destination);
-      notes.forEach((freq,j) => {
-        const o = ac.createOscillator(), g = ac.createGain();
-        o.type = j === 0 ? 'sine' : 'triangle';
-        o.frequency.value = freq;
-        g.gain.value = j === 0 ? 0.8 : 0.5;
-        o.connect(g); g.connect(master);
-        o.start(now + j * 0.012); o.stop(now + 0.45);
-      });
-    } catch(e){}
-  }
-  function navTap(el) {
-    playNavChord();
-    el.classList.remove('tapped'); void el.offsetWidth; el.classList.add('tapped');
-    setTimeout(() => el.classList.remove('tapped'), 400);
-  }
-  window.navTap = navTap;
+/* ─── FIREBASE (compat) ─── */
+const FS=_db;
+const FSV=firebase.firestore.FieldValue;
 
-  // ── Audio ──
-  function stopAudio() {
-    libroAudio.pause();
-    const vp = $('voice-player');
-    if (vp) vp.style.display = 'none';
-    document.querySelectorAll('.card-voice-btn').forEach(b => b.classList.remove('playing'));
-    updateVpPlayBtn();
-  }
+async function addMeters(m){
+  totalM+=m;
+  const stored=parseInt(localStorage.getItem('cruzando_total_metros')||'0');
+  localStorage.setItem('cruzando_total_metros',stored+m);
+  const mv=$('meters-value'); if(mv) mv.textContent=totalM.toLocaleString('es-MX')+'m';
+  if(!usr) return;
+  try{await FS.collection('users').doc(usr.uid).update({totalMeters:FSV.increment(m)});}
+  catch(e){try{await FS.collection('users').doc(usr.uid).set({totalMeters:m},{merge:true});}catch(e2){}}
+}
 
-  // ── Voice player ──
-  function openVoicePlayer(tool) {
-    const url = toolAudioUrl(tool);
-    if (!url) return;
-    if (currentVoiceTool !== tool) {
-      libroAudio.pause();
-      libroAudio.src = url;
-      libroAudio.load();
-      currentVoiceTool = tool;
-    }
-    $('vp-tool-name').textContent = TOOL_LABELS[tool] || tool;
-    $('voice-player').style.display = '';
-    updateVpPlayBtn();
-  }
-  function updateVpPlayBtn() {
-    const btn = $('vp-play-pause');
-    if (btn) btn.textContent = libroAudio.paused ? '▶' : '⏸';
-  }
-  libroAudio.addEventListener('timeupdate', updateVpPlayBtn);
-  libroAudio.addEventListener('ended', () => {
-    updateVpPlayBtn();
-    if (!currentVoiceTool || !currentBlock) return;
-    const rewardKey = currentBlock + '_' + currentMystery + '_' + currentVoiceTool;
-    const isFirst = !audioRewards[rewardKey];
-    if (isFirst) audioRewards[rewardKey] = true;
-    let meters = 0, pose = 'rest-sitting';
-    if (currentVoiceTool === 'rezo')       { meters = 1200; pose = 'walking'; }
-    else if (currentVoiceTool === 'contemplar') { meters = 800; pose = 'contemplative'; }
-    else if (currentVoiceTool === 'canto') { meters = 600; pose = 'happy'; }
-    if (meters) gainMeters(meters, pose, isFirst);
+/* ─── GAMIFICATION ─── */
+function showSlide(m,extra){
+  const ov=$('mariano-overlay'),img=$('mariano-slide-img'),fl=$('meters-float-text');
+  if(!ov) return;
+  img.src=IMGB+'mariano.webp';
+  fl.innerHTML=(extra?`<span class="extra-badge">${extra}</span>`:'')+`+${m}m`;
+  ov.style.display='flex';
+  setTimeout(()=>{ov.style.display='none';},2600);
+}
+
+/* ─── PARSE QUESTIONS ─── */
+function parseQ(text){
+  if(!text) return ['','',''];
+  const out=[];let rem=text;
+  QL.forEach((lbl,i)=>{
+    const idx=rem.indexOf(lbl);
+    if(idx>=0){if(i>0)out.push(rem.substring(0,idx).trim());rem=rem.substring(idx+lbl.length).trim();}
   });
+  out.push(rem.trim());
+  while(out.length<3)out.push('');
+  return out.slice(0,3);
+}
 
-  // ── Tools — abrir/cerrar ──
-  function openTool(tool) {
-    libroAudio.pause();
-    updateVpPlayBtn();
-    $('cards-empty-state').style.display = 'none';
-    const prevIdx = currentTool ? TOOLS.indexOf(currentTool) : -1;
-    const nextIdx = TOOLS.indexOf(tool);
-    if (currentTool) {
-      const prev = $('card-' + currentTool);
-      prev.classList.remove('active');
-      prev.classList.add(prevIdx < nextIdx ? 'hidden-left' : 'hidden-right');
-    }
-    const card = $('card-' + tool);
-    card.classList.remove('hidden-right','hidden-left');
-    card.classList.add('active');
-    currentTool = tool;
-    document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
-    const btn = document.querySelector('#tool-' + tool);
-    if (btn) btn.classList.add('active');
-    if (tool === 'escribir') showSubQ(0);
-  }
-  function closeCard() {
-    libroAudio.pause();
-    $('voice-player').style.display = 'none';
-    document.querySelectorAll('.card').forEach(c => {
-      c.classList.remove('active'); c.classList.add('hidden-right');
-    });
-    document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
-    $('cards-empty-state').style.display = 'flex';
-    currentTool = null;
-  }
-  function goNextTool() {
-    if (!currentTool) return;
-    const idx = TOOLS.indexOf(currentTool);
-    if (idx < TOOLS.length - 1) { openTool(TOOLS[idx + 1]); }
-    else { completeMystery(); }
-  }
-  function goPrevTool() {
-    if (!currentTool) return;
-    const idx = TOOLS.indexOf(currentTool);
-    if (idx > 0) { openTool(TOOLS[idx - 1]); }
-    else { closeCard(); }
-  }
+/* ─── AUTH ─── */
+function initAuth(){
+  initTheme();
+  _auth.onAuthStateChanged(async u=>{
+    if(u){usr=u;await loadAndStart();}
+    else goTo('index.html');
+  });
+}
 
-  // ── Sub-cards (Escribir) ──
-  function showSubQ(qi) {
-    currentSubQ = qi;
-    [0,1,2].forEach(i => {
-      const sc = $('sub-q' + i);
-      if (!sc) return;
-      sc.classList.remove('active','hidden-right','hidden-left');
-      if (i === qi)      sc.classList.add('active');
-      else if (i < qi)   sc.classList.add('hidden-left');
-      else               sc.classList.add('hidden-right');
-    });
-  }
+async function loadAndStart(){
+  showLoading();
+  const p=new URLSearchParams(location.search);
+  nivelId=p.get('c')||'0101';
+  nivel=parseInt(nivelId.slice(0,2))||1;
+  cua=parseInt(nivelId.slice(2,4))||1;
 
-  // ── Swipe ──
-  let _touchStartX = 0, _touchStartY = 0;
-  function initSwipe() {
-    const cc = $('cards-container');
-    cc.addEventListener('touchstart', e => {
-      _touchStartX = e.touches[0].clientX;
-      _touchStartY = e.touches[0].clientY;
-    }, { passive: true });
-    cc.addEventListener('touchend', e => {
-      const dx = e.changedTouches[0].clientX - _touchStartX;
-      const dy = e.changedTouches[0].clientY - _touchStartY;
-      if (Math.abs(dx) < Math.abs(dy) || Math.abs(dx) < 50) return;
-      if (currentTool === 'escribir') {
-        if (dx < -50) {
-          if (currentSubQ < 2) showSubQ(currentSubQ + 1);
-          else openTool('suplica');
-        } else {
-          if (currentSubQ > 0) showSubQ(currentSubQ - 1);
-          else goPrevTool();
-        }
-      } else {
-        if (dx < -50) goNextTool();
-        else           goPrevTool();
-      }
-    }, { passive: true });
-  }
+  try{
+    const snap=await FS.collection('users').doc(usr.uid).get();
+    const ud=snap.exists?snap.data():{};
+    window.resolvePlan&&(window.resolvePlan(ud));
+    totalM=ud.totalMeters||0;
+    const mv=$('meters-value');if(mv)mv.textContent=totalM.toLocaleString('es-MX')+'m';
+  }catch(e){}
 
-  // ── Onboarding ──
-  function maybeShowOnboarding() {
-    const count = parseInt(localStorage.getItem('orar_onboarding_count') || '0');
-    if (count >= 3) return;
-    localStorage.setItem('orar_onboarding_count', count + 1);
-    const tip = document.createElement('div');
-    tip.className = 'onboarding-tip';
-    tip.textContent = 'Elige tu herramienta';
-    const bar = $('tools-bar');
-    bar.style.position = 'relative';
-    bar.appendChild(tip);
-    setTimeout(() => tip.remove(), 3200);
-  }
+  const base=location.origin+location.pathname.substring(0,location.pathname.lastIndexOf('/')+1);
+  try{const r=await fetch(base+'data/'+nivelId+'.json');if(r.ok)data=await r.json();}catch(e){}
+  try{const r=await fetch(base+'data/'+nivelId+'-cantos.json');if(r.ok)cantoJ=await r.json();}catch(e){}
 
-  // ── Reflexiones — guardado con debounce ──
-  function onWritingInput(qi, val) {
-    const b = currentBlock, mi = currentMystery;
-    if (!journal[b]) journal[b] = {};
-    if (!journal[b][mi]) journal[b][mi] = {};
-    journal[b][mi]['q' + qi] = val;
-    if (_writingDebounceTimers[qi]) clearTimeout(_writingDebounceTimers[qi]);
-    _writingDebounceTimers[qi] = setTimeout(() => {
-      saveProgress();
-      if (val.trim().length >= 5) {
-        const mist = DATA.misterios[b] && DATA.misterios[b][mi];
-        const questions = mist ? parseMeditation(mist.meditacion) : [];
-        const qText = questions[qi] || MED_LABELS[qi] || '';
-        saveReflectionToFirestore(b, mi, qi, val, qText);
-        const ind = $('q-saved-' + qi);
-        if (ind) { ind.textContent = '✓ Guardado'; setTimeout(() => { ind.textContent = ''; }, 3000); }
-        const rk = b + '_' + mi + '_q' + qi;
-        if (!reflectionRewards[rk]) {
-          reflectionRewards[rk] = true;
-          gainMeters(650, getNextRestPose(), true);
-        }
-      }
-    }, 2000);
-  }
-  window._caWrite = { onWritingInput };
+  try{
+    const snap=await FS.collection('users').doc(usr.uid).collection('progress').doc(nivelId).get();
+    prog=snap.exists?snap.data():{};
+  }catch(e){prog={};}
 
-  // ── Guardar reflexión en Firestore ──
-  async function saveReflectionToFirestore(b, mi, qi, texto, questionText) {
-    try {
-      const user = _auth.currentUser;
-      if (!user) return;
-      const docId = NIVEL_ID + '_' + b + '_' + mi + '_q' + qi;
-      await _db.collection('users').doc(user.uid).collection('reflections').doc(docId).set({
-        nivelId: NIVEL_ID, bloque: b, misterioIdx: mi, questionIdx: qi,
-        question: questionText || '', text: texto,
-        confirmedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    } catch(e) { console.warn('[CruzAndo] saveReflection:', e.message); }
-  }
-
-  // ── Persistencia ──
-  async function saveProgress() {
-    const payload = { progress, journal, medConfirmed, microDone, reflectionRewards, audioRewards, updatedAt: Date.now() };
-    try { localStorage.setItem(lsKey(), JSON.stringify({ ...payload, isDark })); } catch(e){}
-    try { localStorage.setItem('cruzando_total_metros', String(totalMeters)); } catch(e){}
-    try {
-      const user = _auth.currentUser;
-      if (!user) return;
-      await _db.collection('users').doc(user.uid).collection('progress').doc(NIVEL_ID).set({
-        ...payload, updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      await _db.collection('users').doc(user.uid).set({ totalMeters }, { merge: true });
-    } catch(e) { console.warn('[CruzAndo] saveProgress:', e.message); }
-  }
-
-  async function loadProgress(user) {
-    let loaded = false;
-    if (user) {
-      try {
-        const [snapNivel, snapUser] = await Promise.all([
-          _db.collection('users').doc(user.uid).collection('progress').doc(NIVEL_ID).get(),
-          _db.collection('users').doc(user.uid).get()
-        ]);
-        if (snapNivel.exists) {
-          const d = snapNivel.data();
-          if (d.progress)          progress          = d.progress;
-          if (d.journal)           journal            = d.journal;
-          if (d.medConfirmed)      medConfirmed       = d.medConfirmed;
-          if (d.microDone)         microDone          = d.microDone;
-          if (d.reflectionRewards) reflectionRewards  = d.reflectionRewards;
-          if (d.audioRewards)      audioRewards       = d.audioRewards;
-          loaded = true;
-        }
-        if (snapUser.exists && typeof snapUser.data().totalMeters === 'number') {
-          totalMeters = snapUser.data().totalMeters;
-          try { localStorage.setItem('cruzando_total_metros', String(totalMeters)); } catch(e){}
-        } else {
-          try {
-            const m = localStorage.getItem('cruzando_total_metros');
-            if (m && !isNaN(Number(m)) && Number(m) > 0) {
-              totalMeters = Number(m);
-              _db.collection('users').doc(user.uid).set({ totalMeters }, { merge: true }).catch(()=>{});
-            }
-          } catch(e){}
-        }
-      } catch(e) { console.warn('[CruzAndo] loadProgress:', e.message); }
-    }
-    if (!loaded) {
-      try {
-        const raw = localStorage.getItem(lsKey());
-        if (raw) {
-          const d = JSON.parse(raw);
-          if (d.progress)          progress          = d.progress;
-          if (d.journal)           journal            = d.journal;
-          if (d.medConfirmed)      medConfirmed       = d.medConfirmed;
-          if (d.microDone)         microDone          = d.microDone;
-          if (d.reflectionRewards) reflectionRewards  = d.reflectionRewards;
-          if (d.audioRewards)      audioRewards       = d.audioRewards;
-        }
-      } catch(e){}
-      try {
-        const m = localStorage.getItem('cruzando_total_metros');
-        if (m && !isNaN(Number(m))) totalMeters = Number(m);
-      } catch(e){}
-    }
-    try {
-      const shared = localStorage.getItem('cruzando_theme');
-      if (shared === 'dark')  isDark = true;
-      if (shared === 'light') isDark = false;
-    } catch(e){}
-    try {
-      const raw = localStorage.getItem(lsKey());
-      if (raw) { const d = JSON.parse(raw); if (typeof d.isDark === 'boolean') isDark = d.isDark; }
-    } catch(e){}
-    BLOCKS.forEach(b => {
-      if (!progress[b]) progress[b] = [null,null,null,null,null];
-      if (!journal[b])  journal[b]  = {};
-    });
-    updateMetersDisplay();
-  }
-
-  // ── Paleta ──
-  function hexToRgb(hex) {
-    const h = hex.replace('#','');
-    return [parseInt(h.substring(0,2),16), parseInt(h.substring(2,4),16), parseInt(h.substring(4,6),16)].join(',');
-  }
-  function applyPalette() {
-    if (!DATA || !DATA.tema) return;
-    const p = DATA.tema.paleta, r = document.documentElement.style;
-    r.setProperty('--lvl-bold', p.bold); r.setProperty('--lvl-base', p.base);
-    r.setProperty('--lvl-soft', p.soft); r.setProperty('--lvl-mist', p.mist);
-    r.setProperty('--lvl-light', p.light); r.setProperty('--lvl-ultra', p.ultra);
-    r.setProperty('--lvl-bold-rgb', hexToRgb(p.bold));
-    r.setProperty('--lvl-light-rgb', hexToRgb(p.light));
-    const bl = DATA.tema.bloques;
-    if (bl.gozosos)   r.setProperty('--goz-color', bl.gozosos.color);
-    if (bl.luminosos) r.setProperty('--lum-color', bl.luminosos.color);
-    if (bl.dolorosos) r.setProperty('--dol-color', bl.dolorosos.color);
-    if (bl.gloriosos) r.setProperty('--glo-color', bl.gloriosos.color);
-    document.querySelector('meta[name="theme-color"]').content = isDark ? '#1A1714' : '#E6DED3';
-  }
-  function blockColor(b) { return DATA && DATA.tema && DATA.tema.bloques[b] ? DATA.tema.bloques[b].color : '#888'; }
-  function blockEmoji(b) { return DATA && DATA.tema && DATA.tema.bloques[b] ? DATA.tema.bloques[b].emoji : '📿'; }
-
-  // ── Dark mode ──
-  function toggleDark() {
-    isDark = !isDark;
-    document.body.classList.toggle('dark', isDark);
-    $('ico-sun').style.display  = isDark ? 'none'  : 'block';
-    $('ico-moon').style.display = isDark ? 'block' : 'none';
-    $('theme-sun').style.display  = isDark ? 'none'  : 'block';
-    $('theme-moon').style.display = isDark ? 'block' : 'none';
-    document.querySelector('meta[name="theme-color"]').content = isDark ? '#1A1714' : '#E6DED3';
-    try { localStorage.setItem('cruzando_theme', isDark ? 'dark' : 'light'); } catch(e){}
-    try {
-      const raw = localStorage.getItem(lsKey());
-      const d = raw ? JSON.parse(raw) : {};
-      d.isDark = isDark;
-      localStorage.setItem(lsKey(), JSON.stringify(d));
-    } catch(e){}
-  }
-
-  // ── BGM ──
-  function toggleBgm() {
-    try {
-      const prefs = JSON.parse(localStorage.getItem('cruzando_prefs') || '{}');
-      prefs.bgm = !prefs.bgm;
-      localStorage.setItem('cruzando_prefs', JSON.stringify(prefs));
-      $('btn-bgm').classList.toggle('bgm-on', !!prefs.bgm);
-    } catch(e){}
-  }
-  function syncBgmBtn() {
-    try {
-      const prefs = JSON.parse(localStorage.getItem('cruzando_prefs') || '{}');
-      $('btn-bgm').classList.toggle('bgm-on', !!prefs.bgm);
-    } catch(e){}
-  }
-
-  // ── Gamificación ──
-  function updateMetersDisplay() {
-    const d = $('meters-value');
-    if (d) d.textContent = totalMeters.toLocaleString('es-MX') + 'm';
-  }
-  function getNextRestPose() {
-    const p = REST_POSES[restPoseIndex]; restPoseIndex = (restPoseIndex + 1) % REST_POSES.length; return p;
-  }
-  function getNextOrbit() {
-    const o = 'orbit' + ((orbitIndex % 4) + 1); orbitIndex++; return o;
-  }
-  function luxShine() {
-    const lux = $('lux-svg'); if (!lux) return;
-    lux.classList.add('shine'); setTimeout(() => lux.classList.remove('shine'), 600);
-    spawnLuxParticles(3);
-  }
-  function spawnLuxParticles(count) {
-    const c = $('lux-container'); if (!c) return;
-    for (let i = 0; i < count; i++) {
-      const p = document.createElement('div'); p.className = 'lux-particle';
-      p.style.setProperty('--x',(Math.random()-0.5)*100+'px');
-      p.style.setProperty('--y',(Math.random()-0.5)*100+'px');
-      c.appendChild(p); setTimeout(() => p.remove(), 1500);
-    }
-  }
-  function playRewardSound() {
-    try {
-      const ac = new (window.AudioContext||window.webkitAudioContext)();
-      [523,659].forEach((f,i) => setTimeout(() => {
-        const o = ac.createOscillator(), g = ac.createGain();
-        o.type = 'sine'; o.frequency.value = f;
-        g.gain.setValueAtTime(0.12,ac.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+0.35);
-        o.connect(g); g.connect(ac.destination); o.start(); o.stop(ac.currentTime+0.35);
-      }, i * 90));
-    } catch(e){}
-  }
-  function gainMeters(meters, pose, isFirst = true) {
-    const award = isFirst ? meters : Math.floor(meters / 2);
-    totalMeters += award; updateMetersDisplay(); saveProgress();
-    luxShine(); playRewardSound(); showMarianoSlide(award, pose, isFirst);
-  }
-  function showMarianoSlide(meters, pose, isFirst = true) {
-    const overlay = $('mariano-overlay'), img = $('mariano-slide-img'), text = $('meters-float-text');
-    if (!overlay || !img || !text) return;
-    img.src = MARIANO_BASE + 'mariano-' + pose + '.png';
-    text.innerHTML = (isFirst ? '<span class="extra-badge">✦ EXTRA</span>' : '') +
-      '+' + meters.toLocaleString('es-MX') + 'm';
-    overlay.style.display = 'flex';
-    setTimeout(() => { overlay.style.display = 'none'; }, 2500);
-  }
-  function showMarianoGrandCelebration() {
-    totalMeters += 1000; updateMetersDisplay(); saveProgress();
-    const overlay = $('mariano-grand-overlay');
-    if (!overlay) return;
-    $('mariano-grand-img').src = MARIANO_BASE + 'mariano-celebrate.png';
-    $('mariano-grand-meters').textContent = '+1,000m';
-    $('mariano-grand-text').innerHTML = '¡Bloque completado!<br>Has recorrido una etapa del camino';
-    $('mariano-grand-lux').className = 'mariano-grand-lux ' + getNextOrbit();
-    const cc = $('grand-confetti-container'); cc.innerHTML = '';
-    const cols = ['#01BCE0','#00C853','#FBBC05','#FF7A00','#FFFCF7'];
-    for (let i = 0; i < 40; i++) {
-      const p = document.createElement('div'); p.className = 'grand-confetti';
-      p.style.background = cols[i % 5]; p.style.left = Math.random()*100+'%';
-      p.style.animationDelay = Math.random()*0.5+'s'; cc.appendChild(p);
-    }
-    playNotes([523,659,784,880,1047]);
-    overlay.style.display = 'flex';
-    setTimeout(() => { overlay.style.display = 'none'; }, 3500);
-  }
-  function playNotes(freqs) {
-    try {
-      const ac = new (window.AudioContext||window.webkitAudioContext)();
-      freqs.forEach((f,i) => setTimeout(() => {
-        const o = ac.createOscillator(), g = ac.createGain();
-        o.type = 'sine'; o.frequency.value = f;
-        g.gain.setValueAtTime(0.07,ac.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+0.35);
-        o.connect(g); g.connect(ac.destination); o.start(); o.stop(ac.currentTime+0.35);
-      }, i * 180));
-    } catch(e){}
-  }
-  function playBubble() {
-    try {
-      const ac = new (window.AudioContext||window.webkitAudioContext)(), now = ac.currentTime;
-      const o = ac.createOscillator(), g = ac.createGain();
-      o.type = 'sine';
-      o.frequency.setValueAtTime(150,now);
-      o.frequency.exponentialRampToValueAtTime(580,now+0.055);
-      o.frequency.exponentialRampToValueAtTime(220,now+0.14);
-      g.gain.setValueAtTime(0,now); g.gain.linearRampToValueAtTime(0.15,now+0.012);
-      g.gain.exponentialRampToValueAtTime(0.001,now+0.18);
-      o.connect(g); g.connect(ac.destination); o.start(now); o.stop(now+0.2);
-    } catch(e){}
-  }
-  function playSoftTap() {
-    try {
-      const ac = new (window.AudioContext||window.webkitAudioContext)(), now = ac.currentTime;
-      const bSz = ac.sampleRate*0.03, buf = ac.createBuffer(1,bSz,ac.sampleRate);
-      const d = buf.getChannelData(0);
-      for (let i = 0; i < bSz; i++) d[i] = (Math.random()*2-1)*Math.exp(-i/(bSz*0.15));
-      const s = ac.createBufferSource(); s.buffer = buf;
-      const f = ac.createBiquadFilter(); f.type = 'lowpass'; f.frequency.setValueAtTime(600,now);
-      const gn = ac.createGain(); gn.gain.setValueAtTime(0.22,now);
-      gn.gain.exponentialRampToValueAtTime(0.001,now+0.08);
-      s.connect(f); f.connect(gn); gn.connect(ac.destination); s.start(now); s.stop(now+0.1);
-    } catch(e){}
-  }
-  const MELODIES = [[440,554,659],[523,659,784],[392,494,587,784],[349,440,523,659]];
-  function celebrationSound(v) { playNotes(MELODIES[v % 4]); }
-  function showConfetti() {
-    if (!DATA) return;
-    const c = document.createElement('div'); c.className = 'confetti-container';
-    const cols = [DATA.tema.paleta.bold, DATA.tema.paleta.soft, DATA.tema.paleta.light, '#34A853','#FBBC05','#EA4335'];
-    for (let i = 0; i < 40; i++) {
-      const p = document.createElement('div'); p.className = 'confetti-piece';
-      p.style.left = Math.random()*100+'%';
-      p.style.background = cols[Math.floor(Math.random()*cols.length)];
-      p.style.animationDelay = Math.random()*0.8+'s';
-      p.style.animationDuration = (2+Math.random())+'s';
-      c.appendChild(p);
-    }
-    document.body.appendChild(c); setTimeout(() => c.remove(), 3500);
-  }
-
-  // ── Render: Home ──
-  function renderHome() {
-    $('main-header').style.display = '';
-    $('h-title').textContent = 'CruzAndo';
-    $('h-sub').textContent = nivelLabel(DATA.tema.id) + ': ' + DATA.elemento;
-    $('home-title').textContent = DATA.tema.mundo_nombre || '';
-    $('home-nivel').textContent = nivelLabel(DATA.tema.id);
-    $('home-element').textContent = DATA.elemento || '';
-    const grid = $('block-grid'); grid.innerHTML = '';
-    let allCleared = true;
-    const todayBlock = DAY_BLOCKS[new Date().getDay()];
-    const todayCleared = progress[todayBlock] && progress[todayBlock].every(x => x !== null);
-    const DAY_NAMES_ES = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-    const BLOCK_DAYS = {};
-    for (let d = 0; d < 7; d++) { const bl = DAY_BLOCKS[d]; if (!BLOCK_DAYS[bl]) BLOCK_DAYS[bl] = []; BLOCK_DAYS[bl].push(DAY_NAMES_ES[d]); }
-    const bannerWrap = $('today-banner-wrap');
-    if (!todayCleared) {
-      bannerWrap.innerHTML =
-        '<div class="today-banner fade-in" onclick="window._ca.enterBlock(\'' + todayBlock + '\')">' +
-          '<div class="today-banner-top">' +
-            '<span class="today-banner-label"><span class="today-pulse"></span> Misterios del día · ' + DAY_NAMES_ES[new Date().getDay()] + '</span>' +
-            '<span class="today-banner-arrow">→</span>' +
-          '</div>' +
-          '<h3 style="color:' + blockColor(todayBlock) + '">' + blockEmoji(todayBlock) + ' Misterios ' + BLOCK_NAMES[todayBlock] + '</h3>' +
-          '<div class="today-banner-days">' + BLOCK_DAYS[todayBlock].join(' · ') + '</div>' +
-        '</div>';
-    } else { bannerWrap.innerHTML = ''; }
-    BLOCKS.forEach((b, bi) => {
-      const prog = progress[b] || [];
-      const doneCount = prog.filter(x => x !== null).length;
-      const isCleared = doneCount === 5, isInProgress = doneCount > 0 && !isCleared;
-      if (!isCleared) allCleared = false;
-      const isToday = b === todayBlock && !isCleared;
-      const status = isCleared ? 'cleared' : isInProgress ? 'progress' : (isToday ? 'today' : 'pending');
-      const statusLabel = isCleared ? '✓ Completado' : isInProgress ? 'En progreso' : (isToday ? 'Hoy' : 'Pendiente');
-      const extraClass = isCleared ? 'cleared' : isToday ? 'today' : isInProgress ? 'current' : '';
-      const isLocked = !isPremium() && b !== todayBlock;
-      const FREE_DAYS = { gozosos:'🔒 Lunes y Sábado', luminosos:'🔒 Jueves', dolorosos:'🔒 Martes y Viernes', gloriosos:'🔒 Miércoles y Domingo' };
-      const card = document.createElement('div');
-      card.className = 'block-card fade-in fade-in-d' + (bi+1) + ' ' + extraClass + (isLocked ? ' locked' : '');
-      card.onclick = isLocked ? null : () => enterBlock(b);
-      card.innerHTML =
-        '<div class="block-card-top">' +
-          '<span class="block-emoji">' + blockEmoji(b) + '</span>' +
-          '<span class="block-badge ' + (isLocked ? 'locked-badge' : status) + '">' + (isLocked ? FREE_DAYS[b] : statusLabel) + '</span>' +
-        '</div>' +
-        '<div class="block-title" style="color:' + (isLocked ? 'var(--text-dim)' : blockColor(b)) + '">Misterios ' + BLOCK_NAMES[b] + '</div>' +
-        '<div class="block-subtitle">' + (DATA.subtitulos_bloque ? DATA.subtitulos_bloque[b] || '' : '') + '</div>' +
-        (isLocked
-          ? '<div class="block-locked-hint">Disponible con plan Pro, o el ' + BLOCK_DAYS[b].join('/') + '</div>'
-          : '<div class="block-progress"><div class="block-dots">' +
-              [0,1,2,3,4].map(i => {
-                const cls = prog[i] ? 'done' : (doneCount === i && !isCleared ? 'active' : '');
-                return '<div class="block-dot ' + cls + '"></div>';
-              }).join('') +
-            '</div></div>');
-      grid.appendChild(card);
-    });
-    const wrap = $('nivel-done-wrap');
-    if (allCleared && DATA.tema.siguiente) {
-      wrap.style.display = '';
-      wrap.innerHTML = '<div class="nivel-done-banner fade-in"><h3>¡Nivel completado! 🎉</h3><p>Has recorrido los 20 Misterios de este nivel.</p><a href="?c=' + DATA.tema.siguiente + '" class="btn btn-green btn-block">Avanzar al siguiente nivel →</a></div>';
-    } else if (allCleared) {
-      wrap.style.display = '';
-      wrap.innerHTML = '<div class="nivel-done-banner fade-in"><h3>¡Nivel completado! 🎉</h3><p>Has llegado al final de este nivel. ¡Gloria a Dios!</p></div>';
-    } else { wrap.style.display = 'none'; }
-    show('scr-home');
-  }
-
-  // ── enterBlock ──
-  function enterBlock(b) {
-    const todayBlock = DAY_BLOCKS[new Date().getDay()];
-    if (!isPremium() && b !== todayBlock) return;
-    stopAudio();
-    currentBlock = b;
-    const prog = progress[b] || [];
-    const first = prog.findIndex(x => x === null);
-    currentMystery = first >= 0 ? first : 0;
-    const _user = _auth.currentUser;
-    if (_user && NIVEL_ID) {
-      const _n = parseInt(NIVEL_ID.substring(0,2),10), _c = parseInt(NIVEL_ID.substring(2,4),10);
-      const _BOFF = { gozosos:0, luminosos:5, dolorosos:10, gloriosos:15 };
-      const _gM = (_BOFF[b]||0) + currentMystery + 1;
-      _db.collection('users').doc(_user.uid).collection('bookmark').doc('current')
-        .set({ nivel:_n, cuaderno:_c, misterio:_gM, modo:'libro', updatedAt:Date.now() }, { merge:true })
-        .catch(e => console.warn('[bookmark]', e));
-    }
-    if (!microDone[b] && MICRO_DATA && MICRO_DATA.bloques && MICRO_DATA.bloques[b]) {
-      renderMicro(b); return;
-    }
-    renderSession();
-  }
-
-  // ── Micro-aprendizaje ──
-  function renderMicro(b) {
-    const bloque = MICRO_DATA.bloques[b];
-    const tarjetas = bloque.tarjetas || [], preguntas = bloque.preguntas || [];
-    const total = tarjetas.length + preguntas.length;
-    let step = 0, seleccion = null;
-    const bColor = BLOCK_COLORS[b] || '#FF7A00';
-    $('micro-label').textContent = 'Prepara tu corazón · ' + BLOCK_NAMES[b];
-    $('micro-sub').textContent = bloque.subtitulo || '';
-    $('main-header').style.display = '';
-    function renderDots() {
-      let html = '';
-      for (let i = 0; i < total; i++) {
-        const cls = i < step ? 'done' : i === step ? 'active' : '';
-        const w = i === step ? '24px' : '8px';
-        html += '<div class="micro-dot ' + cls + '" style="width:' + w + '"></div>';
-      }
-      $('micro-progress').innerHTML = html;
-    }
-    function renderStep() {
-      seleccion = null; renderDots();
-      const content = $('micro-content'), nav = $('micro-nav');
-      if (step >= total) {
-        content.innerHTML = '<div class="micro-final"><div class="micro-final-cross"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="48" height="48" style="filter:drop-shadow(0 0 8px ' + bColor + '80)"><rect x="46" y="5" width="8" height="90" fill="' + bColor + '"/><rect x="5" y="42" width="90" height="8" fill="' + bColor + '"/></svg></div><div class="micro-final-titulo">Tu corazón está preparado</div><div class="micro-final-sub">Entra a los Misterios ' + BLOCK_NAMES[b] + '. Reza sin prisa.</div><div class="micro-metros-chip">🚶‍♂️ +600m al peregrino</div></div>';
-        nav.innerHTML = '<button class="btn btn-primary btn-block" id="micro-btn-orar">Comenzar a rezar →</button>';
-        $('micro-btn-orar').onclick = () => {
-          const isFirst = !microDone[b];
-          microDone[b] = true;
-          const award = isFirst ? 600 : 300;
-          totalMeters += award; updateMetersDisplay(); saveProgress();
-          showMarianoSlide(award, 'happy', isFirst); playRewardSound();
-          const p = progress[b] || [];
-          currentMystery = Math.max(0, p.findIndex(x => x === null));
-          renderSession();
-        };
-        playNotes([392,523,659]); return;
-      }
-      if (step < tarjetas.length) {
-        const t = tarjetas[step];
-        content.innerHTML = '<div class="micro-card"><div><div class="micro-card-emoji">' + escHTML(t.emoji) + '</div><div class="micro-card-titulo">' + escHTML(t.titulo) + '</div><div class="micro-card-contenido">' + escHTML(t.contenido) + '</div></div><div class="micro-card-footer"><span class="micro-card-count">Tarjeta ' + (step+1) + ' de ' + tarjetas.length + '</span></div></div>';
-        nav.innerHTML = (step > 0 ? '<button class="btn btn-outline" id="micro-prev">← Anterior</button>' : '') + '<button class="btn btn-primary" id="micro-next">' + (step === tarjetas.length-1 ? 'Prepara tu corazón →' : 'Siguiente →') + '</button>';
-        if ($('micro-prev')) $('micro-prev').onclick = () => { step--; renderStep(); };
-        $('micro-next').onclick = () => { step++; renderStep(); playBubble(); };
-        return;
-      }
-      const pi = step - tarjetas.length, p = preguntas[pi];
-      content.innerHTML = '<div class="micro-q-card" id="micro-q"><div class="micro-q-label">✦ ' + (pi+1) + ' de ' + preguntas.length + '</div><div class="micro-q-texto">' + escHTML(p.pregunta) + '</div>' + p.opciones.map((o,oi) => '<button class="micro-option" id="micro-opt-' + oi + '" onclick="window._ca.microPick(' + oi + ')"><span class="micro-option-circle" id="micro-circ-' + oi + '"></span>' + escHTML(o.texto) + '</button>').join('') + '<div id="micro-eco" style="display:none"></div></div>';
-      nav.innerHTML = '<button class="btn btn-primary" id="micro-next-q" style="display:none">' + (pi === preguntas.length-1 ? 'Estoy listo →' : 'Siguiente →') + '</button>';
-      window._ca.microPick = (oi) => {
-        if (seleccion !== null) return;
-        seleccion = oi; const o = p.opciones[oi];
-        p.opciones.forEach((_,i) => {
-          $('micro-opt-' + i).classList.toggle('selected', i === oi);
-          $('micro-opt-' + i).classList.toggle('dimmed', i !== oi);
-          if (i === oi) $('micro-circ-' + i).textContent = '✓';
-        });
-        $('micro-eco').innerHTML = '<div class="micro-eco"><span class="micro-eco-emoji">' + escHTML(o.emoji) + '</span>' + escHTML(o.eco) + '</div>';
-        $('micro-eco').style.display = '';
-        $('micro-next-q').style.display = '';
-        playSoftTap();
-      };
-      $('micro-next-q').onclick = () => { step++; renderStep(); playBubble(); };
-    }
-    show('scr-micro'); renderStep();
-  }
-
-  // ── Render: Sesión (nuevo) ──
-  function renderSession() {
-    const b = currentBlock, mi = currentMystery;
-    const m = DATA.misterios[b][mi];
-    $('main-header').style.display = 'none';
-
-    // Hero
-    const img = $('hero-img'), ph = $('hero-ph');
-    img.style.display = ''; ph.style.display = 'none';
-    img.src = imagenUrl(m); img.alt = m.titulo;
-    img.onerror = () => { img.style.display = 'none'; ph.style.display = ''; };
-    $('hero-counter').textContent = ORDS[mi] + ' Misterio ' + BTYPES[b];
-    $('hero-title-text').textContent = m.titulo;
-    $('hero-subtitle-text').textContent = m.subtitulo || '';
-
-    // Tint de bloque en gradiente
-    const bc = BLOCK_COLORS[b] || '#FF7A00';
-    $('hero-gradient').style.background =
-      'linear-gradient(to top, rgba(10,7,5,0.92) 0%, ' + bc + '33 55%, transparent 80%)';
-
-    // Beads (cuentas del rosario)
-    const prog = progress[b] || [];
-    const boldColor = DATA.tema.paleta.bold, lightColor = DATA.tema.paleta.light;
-    const borderC = 'rgba(230,222,211,0.35)';
-    let svg = '<svg viewBox="0 0 140 18" style="width:140px;height:18px">';
-    svg += '<line x1="14" y1="9" x2="126" y2="9" stroke="' + borderC + '" stroke-width="1"/>';
-    [0,1,2,3,4].forEach((i, _, arr) => {
-      const cx = 14 + i * 28;
-      if (prog[i]) {
-        svg += '<circle cx="' + cx + '" cy="9" r="6" fill="' + boldColor + '" style="cursor:pointer" onclick="window._ca.goMystery(' + i + ')"/>';
-      } else if (i === mi) {
-        svg += '<circle cx="' + cx + '" cy="9" r="6.5" fill="none" stroke="' + boldColor + '" stroke-width="1.5" style="cursor:pointer" onclick="window._ca.goMystery(' + i + ')"/>';
-        svg += '<circle cx="' + cx + '" cy="9" r="2.5" fill="' + lightColor + '" style="cursor:pointer" onclick="window._ca.goMystery(' + i + ')"/>';
-      } else {
-        svg += '<circle cx="' + cx + '" cy="9" r="6" fill="none" stroke="' + borderC + '" stroke-width="1" style="cursor:pointer" onclick="window._ca.goMystery(' + i + ')"/>';
-      }
-    });
-    svg += '</svg>';
-    $('hero-beads').innerHTML = svg;
-
-    // BGM sync
-    syncBgmBtn();
-
-    // Tema icon sync
-    $('theme-sun').style.display  = isDark ? 'none'  : 'block';
-    $('theme-moon').style.display = isDark ? 'block' : 'none';
-
-    // Poblar tarjetas
-    $('card-ubible-text').innerHTML = escHTML(m.evangelio || '');
-    $('card-ubible-ref').textContent = m.referencia ? '— ' + m.referencia : '';
-    $('card-cont-text').innerHTML = escHTML(m.contemplacion || '');
-    $('card-pray-text').innerHTML = escHTML(m.intercesion || '');
-
-    // Canto
-    if (CANTOS_DATA && CANTOS_DATA.cantos && CANTOS_DATA.cantos[b]) {
-      const co = CANTOS_DATA.cantos[b].find(c => c.numero === m.numero);
-      if (co) {
-        $('card-canto-titulo').textContent = co.titulo || '';
-        $('card-canto-letra').textContent  = co.letra  || '';
-      } else {
-        $('card-canto-titulo').textContent = '';
-        $('card-canto-letra').textContent  = '';
-      }
-    }
-
-    // Preguntas de meditación
-    const qs = parseMeditation(m.meditacion);
-    $('q-text-0').textContent = qs[0] || ''; $('q-text-1').textContent = qs[1] || ''; $('q-text-2').textContent = qs[2] || '';
-
-    // Cargar journal guardado
-    const j = (journal[b] && journal[b][mi]) ? journal[b][mi] : {};
-    $('q-ta-0').value = j['q0'] || ''; $('q-ta-1').value = j['q1'] || ''; $('q-ta-2').value = j['q2'] || '';
-
-    // Súplica: botón Amén o estado completado
-    const isDone = prog[mi];
-    $('suplica-action').innerHTML = isDone
-      ? '<div class="mystery-done-inline"><span class="done-check">✓</span><div><div class="done-text">Misterio completado</div><div class="done-date">' + new Date(isDone).toLocaleDateString('es-MX',{day:'numeric',month:'long'}) + '</div></div></div>'
-      : '<button class="amen-btn-card" id="amen-btn" onclick="window._ca.completeMystery()">Amén →</button>';
-
-    // Reset cards
-    closeCard();
-    currentSubQ = 0;
-    // Resetear currentVoiceTool para que se recargue el audio al abrir nueva herramienta
-    currentVoiceTool = null;
-
-    show('scr-session');
-    maybeShowOnboarding();
-  }
-
-  // ── completeMystery ──
-  function completeMystery() {
-    const b = currentBlock, mi = currentMystery;
-    if (progress[b][mi]) return;
-    progress[b][mi] = Date.now();
-    saveProgress();
-    celebrationSound(BLOCKS.indexOf(b) * 5 + mi);
-    const allDone = progress[b].every(x => x !== null);
-    if (allDone) {
-      setTimeout(() => { showConfetti(); showCelebration(b); }, 600);
-    } else {
-      setTimeout(() => {
-        if (mi < 4) { currentMystery = mi + 1; }
-        stopAudio(); renderSession();
-      }, 600);
-    }
-  }
-
-  // ── goMystery ──
-  function goMystery(i) {
-    currentMystery = i; stopAudio(); renderSession();
-  }
-
-  // ── Celebración de bloque ──
-  function showCelebration(b) {
-    showMarianoGrandCelebration();
-    setTimeout(() => {
-      const maria = 'img/maria_' + b + '.webp';
-      const container = $('maria-container');
-      const img = new Image();
-      img.onload = () => { container.outerHTML = '<img class="maria-img" id="maria-container" src="' + maria + '" alt="Virgen María">'; };
-      img.onerror = () => { container.innerHTML = '🙏'; };
-      img.src = maria;
-      $('celeb-title').textContent = '¡Misterios ' + BLOCK_NAMES[b] + ' completados!';
-      $('celeb-sub').textContent = 'Has contemplado los cinco Misterios ' + BLOCK_NAMES[b] + ' de este nivel. Que María siga acompañándote.';
-      $('btn-celeb-home').onclick = () => { stopAudio(); renderHome(); };
-      show('scr-celebration');
-      celebrationSound(BLOCKS.indexOf(b));
-    }, 3500);
-  }
-
-  // ── parseMeditation ──
-  function parseMeditation(text) {
-    if (!text) return ['','',''];
-    const parts = [];
-    let remaining = text;
-    for (let i = 0; i < MED_LABELS.length; i++) {
-      const idx = remaining.indexOf(MED_LABELS[i]);
-      if (idx >= 0) {
-        if (i > 0 && parts.length < i) parts.push(remaining.substring(0,idx).trim());
-        remaining = remaining.substring(idx + MED_LABELS[i].length).replace(/^\s*:\s*/,'');
-      }
-    }
-    if (remaining.trim()) parts.push(remaining.trim());
-    if (parts.length < 3) {
-      const lines = text.split('\n').filter(l => l.trim());
-      return [lines[0]||'', lines[1]||'', lines[2]||''];
-    }
-    return parts.length >= 3 ? parts.slice(0,3) : [...parts, ...Array(3-parts.length).fill('')];
-  }
-
-  // ── showError ──
-  function showError(msg) {
-    $('scr-loading').style.display = 'none';
-    $('error-msg').textContent = msg;
-    $('scr-error').style.display = 'flex';
-  }
-
-  // ── init ──
-  async function init(currentUser) {
-    const params = new URLSearchParams(location.search);
-    NIVEL_ID = params.get('c') || '0101';
-    if (!/^\d{4}$/.test(NIVEL_ID)) { showError('ID inválido: ' + NIVEL_ID); return; }
-    try { localStorage.setItem('cruzando_current_nivel', NIVEL_ID); } catch(e){}
-    const loc = location;
-    const base = loc.origin + loc.pathname.substring(0, loc.pathname.lastIndexOf('/') + 1);
-    try {
-      const resp = await fetch(base + 'data/' + NIVEL_ID + '.json');
-      if (!resp.ok) throw new Error('HTTP ' + resp.status);
-      DATA = await resp.json();
-    } catch(e) { showError('No se pudo cargar data/' + NIVEL_ID + '.json'); return; }
-    try {
-      const [rC, rM] = await Promise.all([
-        fetch(base + 'data/' + NIVEL_ID + '-cantos.json'),
-        fetch(base + 'data/' + NIVEL_ID + '-micro.json')
-      ]);
-      if (rC.ok) CANTOS_DATA = await rC.json();
-      if (rM.ok) MICRO_DATA  = await rM.json();
-    } catch(e){}
-    try {
-      if (currentUser) {
-        const snap = await _db.collection('users').doc(currentUser.uid).get();
-        if (snap.exists) userPlan = resolvePlan(snap.data());
-      }
-    } catch(e) { console.warn('[CruzAndo] plan:', e.message); }
-    await loadProgress(currentUser);
-    if (isDark) {
-      document.body.classList.add('dark');
-      $('ico-sun').style.display = 'none'; $('ico-moon').style.display = 'block';
-    }
-    applyPalette();
-
-    // Event listeners — botones de header (home/micro)
-    $('btn-dark').onclick = toggleDark;
-
-    // Event listeners — sesión hero
-    $('btn-theme').onclick = toggleDark;
-    $('btn-bgm').onclick   = toggleBgm;
-
-    // Tool buttons
-    document.querySelectorAll('.tool-btn').forEach(btn => {
-      btn.onclick = () => openTool(btn.dataset.tool);
-    });
-
-    // Close buttons
-    document.querySelectorAll('[data-close]').forEach(btn => {
-      btn.onclick = closeCard;
-    });
-
-    // Voice buttons en tarjetas
-    document.querySelectorAll('.card-voice-btn').forEach(btn => {
-      btn.onclick = () => openVoicePlayer(btn.dataset.tool);
-    });
-
-    // Voice player controls
-    $('vp-play-pause').onclick = () => {
-      if (libroAudio.paused) libroAudio.play().catch(()=>{});
-      else libroAudio.pause();
-      updateVpPlayBtn();
-    };
-    $('vp-rewind').onclick  = () => { libroAudio.currentTime -= 15; };
-    $('vp-forward').onclick = () => { libroAudio.currentTime += 15; };
-    $('vp-speed').onchange  = e  => { libroAudio.playbackRate = parseFloat(e.target.value); };
-    $('vp-close').onclick   = () => { libroAudio.pause(); $('voice-player').style.display = 'none'; updateVpPlayBtn(); };
-
-    // Textarea inputs (Escribir)
-    [0,1,2].forEach(qi => {
-      const ta = $('q-ta-' + qi);
-      if (ta) ta.oninput = e => window._caWrite.onWritingInput(qi, e.target.value);
-    });
-
-    // Swipe
-    initSwipe();
-
-    // API global
-    window._ca = {
-      enterBlock, goMystery,
-      completeMystery,
-      backToBlocks: () => { stopAudio(); renderHome(); },
-      reDoMicro: () => { stopAudio(); renderMicro(currentBlock); },
-      microPick: () => {}
-    };
-    window.goHome = () => { stopAudio(); goTo('index.html'); };
-
-    // Render
-    $('scr-loading').style.display = 'none';
-    $('main-header').style.display = '';
-    renderHome();
-
-    // Deep link: ?misterio=N
-    const _mParam = parseInt(params.get('misterio'), 10);
-    if (!isNaN(_mParam) && _mParam >= 1 && _mParam <= 20) {
-      let _tBlock, _tIdx;
-      if      (_mParam <= 5)  { _tBlock = 'gozosos';   _tIdx = _mParam - 1;  }
-      else if (_mParam <= 10) { _tBlock = 'luminosos';  _tIdx = _mParam - 6;  }
-      else if (_mParam <= 15) { _tBlock = 'dolorosos';  _tIdx = _mParam - 11; }
-      else                    { _tBlock = 'gloriosos';  _tIdx = _mParam - 16; }
-      if (BLOCKS.includes(_tBlock)) {
-        currentBlock = _tBlock; currentMystery = _tIdx;
-        if (!microDone[_tBlock] && MICRO_DATA && MICRO_DATA.bloques && MICRO_DATA.bloques[_tBlock]) {
-          renderMicro(_tBlock);
-        } else { renderSession(); }
-      }
-    }
-  }
-
-  // ── Bootstrap ──
-  let _initDone = false;
-  function _startApp(user) { if (_initDone) return; _initDone = true; init(user); }
-  const _authTimeout = setTimeout(() => { if (!_initDone) { console.warn('[CruzAndo] auth timeout'); _startApp(null); } }, 6000);
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => { _auth.onAuthStateChanged(u => { clearTimeout(_authTimeout); _startApp(u); }); });
+  const bParam=p.get('b'),mParam=p.get('m');
+  if(bParam&&BLOCKS.includes(bParam)){
+    blk=bParam;bIdx=Math.max(0,Math.min(4,parseInt(mParam)||0));
+    await checkMicro();
   } else {
-    _auth.onAuthStateChanged(u => { clearTimeout(_authTimeout); _startApp(u); });
+    renderHome();
   }
+}
 
-})();
+/* ─── HOME ─── */
+function renderHome(){
+  if(!data){showError('No hay datos para el nivel '+nivelId);return;}
+  const tema=data.tema||{};
+  $('h-title').textContent=tema.mundo_nombre||'Nivel '+nivel;
+  $('h-sub').textContent='Cuaderno '+cua+' · '+(tema.elemento_slug||'');
+  $('home-title').textContent='Cruzando '+(tema.mundo_nombre||'');
+  $('home-nivel').textContent='Nivel '+nivel+'-'+cua;
+  $('home-element').textContent=data.elemento||'';
+
+  const pBlk=prog?.progress||{};
+  const today={0:'gloriosos',1:'gozosos',2:'dolorosos',3:'gloriosos',4:'luminosos',5:'dolorosos',6:'gozosos'}[new Date().getDay()];
+  const grid=$('block-grid');grid.innerHTML='';
+
+  BLOCKS.forEach((b,bi)=>{
+    const dots=pBlk[b]||[null,null,null,null,null];
+    const done=dots.filter(Boolean).length,isToday=b===today,cleared=done>=5;
+    let badge='pending',bTxt='Pendiente';
+    if(cleared){badge='cleared';bTxt='Completado';}
+    else if(done>0){badge='progress';bTxt=done+'/5';}
+    else if(isToday){badge='today';bTxt='Hoy';}
+    const card=document.createElement('div');
+    card.className='block-card fade-in'+(cleared?' cleared':'')+(isToday?' today':'');
+    card.style.animationDelay=(bi*0.07)+'s';
+    card.innerHTML=
+      `<div class="block-card-top"><span class="block-emoji">${BEM[b]}</span><span class="block-badge ${badge}">${bTxt}</span></div>
+       <div class="block-title">${BFN[b]}</div>
+       <div class="block-subtitle">${esc(data.subtitulos_bloque?.[b]||'')}</div>
+       <div class="block-progress"><div class="block-dots">
+         ${dots.map((d,i)=>`<div class="block-dot ${d?'done':i===done?'active':''}"></div>`).join('')}
+       </div></div>`;
+    card.onclick=()=>{blk=b;bIdx=Math.min(done,4);checkMicro();};
+    grid.appendChild(card);
+  });
+  $('main-header').style.display='';
+  show('scr-home');
+}
+
+/* ─── MICRO CHECK ─── */
+async function checkMicro(){
+  showLoading();
+  const m=mNum(blk,bIdx),isFirst=[1,6,11,16].includes(m);
+  if(isFirst&&prefs().microInAudio!==false){
+    if(!microJ){
+      const base=location.origin+location.pathname.substring(0,location.pathname.lastIndexOf('/')+1);
+      try{const r=await fetch(base+'data/'+nivelId+'-micro.json');if(r.ok)microJ=await r.json();}catch(e){}
+    }
+    microDone=(prog?.microDone||{})[blk]===true;
+    if(microJ?.bloques?.[blk]&&!microDone){renderMicro();return;}
+  }
+  renderSession();
+}
+
+/* ─── MICRO ─── */
+function renderMicro(){
+  const bloque=microJ.bloques[blk];
+  const tarj=bloque.tarjetas||[],pregs=bloque.preguntas||[],tot=tarj.length+pregs.length;
+  let step=0,sel=null;
+  $('micro-label').textContent='Prepara tu corazón · '+BN[blk];
+  $('micro-sub').textContent=bloque.subtitulo||'';
+
+  function dots(){
+    $('micro-progress').innerHTML=Array.from({length:tot},(_,i)=>
+      `<div class="micro-dot ${i<step?'done':i===step?'active':''}" style="width:${i===step?'24px':'8px'};flex:${i===step?'0 0 24px':'1'}"></div>`).join('');
+  }
+  function render(){
+    sel=null;dots();
+    const body=$('micro-content'),nav=$('micro-nav');
+    if(step>=tot){
+      const c=BCL[blk]||'#FF7A00';
+      body.innerHTML=`<div class="micro-final">
+        <div class="micro-final-cross"><svg viewBox="0 0 100 100" width="48" height="48" style="filter:drop-shadow(0 0 8px ${c}80)"><rect x="46" y="5" width="8" height="90" fill="${c}"/><rect x="5" y="42" width="90" height="8" fill="${c}"/></svg></div>
+        <div class="micro-final-titulo">Tu corazón está preparado</div>
+        <div class="micro-final-sub">Reza sin prisa. Lo que necesitas ya lo traes contigo.</div>
+        <div class="micro-metros-chip">🚶 +${MR_MICRO}m al peregrino</div></div>`;
+      nav.innerHTML=`<button class="btn btn-primary btn-block" id="mgo">Comenzar →</button>`;
+      $('mgo').onclick=async()=>{microDone=true;await saveMicroDone();await addMeters(MR_MICRO);showSlide(MR_MICRO);renderSession();};
+      return;
+    }
+    if(step<tarj.length){
+      const t=tarj[step];
+      body.innerHTML=`<div class="micro-card"><div><div class="micro-card-emoji">${esc(t.emoji)}</div><div class="micro-card-titulo">${esc(t.titulo)}</div><div class="micro-card-contenido">${esc(t.contenido)}</div></div><div class="micro-card-footer"><span class="micro-card-count">Tarjeta ${step+1} de ${tarj.length}</span></div></div>`;
+      nav.innerHTML=(step>0?`<button class="btn btn-outline" id="mp">← Anterior</button>`:'')+`<button class="btn btn-primary" id="mn">${step===tarj.length-1?'Prepara tu corazón →':'Siguiente →'}</button>`;
+      if($('mp'))$('mp').onclick=()=>{step--;render();};
+      $('mn').onclick=()=>{step++;render();};
+      return;
+    }
+    const pi=step-tarj.length,pr=pregs[pi];
+    body.innerHTML=`<div class="micro-q-card"><div class="micro-q-label">✦ ${pi+1} de ${pregs.length}</div><div class="micro-q-texto">${esc(pr.pregunta)}</div>${pr.opciones.map((o,oi)=>`<button class="micro-option" id="mo${oi}"><span class="micro-option-circle" id="mc${oi}"></span>${esc(o.texto)}</button>`).join('')}<div id="meco" style="display:none"></div></div>`;
+    nav.innerHTML=`<button class="btn btn-primary" id="mnq" style="display:none">${pi===pregs.length-1?'Estoy listo →':'Siguiente →'}</button>`;
+    pr.opciones.forEach((o,oi)=>{
+      $('mo'+oi).onclick=()=>{
+        if(sel!==null)return;sel=oi;
+        pr.opciones.forEach((_,i)=>{if(i===oi){$('mo'+i).classList.add('selected');$('mc'+i).textContent='✓';}else $('mo'+i).classList.add('dimmed');});
+        $('meco').innerHTML=`<div class="micro-eco"><span class="micro-eco-emoji">${esc(o.emoji)}</span>${esc(o.eco)}</div>`;
+        $('meco').style.display='';$('mnq').style.display='';
+      };
+    });
+    $('mnq').onclick=()=>{step++;render();};
+  }
+  $('main-header').style.display='none';
+  show('scr-micro');render();
+}
+
+async function saveMicroDone(){
+  if(!usr)return;
+  try{
+    await FS.collection('users').doc(usr.uid).collection('progress').doc(nivelId)
+      .set({microDone:{[blk]:true}},{merge:true});
+    if(!prog)prog={};if(!prog.microDone)prog.microDone={};
+    prog.microDone[blk]=true;
+  }catch(e){}
+}
+
+/* ─── RENDER SESSION ─── */
+function renderSession(){
+  $('main-header').style.display='none';
+  awd=new Set();tool=null;
+  ans={0:'',1:'',2:''};firstAns={0:false,1:false,2:false};
+
+  const md=mData(blk,bIdx),m=mNum(blk,bIdx);
+  const hi=$('hero-img');
+  hi.src=`${IMGB}P_${nivel}_${cua}_${m}.webp`;
+  hi.onerror=()=>{hi.style.display='none';$('hero-ph').style.display='flex';};
+  hi.onload=()=>{hi.style.display='';$('hero-ph').style.display='none';};
+  $('hero-bloque-label').textContent=BFN[blk]||'';
+  $('hero-titulo').textContent=md?.titulo||'Misterio '+(bIdx+1);
+  $('hero-subtitulo').textContent=md?.subtitulo||'';
+
+  const bdots=prog?.progress?.[blk]||[null,null,null,null,null];
+  $('hero-beads').innerHTML='<div style="display:flex;gap:8px;margin-top:6px">'+
+    Array.from({length:5},(_,i)=>{
+      const d=bdots[i],cur=i===bIdx;
+      return `<div onclick="window._gm(${i})" style="width:${cur?'12px':'8px'};height:${cur?'12px':'8px'};border-radius:50%;cursor:pointer;transition:all 0.2s;background:${d?'#34A853':cur?'#fff':'rgba(255,255,255,0.4)'};${cur?'border:2px solid #fff;box-shadow:0 0 6px rgba(255,255,255,0.6)':''}"></div>`;
+    }).join('')+'</div>';
+
+  $('tools-bar').style.setProperty('--tools-bar-bg',TBG[blk]||'var(--card)');
+  $('btn-bgm').classList.toggle('bgm-on',bgmOn);
+  closeToolPopup();
+  initVP();
+  show('scr-orar');
+  if(bgmOn)startBgm();
+}
+
+window._gm=i=>{if(i!==bIdx){bIdx=i;if(libro)libro.pause();renderSession();}};
+
+/* ─── POPUP ─── */
+function openToolPopup(t){
+  document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('active'));
+  const btn=document.querySelector(`.tool-btn[data-tool="${t}"]`);
+  if(btn)btn.classList.add('active');
+  tool=t;
+  $('popup-title').textContent=TN[t]||t;
+  $('popup-voice-btn').style.display=['contemplar','rezo','canto'].includes(t)?'':'none';
+  populatePopup(t);
+  $('tool-popup').classList.add('open');
+}
+function closeToolPopup(){
+  $('tool-popup').classList.remove('open');
+  document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('active'));
+  if(libro)libro.pause();
+  $('voice-player').style.display='none';
+  $('popup-voice-btn').classList.remove('playing');
+  tool=null;
+}
+
+function populatePopup(t){
+  const md=mData(blk,bIdx),bd=$('tool-popup-body');
+  switch(t){
+    case 'palabra':
+      bd.innerHTML=`<p class="popup-reference">${esc(md?.referencia||'')}</p><p class="popup-text" style="margin-top:12px">${esc(md?.evangelio||'Texto no disponible')}</p>`;
+      break;
+    case 'contemplar':
+      bd.innerHTML=`<p class="popup-text">${esc(md?.contemplacion||'Contemplación no disponible')}</p>`;
+      break;
+    case 'rezo':{
+      const done=!!(prog?.progress?.[blk]?.[bIdx]);
+      const ts=prog?.progress?.[blk]?.[bIdx];
+      bd.innerHTML=`<p class="popup-text">${esc(md?.intercesion||md?.suplica||'Rezo no disponible')}</p>`+
+        (done
+          ?`<div class="mystery-done-pill"><span class="done-check">✓</span><div><div class="done-txt">Misterio rezado</div><div class="done-date">${new Date(ts).toLocaleDateString('es-MX',{month:'short',day:'numeric'})}</div></div></div>`
+          :`<button class="amen-btn" id="amen-rezo">Amén — Misterio rezado</button>`);
+      if(!done){$('amen-rezo').onclick=async()=>{await completeMystery();populatePopup('rezo');};}
+      break;
+    }
+    case 'canto':{
+      const canto=cantoJ?.cantos?.[blk]?.[bIdx];
+      bd.innerHTML=(canto?.titulo?`<p class="popup-song-title">${esc(canto.titulo)}</p>`:'')+
+        `<p class="popup-lyrics">${esc(canto?.letra||'Letra no disponible')}</p>`;
+      break;
+    }
+    case 'escribir':
+      bd.innerHTML=buildEscrHTML(md);
+      initEscrH(md);
+      loadRefs().then(r=>{[0,1,2].forEach(qi=>{const ta=$('qta'+qi);if(ta){ta.value=r[qi]||'';ans[qi]=ta.value;firstAns[qi]=!!ta.value;}});});
+      break;
+    case 'suplica':
+      bd.innerHTML=`<p class="popup-text">${esc(md?.intercesion||'Súplica no disponible')}</p>`;
+      break;
+  }
+}
+
+function buildEscrHTML(md){
+  const qs=parseQ(md?.meditacion||'');
+  return qs.map((q,qi)=>
+    `<div class="q-block">
+       <div class="q-label" style="color:${QC[qi]}">${QL[qi]}</div>
+       <div class="q-question">${esc(q)}</div>
+       <textarea class="q-textarea" id="qta${qi}" placeholder="Escribe tu respuesta…"></textarea>
+       <div class="q-saved" id="qsv${qi}"></div>
+     </div>`).join('')+
+    `<button class="amen-btn" id="amen-esc">Amén</button>`;
+}
+function initEscrH(md){
+  [0,1,2].forEach(qi=>{
+    const ta=$('qta'+qi);if(!ta)return;
+    ta.addEventListener('input',()=>{ans[qi]=ta.value;clearTimeout(ansT[qi]);ansT[qi]=setTimeout(()=>onWrite(qi,ta.value),2000);});
+  });
+  const ab=$('amen-esc');
+  if(ab)ab.onclick=async()=>{ab.textContent='✓ Guardado';ab.classList.add('done');for(let qi=0;qi<3;qi++)if(ans[qi])await onWrite(qi,ans[qi],true);};
+}
+async function onWrite(qi,text,force=false){
+  if(!text.trim())return;
+  await saveRef(qi,text);
+  if(!firstAns[qi]){firstAns[qi]=true;await addMeters(MR_QF);showSlide(MR_QF,'¡Primera respuesta!');}
+  else if(force){await addMeters(MR_QU);}
+  const sv=$('qsv'+qi);
+  if(sv){sv.textContent='✓ Guardado';setTimeout(()=>{if(sv)sv.textContent='';},2500);}
+}
+async function saveRef(qi,text){
+  if(!usr||!blk)return;
+  const md=mData(blk,bIdx),qs=parseQ(md?.meditacion||'');
+  try{
+    await FS.collection('users').doc(usr.uid).collection('reflections').doc(`${nivelId}_${blk}_${bIdx}_q${qi}`)
+      .set({nivelId,bloque:blk,misterioIdx:bIdx,questionIdx:qi,question:qs[qi]||QL[qi]||'',text,confirmedAt:FSV.serverTimestamp()},{merge:true});
+  }catch(e){console.error('[CruzAndo] saveRef:',e);}
+}
+async function loadRefs(){
+  if(!usr||!blk)return{0:'',1:'',2:''};
+  const r={0:'',1:'',2:''};
+  await Promise.all([0,1,2].map(async qi=>{
+    try{
+      const s=await FS.collection('users').doc(usr.uid).collection('reflections').doc(`${nivelId}_${blk}_${bIdx}_q${qi}`).get();
+      if(s.exists)r[qi]=s.data().text||'';
+    }catch(e){}
+  }));
+  return r;
+}
+
+/* ─── COMPLETE MYSTERY ─── */
+async function completeMystery(){
+  if(!blk||!usr)return;
+  const dots=[...(prog?.progress?.[blk]||[null,null,null,null,null])];
+  if(dots[bIdx])return;
+  dots[bIdx]=Date.now();
+  if(!prog)prog={};if(!prog.progress)prog.progress={};
+  prog.progress[blk]=dots;
+  try{
+    await FS.collection('users').doc(usr.uid).collection('progress').doc(nivelId)
+      .set({progress:{[blk]:dots}},{merge:true});
+  }catch(e){console.error('[CruzAndo] completeMystery:',e);}
+  // Refresh beads
+  const cur=bIdx;
+  $('hero-beads').innerHTML='<div style="display:flex;gap:8px;margin-top:6px">'+
+    Array.from({length:5},(_,i)=>{
+      const d=dots[i],c=i===cur;
+      return `<div onclick="window._gm(${i})" style="width:${c?'12px':'8px'};height:${c?'12px':'8px'};border-radius:50%;cursor:pointer;transition:all 0.2s;background:${d?'#34A853':c?'#fff':'rgba(255,255,255,0.4)'};${c?'border:2px solid #fff;box-shadow:0 0 6px rgba(255,255,255,0.6)':''}"></div>`;
+    }).join('')+'</div>';
+  if(dots.every(Boolean)){setTimeout(async()=>{await addMeters(MR_BNS);showSlide(MR_BNS,'¡Bloque completo!');showCelebration();},600);}
+}
+function showCelebration(){
+  $('celeb-title').textContent=`¡${BFN[blk]} completados!`;
+  $('celeb-sub').textContent=`Has rezado los 5 misterios ${BN[blk].toLowerCase()} de este cuaderno. ¡Bien hecho!`;
+  $('btn-celeb-home').onclick=()=>{
+    location.href=location.origin+location.pathname.substring(0,location.pathname.lastIndexOf('/')+1)+'orar.html?c='+nivelId;
+  };
+  show('scr-celebration');
+}
+
+/* ─── VOICE PLAYER ─── */
+function toolUrl(t){
+  const m=mNum(blk,bIdx);
+  if(t==='contemplar')return`${R2}/cont/CONT_${nivel}_${cua}_${m}.mp3`;
+  if(t==='rezo')return data?.audio_rezo||`${R2}/global/rezo.mp3`;
+  if(t==='canto')return`${MUSB}M_${nivel}_${cua}_${m}.mp3`;
+  return'';
+}
+function initVP(){
+  if(!libro){libro=new Audio();libro.addEventListener('ended',onAudioEnd);}
+  $('vp-play-pause').onclick=()=>vpToggle();
+  $('vp-rewind').onclick=()=>{if(libro)libro.currentTime=Math.max(0,libro.currentTime-15);};
+  $('vp-forward').onclick=()=>{if(libro)libro.currentTime+=15;};
+  $('vp-speed').onchange=()=>{if(libro)libro.playbackRate=parseFloat($('vp-speed').value);};
+  $('vp-close').onclick=()=>closeVP();
+  $('popup-voice-btn').onclick=()=>openVP(tool);
+  $('popup-close').onclick=()=>closeToolPopup();
+}
+function openVP(t){
+  if(!['contemplar','rezo','canto'].includes(t))return;
+  const url=toolUrl(t);if(!url)return;
+  $('vp-tool-name').textContent=TN[t]||t;
+  if(libro.src!==url){libro.src=url;libro.load();}
+  $('voice-player').style.display='';
+  libro.play().catch(()=>{});
+  vpUpd();
+}
+function closeVP(){if(libro)libro.pause();$('voice-player').style.display='none';$('popup-voice-btn').classList.remove('playing');}
+function vpToggle(){
+  if(!libro)return;
+  if(libro.paused){if(!libro.src||libro.src===location.href)openVP(tool);else libro.play().catch(()=>{});}
+  else libro.pause();
+  vpUpd();
+}
+function vpUpd(){
+  const btn=$('vp-play-pause');if(!libro||!btn)return;
+  btn.textContent=libro.paused?'▶':'⏸';
+  $('popup-voice-btn').classList.toggle('playing',!libro.paused);
+  libro.onpause=libro.onplay=vpUpd;
+}
+function onAudioEnd(){
+  vpUpd();
+  if(!tool||awd.has(tool))return;
+  awd.add(tool);
+  const tm={contemplar:MR_CONT,rezo:MR_REZO,canto:MR_CANTO}[tool];
+  if(tm){addMeters(tm);showSlide(tm,TN[tool]);}
+}
+
+/* ─── BGM ─── */
+function toggleBgm(){
+  bgmOn=!bgmOn;const p=prefs();p.bgm=bgmOn;localStorage.setItem('cruzando_prefs',JSON.stringify(p));
+  $('btn-bgm').classList.toggle('bgm-on',bgmOn);
+  bgmOn?startBgm():(bgmEl&&bgmEl.pause());
+}
+function startBgm(){
+  if(!bgmOn)return;
+  const url=`${R2}/BGM/${blk||'gozosos'}.mp3`;
+  if(!bgmEl){bgmEl=new Audio(url);bgmEl.loop=true;bgmEl.volume=0.07;}
+  else if(!bgmEl.src.endsWith((blk||'gozosos')+'.mp3')){bgmEl.src=url;}
+  bgmEl.play().catch(()=>{});
+}
+
+/* ─── SWIPE + INIT ─── */
+function initSwipe(){
+  let sy=0;const pp=$('tool-popup');
+  pp.addEventListener('touchstart',e=>{sy=e.touches[0].clientY;},{passive:true});
+  pp.addEventListener('touchend',e=>{if(e.changedTouches[0].clientY-sy>60)closeToolPopup();},{passive:true});
+}
+function initBtns(){
+  document.querySelectorAll('.tool-btn').forEach(b=>b.onclick=()=>openToolPopup(b.dataset.tool));
+  if($('btn-dark'))$('btn-dark').onclick=toggleTheme;
+  if($('btn-bgm'))$('btn-bgm').onclick=toggleBgm;
+  if($('btn-theme'))$('btn-theme').onclick=toggleTheme;
+}
+
+bgmOn=prefs().bgm!==false;
+initBtns();
+initSwipe();
+initAuth();
+}());
 </script>
 </body>
 </html>
