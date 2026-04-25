@@ -20,8 +20,8 @@ TTS_MODEL = "tts-1"
 TEXT_MODEL = "gpt-4o-mini"
 AUDIO_FORMAT = "mp3"
 
-OUTPUT_DIR = Path("tts_outputs")
-OUTPUT_DIR.mkdir(exist_ok=True)
+OUTPUT_DIR = Path(r"C:\R2\cruzando-audios")
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # --- Secciones activas ---
 SECTION_CODES = {
@@ -399,7 +399,7 @@ def load_base_text(json_file: str, bloque: str, misterio_en_bloque: int, section
         raw = misterio_record.get("intercesion", "").strip()
         if raw and not re.search(r'am[eé]n\.?\s*$', raw, re.IGNORECASE):
             raw += "\n\nAmén."
-        text = "Oración Final\n\n" + raw if raw else "Oración Final"
+        text = raw if raw else ""
         info = "Texto base cargado desde JSON: intercesion"
     elif section_name in ["Bienvenida", "Despedida"]:
         info = "Esta sección no se carga desde JSON. Usa ✨ Generar texto con IA."
@@ -1665,4 +1665,11 @@ with gr.Blocks(
     )
 
 if __name__ == "__main__":
-    demo.launch(inbrowser=True)
+    demo.launch(
+        inbrowser=True,
+        allowed_paths=[
+            r"C:\R2\cruzando-audios",
+            r"C:\R2\cruzando-music",
+            r"C:\R2\cruzando-ilustraciones",
+        ]
+    )
