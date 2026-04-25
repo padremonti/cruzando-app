@@ -736,12 +736,12 @@ function updateToggleHref(){
   if(tab) tab.href=`audio.html?nivel=${nivel}&cuaderno=${cua}&misterio=${currentGlobalMystery}`;
 }
 function goPrevMystery(){
-  if(currentGlobalMystery<=1) return;
+  if(currentGlobalMystery<=1){renderHome();return;}
   const{block,idx}=getMysteryBlock(--currentGlobalMystery);
   loadMystery(block,idx);
 }
 function goNextMystery(){
-  if(currentGlobalMystery>=20) return;
+  if(currentGlobalMystery>=20){showAdvanceLevelPrompt();return;}
   const{block,idx}=getMysteryBlock(++currentGlobalMystery);
   loadMystery(block,idx);
 }
@@ -752,12 +752,23 @@ async function markMysteryComplete(block,idx){
   blk=prev;bIdx=prevIdx;
 }
 function showAdvanceLevelPrompt(){
+  let n=nivel,c=cua+1;
+  if(c>4){c=1;n++;}
+  const nId=String(n).padStart(2,'0')+String(c).padStart(2,'0');
   $('celeb-title').textContent='¡Veinte Misterios completados!';
   $('celeb-sub').textContent='Has rezado los 20 misterios de este cuaderno. ¡Magnífico camino!';
-  $('btn-celeb-home').onclick=()=>{
-    location.href=location.origin+location.pathname.substring(0,location.pathname.lastIndexOf('/')+1)+'orar.html?c='+nivelId;
-  };
+  $('btn-celeb-home').onclick=()=>loadCuaderno(nId);
   show('scr-celebration');
+}
+async function loadCuaderno(nId){
+  showLoading();
+  nivelId=nId;nivel=parseInt(nivelId.slice(0,2))||1;cua=parseInt(nivelId.slice(2,4))||1;
+  const base=location.origin+location.pathname.substring(0,location.pathname.lastIndexOf('/')+1);
+  try{const r=await fetch(base+'data/'+nivelId+'.json');if(r.ok)data=await r.json();}catch(e){}
+  try{const r=await fetch(base+'data/'+nivelId+'-cantos.json');if(r.ok)cantoJ=await r.json();}catch(e){}
+  try{const snap=await FS.collection('users').doc(usr.uid).collection('progress').doc(nivelId).get();prog=snap.exists?snap.data():{};}catch(e){prog={};}
+  blk=null;bIdx=0;
+  renderHome();
 }
 
 /* ─── UTILS ─── */
@@ -1286,6 +1297,12 @@ function initSwipe(){
     if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)*1.5){
       if(dx<0)goNextMystery();else goPrevMystery();
     }
+  },{passive:true});
+
+  let hsx=0;const home=$('scr-home');
+  home.addEventListener('touchstart',e=>{hsx=e.touches[0].clientX;},{passive:true});
+  home.addEventListener('touchend',e=>{
+    if(e.changedTouches[0].clientX-hsx>60)goTo('index.html');
   },{passive:true});
 }
 function initBtns(){
