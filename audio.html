@@ -1260,9 +1260,17 @@ body {
 #tab-toggle-audio,#tab-toggle-texto{color:var(--lvl-bold);position:relative}
 #tab-toggle-audio::before,#tab-toggle-texto::before{content:'';position:absolute;top:4px;width:28px;height:2px;background:var(--lvl-bold);border-radius:1px;opacity:0.5}
 /* ── Audio Home ── */
-#scr-home-audio{display:none;flex-direction:column;overflow-y:auto;padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))}
-#scr-home-audio.active{display:flex}
-.ah-header{padding:28px 20px 8px;flex-shrink:0}
+/* ── Audio Home — overlay emergente (como epílogo) ── */
+#scr-home-audio{position:fixed;inset:0;z-index:400;background:var(--bg);overflow-y:auto;display:flex;flex-direction:column;transform:translateY(100%);transition:transform 0.4s cubic-bezier(0.4,0,0.2,1);pointer-events:none;padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))}
+#scr-home-audio.open{transform:translateY(0);pointer-events:auto}
+.ah-continue-card{display:flex;align-items:center;justify-content:space-between;margin:16px 18px 4px;padding:16px 18px;background:var(--lvl-ultra);border:1.5px solid var(--lvl-bold);border-radius:16px;cursor:pointer;transition:all 0.2s;flex-shrink:0}
+.ah-continue-card:active{transform:scale(0.98)}
+.ah-cont-left{display:flex;flex-direction:column;gap:3px;min-width:0}
+.ah-cont-kicker{font-size:0.63rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--lvl-bold)}
+.ah-cont-title{font-size:1.0rem;font-weight:700;color:var(--text);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ah-cont-sub{font-size:0.73rem;color:var(--text-soft);font-style:italic}
+.ah-cont-arrow{font-size:1.5rem;color:var(--lvl-bold);flex-shrink:0;margin-left:12px}
+.ah-header{padding:20px 20px 6px;flex-shrink:0}
 .ah-title{font-size:1.45rem;font-weight:800;letter-spacing:-0.3px;margin-bottom:2px}
 .ah-nivel{font-size:0.78rem;font-weight:600;color:var(--lvl-bold);text-transform:uppercase;letter-spacing:1px}
 .ah-element{font-size:0.9rem;color:var(--text-soft);margin-top:2px;font-style:italic}
@@ -1330,6 +1338,16 @@ body {
 
   <!-- ═══ PANTALLA: HOME — SELECCIÓN DE BLOQUE ═══ -->
   <div id="scr-home-audio">
+    <div class="micro-handle"></div>
+    <!-- Tarjeta "Continuar" — populated by renderAudioHome() -->
+    <div class="ah-continue-card" id="ah-continue-card">
+      <div class="ah-cont-left">
+        <div class="ah-cont-kicker" id="ah-cont-kicker">Continuar donde lo dejé</div>
+        <div class="ah-cont-title" id="ah-cont-title">Misterio</div>
+        <div class="ah-cont-sub"   id="ah-cont-sub"></div>
+      </div>
+      <span class="ah-cont-arrow">▶</span>
+    </div>
     <div class="ah-header">
       <div class="ah-title" id="ah-title">CruzAndo</div>
       <div class="ah-nivel" id="ah-nivel"></div>
@@ -2058,13 +2076,15 @@ async function loadUserAndStart(skipProgressRead = false) {
   if (goDirectly) {
     await buildSession();
   } else {
-    await showAudioHome();
+    await showAudioHome(); // abre overlay; buildSession() se llama cuando el usuario elige
   }
 }
 
+function openAudioHome()  { $('scr-home-audio').classList.add('open'); }
+function closeAudioHome() { $('scr-home-audio').classList.remove('open'); }
+
 async function showAudioHome() {
-  show('scr-loading'); setMsg('Cargando…');
-  const { nivel, cuaderno } = audioProgress;
+  const { nivel, cuaderno, misterio } = audioProgress;
   const nivelId = String(nivel).padStart(2,'0') + String(cuaderno).padStart(2,'0');
 
   if (!currentData) {
@@ -2086,9 +2106,19 @@ async function showAudioHome() {
 
 function renderAudioHome(nivel, cuaderno, nivelId, progData) {
   const tema = currentData?.tema || {};
-  $('ah-title').textContent  = 'Cruzando ' + (tema.mundo_nombre || ('Nivel ' + nivel));
-  $('ah-nivel').textContent  = 'Nivel ' + nivel + '-' + cuaderno;
+  $('ah-title').textContent   = 'Cruzando ' + (tema.mundo_nombre || ('Nivel ' + nivel));
+  $('ah-nivel').textContent   = 'Nivel ' + nivel + '-' + cuaderno;
   $('ah-element').textContent = currentData?.elemento || '';
+
+  // Populate "Continuar" card
+  const { misterio } = audioProgress;
+  const BLOCK_OFFSET = { gozosos:1, luminosos:6, dolorosos:11, gloriosos:16 };
+  const contBlock   = misterio <= 5 ? 'gozosos' : misterio <= 10 ? 'luminosos' : misterio <= 15 ? 'dolorosos' : 'gloriosos';
+  const contMystery = currentData?.misterios?.[contBlock]?.[misterio - BLOCK_OFFSET[contBlock]];
+  $('ah-cont-kicker').textContent = 'Misterio ' + misterio + ' · ' + (BLOCK_NAMES[contBlock] || contBlock);
+  $('ah-cont-title').textContent  = contMystery?.titulo || ('Misterio ' + misterio);
+  $('ah-cont-sub').textContent    = contMystery?.subtitulo || '';
+  $('ah-continue-card').onclick   = () => { closeAudioHome(); buildSession(); };
 
   const BLOCK_START_M = { gozosos:1, luminosos:6, dolorosos:11, gloriosos:16 };
   const BEM_AUDIO     = { gozosos:'🌹', luminosos:'🕊️', dolorosos:'✝️', gloriosos:'👑' };
@@ -2119,14 +2149,14 @@ function renderAudioHome(nivel, cuaderno, nivelId, progData) {
       dots.map((d, i) => `<div class="block-dot ${d ? 'done' : i === done ? 'active' : ''}"></div>`).join('') +
       `</div></div>`;
     card.onclick = () => {
+      closeAudioHome();
       audioProgress.misterio = misterioNum;
       buildSession();
     };
     grid.appendChild(card);
   });
 
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  $('scr-home-audio').classList.add('active');
+  openAudioHome();
 }
 
 function hasSessionToday() {
