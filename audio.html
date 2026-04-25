@@ -906,7 +906,7 @@ body {
 /* Zona inferior: metros + botones */
 #complete-controls {
   flex-shrink: 0;
-  padding: 10px 20px 12px;
+  padding: 10px 20px calc(16px + 64px + env(safe-area-inset-bottom, 0px));
   background: var(--bg);
   display: flex;
   flex-direction: column;
