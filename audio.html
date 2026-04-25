@@ -1010,13 +1010,14 @@ body {
 
 /* ══ Micro-aprendizaje — overlay emergente ══════════════════════ */
 #scr-micro {
-  position: fixed; inset: 0; z-index: 500;
+  position: fixed; inset: 0; z-index: 600;
   background: var(--bg); overflow-y: auto;
   transform: translateY(100%);
   transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
   display: block;
+  pointer-events: none;
 }
-#scr-micro.open { transform: translateY(0); }
+#scr-micro.open { transform: translateY(0); pointer-events: auto; }
 .micro-handle {
   width: 40px; height: 4px; background: var(--border);
   border-radius: 2px; margin: 12px auto 0; flex-shrink: 0;
