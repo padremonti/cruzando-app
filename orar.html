@@ -65,7 +65,7 @@ body{
 .shell{max-width:480px;margin:0 auto;min-height:100dvh;position:relative;padding-bottom:72px}
 .screen{display:none}
 .screen.active{display:block}
-#scr-orar.active{display:flex;flex-direction:column;height:100dvh;overflow:hidden;padding-bottom:calc(52px + env(safe-area-inset-bottom,0px))}
+#scr-orar.active{display:flex;flex-direction:column;height:100dvh;overflow:hidden;padding-bottom:env(safe-area-inset-bottom,0px)}
 
 /* ── Header (home + micro) ── */
 .header{
@@ -206,7 +206,8 @@ body{
 .block-card.fade-in-d4{animation-delay:0.26s}
 
 /* ── Bottom nav ── */
-.app-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:80;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:stretch;padding-bottom:env(safe-area-inset-bottom,0px);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.app-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:480px;z-index:80;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:stretch;padding-bottom:env(safe-area-inset-bottom,0px);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:transform 0.35s cubic-bezier(0.4,0,0.2,1)}
+.app-nav.visible{transform:translateX(-50%) translateY(0)}
 .app-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:10px 4px 12px;background:none;border:none;cursor:pointer;font-family:inherit;text-decoration:none;color:var(--text-dim);transition:color 0.2s;-webkit-tap-highlight-color:transparent}
 .app-nav-item:active{opacity:1}
 .app-nav-item.active{color:var(--lvl-bold)}
@@ -298,6 +299,9 @@ body{
 .tool-btn:active .tool-btn-circle{transform:scale(0.92)}
 .tool-label{font-size:0.55rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-dim)}
 .tool-btn.active .tool-label{color:var(--lvl-bold)}
+/* Línea de rosario que atraviesa los círculos del toolbar */
+.tools-bar::before{content:'';position:absolute;top:30px;left:0;right:0;height:1.5px;background:var(--border);z-index:0}
+.tool-btn-circle{position:relative;z-index:1}
 
 /* ══════════════════════════════════════
    POPUP — Bottom sheet sobre zona A
@@ -698,6 +702,14 @@ const BN  = {gozosos:'Gozosos',luminosos:'Luminosos',dolorosos:'Dolorosos',glori
 const BFN = {gozosos:'Misterios Gozosos',luminosos:'Misterios Luminosos',dolorosos:'Misterios Dolorosos',gloriosos:'Misterios Gloriosos'};
 const BEM = {gozosos:'🌟',luminosos:'✨',dolorosos:'✝️',gloriosos:'👑'};
 const BCL = {gozosos:'#D4A017',luminosos:'#01BBE1',dolorosos:'#C0392B',gloriosos:'#8E44AD'};
+const BCL_RGB = {gozosos:'212,160,23',luminosos:'1,187,225',dolorosos:'192,57,43',gloriosos:'142,68,173'};
+function applyBlockAccent(block){
+  const c=BCL[block]||BCL.gozosos, r=BCL_RGB[block]||BCL_RGB.gozosos;
+  const root=document.documentElement;
+  root.style.setProperty('--lvl-bold',c);
+  root.style.setProperty('--lvl-soft',c);
+  root.style.setProperty('--lvl-ultra',`rgba(${r},0.10)`);
+}
 const BFM = {gozosos:1,luminosos:6,dolorosos:11,gloriosos:16};
 const TBG = {gozosos:'rgba(232,160,160,0.18)',luminosos:'rgba(1,187,225,0.15)',dolorosos:'rgba(192,57,43,0.15)',gloriosos:'rgba(212,160,23,0.15)'};
 const TN  = {palabra:'La Palabra',contemplar:'Contemplar',rezo:'Rezo',canto:'Canto',escribir:'Escribir',suplica:'Súplica'};
@@ -1059,6 +1071,7 @@ function renderSession(){
       return `<div onclick="window._gm(${i})" style="width:${cur?'12px':'8px'};height:${cur?'12px':'8px'};border-radius:50%;cursor:pointer;transition:all 0.2s;background:${d?'#34A853':cur?'#fff':'rgba(255,255,255,0.4)'};${cur?'border:2px solid #fff;box-shadow:0 0 6px rgba(255,255,255,0.6)':''}"></div>`;
     }).join('')+'</div>';
 
+  applyBlockAccent(blk);
   $('tools-bar').style.setProperty('--tools-bar-bg',TBG[blk]||'var(--card)');
   $('btn-bgm').classList.toggle('bgm-on',bgmOn);
   closeToolPopup();
@@ -1345,6 +1358,20 @@ function initSwipe(){
   home.addEventListener('touchstart',e=>{hsx=e.touches[0].clientX;},{passive:true});
   home.addEventListener('touchend',e=>{
     if(e.changedTouches[0].clientX-hsx>60)goTo('index.html');
+  },{passive:true});
+
+  // Swipe vertical en la sesión: arriba → muestra nav, abajo → oculta
+  let nvY=0,nvX=0,navT=null;
+  function showAppNav(){$('app-nav').classList.add('visible');clearTimeout(navT);navT=setTimeout(()=>$('app-nav').classList.remove('visible'),3500);}
+  function hideAppNav(){$('app-nav').classList.remove('visible');clearTimeout(navT);}
+  const scr=$('scr-orar');
+  scr.addEventListener('touchstart',e=>{nvY=e.touches[0].clientY;nvX=e.touches[0].clientX;},{passive:true});
+  scr.addEventListener('touchend',e=>{
+    const dy=e.changedTouches[0].clientY-nvY;
+    const dx=e.changedTouches[0].clientX-nvX;
+    if(Math.abs(dy)>50&&Math.abs(dy)>Math.abs(dx)*1.5){
+      if(dy<0)showAppNav();else hideAppNav();
+    }
   },{passive:true});
 }
 function initBtns(){

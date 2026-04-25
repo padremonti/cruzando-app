@@ -869,13 +869,16 @@ body {
 
 /* ── Bottom nav bar (estándar CruzAndo) ── */
 .app-nav {
-  position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+  position:fixed; bottom:0; left:50%;
+  transform:translateX(-50%) translateY(100%);
   width:100%; max-width:480px; z-index:90;
   background:var(--bg); border-top:1px solid var(--border);
   display:flex; align-items:stretch;
   padding-bottom:env(safe-area-inset-bottom, 0px);
   backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+  transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);
 }
+.app-nav.visible { transform:translateX(-50%) translateY(0); }
 .app-nav-item {
   flex:1; display:flex; flex-direction:column;
   align-items:center; justify-content:center;
@@ -3544,11 +3547,15 @@ window.goTo   = goTo;
   ep.addEventListener('touchend', e => { if (e.changedTouches[0].clientY - sy > 80) closeEpilogo(); }, { passive: true });
 })();
 
-// Swipe horizontal sobre el hero: izquierda → siguiente misterio, derecha → anterior
+// Swipe horizontal sobre el hero: izquierda → siguiente, derecha → anterior
+// Swipe vertical: arriba → muestra nav, abajo → oculta
 (function(){
   const hero = document.querySelector('.hero-img-wrap');
   if (!hero) return;
   let sx = 0, sy = 0;
+  let navT = null;
+  function showAppNav(){ const n=$('app-nav'); n.classList.add('visible'); clearTimeout(navT); navT=setTimeout(()=>n.classList.remove('visible'),3500); }
+  function hideAppNav(){ $('app-nav').classList.remove('visible'); clearTimeout(navT); }
   hero.addEventListener('touchstart', e => {
     sx = e.touches[0].clientX;
     sy = e.touches[0].clientY;
@@ -3559,6 +3566,9 @@ window.goTo   = goTo;
     if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) {
       if (dx < 0) window.advanceAndRestart();
       else        window._goToPrevMystery();
+    } else if (Math.abs(dy) > 50 && Math.abs(dy) > Math.abs(dx) * 1.5) {
+      if (dy < 0) showAppNav();
+      else        hideAppNav();
     }
   }, { passive: true });
 })();
