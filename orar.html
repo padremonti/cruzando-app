@@ -363,6 +363,11 @@ body{
 .onboarding-tip{position:absolute;bottom:-40px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.78);color:#fff;padding:7px 16px;border-radius:20px;font-size:0.78rem;font-weight:600;pointer-events:none;z-index:50;white-space:nowrap;animation:fadeInOut 3s ease forwards}
 
 @media(max-width:380px){html{font-size:16px}}
+.nav-tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;flex:1;height:100%;padding:0;text-decoration:none;color:var(--text-muted)}
+.nav-tab svg{width:22px;height:22px}
+.nav-tab-label{font-size:0.65rem;font-weight:500;font-family:inherit}
+#tab-toggle-audio,#tab-toggle-texto{color:var(--lvl-bold);position:relative}
+#tab-toggle-audio::before,#tab-toggle-texto::before{content:'';position:absolute;top:4px;width:28px;height:2px;background:var(--lvl-bold);border-radius:1px;opacity:0.5}
 </style>
 </head>
 <body>
@@ -629,14 +634,15 @@ body{
       </div>
       <span class="app-nav-label">Diario</span>
     </button>
-    <button class="app-nav-item" onclick="navTap(this);goTo('cantos.html')">
-      <div class="app-nav-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
-        </svg>
-      </div>
-      <span class="app-nav-label">Cantos</span>
-    </button>
+    <a class="nav-tab" id="tab-toggle-audio" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
+        <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/>
+        <path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+      </svg>
+      <span class="nav-tab-label">Audio</span>
+    </a>
     <button class="app-nav-item" onclick="navTap(this);goTo('sanar.html')">
       <div class="app-nav-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -724,6 +730,10 @@ function updateNavBtns(){
   const prev=$('btn-prev-mystery'),next=$('btn-next-mystery');
   if(prev) prev.style.opacity=currentGlobalMystery>1 ?'1':'0.3';
   if(next) next.style.opacity=currentGlobalMystery<20?'1':'0.3';
+}
+function updateToggleHref(){
+  const tab=$('tab-toggle-audio');
+  if(tab) tab.href=`audio.html?nivel=${nivel}&cuaderno=${cua}&misterio=${currentGlobalMystery}`;
 }
 function goPrevMystery(){
   if(currentGlobalMystery<=1) return;
@@ -841,10 +851,29 @@ function parseQ(text){
 }
 
 /* ─── AUTH ─── */
+async function loadAndEnter(nId,block,idx){
+  showLoading();
+  nivelId=nId;nivel=parseInt(nivelId.slice(0,2))||1;cua=parseInt(nivelId.slice(2,4))||1;
+  blk=block;bIdx=idx;
+  try{const snap=await FS.collection('users').doc(usr.uid).get();const ud=snap.exists?snap.data():{};window.resolvePlan&&window.resolvePlan(ud);totalM=ud.totalMeters||0;const mv=$('meters-value');if(mv)mv.textContent=totalM.toLocaleString('es-MX')+'m';}catch(e){}
+  const base=location.origin+location.pathname.substring(0,location.pathname.lastIndexOf('/')+1);
+  try{const r=await fetch(base+'data/'+nivelId+'.json');if(r.ok)data=await r.json();}catch(e){}
+  try{const r=await fetch(base+'data/'+nivelId+'-cantos.json');if(r.ok)cantoJ=await r.json();}catch(e){}
+  try{const snap=await FS.collection('users').doc(usr.uid).collection('progress').doc(nivelId).get();prog=snap.exists?snap.data():{};}catch(e){prog={};}
+  await checkMicro();
+}
 function initAuth(){
   initTheme();
   _auth.onAuthStateChanged(async u=>{
-    if(u){usr=u;await loadAndStart();}
+    if(u){
+      usr=u;
+      function readQueryParams(){
+        const params=new URLSearchParams(location.search);
+        const nId=params.get('c'),mStr=params.get('misterio');
+        if(nId&&mStr){const{block,idx}=getMysteryBlock(parseInt(mStr,10));loadAndEnter(nId,block,idx);return true;}
+      }
+      if(!readQueryParams())await loadAndStart();
+    }
     else goTo('index.html');
   });
 }
@@ -1025,6 +1054,7 @@ function renderSession(){
   initVP();
   show('scr-orar');
   updateNavBtns();
+  updateToggleHref();
   if(bgmOn)startBgm();
 }
 
@@ -1157,6 +1187,11 @@ async function completeMystery(){
     await FS.collection('users').doc(usr.uid).collection('progress').doc(nivelId)
       .set({progress:{[blk]:dots}},{merge:true});
   }catch(e){console.error('[CruzAndo] completeMystery:',e);}
+  // Sincronizar cursor de audio para que ambos modos compartan posición
+  try{
+    await FS.collection('users').doc(usr.uid).collection('audioProgress').doc('current')
+      .set({nivel,cuaderno:cua,misterio:mNum(blk,bIdx)},{merge:true});
+  }catch(e){}
   // Refresh beads
   const cur=bIdx;
   $('hero-beads').innerHTML='<div style="display:flex;gap:8px;margin-top:6px">'+

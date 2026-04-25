@@ -1241,6 +1241,11 @@ body {
   from { height: 4px; }
   to   { height: var(--h); }
 }
+.nav-tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;flex:1;height:100%;padding:0;text-decoration:none;color:var(--text-muted)}
+.nav-tab svg{width:22px;height:22px}
+.nav-tab-label{font-size:0.65rem;font-weight:500;font-family:inherit}
+#tab-toggle-audio,#tab-toggle-texto{color:var(--lvl-bold);position:relative}
+#tab-toggle-audio::before,#tab-toggle-texto::before{content:'';position:absolute;top:4px;width:28px;height:2px;background:var(--lvl-bold);border-radius:1px;opacity:0.5}
 </style>
 </head>
 <body>
@@ -1492,14 +1497,15 @@ body {
     </div>
     <span class="app-nav-label">Diario</span>
   </button>
-  <button class="app-nav-item" onclick="navTap(this); goTo('cantos.html')">
-    <div class="app-nav-icon">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
-      </svg>
-    </div>
-    <span class="app-nav-label">Cantos</span>
-  </button>
+  <a class="nav-tab" id="tab-toggle-texto" href="#">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round">
+      <line x1="3" y1="6"  x2="21" y2="6"/>
+      <line x1="3" y1="12" x2="21" y2="12"/>
+      <line x1="3" y1="18" x2="15" y2="18"/>
+    </svg>
+    <span class="nav-tab-label">Texto</span>
+  </a>
   <button class="app-nav-item" onclick="navTap(this); goTo('sanar.html')">
     <div class="app-nav-icon">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -1982,8 +1988,7 @@ async function loadUserAndStart(skipProgressRead = false) {
     try { localStorage.setItem('cruzando_current_nivel', urlParam); } catch(e) {}
   }
 
-  // Si viene ?nivel=&cuaderno=&misterio= desde index.html (bookmark específico),
-  // sobrescribir audioProgress en memoria sin tocar Firestore
+  // Si viene ?nivel=&cuaderno=&misterio= (desde index.html o orar.html), respetar posición exacta
   const _sp = new URLSearchParams(location.search);
   const _pN = parseInt(_sp.get('nivel'), 10);
   const _pC = parseInt(_sp.get('cuaderno'), 10);
@@ -1994,6 +1999,7 @@ async function loadUserAndStart(skipProgressRead = false) {
     audioProgress.cuaderno = _pC;
     audioProgress.misterio = _pM;
     try { localStorage.setItem('cruzando_current_nivel', String(_pN).padStart(2,'0') + String(_pC).padStart(2,'0')); } catch(e) {}
+    history.replaceState({}, '', 'audio.html');
   }
 
   console.log('userPlan:', userPlan, '| misterio:', audioProgress.nivel, audioProgress.cuaderno, audioProgress.misterio);
@@ -2633,6 +2639,16 @@ function renderSession() {
     if (_hint) _hint.style.display = 'none';
     startPlaylist();
   };
+
+  updateToggleHref();
+}
+
+function updateToggleHref() {
+  const tab = $('tab-toggle-texto');
+  if (!tab || !currentSession) return;
+  const { nivel, cuaderno, misterio } = currentSession;
+  const nivelId = String(nivel).padStart(2,'0') + String(cuaderno).padStart(2,'0');
+  tab.href = `orar.html?c=${nivelId}&misterio=${misterio}`;
 }
 
 // ════════════════════════════════════════════
