@@ -722,6 +722,7 @@ function applyBlockAccent(block){
 const BFM = {gozosos:1,luminosos:6,dolorosos:11,gloriosos:16};
 const TBG = {gozosos:'rgba(232,160,160,0.18)',luminosos:'rgba(1,187,225,0.15)',dolorosos:'rgba(192,57,43,0.15)',gloriosos:'rgba(212,160,23,0.15)'};
 const TN  = {palabra:'La Palabra',contemplar:'Contemplar',rezo:'Rezo',canto:'Canto',escribir:'Escribir',suplica:'Súplica'};
+const TOOL_ORDER = ['palabra','contemplar','rezo','canto','escribir','suplica'];
 const QL  = ['Por María hacia Jesús:','Desde el Hijo hacia el Padre:','Hijos y hermanos en el Espíritu:'];
 const QC  = ['#FF7A00','#C0392B','#27AE60'];
 const MR_REZO=1200, MR_CONT=800, MR_CANTO=600, MR_QF=650, MR_QU=325, MR_BNS=1000, MR_MICRO=600;
@@ -1364,11 +1365,24 @@ function startBgm(){
   bgmEl.play().catch(()=>{});
 }
 
+function goToolAdj(dir){
+  const i=TOOL_ORDER.indexOf(tool);
+  const n=i+dir;
+  if(n<0||n>=TOOL_ORDER.length)closeToolPopup();
+  else openToolPopup(TOOL_ORDER[n]);
+}
+
 /* ─── SWIPE + INIT ─── */
 function initSwipe(){
-  let sy=0;const pp=$('tool-popup');
-  pp.addEventListener('touchstart',e=>{sy=e.touches[0].clientY;},{passive:true});
-  pp.addEventListener('touchend',e=>{if(e.changedTouches[0].clientY-sy>60)closeToolPopup();},{passive:true});
+  let sx=0,sy=0;const pp=$('tool-popup');
+  pp.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;e.stopPropagation();},{passive:true});
+  pp.addEventListener('touchend',e=>{
+    const dx=e.changedTouches[0].clientX-sx;
+    const dy=e.changedTouches[0].clientY-sy;
+    e.stopPropagation();
+    if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)*1.5){goToolAdj(dx<0?1:-1);}
+    else if(dy>60&&Math.abs(dy)>Math.abs(dx)*1.5){closeToolPopup();}
+  },{passive:true});
 
   let hx=0,hy=0;const hero=$('misterio-hero');
   hero.addEventListener('touchstart',e=>{hx=e.touches[0].clientX;hy=e.touches[0].clientY;},{passive:true});
