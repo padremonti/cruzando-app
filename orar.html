@@ -65,7 +65,7 @@ body{
 .shell{max-width:480px;margin:0 auto;min-height:100dvh;position:relative;padding-bottom:72px}
 .screen{display:none}
 .screen.active{display:block}
-#scr-orar.active{display:flex;flex-direction:column;height:100dvh;overflow:hidden}
+#scr-orar.active{display:flex;flex-direction:column;height:100dvh;overflow:hidden;padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))}
 
 /* ── Header (home + micro) ── */
 .header{
@@ -291,12 +291,13 @@ body{
    ZONA B — Barra de herramientas
    ══════════════════════════════════════ */
 .tools-bar{
-  flex-shrink:0;
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:480px;
+  z-index:5;
   display:flex;justify-content:space-around;align-items:center;
   padding:8px 12px env(safe-area-inset-bottom,8px);
   background:var(--tools-bar-bg,var(--card));
   border-top:1px solid var(--border);
-  position:relative;z-index:10;
 }
 /* ── Variables de contraste para toolbar (dark default → light override) ── */
 :root{--tb-circle-bg:rgba(255,255,255,0.06);--tb-circle-border:rgba(255,255,255,0.22);--tb-icon:rgba(255,255,255,0.62);--tb-bead:rgba(255,255,255,0.16)}
@@ -373,10 +374,9 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
 
 @media(max-width:380px){html{font-size:16px}}
 .nav-tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;flex:1;padding:10px 4px 12px;text-decoration:none;color:var(--text-muted)}
-.nav-tab svg{width:22px;height:22px}
+.nav-tab .app-nav-icon svg{width:22px;height:22px}
 .nav-tab-label{font-size:0.6rem;font-weight:600;letter-spacing:0.4px;text-transform:uppercase;font-family:inherit}
-#tab-toggle-audio,#tab-toggle-texto{color:var(--lvl-bold);position:relative}
-#tab-toggle-audio::before,#tab-toggle-texto::before{content:'';position:absolute;top:10px;width:28px;height:2px;background:var(--lvl-bold);border-radius:1px;opacity:0.5}
+#tab-toggle-audio,#tab-toggle-texto{color:var(--lvl-bold)}
 </style>
 </head>
 <body>
@@ -647,12 +647,13 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
       <span class="app-nav-label">Diario</span>
     </button>
     <a class="nav-tab" id="tab-toggle-audio" href="#">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-           stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
-        <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/>
-        <path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
-      </svg>
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
+          <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/>
+          <path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+        </svg>
+      </div>
       <span class="nav-tab-label">Audio</span>
     </a>
     <button class="app-nav-item" onclick="navTap(this);goTo('sanar.html')">

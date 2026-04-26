@@ -1206,10 +1206,9 @@ body.light { --tb-circle-bg:var(--card); --tb-circle-border:var(--border); --tb-
   to   { height: var(--h); }
 }
 .nav-tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;flex:1;padding:10px 4px 12px;text-decoration:none;color:var(--text-muted)}
-.nav-tab svg{width:22px;height:22px}
+.nav-tab .app-nav-icon svg{width:22px;height:22px}
 .nav-tab-label{font-size:0.6rem;font-weight:600;letter-spacing:0.4px;text-transform:uppercase;font-family:inherit}
-#tab-toggle-audio,#tab-toggle-texto{color:var(--lvl-bold);position:relative}
-#tab-toggle-audio::before,#tab-toggle-texto::before{content:'';position:absolute;top:10px;width:28px;height:2px;background:var(--lvl-bold);border-radius:1px;opacity:0.5}
+#tab-toggle-audio,#tab-toggle-texto{color:var(--lvl-bold)}
 /* ── Audio Home ── */
 /* ── Audio Home — overlay emergente (como epílogo) ── */
 #scr-home-audio{position:fixed;inset:0;z-index:400;background:var(--bg);overflow-y:auto;display:flex;flex-direction:column;transform:translateY(100%);transition:transform 0.4s cubic-bezier(0.4,0,0.2,1);pointer-events:none;padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))}
@@ -1508,12 +1507,13 @@ body.light { --tb-circle-bg:var(--card); --tb-circle-border:var(--border); --tb-
     <span class="app-nav-label">Diario</span>
   </button>
   <a class="nav-tab" id="tab-toggle-texto" href="#">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-         stroke-width="2" stroke-linecap="round">
-      <line x1="3" y1="6"  x2="21" y2="6"/>
-      <line x1="3" y1="12" x2="21" y2="12"/>
-      <line x1="3" y1="18" x2="15" y2="18"/>
-    </svg>
+    <div class="app-nav-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="3" y1="6"  x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="15" y2="18"/>
+      </svg>
+    </div>
     <span class="nav-tab-label">Texto</span>
   </a>
   <button class="app-nav-item" onclick="navTap(this); goTo('sanar.html')">
