@@ -395,11 +395,11 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Barra de progreso de playlist */
+/* Segmentos de secciones */
 .playlist-progress {
   display: flex;
   gap: 3px;
-  margin-bottom: 10px;
+  padding: 10px 18px 0;
 }
 .playlist-seg {
   flex: 1;
@@ -492,7 +492,7 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 18px 0;
+  padding: 6px 18px 0;
 }
 .audio-progress-bar {
   flex: 1;
@@ -1401,12 +1401,13 @@ body {
       <span id="section-pulse"></span><span id="section-name"></span>
       <span id="section-time"></span>
       <div id="section-perspective"><span id="perspective-dot"></span><span id="perspective-label"></span></div>
-      <div id="playlist-progress"></div>
       <span id="session-meters-display"></span>
     </div>
 
     <!-- Barra inferior: progreso + toolbar -->
     <div class="audio-bottom">
+      <!-- Segmentos de secciones -->
+      <div class="playlist-progress" id="playlist-progress"></div>
       <div class="audio-progress-wrap">
         <span class="audio-time" id="time-current">0:00</span>
         <div class="audio-progress-bar" id="progress-bar">
