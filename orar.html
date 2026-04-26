@@ -65,7 +65,7 @@ body{
 .shell{max-width:480px;margin:0 auto;min-height:100dvh;position:relative;padding-bottom:72px}
 .screen{display:none}
 .screen.active{display:block}
-#scr-orar.active{display:flex;flex-direction:column;height:100dvh;overflow:hidden;padding-bottom:env(safe-area-inset-bottom,0px)}
+#scr-orar.active{display:flex;flex-direction:column;height:100dvh;overflow:hidden}
 
 /* ── Header (home + micro) ── */
 .header{
@@ -291,12 +291,11 @@ body{
    ZONA B — Barra de herramientas
    ══════════════════════════════════════ */
 .tools-bar{
-  flex-shrink:0;height:72px;
+  flex-shrink:0;
   display:flex;justify-content:space-around;align-items:center;
-  padding:8px 12px;
+  padding:8px 12px env(safe-area-inset-bottom,8px);
   background:var(--tools-bar-bg,var(--card));
   border-top:1px solid var(--border);
-  border-bottom:1px solid var(--border);
   position:relative;z-index:10;
 }
 .tool-btn{display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:0}
@@ -1358,9 +1357,10 @@ function toggleBgm(){
 }
 function startBgm(){
   if(!bgmOn)return;
-  const url=`${R2}/BGM/${blk||'gozosos'}.mp3`;
+  const url=`${R2}/BGM/BGM_${nivel}_${cua}.mp3`;
+  const trackId=`BGM_${nivel}_${cua}.mp3`;
   if(!bgmEl){bgmEl=new Audio(url);bgmEl.loop=true;bgmEl.volume=0.07;}
-  else if(!bgmEl.src.endsWith((blk||'gozosos')+'.mp3')){bgmEl.src=url;}
+  else if(!bgmEl.src.endsWith(trackId)){bgmEl.pause();bgmEl.src=url;}
   bgmEl.play().catch(()=>{});
 }
 
