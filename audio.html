@@ -3605,29 +3605,42 @@ window.goTo   = goTo;
 })();
 
 // Swipe horizontal sobre el hero: izquierda → siguiente, derecha → anterior
-// Swipe vertical: arriba → muestra nav, abajo → oculta
+// Swipe vertical en cualquier parte de la sesión: arriba → muestra nav, abajo → oculta
 (function(){
-  const hero = document.querySelector('.hero-img-wrap');
-  if (!hero) return;
-  let sx = 0, sy = 0;
   let navT = null;
-  function showAppNav(){ const n=$('app-nav'); n.classList.add('visible'); clearTimeout(navT); navT=setTimeout(()=>n.classList.remove('visible'),3500); }
-  function hideAppNav(){ $('app-nav').classList.remove('visible'); clearTimeout(navT); }
-  hero.addEventListener('touchstart', e => {
-    sx = e.touches[0].clientX;
-    sy = e.touches[0].clientY;
-  }, { passive: true });
-  hero.addEventListener('touchend', e => {
-    const dx = e.changedTouches[0].clientX - sx;
-    const dy = e.changedTouches[0].clientY - sy;
-    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) {
-      if (dx < 0) window.advanceAndRestart();
-      else        window._goToPrevMystery();
-    } else if (Math.abs(dy) > 50 && Math.abs(dy) > Math.abs(dx) * 1.5) {
-      if (dy < 0) showAppNav();
-      else        hideAppNav();
-    }
-  }, { passive: true });
+  function showAppNav(){ const n=$('app-nav'); if(!n)return; n.classList.add('visible'); clearTimeout(navT); navT=setTimeout(()=>n.classList.remove('visible'),3500); }
+  function hideAppNav(){ const n=$('app-nav'); if(!n)return; n.classList.remove('visible'); clearTimeout(navT); }
+
+  // Horizontal swipe (y navegación vertical) solo en el hero
+  const hero = document.querySelector('.hero-img-wrap');
+  if (hero) {
+    let sx = 0, sy = 0;
+    hero.addEventListener('touchstart', e => { sx=e.touches[0].clientX; sy=e.touches[0].clientY; }, { passive: true });
+    hero.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - sx;
+      const dy = e.changedTouches[0].clientY - sy;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+        if (dx < 0) window.advanceAndRestart();
+        else        window._goToPrevMystery();
+      } else if (Math.abs(dy) > 50 && Math.abs(dy) > Math.abs(dx) * 1.5) {
+        if (dy < 0) showAppNav(); else hideAppNav();
+      }
+    }, { passive: true });
+  }
+
+  // Swipe vertical en los controles (zona inferior) para mostrar nav
+  const scr = document.getElementById('scr-session');
+  if (scr) {
+    let cy = 0, cx = 0;
+    scr.addEventListener('touchstart', e => { cy=e.touches[0].clientY; cx=e.touches[0].clientX; }, { passive: true });
+    scr.addEventListener('touchend', e => {
+      const dy = e.changedTouches[0].clientY - cy;
+      const dx = e.changedTouches[0].clientX - cx;
+      if (Math.abs(dy) > 50 && Math.abs(dy) > Math.abs(dx) * 1.5) {
+        if (dy < 0) showAppNav(); else hideAppNav();
+      }
+    }, { passive: true });
+  }
 })();
 
 initAuth();
