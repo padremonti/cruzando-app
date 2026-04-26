@@ -206,7 +206,7 @@ body{
 .block-card.fade-in-d4{animation-delay:0.26s}
 
 /* ── Bottom nav ── */
-.app-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:480px;z-index:80;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:stretch;padding-bottom:env(safe-area-inset-bottom,0px);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:transform 0.35s cubic-bezier(0.4,0,0.2,1)}
+.app-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:480px;z-index:250;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:stretch;padding-bottom:env(safe-area-inset-bottom,0px);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:transform 0.35s cubic-bezier(0.4,0,0.2,1)}
 .app-nav.visible{transform:translateX(-50%) translateY(0)}
 .app-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:10px 4px 12px;background:none;border:none;cursor:pointer;font-family:inherit;text-decoration:none;color:var(--text-dim);transition:color 0.2s;-webkit-tap-highlight-color:transparent}
 .app-nav-item:active{opacity:1}
@@ -271,7 +271,7 @@ body{
 .hero-beads{margin-top:8px;pointer-events:auto}
 
 /* Botones circulares sobre la imagen */
-.hero-btn{position:absolute;top:14px;width:43px;height:43px;border-radius:50%;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;color:rgba(230,222,211,0.85);cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);-webkit-tap-highlight-color:transparent;transition:background 0.2s;z-index:4}
+.hero-btn{position:absolute;top:14px;width:43px;height:43px;border-radius:50%;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;color:rgba(230,222,211,0.85);cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);-webkit-tap-highlight-color:transparent;transition:background 0.2s;z-index:4;touch-action:manipulation}
 .hero-btn svg{width:19px;height:19px}
 .hero-btn:active{background:rgba(0,0,0,0.55)}
 .hero-btn-left{left:14px}
@@ -1074,6 +1074,8 @@ function renderSession(){
   applyBlockAccent(blk);
   $('tools-bar').style.setProperty('--tools-bar-bg',TBG[blk]||'var(--card)');
   $('btn-bgm').classList.toggle('bgm-on',bgmOn);
+  $('btn-bgm').onclick=toggleBgm;
+  $('btn-theme').onclick=toggleTheme;
   closeToolPopup();
   initVP();
   show('scr-orar');
