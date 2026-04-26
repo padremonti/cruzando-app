@@ -419,15 +419,23 @@ body {
 }
 .playlist-seg-fill { width: 0%; }
 
+/* ── Audio Bottom: progreso + toolbar ── */
+.audio-bottom {
+  position: relative;
+  z-index: 2;
+  flex: 0 0 auto;
+  background: var(--card);
+  border-top: 1px solid var(--border);
+  padding-bottom: 72px; /* compensar nav bar */
+}
+
 /* ── Audio Toolbar (5 botones estilo rosario) ── */
 .audio-tools-bar {
   display: flex;
   justify-content: space-around;
   align-items: center;
   height: 72px;
-  margin: 4px -20px 0;
-  padding: 8px 16px;
-  border-top: 1px solid var(--border);
+  padding: 8px 12px;
   position: relative;
 }
 .audio-tools-bar::before {
@@ -485,7 +493,7 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 10px;
+  padding: 10px 18px 0;
 }
 .audio-progress-bar {
   flex: 1;
@@ -937,8 +945,6 @@ body {
   text-transform:uppercase;
 }
 
-/* Compensar espacio del nav bar */
-#scr-session .session-controls { padding-bottom: 72px; }
 
 /* Referencia bíblica en el degradado inferior */
 .hero-reference {
@@ -1391,27 +1397,17 @@ body {
       </div>
     </div>
 
-    <!-- Controles -->
-    <div class="session-controls">
+    <!-- Hooks JS ocultos (sección, playlist, metros — no se muestran) -->
+    <div style="display:none" aria-hidden="true">
+      <span id="section-pulse"></span><span id="section-name"></span>
+      <span id="section-time"></span>
+      <div id="section-perspective"><span id="perspective-dot"></span><span id="perspective-label"></span></div>
+      <div id="playlist-progress"></div>
+      <span id="session-meters-display"></span>
+    </div>
 
-      <!-- Sección actual + tiempo -->
-      <div class="section-label-wrap">
-        <div class="section-label">
-          <span class="section-pulse" id="section-pulse"></span>
-          <span id="section-name">Cargando…</span>
-        </div>
-        <span class="section-time" id="section-time">0:00 / 0:00</span>
-      </div>
-      <!-- Perspectiva activa (visible solo en QA/QB/QC) -->
-      <div class="section-perspective" id="section-perspective" style="display:none">
-        <span class="perspective-dot" id="perspective-dot"></span>
-        <span class="perspective-label" id="perspective-label"></span>
-      </div>
-
-      <!-- Barra de progreso playlist (8 segmentos) -->
-      <div class="playlist-progress" id="playlist-progress"></div>
-
-      <!-- Barra de progreso del track actual -->
+    <!-- Barra inferior: progreso + toolbar -->
+    <div class="audio-bottom">
       <div class="audio-progress-wrap">
         <span class="audio-time" id="time-current">0:00</span>
         <div class="audio-progress-bar" id="progress-bar">
@@ -1419,7 +1415,6 @@ body {
         </div>
         <span class="audio-time" id="time-duration">0:00</span>
       </div>
-
       <!-- Audio Toolbar: Nivel | Atrás | Play | Sig. | Notas -->
       <div class="audio-tools-bar">
         <button class="atb-btn" id="atb-nivel">
@@ -1453,20 +1448,8 @@ body {
           <span class="atb-label">Notas</span>
         </button>
       </div>
-
-      <!-- Metros acumulados sesión -->
-      <div class="meters-row">
-        <div class="meters-chip">
-          <span class="meters-icon">🥾</span>
-          <span id="session-meters-display">0m esta sesión</span>
-        </div>
-      </div>
-
-      <!-- Botón completar sesión (aparece al terminar playlist) -->
-      <button class="btn-complete" id="btn-complete">
-        ✓ Completar sesión
-      </button>
-
+      <!-- Botón completar sesión -->
+      <button class="btn-complete" id="btn-complete">✓ Completar sesión</button>
     </div>
   </div>
 
@@ -2559,8 +2542,8 @@ function playMicroIntroThenMicro(block, nivelId) {
   // Mostrar scr-session con welcome overlay mientras suena la invitación al micro
   applyBlockColor(block);
   renderWelcomeOverlay();
-  // Ocultar controles del player (aún no hay sesión activa)
-  const controls = document.querySelector('#scr-session .session-controls');
+  // Ocultar barra inferior (aún no hay sesión activa)
+  const controls = document.querySelector('#scr-session .audio-bottom');
   if (controls) controls.style.visibility = 'hidden';
   show('scr-session');
 
