@@ -93,18 +93,29 @@ body.light {
   border-radius: 2px; width: 0%; transition: width 0.3s linear; }
 .canto-time { font-size: 0.72rem; color: var(--text-dim); display: flex; justify-content: space-between; }
 
+/* ── Ordenar ── */
+.sort-bar { display: flex; gap: 8px; padding: 12px 18px 4px; }
+.sort-btn {
+  flex: 1; padding: 7px 4px; border-radius: 10px;
+  border: 1px solid var(--border); background: var(--card);
+  font-family: inherit; font-size: 0.72rem; font-weight: 600;
+  color: var(--text-dim); cursor: pointer; transition: background 0.15s, color 0.15s, border-color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.sort-btn.active { background: var(--orange); border-color: var(--orange); color: #fff; }
+
 /* ── Letra ── */
 .canto-letra-wrap { padding: 14px 16px 16px; }
 .canto-letra {
-  font-family: 'Crimson Pro', serif; font-size: 1.05rem;
-  color: var(--text-soft); line-height: 1.75; white-space: pre-line;
+  font-family: 'Crimson Pro', serif; font-size: 1.22rem;
+  color: var(--text-soft); line-height: 1.8; white-space: pre-line;
   overflow: hidden; transition: max-height 0.4s ease;
 }
 .canto-letra .sep-line { color: var(--text-dim); display: block; text-align: center;
   margin: 2px 0; font-family: 'Inter', sans-serif; font-size: 0.75rem; letter-spacing: 2px; }
 .canto-ver-mas {
   margin-top: 10px; background: none; border: none; cursor: pointer;
-  font-size: 0.8rem; color: var(--text-dim); text-decoration: underline;
+  font-size: 0.82rem; color: var(--text-dim); text-decoration: underline;
   font-family: inherit; padding: 0;
 }
 
@@ -254,6 +265,26 @@ function navTap(el) {
 window.goTo   = goTo;
 window.navTap = navTap;
 
+// Estado de ordenación
+let allCantos  = [];
+let sortMode   = 'nivel-asc';
+
+function sortedCantos() {
+  const arr = allCantos.slice();
+  if (sortMode === 'nivel-asc')  arr.sort((a,b) => a.nivel!==b.nivel ? a.nivel-b.nivel : a.cuaderno!==b.cuaderno ? a.cuaderno-b.cuaderno : a.bloqueIdx-b.bloqueIdx);
+  if (sortMode === 'nivel-desc') arr.sort((a,b) => a.nivel!==b.nivel ? b.nivel-a.nivel : a.cuaderno!==b.cuaderno ? b.cuaderno-a.cuaderno : b.bloqueIdx-a.bloqueIdx);
+  if (sortMode === 'az')         arr.sort((a,b) => (a.titulo||'').localeCompare(b.titulo||'', 'es'));
+  return arr;
+}
+
+function setSortMode(mode) {
+  sortMode = mode;
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.toggle('active', b.dataset.sort === mode));
+  const list = document.getElementById('cantos-list');
+  if (list) renderList(list, sortedCantos());
+}
+window.setSortMode = setSortMode;
+
 // Player activo
 let activeAudio = null;
 let activePlayBtn = null;
@@ -323,28 +354,9 @@ function renderLetra(letra) {
   ).join('<span class="sep-line">───</span>');
 }
 
-// Render principal
-function renderCantos(cantos) {
-  const content = document.getElementById('content');
-
-  if (!cantos.length) {
-    content.innerHTML =
-      '<div class="empty-state">' +
-        '<div class="empty-icon">🎵</div>' +
-        '<div class="empty-title">Aún no tienes cantos desbloqueados</div>' +
-        '<div class="empty-desc">Completa los 5 misterios de un bloque en modo audio para desbloquear su canto.</div>' +
-        '<button class="btn-orar" onclick="goTo(\'audio.html\')">Ir a orar</button>' +
-      '</div>';
-    return;
-  }
-
-  // Marcar como vistos en localStorage
-  const SEEN_KEY = 'cruzando_cantos_seen_' + auth.currentUser?.uid;
-  try { localStorage.setItem(SEEN_KEY, String(cantos.length)); } catch(e) {}
-
-  const list = document.createElement('div');
-  list.className = 'cantos-list';
-
+// Renderiza solo el listado dentro del wrapper ya existente
+function renderList(listEl, cantos) {
+  listEl.innerHTML = '';
   cantos.forEach((canto, ci) => {
     const color    = BLOCK_COLORS[canto.bloque] || '#D4A017';
     const label    = BLOCK_LABELS[canto.bloque] || canto.bloque;
@@ -381,9 +393,8 @@ function renderCantos(cantos) {
         '<button class="canto-ver-mas" id="btn-ver-' + cardId + '">ver más</button>' +
       '</div>';
 
-    list.appendChild(card);
+    listEl.appendChild(card);
 
-    // Wiring después de insertar en DOM
     requestAnimationFrame(() => {
       const playBtn = document.getElementById('play-' + cardId);
       const barFill = document.getElementById('bar-' + cardId);
@@ -393,23 +404,20 @@ function renderCantos(cantos) {
       const letraEl = document.getElementById('letra-' + cardId);
       const verBtn  = document.getElementById('btn-ver-' + cardId);
 
-      // Verificar si el audio existe antes de habilitar el player
       fetch(cantoUrl, { method: 'HEAD' }).then(r => {
-        if (!r.ok) { playBtn.disabled = true; }
+        if (!r.ok) playBtn.disabled = true;
       }).catch(() => { playBtn.disabled = true; });
 
       playBtn.onclick = () => {
         if (playBtn.disabled) return;
         const isPlaying = activePlayBtn === playBtn && activeAudio && !activeAudio.paused;
         if (isPlaying) {
-          activeAudio.pause();
-          setPlayIcon(playBtn, false);
+          activeAudio.pause(); setPlayIcon(playBtn, false);
           activeAudio = null; activePlayBtn = null;
         } else {
           playCantoAudio(cantoUrl, playBtn, barFill, curEl, durEl);
         }
       };
-
       barWrap.onclick = (e) => { if (activeAudio && activePlayBtn === playBtn) seekCanto(e, activeAudio, barWrap); };
 
       let expandido = false;
@@ -420,9 +428,36 @@ function renderCantos(cantos) {
       };
     });
   });
+}
 
-  content.innerHTML = '';
-  content.appendChild(list);
+// Render principal
+function renderCantos(cantos) {
+  const content = document.getElementById('content');
+
+  if (!cantos.length) {
+    content.innerHTML =
+      '<div class="empty-state">' +
+        '<div class="empty-icon">🎵</div>' +
+        '<div class="empty-title">Aún no tienes cantos desbloqueados</div>' +
+        '<div class="empty-desc">Completa los 5 misterios de un bloque en modo audio para desbloquear su canto.</div>' +
+        '<button class="btn-orar" onclick="goTo(\'audio.html\')">Ir a orar</button>' +
+      '</div>';
+    return;
+  }
+
+  allCantos = cantos;
+  const SEEN_KEY = 'cruzando_cantos_seen_' + auth.currentUser?.uid;
+  try { localStorage.setItem(SEEN_KEY, String(cantos.length)); } catch(e) {}
+
+  content.innerHTML =
+    '<div class="sort-bar">' +
+      '<button class="sort-btn active" data-sort="nivel-asc"  onclick="setSortMode(\'nivel-asc\')">Nivel ↑</button>' +
+      '<button class="sort-btn"        data-sort="nivel-desc" onclick="setSortMode(\'nivel-desc\')">Nivel ↓</button>' +
+      '<button class="sort-btn"        data-sort="az"         onclick="setSortMode(\'az\')">A – Z</button>' +
+    '</div>' +
+    '<div class="cantos-list" id="cantos-list"></div>';
+
+  renderList(document.getElementById('cantos-list'), sortedCantos());
 }
 
 function escHTML(s) {
