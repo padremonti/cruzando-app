@@ -209,7 +209,7 @@ body.light {
 <script type="module">
 import { initializeApp }    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import { getFirestore, collection, getDocs, doc, setDoc }
+import { getFirestore, collection, getDocs, getDoc, doc, setDoc }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 const FIREBASE_CONFIG = {
@@ -430,6 +430,40 @@ function escHTML(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+// Backfill: detecta bloques completados en progress/ y crea los unlockedCantos faltantes
+async function backfillCantos(uid) {
+  const base = location.origin + location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1);
+  const BLOCK_IDX_MAP = { gozosos:1, luminosos:2, dolorosos:3, gloriosos:4 };
+  const BLOCKS = ['gozosos','luminosos','dolorosos','gloriosos'];
+  try {
+    const progressSnap = await getDocs(collection(db, 'users', uid, 'progress'));
+    for (const pDoc of progressSnap.docs) {
+      const nivelId  = pDoc.id;
+      const nivel    = parseInt(nivelId.slice(0, 2));
+      const cuaderno = parseInt(nivelId.slice(2, 4));
+      const prog     = (pDoc.data().progress) || {};
+      for (const block of BLOCKS) {
+        const slots = prog[block] || [];
+        if (slots.length < 5 || !slots.every(v => v != null)) continue;
+        const bloqueIdx = BLOCK_IDX_MAP[block];
+        const cantoKey  = `${nivel}_${cuaderno}_${bloqueIdx}`;
+        const existing  = await getDoc(doc(db, 'users', uid, 'unlockedCantos', cantoKey));
+        if (existing.exists()) continue;
+        try {
+          const r = await fetch(base + 'data/' + nivelId + '-cantos.json');
+          if (!r.ok) continue;
+          const cantosData = await r.json();
+          if (!cantosData.cantos?.[block]) continue;
+          const letra  = cantosData.cantos[block].map(c => c.letra || '').join('\n\n───\n\n');
+          const titulo = cantosData.cantos[block][0]?.titulo || block;
+          await setDoc(doc(db, 'users', uid, 'unlockedCantos', cantoKey),
+            { titulo, bloque: block, nivel, cuaderno, bloqueIdx, letra, unlockedAt: Date.now() });
+        } catch(e) { console.warn('[backfill canto]', nivelId, block, e); }
+      }
+    }
+  } catch(e) { console.warn('[backfill]', e); }
+}
+
 // Auth + carga
 onAuthStateChanged(auth, async user => {
   if (!user) {
@@ -439,6 +473,14 @@ onAuthStateChanged(auth, async user => {
     const snap  = await getDocs(collection(db, 'users', user.uid, 'unlockedCantos'));
     const cantos = [];
     snap.forEach(d => cantos.push(d.data()));
+
+    // Si no hay cantos pero hay progreso, intentar backfill una vez
+    if (cantos.length === 0) {
+      await backfillCantos(user.uid);
+      const snap2 = await getDocs(collection(db, 'users', user.uid, 'unlockedCantos'));
+      snap2.forEach(d => cantos.push(d.data()));
+    }
+
     cantos.sort((a, b) => (b.unlockedAt || 0) - (a.unlockedAt || 0));
     renderCantos(cantos);
   } catch(e) {
