@@ -176,6 +176,66 @@ body.light {
 .hero-bounce-left  { animation: heroBounceLeft  0.38s ease; }
 .hero-bounce-right { animation: heroBounceRight 0.38s ease; }
 
+/* ── Letra sheet ── */
+.hero-letra-row {
+  display: flex; justify-content: flex-end;
+  margin-top: 10px; position: relative;
+}
+.hero-btn-letra {
+  background: rgba(0,0,0,0.2); border: 1.5px solid rgba(255,255,255,0.25);
+  border-radius: 999px; padding: 5px 16px;
+  font-family: inherit; font-size: 0.72rem; font-weight: 600;
+  color: rgba(255,255,255,0.9); cursor: pointer; letter-spacing: 0.4px;
+  -webkit-tap-highlight-color: transparent;
+}
+.hero-btn-letra:active { background: rgba(0,0,0,0.35); }
+.letra-sheet {
+  position: absolute; inset: 0; border-radius: 18px;
+  background: rgba(14, 7, 1, 0.97);
+  display: flex; flex-direction: column;
+  transform: translateY(100%);
+  transition: transform 0.36s cubic-bezier(0.32, 0.72, 0, 1);
+  overflow: hidden; z-index: 10;
+}
+.letra-sheet.open { transform: translateY(0); }
+body.light .letra-sheet { background: rgba(248, 240, 230, 0.98); }
+.sheet-handle {
+  width: 36px; height: 4px; border-radius: 2px;
+  background: rgba(255,255,255,0.3); margin: 10px auto 6px; flex-shrink: 0;
+}
+body.light .sheet-handle { background: rgba(0,0,0,0.2); }
+.sheet-header {
+  padding: 2px 16px 10px; flex-shrink: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+}
+body.light .sheet-header { border-bottom-color: rgba(0,0,0,0.1); }
+.sheet-titulo {
+  font-family: 'Crimson Pro', serif; font-size: 1.1rem; font-weight: 600;
+  color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+body.light .sheet-titulo { color: var(--text); }
+.sheet-body {
+  flex: 1; overflow-y: auto; padding: 14px 16px 16px;
+  -webkit-overflow-scrolling: touch;
+}
+.sheet-letra {
+  font-family: 'Crimson Pro', serif; font-size: 1.18rem;
+  color: rgba(255,255,255,0.85); line-height: 1.85;
+}
+body.light .sheet-letra { color: var(--text-soft); }
+.sheet-letra .sep-line {
+  color: rgba(255,255,255,0.35); display: block; text-align: center;
+  margin: 4px 0; font-family: 'Inter', sans-serif; font-size: 0.75rem; letter-spacing: 2px;
+}
+body.light .sheet-letra .sep-line { color: var(--text-dim); }
+.btn-letra {
+  display: block; width: 100%; padding: 10px 16px;
+  background: none; border: none; cursor: pointer; text-align: left;
+  font-family: 'Crimson Pro', serif; font-size: 0.98rem;
+  color: var(--block-color, #D4A017); border-top: 1px solid var(--border);
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* ── Letra ── */
 .canto-letra-wrap { padding: 14px 16px 16px; }
 .canto-letra {
@@ -249,6 +309,9 @@ body.light {
     <div class="cantos-hero-badge" id="hero-badge">Misterios Gozosos</div>
     <div class="cantos-hero-title" id="hero-title">Mis Cantos</div>
     <div class="cantos-hero-sub" id="hero-sub">Nivel 1</div>
+    <div class="hero-letra-row">
+      <button class="hero-btn-letra" onclick="window.openHeroLetra()">Letra</button>
+    </div>
     <div class="hero-controls">
       <button class="hero-nav-btn" id="hero-prev" onclick="window.heroNav(-1)" disabled>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
@@ -257,6 +320,15 @@ body.light {
       <button class="hero-nav-btn" id="hero-next" onclick="window.heroNav(1)" disabled>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       </button>
+    </div>
+    <div class="letra-sheet" id="letra-sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <div class="sheet-titulo" id="sheet-titulo"></div>
+      </div>
+      <div class="sheet-body" id="sheet-body">
+        <div class="sheet-letra" id="sheet-body-letra"></div>
+      </div>
     </div>
   </div>
 
@@ -409,6 +481,34 @@ function heroNav(delta) {
 }
 window.heroNav = heroNav;
 
+function openLetraSheet(letra, titulo) {
+  document.getElementById('sheet-titulo').textContent   = titulo;
+  document.getElementById('sheet-body-letra').innerHTML = renderLetra(letra);
+  document.getElementById('sheet-body').scrollTop       = 0;
+  document.getElementById('letra-sheet').classList.add('open');
+  letraOpen = true;
+}
+function closeLetraSheet() {
+  document.getElementById('letra-sheet').classList.remove('open');
+  letraOpen = false;
+}
+window.closeLetraSheet = closeLetraSheet;
+window.openHeroLetra   = function() {
+  const canto = navCantos[currentIdx];
+  if (canto) openLetraSheet(canto.letra || '', canto.titulo);
+};
+
+// Swipe down para cerrar el sheet de letra
+(function() {
+  const sheet = document.getElementById('letra-sheet');
+  let ty0 = 0;
+  sheet.addEventListener('touchstart', e => { ty0 = e.touches[0].clientY; }, { passive: true });
+  sheet.addEventListener('touchend',   e => {
+    const dy = e.changedTouches[0].clientY - ty0;
+    if (dy > 60) closeLetraSheet();
+  }, { passive: true });
+})();
+
 // Swipe en el hero
 (function() {
   const hero = document.getElementById('cantos-hero');
@@ -416,7 +516,7 @@ window.heroNav = heroNav;
   hero.addEventListener('touchstart', e => { tx0 = e.touches[0].clientX; }, { passive: true });
   hero.addEventListener('touchend',   e => {
     const dx = e.changedTouches[0].clientX - tx0;
-    if (Math.abs(dx) < 40) return;
+    if (Math.abs(dx) < 40 || letraOpen) return;
     heroNav(dx < 0 ? 1 : -1);
   }, { passive: true });
 })();
@@ -425,6 +525,7 @@ window.heroNav = heroNav;
 let allCantos  = [];
 let navCantos  = [];
 let currentIdx = 0;
+let letraOpen  = false;
 let sortMode   = 'nivel-asc';
 
 function sortedCantos() {
@@ -544,12 +645,7 @@ function renderList(listEl, cantos) {
           '</div>' +
         '</div>' +
       '</div>' +
-      '<div class="canto-letra-wrap">' +
-        '<div class="canto-letra" id="letra-' + cardId + '" style="max-height:110px">' +
-          renderLetra(canto.letra || '') +
-        '</div>' +
-        '<button class="canto-ver-mas" id="btn-ver-' + cardId + '">ver más</button>' +
-      '</div>';
+      '<button class="btn-letra" id="btn-letra-' + cardId + '">Letra</button>';
 
     listEl.appendChild(card);
 
@@ -559,8 +655,7 @@ function renderList(listEl, cantos) {
       const barWrap = document.getElementById('bar-wrap-' + cardId);
       const curEl   = document.getElementById('cur-' + cardId);
       const durEl   = document.getElementById('dur-' + cardId);
-      const letraEl = document.getElementById('letra-' + cardId);
-      const verBtn  = document.getElementById('btn-ver-' + cardId);
+      const letraBtn = document.getElementById('btn-letra-' + cardId);
 
       fetch(cantoUrl, { method: 'HEAD' }).then(r => {
         if (!r.ok) playBtn.disabled = true;
@@ -581,11 +676,11 @@ function renderList(listEl, cantos) {
       };
       barWrap.onclick = (e) => { if (activeAudio && activePlayBtn === playBtn) seekCanto(e, activeAudio, barWrap); };
 
-      let expandido = false;
-      verBtn.onclick = () => {
-        expandido = !expandido;
-        letraEl.style.maxHeight = expandido ? '9999px' : '110px';
-        verBtn.textContent = expandido ? 'ver menos' : 'ver más';
+      letraBtn.onclick = () => {
+        updateHero(canto);
+        const ni = navCantos.findIndex(c => c.nivel===canto.nivel && c.cuaderno===canto.cuaderno && c.bloqueIdx===canto.bloqueIdx);
+        if (ni >= 0) { currentIdx = ni; renderDots(); updateNavBtns(); }
+        openLetraSheet(canto.letra || '', canto.titulo);
       };
     });
   });
