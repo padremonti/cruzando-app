@@ -332,7 +332,7 @@ def build_ubible_text(misterio_record: dict, titulo_oficial: str) -> str:
     partes = []
     if titulo_oficial:
         partes.append(titulo_oficial)
-    partes.append(formula)
+    partes.append(formula + ":")
     partes.append(evangelio)
     partes.append(cierre)
 
@@ -473,6 +473,35 @@ def load_context_and_text(json_file, bloque, misterio_en_bloque, section_name):
     return nivel, cuaderno, misterio, titulo_info, summary, text, info, filename
 
 
+def load_context_and_text_with_fields(json_file, bloque, misterio_en_bloque, section_name):
+    """Como load_context_and_text pero también devuelve los 7 campos del misterio para el accordion."""
+    text, info, nivel, cuaderno, misterio, titulo_info, summary = _auto_load_text(
+        json_file, bloque, misterio_en_bloque, section_name
+    )
+    filename, _ = preview_filename(section_name, int(nivel), int(cuaderno), int(misterio))
+
+    # Cargar campos crudos del misterio para el accordion
+    try:
+        data = load_json_file(json_file)
+        rec = get_misterio_record(data, bloque, int(misterio_en_bloque))
+        ac_titulo       = rec.get("titulo", "")
+        ac_subtitulo    = rec.get("subtitulo", "")
+        ac_referencia   = rec.get("referencia", "")
+        ac_evangelio    = rec.get("evangelio", "")
+        ac_contemplacion = rec.get("contemplacion", "")
+        ac_meditacion   = rec.get("meditacion", "")
+        ac_intercesion  = rec.get("intercesion", "")
+    except Exception:
+        ac_titulo = ac_subtitulo = ac_referencia = ""
+        ac_evangelio = ac_contemplacion = ac_meditacion = ac_intercesion = ""
+
+    return (
+        nivel, cuaderno, misterio, titulo_info, summary, text, info, filename,
+        ac_titulo, ac_subtitulo, ac_referencia,
+        ac_evangelio, ac_contemplacion, ac_meditacion, ac_intercesion,
+    )
+
+
 def siguiente_seccion_y_carga(section_name, json_file, bloque, misterio_en_bloque, nivel, cuaderno, misterio):
     aviso = ""
     new_bloque = bloque
@@ -543,36 +572,42 @@ def generate_ai_text(json_file: str, bloque: str, misterio_en_bloque: int, secti
 
     if section_name == "Bienvenida":
         prompt = f"""
-Escribe la bienvenida de audio para una sesión de oración de CruzAndo. Debe ser MUY BREVE: máximo 5 oraciones antes del cierre final.
+Eres el asistente de redacción del P. César Ricardo Montijo Rivas, sacerdote mexicano y creador de CruzAndo, una peregrinación espiritual gamificada basada en el Santo Rosario. Debes escribir un borrador de START (Bienvenida) para una sesión de audio que él revisará y editará.
 
-Contexto del itinerario:
+CONTEXTO DEL MISTERIO:
 - Mundo: {mundo}
 - Elemento: {elemento}
 - Bloque: {bloque} — {subtitulo_bloque}
-- Misterio: {titulo} ({subtitulo})
+- Misterio: {titulo}
+- Subtítulo del misterio: {subtitulo}
 - Referencia bíblica: {referencia}
 
-Estructura obligatoria (en este orden):
-1. Una frase que ubique al usuario en el itinerario (mundo, elemento o bloque), sin describir demasiado.
-2. Una frase que anuncie de qué trata esta sesión, mencionando el nombre del misterio.
-3. Mencionar la referencia bíblica solo como libro, capítulo y versículo (ej. "Lucas uno, veintiseis"), nunca copiar el texto.
-4. Terminar EXACTAMENTE con estas tres líneas, sin agregar nada después:
+ESTILO Y VOZ (imitar con fidelidad):
+- Voz femenina, maternal y cercana — como una guía que camina contigo, no que predica desde arriba.
+- Tono pastoral y cálido, nunca solemne ni teatral. Natural, como en conversación real.
+- Puedes abrir con una pregunta retórica o tensión espiritual que enganche al oyente antes de ubicarlo en el itinerario.
+- Segunda persona singular (tú), directa y personal.
+- Puedes mencionar el nombre del mundo, elemento o bloque con naturalidad en la primera o segunda frase.
+- Anuncia el misterio y la referencia bíblica de forma sencilla (ej: "Lucas dos, versículos uno al siete").
+- Las frases son cortas. Los párrafos también. Hay espacio entre las ideas.
+- Máximo 4-6 oraciones de contenido antes del cierre ritual.
+
+EJEMPLOS DE ESTILO DEL AUTOR (observa el tono y la estructura, no copies):
+Ejemplo 1: "Bienvenido a esta sesión de CruzAndo la Cruz, en el segundo nivel: pecado. A pesar de encontrarnos meditando los tiernos misterios de la infancia de Cristo, ya desde su nacimiento se enfrentó con un mundo oscuro, donde el egoísmo hace que cerremos las puertas a Dios. Vamos a meditar en Lucas 2, versículos del 1 al 7."
+Ejemplo 2: "Tal vez, muchas veces has escuchado y dicho la expresión: «Cordero de Dios que quita el pecado del mundo»... ¿qué significa esto? Vamos a sumergirnos en el misterio del Bautismo en el Jordán, escuchando Juan 1, versículos 29 y del 32 al 34."
+Ejemplo 3: "Muchas personas se suelen preguntar: ¿por qué Dios permitió que me hicieran daño?... Y la respuesta más liberadora que puedo darte es esta: Dios NO permitió el pecado: lo padeció contigo y por ti."
+
+CIERRE OBLIGATORIO — terminar SIEMPRE con estas tres líneas exactas, sin añadir nada después:
 
 Respira hondo…
 Abre tu corazón…
 Comencemos a cruzar…
-
-Estilo:
-- Segunda persona singular (tú), nunca plural ni impersonal
-- Tono cálido, cercano y sencillo
-- Frases cortas, naturales para voz femenina
-- Sin dramatismo, sin solemnidad excesiva
 """
     else:
         prompt = f"""
-Genera una despedida breve para una sesión de oración católica de CruzAndo.
+Eres el asistente de redacción del P. César Ricardo Montijo Rivas, sacerdote mexicano y creador de CruzAndo, una peregrinación espiritual gamificada basada en el Santo Rosario. Debes escribir un borrador de BYE (Despedida) para una sesión de audio que él revisará y editará.
 
-Contexto:
+CONTEXTO DEL MISTERIO:
 - Mundo: {mundo}
 - Elemento: {elemento}
 - Bloque: {bloque}
@@ -580,21 +615,21 @@ Contexto:
 - Misterio: {titulo}
 - Subtítulo del misterio: {subtitulo}
 
-Objetivo:
-- voz femenina cálida, cercana y luminosa
-- tono alegre, motivador y reconfortante
-- no solemne
-- breve
-- debe dejar impulso para seguir caminando
-- debe sonar como una madre que despide con cariño y ánimo
-- frases cortas, buenas para audio
+ESTILO Y VOZ (imitar con fidelidad):
+- Voz femenina, maternal y cercana — como una guía que te acompaña al final del camino de hoy.
+- Tono alegre, esperanzador, con impulso hacia adelante. Nunca solemne ni pesado.
+- Estructura habitual: (1) remate contemplativo breve sobre el misterio recién rezado, (2) anticipo del próximo misterio o sesión como gancho, (3) opcionalmente: recordatorio del diario personal, (4) cierre festivo.
+- Las frases son cortas. Puede haber una pausa dramática ("...") entre ideas.
+- Segunda persona singular (tú), directa y personal.
+- Máximo 4-6 oraciones antes del cierre.
+- No sonar comercial ni genérico.
 
-Importante:
-- dirigirse siempre al usuario en segunda persona singular (tú), nunca en plural ni en impersonal
-- no escribir oración final larga
-- no usar cierre demasiado serio
-- no sonar comercial
-- terminar EXACTAMENTE con esta frase y nada distinto al final:
+EJEMPLOS DE ESTILO DEL AUTOR (observa el tono y la estructura, no copies):
+Ejemplo 1: "El Salvador ya está aquí, liberándote de todo peso. Siente esa alegría en tu corazón. En la próxima sesión, vamos a reconocer cuántas veces hemos cerrado las puertas a Dios, y eso es justamente el pecado."
+Ejemplo 2: "Con cada Eucaristía, su sangre derramada nos recuerda que siempre hay un nuevo comienzo. Felicidades por recorrer los Misterios Luminosos cruzando el pecado. Ahora, has desbloqueado el canto: «Entra su Luz». A propósito, ¿has descubierto más sobre tu fe? Recuerda que puedes escribir tus reflexiones en tu diario personal."
+Ejemplo 3: "La Flagelación del Señor nos enseña a enfrentar el dolor con valentía, para interrumpir por siempre el ciclo de la venganza y la violencia. ¿Has escrito alguna reflexión que sea valiosa, para compartir con alguien? Recuerda que puedes consultarla en tu diario... En la próxima sesión vamos a entrar a un tema muy actual: la cultura de la cancelación. ¡Te espero pronto!"
+
+CIERRE OBLIGATORIO — terminar SIEMPRE con esta línea exacta, sin añadir nada después:
 
 ¡Goza el camino, y que Dios te bendiga siempre!
 """
@@ -885,6 +920,44 @@ def gestor_a_load_misterio_fields(data, bloque_display: str, misterio_label: str
         m.get("meditacion", ""),
         m.get("intercesion", ""),
     )
+
+
+def save_misterio_from_accordion(json_file, bloque, misterio_en_bloque,
+                                  titulo, subtitulo, referencia,
+                                  evangelio, contemplacion, meditacion, intercesion):
+    """Guarda los campos editados en el accordion directamente al JSON cargado en TTS Maker."""
+    if not json_file:
+        return "No hay archivo JSON seleccionado."
+    try:
+        data = load_json_file(json_file)
+    except Exception as e:
+        return f"Error al leer el archivo: {e}"
+
+    bloque = bloque.lower() if bloque else "gozosos"
+    misterios = data.get("misterios", {}).get(bloque, [])
+    idx_en_bloque = int(misterio_en_bloque) - 1
+
+    if idx_en_bloque < 0 or idx_en_bloque >= len(misterios):
+        return f"Índice de misterio fuera de rango ({misterio_en_bloque}) en bloque '{bloque}'."
+
+    data["misterios"][bloque][idx_en_bloque].update({
+        "titulo":        titulo.strip()       if titulo        else "",
+        "subtitulo":     subtitulo.strip()    if subtitulo     else "",
+        "referencia":    referencia.strip()   if referencia    else "",
+        "evangelio":     evangelio            if evangelio     else "",
+        "contemplacion": contemplacion        if contemplacion else "",
+        "meditacion":    meditacion           if meditacion    else "",
+        "intercesion":   intercesion          if intercesion   else "",
+    })
+
+    try:
+        path = Path(json_file)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+        num = data["misterios"][bloque][idx_en_bloque].get("numero", misterio_en_bloque)
+        return f"Misterio {num} ({bloque}) guardado correctamente en {path.name}."
+    except Exception as e:
+        return f"Error al guardar: {e}"
 
 
 def gestor_a_save_misterio(nivel_id, bloque_display, misterio_label, data,
@@ -1210,6 +1283,57 @@ def save_micro_preview(nivel_id: str, content: str):
 
 
 # -------------------------------------------------------------------
+# Mejorar estilo con IA
+# -------------------------------------------------------------------
+
+_ESTILO_SYSTEM = (
+    "Eres el corrector de estilo del P. César Ricardo Montijo Rivas, sacerdote mexicano y autor de CruzAndo. "
+    "Recibirás un texto de audio para la app: puede ser una bienvenida, una despedida, una contemplación, "
+    "una pregunta de meditación, una intercesión u otro guion de sesión de oración. "
+    "Tu tarea es corregir ortografía, puntuación y fluidez oral, conservando íntegramente la voz y el estilo del autor. "
+    "Reglas estrictas:\n"
+    "- NO reescribas ni parafrasees: solo corrige errores reales y mejora levemente la fluidez donde sea necesario.\n"
+    "- Conserva todas las elipsis (…), exclamaciones, preguntas retóricas y pausas dramáticas tal como están.\n"
+    "- No añadas ni elimines ideas, frases ni párrafos.\n"
+    "- No cambies el tono ni la estructura.\n"
+    "- El texto es para ser leído en voz alta: prioriza el ritmo oral sobre las normas académicas.\n"
+    "- Devuelve SOLO el texto corregido, sin explicaciones, sin comentarios, sin marcas de cambio."
+)
+
+
+def mejorar_estilo_con_ia(text: str):
+    if not OPENAI_API_KEY:
+        raise gr.Error("No encontré OPENAI_API_KEY en tu archivo .env")
+    if not text or not text.strip():
+        raise gr.Error("No hay texto en la caja para mejorar.")
+
+    headers = {"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"}
+    payload = {
+        "model": TEXT_MODEL,
+        "instructions": _ESTILO_SYSTEM,
+        "input": text.strip(),
+    }
+
+    try:
+        r = requests.post(RESPONSES_API_URL, headers=headers, json=payload, timeout=180)
+        r.raise_for_status()
+        result = extract_output_text_from_responses_api(r.json())
+    except requests.HTTPError as e:
+        try:
+            detail = r.json()
+        except Exception:
+            detail = r.text
+        raise gr.Error(f"Error HTTP al mejorar texto:\n{detail}") from e
+    except Exception as e:
+        raise gr.Error(f"Error al mejorar texto: {e}") from e
+
+    if not result.strip():
+        raise gr.Error("La IA no devolvió texto.")
+
+    return result, f"Texto mejorado con IA | Modelo: {TEXT_MODEL}"
+
+
+# -------------------------------------------------------------------
 # UI
 # -------------------------------------------------------------------
 
@@ -1281,6 +1405,8 @@ audio {
     max-height: 300px !important;
     overflow-y: auto !important;
     resize: none !important;
+    font-size: 18px !important;
+    line-height: 1.6 !important;
 }
 
 #editor_content textarea {
@@ -1371,7 +1497,9 @@ with gr.Blocks(
                         elem_id="text_editable",
                         placeholder="Aquí se cargará o generará el texto. Luego puedes corregirlo antes de crear el TTS.",
                     )
-                    generate_btn = gr.Button("🎧 Generar audio", variant="primary")
+                    with gr.Row():
+                        mejorar_btn = gr.Button("✨ Mejorar estilo", variant="secondary")
+                        generate_btn = gr.Button("🎧 Generar audio", variant="primary")
 
                 with gr.Column(scale=1):
                     gr.Markdown("### Resultado")
@@ -1381,6 +1509,23 @@ with gr.Blocks(
                     next_section_btn = gr.Button("➡️ Siguiente sección")
                     result_output = gr.Textbox(label="Resultado", lines=8)
                     download_output = gr.File(label="Descargar MP3")
+
+            with gr.Accordion("✏️ Editar misterio actual", open=False):
+                gr.Markdown(
+                    "Edita los campos del misterio cargado y guarda directamente al JSON. "
+                    "Los campos se rellenan automáticamente al pulsar **📥 Cargar contexto JSON**."
+                )
+                with gr.Row():
+                    ac_titulo        = gr.Textbox(label="Título", scale=2)
+                    ac_subtitulo     = gr.Textbox(label="Subtítulo", scale=2)
+                    ac_referencia    = gr.Textbox(label="Referencia bíblica", scale=1)
+                ac_evangelio     = gr.Textbox(label="Evangelio", lines=6)
+                ac_contemplacion = gr.Textbox(label="Contemplación", lines=6)
+                ac_meditacion    = gr.Textbox(label="Meditación", lines=6)
+                ac_intercesion   = gr.Textbox(label="Intercesión", lines=4)
+                with gr.Row():
+                    ac_save_btn   = gr.Button("💾 Guardar cambios en JSON", variant="primary")
+                    ac_save_status = gr.Textbox(label="Estado", lines=2, scale=2)
 
         # ============================================================
         # TAB 2 — Editor de Contenido
@@ -1540,15 +1685,35 @@ with gr.Blocks(
     )
 
     load_context_btn.click(
-        fn=load_context_and_text,
+        fn=load_context_and_text_with_fields,
         inputs=[json_file, bloque, misterio_en_bloque, section_name],
-        outputs=[nivel, cuaderno, misterio, titulo_info, context_info, text, voice_info, filename_preview],
+        outputs=[
+            nivel, cuaderno, misterio, titulo_info, context_info, text, voice_info, filename_preview,
+            ac_titulo, ac_subtitulo, ac_referencia,
+            ac_evangelio, ac_contemplacion, ac_meditacion, ac_intercesion,
+        ],
+    )
+
+    ac_save_btn.click(
+        fn=save_misterio_from_accordion,
+        inputs=[
+            json_file, bloque, misterio_en_bloque,
+            ac_titulo, ac_subtitulo, ac_referencia,
+            ac_evangelio, ac_contemplacion, ac_meditacion, ac_intercesion,
+        ],
+        outputs=[ac_save_status],
     )
 
     generate_btn.click(
         fn=generate_audio,
         inputs=[text, section_name, nivel, cuaderno, misterio],
         outputs=[audio_output, result_output, filename_preview, download_output],
+    )
+
+    mejorar_btn.click(
+        fn=mejorar_estilo_con_ia,
+        inputs=[text],
+        outputs=[text, voice_info],
     )
 
     next_section_btn.click(
