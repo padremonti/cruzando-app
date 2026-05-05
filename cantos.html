@@ -145,6 +145,36 @@ body.light {
   font-size: 0.78rem; color: rgba(255,255,255,0.68);
   margin-top: 5px; position: relative;
 }
+.hero-controls {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 14px; position: relative;
+}
+.hero-nav-btn {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.3); background: rgba(0,0,0,0.15);
+  color: rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: background 0.15s; -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+}
+.hero-nav-btn:disabled { opacity: 0.3; cursor: default; }
+.hero-nav-btn:active:not(:disabled) { background: rgba(0,0,0,0.3); }
+.hero-dots {
+  display: flex; align-items: center; justify-content: center;
+  gap: 5px; flex: 1; padding: 0 8px;
+}
+.hero-dot {
+  height: 6px; border-radius: 3px; background: rgba(255,255,255,0.4);
+  transition: width 0.25s ease, background 0.25s ease; width: 6px; flex-shrink: 0;
+}
+.hero-dot.active { width: 18px; background: rgba(255,255,255,0.95); }
+@keyframes heroBounceLeft {
+  0%{transform:translateX(0)} 30%{transform:translateX(-14px)} 65%{transform:translateX(5px)} 100%{transform:translateX(0)}
+}
+@keyframes heroBounceRight {
+  0%{transform:translateX(0)} 30%{transform:translateX(14px)} 65%{transform:translateX(-5px)} 100%{transform:translateX(0)}
+}
+.hero-bounce-left  { animation: heroBounceLeft  0.38s ease; }
+.hero-bounce-right { animation: heroBounceRight 0.38s ease; }
 
 /* ── Letra ── */
 .canto-letra-wrap { padding: 14px 16px 16px; }
@@ -219,6 +249,15 @@ body.light {
     <div class="cantos-hero-badge" id="hero-badge">Misterios Gozosos</div>
     <div class="cantos-hero-title" id="hero-title">Mis Cantos</div>
     <div class="cantos-hero-sub" id="hero-sub">Nivel 1</div>
+    <div class="hero-controls">
+      <button class="hero-nav-btn" id="hero-prev" onclick="window.heroNav(-1)" disabled>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="hero-dots" id="hero-dots"></div>
+      <button class="hero-nav-btn" id="hero-next" onclick="window.heroNav(1)" disabled>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
   </div>
 
   <div id="content">
@@ -328,8 +367,64 @@ function updateHero(canto) {
 }
 window.toggleAuto = function(btn) { btn.classList.toggle('on'); };
 
-// Estado de ordenación
+function renderDots() {
+  const total = navCantos.length;
+  const el    = document.getElementById('hero-dots');
+  if (!el || total <= 1) { if (el) el.innerHTML = ''; return; }
+  const MAX   = 7;
+  const start = Math.max(0, Math.min(currentIdx - Math.floor(MAX / 2), total - MAX));
+  const end   = Math.min(total, start + MAX);
+  let html = '';
+  for (let i = start; i < end; i++)
+    html += '<div class="hero-dot' + (i === currentIdx ? ' active' : '') + '"></div>';
+  el.innerHTML = html;
+}
+
+function updateNavBtns() {
+  const prev = document.getElementById('hero-prev');
+  const next = document.getElementById('hero-next');
+  if (prev) prev.disabled = currentIdx === 0;
+  if (next) next.disabled = currentIdx >= navCantos.length - 1;
+}
+
+function heroBounce(dir) {
+  const hero = document.getElementById('cantos-hero');
+  const cls  = dir === 'right' ? 'hero-bounce-right' : 'hero-bounce-left';
+  hero.classList.remove('hero-bounce-left', 'hero-bounce-right');
+  void hero.offsetWidth;
+  hero.classList.add(cls);
+  hero.addEventListener('animationend', () => hero.classList.remove(cls), { once: true });
+}
+
+function heroNav(delta) {
+  const next = currentIdx + delta;
+  if (next < 0 || next >= navCantos.length) {
+    heroBounce(delta > 0 ? 'right' : 'left');
+    return;
+  }
+  currentIdx = next;
+  updateHero(navCantos[currentIdx]);
+  renderDots();
+  updateNavBtns();
+}
+window.heroNav = heroNav;
+
+// Swipe en el hero
+(function() {
+  const hero = document.getElementById('cantos-hero');
+  let tx0 = 0;
+  hero.addEventListener('touchstart', e => { tx0 = e.touches[0].clientX; }, { passive: true });
+  hero.addEventListener('touchend',   e => {
+    const dx = e.changedTouches[0].clientX - tx0;
+    if (Math.abs(dx) < 40) return;
+    heroNav(dx < 0 ? 1 : -1);
+  }, { passive: true });
+})();
+
+// Estado de ordenación y navegación
 let allCantos  = [];
+let navCantos  = [];
+let currentIdx = 0;
 let sortMode   = 'nivel-asc';
 
 function sortedCantos() {
@@ -480,6 +575,8 @@ function renderList(listEl, cantos) {
         } else {
           playCantoAudio(cantoUrl, playBtn, barFill, curEl, durEl);
           updateHero(canto);
+          const ni = navCantos.findIndex(c => c.nivel===canto.nivel && c.cuaderno===canto.cuaderno && c.bloqueIdx===canto.bloqueIdx);
+          if (ni >= 0) { currentIdx = ni; renderDots(); updateNavBtns(); }
         }
       };
       barWrap.onclick = (e) => { if (activeAudio && activePlayBtn === playBtn) seekCanto(e, activeAudio, barWrap); };
@@ -509,7 +606,9 @@ function renderCantos(cantos) {
     return;
   }
 
-  allCantos = cantos;
+  allCantos  = cantos;
+  navCantos  = cantos.slice().sort((a,b) => a.nivel!==b.nivel ? a.nivel-b.nivel : a.cuaderno!==b.cuaderno ? a.cuaderno-b.cuaderno : a.bloqueIdx-b.bloqueIdx);
+  currentIdx = 0;
   const SEEN_KEY = 'cruzando_cantos_seen_' + auth.currentUser?.uid;
   try { localStorage.setItem(SEEN_KEY, String(cantos.length)); } catch(e) {}
 
@@ -523,7 +622,7 @@ function renderCantos(cantos) {
 
   const _sc = sortedCantos();
   renderList(document.getElementById('cantos-list'), _sc);
-  if (_sc.length) updateHero(_sc[0]);
+  if (navCantos.length) { updateHero(navCantos[0]); renderDots(); updateNavBtns(); }
 }
 
 function escHTML(s) {
