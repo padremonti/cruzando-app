@@ -309,11 +309,15 @@ body.light .sheet-letra .sep-line { color: var(--text-dim); }
 /* ── Nav bar ── */
 .shell { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding-bottom: 0; }
 .app-nav {
-  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-  width: 100%; max-width: 480px; z-index: 80;
+  position: fixed; bottom: 0; left: 50%;
+  transform: translateX(-50%) translateY(100%);
+  width: 100%; max-width: 480px; z-index: 100;
   background: var(--card); border-top: 1px solid var(--border);
   display: flex; align-items: stretch; padding: 6px 0 env(safe-area-inset-bottom, 0);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
 }
+.app-nav.visible { transform: translateX(-50%) translateY(0); }
 .app-nav-item {
   flex: 1; background: none; border: none; cursor: pointer;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -562,7 +566,7 @@ body.light .hero-grad {
   0%   { opacity: 0.5; transform: translate(-50%,-50%) scale(0.8); }
   100% { opacity: 0;   transform: translate(-50%,-50%) scale(1.4); }
 }
-.hero-content { position: relative; z-index: 2; }
+.hero-content { position: relative; z-index: 3; }
 .hero-badge {
   display: inline-flex; align-items: center; gap: 5px;
   background: var(--block-color-bg); border: 1px solid var(--block-color);
@@ -578,8 +582,22 @@ body.light .hero-grad {
 .hero-titulo {
   font-family: 'Crimson Pro', serif; font-size: 2rem; font-weight: 600;
   line-height: 1.1; color: #fff; margin-bottom: 4px;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.6), 0 2px 20px rgba(0,0,0,0.5);
 }
-.hero-subtitulo { font-size: 0.72rem; color: rgba(255,255,255,0.55); }
+.hero-subtitulo {
+  font-size: 0.72rem; color: rgba(255,255,255,0.55);
+  text-shadow: 0 1px 6px rgba(0,0,0,0.7);
+}
+.hero-badge { text-shadow: 0 1px 6px rgba(0,0,0,0.7); }
+.badge-text  { text-shadow: 0 1px 6px rgba(0,0,0,0.7); }
+.hero-color-wash {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 65%;
+  background: linear-gradient(to top, var(--block-color) 0%, rgba(0,0,0,0) 100%);
+  opacity: 0.45; pointer-events: none; z-index: 1;
+  transition: opacity 0.3s;
+}
+body.light .hero-color-wash { opacity: 0.65; }
 .hero-dots-bar {
   position: relative; z-index: 2;
   display: flex; align-items: center; justify-content: center;
@@ -721,6 +739,7 @@ body.light .tool-btn svg { background: rgba(0,0,0,0.04); }
       <rect width="360" height="220" filter="url(#noise-filter)" opacity="0.4"/>
     </svg>
     <div class="hero-grad"></div>
+    <div class="hero-color-wash"></div>
     <div class="hero-glow"></div>
     <div class="hero-ring r1"></div>
     <div class="hero-ring r2"></div>
@@ -1074,18 +1093,43 @@ function heroBounce(dir) {
   hero.addEventListener('animationend', () => hero.classList.remove(cls), { once: true });
 }
 
-function heroNav(delta) {
-  const next = currentIdx + delta;
-  if (next < 0 || next >= navCantos.length) {
-    heroBounce(delta > 0 ? 'right' : 'left');
+function goToCanto(index) {
+  if (index < 0 || index >= navCantos.length) {
+    heroBounce(index < 0 ? 'right' : 'left');
     return;
   }
-  currentIdx = next;
+  // Capturar si el hero estaba sonando antes de cambiar
+  const heroPlayBtn   = document.getElementById('hero-play-btn');
+  const wasHeroPlaying = activeAudio && !activeAudio.paused && activePlayBtn === heroPlayBtn;
+
+  // Detener audio completamente
+  if (activeAudio) {
+    activeAudio.pause();
+    activeAudio.src = '';
+    if (activePlayBtn) setPlayIcon(activePlayBtn, false);
+    if (activeBarFill) activeBarFill.style.width = '0%';
+    if (activeCurEl)   activeCurEl.textContent   = '0:00';
+    if (activeDurEl)   activeDurEl.textContent   = '0:00';
+    activeAudio = null; activePlayBtn = null;
+    activeBarFill = null; activeCurEl = null; activeDurEl = null;
+  }
+  document.getElementById('cantos-hero')?.classList.remove('playing');
+
+  currentIdx = index;
   updateHero(navCantos[currentIdx]);
   renderDots();
   updateNavBtns();
+  saveBookmark(navCantos[currentIdx]);
+
+  // Si estaba sonando en el hero, arrancar el nuevo automáticamente
+  if (wasHeroPlaying) playHeroCanto(navCantos[currentIdx]);
 }
-window.heroNav = heroNav;
+
+function heroNav(delta) {
+  goToCanto(currentIdx + delta);
+}
+window.heroNav   = heroNav;
+window.goToCanto = goToCanto;
 
 function openLetraSheet(letra, titulo) {
   document.getElementById('sheet-titulo').textContent   = titulo;
@@ -1663,6 +1707,40 @@ async function backfillCantos(uid) {
     }
   } catch(e) { console.warn('[backfill]', e); }
 }
+
+// ════════════════════════════════════════
+// SWIPE VERTICAL → mostrar/ocultar nav
+// ════════════════════════════════════════
+(function(){
+  let navTimer = null;
+  function showAppNav() {
+    const n = document.getElementById('app-nav');
+    if (!n) return;
+    n.classList.add('visible');
+    clearTimeout(navTimer);
+    navTimer = setTimeout(() => n.classList.remove('visible'), 3500);
+  }
+  function hideAppNav() {
+    const n = document.getElementById('app-nav');
+    if (!n) return;
+    n.classList.remove('visible');
+    clearTimeout(navTimer);
+  }
+  let startY = 0, startX = 0;
+  document.addEventListener('touchstart', e => {
+    startY = e.touches[0].clientY;
+    startX = e.touches[0].clientX;
+  }, { passive: true });
+  document.addEventListener('touchend', e => {
+    if (letraOpen) return;
+    const dy = e.changedTouches[0].clientY - startY;
+    const dx = e.changedTouches[0].clientX - startX;
+    if (Math.abs(dy) > 50 && Math.abs(dy) > Math.abs(dx) * 1.5) {
+      if (dy < 0) showAppNav();
+      else hideAppNav();
+    }
+  }, { passive: true });
+})();
 
 // Auth + carga
 onAuthStateChanged(auth, async user => {
