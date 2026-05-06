@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="theme-color" content="#1A0E04"/>
+<title>Extras · CruzAndo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+/* ── Reset & vars ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:        #1A0E04;
+  --card:      #231508;
+  --border:    rgba(255,255,255,0.09);
+  --text:      #F5EDE4;
+  --text-soft: #C8B8AA;
+  --text-dim:  #806858;
+  --orange:    #FF7A00;
+  --gold:      #D4A017;
+  --gold-glow: rgba(212,160,23,0.35);
+  --gold-bg:   rgba(212,160,23,0.18);
+}
+body {
+  background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif;
+  min-height: 100vh; padding-bottom: 80px;
+}
+body.light {
+  --bg:        #E6DED3;
+  --card:      #F5EDE4;
+  --border:    rgba(0,0,0,0.1);
+  --text:      #1A0E04;
+  --text-soft: #4A3828;
+  --text-dim:  #9A8878;
+}
+
+/* ── Status bar ── */
+.status-bar {
+  position: sticky; top: 0; z-index: 50;
+  background: var(--bg); border-bottom: 1px solid var(--border);
+  padding: 14px 18px 10px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.status-bar-center { flex: 1; text-align: center; }
+.status-bar-title {
+  font-family: 'Crimson Pro', serif; font-size: 1.1rem;
+  font-weight: 600; color: var(--text);
+}
+.status-bar-sub { font-size: 0.72rem; color: var(--text-dim); letter-spacing: 0.6px; }
+.btn-icon {
+  background: none; border: none; cursor: pointer; color: var(--text-soft);
+  width: 38px; height: 38px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+
+/* ── Shop hero ── */
+.shop-hero {
+  position: relative; height: 200px; overflow: hidden;
+  display: flex; flex-direction: column;
+  justify-content: flex-end; padding: 20px 20px 18px;
+}
+.shop-hero-bg {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--orange) 0%, var(--gold) 100%);
+}
+.shop-hero-noise {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  pointer-events: none; mix-blend-mode: soft-light; opacity: 0.45;
+}
+.shop-hero-grad {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top,
+    rgba(26,14,4,0.92) 0%, rgba(26,14,4,0.35) 55%, transparent 100%);
+}
+body.light .shop-hero-grad {
+  background: linear-gradient(to top,
+    rgba(230,222,211,0.92) 0%, rgba(230,222,211,0.35) 55%, transparent 100%);
+}
+.shop-hero-glow {
+  position: absolute; top: -50px; right: -50px;
+  width: 220px; height: 220px; border-radius: 50%;
+  background: radial-gradient(circle, var(--gold-glow) 0%, transparent 70%);
+  animation: shop-glow-pulse 3s ease-in-out infinite;
+}
+@keyframes shop-glow-pulse {
+  0%,100% { opacity: 0.7; transform: scale(1);    }
+  50%      { opacity: 1;   transform: scale(1.12); }
+}
+.shop-hero-content { position: relative; z-index: 2; }
+.shop-hero-badge {
+  display: inline-flex; align-items: center;
+  background: rgba(0,0,0,0.22); border-radius: 999px;
+  padding: 3px 11px; margin-bottom: 9px;
+  font-size: 0.63rem; font-weight: 700;
+  color: rgba(255,255,255,0.92); letter-spacing: 0.9px; text-transform: uppercase;
+}
+.shop-hero-title {
+  font-family: 'Crimson Pro', serif; font-size: 2rem;
+  font-weight: 600; color: #fff; line-height: 1.1; margin-bottom: 4px;
+}
+.shop-hero-sub { font-size: 0.78rem; color: rgba(255,255,255,0.62); }
+
+/* ── Saldo bar ── */
+.saldo-bar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 18px;
+  background: rgba(212,160,23,0.07);
+  border-bottom: 1px solid rgba(212,160,23,0.15);
+}
+.saldo-icon { font-size: 1.1rem; flex-shrink: 0; }
+.saldo-label { font-size: 0.75rem; color: var(--text-dim); flex: 1; }
+.saldo-value {
+  font-size: 1.05rem; font-weight: 700; color: var(--gold);
+  font-variant-numeric: tabular-nums;
+}
+.saldo-nivel {
+  font-size: 0.7rem; color: var(--text-dim);
+  margin-left: 4px; align-self: flex-end; padding-bottom: 1px;
+}
+
+/* ── Category tabs ── */
+.cats-scroll {
+  overflow-x: auto; overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 14px 18px 12px;
+  scrollbar-width: none;
+  display: flex; gap: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.cats-scroll::-webkit-scrollbar { display: none; }
+.cat-tab {
+  flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px;
+  padding: 7px 14px; border-radius: 20px;
+  border: 1px solid var(--border); background: var(--card);
+  font-family: inherit; font-size: 0.78rem; font-weight: 600;
+  color: var(--text-dim); cursor: pointer; white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.cat-tab.active { background: var(--gold-bg); border-color: var(--gold); color: var(--gold); }
+.cat-tab:active:not(.active) { background: var(--border); }
+
+/* ── Products section ── */
+.products-section { padding: 18px 18px 4px; }
+.section-title {
+  font-family: 'Crimson Pro', serif; font-size: 1.1rem; font-weight: 600;
+  color: var(--text); margin-bottom: 12px;
+}
+
+/* ── Product grid 2 columnas ── */
+.products-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 12px; margin-bottom: 28px;
+}
+.product-card {
+  background: var(--card); border-radius: 16px;
+  border: 1px solid var(--border);
+  overflow: hidden; display: flex; flex-direction: column;
+}
+.product-thumb {
+  height: 96px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, rgba(212,160,23,0.12) 0%, rgba(255,122,0,0.08) 100%);
+  font-size: 2.4rem;
+}
+.product-info {
+  padding: 10px 12px 12px; flex: 1;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.product-name {
+  font-family: 'Crimson Pro', serif; font-size: 0.98rem; font-weight: 600;
+  color: var(--text); line-height: 1.2;
+}
+.product-desc { font-size: 0.7rem; color: var(--text-dim); line-height: 1.4; }
+.product-price {
+  display: flex; align-items: center; gap: 4px;
+  margin-top: auto; padding-top: 8px;
+  font-size: 0.82rem; font-weight: 700; color: var(--gold);
+}
+.product-card.state-owned { border-color: var(--gold); }
+.product-card.state-locked { opacity: 0.55; }
+.product-badge {
+  display: inline-block; font-size: 0.62rem; font-weight: 700;
+  color: var(--gold); background: var(--gold-bg);
+  border-radius: 999px; padding: 2px 8px;
+  letter-spacing: 0.4px; align-self: flex-start; margin-bottom: 2px;
+}
+.product-btn {
+  width: 100%; padding: 7px; border-radius: 10px;
+  border: 1px solid var(--border); background: transparent;
+  font-family: inherit; font-size: 0.75rem; font-weight: 700;
+  color: var(--text-dim); cursor: default; margin-top: 6px;
+  -webkit-tap-highlight-color: transparent; transition: background 0.15s, opacity 0.15s;
+}
+.product-btn.btn-canjear {
+  border-color: var(--orange); background: var(--orange);
+  color: #fff; cursor: pointer;
+}
+.product-btn.btn-canjear:active { opacity: 0.85; }
+.product-btn.btn-owned {
+  border-color: var(--gold); background: var(--gold-bg); color: var(--gold);
+}
+.grid-section-empty {
+  text-align: center; padding: 40px 0 20px;
+  color: var(--text-dim); font-size: 0.88rem; grid-column: 1 / -1;
+}
+
+/* ── Medals horizontal ── */
+.medals-scroll {
+  overflow-x: auto; overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 4px 0 12px; scrollbar-width: none;
+  display: flex; gap: 10px;
+}
+.medals-scroll::-webkit-scrollbar { display: none; }
+.medal-item {
+  flex-shrink: 0; display: flex; flex-direction: column;
+  align-items: center; gap: 6px; width: 72px;
+}
+.medal-circle {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: rgba(212,160,23,0.08); border: 2px solid rgba(212,160,23,0.2);
+  display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
+  transition: background 0.2s, border-color 0.2s;
+}
+.medal-circle.earned {
+  background: var(--gold-bg); border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(212,160,23,0.15);
+}
+.medal-circle.locked { opacity: 0.35; }
+.medal-label {
+  font-size: 0.62rem; color: var(--text-dim);
+  text-align: center; line-height: 1.25; max-width: 68px;
+}
+.medal-label.earned { color: var(--gold); }
+
+/* ── Nav bar ── */
+.shell { padding-bottom: 72px; }
+.app-nav {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 480px; z-index: 80;
+  background: var(--card); border-top: 1px solid var(--border);
+  display: flex; align-items: stretch; padding: 6px 0 env(safe-area-inset-bottom, 0);
+}
+.app-nav-item {
+  flex: 1; background: none; border: none; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; padding: 4px 2px; color: var(--text-dim);
+  font-family: inherit; transition: color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.app-nav-item.active { color: var(--orange); }
+.app-nav-item[disabled] { cursor: default; opacity: 1; }
+.app-nav-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; }
+.app-nav-label { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.3px; }
+</style>
+<script src="utils.js"></script>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- Status bar -->
+  <header class="status-bar">
+    <div style="width:38px"></div>
+    <div class="status-bar-center">
+      <div class="status-bar-title">Tienda del Peregrino</div>
+      <div class="status-bar-sub">CruzAndo · Extras</div>
+    </div>
+    <button class="btn-icon" id="btn-dark" aria-label="Tema">
+      <svg id="ico-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <circle cx="12" cy="12" r="5"/>
+        <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+      <svg id="ico-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display:none">
+        <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+      </svg>
+    </button>
+  </header>
+
+  <!-- Shop hero -->
+  <section class="shop-hero" id="shop-hero">
+    <div class="shop-hero-bg"></div>
+    <svg class="shop-hero-noise" viewBox="0 0 360 200" xmlns="http://www.w3.org/2000/svg">
+      <filter id="shop-noise-filter">
+        <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>
+        <feColorMatrix type="saturate" values="0"/>
+      </filter>
+      <rect width="360" height="200" filter="url(#shop-noise-filter)" opacity="0.4"/>
+    </svg>
+    <div class="shop-hero-grad"></div>
+    <div class="shop-hero-glow"></div>
+    <div class="shop-hero-content">
+      <div class="shop-hero-badge">Tienda del peregrino</div>
+      <h1 class="shop-hero-title">Extras</h1>
+      <p class="shop-hero-sub">Personaliza tu camino con metros ganados</p>
+    </div>
+  </section>
+
+  <!-- Saldo bar -->
+  <div class="saldo-bar" id="saldo-bar">
+    <span class="saldo-icon">👣</span>
+    <span class="saldo-label">Metros disponibles</span>
+    <span class="saldo-value" id="saldo-value">0</span>
+    <span class="saldo-nivel" id="saldo-nivel">Nivel 1</span>
+  </div>
+
+  <!-- Category tabs -->
+  <div class="cats-scroll" id="cats-scroll">
+    <button class="cat-tab active" data-cat="cantos"     onclick="selectCat(this)">🎵 Cantos</button>
+    <button class="cat-tab"        data-cat="bgm"         onclick="selectCat(this)">🎶 BGM</button>
+    <button class="cat-tab"        data-cat="estampitas"  onclick="selectCat(this)">🖼 Estampitas</button>
+    <button class="cat-tab"        data-cat="skins"       onclick="selectCat(this)">🎨 Skins</button>
+    <button class="cat-tab"        data-cat="medallas"    onclick="selectCat(this)">🏅 Medallas</button>
+  </div>
+
+  <!-- Products section -->
+  <div class="products-section" id="products-section">
+
+    <!-- Grid (oculto cuando cat = medallas) -->
+    <div id="grid-section">
+      <div class="section-title">Disponibles</div>
+      <div class="products-grid" id="products-grid">
+        <div class="grid-section-empty">Cargando…</div>
+      </div>
+    </div>
+
+    <!-- Medallas — siempre visible -->
+    <div id="medals-section">
+      <div class="section-title">Mis Medallas</div>
+      <div class="medals-scroll" id="medals-scroll"></div>
+    </div>
+
+  </div>
+
+  <!-- Nav bar — Extras activo -->
+  <nav class="app-nav">
+    <button class="app-nav-item" onclick="navTap(this); goTo('orar.html')">
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="2" x2="12" y2="22"/><line x1="4" y1="9" x2="20" y2="9"/>
+        </svg>
+      </div>
+      <span class="app-nav-label">Orar</span>
+    </button>
+    <button class="app-nav-item" onclick="navTap(this); goTo('diario.html')">
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/>
+          <path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/>
+        </svg>
+      </div>
+      <span class="app-nav-label">Diario</span>
+    </button>
+    <button class="app-nav-item" onclick="navTap(this); goTo('cantos.html')">
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 18V5l12-2v13"/>
+          <circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+        </svg>
+      </div>
+      <span class="app-nav-label">Cantos</span>
+    </button>
+    <button class="app-nav-item" onclick="navTap(this); goTo('sanar.html')">
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s-8-5.5-8-11a8 8 0 0116 0c0 5.5-8 11-8 11z"/>
+          <path d="M9 11h6M12 8v6"/>
+        </svg>
+      </div>
+      <span class="app-nav-label">Sanar</span>
+    </button>
+    <button class="app-nav-item active" disabled>
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+      </div>
+      <span class="app-nav-label">Extras</span>
+    </button>
+  </nav>
+
+</div>
+
+<script>
+/* ── Tema ── */
+(function () {
+  var stored = localStorage.getItem('cruzando_theme');
+  if (stored === 'light') document.body.classList.add('light');
+  var btn  = document.getElementById('btn-dark');
+  var sun  = document.getElementById('ico-sun');
+  var moon = document.getElementById('ico-moon');
+  function applyTheme(light) {
+    sun.style.display  = light ? 'none' : '';
+    moon.style.display = light ? ''     : 'none';
+  }
+  applyTheme(document.body.classList.contains('light'));
+  btn.addEventListener('click', function () {
+    var isLight = document.body.classList.toggle('light');
+    localStorage.setItem('cruzando_theme', isLight ? 'light' : 'dark');
+    applyTheme(isLight);
+  });
+})();
+
+/* ── Nav helpers ── */
+function navTap(el) {
+  document.querySelectorAll('.app-nav-item').forEach(function (b) { b.classList.remove('active'); });
+  el.classList.add('active');
+}
+function goTo(page) {
+  var base = location.origin + location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1);
+  location.href = base + page;
+}
+
+/* ── Catalog globals ── */
+var CATALOG        = null;
+var ACTIVE_CAT     = 'cantos';
+var USER_PURCHASES = [];
+var USER_PROGRESS  = {};
+
+var CAT_TYPE_MAP = {
+  cantos:     'canto',
+  bgm:        'bgm',
+  estampitas: 'estampita',
+  skins:      'skin',
+  medallas:   'medal'
+};
+
+/* ── Category tabs ── */
+function selectCat(el) {
+  document.querySelectorAll('.cat-tab').forEach(function (b) { b.classList.remove('active'); });
+  el.classList.add('active');
+  renderProducts(el.dataset.cat, USER_PURCHASES, USER_PROGRESS);
+}
+
+/* ── Fetch catalog ── */
+(function () {
+  var base = location.origin + location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1);
+  fetch(base + 'data/extras-catalog.json')
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      CATALOG = data;
+      renderProducts(ACTIVE_CAT, USER_PURCHASES, USER_PROGRESS);
+      renderMedals(USER_PURCHASES);
+    })
+    .catch(function () {
+      document.getElementById('products-grid').innerHTML =
+        '<div class="grid-section-empty">Error al cargar el catálogo.</div>';
+    });
+})();
+
+/* ── Nombres de niveles (28 en total) ── */
+var NIVEL_NAMES = {
+  '0101':'Cruz · Males',         '0102':'Cruz · Pecado',
+  '0103':'Cruz · Conversión',    '0104':'Cruz · Gracia',
+  '0201':'Emociones · Sensaciones','0202':'Emociones · Sentimientos',
+  '0203':'Emociones · Gustos',   '0204':'Emociones · Deseos',
+  '0301':'Mente · Imaginación',  '0302':'Mente · Memoria',
+  '0303':'Mente · Razón',        '0304':'Mente · Intenciones',
+  '0401':'Corazón · Necesidad',  '0402':'Corazón · Placer',
+  '0403':'Corazón · Requiero',   '0404':'Corazón · Gozo',
+  '0501':'Relaciones · Dependencia','0502':'Relaciones · Vínculo',
+  '0503':'Relaciones · Pertenencia','0504':'Relaciones · Comunión',
+  '0601':'Amor · Afecto',        '0602':'Amor · Amistad',
+  '0603':'Amor · Querer',        '0604':'Amor · Caridad',
+  '0701':'Tiempo · Curiosidad',  '0702':'Tiempo · Interés',
+  '0703':'Tiempo · Problemas',   '0704':'Tiempo · Asombro'
+};
+
+/* ── Nivel máximo alcanzado (acepta array o objeto) ── */
+function getMaxNivel(userProgress) {
+  var keys = Array.isArray(userProgress) ? userProgress : Object.keys(userProgress);
+  if (!keys.length) return '0000';
+  return keys.slice().sort().pop();
+}
+
+/* ── Actualizar franja de saldo ── */
+function renderSaldoBar(totalMeters, currentNivel) {
+  document.getElementById('saldo-value').textContent =
+    totalMeters.toLocaleString('es-MX') + ' m';
+  document.getElementById('saldo-nivel').textContent =
+    NIVEL_NAMES[currentNivel] || ('Nivel ' + currentNivel);
+}
+
+/* ── Estado de un producto ── */
+function getProductState(product, userPurchases, userProgress) {
+  if (userPurchases.indexOf(product.id) !== -1) return 'owned';
+  if (product.unlock_from_nivel && product.unlock_from_nivel > getMaxNivel(userProgress)) return 'locked';
+  return 'available';
+}
+
+/* ── Formatear precio ── */
+function fmtPrice(n) {
+  return n.toLocaleString('es-MX') + ' m';
+}
+
+/* ── Construir HTML de una card ── */
+function buildProductCard(product, state) {
+  var thumbEmoji = state === 'locked' ? '🔒' : product.emoji;
+  var thumbBg    = product.color_bg || 'rgba(212,160,23,0.12)';
+  var badgeHtml  = state === 'owned'
+    ? '<span class="product-badge">Tuyo</span>'
+    : '';
+  var priceHtml  = product.price > 0
+    ? '<div class="product-price"><span>👣</span><span>' + fmtPrice(product.price) + '</span></div>'
+    : '';
+  var btnHtml;
+  if (state === 'owned') {
+    btnHtml = '<button class="product-btn btn-owned" disabled>✓ Tienes</button>';
+  } else if (state === 'available') {
+    btnHtml = '<button class="product-btn btn-canjear" onclick="onCanjear(\'' + product.id + '\')">Canjear</button>';
+  } else {
+    btnHtml = '<button class="product-btn" disabled>🔒 Bloqueado</button>';
+  }
+  return '<div class="product-card state-' + state + '">' +
+    '<div class="product-thumb" style="background:' + thumbBg + '">' + thumbEmoji + '</div>' +
+    '<div class="product-info">' +
+      badgeHtml +
+      '<div class="product-name">' + product.name + '</div>' +
+      '<div class="product-desc">' + product.description + '</div>' +
+      priceHtml +
+      btnHtml +
+    '</div>' +
+  '</div>';
+}
+
+/* ── Renderizar productos ── */
+function renderProducts(categoryFilter, userPurchases, userProgress) {
+  ACTIVE_CAT     = categoryFilter;
+  USER_PURCHASES = userPurchases;
+  USER_PROGRESS  = userProgress;
+
+  var gridSection = document.getElementById('grid-section');
+  var grid        = document.getElementById('products-grid');
+
+  if (categoryFilter === 'medallas') {
+    gridSection.style.display = 'none';
+    return;
+  }
+  gridSection.style.display = '';
+
+  if (!CATALOG) return;
+
+  var type     = CAT_TYPE_MAP[categoryFilter] || categoryFilter;
+  var products = CATALOG.products.filter(function (p) { return p.type === type; });
+
+  if (!products.length) {
+    grid.innerHTML = '<div class="grid-section-empty">Próximamente…</div>';
+    return;
+  }
+
+  grid.innerHTML = products.map(function (p) {
+    return buildProductCard(p, getProductState(p, userPurchases, userProgress));
+  }).join('');
+}
+
+/* ── Renderizar medallas (siempre visible) ── */
+function renderMedals(userPurchases) {
+  if (!CATALOG) return;
+  var medals = CATALOG.products.filter(function (p) { return p.type === 'medal'; });
+  var el     = document.getElementById('medals-scroll');
+  el.innerHTML = medals.map(function (m) {
+    var earned = userPurchases.indexOf(m.id) !== -1;
+    return '<div class="medal-item">' +
+      '<div class="medal-circle' + (earned ? ' earned' : ' locked') + '">' + m.emoji + '</div>' +
+      '<div class="medal-label' + (earned ? ' earned' : '') + '">' + m.name + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+/* ── Canjear placeholder — Bloque 3 conecta Firebase ── */
+function onCanjear(productId) {
+  console.log('canjear', productId);
+}
+</script>
+<!-- Firebase compat SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
+/* ── Firebase init ── */
+firebase.initializeApp({
+  apiKey:            "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
+  authDomain:        "cruzando-app.firebaseapp.com",
+  projectId:         "cruzando-app",
+  storageBucket:     "cruzando-app.firebasestorage.app",
+  messagingSenderId: "408196948528",
+  appId:             "1:408196948528:web:de291e8afc969252e943f5"
+});
+var _db   = firebase.firestore();
+var _auth = firebase.auth();
+
+_auth.onAuthStateChanged(async function (user) {
+  if (!user) {
+    renderSaldoBar(0, '0101');
+    renderProducts(ACTIVE_CAT, [], []);
+    renderMedals([]);
+    return;
+  }
+  try {
+    // 1. Saldo de metros
+    var userSnap    = await _db.collection('users').doc(user.uid).get();
+    var userData    = userSnap.exists ? userSnap.data() : {};
+    var totalMeters = userData.totalMeters ?? 0;
+    var currentNivel = userData.currentNivel ?? '0101';
+
+    // 2. Compras realizadas
+    var extrasSnap   = await _db.collection('users').doc(user.uid)
+                                .collection('extras').doc('purchases').get();
+    var userPurchases = extrasSnap.exists ? (extrasSnap.data().items ?? []) : [];
+
+    // 3. Niveles completados (para determinar productos desbloqueados)
+    var progressSnap     = await _db.collection('users').doc(user.uid)
+                                    .collection('progress').get();
+    var completedNiveles = progressSnap.docs
+      .filter(function (d) { return d.data().completed === true; })
+      .map(function (d) { return d.id; });
+
+    // 4. Renderizar con datos reales
+    renderSaldoBar(totalMeters, currentNivel);
+    renderProducts(ACTIVE_CAT, userPurchases, completedNiveles);
+    renderMedals(userPurchases);
+
+  } catch (e) {
+    console.warn('[CruzAndo] extras:', e.message);
+    renderSaldoBar(0, '0101');
+    renderProducts(ACTIVE_CAT, [], []);
+    renderMedals([]);
+  }
+});
+</script>
+</body>
+</html>

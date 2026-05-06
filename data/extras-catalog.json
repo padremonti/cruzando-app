@@ -1,0 +1,89 @@
+{
+  "version": "1.0",
+  "categories": ["cantos", "bgm", "estampitas", "skins"],
+  "products": [
+    {
+      "id": "canto_extra_ave_maria",
+      "type": "canto",
+      "name": "Ave María",
+      "description": "Misterios Gozosos · Cruz",
+      "price": 2500,
+      "unlock_from_nivel": "0101",
+      "audio_filename": "CANTO_EXTRA_01.mp3",
+      "bloque": "gozosos",
+      "mundo": "01",
+      "emoji": "🎵",
+      "color_bg": "rgba(232,160,160,0.15)"
+    },
+    {
+      "id": "canto_extra_salve_regina",
+      "type": "canto",
+      "name": "Salve Regina",
+      "description": "Misterios Luminosos · Cruz",
+      "price": 2500,
+      "unlock_from_nivel": "0101",
+      "audio_filename": "CANTO_EXTRA_02.mp3",
+      "bloque": "luminosos",
+      "mundo": "01",
+      "emoji": "🎵",
+      "color_bg": "rgba(1,187,225,0.12)"
+    },
+    {
+      "id": "bgm_aurora",
+      "type": "bgm",
+      "name": "Aurora",
+      "description": "Música de fondo serena para el amanecer",
+      "price": 3500,
+      "unlock_from_nivel": "0101",
+      "audio_filename": "BGM_AURORA.mp3",
+      "emoji": "🎶",
+      "color_bg": "rgba(1,187,225,0.12)"
+    },
+    {
+      "id": "estampita_guadalupe",
+      "type": "estampita",
+      "name": "Nuestra Señora de Guadalupe",
+      "description": "Fondo alternativo para tus sesiones de oración",
+      "price": 1200,
+      "unlock_from_nivel": "0101",
+      "image_filename": "ESTAMPITA_GUADALUPE.webp",
+      "emoji": "🖼",
+      "color_bg": "rgba(212,160,23,0.12)"
+    },
+    {
+      "id": "skin_noche_oscura",
+      "type": "skin",
+      "name": "Noche oscura",
+      "description": "Paleta profunda para orar de madrugada",
+      "price": 1800,
+      "unlock_from_nivel": "0201",
+      "theme_vars": {
+        "--bg": "#0A0610",
+        "--card": "#120D1A",
+        "--orange": "#9B59B6"
+      },
+      "emoji": "🎨",
+      "color_bg": "rgba(155,89,182,0.12)"
+    },
+    {
+      "id": "medal_cruz",
+      "type": "medal",
+      "name": "Cruz",
+      "description": "Completaste CruzAndo la Cruz",
+      "price": 0,
+      "unlock_condition": "complete_mundo_01",
+      "emoji": "✝️",
+      "color_bg": "rgba(255,122,0,0.12)"
+    },
+    {
+      "id": "medal_emociones",
+      "type": "medal",
+      "name": "Emociones",
+      "description": "Completaste CruzAndo Emociones",
+      "price": 0,
+      "unlock_condition": "complete_mundo_02",
+      "emoji": "😊",
+      "color_bg": "rgba(232,160,160,0.12)"
+    }
+  ]
+}
