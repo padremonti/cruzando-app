@@ -28,8 +28,11 @@
   --rojo:   #C0392B;
   --dorado: #D4A017;
 }
-body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif;
-  min-height: 100vh; padding-bottom: 80px; }
+body {
+  background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif;
+  height: 100dvh; overflow: hidden;
+  display: flex; flex-direction: column;
+}
 body.light {
   --bg:        #E6DED3;
   --card:      #F5EDE4;
@@ -243,16 +246,17 @@ body.light .sheet-handle { background: rgba(0,0,0,0.2); }
 body.light .sheet-header { border-bottom-color: rgba(0,0,0,0.1); }
 .sheet-titulo {
   font-family: 'Crimson Pro', serif; font-size: 1.1rem; font-weight: 600;
-  color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  color: rgba(255,255,255,0.55); letter-spacing: 0.3px;
+  text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-body.light .sheet-titulo { color: var(--text); }
+body.light .sheet-titulo { color: var(--text-dim); }
 .sheet-body {
-  flex: 1; overflow-y: auto; padding: 14px 16px 16px;
+  flex: 1; overflow-y: auto; padding: 28px 24px 32px;
   -webkit-overflow-scrolling: touch;
 }
 .sheet-letra {
-  font-family: 'Crimson Pro', serif; font-size: 1.18rem;
-  color: rgba(255,255,255,0.85); line-height: 1.85;
+  font-family: 'Crimson Pro', serif; font-size: 1.45rem;
+  color: rgba(255,255,255,0.85); line-height: 2;
 }
 body.light .sheet-letra { color: var(--text-soft); }
 .sheet-letra .sep-line {
@@ -303,7 +307,7 @@ body.light .sheet-letra .sep-line { color: var(--text-dim); }
 }
 
 /* ── Nav bar ── */
-.shell { padding-bottom: 72px; }
+.shell { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding-bottom: 0; }
 .app-nav {
   position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
   width: 100%; max-width: 480px; z-index: 80;
@@ -513,7 +517,7 @@ body.light .filter-row:active { background: rgba(0,0,0,0.05); }
 
 /* Hero section */
 .hero-section {
-  position: relative; height: 220px; overflow: hidden;
+  position: relative; flex: 1; min-height: 200px; overflow: hidden;
   display: flex; flex-direction: column;
   justify-content: flex-end; padding: 20px 20px 14px;
 }
@@ -660,6 +664,14 @@ body.light .progress-track { background: rgba(0,0,0,0.1); }
 body.light .tool-btn svg { background: rgba(0,0,0,0.04); }
 .tool-btn.active svg { background: var(--block-color-bg); }
 
+/* Badge "Extra" en el hero */
+.hero-extra-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: rgba(212,160,23,0.2); border: 1px solid rgba(212,160,23,0.45);
+  border-radius: 999px; padding: 3px 10px; margin-top: 5px;
+  font-size: 0.64rem; font-weight: 700; color: #D4A017; letter-spacing: 0.5px;
+}
+
 /* Playlist list section (dentro del popup) */
 .playlist-list-section {
   overflow-y: auto; -webkit-overflow-scrolling: touch;
@@ -720,6 +732,7 @@ body.light .tool-btn svg { background: rgba(0,0,0,0.04); }
       </div>
       <h1 class="hero-titulo" id="hero-titulo">Mis Cantos</h1>
       <p class="hero-subtitulo" id="hero-subtitulo">Nivel 1</p>
+      <span id="hero-extra-badge" class="hero-extra-badge" style="display:none">⭐ Extra</span>
     </div>
     <div class="hero-dots-bar">
       <span class="swipe-arrow">‹</span>
@@ -895,7 +908,8 @@ const app  = initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 
-const CANTOS_BASE = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/cantos/';
+const CANTOS_BASE       = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/cantos/';
+const EXTRAS_CANTOS_BASE = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/extras/';
 const BLOCK_COLORS = {
   gozosos:  { color:'#E8A0A0', glow:'rgba(232,160,160,0.35)', bg:'rgba(232,160,160,0.18)', label:'MISTERIOS GOZOSOS' },
   luminosos:{ color:'#01BBE1', glow:'rgba(1,187,225,0.3)',    bg:'rgba(1,187,225,0.15)',   label:'MISTERIOS LUMINOSOS' },
@@ -904,6 +918,23 @@ const BLOCK_COLORS = {
 };
 const BLOCK_LABELS = { gozosos:'Misterios Gozosos', luminosos:'Misterios Luminosos',
                        dolorosos:'Misterios Dolorosos', gloriosos:'Misterios Gloriosos' };
+
+const NIVEL_TEMAS = {
+  '0101':'Males',       '0102':'Pecado',      '0103':'Conversión',  '0104':'Gracia',
+  '0201':'Sensaciones', '0202':'Sentimientos', '0203':'Gustos',      '0204':'Deseos',
+  '0301':'Imaginación', '0302':'Memoria',      '0303':'Razón',       '0304':'Intenciones',
+  '0401':'Necesidad',   '0402':'Placer',       '0403':'Requiero',    '0404':'Gozo',
+  '0501':'Dependencia', '0502':'Vínculo',      '0503':'Pertenencia', '0504':'Comunión',
+  '0601':'Afecto',      '0602':'Amistad',      '0603':'Querer',      '0604':'Caridad',
+  '0701':'Curiosidad',  '0702':'Interés',      '0703':'Problemas',   '0704':'Asombro',
+};
+
+function cantoAudioUrl(canto) {
+  if (canto.source === 'extras' && canto.audio_filename) {
+    return EXTRAS_CANTOS_BASE + canto.audio_filename;
+  }
+  return CANTOS_BASE + 'CANTO_' + canto.nivel + '_' + canto.cuaderno + '_' + canto.bloqueIdx + '.mp3';
+}
 
 function updateBlockColor(bloque) {
   const c = BLOCK_COLORS[bloque] || BLOCK_COLORS.gozosos;
@@ -949,8 +980,18 @@ function updateHero(canto) {
   updateBlockColor(canto.bloque);
   const tituloEl   = document.getElementById('hero-titulo');
   const subtitEl   = document.getElementById('hero-subtitulo');
-  if (tituloEl) tituloEl.textContent  = canto.titulo;
-  if (subtitEl) subtitEl.textContent  = 'Nivel ' + canto.nivel;
+  if (tituloEl) tituloEl.textContent = canto.titulo;
+  if (subtitEl) {
+    if (canto.source === 'extras') {
+      subtitEl.textContent = 'Canto Extra';
+    } else {
+      const nivelId = String(canto.nivel).padStart(2,'0') + String(canto.cuaderno).padStart(2,'0');
+      const tema = NIVEL_TEMAS[nivelId] || '';
+      subtitEl.textContent = canto.nivel + '-' + canto.cuaderno + (tema ? ' · ' + tema : '');
+    }
+  }
+  const extraBadge = document.getElementById('hero-extra-badge');
+  if (extraBadge) extraBadge.style.display = canto.source === 'extras' ? '' : 'none';
   const heroFav = document.getElementById('hero-fav');
   if (heroFav) {
     setFavIcon(heroFav, !!canto.favorite);
@@ -1064,7 +1105,7 @@ window.openHeroLetra   = function() {
 };
 
 function playHeroCanto(canto) {
-  const url     = CANTOS_BASE + 'CANTO_' + canto.nivel + '_' + canto.cuaderno + '_' + canto.bloqueIdx + '.mp3';
+  const url     = cantoAudioUrl(canto);
   const playBtn = document.getElementById('hero-play-btn');
   const barFill = document.getElementById('hero-bar-fill');
   const curEl   = document.getElementById('hero-cur');
@@ -1293,7 +1334,7 @@ window.closePlaylistPopup = closePlaylistPopup;
 
 async function saveBookmark(canto) {
   const uid = auth.currentUser?.uid;
-  if (!uid || !canto) return;
+  if (!uid || !canto || canto.source === 'extras') return;
   try {
     await setDoc(doc(db, 'users', uid, 'bookmark', 'currentCanto'),
       { nivel: canto.nivel, cuaderno: canto.cuaderno, bloqueIdx: canto.bloqueIdx });
@@ -1445,11 +1486,17 @@ function renderLetra(letra) {
 function renderList(listEl, cantos) {
   listEl.innerHTML = '';
   cantos.forEach((canto, ci) => {
-    const color    = BLOCK_COLORS[canto.bloque] || '#D4A017';
-    const label    = BLOCK_LABELS[canto.bloque] || canto.bloque;
-    const cantoUrl = CANTOS_BASE + 'CANTO_' + canto.nivel + '_' + canto.cuaderno + '_' + canto.bloqueIdx + '.mp3';
+    const color     = (BLOCK_COLORS[canto.bloque] || {}).color || '#D4A017';
+    const label     = BLOCK_LABELS[canto.bloque] || canto.bloque;
+    const cantoUrl  = cantoAudioUrl(canto);
+    const subtitulo = canto.source === 'extras'
+      ? 'Canto Extra · ' + label
+      : 'Nivel ' + canto.nivel + '-' + canto.cuaderno + ' · ' + label;
     const cardId   = 'canto-' + ci;
     const delay    = Math.min(ci * 0.07, 0.4);
+    const extraTag = canto.source === 'extras'
+      ? '<span style="display:inline-block;font-size:0.6rem;font-weight:700;color:#D4A017;background:rgba(212,160,23,0.15);border-radius:999px;padding:1px 8px;margin-bottom:3px">⭐ Extra</span><br>'
+      : '';
 
     const card = document.createElement('div');
     card.className = 'canto-card';
@@ -1457,12 +1504,12 @@ function renderList(listEl, cantos) {
     card.innerHTML =
       '<div class="canto-card-header">' +
         '<div class="canto-header-top">' +
-          '<div class="canto-titulo">' + escHTML(canto.titulo) + '</div>' +
+          '<div class="canto-titulo">' + extraTag + escHTML(canto.titulo) + '</div>' +
           '<button class="btn-fav' + (canto.favorite ? ' on' : '') + '" id="fav-' + cardId + '" aria-label="Favorita">' +
             (canto.favorite ? SVG_HEART_FILLED : SVG_HEART_OUTLINE) +
           '</button>' +
         '</div>' +
-        '<div class="canto-subtitulo">Nivel ' + canto.nivel + '-' + canto.cuaderno + ' · ' + label + '</div>' +
+        '<div class="canto-subtitulo">' + subtitulo + '</div>' +
       '</div>' +
       '<div class="canto-player">' +
         '<button class="canto-play-btn" id="play-' + cardId + '">' +
@@ -1632,7 +1679,19 @@ onAuthStateChanged(auth, async user => {
     const extrasCantos   = [];
     const bookmark = bmarkSnap?.exists() ? bmarkSnap.data() : null;
     unlockedSnap.forEach(d => { const data = d.data(); data._col = 'unlockedCantos'; data._docId = d.id; unlockedCantos.push(data); });
-    if (extrasSnap) extrasSnap.forEach(d => { const data = d.data(); data._col = 'extrasCantos'; data._docId = d.id; extrasCantos.push(data); });
+    if (extrasSnap) {
+      let _ei = 0;
+      extrasSnap.forEach(d => {
+        const data     = d.data();
+        data._col      = 'extrasCantos';
+        data._docId    = d.id;
+        data.titulo    = data.titulo || data.name || d.id;
+        data.nivel     = parseInt(data.mundo, 10) || 99;
+        data.cuaderno  = 0;
+        data.bloqueIdx = _ei++;
+        extrasCantos.push(data);
+      });
+    }
 
     // Si no hay cantos desbloqueados pero hay progreso, intentar backfill una vez
     if (unlockedCantos.length === 0) {
