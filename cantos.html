@@ -1032,15 +1032,25 @@ window.togglePlay = function() {
   const canto   = navCantos[currentIdx];
   if (!canto) return;
   const playBtn = document.getElementById('hero-play-btn');
-  const isPlaying = activePlayBtn === playBtn && activeAudio && !activeAudio.paused;
-  if (isPlaying) {
-    activeAudio.pause(); setPlayIcon(playBtn, false);
-    activeAudio = null; activePlayBtn = null;
-    document.getElementById('cantos-hero').classList.remove('playing');
-  } else {
-    playHeroCanto(canto);
-    saveBookmark(canto);
+
+  if (activeAudio && activePlayBtn === playBtn) {
+    if (!activeAudio.paused) {
+      // Pausar — mantener referencia para poder resumir
+      activeAudio.pause();
+      setPlayIcon(playBtn, false);
+      document.getElementById('cantos-hero')?.classList.remove('playing');
+    } else {
+      // Resumir
+      activeAudio.play().catch(() => {});
+      setPlayIcon(playBtn, true);
+      document.getElementById('cantos-hero')?.classList.add('playing');
+    }
+    return;
   }
+
+  // Arrancar nuevo canto en el hero
+  playHeroCanto(canto);
+  saveBookmark(canto);
 };
 window.prevCanto = function() { heroNav(-1); };
 window.nextCanto = function() { heroNav(1); };
@@ -1105,7 +1115,12 @@ function goToCanto(index) {
   // Detener audio completamente
   if (activeAudio) {
     activeAudio.pause();
-    activeAudio.src = '';
+    activeAudio.src  = '';
+    activeAudio.load();
+    activeAudio.ontimeupdate     = null;
+    activeAudio.onloadedmetadata = null;
+    activeAudio.onended          = null;
+    activeAudio.onerror          = null;
     if (activePlayBtn) setPlayIcon(activePlayBtn, false);
     if (activeBarFill) activeBarFill.style.width = '0%';
     if (activeCurEl)   activeCurEl.textContent   = '0:00';
@@ -1427,18 +1442,22 @@ function fmt(s) {
 }
 
 function playCantoAudio(url, playBtn, barFill, curEl, durEl) {
-  // Parar el anterior
-  if (activeAudio && activeAudio !== null) {
+  // Destruir completamente el audio anterior antes de crear el nuevo
+  if (activeAudio) {
     activeAudio.pause();
+    activeAudio.src              = '';
+    activeAudio.load();
+    activeAudio.ontimeupdate     = null;
+    activeAudio.onloadedmetadata = null;
+    activeAudio.onended          = null;
+    activeAudio.onerror          = null;
     if (activePlayBtn) setPlayIcon(activePlayBtn, false);
     if (activeBarFill) activeBarFill.style.width = '0%';
-    if (activeCurEl)  activeCurEl.textContent = '0:00';
-  }
-
-  if (activeAudio && activePlayBtn === playBtn) {
-    // Mismo botón → pausar
+    if (activeCurEl)   activeCurEl.textContent   = '0:00';
+    if (activeDurEl)   activeDurEl.textContent   = '0:00';
+    document.getElementById('cantos-hero')?.classList.remove('playing');
     activeAudio = null; activePlayBtn = null;
-    return;
+    activeBarFill = null; activeCurEl = null; activeDurEl = null;
   }
 
   const audio = new Audio(url);
@@ -1588,17 +1607,26 @@ function renderList(listEl, cantos) {
 
       playBtn.onclick = () => {
         if (playBtn.disabled) return;
-        const isPlaying = activePlayBtn === playBtn && activeAudio && !activeAudio.paused;
-        if (isPlaying) {
-          activeAudio.pause(); setPlayIcon(playBtn, false);
-          activeAudio = null; activePlayBtn = null;
-        } else {
-          playCantoAudio(cantoUrl, playBtn, barFill, curEl, durEl);
-          updateHero(canto);
-          const ni = navCantos.findIndex(c => c.nivel===canto.nivel && c.cuaderno===canto.cuaderno && c.bloqueIdx===canto.bloqueIdx);
-          if (ni >= 0) { currentIdx = ni; renderDots(); updateNavBtns(); }
-          saveBookmark(canto);
+
+        // Toggle pause/resume cuando es el mismo botón
+        if (activeAudio && activePlayBtn === playBtn) {
+          if (activeAudio.paused) {
+            activeAudio.play().catch(() => {});
+            setPlayIcon(playBtn, true);
+          } else {
+            activeAudio.pause();
+            setPlayIcon(playBtn, false);
+          }
+          return;
         }
+
+        // Nuevo canto: destruir anterior y arrancar este
+        playCantoAudio(cantoUrl, playBtn, barFill, curEl, durEl);
+        updateHero(canto);
+        const ni = navCantos.findIndex(c =>
+          c.nivel===canto.nivel && c.cuaderno===canto.cuaderno && c.bloqueIdx===canto.bloqueIdx);
+        if (ni >= 0) { currentIdx = ni; renderDots(); updateNavBtns(); }
+        saveBookmark(canto);
       };
       barWrap.onclick = (e) => { if (activeAudio && activePlayBtn === playBtn) seekCanto(e, activeAudio, barWrap); };
 
