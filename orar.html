@@ -1291,7 +1291,25 @@ async function completeMystery(){
       const d=dots[i],c=i===cur;
       return `<div onclick="window._gm(${i})" style="width:${c?'12px':'8px'};height:${c?'12px':'8px'};border-radius:50%;cursor:pointer;transition:all 0.2s;background:${d?'#34A853':c?'#fff':'rgba(255,255,255,0.4)'};${c?'border:2px solid #fff;box-shadow:0 0 6px rgba(255,255,255,0.6)':''}"></div>`;
     }).join('')+'</div>';
-  if(dots.every(Boolean)){setTimeout(async()=>{await addMeters(MR_BNS);showSlide(MR_BNS,'¡Bloque completo!');showCelebration();},600);}
+  if(dots.every(Boolean)){
+    setTimeout(async()=>{await addMeters(MR_BNS);showSlide(MR_BNS,'¡Bloque completo!');showCelebration();},600);
+    if(blk==='gloriosos'&&cua===4){
+      const MUNDO_MEDAL_MAP={1:'medal_cruz',2:'medal_emociones',3:'medal_mente',4:'medal_corazon',5:'medal_relaciones',6:'medal_amor',7:'medal_tiempo'};
+      const medalId=MUNDO_MEDAL_MAP[nivel];
+      if(medalId&&usr){
+        try{
+          const extrasRef=FS.collection('users').doc(usr.uid).collection('extras').doc('purchases');
+          const extrasSnap=await extrasRef.get();
+          const items=extrasSnap.exists?(extrasSnap.data().items||[]):[];
+          if(!items.some(it=>it.id===medalId)){
+            items.push({id:medalId,type:'medal',earnedAt:new Date().toISOString()});
+            await extrasRef.set({items},{merge:true});
+            setTimeout(()=>showSlide(0,'🏅 ¡Medalla desbloqueada!'),1200);
+          }
+        }catch(e){console.warn('[CruzAndo] medal:',e.message);}
+      }
+    }
+  }
 }
 function showCelebration(){
   $('celeb-title').textContent=`¡${BFN[blk]} completados!`;

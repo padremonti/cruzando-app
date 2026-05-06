@@ -3308,6 +3308,27 @@ async function completeSession() {
     setTimeout(() => showToast(`+${METERS_BLOCK_BONUS}m · ¡Bloque ${BLOCK_NAMES[block]} completado!`), 400);
   }
 
+  /* Medalla automática: completar el bloque gloriosos del cuaderno 4 desbloquea la medalla del Mundo */
+  if (block === 'gloriosos' && cuaderno === 4 && doneInBlock.size >= 5 && currentUser) {
+    const MUNDO_MEDAL_MAP = {
+      1: 'medal_cruz', 2: 'medal_emociones', 3: 'medal_mente',
+      4: 'medal_corazon', 5: 'medal_relaciones', 6: 'medal_amor', 7: 'medal_tiempo'
+    };
+    const medalId = MUNDO_MEDAL_MAP[nivel];
+    if (medalId) {
+      try {
+        const extrasRef  = doc(db, 'users', currentUser.uid, 'extras', 'purchases');
+        const extrasSnap = await getDoc(extrasRef);
+        const items      = extrasSnap.exists() ? (extrasSnap.data().items || []) : [];
+        if (!items.some(it => it.id === medalId)) {
+          items.push({ id: medalId, type: 'medal', earnedAt: new Date().toISOString() });
+          await setDoc(extrasRef, { items }, { merge: true });
+          setTimeout(() => showToast('🏅 ¡Medalla desbloqueada!'), 1200);
+        }
+      } catch (e) { console.warn('[CruzAndo] medal:', e.message); }
+    }
+  }
+
   await saveAudioProgress();
   await syncToOrarProgress(nivel, cuaderno, misterio);
 

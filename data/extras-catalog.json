@@ -84,6 +84,56 @@
       "unlock_condition": "complete_mundo_02",
       "emoji": "😊",
       "color_bg": "rgba(232,160,160,0.12)"
+    },
+    {
+      "id": "medal_mente",
+      "type": "medal",
+      "name": "Mente",
+      "description": "Completaste CruzAndo la Mente",
+      "price": 0,
+      "unlock_condition": "complete_mundo_03",
+      "emoji": "🧠",
+      "color_bg": "rgba(100,149,237,0.12)"
+    },
+    {
+      "id": "medal_corazon",
+      "type": "medal",
+      "name": "Corazón",
+      "description": "Completaste CruzAndo el Corazón",
+      "price": 0,
+      "unlock_condition": "complete_mundo_04",
+      "emoji": "❤️",
+      "color_bg": "rgba(220,60,60,0.12)"
+    },
+    {
+      "id": "medal_relaciones",
+      "type": "medal",
+      "name": "Relaciones",
+      "description": "Completaste CruzAndo las Relaciones",
+      "price": 0,
+      "unlock_condition": "complete_mundo_05",
+      "emoji": "🤝",
+      "color_bg": "rgba(46,139,87,0.12)"
+    },
+    {
+      "id": "medal_amor",
+      "type": "medal",
+      "name": "Amor",
+      "description": "Completaste CruzAndo el Amor",
+      "price": 0,
+      "unlock_condition": "complete_mundo_06",
+      "emoji": "💛",
+      "color_bg": "rgba(212,160,23,0.12)"
+    },
+    {
+      "id": "medal_tiempo",
+      "type": "medal",
+      "name": "Tiempo",
+      "description": "Completaste CruzAndo el Tiempo",
+      "price": 0,
+      "unlock_condition": "complete_mundo_07",
+      "emoji": "⏳",
+      "color_bg": "rgba(155,89,182,0.12)"
     }
   ]
 }

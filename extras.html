@@ -239,6 +239,106 @@ body.light .shop-hero-grad {
 }
 .medal-label.earned { color: var(--gold); }
 
+/* ── Confirm overlay ── */
+.confirm-overlay {
+  position: fixed; inset: 0; z-index: 110;
+  background: rgba(0,0,0,0.55);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.confirm-overlay.open { opacity: 1; pointer-events: auto; }
+
+/* ── Confirm sheet ── */
+.confirm-sheet {
+  position: fixed; bottom: 0; left: 50%;
+  transform: translateX(-50%) translateY(110%);
+  width: 100%; max-width: 480px; z-index: 111;
+  background: var(--card);
+  border-radius: 20px 20px 0 0;
+  border-top: 1px solid var(--border);
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+.confirm-sheet.open { transform: translateX(-50%) translateY(0); }
+.confirm-handle {
+  width: 36px; height: 4px; border-radius: 2px;
+  background: var(--border); margin: 10px auto 14px; display: block;
+}
+.confirm-product-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 0 20px 16px; border-bottom: 1px solid var(--border);
+}
+.confirm-emoji {
+  font-size: 2.4rem; flex-shrink: 0;
+  width: 60px; height: 60px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(212,160,23,0.12);
+}
+.confirm-meta { flex: 1; min-width: 0; }
+.confirm-name {
+  font-family: 'Crimson Pro', serif; font-size: 1.2rem; font-weight: 600;
+  color: var(--text); line-height: 1.2; margin-bottom: 3px;
+}
+.confirm-desc { font-size: 0.78rem; color: var(--text-dim); line-height: 1.4; }
+.confirm-price-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px;
+}
+.confirm-cost-label { display: block; font-size: 0.7rem; color: var(--text-dim); margin-bottom: 3px; }
+.confirm-cost-value { font-size: 1rem; font-weight: 700; color: var(--gold); }
+.confirm-balance { display: flex; align-items: center; gap: 6px; font-size: 0.88rem; }
+.confirm-balance-before {
+  color: var(--text-dim); text-decoration: line-through;
+  font-variant-numeric: tabular-nums;
+}
+.confirm-balance-arrow { color: var(--text-dim); font-size: 0.8rem; }
+.confirm-balance-after {
+  color: var(--gold); font-weight: 700; font-variant-numeric: tabular-nums;
+}
+.confirm-balance-after.insufficient { color: #E53E3E; }
+.confirm-error {
+  margin: 0 20px 6px; padding: 10px 14px; border-radius: 10px;
+  background: rgba(229,62,62,0.1); border: 1px solid rgba(229,62,62,0.25);
+  font-size: 0.82rem; color: #E53E3E; text-align: center;
+}
+.confirm-actions {
+  display: flex; gap: 10px; padding: 8px 20px 12px;
+}
+.confirm-btn-cancel {
+  flex: 1; padding: 12px; border-radius: 12px;
+  border: 1px solid var(--border); background: transparent;
+  font-family: inherit; font-size: 0.9rem; font-weight: 600;
+  color: var(--text-dim); cursor: pointer;
+  -webkit-tap-highlight-color: transparent; transition: background 0.15s;
+}
+.confirm-btn-cancel:active { background: var(--border); }
+.confirm-btn-ok {
+  flex: 2; padding: 12px; border-radius: 12px;
+  border: none; background: var(--orange);
+  font-family: inherit; font-size: 0.9rem; font-weight: 700;
+  color: #fff; cursor: pointer;
+  -webkit-tap-highlight-color: transparent; transition: opacity 0.15s;
+}
+.confirm-btn-ok:active:not(:disabled) { opacity: 0.85; }
+.confirm-btn-ok:disabled { opacity: 0.45; cursor: default; }
+
+/* ── Purchase toast ── */
+.purchase-toast {
+  position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
+  z-index: 120; max-width: 340px; width: calc(100% - 40px);
+  background: var(--card); border: 1px solid var(--gold);
+  border-radius: 14px; padding: 12px 18px;
+  display: flex; align-items: center; gap: 10px;
+  box-shadow: 0 4px 24px rgba(212,160,23,0.22);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+.purchase-toast.show {
+  opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0);
+}
+.purchase-toast-icon { font-size: 1.4rem; flex-shrink: 0; }
+.purchase-toast-text { font-size: 0.88rem; font-weight: 600; color: var(--gold); }
+
 /* ── Nav bar ── */
 .shell { padding-bottom: 72px; }
 .app-nav {
@@ -388,6 +488,43 @@ body.light .shop-hero-grad {
     </button>
   </nav>
 
+  <!-- Purchase toast -->
+  <div class="purchase-toast" id="purchase-toast">
+    <span class="purchase-toast-icon">✓</span>
+    <span class="purchase-toast-text" id="purchase-toast-text"></span>
+  </div>
+
+  <!-- Confirm overlay + sheet -->
+  <div class="confirm-overlay" id="confirm-overlay" onclick="closeConfirm()"></div>
+  <div class="confirm-sheet" id="confirm-sheet">
+    <div class="confirm-handle"></div>
+    <div class="confirm-product-row">
+      <div class="confirm-emoji" id="confirm-emoji">🎵</div>
+      <div class="confirm-meta">
+        <div class="confirm-name" id="confirm-name"></div>
+        <div class="confirm-desc" id="confirm-desc"></div>
+      </div>
+    </div>
+    <div class="confirm-price-row">
+      <div>
+        <span class="confirm-cost-label">Costo</span>
+        <span class="confirm-cost-value" id="confirm-cost"></span>
+      </div>
+      <div class="confirm-balance">
+        <span class="confirm-balance-before" id="confirm-before"></span>
+        <span class="confirm-balance-arrow">→</span>
+        <span class="confirm-balance-after" id="confirm-after"></span>
+      </div>
+    </div>
+    <div class="confirm-error" id="confirm-error" style="display:none">
+      No tienes metros suficientes
+    </div>
+    <div class="confirm-actions">
+      <button class="confirm-btn-cancel" onclick="closeConfirm()">Cancelar</button>
+      <button class="confirm-btn-ok" id="confirm-btn-ok" onclick="onConfirmBuy()">👣 Canjear ahora</button>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -421,10 +558,12 @@ function goTo(page) {
 }
 
 /* ── Catalog globals ── */
-var CATALOG        = null;
-var ACTIVE_CAT     = 'cantos';
-var USER_PURCHASES = [];
-var USER_PROGRESS  = {};
+var CATALOG         = null;
+var ACTIVE_CAT      = 'cantos';
+var USER_PURCHASES  = [];
+var USER_PROGRESS   = {};
+var TOTAL_METERS    = 0;
+var CONFIRM_PRODUCT = null;
 
 var CAT_TYPE_MAP = {
   cantos:     'canto',
@@ -438,7 +577,11 @@ var CAT_TYPE_MAP = {
 function selectCat(el) {
   document.querySelectorAll('.cat-tab').forEach(function (b) { b.classList.remove('active'); });
   el.classList.add('active');
-  renderProducts(el.dataset.cat, USER_PURCHASES, USER_PROGRESS);
+  var cat = el.dataset.cat;
+  renderProducts(cat, USER_PURCHASES, USER_PROGRESS);
+  if (cat === 'medallas') {
+    renderMedals(USER_PURCHASES, Array.isArray(USER_PROGRESS) ? USER_PROGRESS : Object.keys(USER_PROGRESS));
+  }
 }
 
 /* ── Fetch catalog ── */
@@ -449,7 +592,7 @@ function selectCat(el) {
     .then(function (data) {
       CATALOG = data;
       renderProducts(ACTIVE_CAT, USER_PURCHASES, USER_PROGRESS);
-      renderMedals(USER_PURCHASES);
+      renderMedals(USER_PURCHASES, Array.isArray(USER_PROGRESS) ? USER_PROGRESS : Object.keys(USER_PROGRESS));
     })
     .catch(function () {
       document.getElementById('products-grid').innerHTML =
@@ -484,6 +627,7 @@ function getMaxNivel(userProgress) {
 
 /* ── Actualizar franja de saldo ── */
 function renderSaldoBar(totalMeters, currentNivel) {
+  TOTAL_METERS = totalMeters;
   document.getElementById('saldo-value').textContent =
     totalMeters.toLocaleString('es-MX') + ' m';
   document.getElementById('saldo-nivel').textContent =
@@ -506,20 +650,45 @@ function fmtPrice(n) {
 function buildProductCard(product, state) {
   var thumbEmoji = state === 'locked' ? '🔒' : product.emoji;
   var thumbBg    = product.color_bg || 'rgba(212,160,23,0.12)';
-  var badgeHtml  = state === 'owned'
-    ? '<span class="product-badge">Tuyo</span>'
-    : '';
-  var priceHtml  = product.price > 0
+
+  /* Skin: miniatura con gradiente de sus propios colores */
+  if (product.type === 'skin' && product.theme_vars && state !== 'locked') {
+    var bg1 = product.theme_vars['--bg']     || '#111';
+    var ac1 = product.theme_vars['--orange'] || '#FF7A00';
+    thumbBg = 'linear-gradient(135deg, ' + bg1 + ' 0%, ' + ac1 + ' 100%)';
+  }
+
+  var activeSkinId = localStorage.getItem('activeSkin');
+  var isSkinActive = product.type === 'skin' && state === 'owned' && activeSkinId === product.id;
+
+  var badgeHtml;
+  if (state === 'owned') {
+    badgeHtml = isSkinActive
+      ? '<span class="product-badge" style="background:rgba(1,187,225,0.18);color:#01BBE1">Activa</span>'
+      : '<span class="product-badge">Tuyo</span>';
+  } else {
+    badgeHtml = '';
+  }
+
+  var priceHtml = product.price > 0
     ? '<div class="product-price"><span>👣</span><span>' + fmtPrice(product.price) + '</span></div>'
     : '';
+
   var btnHtml;
   if (state === 'owned') {
-    btnHtml = '<button class="product-btn btn-owned" disabled>✓ Tienes</button>';
+    if (product.type === 'skin') {
+      btnHtml = isSkinActive
+        ? '<button class="product-btn btn-owned" disabled>Activa ✓</button>'
+        : '<button class="product-btn btn-canjear" onclick="activateSkin(\'' + product.id + '\')">Activar</button>';
+    } else {
+      btnHtml = '<button class="product-btn btn-owned" disabled>✓ Tienes</button>';
+    }
   } else if (state === 'available') {
     btnHtml = '<button class="product-btn btn-canjear" onclick="onCanjear(\'' + product.id + '\')">Canjear</button>';
   } else {
     btnHtml = '<button class="product-btn" disabled>🔒 Bloqueado</button>';
   }
+
   return '<div class="product-card state-' + state + '">' +
     '<div class="product-thumb" style="background:' + thumbBg + '">' + thumbEmoji + '</div>' +
     '<div class="product-info">' +
@@ -562,24 +731,110 @@ function renderProducts(categoryFilter, userPurchases, userProgress) {
   }).join('');
 }
 
+/* ── Evaluar medallas según niveles completados ── */
+function evaluateMedals(completedNiveles, catalog, userPurchases) {
+  var CONDITIONS = {
+    'complete_mundo_01': ['0101','0102','0103','0104'],
+    'complete_mundo_02': ['0201','0202','0203','0204'],
+    'complete_mundo_03': ['0301','0302','0303','0304'],
+    'complete_mundo_04': ['0401','0402','0403','0404'],
+    'complete_mundo_05': ['0501','0502','0503','0504'],
+    'complete_mundo_06': ['0601','0602','0603','0604'],
+    'complete_mundo_07': ['0701','0702','0703','0704']
+  };
+  var niveles = completedNiveles || [];
+  var purchases = userPurchases || [];
+  return catalog.products.filter(function (p) { return p.type === 'medal'; })
+    .map(function (medal) {
+      var inPurchases = purchases.indexOf(medal.id) !== -1;
+      var cond = CONDITIONS[medal.unlock_condition];
+      var byCondition = cond
+        ? cond.every(function (id) { return niveles.indexOf(id) !== -1; })
+        : false;
+      return Object.assign({}, medal, { earned: inPurchases || byCondition });
+    });
+}
+
 /* ── Renderizar medallas (siempre visible) ── */
-function renderMedals(userPurchases) {
+function renderMedals(userPurchases, completedNiveles) {
   if (!CATALOG) return;
-  var medals = CATALOG.products.filter(function (p) { return p.type === 'medal'; });
-  var el     = document.getElementById('medals-scroll');
+  var medals = evaluateMedals(
+    Array.isArray(completedNiveles) ? completedNiveles : (Array.isArray(USER_PROGRESS) ? USER_PROGRESS : Object.keys(USER_PROGRESS)),
+    CATALOG,
+    userPurchases
+  );
+  var el = document.getElementById('medals-scroll');
   el.innerHTML = medals.map(function (m) {
-    var earned = userPurchases.indexOf(m.id) !== -1;
-    return '<div class="medal-item">' +
-      '<div class="medal-circle' + (earned ? ' earned' : ' locked') + '">' + m.emoji + '</div>' +
-      '<div class="medal-label' + (earned ? ' earned' : '') + '">' + m.name + '</div>' +
+    var tooltip = m.earned ? ' title="' + m.name + '"' : '';
+    return '<div class="medal-item"' + tooltip + '>' +
+      '<div class="medal-circle' + (m.earned ? ' earned' : ' locked') + '">' + m.emoji + '</div>' +
+      '<div class="medal-label' + (m.earned ? ' earned' : '') + '">' + m.name + '</div>' +
     '</div>';
   }).join('');
 }
 
-/* ── Canjear placeholder — Bloque 3 conecta Firebase ── */
-function onCanjear(productId) {
-  console.log('canjear', productId);
+/* ── Activar skin ── */
+function activateSkin(productId) {
+  localStorage.setItem('activeSkin', productId);
+  if (window.applySavedSkin) window.applySavedSkin();
+  renderProducts(ACTIVE_CAT, USER_PURCHASES, USER_PROGRESS);
 }
+
+/* ── Confirm sheet ── */
+function onCanjear(productId) {
+  openConfirm(productId);
+}
+
+function openConfirm(productId) {
+  if (!CATALOG) return;
+  var product = CATALOG.products.find(function (p) { return p.id === productId; });
+  if (!product) return;
+  CONFIRM_PRODUCT = product;
+
+  var saldoAfter = TOTAL_METERS - product.price;
+  var canBuy     = saldoAfter >= 0;
+
+  var emojiEl = document.getElementById('confirm-emoji');
+  emojiEl.textContent       = product.emoji;
+  emojiEl.style.background  = product.color_bg || 'rgba(212,160,23,0.12)';
+  document.getElementById('confirm-name').textContent  = product.name;
+  document.getElementById('confirm-desc').textContent  = product.description;
+  document.getElementById('confirm-cost').textContent  = '👣 ' + fmtPrice(product.price);
+  document.getElementById('confirm-before').textContent = fmtPrice(TOTAL_METERS);
+
+  var afterEl = document.getElementById('confirm-after');
+  afterEl.textContent = fmtPrice(Math.max(0, saldoAfter));
+  afterEl.classList.toggle('insufficient', !canBuy);
+
+  document.getElementById('confirm-error').style.display = canBuy ? 'none' : '';
+  document.getElementById('confirm-btn-ok').disabled     = !canBuy;
+
+  document.getElementById('confirm-overlay').classList.add('open');
+  document.getElementById('confirm-sheet').classList.add('open');
+}
+
+function closeConfirm() {
+  document.getElementById('confirm-overlay').classList.remove('open');
+  document.getElementById('confirm-sheet').classList.remove('open');
+  CONFIRM_PRODUCT = null;
+}
+
+function onConfirmBuy() {
+  if (!CONFIRM_PRODUCT) return;
+  executePurchase(CONFIRM_PRODUCT);
+}
+
+/* ── Swipe-down para cerrar confirm sheet ── */
+(function () {
+  var sheet = document.getElementById('confirm-sheet');
+  var ty0   = 0;
+  sheet.addEventListener('touchstart', function (e) {
+    ty0 = e.touches[0].clientY;
+  }, { passive: true });
+  sheet.addEventListener('touchend', function (e) {
+    if (e.changedTouches[0].clientY - ty0 > 60) closeConfirm();
+  }, { passive: true });
+})();
 </script>
 <!-- Firebase compat SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -598,6 +853,100 @@ firebase.initializeApp({
 });
 var _db   = firebase.firestore();
 var _auth = firebase.auth();
+
+/* ── Helpers de UI post-compra ── */
+function updateSaldoDisplay(newTotal) {
+  TOTAL_METERS = newTotal;
+  document.getElementById('saldo-value').textContent =
+    newTotal.toLocaleString('es-MX') + ' m';
+}
+
+var _toastTimer = null;
+function showPurchaseSuccess(product) {
+  closeConfirm();
+  var toast = document.getElementById('purchase-toast');
+  document.getElementById('purchase-toast-text').textContent =
+    '¡' + product.name + ' desbloqueado!';
+  toast.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(function () { toast.classList.remove('show'); }, 2000);
+}
+
+/* ── Transacción de compra ── */
+async function executePurchase(product) {
+  var user = _auth.currentUser;
+  if (!user) return;
+
+  var userRef   = _db.collection('users').doc(user.uid);
+  var extrasRef = _db.collection('users').doc(user.uid)
+                     .collection('extras').doc('purchases');
+
+  var okBtn = document.getElementById('confirm-btn-ok');
+  okBtn.disabled   = true;
+  okBtn.textContent = 'Procesando…';
+
+  try {
+    await _db.runTransaction(async function (transaction) {
+      var userSnap      = await transaction.get(userRef);
+      var currentMeters = (userSnap.exists ? userSnap.data().totalMeters : 0) ?? 0;
+
+      if (currentMeters < product.price) {
+        throw new Error('metros_insuficientes');
+      }
+
+      transaction.update(userRef, {
+        totalMeters: currentMeters - product.price
+      });
+
+      var extrasSnap = await transaction.get(extrasRef);
+      var existing   = extrasSnap.exists
+        ? (extrasSnap.data().items ?? [])
+        : [];
+      transaction.set(extrasRef, {
+        items: existing.concat([{
+          id:          product.id,
+          type:        product.type,
+          purchasedAt: new Date().toISOString()
+        }])
+      });
+
+      if (product.type === 'canto') {
+        var cantoRef = _db.collection('users').doc(user.uid)
+                         .collection('extrasCantos').doc(product.id);
+        transaction.set(cantoRef, {
+          id:             product.id,
+          name:           product.name,
+          audio_filename: product.audio_filename,
+          bloque:         product.bloque,
+          mundo:          product.mundo,
+          source:         'extras',
+          favorite:       false,
+          purchasedAt:    new Date().toISOString()
+        });
+      }
+    });
+
+    var newTotal = TOTAL_METERS - product.price;
+    USER_PURCHASES = USER_PURCHASES.concat([product.id]);
+    updateSaldoDisplay(newTotal);
+    if (product.type === 'skin') {
+      localStorage.setItem('activeSkin', product.id);
+      if (window.applySavedSkin) window.applySavedSkin();
+    }
+    renderProducts(ACTIVE_CAT, USER_PURCHASES, USER_PROGRESS);
+    renderMedals(USER_PURCHASES, Array.isArray(USER_PROGRESS) ? USER_PROGRESS : Object.keys(USER_PROGRESS));
+    showPurchaseSuccess(product);
+
+  } catch (err) {
+    okBtn.disabled   = false;
+    okBtn.textContent = '👣 Canjear ahora';
+    var errorEl = document.getElementById('confirm-error');
+    errorEl.textContent = err.message === 'metros_insuficientes'
+      ? 'No tienes metros suficientes para este canje.'
+      : 'Ocurrió un error. Intenta de nuevo.';
+    errorEl.style.display = '';
+  }
+}
 
 _auth.onAuthStateChanged(async function (user) {
   if (!user) {
@@ -628,13 +977,13 @@ _auth.onAuthStateChanged(async function (user) {
     // 4. Renderizar con datos reales
     renderSaldoBar(totalMeters, currentNivel);
     renderProducts(ACTIVE_CAT, userPurchases, completedNiveles);
-    renderMedals(userPurchases);
+    renderMedals(userPurchases, completedNiveles);
 
   } catch (e) {
     console.warn('[CruzAndo] extras:', e.message);
     renderSaldoBar(0, '0101');
     renderProducts(ACTIVE_CAT, [], []);
-    renderMedals([]);
+    renderMedals([], []);
   }
 });
 </script>

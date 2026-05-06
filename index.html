@@ -784,6 +784,19 @@ body {
           </div>
         </div>
 
+        <div class="modulo-card modulo-cantos anim-in" id="extras-card" style="display:none" onclick="playTap(); navigateTo('extras.html', event)">
+          <div class="modulo-top">
+            <div class="modulo-icon-wrap">⭐</div>
+            <span class="modulo-badge">Tienda</span>
+          </div>
+          <div class="modulo-titulo">Extras</div>
+          <div class="modulo-desc">Cantos, skins y medallas para personalizar tu peregrinación.</div>
+          <div class="modulo-footer">
+            <span class="modulo-meta">👣 Canjea tus metros</span>
+            <span class="modulo-cta">Ver →</span>
+          </div>
+        </div>
+
         <div class="modulo-card modulo-diario anim-in" style="grid-column:1/-1" onclick="playTap(); navigateTo('diario.html', event)">
           <div class="modulo-top">
             <div class="modulo-icon-wrap">📓</div>
@@ -848,16 +861,13 @@ body {
       </div>
       <span class="app-nav-label">Sanar</span>
     </button>
-    <button class="app-nav-item active" disabled>
+    <button class="app-nav-item" id="nav-extras-btn" onclick="navTap(this); navigateTo('extras.html')">
       <div class="app-nav-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="3" width="7" height="7" rx="1"/>
-          <rect x="14" y="3" width="7" height="7" rx="1"/>
-          <rect x="3" y="14" width="7" height="7" rx="1"/>
-          <rect x="14" y="14" width="7" height="7" rx="1"/>
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
         </svg>
       </div>
-      <span class="app-nav-label">Inicio</span>
+      <span class="app-nav-label">Extras</span>
     </button>
   </nav>
 
@@ -1033,6 +1043,16 @@ function renderHome(userData) {
   // Banner premium — solo para free
   var banner = document.getElementById('banner-premium');
   if (banner) banner.style.display = currentPlan === 'free' ? '' : 'none';
+
+  // Extras card — visible solo desde nivel 0201 en adelante
+  var extrasCard = document.getElementById('extras-card');
+  var extrasBtn  = document.getElementById('nav-extras-btn');
+  var extrasUnlocked = currentNivelId >= '0201';
+  if (extrasCard) extrasCard.style.display = extrasUnlocked ? '' : 'none';
+  if (extrasBtn) {
+    extrasBtn.disabled = !extrasUnlocked;
+    extrasBtn.style.opacity = extrasUnlocked ? '' : '0.4';
+  }
 
   // Nombre
   var name = (userData.displayName || '').split(' ')[0] || 'Peregrino';
