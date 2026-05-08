@@ -572,7 +572,7 @@ body {
 .brand-cross-sm::after  { width:20px;  height:3.5px; top:37%; left:0; }
 
 .menu-btn {
-  width:34px; height:34px; border-radius:10px;
+  width:44px; height:44px; border-radius:13px;
   background:rgba(255,255,255,0.08); border:none;
   display:flex; align-items:center; justify-content:center;
   cursor:pointer; color:var(--text-soft); transition:background 0.15s;
@@ -620,7 +620,7 @@ body {
 .drawer-nav { flex:1; padding:8px 0; overflow-y:auto; }
 
 .drawer-item {
-  display:flex; align-items:center; gap:14px; padding:13px 20px;
+  display:flex; align-items:center; gap:16px; padding:15px 22px;
   cursor:pointer; border:none; background:none; width:100%; text-align:left;
   font-family:'Inter',sans-serif; transition:background 0.15s;
   -webkit-tap-highlight-color:transparent;
@@ -629,15 +629,15 @@ body {
 .light .drawer-item:active { background:rgba(0,0,0,0.04); }
 .drawer-item.active { background:rgba(255,122,0,0.08); }
 .drawer-item-icon {
-  width:38px; height:38px; border-radius:12px;
+  width:44px; height:44px; border-radius:14px;
   background:rgba(255,255,255,0.06);
   display:flex; align-items:center; justify-content:center;
-  font-size:1.1rem; flex-shrink:0; transition:background 0.15s;
+  font-size:1.4rem; flex-shrink:0; transition:background 0.15s;
 }
 .light .drawer-item-icon { background:rgba(0,0,0,0.06); }
 .drawer-item.active .drawer-item-icon { background:rgba(255,122,0,0.15); }
-.drawer-item-label { font-size:0.85rem; font-weight:600; color:var(--text); }
-.drawer-item-sub   { font-size:0.6rem; color:var(--text-dim); margin-top:1px; }
+.drawer-item-label { font-size:1rem; font-weight:700; color:var(--text); }
+.drawer-item-sub   { font-size:0.68rem; color:var(--text-dim); margin-top:2px; }
 .drawer-divider    { height:1px; background:var(--border); margin:6px 16px; }
 .drawer-item-badge {
   margin-left:auto; font-size:0.55rem; font-weight:700;
@@ -881,6 +881,30 @@ body {
 .popup-hero { padding:14px 20px 16px; position:relative; overflow:hidden; }
 .popup-hero-bg { position:absolute; inset:0; z-index:0; pointer-events:none; }
 .popup-hero-content { position:relative; z-index:1; }
+
+/* ── Imagen del misterio (duotono) ── */
+.popup-mystery-frame {
+  width:100%; height:112px; position:relative; overflow:hidden;
+  border-radius:13px; margin-bottom:12px;
+  background:rgba(255,255,255,0.04);
+}
+.popup-mystery-img {
+  width:100%; height:100%; object-fit:cover; object-position:center 20%;
+  display:block;
+  filter:grayscale(1) contrast(1.1) brightness(0.82);
+}
+.popup-mystery-tint {
+  position:absolute; inset:0;
+  mix-blend-mode:color;
+  opacity:0.55; pointer-events:none;
+}
+/* degradado inferior para suavizar la transición con el badge */
+.popup-mystery-frame::after {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(to bottom, transparent 40%, var(--popup-bg) 100%);
+  pointer-events:none;
+}
+
 .popup-badge {
   display:inline-flex; align-items:center; gap:5px;
   padding:3px 10px; border-radius:20px; font-size:0.58rem; font-weight:700;
@@ -1025,7 +1049,7 @@ body {
       <div class="drawer-item-icon">🌿</div>
       <div><div class="drawer-item-label">Sanar</div><div class="drawer-item-sub">Talleres de acompañamiento</div></div>
     </button>
-    <button class="drawer-item" id="drawer-extras-btn" onclick="closeDrawer(); playTap(); navigateTo('extras.html')" style="display:none">
+    <button class="drawer-item" id="drawer-extras-btn" onclick="closeDrawer(); playTap(); navigateTo('extras.html')">
       <div class="drawer-item-icon">⭐</div>
       <div><div class="drawer-item-label">Extras</div><div class="drawer-item-sub">Canjea tus metros</div></div>
     </button>
@@ -1196,7 +1220,7 @@ body {
         <span class="stat-val gold" id="metros-display">0m</span>
       </div>
       <button class="menu-btn" onclick="openDrawer()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <line x1="3" y1="6"  x2="21" y2="6"/>
           <line x1="3" y1="12" x2="21" y2="12"/>
           <line x1="3" y1="18" x2="21" y2="18"/>
@@ -1306,6 +1330,10 @@ body {
       <div class="popup-hero">
         <div class="popup-hero-bg" id="popup-bg"></div>
         <div class="popup-hero-content">
+          <div class="popup-mystery-frame" id="popup-mystery-frame" style="display:none">
+            <img class="popup-mystery-img" id="popup-mystery-img" src="" alt="">
+            <div class="popup-mystery-tint" id="popup-mystery-tint"></div>
+          </div>
           <div class="popup-badge" id="popup-badge"></div>
           <div class="popup-name" id="popup-name"></div>
           <div class="popup-sub"  id="popup-sub"></div>
@@ -1694,6 +1722,7 @@ var NIVELES_ORDER = [
   '0601','0602','0603','0604',
   '0701','0702','0703','0704'
 ];
+window.NIVELES_ORDER = NIVELES_ORDER;
 var BLOCKS = ['gozosos','luminosos','dolorosos','gloriosos'];
 
 var OFFICIAL_NAMES = {
@@ -2341,6 +2370,8 @@ function buildBioma(canvas, totalH) {
 }
 
 /* ══ POPUP MISTERIO ══ */
+var IMG_BASE_IDX = 'https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev/';
+
 function openMapPopup(gi, bi, mi) {
   var b=BLOQUES_MAP[bi], c=b.color;
   document.getElementById('popup-bg').style.background='radial-gradient(ellipse at 30% 60%,' + c + '35 0%,transparent 60%)';
@@ -2349,6 +2380,23 @@ function openMapPopup(gi, bi, mi) {
   badge.style.cssText='background:' + c + '22;color:' + c + ';border:1px solid ' + c + '44;';
   document.getElementById('popup-name').textContent=b.misterios[mi];
   document.getElementById('popup-sub').textContent='Misterio ' + (gi+1) + ' de 20 · ' + (gi < window.DONE_COUNT ? 'Completado ✓' : 'Pendiente');
+
+  // Imagen del misterio con filtro duotono
+  var cId  = window.currentNivelId || '0101';
+  var niv  = parseInt(cId.substring(0,2), 10);
+  var cuad = parseInt(cId.substring(2,4), 10);
+  var imgUrl = IMG_BASE_IDX + 'P_' + niv + '_' + cuad + '_' + (gi+1) + '.webp';
+  var frameEl = document.getElementById('popup-mystery-frame');
+  var imgEl   = document.getElementById('popup-mystery-img');
+  var tintEl  = document.getElementById('popup-mystery-tint');
+  if (frameEl && imgEl) {
+    frameEl.style.display = 'none'; // oculto hasta que carga
+    imgEl.onload  = function() { frameEl.style.display = ''; };
+    imgEl.onerror = function() { frameEl.style.display = 'none'; };
+    imgEl.src = imgUrl;
+  }
+  if (tintEl) tintEl.style.background = c;
+
   document.getElementById('popup-audio').onclick=function(){
     closePopup();
     if (window.navigateTo && window.currentNivelId) window.navigateTo('audio.html?c=' + window.currentNivelId);
