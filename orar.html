@@ -731,7 +731,7 @@ function updateToggleHref(){
   if(tab) tab.href=`audio.html?nivel=${nivel}&cuaderno=${cua}&misterio=${currentGlobalMystery}`;
 }
 function goPrevMystery(){
-  if(currentGlobalMystery<=1){renderHome();return;}
+  if(currentGlobalMystery<=1){goTo('index.html');return;}
   const{block,idx}=getMysteryBlock(--currentGlobalMystery);
   loadMystery(block,idx);
 }
@@ -762,8 +762,15 @@ async function loadCuaderno(nId){
   try{const r=await fetch(base+'data/'+nivelId+'.json');if(r.ok)data=await r.json();}catch(e){}
   try{const r=await fetch(base+'data/'+nivelId+'-cantos.json');if(r.ok)cantoJ=await r.json();}catch(e){}
   try{const snap=await FS.collection('users').doc(usr.uid).collection('progress').doc(nivelId).get();prog=snap.exists?snap.data():{};}catch(e){prog={};}
-  blk=null;bIdx=0;
-  renderHome();
+  // Elegir primer bloque/misterio incompleto del nuevo nivel
+  const pBlk=prog?.progress||{};let found=false;
+  for(const b of BLOCKS){
+    const dots=pBlk[b]||[null,null,null,null,null];
+    const done=dots.filter(Boolean).length;
+    if(done<5){blk=b;bIdx=Math.min(done,4);found=true;break;}
+  }
+  if(!found){blk=BLOCKS[0];bIdx=0;}
+  await checkMicro();
 }
 
 /* ─── UTILS ─── */
@@ -1355,10 +1362,11 @@ function initSwipe(){
     }
   },{passive:true});
 
-  let hsx=0;const home=$('scr-home');
-  home.addEventListener('touchstart',e=>{hsx=e.touches[0].clientX;},{passive:true});
-  home.addEventListener('touchend',e=>{
-    if(e.changedTouches[0].clientX-hsx>60)goTo('index.html');
+  // scr-home ya no existe; el swipe horizontal desde scr-orar lleva a index.html
+  let hsx=0;const orarScr=$('scr-orar');
+  orarScr.addEventListener('touchstart',e=>{hsx=e.touches[0].clientX;},{passive:true});
+  orarScr.addEventListener('touchend',e=>{
+    if(e.changedTouches[0].clientX-hsx>80)goTo('index.html');
   },{passive:true});
 
   // Swipe vertical en la sesión: arriba → muestra nav, abajo → oculta
