@@ -888,6 +888,7 @@ body {
   width:100%; flex:1; min-height:180px; position:relative; overflow:hidden;
   border-radius:13px; margin-bottom:12px;
   background:rgba(255,255,255,0.04);
+  opacity:0; transition:opacity 0.4s ease;
 }
 .popup-mystery-img {
   width:100%; height:100%; object-fit:cover; object-position:center 20%;
@@ -2525,8 +2526,12 @@ function openMapPopup(gi, bi, mi) {
   var imgEl   = document.getElementById('popup-mystery-img');
   var tintEl  = document.getElementById('popup-mystery-tint');
   if (frameEl && imgEl) {
-    frameEl.style.display = 'none'; // oculto hasta que carga
-    imgEl.onload  = function() { frameEl.style.display = ''; };
+    frameEl.style.display = 'none';
+    frameEl.style.opacity = '0';
+    imgEl.onload  = function() {
+      frameEl.style.display = '';
+      setTimeout(function() { frameEl.style.opacity = '1'; }, 260);
+    };
     imgEl.onerror = function() { frameEl.style.display = 'none'; };
     imgEl.src = imgUrl;
   }
@@ -2550,6 +2555,13 @@ function openMapPopup(gi, bi, mi) {
     el.style.display = _showDesc ? '' : 'none';
   });
 
+  // Reiniciar animación sheetUp en cada apertura
+  var _sheet = document.querySelector('.popup-sheet');
+  if (_sheet) {
+    _sheet.style.animation = 'none';
+    _sheet.offsetHeight; // fuerza reflow para que el browser resetee la animación
+    _sheet.style.animation = '';
+  }
   document.getElementById('popup-overlay').classList.add('open');
 }
 function closePopup() {
