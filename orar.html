@@ -35,7 +35,7 @@ const _auth = firebase.auth();
   --green:#34A853;--green-soft:rgba(52,168,83,0.12);
   --lvl-bold:#FF7A00;--lvl-base:#FF7F09;--lvl-soft:#F69C49;
   --lvl-mist:#FFA34E;--lvl-light:#FFCFA2;--lvl-ultra:rgba(255,122,0,0.07);
-  --goz-color:#D4A017;--lum-color:#01BBE1;--dol-color:#C0392B;--glo-color:#8E44AD;
+  --goz-color:#E8A0A0;--lum-color:#01BBE1;--dol-color:#C0392B;--glo-color:#D4A017;
   --brand:#01BBE1;
   --bg-rgb:230,222,211;
 }
@@ -683,8 +683,8 @@ const BLOCKS = ['gozosos','luminosos','dolorosos','gloriosos'];
 const BN  = {gozosos:'Gozosos',luminosos:'Luminosos',dolorosos:'Dolorosos',gloriosos:'Gloriosos'};
 const BFN = {gozosos:'Misterios Gozosos',luminosos:'Misterios Luminosos',dolorosos:'Misterios Dolorosos',gloriosos:'Misterios Gloriosos'};
 const BEM = {gozosos:'🌟',luminosos:'✨',dolorosos:'✝️',gloriosos:'👑'};
-const BCL = {gozosos:'#D4A017',luminosos:'#01BBE1',dolorosos:'#C0392B',gloriosos:'#8E44AD'};
-const BCL_RGB = {gozosos:'212,160,23',luminosos:'1,187,225',dolorosos:'192,57,43',gloriosos:'142,68,173'};
+const BCL = {gozosos:'#E8A0A0',luminosos:'#01BBE1',dolorosos:'#C0392B',gloriosos:'#D4A017'};
+const BCL_RGB = {gozosos:'232,160,160',luminosos:'1,187,225',dolorosos:'192,57,43',gloriosos:'212,160,23'};
 function applyBlockAccent(block){
   const c=BCL[block]||BCL.gozosos, r=BCL_RGB[block]||BCL_RGB.gozosos;
   const root=document.documentElement;

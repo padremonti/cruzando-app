@@ -2201,18 +2201,19 @@ var MAP_BLOCK_GAP = 260; // espacio extra entre bloques: tesoro + pater sin enci
 var MAP_TOP       = 32;
 var MAP_STEP      = (2 * Math.PI) / 8;
 
-function computeAllPositions() {
+function computeAllPositions(cuaderno) {
+  // Cada cuaderno arranca en una fase distinta del seno para que el mapa se sienta diferente
+  var phaseOff = ((cuaderno || 1) - 1) * 2;
   var pts = []; var y = MAP_TOP; var gi = 0;
   BLOQUES_MAP.forEach(function(bloque, bi) {
     bloque.misterios.forEach(function(_, mi) {
-      var x = MAP_CX + MAP_AMP * Math.sin(gi * MAP_STEP);
+      var x = MAP_CX + MAP_AMP * Math.sin((gi + phaseOff) * MAP_STEP);
       pts.push({ type:'misterio', x:x, y:y, bi:bi, mi:mi, globalIdx:gi });
       y += MAP_NODE_H; gi++;
     });
     if (bi < BLOQUES_MAP.length - 1) {
-      // y apunta al inicio del próximo bloque; insertamos tesoro y pater DENTRO del gap
       var xPrev  = pts[pts.length-1].x;
-      var xNext  = MAP_CX + MAP_AMP * Math.sin(gi * MAP_STEP);
+      var xNext  = MAP_CX + MAP_AMP * Math.sin((gi + phaseOff) * MAP_STEP);
       var xChest = (xPrev + xNext) / 2;
       pts.push({ type:'treasure', x:xChest,            y:y + MAP_BLOCK_GAP * 0.35, bi:bi });
       pts.push({ type:'pater',    x:(xChest+xNext)/2, y:y + MAP_BLOCK_GAP * 0.65, color:BLOQUES_MAP[bi+1].color });
@@ -2235,16 +2236,16 @@ function buildMap() {
   var _mundoColors = ['#FF7A00','#01BBE1','#8E44AD','#C0392B','#27AE60','#E91E8C','#D4A017'];
 
   // Si hay "Anterior", dar espacio en el tope
+  var _cuad = parseInt(_bCId.substring(2,4), 10);
+  var _mnd  = parseInt(_bCId.substring(0,2), 10);
+
   var origMapTop = MAP_TOP;
   if (_hasPrev) MAP_TOP = 200;
-  var res = computeAllPositions();
+  var res = computeAllPositions(_cuad);
   MAP_TOP = origMapTop;
 
   var pts = res.pts; var totalH = res.totalH;
   canvas.style.height = totalH + 'px';
-
-  var _cuad = parseInt(_bCId.substring(2,4), 10);
-  var _mnd  = parseInt(_bCId.substring(0,2), 10);
   buildBioma(canvas, totalH, _cuad, _mundoColors[_mnd - 1] || '#FF7A00');
 
   var svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
@@ -2423,36 +2424,38 @@ function buildMap() {
 }
 
 function drawMapPath(svg, mPts) {
-  var d = 'M ' + mPts[0].x + ' ' + mPts[0].y;
-  for (var i=1; i<mPts.length; i++) {
-    var p1=mPts[i-1], p2=mPts[i], my=(p1.y+p2.y)/2;
-    d += ' Q ' + p1.x + ' ' + my + ' ' + (p1.x+p2.x)/2 + ' ' + my + ' Q ' + p2.x + ' ' + my + ' ' + p2.x + ' ' + p2.y;
+  function buildD(points) {
+    var d = 'M ' + points[0].x + ' ' + points[0].y;
+    for (var i=1; i<points.length; i++) {
+      var p1=points[i-1], p2=points[i], my=(p1.y+p2.y)/2;
+      d += ' Q ' + p1.x + ' ' + my + ' ' + (p1.x+p2.x)/2 + ' ' + my +
+           ' Q ' + p2.x + ' ' + my + ' ' + p2.x + ' ' + p2.y;
+    }
+    return d;
   }
+
+  // Camino base completo (pendiente)
   var base = document.createElementNS('http://www.w3.org/2000/svg','path');
-  base.setAttribute('d',d); base.setAttribute('fill','none');
-  base.setAttribute('stroke','var(--path-base)'); base.setAttribute('stroke-width','2');
-  base.setAttribute('stroke-dasharray','5 4');
+  base.setAttribute('d', buildD(mPts));
+  base.setAttribute('fill','none');
+  base.setAttribute('stroke','rgba(255,255,255,0.07)');
+  base.setAttribute('stroke-width','30');
+  base.setAttribute('stroke-linecap','round');
   svg.appendChild(base);
 
+  // Segmentos completados por bloque (encima del camino base)
   BLOQUES_MAP.forEach(function(bloque, bi) {
     var start=bi*5, done=Math.max(0,Math.min(window.DONE_COUNT-start,5));
     if (done<=0) return;
     var pts=mPts.slice(start, start+done+1);
     if (pts.length<2) return;
-    var seg='M ' + pts[0].x + ' ' + pts[0].y;
-    for (var i=1; i<pts.length; i++) {
-      var p1=pts[i-1],p2=pts[i],my=(p1.y+p2.y)/2;
-      seg += ' Q '+p1.x+' '+my+' '+(p1.x+p2.x)/2+' '+my+' Q '+p2.x+' '+my+' '+p2.x+' '+p2.y;
-    }
-    var glow=document.createElementNS('http://www.w3.org/2000/svg','path');
-    glow.setAttribute('d',seg); glow.setAttribute('fill','none');
-    glow.setAttribute('stroke',bloque.color); glow.setAttribute('stroke-width','5');
-    glow.setAttribute('stroke-linecap','round'); glow.setAttribute('opacity','0.18');
-    svg.appendChild(glow);
     var line=document.createElementNS('http://www.w3.org/2000/svg','path');
-    line.setAttribute('d',seg); line.setAttribute('fill','none');
-    line.setAttribute('stroke',bloque.color); line.setAttribute('stroke-width','2.5');
-    line.setAttribute('stroke-linecap','round'); line.setAttribute('opacity','0.85');
+    line.setAttribute('d', buildD(pts));
+    line.setAttribute('fill','none');
+    line.setAttribute('stroke',bloque.color);
+    line.setAttribute('stroke-width','30');
+    line.setAttribute('stroke-linecap','round');
+    line.setAttribute('opacity','0.35');
     svg.appendChild(line);
   });
 }
