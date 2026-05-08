@@ -1550,7 +1550,12 @@ function renderHome(userData) {
   // Plan
   currentPlan = resolvePlan(userData);
   window.currentPlan = currentPlan;
-  window.currentNivelId = currentNivelId; // ya calculado desde Firestore
+  // Sincronizar: si el no-módulo cambió currentNivelId (selector), respetar ese valor
+  if (window.currentNivelId && window.currentNivelId !== currentNivelId) {
+    currentNivelId = window.currentNivelId;
+  } else {
+    window.currentNivelId = currentNivelId;
+  }
   // Mostrar bottom nav
   var nav = document.getElementById('app-nav');
   if (nav) nav.style.display = '';
