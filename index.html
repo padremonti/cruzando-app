@@ -994,6 +994,46 @@ body {
   height:calc(100dvh - 72px);
   overflow:hidden;
 }
+
+/* ══ ODÓMETRO ══ */
+.odometro-wrap {
+  margin:10px 14px 0; padding:12px 14px;
+  background:var(--card2,var(--card)); border:1px solid var(--border);
+  border-radius:16px; flex-shrink:0;
+}
+.odometro-top { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:8px; }
+.odometro-label { font-size:0.58rem; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; color:var(--text-dim); }
+.odometro-fraction { font-size:0.68rem; font-weight:700; color:var(--text-soft); }
+.odometro-hoy { font-size:0.9rem; font-weight:800; color:var(--orange); }
+.odometro-track { height:6px; background:rgba(255,255,255,0.08); border-radius:4px; overflow:visible; position:relative; margin-bottom:6px; }
+.light .odometro-track { background:rgba(0,0,0,0.08); }
+.odometro-fill { height:100%; background:linear-gradient(90deg,var(--orange),var(--gold,#D4A017)); border-radius:4px; width:0%; transition:width 0.8s cubic-bezier(0.16,1,0.3,1); position:relative; }
+.odometro-fill::after { content:''; position:absolute; right:-4px; top:50%; transform:translateY(-50%); width:10px; height:10px; border-radius:50%; background:#fff; box-shadow:0 0 8px rgba(255,122,0,0.9); transition:box-shadow 0.3s; }
+.odometro-fill.done { background:linear-gradient(90deg,var(--green,#34A853),#6FCFA0); }
+.odometro-fill.done::after { box-shadow:0 0 8px rgba(76,175,125,0.9); }
+.odometro-bottom { display:flex; align-items:center; justify-content:space-between; }
+.odometro-estado { display:flex; align-items:center; gap:5px; font-size:0.62rem; font-weight:600; color:var(--text-dim); }
+.odometro-estado.cumplida { color:var(--green,#34A853); }
+.odo-dot-live { width:6px; height:6px; border-radius:50%; background:var(--orange); flex-shrink:0; animation:odoDotPulse 1.5s ease-in-out infinite; }
+.odometro-estado.cumplida .odo-dot-live { background:var(--green,#34A853); }
+@keyframes odoDotPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(1.5)} }
+.odometro-falta { font-size:0.6rem; color:var(--text-dim); }
+
+/* ══ PREFS META ══ */
+.prefs-section { margin-top:18px; padding-top:16px; border-top:1px solid var(--border); }
+.prefs-section-title { font-size:0.62rem; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; color:var(--text-dim); margin-bottom:10px; }
+.prefs-section-title.highlighted { color:var(--orange); animation:highlightPulse 2s ease-in-out 3; }
+@keyframes highlightPulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.prefs-meta-row { display:flex; flex-direction:column; gap:8px; }
+.prefs-meta-display { display:flex; align-items:baseline; gap:5px; }
+#prefs-meta-val { font-size:1.4rem; font-weight:800; color:var(--orange); }
+.prefs-meta-unit { font-size:0.72rem; color:var(--text-dim); }
+.meta-slider { width:100%; accent-color:var(--orange); height:4px; border-radius:2px; cursor:pointer; }
+.prefs-meta-hints { display:flex; justify-content:space-between; font-size:0.58rem; color:var(--text-dim); }
+.btn-guardar-meta { width:100%; padding:11px; border-radius:12px; background:var(--orange); color:#fff; border:none; font-size:0.82rem; font-weight:700; cursor:pointer; margin-top:4px; }
+
+/* ══ POPUP META FALLIDA ══ */
+.meta-streak-sheet { width:100%; max-width:480px; background:var(--popup-bg); border-radius:26px 26px 0 0; border-top:1px solid var(--border); padding-bottom:env(safe-area-inset-bottom,24px); }
 </style>
 </head>
 <body>
@@ -1133,6 +1173,24 @@ body {
         <button class="pref-toggle" id="pref-toggle-micro" onclick="prefToggleMicro()"></button>
       </div>
 
+      <!-- ── META DEL DÍA ── -->
+      <div class="prefs-section" id="prefs-meta-section">
+        <div class="prefs-section-title" id="prefs-meta-highlight">Meta del día</div>
+        <div class="prefs-meta-row">
+          <div class="prefs-meta-display">
+            <span id="prefs-meta-val">1,850</span>
+            <span class="prefs-meta-unit">metros</span>
+          </div>
+          <input type="range" id="prefs-meta-slider" min="500" max="7000" step="50" value="1850" class="meta-slider" oninput="onMetaSliderChange(this.value)"/>
+          <div class="prefs-meta-hints">
+            <span>500m</span>
+            <span style="color:var(--orange);font-weight:700">1,850m recomendado</span>
+            <span>7,000m</span>
+          </div>
+        </div>
+        <button class="btn-guardar-meta" id="btn-guardar-meta" onclick="guardarMeta()">Guardar meta</button>
+      </div>
+
       <button class="btn-modal-close" onclick="closePrefs()" style="margin-top:20px">Cerrar</button>
     </div>
   </div>
@@ -1246,6 +1304,27 @@ body {
     <!-- Level picker -->
     <div id="level-picker" class="level-picker">
       <div class="level-picker-scroll" id="level-picker-scroll"></div>
+    </div>
+
+    <!-- ── ODÓMETRO META DEL DÍA ── -->
+    <div class="odometro-wrap" id="odometro-wrap">
+      <div class="odometro-top">
+        <div class="odometro-label">Meta del día</div>
+        <div class="odometro-fraction">
+          <span class="odometro-hoy" id="odo-hoy">0m</span>
+          <span class="odometro-meta-txt" id="odo-meta-txt"> / 1,850m</span>
+        </div>
+      </div>
+      <div class="odometro-track">
+        <div class="odometro-fill" id="odo-fill" style="width:0%"></div>
+      </div>
+      <div class="odometro-bottom">
+        <div class="odometro-estado" id="odo-estado">
+          <div class="odo-dot-live"></div>
+          <span id="odo-estado-txt">En camino</span>
+        </div>
+        <div class="odometro-falta" id="odo-falta">faltan 1,850m</div>
+      </div>
     </div>
 
     <!-- Map scroll -->
@@ -1379,6 +1458,26 @@ body {
     </div>
   </div>
 
+  <!-- ── POPUP META FALLIDA ── -->
+  <div class="popup-overlay" id="meta-streak-overlay">
+    <div class="meta-streak-sheet">
+      <div class="popup-handle"></div>
+      <div style="padding:20px 20px 6px;text-align:center;">
+        <div style="font-size:2rem;margin-bottom:8px">🎯</div>
+        <div class="popup-name" style="font-size:1.2rem">¿Ajustamos tu meta?</div>
+        <div class="popup-sub" style="margin-top:6px;line-height:1.6;">
+          Llevas 3 días sin alcanzar tu meta de
+          <strong id="meta-popup-val" style="color:var(--orange)">0m</strong>.
+          Puedes ajustarla para que sea más alcanzable.
+        </div>
+      </div>
+      <div style="padding:10px 20px 16px;display:flex;flex-direction:column;gap:8px;">
+        <button class="popup-modo primary" onclick="irAMetaSettings()" style="border-radius:14px;padding:13px 20px;background:var(--orange);color:#fff;font-weight:700;font-size:0.85rem;cursor:pointer;border:none;text-align:left;">Sí, ajustar mi meta →</button>
+        <button class="popup-modo" onclick="document.getElementById('meta-streak-overlay').classList.remove('open')" style="border-radius:14px;padding:12px;background:none;border:1px solid var(--border);color:var(--text-dim);font-size:0.8rem;cursor:pointer;text-align:left;">Mantener mi meta actual</button>
+      </div>
+    </div>
+  </div>
+
   <div class="nav-overlay" id="nav-overlay"></div>
 </div>
 
@@ -1440,12 +1539,21 @@ var NIVEL_NAMES = {
 };
 window.NIVEL_NAMES = NIVEL_NAMES;
 
+// ── Constantes de meta diaria ─────────────────────────────────────
+const META_DEFAULT   = 1850;
+const META_MAX       = 7000;
+const META_KEY       = 'cruzando_daily_goal';
+const HISTORIAL_KEY  = 'cruzando_daily_hist';
+
 // ── Estado ────────────────────────────────────────────────────────
 let currentUser    = null;
 let currentPlan    = 'free'; // 'free' | 'beta' | 'premium'
 let currentNivelId = '0101';
 let selectedPlan   = 'anual';
 let codeApplied    = null;   // null | 'beta' | 'discount'
+let metaMetros  = META_DEFAULT;
+let metrosHoy   = 0;
+let todayKey    = '';
 
 // ── Tema ──────────────────────────────────────────────────────────
 var isLight = localStorage.getItem('cruzando_theme') === 'light';
@@ -1480,6 +1588,12 @@ window.openPrefs = function() {
   document.getElementById('pref-toggle-theme').classList.toggle('on', !isLight);
   document.getElementById('pref-toggle-bgm').classList.toggle('on', p.bgm !== false);
   document.getElementById('pref-toggle-micro').classList.toggle('on', p.microInAudio !== false);
+  var slider = document.getElementById('prefs-meta-slider');
+  if (slider && window.metaMetros !== undefined) {
+    slider.value = window.metaMetros;
+    var valEl = document.getElementById('prefs-meta-val');
+    if (valEl) valEl.textContent = window.metaMetros.toLocaleString('es-MX');
+  }
   document.getElementById('modal-prefs').classList.add('open');
 };
 window.closePrefs = function() {
@@ -1499,6 +1613,13 @@ window.prefToggleMicro = function() {
 };
 
 // ── Helpers de fecha ─────────────────────────────────────────────
+function getTodayKey() {
+  const d = new Date();
+  return d.getFullYear() + '-' +
+    String(d.getMonth()+1).padStart(2,'0') + '-' +
+    String(d.getDate()).padStart(2,'0');
+}
+
 function greetingTime() {
   var h = new Date().getHours();
   if (h < 12) return 'Buenos días';
@@ -1838,6 +1959,28 @@ onAuthStateChanged(auth, async function(user) {
       window._firestoreProgress = progSnap.exists() ? progSnap.data() : null;
     } catch(e) { window._firestoreProgress = null; }
 
+    // ── Cargar meta diaria ──
+    todayKey = getTodayKey();
+    try {
+      const goalRef  = doc(db, 'users', user.uid, 'dailyGoal', 'data');
+      const goalSnap = await getDoc(goalRef);
+      if (goalSnap.exists()) {
+        const gd = goalSnap.data();
+        metaMetros = gd.metaMetros ?? META_DEFAULT;
+        metrosHoy  = gd.historial?.[todayKey] ?? 0;
+        window._dailyHist = gd.historial ?? {};
+      } else {
+        metaMetros = META_DEFAULT; metrosHoy = 0; window._dailyHist = {};
+      }
+    } catch(e) {
+      metaMetros = parseInt(localStorage.getItem(META_KEY)) || META_DEFAULT;
+      const hist = JSON.parse(localStorage.getItem(HISTORIAL_KEY) || '{}');
+      metrosHoy  = hist[todayKey] ?? 0;
+      window._dailyHist = hist;
+    }
+    updateOdometro();
+    checkMetaStreak();
+
     renderHome(userData);
     showScreen('home');
     if (window.buildMap) window.buildMap();
@@ -2078,6 +2221,96 @@ document.getElementById('btn-premium-continuar').addEventListener('click', async
   // Por ahora mostramos un mensaje informativo
   alert('El pago con Stripe se activará próximamente. Por ahora usa el código BETA2026 si eres beta tester.');
 });
+
+// ── Meta diaria: guardar metros de hoy ───────────────────────────
+async function saveMetrosHoy(added) {
+  metrosHoy += added;
+  updateOdometro();
+  try {
+    const goalRef = doc(db, 'users', currentUser.uid, 'dailyGoal', 'data');
+    await setDoc(goalRef, {
+      metaMetros,
+      historial: { [todayKey]: metrosHoy }
+    }, { merge: true });
+  } catch(e) {
+    const hist = JSON.parse(localStorage.getItem(HISTORIAL_KEY) || '{}');
+    hist[todayKey] = metrosHoy;
+    localStorage.setItem(HISTORIAL_KEY, JSON.stringify(hist));
+  }
+}
+
+// ── Meta diaria: UI ───────────────────────────────────────────────
+function updateOdometro() {
+  window.metaMetros = metaMetros;
+  const pct      = Math.min((metrosHoy / metaMetros) * 100, 100);
+  const cumplida = metrosHoy >= metaMetros;
+  const fill      = document.getElementById('odo-fill');
+  const hoyEl     = document.getElementById('odo-hoy');
+  const metaTxt   = document.getElementById('odo-meta-txt');
+  const estadoEl  = document.getElementById('odo-estado');
+  const estadoTxt = document.getElementById('odo-estado-txt');
+  const faltaEl   = document.getElementById('odo-falta');
+  if (!fill) return;
+  fill.style.width = pct + '%';
+  fill.classList.toggle('done', cumplida);
+  if (hoyEl)    hoyEl.textContent   = metrosHoy.toLocaleString('es-MX') + 'm';
+  if (metaTxt)  metaTxt.textContent = ' / ' + metaMetros.toLocaleString('es-MX') + 'm';
+  if (estadoEl) estadoEl.classList.toggle('cumplida', cumplida);
+  if (cumplida) {
+    if (estadoTxt) estadoTxt.textContent = '¡Meta del día cumplida!';
+    if (faltaEl)   faltaEl.textContent   = '+' + (metrosHoy - metaMetros).toLocaleString('es-MX') + 'm extra';
+  } else {
+    if (estadoTxt) estadoTxt.textContent = 'En camino';
+    if (faltaEl)   faltaEl.textContent   = 'faltan ' + (metaMetros - metrosHoy).toLocaleString('es-MX') + 'm';
+  }
+}
+
+function checkMetaStreak() {
+  if (metaMetros <= META_DEFAULT) return;
+  let diasFallidos = 0;
+  for (let i = 1; i <= 3; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const key = d.getFullYear() + '-' +
+      String(d.getMonth()+1).padStart(2,'0') + '-' +
+      String(d.getDate()).padStart(2,'0');
+    if ((window._dailyHist?.[key] ?? 0) < metaMetros) diasFallidos++;
+  }
+  if (diasFallidos >= 3) setTimeout(() => showMetaPopup(), 1500);
+}
+
+function showMetaPopup() {
+  const el = document.getElementById('meta-popup-val');
+  if (el) el.textContent = metaMetros.toLocaleString('es-MX') + 'm';
+  document.getElementById('meta-streak-overlay').classList.add('open');
+}
+
+function irAMetaSettings() {
+  document.getElementById('meta-streak-overlay').classList.remove('open');
+  if (window.openPrefs) window.openPrefs();
+  setTimeout(() => {
+    const section = document.getElementById('prefs-meta-highlight');
+    if (section) {
+      section.classList.add('highlighted');
+      section.scrollIntoView({ behavior:'smooth', block:'center' });
+      setTimeout(() => section.classList.remove('highlighted'), 7000);
+    }
+  }, 400);
+}
+window.irAMetaSettings = irAMetaSettings;
+
+window._guardarMeta = async function(val) {
+  metaMetros = Math.min(Math.max(val, 500), META_MAX);
+  try {
+    const goalRef = doc(db, 'users', currentUser.uid, 'dailyGoal', 'data');
+    await setDoc(goalRef, { metaMetros }, { merge: true });
+  } catch(e) {
+    localStorage.setItem(META_KEY, metaMetros);
+  }
+  updateOdometro();
+  const btn = document.getElementById('btn-guardar-meta');
+  if (btn) { btn.textContent = '✓ Guardado'; setTimeout(() => btn.textContent = 'Guardar meta', 2000); }
+};
 
 // ── Navegación ────────────────────────────────────────────────────
 window.openModal  = function(id) { document.getElementById(id).classList.add('open'); };
@@ -2770,6 +3003,18 @@ window.toggleLevelPicker = toggleLevelPicker;
 window.openLevelPicker   = openLevelPicker;
 window.closeLevelPicker  = closeLevelPicker;
 window.selectNivel       = selectNivel;
+
+/* ══ META DEL DÍA — funciones llamadas desde HTML ══ */
+function onMetaSliderChange(val) {
+  var v = parseInt(val);
+  var el = document.getElementById('prefs-meta-val');
+  if (el) el.textContent = v.toLocaleString('es-MX');
+}
+
+async function guardarMeta() {
+  var val = parseInt(document.getElementById('prefs-meta-slider').value);
+  if (window._guardarMeta) { window._guardarMeta(val); return; }
+}
 </script>
 </body>
 </html>
