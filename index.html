@@ -870,8 +870,8 @@ body {
   border-radius:26px 26px 0 0; border-top:1px solid var(--border);
   padding-bottom:env(safe-area-inset-bottom,24px);
   animation:sheetUp 0.38s cubic-bezier(0.34,1.2,0.64,1);
-  overflow-y:auto; transition:background 0.3s;
-  height:100dvh;
+  overflow:hidden; transition:background 0.3s, transform 0.3s cubic-bezier(0.32,0,0.67,0);
+  height:100dvh; display:flex; flex-direction:column;
 }
 @keyframes sheetUp { from{transform:translateY(100%)}to{transform:translateY(0)} }
 .popup-handle {
@@ -879,13 +879,13 @@ body {
   background:rgba(255,255,255,0.15); margin:12px auto 0;
 }
 .light .popup-handle { background:rgba(0,0,0,0.15); }
-.popup-hero { padding:14px 20px 16px; position:relative; overflow:hidden; }
+.popup-hero { padding:14px 20px 16px; position:relative; overflow:hidden; flex:1; display:flex; flex-direction:column; }
 .popup-hero-bg { position:absolute; inset:0; z-index:0; pointer-events:none; }
-.popup-hero-content { position:relative; z-index:1; }
+.popup-hero-content { position:relative; z-index:1; flex:1; display:flex; flex-direction:column; }
 
 /* ── Imagen del misterio (duotono) ── */
 .popup-mystery-frame {
-  width:100%; height:260px; position:relative; overflow:hidden;
+  width:100%; flex:1; min-height:180px; position:relative; overflow:hidden;
   border-radius:13px; margin-bottom:12px;
   background:rgba(255,255,255,0.04);
 }
@@ -2461,9 +2461,50 @@ function openMapPopup(gi, bi, mi) {
     closePopup();
     if (window.navigateTo) window.navigateTo('orar.html?c=' + _nId + '&misterio=' + _mis);
   };
+  // Ocultar descripciones si el usuario ya pasó 1-1-5
+  var _showDesc = (_nId === '0101' && _mis <= 5);
+  document.querySelectorAll('.popup-modo .modo-desc').forEach(function(el) {
+    el.style.display = _showDesc ? '' : 'none';
+  });
+
   document.getElementById('popup-overlay').classList.add('open');
 }
-function closePopup() { document.getElementById('popup-overlay').classList.remove('open'); }
+function closePopup() {
+  var sheet = document.querySelector('.popup-sheet');
+  if (sheet) sheet.style.transform = '';
+  document.getElementById('popup-overlay').classList.remove('open');
+}
+
+(function() {
+  var sheet = document.querySelector('.popup-sheet');
+  if (!sheet) return;
+  var startY = 0, dragging = false;
+  sheet.addEventListener('touchstart', function(e) {
+    startY = e.touches[0].clientY;
+    dragging = false;
+  }, { passive: true });
+  sheet.addEventListener('touchmove', function(e) {
+    var dy = e.touches[0].clientY - startY;
+    if (dy > 0) {
+      dragging = true;
+      sheet.style.transition = 'none';
+      sheet.style.transform = 'translateY(' + dy + 'px)';
+      e.preventDefault();
+    }
+  }, { passive: false });
+  sheet.addEventListener('touchend', function(e) {
+    if (!dragging) return;
+    var dy = e.changedTouches[0].clientY - startY;
+    sheet.style.transition = '';
+    if (dy > 80) {
+      sheet.style.transform = 'translateY(100%)';
+      setTimeout(closePopup, 300);
+    } else {
+      sheet.style.transform = '';
+    }
+    dragging = false;
+  }, { passive: true });
+})();
 
 /* ══ POPUP COFRE ══ */
 function openTreasure(bi, state) {
@@ -2572,7 +2613,7 @@ function buildLevelPicker() {
         orb.appendChild(subEl);
       }
 
-      if (isUnlocked && !isActive) {
+      if (isUnlocked) {
         orb.onclick = (function(id) { return function() { selectNivel(id); }; })(nid);
       }
       orbsRow.appendChild(orb);
