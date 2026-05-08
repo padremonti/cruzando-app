@@ -1554,6 +1554,19 @@ function renderHome(userData) {
   var diarioEl = document.getElementById('diario-metros');
   if (diarioEl) diarioEl.textContent = '🚶‍♂️ ' + totalM.toLocaleString('es-MX') + 'm';
 
+  // Drawer — datos reales del usuario
+  var drawerNameEl   = document.getElementById('drawer-user-name');
+  var drawerNivelEl  = document.getElementById('drawer-nivel-label');
+  var drawerPlanEl   = document.getElementById('plan-chip-drawer');
+  var drawerMetrosEl = document.getElementById('drawer-metros-val');
+  if (drawerNameEl)  drawerNameEl.textContent  = name;
+  if (drawerNivelEl) drawerNivelEl.textContent = 'Mundo ' + mundo + ' · Nivel ' + mundo + '-' + nivel;
+  if (drawerPlanEl) {
+    drawerPlanEl.textContent = currentPlan === 'premium' ? 'Premium' : currentPlan === 'beta' ? 'Beta' : 'Free';
+    drawerPlanEl.className   = currentPlan === 'premium' ? 'plan-chip-premium' : currentPlan === 'beta' ? 'plan-chip-beta' : 'plan-chip-free';
+  }
+  if (drawerMetrosEl) drawerMetrosEl.textContent = totalM.toLocaleString('es-MX') + 'm';
+
   // Cantos desbloqueados — revisar si hay nuevos y mostrar badge
   if (currentUser) { checkCantosNuevos(currentUser.uid); }
 }
@@ -1570,6 +1583,8 @@ async function checkCantosNuevos(uid) {
     var meta   = document.getElementById('cantos-meta');
     if (badge)  badge.style.display  = (hayNuevos && count > 0) ? '' : 'none';
     if (dot)    dot.style.display    = (hayNuevos && count > 0) ? '' : 'none';
+    var drawerBadge = document.getElementById('cantos-badge-drawer');
+    if (drawerBadge) drawerBadge.style.display = (hayNuevos && count > 0) ? '' : 'none';
     if (meta && count > 0) meta.textContent = count + ' canto' + (count > 1 ? 's' : '') + ' desbloqueado' + (count > 1 ? 's' : '');
   } catch(e) { console.warn('[cantos check]', e); }
 }
