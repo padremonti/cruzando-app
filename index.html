@@ -2210,7 +2210,7 @@ function computeAllPositions() {
       y += MAP_BLOCK_GAP;
     }
   });
-  return { pts:pts, totalH:y + 50 };
+  return { pts:pts, totalH:y + 300 };
 }
 
 function buildMap() {
@@ -2319,6 +2319,51 @@ function buildMap() {
     }
   });
 
+  // ── Esfera "Siguiente nivel" ──────────────────────────────────────
+  var _cId    = window.currentNivelId || '0101';
+  var _cOrder = window.NIVELES_ORDER;
+  var _cIdx2  = _cOrder ? _cOrder.indexOf(_cId) : -1;
+  var _nextId = (_cIdx2 >= 0 && _cIdx2 < _cOrder.length - 1) ? _cOrder[_cIdx2 + 1] : null;
+
+  if (_nextId && mPts.length > 0) {
+    var _lastPt  = mPts[mPts.length - 1];
+    var _nextY   = _lastPt.y + 200;
+    var _nextX   = MAP_CX;
+
+    // ¿Ya lo alcanzó el usuario? (está en su historial de progreso)
+    var _nextIdx2      = _cOrder.indexOf(_nextId);
+    var _accessible    = _nextIdx2 <= _cIdx2 || window.DONE_COUNT >= 20;
+
+    var _nextName  = (window.NIVEL_NAMES && window.NIVEL_NAMES[_nextId]) || _nextId;
+    var _nMundo    = parseInt(_nextId.substring(0, 2), 10);
+    var _mundoColors = ['#FF7A00','#01BBE1','#8E44AD','#C0392B','#27AE60','#E91E8C','#D4A017'];
+    var _nc        = _mundoColors[_nMundo - 1] || '#FF7A00';
+
+    var _nextNode = document.createElement('div');
+    _nextNode.className = 'map-node' + (_accessible ? '' : ' locked');
+    _nextNode.style.cssText = 'left:' + _nextX + 'px;top:' + _nextY + 'px;';
+
+    var _sStyle = _accessible
+      ? 'background:radial-gradient(circle at 35% 30%,' + _nc + 'ee,' + _nc + '77);border-color:' + _nc + '55;--nc:' + _nc + '88;'
+      : 'background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.08);opacity:0.4;';
+
+    _nextNode.innerHTML =
+      '<div class="node-sphere xl" style="' + _sStyle + '">' +
+        '<div class="node-icon" style="font-size:2.4rem">' + (_accessible ? '→' : '🔒') + '</div>' +
+      '</div>' +
+      '<div class="node-label">' +
+        '<div class="node-label-name" style="color:' + (_accessible ? _nc : 'var(--text-dim)') + ';font-size:0.75rem;font-weight:800;letter-spacing:0.4px">Siguiente</div>' +
+        '<div style="font-size:0.58rem;color:var(--text-dim);text-align:center;max-width:120px;margin-top:3px;line-height:1.3">' + _nextName + '</div>' +
+      '</div>';
+
+    if (_accessible) {
+      _nextNode.onclick = (function(id) {
+        return function() { if (window.selectNivel) window.selectNivel(id); };
+      })(_nextId);
+    }
+    canvas.appendChild(_nextNode);
+  }
+
   setTimeout(function() {
     var ap = mPts.find(function(p){ return p.globalIdx === window.DONE_COUNT; });
     if (ap) {
@@ -2399,13 +2444,17 @@ function openMapPopup(gi, bi, mi) {
   }
   if (tintEl) tintEl.style.background = c;
 
+  var _nId = window.currentNivelId || '0101';
+  var _niv = parseInt(_nId.substring(0,2), 10);
+  var _cuad = parseInt(_nId.substring(2,4), 10);
+  var _mis = gi + 1; // misterio 1-20
   document.getElementById('popup-audio').onclick=function(){
     closePopup();
-    if (window.navigateTo && window.currentNivelId) window.navigateTo('audio.html?c=' + window.currentNivelId);
+    if (window.navigateTo) window.navigateTo('audio.html?nivel=' + _niv + '&cuaderno=' + _cuad + '&misterio=' + _mis);
   };
   document.getElementById('popup-orar').onclick=function(){
     closePopup();
-    if (window.navigateTo && window.currentNivelId) window.navigateTo('orar.html?c=' + window.currentNivelId);
+    if (window.navigateTo) window.navigateTo('orar.html?c=' + _nId + '&misterio=' + _mis);
   };
   document.getElementById('popup-overlay').classList.add('open');
 }

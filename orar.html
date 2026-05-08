@@ -424,33 +424,6 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
     </div>
   </header>
 
-  <!-- ═══ INICIO ═══ -->
-  <div class="screen" id="scr-home">
-    <div class="home-intro fade-in">
-      <h1 id="home-title"></h1>
-      <div class="nivel-heading" id="home-nivel"></div>
-      <div class="elemento-heading" id="home-element"></div>
-    </div>
-    <div id="nivel-done-wrap" style="display:none"></div>
-    <div id="today-banner-wrap"></div>
-    <div class="block-grid" id="block-grid"></div>
-    <div class="nivel-switch-card" onclick="goTo('world.html')">
-      <div class="nivel-switch-left">
-        <div class="nivel-switch-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--lvl-bold)">
-            <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
-            <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
-          </svg>
-        </div>
-        <div>
-          <div class="nivel-switch-title">Elegir nivel</div>
-          <div class="nivel-switch-sub">Ver el mapa completo del camino</div>
-        </div>
-      </div>
-      <span class="nivel-switch-arrow">→</span>
-    </div>
-  </div>
-
   <!-- ═══ MICRO-APRENDIZAJE ═══ -->
   <div class="screen" id="scr-micro">
     <div class="micro-screen">
@@ -937,49 +910,19 @@ async function loadAndStart(){
 
   const bParam=p.get('b'),mParam=p.get('m');
   if(bParam&&BLOCKS.includes(bParam)){
-    blk=bParam;bIdx=Math.max(0,Math.min(4,parseInt(mParam)||0));
-    await checkMicro();
+    blk=bParam; bIdx=Math.max(0,Math.min(4,parseInt(mParam)||0));
   } else {
-    renderHome();
+    // Sin bloque explícito: elegir el primer bloque/misterio incompleto del progreso
+    const pBlk=prog?.progress||{};
+    let found=false;
+    for(const b of BLOCKS){
+      const dots=pBlk[b]||[null,null,null,null,null];
+      const done=dots.filter(Boolean).length;
+      if(done<5){blk=b;bIdx=Math.min(done,4);found=true;break;}
+    }
+    if(!found){blk=BLOCKS[0];bIdx=0;} // todos completados → empezar desde el inicio
   }
-}
-
-/* ─── HOME ─── */
-function renderHome(){
-  if(!data){showError('No hay datos para el nivel '+nivelId);return;}
-  const tema=data.tema||{};
-  $('h-title').textContent=tema.mundo_nombre||'Nivel '+nivel;
-  $('h-sub').textContent='Cuaderno '+cua+' · '+(tema.elemento_slug||'');
-  $('home-title').textContent='Cruzando '+(tema.mundo_nombre||'');
-  $('home-nivel').textContent='Nivel '+nivel+'-'+cua;
-  $('home-element').textContent=data.elemento||'';
-
-  const pBlk=prog?.progress||{};
-  const today={0:'gloriosos',1:'gozosos',2:'dolorosos',3:'gloriosos',4:'luminosos',5:'dolorosos',6:'gozosos'}[new Date().getDay()];
-  const grid=$('block-grid');grid.innerHTML='';
-
-  BLOCKS.forEach((b,bi)=>{
-    const dots=pBlk[b]||[null,null,null,null,null];
-    const done=dots.filter(Boolean).length,isToday=b===today,cleared=done>=5;
-    let badge='pending',bTxt='Pendiente';
-    if(cleared){badge='cleared';bTxt='Completado';}
-    else if(done>0){badge='progress';bTxt=done+'/5';}
-    else if(isToday){badge='today';bTxt='Hoy';}
-    const card=document.createElement('div');
-    card.className='block-card fade-in'+(cleared?' cleared':'')+(isToday?' today':'');
-    card.style.animationDelay=(bi*0.07)+'s';
-    card.innerHTML=
-      `<div class="block-card-top"><span class="block-emoji">${BEM[b]}</span><span class="block-badge ${badge}">${bTxt}</span></div>
-       <div class="block-title">${BFN[b]}</div>
-       <div class="block-subtitle">${esc(data.subtitulos_bloque?.[b]||'')}</div>
-       <div class="block-progress"><div class="block-dots">
-         ${dots.map((d,i)=>`<div class="block-dot ${d?'done':i===done?'active':''}"></div>`).join('')}
-       </div></div>`;
-    card.onclick=()=>{blk=b;bIdx=Math.min(done,4);checkMicro();};
-    grid.appendChild(card);
-  });
-  $('main-header').style.display='';
-  show('scr-home');
+  await checkMicro();
 }
 
 /* ─── MICRO CHECK ─── */

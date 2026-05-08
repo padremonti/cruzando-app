@@ -1288,39 +1288,6 @@ body.light { --tb-circle-bg:var(--card); --tb-circle-border:var(--border); --tb-
     </div>
   </div>
 
-  <!-- ═══ PANTALLA: HOME — SELECCIÓN DE BLOQUE ═══ -->
-  <div id="scr-home-audio">
-    <div class="micro-handle"></div>
-    <!-- Tarjeta "Continuar" — populated by renderAudioHome() -->
-    <div class="ah-continue-card" id="ah-continue-card">
-      <div class="ah-cont-left">
-        <div class="ah-cont-kicker" id="ah-cont-kicker">Continuar donde lo dejé</div>
-        <div class="ah-cont-title" id="ah-cont-title">Misterio</div>
-        <div class="ah-cont-sub"   id="ah-cont-sub"></div>
-      </div>
-      <span class="ah-cont-arrow">▶</span>
-    </div>
-    <div class="ah-header">
-      <div class="ah-title" id="ah-title">CruzAndo</div>
-      <div class="ah-nivel" id="ah-nivel"></div>
-      <div class="ah-element" id="ah-element"></div>
-    </div>
-    <div class="ah-block-grid" id="ah-block-grid"></div>
-    <div class="ah-switch-card" onclick="goTo('world.html')">
-      <div class="ah-switch-left">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--lvl-bold)">
-          <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
-          <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
-        </svg>
-        <div>
-          <div class="ah-switch-title">Elegir nivel</div>
-          <div class="ah-switch-sub">Ver el mapa completo del camino</div>
-        </div>
-      </div>
-      <span class="ah-switch-arrow">→</span>
-    </div>
-  </div>
-
   <!-- ═══ OVERLAY: MICRO-APRENDIZAJE ═══ -->
   <div id="scr-micro">
     <div class="micro-handle"></div>
@@ -2083,35 +2050,7 @@ async function loadUserAndStart(skipProgressRead = false) {
   }
 
   console.log('userPlan:', userPlan, '| misterio:', audioProgress.nivel, audioProgress.cuaderno, audioProgress.misterio);
-  if (goDirectly) {
-    await buildSession();
-  } else {
-    await showAudioHome(); // abre overlay; buildSession() se llama cuando el usuario elige
-  }
-}
-
-function openAudioHome()  { $('scr-home-audio').classList.add('open'); }
-function closeAudioHome() { $('scr-home-audio').classList.remove('open'); }
-
-async function showAudioHome() {
-  const { nivel, cuaderno, misterio } = audioProgress;
-  const nivelId = String(nivel).padStart(2,'0') + String(cuaderno).padStart(2,'0');
-
-  if (!currentData) {
-    try {
-      const base = location.origin + location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1);
-      const resp = await fetch(base + 'data/' + nivelId + '.json');
-      if (resp.ok) currentData = await resp.json();
-    } catch(e) {}
-  }
-
-  let progData = {};
-  try {
-    const snap = await getDoc(doc(db, 'users', currentUser.uid, 'progress', nivelId));
-    if (snap.exists()) progData = snap.data();
-  } catch(e) {}
-
-  renderAudioHome(nivel, cuaderno, nivelId, progData);
+  await buildSession();
 }
 
 function renderAudioHome(nivel, cuaderno, nivelId, progData) {
