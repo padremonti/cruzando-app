@@ -2187,10 +2187,10 @@ window.chestState  = ['locked','locked','locked','locked'];
 var MAP_W      = 375;
 var MAP_CX     = MAP_W / 2;
 var MAP_AMP    = 50;
-var MAP_NODE_H = 132;
-var MAP_PATER_H= 100;
-var MAP_TOP    = 32;
-var MAP_STEP   = (2 * Math.PI) / 8;
+var MAP_NODE_H    = 132;
+var MAP_BLOCK_GAP = 260; // espacio extra entre bloques: tesoro + pater sin encimarse con esferas
+var MAP_TOP       = 32;
+var MAP_STEP      = (2 * Math.PI) / 8;
 
 function computeAllPositions() {
   var pts = []; var y = MAP_TOP; var gi = 0;
@@ -2201,11 +2201,13 @@ function computeAllPositions() {
       y += MAP_NODE_H; gi++;
     });
     if (bi < BLOQUES_MAP.length - 1) {
+      // y apunta al inicio del próximo bloque; insertamos tesoro y pater DENTRO del gap
       var xPrev  = pts[pts.length-1].x;
       var xNext  = MAP_CX + MAP_AMP * Math.sin(gi * MAP_STEP);
       var xChest = (xPrev + xNext) / 2;
-      pts.push({ type:'treasure', x:xChest, y:y - MAP_NODE_H/2 + 4, bi:bi });
-      pts.push({ type:'pater',    x:(xChest+xNext)/2, y:y - MAP_NODE_H/2 + MAP_PATER_H/2 + 4, color:BLOQUES_MAP[bi+1].color });
+      pts.push({ type:'treasure', x:xChest,            y:y + MAP_BLOCK_GAP * 0.35, bi:bi });
+      pts.push({ type:'pater',    x:(xChest+xNext)/2, y:y + MAP_BLOCK_GAP * 0.65, color:BLOQUES_MAP[bi+1].color });
+      y += MAP_BLOCK_GAP;
     }
   });
   return { pts:pts, totalH:y + 50 };
@@ -2469,7 +2471,6 @@ function buildLevelPicker() {
   if (!scroll) return;
   var cId   = window.currentNivelId || '0101';
   var cIdx  = NIVELES_ORDER.indexOf(cId);
-  var plan  = window.currentPlan || 'free';
   var names = window.NIVEL_NAMES || {};
   scroll.innerHTML = '';
 
@@ -2491,7 +2492,6 @@ function buildLevelPicker() {
       var idx    = NIVELES_ORDER.indexOf(nid);
       var isActive   = nid === cId;
       var isUnlocked = idx <= cIdx;
-      if (plan === 'free' && nid !== '0101') isUnlocked = false;
 
       var orb = document.createElement('div');
       orb.className = 'nivel-orb' + (!isUnlocked ? ' locked' : '') + (isActive ? ' active' : '');
