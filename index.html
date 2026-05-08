@@ -2428,9 +2428,7 @@ function drawMapPath(svg, mPts) {
   function buildD(points) {
     var d = 'M ' + points[0].x + ' ' + points[0].y;
     for (var i=1; i<points.length; i++) {
-      var p1=points[i-1], p2=points[i], my=(p1.y+p2.y)/2;
-      d += ' Q ' + p1.x + ' ' + my + ' ' + (p1.x+p2.x)/2 + ' ' + my +
-           ' Q ' + p2.x + ' ' + my + ' ' + p2.x + ' ' + p2.y;
+      d += ' L ' + points[i].x + ' ' + points[i].y;
     }
     return d;
   }
