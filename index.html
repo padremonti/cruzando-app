@@ -870,7 +870,8 @@ body {
   border-radius:26px 26px 0 0; border-top:1px solid var(--border);
   padding-bottom:env(safe-area-inset-bottom,24px);
   animation:sheetUp 0.38s cubic-bezier(0.34,1.2,0.64,1);
-  overflow:hidden; transition:background 0.3s;
+  overflow-y:auto; transition:background 0.3s;
+  height:100dvh;
 }
 @keyframes sheetUp { from{transform:translateY(100%)}to{transform:translateY(0)} }
 .popup-handle {
@@ -884,7 +885,7 @@ body {
 
 /* ── Imagen del misterio (duotono) ── */
 .popup-mystery-frame {
-  width:100%; height:112px; position:relative; overflow:hidden;
+  width:100%; height:260px; position:relative; overflow:hidden;
   border-radius:13px; margin-bottom:12px;
   background:rgba(255,255,255,0.04);
 }
@@ -1769,32 +1770,35 @@ function getMysteryName(misterio) {
 }
 
 async function getCurrentNivelFromFirestore(user) {
-  // 1. Bookmark explícito: el nivel que el usuario visitó por última vez (audio o libro)
+  var bookmark = null;
   try {
-    var bookmark = localStorage.getItem('cruzando_current_nivel');
-    if (bookmark && /^\d{4}$/.test(bookmark)) return bookmark;
+    var bk = localStorage.getItem('cruzando_current_nivel');
+    if (bk && /^\d{4}$/.test(bk)) bookmark = bk;
   } catch(e) {}
 
-  // 2. Fallback: primer nivel incompleto (frontera de progreso)
   try {
     var snaps = await Promise.all(
       NIVELES_ORDER.map(function(id) {
         return getDoc(doc(db, 'users', user.uid, 'progress', id));
       })
     );
+    var frontier = NIVELES_ORDER[0];
     for (var i = 0; i < snaps.length; i++) {
-      if (!snaps[i].exists()) return NIVELES_ORDER[i];
+      if (!snaps[i].exists()) { frontier = NIVELES_ORDER[i]; break; }
       var d = snaps[i].data();
-      if (!d.progress) return NIVELES_ORDER[i];
+      if (!d.progress) { frontier = NIVELES_ORDER[i]; break; }
       var allDone = BLOCKS.every(function(b) {
         return d.progress[b] && d.progress[b].every(function(x) { return x !== null; });
       });
-      if (!allDone) return NIVELES_ORDER[i];
+      frontier = NIVELES_ORDER[i];
+      if (!allDone) break;
     }
-    return NIVELES_ORDER[NIVELES_ORDER.length - 1];
+    window.frontierNivelId = frontier;
+    return bookmark || frontier;
   } catch(e) {
     console.warn('[CruzAndo] getCurrentNivelFromFirestore:', e);
-    return getCurrentNivel();
+    window.frontierNivelId = bookmark || '0101';
+    return bookmark || getCurrentNivel();
   }
 }
 
@@ -2330,9 +2334,10 @@ function buildMap() {
     var _nextY   = _lastPt.y + 200;
     var _nextX   = MAP_CX;
 
-    // ¿Ya lo alcanzó el usuario? (está en su historial de progreso)
+    // ¿Ya lo alcanzó el usuario? (frontera de progreso, no solo bookmark)
     var _nextIdx2      = _cOrder.indexOf(_nextId);
-    var _accessible    = _nextIdx2 <= _cIdx2 || window.DONE_COUNT >= 20;
+    var _frontierIdx   = _cOrder ? _cOrder.indexOf(window.frontierNivelId || _cId) : _cIdx2;
+    var _accessible    = _nextIdx2 <= _frontierIdx || window.DONE_COUNT >= 20;
 
     var _nextName  = (window.NIVEL_NAMES && window.NIVEL_NAMES[_nextId]) || _nextId;
     var _nMundo    = parseInt(_nextId.substring(0, 2), 10);
@@ -2519,7 +2524,8 @@ function buildLevelPicker() {
   var scroll = document.getElementById('level-picker-scroll');
   if (!scroll) return;
   var cId   = window.currentNivelId || '0101';
-  var cIdx  = NIVELES_ORDER.indexOf(cId);
+  var frontierIdForPicker = window.frontierNivelId || cId;
+  var cIdx  = NIVELES_ORDER.indexOf(frontierIdForPicker);
   var names = window.NIVEL_NAMES || {};
   scroll.innerHTML = '';
 
