@@ -663,10 +663,11 @@ body {
 
 /* ══ UNIT BANNER ══ */
 .unit-banner {
-  margin:10px 14px 0; padding:11px 14px; border-radius:16px;
+  margin:10px 14px 0; padding:14px 16px; border-radius:16px;
   position:relative; overflow:hidden; flex-shrink:0;
   display:flex; align-items:center; justify-content:space-between;
   border:1.5px solid rgba(255,122,0,0.2); background:rgba(255,122,0,0.1);
+  cursor:pointer; user-select:none; -webkit-tap-highlight-color:transparent;
 }
 .unit-banner-noise {
   position:absolute; inset:0; width:100%; height:100%;
@@ -678,11 +679,69 @@ body {
   text-transform:uppercase; color:rgba(255,160,80,0.8); margin-bottom:2px;
 }
 .unit-banner-title {
-  font-family:'Crimson Pro',serif; font-size:1rem; font-weight:700;
-  color:var(--text); line-height:1.15;
+  font-family:'Crimson Pro',serif; font-size:1.7rem; font-weight:700;
+  color:var(--text); line-height:1.1;
 }
 .unit-banner-right { display:flex; align-items:center; gap:6px; position:relative; z-index:1; }
 .unit-progress-text { font-size:0.68rem; font-weight:700; color:var(--orange); }
+.unit-picker-chevron {
+  font-size:1.3rem; color:var(--orange); line-height:1;
+  transition:transform 0.3s cubic-bezier(0.4,0,0.2,1); display:block;
+}
+
+/* ══ LEVEL PICKER ══ */
+.level-picker {
+  overflow:hidden; max-height:0;
+  transition:max-height 0.38s cubic-bezier(0.4,0,0.2,1);
+  flex-shrink:0; margin:0 14px;
+}
+.level-picker.open { max-height:160px; }
+.level-picker-scroll {
+  overflow-x:auto; overflow-y:hidden;
+  display:flex; gap:0; align-items:flex-start;
+  padding:14px 4px 10px;
+  scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+.level-picker-scroll::-webkit-scrollbar { display:none; }
+.nivel-mundo-group {
+  display:flex; flex-direction:column; align-items:center;
+  flex-shrink:0; scroll-snap-align:start;
+  padding:0 10px; border-right:1px solid rgba(255,255,255,0.07);
+}
+.nivel-mundo-group:last-child { border-right:none; }
+.nivel-mundo-label {
+  font-size:0.52rem; font-weight:800; text-transform:uppercase;
+  letter-spacing:0.9px; margin-bottom:9px; opacity:0.85;
+}
+.nivel-orbs { display:flex; gap:9px; }
+.nivel-orb {
+  width:54px; height:54px; border-radius:50%;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  cursor:pointer; border:2px solid transparent;
+  transition:transform 0.15s, box-shadow 0.15s;
+  gap:2px; -webkit-tap-highlight-color:transparent;
+}
+.nivel-orb.locked {
+  background:rgba(255,255,255,0.05) !important;
+  border-color:rgba(255,255,255,0.1) !important;
+  cursor:default;
+}
+.nivel-orb.active {
+  box-shadow:0 0 0 3px var(--mc,#FF7A00), 0 4px 14px rgba(0,0,0,0.4);
+}
+.nivel-orb:not(.locked):not(.active):active { transform:scale(0.91); }
+.nivel-orb-num {
+  font-size:0.85rem; font-weight:800; line-height:1;
+  color:#fff;
+}
+.nivel-orb.locked .nivel-orb-num { color:rgba(255,255,255,0.2); }
+.nivel-orb-sub {
+  font-size:0.38rem; letter-spacing:0.2px; color:rgba(255,255,255,0.75);
+  max-width:46px; text-align:center; overflow:hidden;
+  text-overflow:ellipsis; white-space:nowrap;
+}
+.nivel-orb.locked .nivel-orb-sub { color:rgba(255,255,255,0.15); }
 
 /* ══ MAP SCROLL ══ */
 .map-scroll {
@@ -700,18 +759,18 @@ body {
 }
 .map-node.locked { cursor:default; }
 .node-sphere {
-  width:52px; height:52px; border-radius:50%;
+  width:104px; height:104px; border-radius:50%;
   display:flex; align-items:center; justify-content:center;
   position:relative; transition:transform 0.18s cubic-bezier(0.34,1.56,0.64,1);
-  border-bottom:3px solid rgba(0,0,0,0.3); border-top:1.5px solid rgba(255,255,255,0.2);
+  border-bottom:6px solid rgba(0,0,0,0.3); border-top:3px solid rgba(255,255,255,0.2);
 }
 .map-node:not(.locked):active .node-sphere { transform:scale(0.91); }
-.node-sphere.xl { width:60px; height:60px; }
-.node-sphere.sm { width:40px; height:40px; }
+.node-sphere.xl { width:120px; height:120px; }
+.node-sphere.sm { width:80px; height:80px; }
 .node-sphere.active { animation:nodeGlow 2s ease-in-out infinite; }
 @keyframes nodeGlow {
   0%,100% { box-shadow:0 0 0 0 var(--nc,rgba(255,122,0,0.4)),0 5px 18px rgba(0,0,0,0.4); }
-  50%      { box-shadow:0 0 0 9px color-mix(in srgb,var(--nc) 0%,transparent),0 5px 18px rgba(0,0,0,0.4); }
+  50%      { box-shadow:0 0 0 18px color-mix(in srgb,var(--nc) 0%,transparent),0 10px 36px rgba(0,0,0,0.4); }
 }
 .node-sphere.done   { box-shadow:0 4px 14px var(--nc,rgba(255,122,0,0.35)),0 5px 18px rgba(0,0,0,0.35); }
 .node-sphere.locked {
@@ -720,7 +779,7 @@ body {
   border-bottom-color:rgba(0,0,0,0.15) !important;
   box-shadow:none; opacity:0.5; filter:grayscale(0.7);
 }
-.node-icon { font-size:1.2rem; line-height:1; position:relative; z-index:1; }
+.node-icon { font-size:2.4rem; line-height:1; position:relative; z-index:1; }
 .node-badge {
   background:var(--orange); color:#fff;
   font-size:0.58rem; font-weight:800; letter-spacing:0.8px; text-transform:uppercase;
@@ -728,9 +787,8 @@ body {
   box-shadow:0 3px 10px rgba(255,122,0,0.5); animation:badgePulse 2s ease-in-out infinite;
 }
 @keyframes badgePulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
-.node-label { margin-top:5px; text-align:center; }
-.node-label-name { font-size:0.63rem; font-weight:700; color:var(--text-soft); line-height:1.2; max-width:78px; }
-.node-label-num  { font-size:0.5rem; color:var(--text-dim); margin-top:1px; }
+.node-label { margin-top:7px; text-align:center; }
+.node-label-name { font-size:0.68rem; font-weight:700; color:var(--text-soft); line-height:1.2; max-width:110px; }
 
 /* ══ TESORO ══ */
 .treasure-node {
@@ -1147,18 +1205,23 @@ body {
     </div>
 
     <!-- Unit banner -->
-    <div class="unit-banner">
+    <div class="unit-banner" onclick="toggleLevelPicker()">
       <svg class="unit-banner-noise" viewBox="0 0 400 54" xmlns="http://www.w3.org/2000/svg">
         <filter id="ubn"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
         <rect width="400" height="54" filter="url(#ubn)" opacity="0.3"/>
       </svg>
       <div class="unit-banner-content">
-        <div class="unit-banner-label" id="orar-nivel-tag">Nivel 1-1</div>
-        <div class="unit-banner-title" id="orar-nivel-nombre">CruzAndo la Cruz · Males</div>
+        <span id="orar-nivel-tag" style="display:none"></span>
+        <div class="unit-banner-title" id="orar-nivel-nombre">Cruz 1-1: Males</div>
       </div>
       <div class="unit-banner-right">
-        <span class="unit-progress-text" id="unit-progress-text">0/20</span>
+        <span class="unit-progress-text" id="unit-progress-text" style="display:none">0/20</span>
+        <span class="unit-picker-chevron" id="unit-picker-chevron">▾</span>
       </div>
+    </div>
+    <!-- Level picker -->
+    <div id="level-picker" class="level-picker">
+      <div class="level-picker-scroll" id="level-picker-scroll"></div>
     </div>
 
     <!-- Map scroll -->
@@ -1347,6 +1410,7 @@ var NIVEL_NAMES = {
   '0701':'Tiempo 7-1',           '0702':'Tiempo 7-2',
   '0703':'Tiempo 7-3',           '0704':'Tiempo 7-4',
 };
+window.NIVEL_NAMES = NIVEL_NAMES;
 
 // ── Estado ────────────────────────────────────────────────────────
 let currentUser    = null;
@@ -1456,6 +1520,7 @@ function getTotalMetros() {
 function renderHome(userData) {
   // Plan
   currentPlan = resolvePlan(userData);
+  window.currentPlan = currentPlan;
   window.currentNivelId = currentNivelId; // ya calculado desde Firestore
   // Mostrar bottom nav
   var nav = document.getElementById('app-nav');
@@ -1499,8 +1564,10 @@ function renderHome(userData) {
   var nombreEl = document.getElementById('orar-nivel-nombre');
   if (nombreEl) nombreEl.textContent = NIVEL_NAMES[currentNivelId] || 'Nivel ' + mundo + '-' + nivel;
 
-  // Barras de bloques
-  var data   = getProgreso(currentNivelId);
+  // Barras de bloques — Firestore es fuente de verdad; localStorage como fallback offline
+  var data   = (window._firestoreProgress && window._firestoreProgress.progress)
+               ? window._firestoreProgress
+               : getProgreso(currentNivelId);
   var blocks = ['gozosos','luminosos','dolorosos','gloriosos'];
   var BLOQUE_COLORS = { gozosos:'#D4A017', luminosos:'#01BBE1', dolorosos:'#C0392B', gloriosos:'#8E44AD' };
   blocks.forEach(function(b) {
@@ -1716,6 +1783,7 @@ onAuthStateChanged(auth, async function(user) {
   if (user) {
     currentUser = user;
     var userData = await ensureUserDoc(user);
+    window._lastUserData = userData;
     // Cargar en paralelo: nivel actual + audioProgress + bookmark
     var results = await Promise.all([
       getCurrentNivelFromFirestore(user),
@@ -1726,9 +1794,27 @@ onAuthStateChanged(auth, async function(user) {
     window.currentNivelId = currentNivelId;
     var audioProgressSnap = results[1];
     var bookmarkSnap      = results[2];
+
+    // Leer progreso del nivel activo desde Firestore (fuente de verdad para DONE_COUNT del mapa)
+    try {
+      var progSnap = await getDoc(doc(db, 'users', user.uid, 'progress', currentNivelId));
+      window._firestoreProgress = progSnap.exists() ? progSnap.data() : null;
+    } catch(e) { window._firestoreProgress = null; }
+
     renderHome(userData);
     showScreen('home');
     if (window.buildMap) window.buildMap();
+    window._refreshHome = function() {
+      renderHome(window._lastUserData || userData);
+      if (window.buildMap) window.buildMap();
+    };
+    window._fetchProgressForNivel = async function(id) {
+      if (!currentUser) { window._firestoreProgress = null; return; }
+      try {
+        var snap = await getDoc(doc(db, 'users', currentUser.uid, 'progress', id));
+        window._firestoreProgress = snap.exists() ? snap.data() : null;
+      } catch(e) { window._firestoreProgress = null; }
+    };
     // Mostrar banner "Tu Camino" si bookmark difiere del frente lineal
     var progreso  = (audioProgressSnap && audioProgressSnap.exists()) ? audioProgressSnap.data()  : null;
     var bookmark  = (bookmarkSnap      && bookmarkSnap.exists())      ? bookmarkSnap.data()        : null;
@@ -2072,8 +2158,8 @@ window.chestState  = ['locked','locked','locked','locked'];
 var MAP_W      = 375;
 var MAP_CX     = MAP_W / 2;
 var MAP_AMP    = 50;
-var MAP_NODE_H = 66;
-var MAP_PATER_H= 50;
+var MAP_NODE_H = 132;
+var MAP_PATER_H= 100;
 var MAP_TOP    = 32;
 var MAP_STEP   = (2 * Math.PI) / 8;
 
@@ -2167,22 +2253,21 @@ function buildMap() {
     if (isDone) {
       sphereClass += ' done';
       sphereStyle = 'background:radial-gradient(circle at 35% 30%,' + bloque.color + 'ff,' + bloque.color + '88);border-color:' + bloque.color + '88;--nc:' + bloque.color + '66;box-shadow:0 4px 14px ' + bloque.color + '55,inset 0 -3px 0 rgba(0,0,0,0.3);';
-      iconHtml = '<div class="node-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>';
+      iconHtml = '<div class="node-icon"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>';
       labelColor = 'var(--text-dim)';
     } else if (isActive) {
       sphereClass += ' active xl';
       sphereStyle = 'background:radial-gradient(circle at 35% 30%,' + bloque.color + 'ff,' + bloque.color + '99);border-color:' + bloque.color + ';--nc:' + bloque.color + '88;box-shadow:0 6px 22px ' + bloque.color + '66,inset 0 -4px 0 rgba(0,0,0,0.35);';
-      iconHtml = '<div class="node-icon" style="font-size:1.4rem">' + bloque.icon_active + '</div>';
+      iconHtml = '<div class="node-icon" style="font-size:2.8rem">' + bloque.icon_active + '</div>';
       badgeHtml = '<div class="node-badge">CONTINUAR</div>';
     } else {
       sphereClass += ' sm locked';
-      iconHtml = '<div class="node-icon" style="font-size:1rem;opacity:0.3">' + bloque.icon_locked + '</div>';
+      iconHtml = '<div class="node-icon" style="font-size:2rem;opacity:0.3">' + bloque.icon_locked + '</div>';
     }
 
     node.innerHTML = badgeHtml +
       '<div class="' + sphereClass + '" style="' + sphereStyle + '">' + iconHtml + '</div>' +
-      '<div class="node-label"><div class="node-label-name" style="color:' + labelColor + '">' + nombre + '</div>' +
-      '<div class="node-label-num">' + (gi+1) + '/20</div></div>';
+      '<div class="node-label"><div class="node-label-name" style="color:' + labelColor + '">' + nombre + '</div></div>';
 
     if (!isLocked) {
       (function(gi,bi,mi){ node.onclick = function(){ openMapPopup(gi,bi,mi); }; })(gi,bi,mi);
@@ -2319,6 +2404,129 @@ window.openDrawer  = openDrawer;
 window.closeDrawer = closeDrawer;
 window.closePopup  = closePopup;
 window.closeTreasure = closeTreasure;
+
+/* ══ LEVEL PICKER ══ */
+var MUNDOS_DATA = [
+  { id:1, name:'Cruz',       color:'#FF7A00' },
+  { id:2, name:'Emociones',  color:'#01BBE1' },
+  { id:3, name:'Mente',      color:'#8E44AD' },
+  { id:4, name:'Corazón',    color:'#C0392B' },
+  { id:5, name:'Relaciones', color:'#27AE60' },
+  { id:6, name:'Amor',       color:'#E91E8C' },
+  { id:7, name:'Tiempo',     color:'#D4A017' },
+];
+
+function buildLevelPicker() {
+  var scroll = document.getElementById('level-picker-scroll');
+  if (!scroll) return;
+  var cId   = window.currentNivelId || '0101';
+  var cIdx  = NIVELES_ORDER.indexOf(cId);
+  var plan  = window.currentPlan || 'free';
+  var names = window.NIVEL_NAMES || {};
+  scroll.innerHTML = '';
+
+  MUNDOS_DATA.forEach(function(m, mi) {
+    var group = document.createElement('div');
+    group.className = 'nivel-mundo-group';
+
+    var lbl = document.createElement('div');
+    lbl.className = 'nivel-mundo-label';
+    lbl.style.color = m.color;
+    lbl.textContent = m.name;
+    group.appendChild(lbl);
+
+    var orbsRow = document.createElement('div');
+    orbsRow.className = 'nivel-orbs';
+
+    for (var c = 1; c <= 4; c++) {
+      var nid    = String(m.id).padStart(2,'0') + String(c).padStart(2,'0');
+      var idx    = NIVELES_ORDER.indexOf(nid);
+      var isActive   = nid === cId;
+      var isUnlocked = idx <= cIdx;
+      if (plan === 'free' && nid !== '0101') isUnlocked = false;
+
+      var orb = document.createElement('div');
+      orb.className = 'nivel-orb' + (!isUnlocked ? ' locked' : '') + (isActive ? ' active' : '');
+      if (isUnlocked) {
+        orb.style.cssText =
+          'background:radial-gradient(circle at 35% 30%,' + m.color + 'ee,' + m.color + '77);' +
+          'border-color:' + m.color + '55;' +
+          '--mc:' + m.color + ';';
+      }
+
+      var full = names[nid] || '';
+      var sub  = full.indexOf(': ') !== -1 ? full.split(': ')[1] : '';
+
+      var numEl = document.createElement('div');
+      numEl.className = 'nivel-orb-num';
+      numEl.textContent = m.id + '-' + c;
+      orb.appendChild(numEl);
+
+      if (sub) {
+        var subEl = document.createElement('div');
+        subEl.className = 'nivel-orb-sub';
+        subEl.textContent = sub;
+        orb.appendChild(subEl);
+      }
+
+      if (isUnlocked && !isActive) {
+        orb.onclick = (function(id) { return function() { selectNivel(id); }; })(nid);
+      }
+      orbsRow.appendChild(orb);
+    }
+
+    group.appendChild(orbsRow);
+    scroll.appendChild(group);
+
+    // Scroll al mundo actual al abrir
+    if (mi === parseInt(cId.substring(0, 2), 10) - 1) {
+      setTimeout(function(el) { return function() {
+        el.scrollIntoView({ behavior:'instant', block:'nearest', inline:'start' });
+      }; }(group), 0);
+    }
+  });
+}
+
+function openLevelPicker() {
+  buildLevelPicker();
+  var p  = document.getElementById('level-picker');
+  var ch = document.getElementById('unit-picker-chevron');
+  if (p)  p.classList.add('open');
+  if (ch) ch.style.transform = 'rotate(180deg)';
+}
+
+function closeLevelPicker() {
+  var p  = document.getElementById('level-picker');
+  var ch = document.getElementById('unit-picker-chevron');
+  if (p)  p.classList.remove('open');
+  if (ch) ch.style.transform = '';
+}
+
+function toggleLevelPicker() {
+  var p = document.getElementById('level-picker');
+  if (!p) return;
+  if (p.classList.contains('open')) closeLevelPicker();
+  else openLevelPicker();
+}
+
+function selectNivel(id) {
+  closeLevelPicker();
+  window.currentNivelId = id;
+  try { localStorage.setItem('cruzando_current_nivel', id); } catch(e) {}
+  window._firestoreProgress = null; // limpiar mientras carga
+  if (window._fetchProgressForNivel) {
+    window._fetchProgressForNivel(id).then(function() {
+      if (window._refreshHome) window._refreshHome();
+    });
+  } else if (window._refreshHome) {
+    window._refreshHome();
+  }
+}
+
+window.toggleLevelPicker = toggleLevelPicker;
+window.openLevelPicker   = openLevelPicker;
+window.closeLevelPicker  = closeLevelPicker;
+window.selectNivel       = selectNivel;
 </script>
 </body>
 </html>
