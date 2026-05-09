@@ -2190,16 +2190,21 @@ async function syncToOrarProgress(nivel, cuaderno, misterio) {
 
 async function addMetersToFirestore(meters) {
   if (!currentUser) return;
+  const todayKey = new Date().toISOString().slice(0, 10);
   try {
     await updateDoc(doc(db, 'users', currentUser.uid), {
       totalMeters: increment(meters)
     });
   } catch(e) {
-    // Si el doc no existe, créalo
     try {
       await setDoc(doc(db, 'users', currentUser.uid), { totalMeters: meters }, { merge: true });
     } catch(e2) { console.error(e2); }
   }
+  try {
+    await setDoc(doc(db, 'users', currentUser.uid, 'dailyGoal', 'data'), {
+      historial: { [todayKey]: increment(meters) }
+    }, { merge: true });
+  } catch(e) {}
 }
 
 // Etiquetas de preguntas (igual que diario.html / orar.html)

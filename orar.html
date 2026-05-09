@@ -836,8 +836,10 @@ async function addMeters(m){
   localStorage.setItem('cruzando_total_metros',stored+m);
   const mv=$('meters-value'); if(mv) mv.textContent=totalM.toLocaleString('es-MX')+'m';
   if(!usr) return;
+  const todayKey=new Date().toISOString().slice(0,10);
   try{await FS.collection('users').doc(usr.uid).update({totalMeters:FSV.increment(m)});}
   catch(e){try{await FS.collection('users').doc(usr.uid).set({totalMeters:m},{merge:true});}catch(e2){}}
+  try{await FS.collection('users').doc(usr.uid).collection('dailyGoal').doc('data').set({historial:{[todayKey]:FSV.increment(m)}},{merge:true});}catch(e){}
 }
 
 /* ─── GAMIFICATION ─── */
