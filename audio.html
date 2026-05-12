@@ -2195,6 +2195,11 @@ function _getTodayKey() {
 
 async function addMetersToFirestore(meters) {
   if (!currentUser) return;
+  // Siempre persistir en localStorage — fuente de verdad para el odómetro
+  const todayKey = _getTodayKey();
+  const _hist = JSON.parse(localStorage.getItem('cruzando_daily_hist') || '{}');
+  _hist[todayKey] = (_hist[todayKey] || 0) + meters;
+  localStorage.setItem('cruzando_daily_hist', JSON.stringify(_hist));
   try {
     await updateDoc(doc(db, 'users', currentUser.uid), {
       totalMeters: increment(meters)
@@ -2204,7 +2209,6 @@ async function addMetersToFirestore(meters) {
       await setDoc(doc(db, 'users', currentUser.uid), { totalMeters: meters }, { merge: true });
     } catch(e2) { console.error(e2); }
   }
-  const todayKey = _getTodayKey();
   const dailyRef = doc(db, 'users', currentUser.uid, 'dailyGoal', 'data');
   try {
     await updateDoc(dailyRef, { [`historial.${todayKey}`]: increment(meters) });

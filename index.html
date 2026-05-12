@@ -1980,13 +1980,17 @@ onAuthStateChanged(auth, async function(user) {
     try {
       const goalRef  = doc(db, 'users', user.uid, 'dailyGoal', 'data');
       const goalSnap = await getDoc(goalRef);
+      const localHist = JSON.parse(localStorage.getItem(HISTORIAL_KEY) || '{}');
       if (goalSnap.exists()) {
         const gd = goalSnap.data();
         metaMetros = gd.metaMetros ?? META_DEFAULT;
-        metrosHoy  = gd.historial?.[todayKey] ?? 0;
+        // Tomar el máximo entre Firestore y localStorage por si el write de otra página falló
+        metrosHoy  = Math.max(gd.historial?.[todayKey] ?? 0, localHist[todayKey] ?? 0);
         window._dailyHist = gd.historial ?? {};
       } else {
-        metaMetros = META_DEFAULT; metrosHoy = 0; window._dailyHist = {};
+        metaMetros = META_DEFAULT;
+        metrosHoy  = localHist[todayKey] ?? 0;
+        window._dailyHist = localHist;
       }
     } catch(e) {
       metaMetros = parseInt(localStorage.getItem(META_KEY)) || META_DEFAULT;

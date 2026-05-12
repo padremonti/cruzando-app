@@ -837,10 +837,14 @@ async function addMeters(m){
   const stored=parseInt(localStorage.getItem('cruzando_total_metros')||'0');
   localStorage.setItem('cruzando_total_metros',stored+m);
   const mv=$('meters-value'); if(mv) mv.textContent=totalM.toLocaleString('es-MX')+'m';
+  // Siempre persistir en localStorage — fuente de verdad para el odómetro
+  const todayKey=_getTodayKey();
+  const _hist=JSON.parse(localStorage.getItem('cruzando_daily_hist')||'{}');
+  _hist[todayKey]=(_hist[todayKey]||0)+m;
+  localStorage.setItem('cruzando_daily_hist',JSON.stringify(_hist));
   if(!usr) return;
   try{await FS.collection('users').doc(usr.uid).update({totalMeters:FSV.increment(m)});}
   catch(e){try{await FS.collection('users').doc(usr.uid).set({totalMeters:m},{merge:true});}catch(e2){}}
-  const todayKey=_getTodayKey();
   const dailyRef=FS.collection('users').doc(usr.uid).collection('dailyGoal').doc('data');
   try{await dailyRef.update({[`historial.${todayKey}`]:FSV.increment(m)});}
   catch(e){try{await dailyRef.set({historial:{[todayKey]:m}},{merge:true});}catch(e2){}}
