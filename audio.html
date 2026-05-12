@@ -1253,6 +1253,18 @@ body.light { --tb-circle-bg:var(--card); --tb-circle-border:var(--border); --tb-
 .ah-switch-arrow{font-size:1.1rem;color:var(--text-dim)}
 @keyframes ahSlideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 .block-card.fade-in{animation:ahSlideUp 0.45s cubic-bezier(0.34,1.56,0.64,1) both}
+
+/* ══ CONFIRMACIÓN SALIDA SESIÓN ══ */
+.nav-confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:none;align-items:center;justify-content:center;}
+.nav-confirm-overlay.open{display:flex;}
+.nav-confirm-sheet{background:var(--card);border-radius:22px;padding:30px 24px 24px;max-width:310px;width:88%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.35);}
+.nav-confirm-icon{font-size:2rem;margin-bottom:10px;}
+.nav-confirm-title{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:8px;}
+.nav-confirm-body{font-size:0.8rem;color:var(--text-dim);line-height:1.5;margin-bottom:22px;}
+.nav-confirm-actions{display:flex;gap:10px;}
+.nav-confirm-btn{flex:1;padding:12px 8px;border-radius:13px;font-size:0.82rem;font-weight:700;cursor:pointer;border:none;font-family:inherit;}
+.nav-confirm-btn.secondary{background:var(--card2,rgba(255,255,255,0.06));border:1px solid var(--border);color:var(--text);}
+.nav-confirm-btn.danger{background:#C0392B;color:#fff;}
 </style>
 </head>
 <body>
@@ -1466,7 +1478,7 @@ body.light { --tb-circle-bg:var(--card); --tb-circle-border:var(--border); --tb-
     </div>
     <span class="app-nav-label">Orar</span>
   </button>
-  <button class="app-nav-item" onclick="navTap(this); goTo('diario.html')">
+  <button class="app-nav-item" onclick="navTap(this); navGuard('diario.html')">
     <div class="app-nav-icon">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/>
@@ -1485,7 +1497,7 @@ body.light { --tb-circle-bg:var(--card); --tb-circle-border:var(--border); --tb-
     </div>
     <span class="nav-tab-label">Texto</span>
   </a>
-  <button class="app-nav-item" onclick="navTap(this); goTo('sanar.html')">
+  <button class="app-nav-item" onclick="navTap(this); navGuard('sanar.html')">
     <div class="app-nav-icon">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 22s-8-5.5-8-11a8 8 0 0116 0c0 5.5-8 11-8 11z"/>
@@ -1494,7 +1506,7 @@ body.light { --tb-circle-bg:var(--card); --tb-circle-border:var(--border); --tb-
     </div>
     <span class="app-nav-label">Sanar</span>
   </button>
-  <button class="app-nav-item" onclick="navTap(this); goTo('index.html')">
+  <button class="app-nav-item" onclick="navTap(this); navGuard('index.html')">
     <div class="app-nav-icon">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <rect x="3" y="3" width="7" height="7" rx="1"/>
@@ -3627,6 +3639,28 @@ function navTap(el) {
 window.navTap = navTap;
 window.goTo   = goTo;
 
+let _navConfirmDest = null;
+function navGuard(dest) {
+  const sessionActive = currentTrack >= 0 && !sessionCompleted;
+  if (!sessionActive) { goTo(dest); return; }
+  _navConfirmDest = dest;
+  document.getElementById('nav-confirm-overlay').classList.add('open');
+}
+function closeNavConfirm() {
+  document.getElementById('nav-confirm-overlay').classList.remove('open');
+  _navConfirmDest = null;
+}
+function confirmNavExit() {
+  const dest = _navConfirmDest;
+  closeNavConfirm();
+  if (audioEl) { audioEl.pause(); isPlaying = false; }
+  bgmStop();
+  goTo(dest);
+}
+window.navGuard       = navGuard;
+window.closeNavConfirm = closeNavConfirm;
+window.confirmNavExit  = confirmNavExit;
+
 // ════════════════════════════════════════════
 // INIT
 // ════════════════════════════════════════════
@@ -3670,6 +3704,19 @@ window.goTo   = goTo;
 initAuth();
 </script>
 <script src="sounds.js"></script>
+
+<!-- ── Confirmación salida durante sesión ── -->
+<div class="nav-confirm-overlay" id="nav-confirm-overlay">
+  <div class="nav-confirm-sheet">
+    <div class="nav-confirm-icon">⏸</div>
+    <div class="nav-confirm-title">Sesión en curso</div>
+    <div class="nav-confirm-body">Si sales ahora el progreso de esta sesión no se guardará.</div>
+    <div class="nav-confirm-actions">
+      <button class="nav-confirm-btn secondary" onclick="closeNavConfirm()">Seguir rezando</button>
+      <button class="nav-confirm-btn danger" onclick="confirmNavExit()">Salir</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
