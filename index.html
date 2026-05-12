@@ -2226,16 +2226,20 @@ document.getElementById('btn-premium-continuar').addEventListener('click', async
 async function saveMetrosHoy(added) {
   metrosHoy += added;
   updateOdometro();
+  const goalRef = doc(db, 'users', currentUser.uid, 'dailyGoal', 'data');
   try {
-    const goalRef = doc(db, 'users', currentUser.uid, 'dailyGoal', 'data');
-    await setDoc(goalRef, {
+    await updateDoc(goalRef, {
       metaMetros,
-      historial: { [todayKey]: metrosHoy }
-    }, { merge: true });
+      [`historial.${todayKey}`]: metrosHoy
+    });
   } catch(e) {
-    const hist = JSON.parse(localStorage.getItem(HISTORIAL_KEY) || '{}');
-    hist[todayKey] = metrosHoy;
-    localStorage.setItem(HISTORIAL_KEY, JSON.stringify(hist));
+    try {
+      await setDoc(goalRef, { metaMetros, historial: { [todayKey]: metrosHoy } }, { merge: true });
+    } catch(e2) {
+      const hist = JSON.parse(localStorage.getItem(HISTORIAL_KEY) || '{}');
+      hist[todayKey] = metrosHoy;
+      localStorage.setItem(HISTORIAL_KEY, JSON.stringify(hist));
+    }
   }
 }
 

@@ -830,16 +830,20 @@ window.navTap=navTap; window.goTo=goTo;
 const FS=_db;
 const FSV=firebase.firestore.FieldValue;
 
+function _getTodayKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+
 async function addMeters(m){
   totalM+=m;
   const stored=parseInt(localStorage.getItem('cruzando_total_metros')||'0');
   localStorage.setItem('cruzando_total_metros',stored+m);
   const mv=$('meters-value'); if(mv) mv.textContent=totalM.toLocaleString('es-MX')+'m';
   if(!usr) return;
-  const todayKey=new Date().toISOString().slice(0,10);
   try{await FS.collection('users').doc(usr.uid).update({totalMeters:FSV.increment(m)});}
   catch(e){try{await FS.collection('users').doc(usr.uid).set({totalMeters:m},{merge:true});}catch(e2){}}
-  try{await FS.collection('users').doc(usr.uid).collection('dailyGoal').doc('data').set({historial:{[todayKey]:FSV.increment(m)}},{merge:true});}catch(e){}
+  const todayKey=_getTodayKey();
+  const dailyRef=FS.collection('users').doc(usr.uid).collection('dailyGoal').doc('data');
+  try{await dailyRef.update({[`historial.${todayKey}`]:FSV.increment(m)});}
+  catch(e){try{await dailyRef.set({historial:{[todayKey]:m}},{merge:true});}catch(e2){}}
 }
 
 /* ─── GAMIFICATION ─── */

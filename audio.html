@@ -2188,9 +2188,13 @@ async function syncToOrarProgress(nivel, cuaderno, misterio) {
   }
 }
 
+function _getTodayKey() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
 async function addMetersToFirestore(meters) {
   if (!currentUser) return;
-  const todayKey = new Date().toISOString().slice(0, 10);
   try {
     await updateDoc(doc(db, 'users', currentUser.uid), {
       totalMeters: increment(meters)
@@ -2200,11 +2204,13 @@ async function addMetersToFirestore(meters) {
       await setDoc(doc(db, 'users', currentUser.uid), { totalMeters: meters }, { merge: true });
     } catch(e2) { console.error(e2); }
   }
+  const todayKey = _getTodayKey();
+  const dailyRef = doc(db, 'users', currentUser.uid, 'dailyGoal', 'data');
   try {
-    await setDoc(doc(db, 'users', currentUser.uid, 'dailyGoal', 'data'), {
-      historial: { [todayKey]: increment(meters) }
-    }, { merge: true });
-  } catch(e) {}
+    await updateDoc(dailyRef, { [`historial.${todayKey}`]: increment(meters) });
+  } catch(e) {
+    try { await setDoc(dailyRef, { historial: { [todayKey]: meters } }, { merge: true }); } catch(e2) {}
+  }
 }
 
 // Etiquetas de preguntas (igual que diario.html / orar.html)
