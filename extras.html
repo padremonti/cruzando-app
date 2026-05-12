@@ -549,6 +549,7 @@ body.light .shop-hero-grad {
 
 /* ── Nav helpers ── */
 function navTap(el) {
+  if (window.CZSound) CZSound('navTap');
   document.querySelectorAll('.app-nav-item').forEach(function (b) { b.classList.remove('active'); });
   el.classList.add('active');
 }
@@ -935,6 +936,7 @@ async function executePurchase(product) {
     }
     renderProducts(ACTIVE_CAT, USER_PURCHASES, USER_PROGRESS);
     renderMedals(USER_PURCHASES, Array.isArray(USER_PROGRESS) ? USER_PROGRESS : Object.keys(USER_PROGRESS));
+    if (window.CZSound) CZSound('purchase');
     showPurchaseSuccess(product);
 
   } catch (err) {
@@ -987,5 +989,6 @@ _auth.onAuthStateChanged(async function (user) {
   }
 });
 </script>
+<script src="sounds.js"></script>
 </body>
 </html>

@@ -333,6 +333,7 @@ function playNavChord() {
   } catch(e) {}
 }
 function navTap(el) {
+  if (window.CZSound) CZSound('navTap');
   playNavChord();
   el.classList.remove('tapped');
   void el.offsetWidth;
@@ -468,5 +469,6 @@ _auth.onAuthStateChanged(async function(user) {
   renderMap();
 });
 </script>
+<script src="sounds.js"></script>
 </body>
 </html>

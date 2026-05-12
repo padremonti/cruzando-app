@@ -2891,6 +2891,7 @@ function goTrack(idx) {
   };
 
   // play() directo — funciona dentro del gesto del usuario y para tracks sucesivos
+  if (window.CZSound && idx === 0) CZSound('playStart');
   audioEl.play().then(() => {
     isPlaying = true;
     updatePlayPauseBtn();
@@ -3303,6 +3304,7 @@ async function completeSession() {
   bgmStop();
 
   // Registrar en historial
+  if (window.CZSound) CZSound('mysteryClear');
   const { nivel, cuaderno, misterio, block, blockIdx } = currentSession;
   if (!audioProgress.history) audioProgress.history = [];
   audioProgress.history.push({ n:nivel, c:cuaderno, m:misterio, completedAt: Date.now() });
@@ -3320,11 +3322,13 @@ async function completeSession() {
     audioProgress.blockBonuses = blockBonuses;
     sessionMeters += METERS_BLOCK_BONUS;
     await addMetersToFirestore(METERS_BLOCK_BONUS);
+    if (window.CZSound) CZSound('blockClear');
     setTimeout(() => showToast(`+${METERS_BLOCK_BONUS}m · ¡Bloque ${BLOCK_NAMES[block]} completado!`), 400);
   }
 
   /* Medalla automática: completar el bloque gloriosos del cuaderno 4 desbloquea la medalla del Mundo */
   if (block === 'gloriosos' && cuaderno === 4 && doneInBlock.size >= 5 && currentUser) {
+    if (window.CZSound) CZSound('levelClear');
     const MUNDO_MEDAL_MAP = {
       1: 'medal_cruz', 2: 'medal_emociones', 3: 'medal_mente',
       4: 'medal_corazon', 5: 'medal_relaciones', 6: 'medal_amor', 7: 'medal_tiempo'
@@ -3597,6 +3601,7 @@ function playNavChord() {
 }
 
 function navTap(el) {
+  if (window.CZSound) CZSound('navTap');
   playNavChord();
   el.classList.remove('tapped');
   void el.offsetWidth;
@@ -3648,6 +3653,7 @@ window.goTo   = goTo;
 
 initAuth();
 </script>
+<script src="sounds.js"></script>
 
 </body>
 </html>

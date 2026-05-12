@@ -1173,6 +1173,14 @@ body {
         <button class="pref-toggle" id="pref-toggle-micro" onclick="prefToggleMicro()"></button>
       </div>
 
+      <div class="pref-toggle-row" id="prefs-sounds-row">
+        <div>
+          <div class="pref-toggle-label">Sonidos de interfaz</div>
+          <div class="pref-toggle-sub">Efectos sonoros al navegar y completar acciones</div>
+        </div>
+        <button class="pref-toggle" id="pref-toggle-sounds" onclick="toggleSounds()"></button>
+      </div>
+
       <!-- ── META DEL DÍA ── -->
       <div class="prefs-section" id="prefs-meta-section">
         <div class="prefs-section-title" id="prefs-meta-highlight">Meta del día</div>
@@ -1588,6 +1596,8 @@ window.openPrefs = function() {
   document.getElementById('pref-toggle-theme').classList.toggle('on', !isLight);
   document.getElementById('pref-toggle-bgm').classList.toggle('on', p.bgm !== false);
   document.getElementById('pref-toggle-micro').classList.toggle('on', p.microInAudio !== false);
+  var soundsToggle = document.getElementById('pref-toggle-sounds');
+  if (soundsToggle) soundsToggle.classList.toggle('on', localStorage.getItem('cruzando_sounds') !== 'off');
   var slider = document.getElementById('prefs-meta-slider');
   if (slider && window.metaMetros !== undefined) {
     slider.value = window.metaMetros;
@@ -1611,6 +1621,12 @@ window.prefToggleMicro = function() {
   var p = getPrefs(); p.microInAudio = p.microInAudio === false ? true : false; setPrefs(p);
   document.getElementById('pref-toggle-micro').classList.toggle('on', p.microInAudio !== false);
 };
+function toggleSounds() {
+  const off = localStorage.getItem('cruzando_sounds') === 'off';
+  localStorage.setItem('cruzando_sounds', off ? 'on' : 'off');
+  document.getElementById('pref-toggle-sounds').classList.toggle('on', off);
+}
+window.toggleSounds = toggleSounds;
 
 // ── Helpers de fecha ─────────────────────────────────────────────
 function getTodayKey() {
@@ -2261,9 +2277,11 @@ function updateOdometro() {
   if (metaTxt)  metaTxt.textContent = ' / ' + metaMetros.toLocaleString('es-MX') + 'm';
   if (estadoEl) estadoEl.classList.toggle('cumplida', cumplida);
   if (cumplida) {
+    if (!window._goalSoundPlayed) { window._goalSoundPlayed = true; if (window.CZSound) CZSound('goalReached'); }
     if (estadoTxt) estadoTxt.textContent = '¡Meta del día cumplida!';
     if (faltaEl)   faltaEl.textContent   = '+' + (metrosHoy - metaMetros).toLocaleString('es-MX') + 'm extra';
   } else {
+    window._goalSoundPlayed = false;
     if (estadoTxt) estadoTxt.textContent = 'En camino';
     if (faltaEl)   faltaEl.textContent   = 'faltan ' + (metaMetros - metrosHoy).toLocaleString('es-MX') + 'm';
   }
@@ -2333,22 +2351,19 @@ window.navigateTo = function(url, e) {
 };
 // ── Sonido tap — Acorde suave (C) ────────────────────────────────
 function playTap() {
-  try {
-    var ac = new (window.AudioContext || window.webkitAudioContext)();
-    var now = ac.currentTime;
-    var master = ac.createGain();
-    master.gain.setValueAtTime(0, now);
-    master.gain.linearRampToValueAtTime(0.07, now + 0.02);
-    master.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-    master.connect(ac.destination);
-    [523, 659].forEach(function(freq) {
-      var o = ac.createOscillator(), g = ac.createGain();
-      o.type = 'sine'; o.frequency.value = freq;
-      g.gain.value = 0.7;
-      o.connect(g); g.connect(master);
-      o.start(now); o.stop(now + 0.45);
-    });
-  } catch(e) {}
+  if (window.CZSound) {
+    window.CZSound('navTap');
+  } else {
+    try {
+      const ac = new (window.AudioContext || window.webkitAudioContext)();
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.frequency.value = 600; o.type = 'sine';
+      g.gain.setValueAtTime(0.1, ac.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.08);
+      o.connect(g); g.connect(ac.destination);
+      o.start(); o.stop(ac.currentTime + 0.1);
+    } catch(e) {}
+  }
 }
 window.playTap = playTap;
 
@@ -2375,6 +2390,7 @@ function playNavChord() {
   } catch(e) {}
 }
 function navTap(el) {
+  if (window.CZSound) CZSound('navTap');
   playNavChord();
   el.classList.remove('tapped');
   void el.offsetWidth;
@@ -2563,7 +2579,7 @@ function buildMap() {
       '<div class="node-label"><div class="node-label-name" style="color:' + labelColor + '">' + nombre + '</div></div>';
 
     if (!isLocked) {
-      (function(gi,bi,mi){ node.onclick = function(){ openMapPopup(gi,bi,mi); }; })(gi,bi,mi);
+      (function(gi,bi,mi){ node.onclick = function(){ if(window.CZSound) CZSound('beadTap'); openMapPopup(gi,bi,mi); }; })(gi,bi,mi);
     }
     canvas.appendChild(node);
 
@@ -2844,6 +2860,7 @@ function closePopup() {
 
 /* ══ POPUP COFRE ══ */
 function openTreasure(bi, state) {
+  if (window.CZSound) CZSound('chestOpen');
   var b=BLOQUES_MAP[bi], c=b.color, t=b.treasure;
   document.getElementById('treasure-bg').style.background='radial-gradient(ellipse at 50% 60%,' + c + '30 0%,transparent 65%)';
   document.getElementById('treasure-chest-emoji').textContent = state==='opened' ? '📦' : '🎁';
@@ -2863,7 +2880,7 @@ function openTreasure(bi, state) {
   } else {
     btn.textContent='✨ ¡Recibir recompensas!'; btn.classList.remove('already-opened');
     btn.onclick=function(){
-      window.chestState[bi]='opened'; closeTreasure(); buildMap();
+      if (window.CZSound) CZSound('blockClear'); window.chestState[bi]='opened'; closeTreasure(); buildMap();
     };
   }
   document.getElementById('treasure-overlay').classList.add('open');
@@ -2872,6 +2889,7 @@ function closeTreasure() { document.getElementById('treasure-overlay').classList
 
 /* ══ DRAWER ══ */
 function openDrawer() {
+  if (window.CZSound) CZSound('drawerOpen');
   document.getElementById('drawer').classList.add('open');
   document.getElementById('drawer-overlay').classList.add('open');
 }
@@ -3020,5 +3038,6 @@ async function guardarMeta() {
   if (window._guardarMeta) { window._guardarMeta(val); return; }
 }
 </script>
+<script src="sounds.js"></script>
 </body>
 </html>

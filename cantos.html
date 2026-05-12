@@ -989,6 +989,7 @@ function goTo(page) {
   location.href = base + page;
 }
 function navTap(el) {
+  if (window.CZSound) CZSound('navTap');
   el.classList.remove('tapped'); void el.offsetWidth; el.classList.add('tapped');
   setTimeout(() => el.classList.remove('tapped'), 400);
 }
@@ -1065,6 +1066,7 @@ window.toggleLetra = function() {
   document.getElementById('tool-letra').classList.toggle('active', letraOpen);
 };
 window.toggleFavorita = function() {
+  if (window.CZSound) CZSound('heartTap');
   const canto = navCantos[currentIdx];
   if (!canto || !canto._col) return;
   const newVal  = !canto.favorite;
@@ -1104,6 +1106,7 @@ function heroBounce(dir) {
 }
 
 function goToCanto(index) {
+  if (window.CZSound) CZSound('cantosSwipe');
   if (index < 0 || index >= navCantos.length) {
     heroBounce(index < 0 ? 'right' : 'left');
     return;
@@ -1828,5 +1831,6 @@ onAuthStateChanged(auth, async user => {
   }, 8000);
 });
 </script>
+<script src="sounds.js"></script>
 </body>
 </html>

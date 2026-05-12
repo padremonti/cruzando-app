@@ -344,6 +344,7 @@ function playNavChord() {
   } catch(e) {}
 }
 function navTap(el) {
+  if (window.CZSound) CZSound('navTap');
   playNavChord();
   el.classList.remove('tapped');
   void el.offsetWidth;
@@ -479,6 +480,7 @@ function renderMap() {
 
 /* ── Selección ── */
 function pick(id, num, elem, mundo, color) {
+  if (window.CZSound) CZSound('beadTap');
   if (selId) {
     var prev = document.getElementById('n-' + selId);
     if (prev) { prev.classList.remove('sel'); prev.style.boxShadow = ''; }
@@ -522,5 +524,6 @@ _auth.onAuthStateChanged(async function(user) {
   renderMap();
 });
 </script>
+<script src="sounds.js"></script>
 </body>
 </html>
