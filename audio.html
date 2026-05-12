@@ -1859,7 +1859,7 @@ window.advanceAndRestart = async () => {
   await saveAudioProgress();
   sessionMeters = 0; sectionRewards = new Set(); sessionCompleted = false;
   currentTrack = -1;
-  stopAudio();
+  stopAudio(); bgmStop();
   await buildSession();
 };
 
@@ -2976,12 +2976,14 @@ let bgmAudioCtx  = null;
 let bgmSource    = null;
 let bgmGainNode  = null;
 let bgmFadeTimer = null;
+let _bgmUnlockAttached = false;
 
 function bgmClearFade() {
   if (bgmFadeTimer) { clearTimeout(bgmFadeTimer); bgmFadeTimer = null; }
 }
 
 function bgmInit() {
+  bgmStop(); // limpiar cualquier instancia previa antes de crear una nueva
   if (!currentSession) return;
   const { nivel, cuaderno } = currentSession;
   const url = `${BGM_BASE}BGM_${nivel}_${cuaderno}.mp3`;
@@ -3018,6 +3020,16 @@ function bgmInit() {
       bgmResume();
     }
   };
+
+  // Autoplay unlock: en el primer gesto del usuario reanudar BGM si Chrome lo bloqueó
+  if (!_bgmUnlockAttached) {
+    _bgmUnlockAttached = true;
+    const _unlock = () => {
+      if (bgmEl && bgmEnabled && bgmEl.paused) bgmResume();
+    };
+    document.addEventListener('click',      _unlock, { once: true });
+    document.addEventListener('touchstart', _unlock, { once: true, passive: true });
+  }
 }
 
 function bgmSetGain(value) {
