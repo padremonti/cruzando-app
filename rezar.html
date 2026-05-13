@@ -1204,8 +1204,14 @@ function renderMysteryDots(){
 /* ─── RENDER — PLAYLIST STRIP ─── */
 function updatePlaylistStrip(){
   const strip=$('playlist-strip');if(!strip)return;
-  strip.innerHTML=playlist.map((t,i)=>{
-    const state=i<plIdx?'done':i===plIdx?'active':'';
+  const visible=playlist
+    .map((t,i)=>({...t,oi:i}))
+    .filter(t=>!t.hidden);
+  strip.innerHTML=visible.map((t,vi)=>{
+    const nextOi=visible[vi+1]?.oi??Infinity;
+    const isActive=plIdx>=t.oi&&plIdx<nextOi;
+    const isDone=t.oi<plIdx&&!isActive;
+    const state=isActive?'active':isDone?'done':'';
     const lbl=
       t.type==='inicio'   ?'Inicio':
       t.type==='misterio' ?'M'+(t.mIdx+1):
@@ -1214,7 +1220,6 @@ function updatePlaylistStrip(){
       t.type==='salve'    ?'Salve':'Final';
     return '<div class="pl-item '+state+'"><div class="pl-dot"></div><div class="pl-lbl">'+lbl+'</div></div>';
   }).join('');
-  /* espejo en scr-letanias si existe */
   const sf=$('playlist-strip-final');
   if(sf)sf.innerHTML=strip.innerHTML;
 }
@@ -1483,10 +1488,13 @@ function buildPlaylist(startIdx){
   }
   for(let i=startIdx;i<5;i++){
     const m=mNum(blk,i),ab=(i%2===0)?'MA':'MB';
-    pl.push({id:'misterio_'+i,type:'misterio',mIdx:i,src:globalTrack(ab+'.mp3')});
+    pl.push({id:'anuncio_'+i,  type:'anuncio', mIdx:i,hidden:true,
+             src:globalTrack('MISTERIO_'+m+'.mp3')});
+    pl.push({id:'misterio_'+i, type:'misterio',mIdx:i,
+             src:globalTrack(ab+'.mp3')});
     if(p.cantos!==false){
-      pl.push({id:'canto_'+i,type:'canto',mIdx:i,
-        src:MUSB+'M_'+nivel+'_'+cua+'_'+m+'.mp3'});
+      pl.push({id:'canto_'+i,  type:'canto',   mIdx:i,
+               src:MUSB+'M_'+nivel+'_'+cua+'_'+m+'.mp3'});
     }
   }
   if(p.letanias){
