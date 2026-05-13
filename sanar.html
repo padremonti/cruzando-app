@@ -206,6 +206,177 @@ body.light .card-prog-wrap { background:rgba(0,0,0,0.08); }
   background:rgba(255,122,0,0.12); border-radius:10px;
 }
 .app-nav-label { font-size:0.6rem; font-weight:600; letter-spacing:0.4px; text-transform:uppercase; }
+
+/* ── Skeleton loader ── */
+.sk-card {
+  background:var(--card); border:1.5px solid var(--border);
+  border-radius:18px; padding:20px 20px 18px; margin-bottom:14px;
+}
+.sk-top  { height:18px; width:35%; border-radius:6px; background:var(--border); margin-bottom:12px; }
+.sk-name { height:26px; width:72%; border-radius:6px; background:var(--border); margin-bottom:16px; }
+.sk-btn  { height:46px; border-radius:13px; background:var(--border); }
+@keyframes shimmer {
+  0%,100% { opacity:0.45; }
+  50%     { opacity:1; }
+}
+.sk-card:nth-child(1) { animation:shimmer 1.5s ease-in-out infinite; }
+.sk-card:nth-child(2) { animation:shimmer 1.5s ease-in-out 0.2s infinite; }
+.sk-card:nth-child(3) { animation:shimmer 1.5s ease-in-out 0.4s infinite; }
+
+/* ── Vista B — Barra superior ── */
+#retiro-header {
+  position:fixed; top:0; left:0; right:0; height:52px;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 16px;
+  background:var(--bg); border-bottom:1px solid var(--border);
+  z-index:100;
+}
+#retiro-titulo {
+  font-family:'Inter',sans-serif; font-size:15px; font-weight:600;
+  color:var(--text); flex:1;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  margin-right:12px;
+}
+#retiro-controles { display:flex; gap:8px; flex-shrink:0; }
+#retiro-controles button {
+  width:36px; height:36px; border-radius:50%; border:none;
+  background:var(--card); color:var(--text);
+  font-size:16px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:opacity 0.2s;
+}
+#retiro-controles button:active { opacity:0.7; }
+
+/* ── Vista B — Barra de progreso segmentada ── */
+#retiro-progreso {
+  position:fixed; top:52px; left:0; right:0; height:4px;
+  display:flex; gap:2px; padding:0 2px;
+  background:var(--bg); z-index:100;
+}
+.progreso-segmento {
+  flex:1; height:4px; border-radius:2px;
+  background:var(--border); transition:background 0.3s ease;
+}
+.progreso-segmento.completado { background:var(--orange); }
+.progreso-segmento.activo     { background:var(--orange); opacity:0.5; }
+
+/* ── Vista B — Área de tarjetas ── */
+#retiro-tarjetas {
+  position:fixed; top:56px; left:0; right:0; bottom:0;
+  overflow:hidden;
+}
+
+/* ── 5C: Tarjetas ── */
+.tarjeta {
+  width:100%; height:100%;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--bg); padding:24px; box-sizing:border-box;
+}
+.tarjeta-inner { max-width:480px; width:100%; text-align:center; }
+.tarjeta-tipo {
+  font-family:'Inter',sans-serif; font-size:11px; font-weight:600;
+  letter-spacing:0.1em; color:var(--text-soft);
+  margin-bottom:12px; text-transform:uppercase;
+}
+.tarjeta-titulo {
+  font-family:'Lora',serif; font-size:26px; font-weight:600;
+  color:var(--text); margin-bottom:8px; line-height:1.3;
+}
+.tarjeta-info {
+  font-family:'Inter',sans-serif; font-size:14px;
+  color:var(--text-soft); margin-bottom:32px;
+}
+.btn-completar {
+  background:var(--orange); color:white;
+  border:none; border-radius:24px; padding:14px 28px;
+  font-family:'Inter',sans-serif; font-size:16px; font-weight:600;
+  cursor:pointer; width:100%; max-width:320px;
+  transition:opacity 0.2s;
+}
+.btn-completar:active { opacity:0.8; }
+.msg-bloqueo {
+  font-family:'Inter',sans-serif; font-size:13px;
+  color:var(--orange); margin-top:16px;
+  opacity:0; transition:opacity 0.3s ease;
+}
+@keyframes sacudir {
+  0%   { transform:translateX(0); }
+  20%  { transform:translateX(-8px); }
+  40%  { transform:translateX(8px); }
+  60%  { transform:translateX(-6px); }
+  80%  { transform:translateX(6px); }
+  100% { transform:translateX(0); }
+}
+.sacudir { animation:sacudir 0.4s ease; }
+
+/* ── 5D: Plantillas de tarjetas ── */
+.tarjeta-umbral {
+  position:relative;
+  background:linear-gradient(135deg, #1a1a2e 0%, #2d1b3d 100%);
+}
+.tarjeta-hero-overlay {
+  position:absolute; inset:0; background:rgba(0,0,0,0.45);
+}
+.tarjeta-inner-centrada {
+  text-align:center; position:relative; z-index:1;
+}
+.tarjeta-titulo-hero {
+  font-family:'Lora',serif; font-size:30px; font-weight:600;
+  color:white; line-height:1.3; margin-bottom:12px;
+}
+.tarjeta-subtexto {
+  font-family:'Inter',sans-serif; font-size:16px;
+  color:rgba(255,255,255,0.7); margin-bottom:32px; line-height:1.5;
+}
+.tarjeta-contenido {
+  overflow-y:auto; align-items:flex-start; padding-top:32px;
+}
+.tarjeta-texto-lora {
+  font-family:'Lora',serif; font-size:19px;
+  line-height:1.7; color:var(--text); margin-bottom:24px;
+}
+.tarjeta-texto-cita {
+  font-style:italic;
+  border-left:3px solid var(--orange); padding-left:16px;
+}
+.tarjeta-referencia {
+  font-family:'Inter',sans-serif; font-size:13px;
+  color:var(--text-soft); margin-bottom:24px;
+}
+.tarjeta-oracion {
+  background:#0d0d1a; justify-content:center;
+}
+.btn-primario {
+  background:var(--orange); color:white;
+  border:none; border-radius:24px; padding:14px 28px;
+  font-family:'Inter',sans-serif; font-size:17px; font-weight:600;
+  cursor:pointer; width:100%; max-width:320px; margin-top:8px;
+  transition:opacity 0.2s;
+}
+.btn-primario:active { opacity:0.82; }
+.btn-secundario {
+  background:transparent; color:var(--orange);
+  border:1.5px solid var(--orange); border-radius:24px;
+  padding:12px 28px;
+  font-family:'Inter',sans-serif; font-size:16px; font-weight:600;
+  cursor:pointer; width:100%; max-width:320px; margin-top:8px;
+  transition:opacity 0.3s ease;
+}
+.btn-amen {
+  background:white; color:#0d0d1a;
+  border:none; border-radius:24px; padding:16px 40px;
+  font-family:'Lora',serif; font-size:20px; font-weight:600;
+  cursor:pointer; width:100%; max-width:280px; margin-top:32px;
+}
+.pregunta-bloque { margin-bottom:24px; }
+.textarea-reflexion {
+  width:100%; min-height:100px; border-radius:12px;
+  border:1.5px solid var(--border);
+  background:var(--card); color:var(--text);
+  font-family:'Lora',serif; font-size:17px; line-height:1.6;
+  padding:12px 16px; resize:vertical; box-sizing:border-box;
+}
+.textarea-reflexion:focus { outline:none; border-color:var(--orange); }
 </style>
 </head>
 <body>
@@ -243,15 +414,46 @@ body.light .card-prog-wrap { background:rgba(0,0,0,0.08); }
     </button>
   </header>
 
-  <!-- Hero -->
-  <section class="hero">
-    <p class="hero-question">¿Qué estás cruzando ahora?</p>
-    <p class="hero-sub">Encuentra un retiro para este momento de tu camino.</p>
-  </section>
+  <!-- VISTA A — La Hospedería -->
+  <div id="vista-hospederia">
 
-  <!-- Catálogo -->
-  <div id="hospederia" class="hospederia">
-    <div class="spinner-wrap"><div class="spinner"></div></div>
+    <!-- Hero -->
+    <section class="hero">
+      <p class="hero-question">¿Qué estás cruzando ahora?</p>
+      <p class="hero-sub">Encuentra un retiro para este momento de tu camino.</p>
+    </section>
+
+    <!-- Catálogo -->
+    <div id="hospederia" class="hospederia">
+      <div class="spinner-wrap"><div class="spinner"></div></div>
+    </div>
+
+  </div><!-- /#vista-hospederia -->
+
+  <!-- VISTA B — El Retiro -->
+  <div id="vista-retiro" style="display:none">
+
+    <!-- Barra superior fija -->
+    <div id="retiro-header">
+      <span id="retiro-titulo">Cargando...</span>
+      <div id="retiro-controles">
+        <button id="btn-play" onclick="window.toggleAudioRetiro()">▶</button>
+        <button id="btn-cerrar" onclick="window.cerrarRetiro()">✕</button>
+      </div>
+    </div>
+
+    <!-- Barra de progreso segmentada -->
+    <div id="retiro-progreso">
+      <!-- Los segmentos se generan dinámicamente -->
+    </div>
+
+    <!-- Área de tarjetas -->
+    <div id="retiro-tarjetas">
+      <p style="padding:2rem;color:var(--text-soft);font-size:0.9rem">
+        Tarjetas — próximamente
+      </p>
+    </div>
+
   </div>
 
   <!-- Bottom nav -->
@@ -312,6 +514,9 @@ body.light .card-prog-wrap { background:rgba(0,0,0,0.08); }
 
 </div><!-- /.shell -->
 
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script type="module" src="sanar.js"></script>
 <script src="sounds.js"></script>
 </body>
