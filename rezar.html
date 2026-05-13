@@ -273,17 +273,26 @@ body{
 
 /* ── Cuentas del Rosario ── */
 .beads-col{
-  position:absolute;right:14px;top:50%;transform:translateY(-50%);
-  display:flex;flex-direction:column;align-items:center;gap:6px;z-index:5;
+  position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:8px;z-index:5;
 }
 .bead{
-  width:20px;height:20px;border-radius:50%;
-  border:1.5px solid rgba(255,255,255,0.25);
-  background:transparent;
-  transition:background 0.15s,border-color 0.15s;
+  width:28px;height:28px;border-radius:50%;
+  border:2px solid rgba(255,255,255,0.35);
+  background:rgba(255,255,255,0.08);
+  transition:background 0.18s,border-color 0.18s,transform 0.12s;
 }
-.bead.lit{background:var(--lvl-bold);border-color:var(--lvl-bold)}
-.beads-col-label{font-size:9px;font-weight:700;color:rgba(255,255,255,0.35);letter-spacing:0.8px;margin-top:2px}
+.bead.lit{
+  background:var(--lvl-bold);border-color:var(--lvl-bold);
+  box-shadow:0 0 8px rgba(255,122,0,0.5);
+  animation:bead-pop 0.18s ease-out;
+}
+.beads-col-label{font-size:9px;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:0.8px;margin-top:4px;text-transform:uppercase}
+@keyframes bead-pop{
+  0%{transform:scale(1)}
+  40%{transform:scale(1.25)}
+  100%{transform:scale(1)}
+}
 
 /* ── Barra de progreso (no scrubable) ── */
 .progress-bar-wrap{height:3px;background:var(--border)}
@@ -919,7 +928,7 @@ let nivelId='0101', nivel=1, cua=1;
 let blk='gozosos', bIdx=0;
 let totalM=0;
 let playlist=[], plIdx=0;
-let rezarAudio=null, beadSfx=null;
+let rezarAudio=null;
 let beadCount=0;
 let currentTool=null;
 let pendingNav=null;
@@ -1122,14 +1131,63 @@ function resetBeads(){
   beadCount=0;
   document.querySelectorAll('#beads-col .bead').forEach(b=>b.classList.remove('lit'));
 }
+function playBeadSound(){
+  try{
+    const ac=new(window.AudioContext||window.webkitAudioContext)();
+    const now=ac.currentTime;
+    const master=ac.createGain();
+    master.gain.setValueAtTime(0,now);
+    master.gain.linearRampToValueAtTime(0.22,now+0.008);
+    master.gain.exponentialRampToValueAtTime(0.001,now+0.9);
+    master.connect(ac.destination);
+    const osc1=ac.createOscillator(),g1=ac.createGain();
+    osc1.type='sine';osc1.frequency.value=432;g1.gain.value=0.7;
+    osc1.connect(g1);g1.connect(master);osc1.start(now);osc1.stop(now+0.9);
+    const osc2=ac.createOscillator(),g2=ac.createGain();
+    osc2.type='sine';osc2.frequency.value=864;g2.gain.value=0.25;
+    osc2.connect(g2);g2.connect(master);osc2.start(now);osc2.stop(now+0.6);
+    const bufSize=Math.floor(ac.sampleRate*0.04);
+    const buf=ac.createBuffer(1,bufSize,ac.sampleRate);
+    const bd=buf.getChannelData(0);
+    for(let i=0;i<bufSize;i++)bd[i]=(Math.random()*2-1)*Math.pow(1-i/bufSize,18);
+    const noise=ac.createBufferSource();noise.buffer=buf;
+    const bpf=ac.createBiquadFilter();bpf.type='bandpass';bpf.frequency.value=1800;bpf.Q.value=1.2;
+    const gn=ac.createGain();gn.gain.value=0.35;
+    noise.connect(bpf);bpf.connect(gn);gn.connect(master);
+    noise.start(now);noise.stop(now+0.04);
+    setTimeout(()=>{try{ac.close();}catch(e){}},1100);
+  }catch(e){}
+}
+
+function playBeadComplete(){
+  try{
+    const ac=new(window.AudioContext||window.webkitAudioContext)();
+    const now=ac.currentTime;
+    const master=ac.createGain();
+    master.gain.setValueAtTime(0,now);
+    master.gain.linearRampToValueAtTime(0.28,now+0.01);
+    master.gain.exponentialRampToValueAtTime(0.001,now+2.2);
+    master.connect(ac.destination);
+    [432,648,864].forEach((f,i)=>{
+      const o=ac.createOscillator(),g=ac.createGain();
+      o.type='sine';o.frequency.value=f;g.gain.value=i===0?0.6:0.3;
+      o.connect(g);g.connect(master);o.start(now+i*0.025);o.stop(now+2.2);
+    });
+    setTimeout(()=>{try{ac.close();}catch(e){}},2400);
+  }catch(e){}
+}
+
 function countBead(){
   if(beadCount>=10)return;
   beadCount++;
   const beads=document.querySelectorAll('#beads-col .bead');
   if(beads[beadCount-1])beads[beadCount-1].classList.add('lit');
-  if(!beadSfx)beadSfx=new Audio(R2+'/sfx/bead_click.mp3');
-  beadSfx.currentTime=0;beadSfx.volume=0.6;beadSfx.play().catch(()=>{});
-  if(beadCount===10&&navigator.vibrate)navigator.vibrate(40);
+  if(beadCount===10){
+    playBeadComplete();
+    if(navigator.vibrate)navigator.vibrate([30,60,30]);
+  }else{
+    playBeadSound();
+  }
 }
 window.countBead=countBead;
 
