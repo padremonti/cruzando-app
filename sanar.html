@@ -6,9 +6,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#1A0E04">
-<title>Mapa del Camino · CruzAndo</title>
+<title>El Santuario · CruzAndo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
 
@@ -24,13 +24,13 @@
   --green:     #4CAF7D;
 }
 body.light {
-  --bg:        #E6DED3;
-  --bg2:       #D9CFC4;
+  --bg:        #F5F0E8;
+  --bg2:       #EDE5D8;
   --card:      #FFFCF7;
-  --border:    #D0C4B8;
-  --text:      #2B1A0E;
-  --text-soft: #6B5040;
-  --text-dim:  #9B8878;
+  --border:    #D9CFC4;
+  --text:      #2B2622;
+  --text-soft: #6B6259;
+  --text-dim:  #9B9389;
 }
 
 html { font-size:18px; }
@@ -39,109 +39,132 @@ body {
   background:var(--bg); color:var(--text);
   line-height:1.6; min-height:100dvh;
   -webkit-font-smoothing:antialiased;
-  transition:background 0.35s, color 0.35s;
+  transition:background 0.3s, color 0.3s;
 }
-.shell { max-width:480px; margin:0 auto; min-height:100dvh; padding-bottom:72px; }
+.shell { max-width:480px; margin:0 auto; min-height:100dvh; padding-bottom:82px; }
 
 /* ── Header ── */
 .header {
   position:sticky; top:0; z-index:50;
-  display:flex; align-items:center; justify-content:space-between;
-  padding:14px 20px 12px;
+  display:flex; align-items:center; gap:10px;
+  padding:14px 18px 12px;
   background:var(--bg); border-bottom:1px solid var(--border);
 }
+.header-center { flex:1; min-width:0; }
 .header-title {
-  font-family:'Crimson Pro',serif;
-  font-size:1.3rem; font-weight:600; color:var(--text);
+  font-family:'Lora',serif; font-size:1.1rem; font-weight:600;
+  color:var(--text); line-height:1.2;
 }
-.header-sub { font-size:0.65rem; color:var(--text-dim); margin-top:1px; text-transform:uppercase; letter-spacing:0.8px; }
 .icon-btn {
-  width:36px; height:36px; border-radius:50%;
+  width:38px; height:38px; border-radius:50%;
   background:var(--card); border:1px solid var(--border);
   display:flex; align-items:center; justify-content:center;
-  cursor:pointer; color:var(--text-soft); transition:all 0.2s; flex-shrink:0;
+  cursor:pointer; color:var(--text-soft);
+  transition:all 0.2s; flex-shrink:0;
 }
 .icon-btn:active { transform:scale(0.92); }
+.icon-btn svg { width:18px; height:18px; }
 
-/* ── Mapa ── */
-.map-wrap { padding:20px 18px 8px; }
-
-.mundo-sec { margin-bottom:28px; }
-.mundo-lbl {
-  display:flex; align-items:center; gap:10px; margin-bottom:14px;
+/* ── Hero ── */
+.hero {
+  padding:28px 22px 22px;
+  border-bottom:1px solid var(--border);
 }
-.mundo-line { flex:1; height:1px; background:var(--border); }
-.mundo-name {
+.hero-question {
+  font-family:'Lora',serif; font-size:1.35rem; font-weight:600;
+  color:var(--text); line-height:1.3; margin-bottom:8px;
+}
+.hero-sub {
+  font-size:0.85rem; color:var(--text-soft); line-height:1.65;
+}
+
+/* ── Hospedería ── */
+.hospederia { padding:22px 18px 8px; }
+
+/* ── Mundo separador ── */
+.mundo-group { margin-bottom:34px; }
+.mundo-sep {
+  display:flex; align-items:center; gap:10px; margin-bottom:16px;
+}
+.mundo-sep-line { flex:1; height:1px; }
+.mundo-sep-label {
   font-size:0.6rem; font-weight:700; text-transform:uppercase;
   letter-spacing:1px; white-space:nowrap;
 }
 
-.nivel-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
-.nodo {
-  aspect-ratio:1; border-radius:50%;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  cursor:pointer; transition:all 0.18s; border:2.5px solid;
+/* ── Cards ── */
+.retiro-card {
+  background:var(--card); border-radius:18px;
+  border:1.5px solid var(--border);
+  padding:20px 20px 18px; margin-bottom:14px;
+  transition:opacity 0.2s;
+}
+.retiro-card.bloqueado  { opacity:0.45; }
+.retiro-card.pendiente  { opacity:0.60; }
+.retiro-card.completado { opacity:0.72; }
+
+.card-top {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:10px;
+}
+.card-icono { font-size:1.4rem; line-height:1; }
+.card-chip {
+  font-size:0.6rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:0.8px; padding:3px 10px; border-radius:20px;
+  border:1.5px solid; background:transparent;
+}
+.card-nombre {
+  font-family:'Lora',serif; font-size:1.15rem; font-weight:600;
+  color:var(--text); line-height:1.3; margin-bottom:14px;
+}
+
+/* Barra de progreso (en_progreso) */
+.card-prog-wrap {
+  height:4px; border-radius:2px; overflow:hidden;
+  background:rgba(255,255,255,0.08); margin-bottom:14px;
+}
+body.light .card-prog-wrap { background:rgba(0,0,0,0.08); }
+.card-prog-bar { height:100%; border-radius:2px; }
+
+/* Footer de card */
+.card-footer { display:flex; align-items:center; gap:10px; min-height:40px; }
+.card-btn {
+  flex:1; padding:13px 16px; border:none; border-radius:13px;
+  font-family:'Inter',sans-serif; font-size:0.85rem; font-weight:700;
+  color:#1A0E04; cursor:pointer; text-align:center;
+  transition:opacity 0.2s, transform 0.15s;
   -webkit-tap-highlight-color:transparent;
 }
-.nodo:active { transform:scale(0.91); }
-.nodo.sel { transform:scale(1.1); }
-.nodo.done { opacity:0.55; }
-.nodo.done::after {
-  content:''; position:absolute;
+.card-btn:active { opacity:0.82; transform:scale(0.97); }
+
+.card-msg-lock {
+  font-size:0.78rem; color:var(--text-dim);
+  line-height:1.5; font-style:italic;
 }
-.nodo-wrap { position:relative; }
-.done-check {
-  position:absolute; top:-3px; right:-3px;
-  width:18px; height:18px; border-radius:50%;
-  background:var(--green); border:2px solid var(--bg);
-  display:flex; align-items:center; justify-content:center;
-  font-size:9px; color:#fff; font-weight:700; z-index:1;
+.card-msg-done {
+  font-size:0.82rem; color:var(--text-dim);
+  font-weight:600; display:flex; align-items:center; gap:6px;
 }
-.nodo-num {
-  font-family:'Crimson Pro',serif; font-weight:600;
-  font-size:clamp(1rem,5vw,1.5rem);
-  line-height:1; text-align:center;
+.card-msg-pronto {
+  font-size:0.78rem; color:var(--text-dim); line-height:1.5;
 }
-.nodo-elem {
-  font-size:0.48rem; font-weight:600; text-align:center;
-  margin-top:3px; padding:0 4px; line-height:1.2;
-  text-transform:uppercase; letter-spacing:0.3px;
-  opacity:0.7;
+.card-lock-svg {
+  width:26px; height:26px; flex-shrink:0; color:var(--text-dim); opacity:0.7;
 }
 
-/* ── Panel de confirmación ── */
-.confirm {
-  display:none; margin:0 18px 24px;
-  background:var(--card); border-radius:18px;
-  padding:22px 20px; border:1.5px solid var(--border);
+/* ── Spinner ── */
+.spinner-wrap { display:flex; align-items:center; justify-content:center; min-height:50dvh; }
+.spinner {
+  width:32px; height:32px; border:3px solid var(--border);
+  border-top-color:var(--orange); border-radius:50%;
+  animation:spin 0.8s linear infinite;
 }
-.confirm.vis { display:block; animation:slideUp 0.35s cubic-bezier(0.34,1.56,0.64,1) both; }
-@keyframes slideUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+@keyframes spin { to { transform:rotate(360deg); } }
 
-.c-num {
-  font-size:0.65rem; font-weight:700; text-transform:uppercase;
-  letter-spacing:1.2px; margin-bottom:8px;
-}
-.c-elem {
-  font-family:'Crimson Pro',serif;
-  font-size:2rem; font-weight:600; color:var(--text);
-  line-height:1.1; margin-bottom:4px;
-}
-.c-mundo {
-  font-family:'Crimson Pro',serif;
-  font-size:1.2rem; font-weight:400; font-style:italic;
-  color:var(--text-soft); margin-bottom:20px; line-height:1.2;
-}
-.c-btn {
-  width:100%; padding:15px; border:none; border-radius:13px;
-  font-family:'Inter',sans-serif; font-size:0.9rem; font-weight:700;
-  color:#1A0E04; cursor:pointer; transition:opacity 0.2s;
-}
-.c-btn:active { opacity:0.85; }
-.c-cancel {
-  display:block; width:100%; margin-top:10px; padding:8px;
-  background:none; border:none; font-family:'Inter',sans-serif;
-  font-size:0.75rem; color:var(--text-dim); cursor:pointer; text-align:center;
+/* ── Error ── */
+.error-msg {
+  padding:48px 24px; text-align:center;
+  color:var(--text-soft); font-size:0.9rem; line-height:1.7;
 }
 
 /* ── Bottom nav ── */
@@ -150,7 +173,7 @@ body {
   width:100%; max-width:480px; z-index:80;
   background:var(--bg); border-top:1px solid var(--border);
   display:flex; align-items:stretch;
-  padding-bottom:env(safe-area-inset-bottom,0px);
+  padding-bottom:env(safe-area-inset-bottom, 0px);
   backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
 }
 .app-nav-item {
@@ -183,85 +206,100 @@ body {
   background:rgba(255,122,0,0.12); border-radius:10px;
 }
 .app-nav-label { font-size:0.6rem; font-weight:600; letter-spacing:0.4px; text-transform:uppercase; }
-
-/* ── Spinner ── */
-.spinner-wrap { display:flex; align-items:center; justify-content:center; min-height:60dvh; }
-.spinner {
-  width:32px; height:32px; border:3px solid var(--border);
-  border-top-color:var(--orange); border-radius:50%;
-  animation:spin 0.8s linear infinite;
-}
-@keyframes spin { to { transform:rotate(360deg); } }
 </style>
 </head>
 <body>
+<!-- Aplicar tema antes de render para evitar flash -->
+<script>(function(){ if(localStorage.getItem('cruzando_theme')==='light') document.body.classList.add('light'); })();</script>
+
 <div class="shell">
 
   <!-- Header -->
   <header class="header">
-    <div>
-      <div class="header-title">Mapa del Camino</div>
-      <div class="header-sub">Elige un nivel para cruzar</div>
+    <button class="icon-btn" onclick="window.goTo('index.html')" title="Volver">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 5l-7 7 7 7"/>
+      </svg>
+    </button>
+    <div class="header-center">
+      <div class="header-title">El Santuario</div>
     </div>
-    <button class="icon-btn" id="btn-dark" onclick="toggleDark()" title="Cambiar tema">
-      <svg id="ico-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-      <svg id="ico-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+    <button class="icon-btn" id="btn-dark" onclick="window.toggleDarkMode()" title="Cambiar tema">
+      <svg id="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round">
+        <circle cx="12" cy="12" r="5"/>
+        <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+      <svg id="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+        <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+      </svg>
     </button>
   </header>
 
-  <!-- Mapa -->
-  <div class="map-wrap" id="map-wrap">
-    <div class="spinner-wrap"><div class="spinner"></div></div>
-  </div>
+  <!-- Hero -->
+  <section class="hero">
+    <p class="hero-question">¿Qué estás cruzando ahora?</p>
+    <p class="hero-sub">Encuentra un retiro para este momento de tu camino.</p>
+  </section>
 
-  <!-- Panel de confirmación -->
-  <div class="confirm" id="confirm">
-    <div class="c-num" id="c-num"></div>
-    <div class="c-elem" id="c-elem"></div>
-    <div class="c-mundo" id="c-mundo"></div>
-    <button class="c-btn" id="c-btn">Ir a este nivel →</button>
-    <button class="c-cancel" onclick="cancelSel()">Cancelar</button>
+  <!-- Catálogo -->
+  <div id="hospederia" class="hospederia">
+    <div class="spinner-wrap"><div class="spinner"></div></div>
   </div>
 
   <!-- Bottom nav -->
   <nav class="app-nav">
-    <button class="app-nav-item" onclick="navTap(this); goTo('orar.html')">
+    <button class="app-nav-item" onclick="window.navTap(this); window.goTo('orar.html')">
       <div class="app-nav-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="12" y1="2" x2="12" y2="22"/><line x1="4" y1="9" x2="20" y2="9"/>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="2" x2="12" y2="22"/>
+          <line x1="4" y1="9" x2="20" y2="9"/>
         </svg>
       </div>
       <span class="app-nav-label">Orar</span>
     </button>
-    <button class="app-nav-item" onclick="navTap(this); goTo('diario.html')">
+    <button class="app-nav-item" onclick="window.navTap(this); window.goTo('diario.html')">
       <div class="app-nav-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/>
           <path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/>
         </svg>
       </div>
       <span class="app-nav-label">Diario</span>
     </button>
-    <button class="app-nav-item" onclick="navTap(this); goTo('cantos.html')">
+    <button class="app-nav-item" onclick="window.navTap(this); window.goTo('cantos.html')">
       <div class="app-nav-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 18V5l12-2v13"/>
+          <circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
         </svg>
       </div>
       <span class="app-nav-label">Cantos</span>
     </button>
-    <button class="app-nav-item" onclick="navTap(this); goTo('sanar.html')">
+    <button class="app-nav-item active" disabled>
       <div class="app-nav-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 22s-8-5.5-8-11a8 8 0 0116 0c0 5.5-8 11-8 11z"/>
           <path d="M9 11h6M12 8v6"/>
         </svg>
       </div>
       <span class="app-nav-label">Sanar</span>
     </button>
-    <button class="app-nav-item active" disabled>
+    <button class="app-nav-item" onclick="window.navTap(this); window.goTo('index.html')">
       <div class="app-nav-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="3" width="7" height="7" rx="1"/>
           <rect x="14" y="3" width="7" height="7" rx="1"/>
           <rect x="3" y="14" width="7" height="7" rx="1"/>
@@ -272,203 +310,9 @@ body {
     </button>
   </nav>
 
-</div>
+</div><!-- /.shell -->
 
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-
-<script>
-/* ── Firebase ── */
-const firebaseConfig = {
-  apiKey:            "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
-  authDomain:        "cruzando-app.firebaseapp.com",
-  projectId:         "cruzando-app",
-  storageBucket:     "cruzando-app.firebasestorage.app",
-  messagingSenderId: "408196948528",
-  appId:             "1:408196948528:web:de291e8afc969252e943f5"
-};
-firebase.initializeApp(firebaseConfig);
-const _db   = firebase.firestore();
-const _auth = firebase.auth();
-
-/* ── Tema ── */
-var isLight = localStorage.getItem('cruzando_theme') === 'light';
-function applyTheme(light) {
-  document.body.classList.toggle('light', light);
-  document.getElementById('ico-sun').style.display  = light ? 'none'  : 'block';
-  document.getElementById('ico-moon').style.display = light ? 'block' : 'none';
-  document.querySelector('meta[name="theme-color"]').content = light ? '#E6DED3' : '#1A0E04';
-  localStorage.setItem('cruzando_theme', light ? 'light' : 'dark');
-}
-function toggleDark() { isLight = !isLight; applyTheme(isLight); }
-if (isLight) applyTheme(true);
-
-/* ── Navegación ── */
-function goTo(page) {
-  var base = window.location.origin + window.location.pathname.replace(/\/world\.html$/, '/');
-  window.location.href = base + page;
-}
-
-window._navChord = 0;
-function playNavChord() {
-  var CHORDS = [[523,659,784],[659,784,988],[784,988,1175],[587,740,880]];
-  try {
-    var ac = new (window.AudioContext || window.webkitAudioContext)();
-    var now = ac.currentTime;
-    var notes = CHORDS[window._navChord % 4]; window._navChord++;
-    var master = ac.createGain();
-    master.gain.setValueAtTime(0, now);
-    master.gain.linearRampToValueAtTime(0.07, now + 0.018);
-    master.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-    master.connect(ac.destination);
-    notes.forEach(function(freq, j) {
-      var o = ac.createOscillator(), g = ac.createGain();
-      o.type = j === 0 ? 'sine' : 'triangle';
-      o.frequency.value = freq; g.gain.value = j === 0 ? 0.8 : 0.5;
-      o.connect(g); g.connect(master);
-      o.start(now + j * 0.012); o.stop(now + 0.45);
-    });
-  } catch(e) {}
-}
-function navTap(el) {
-  if (window.CZSound) CZSound('navTap');
-  playNavChord();
-  el.classList.remove('tapped');
-  void el.offsetWidth;
-  el.classList.add('tapped');
-  setTimeout(function() { el.classList.remove('tapped'); }, 400);
-}
-
-/* ── Datos de niveles ── */
-var MUNDOS = [
-  { nombre:'CruzAndo la Cruz',    bold:'#FF7A00', bg:'rgba(255,122,0,0.12)',    niveles:[
-    {id:'0101',num:'1-1',elem:'Males'},       {id:'0102',num:'1-2',elem:'Pecado'},
-    {id:'0103',num:'1-3',elem:'Conversión'},  {id:'0104',num:'1-4',elem:'Gracia'}
-  ]},
-  { nombre:'CruzAndo Emociones',  bold:'#FF9A8A', bg:'rgba(255,154,138,0.12)', niveles:[
-    {id:'0201',num:'2-1',elem:'Sensaciones'}, {id:'0202',num:'2-2',elem:'Sentimientos'},
-    {id:'0203',num:'2-3',elem:'Gustos'},      {id:'0204',num:'2-4',elem:'Deseos'}
-  ]},
-  { nombre:'CruzAndo la Mente',   bold:'#A276F4', bg:'rgba(89,0,255,0.12)',    niveles:[
-    {id:'0301',num:'3-1',elem:'Imaginación'}, {id:'0302',num:'3-2',elem:'Memoria'},
-    {id:'0303',num:'3-3',elem:'Razón'},       {id:'0304',num:'3-4',elem:'Intenciones'}
-  ]},
-  { nombre:'CruzAndo el Corazón', bold:'#EDC800', bg:'rgba(237,200,0,0.12)',   niveles:[
-    {id:'0401',num:'4-1',elem:'Necesidad'},   {id:'0402',num:'4-2',elem:'Placer'},
-    {id:'0403',num:'4-3',elem:'Requiero'},    {id:'0404',num:'4-4',elem:'Gozo'}
-  ]},
-  { nombre:'CruzAndo Relaciones', bold:'#10BF58', bg:'rgba(16,191,88,0.12)',   niveles:[
-    {id:'0501',num:'5-1',elem:'Dependencia'}, {id:'0502',num:'5-2',elem:'Vínculo'},
-    {id:'0503',num:'5-3',elem:'Pertenencia'}, {id:'0504',num:'5-4',elem:'Comunión'}
-  ]},
-  { nombre:'CruzAndo el Amor',    bold:'#FF2663', bg:'rgba(255,38,99,0.12)',   niveles:[
-    {id:'0601',num:'6-1',elem:'Afecto'},      {id:'0602',num:'6-2',elem:'Amistad'},
-    {id:'0603',num:'6-3',elem:'Querer'},      {id:'0604',num:'6-4',elem:'Caridad'}
-  ]},
-  { nombre:'CruzAndo el Tiempo',  bold:'#3EF7BE', bg:'rgba(62,247,190,0.12)',  niveles:[
-    {id:'0701',num:'7-1',elem:'Curiosidad'},  {id:'0702',num:'7-2',elem:'Interés'},
-    {id:'0703',num:'7-3',elem:'Problemas'},   {id:'0704',num:'7-4',elem:'Asombro'}
-  ]}
-];
-
-var selId = null;
-var completedIds = {};
-
-/* ── Detectar niveles completados desde Firestore ── */
-async function loadCompleted(user) {
-  try {
-    var allIds = MUNDOS.reduce(function(acc, m) {
-      return acc.concat(m.niveles.map(function(n) { return n.id; }));
-    }, []);
-    var snaps = await Promise.all(allIds.map(function(id) {
-      return _db.collection('users').doc(user.uid).collection('progress').doc(id).get();
-    }));
-    var BLOCKS = ['gozosos','luminosos','dolorosos','gloriosos'];
-    snaps.forEach(function(snap, i) {
-      if (!snap.exists) return;
-      var d = snap.data();
-      if (!d.progress) return;
-      var allDone = BLOCKS.every(function(b) {
-        return d.progress[b] && d.progress[b].every(function(x) { return x !== null; });
-      });
-      if (allDone) completedIds[allIds[i]] = true;
-    });
-  } catch(e) {
-    console.warn('[CruzAndo] loadCompleted:', e.message);
-  }
-}
-
-/* ── Render del mapa ── */
-function renderMap() {
-  var html = '';
-  MUNDOS.forEach(function(m) {
-    html += '<div class="mundo-sec">';
-    html += '<div class="mundo-lbl"><div class="mundo-line"></div>';
-    html += '<span class="mundo-name" style="color:' + m.bold + '">' + m.nombre + '</span>';
-    html += '<div class="mundo-line"></div></div>';
-    html += '<div class="nivel-grid">';
-    m.niveles.forEach(function(n) {
-      var done = completedIds[n.id];
-      html += '<div class="nodo-wrap" style="position:relative">';
-      html += '<div class="nodo' + (done ? ' done' : '') + '" id="n-' + n.id + '" ';
-      html += 'style="background:' + m.bg + ';border-color:' + m.bold + (done ? 'AA' : '55') + ';" ';
-      html += 'onclick="pick(\'' + n.id + '\',\'' + n.num + '\',\'' + n.elem.replace(/'/g,"\\'") + '\',\'' + m.nombre.replace(/'/g,"\\'") + '\',\'' + m.bold + '\')">';
-      html += '<div class="nodo-num" style="color:' + m.bold + '">' + n.num + '</div>';
-      html += '<div class="nodo-elem" style="color:' + m.bold + '">' + n.elem + '</div>';
-      html += '</div>';
-      if (done) html += '<div class="done-check">✓</div>';
-      html += '</div>';
-    });
-    html += '</div></div>';
-  });
-  document.getElementById('map-wrap').innerHTML = html;
-}
-
-/* ── Selección ── */
-function pick(id, num, elem, mundo, color) {
-  if (selId) {
-    var prev = document.getElementById('n-' + selId);
-    if (prev) prev.classList.remove('sel');
-  }
-  if (selId === id) {
-    selId = null;
-    document.getElementById('confirm').classList.remove('vis');
-    return;
-  }
-  selId = id;
-  var el = document.getElementById('n-' + id);
-  if (el) { el.classList.add('sel'); el.style.boxShadow = '0 0 0 4px ' + color + '33'; }
-  document.getElementById('c-num').textContent = 'Nivel ' + num;
-  document.getElementById('c-num').style.color = color;
-  document.getElementById('c-elem').textContent = elem;
-  document.getElementById('c-mundo').textContent = mundo;
-  document.getElementById('c-btn').style.background = color;
-  document.getElementById('c-btn').onclick = function() { goTo('orar.html?c=' + id); };
-  document.getElementById('confirm').classList.add('vis');
-  setTimeout(function() {
-    document.getElementById('confirm').scrollIntoView({ behavior:'smooth', block:'nearest' });
-  }, 100);
-}
-
-function cancelSel() {
-  if (selId) {
-    var el = document.getElementById('n-' + selId);
-    if (el) { el.classList.remove('sel'); el.style.boxShadow = ''; }
-  }
-  selId = null;
-  document.getElementById('confirm').classList.remove('vis');
-}
-
-/* ── Init ── */
-_auth.onAuthStateChanged(async function(user) {
-  if (user) {
-    await loadCompleted(user);
-  }
-  renderMap();
-});
-</script>
+<script type="module" src="sanar.js"></script>
 <script src="sounds.js"></script>
 </body>
 </html>

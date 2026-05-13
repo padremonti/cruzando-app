@@ -1,0 +1,260 @@
+{
+  "slug": "s1_2",
+  "nombre": "Sanando el Duelo",
+  "tipo": "santuario",
+  "icono": "◆",
+  "mundo": 1,
+  "mundoNombre": "Cruz",
+  "mundoColor": "#FF7A00",
+  "nivelDesbloqueo": "0102",
+  "imagenHero": "https://pub-96c43f31...r2.dev/s1_2_hero.webp",
+  "audioBienvenida": "https://pub-cd28789...r2.dev/s1_2_intro.mp3",
+  "introduccion": {
+    "texto": "PLACEHOLDER — texto de introducción temática del retiro.",
+    "audio": "https://pub-cd28789...r2.dev/s1_2_bienvenida.mp3"
+  },
+  "misterios": [
+    {
+      "numero": 1,
+      "tipo": "doloroso",
+      "nombre": "La Agonía en el Huerto",
+      "subtituloTematico": "PLACEHOLDER — subtítulo temático",
+      "imagenHero": "https://pub-96c43f31...r2.dev/s1_2_m1.webp",
+      "evangelio": {
+        "texto": "PLACEHOLDER — texto del evangelio DHH.",
+        "referencia": "Lucas 22:39-44 (DHH)"
+      },
+      "contemplacion": {
+        "texto": "PLACEHOLDER — texto de contemplación.",
+        "audio": "https://pub-cd28789...r2.dev/s1_2_1.mp3"
+      },
+      "actividades": [
+        {
+          "tipo": "nombrar_emocion",
+          "pregunta": "¿Qué sientes ahora mismo?",
+          "opciones": [
+            "tristeza", "miedo", "esperanza",
+            "gratitud", "confusión", "paz",
+            "enojo", "ternura"
+          ]
+        },
+        {
+          "tipo": "completar_frase",
+          "enunciado": "Lo que más me cuesta soltar es ___."
+        },
+        {
+          "tipo": "escala_resonancia",
+          "pregunta": "¿Cuánto resuena esto contigo ahora?",
+          "etiquetas": ["Apenas", "Poco", "Algo", "Mucho", "Profundamente"]
+        }
+      ],
+      "oracion": {
+        "texto": "PLACEHOLDER — texto de la intercesión.",
+        "audio": "https://pub-cd28789...r2.dev/s1_2_1_oracion.mp3"
+      },
+      "canto": {
+        "titulo": "PLACEHOLDER — título del canto",
+        "audio": "https://pub-cd28789...r2.dev/s1_2_1_canto.mp3",
+        "letra": "PLACEHOLDER — letra del canto."
+      },
+      "preguntas": [
+        "PLACEHOLDER — primera pregunta de reflexión.",
+        "PLACEHOLDER — segunda pregunta de reflexión."
+      ]
+    },
+    {
+      "numero": 2,
+      "tipo": "doloroso",
+      "nombre": "La Flagelación",
+      "subtituloTematico": "PLACEHOLDER — subtítulo temático",
+      "imagenHero": "https://pub-96c43f31...r2.dev/s1_2_m2.webp",
+      "evangelio": {
+        "texto": "PLACEHOLDER — texto del evangelio DHH.",
+        "referencia": "Marcos 15:15 (DHH)"
+      },
+      "contemplacion": {
+        "texto": "PLACEHOLDER — texto de contemplación.",
+        "audio": "https://pub-cd28789...r2.dev/s1_2_2.mp3"
+      },
+      "actividades": [
+        {
+          "tipo": "mapa_corporal",
+          "pregunta": "¿Dónde sientes esto en tu cuerpo?"
+        },
+        {
+          "tipo": "dos_caras",
+          "pregunta": "¿Cuál de estas afirmaciones resuena más contigo ahora?",
+          "opcionA": "Necesito tiempo para sanar.",
+          "opcionB": "Necesito seguir adelante ya."
+        },
+        {
+          "tipo": "carta_breve",
+          "encabezado": "Escríbele dos líneas a Jesús sobre lo que acabas de contemplar."
+        }
+      ],
+      "oracion": {
+        "texto": "PLACEHOLDER — texto de la intercesión.",
+        "audio": "https://pub-cd28789...r2.dev/s1_2_2_oracion.mp3"
+      },
+      "canto": {
+        "titulo": "PLACEHOLDER — título del canto",
+        "audio": "https://pub-cd28789...r2.dev/s1_2_2_canto.mp3",
+        "letra": "PLACEHOLDER — letra del canto."
+      },
+      "preguntas": [
+        "PLACEHOLDER — primera pregunta de reflexión.",
+        "PLACEHOLDER — segunda pregunta de reflexión."
+      ]
+    },
+    {
+      "numero": 3,
+      "tipo": "doloroso",
+      "nombre": "La Coronación de Espinas",
+      "subtituloTematico": "PLACEHOLDER — subtítulo temático",
+      "imagenHero": "https://pub-96c43f31...r2.dev/s1_2_m3.webp",
+      "evangelio": {
+        "texto": "PLACEHOLDER — texto del evangelio DHH.",
+        "referencia": "Mateo 27:28-30 (DHH)"
+      },
+      "contemplacion": {
+        "texto": "PLACEHOLDER — texto de contemplación.",
+        "audio": "https://pub-cd28789...r2.dev/s1_2_3.mp3"
+      },
+      "actividades": [
+        {
+          "tipo": "seleccion_imagen",
+          "pregunta": "¿Cuál de estas imágenes describe mejor cómo llevas tu duelo ahora?",
+          "imagenes": [
+            "https://pub-96c43f31...r2.dev/s1_2_act3a.webp",
+            "https://pub-96c43f31...r2.dev/s1_2_act3b.webp",
+            "https://pub-96c43f31...r2.dev/s1_2_act3c.webp"
+          ]
+        },
+        {
+          "tipo": "antes_despues",
+          "enunciadoAntes": "Antes de esta contemplación pensaba...",
+          "enunciadoDespues": "Ahora pienso..."
+        },
+        {
+          "tipo": "escala_dificultad",
+          "pregunta": "¿Qué tan difícil te resulta esto ahora?",
+          "opciones": ["Puedo con ello", "Me cuesta", "Es muy pesado"]
+        }
+      ],
+      "oracion": {
+        "texto": "PLACEHOLDER — texto de la intercesión.",
+        "audio": "https://pub-cd28789...r2.dev/s1_2_3_oracion.mp3"
+      },
+      "canto": {
+        "titulo": "PLACEHOLDER — título del canto",
+        "audio": "https://pub-cd28789...r2.dev/s1_2_3_canto.mp3",
+        "letra": "PLACEHOLDER — letra del canto."
+      },
+      "preguntas": [
+        "PLACEHOLDER — primera pregunta de reflexión.",
+        "PLACEHOLDER — segunda pregunta de reflexión."
+      ]
+    },
+    {
+      "numero": 4,
+      "tipo": "doloroso",
+      "nombre": "Jesús con la Cruz a Cuestas",
+      "subtituloTematico": "PLACEHOLDER — subtítulo temático",
+      "imagenHero": "https://pub-96c43f31...r2.dev/s1_2_m4.webp",
+      "evangelio": {
+        "texto": "PLACEHOLDER — texto del evangelio DHH.",
+        "referencia": "Lucas 23:26-28 (DHH)"
+      },
+      "contemplacion": {
+        "texto": "PLACEHOLDER — texto de contemplación.",
+        "audio": "https://pub-cd28789...r2.dev/s1_2_4.mp3"
+      },
+      "actividades": [
+        {
+          "tipo": "la_palabra",
+          "instruccion": "Toca la palabra o frase que más te impactó de esta contemplación.",
+          "texto": "PLACEHOLDER — párrafo corto de la contemplación para selección."
+        },
+        {
+          "tipo": "pregunta_reconocimiento",
+          "pregunta": "¿Hay alguien en tu vida cuyo duelo estás cargando también?",
+          "opciones": ["Sí", "Tal vez", "No estoy seguro"]
+        },
+        {
+          "tipo": "momento_silencio",
+          "duracion": 60,
+          "invitacion": "Quédate en silencio con lo que acabas de contemplar.",
+          "audioFondo": "https://pub-faed94...r2.dev/silencio_suave.mp3"
+        }
+      ],
+      "oracion": {
+        "texto": "PLACEHOLDER — texto de la intercesión.",
+        "audio": "https://pub-cd28789...r2.dev/s1_2_4_oracion.mp3"
+      },
+      "canto": {
+        "titulo": "PLACEHOLDER — título del canto",
+        "audio": "https://pub-cd28789...r2.dev/s1_2_4_canto.mp3",
+        "letra": "PLACEHOLDER — letra del canto."
+      },
+      "preguntas": [
+        "PLACEHOLDER — primera pregunta de reflexión.",
+        "PLACEHOLDER — segunda pregunta de reflexión."
+      ]
+    },
+    {
+      "numero": 5,
+      "tipo": "doloroso",
+      "nombre": "La Crucifixión",
+      "subtituloTematico": "PLACEHOLDER — subtítulo temático",
+      "imagenHero": "https://pub-96c43f31...r2.dev/s1_2_m5.webp",
+      "evangelio": {
+        "texto": "PLACEHOLDER — texto del evangelio DHH.",
+        "referencia": "Juan 19:25-27 (DHH)"
+      },
+      "contemplacion": {
+        "texto": "PLACEHOLDER — texto de contemplación.",
+        "audio": "https://pub-cd28789...r2.dev/s1_2_5.mp3"
+      },
+      "actividades": [
+        {
+          "tipo": "completar_frase",
+          "enunciado": "Lo que le quiero entregar a Jesús en esta cruz es ___."
+        },
+        {
+          "tipo": "escala_resonancia",
+          "pregunta": "¿Sientes que algo en ti ha cambiado durante este retiro?",
+          "etiquetas": ["Apenas", "Poco", "Algo", "Mucho", "Profundamente"]
+        },
+        {
+          "tipo": "carta_breve",
+          "encabezado": "Escríbele a la persona que extrañas o que has perdido."
+        }
+      ],
+      "oracion": {
+        "texto": "PLACEHOLDER — texto de la intercesión.",
+        "audio": "https://pub-cd28789...r2.dev/s1_2_5_oracion.mp3"
+      },
+      "canto": {
+        "titulo": "PLACEHOLDER — título del canto",
+        "audio": "https://pub-cd28789...r2.dev/s1_2_5_canto.mp3",
+        "letra": "PLACEHOLDER — letra del canto."
+      },
+      "preguntas": [
+        "PLACEHOLDER — primera pregunta de reflexión.",
+        "PLACEHOLDER — segunda pregunta de reflexión.",
+        "PLACEHOLDER — tercera pregunta de integración."
+      ]
+    }
+  ],
+  "cierre": {
+    "comunidadSostiene": [
+      "PLACEHOLDER — primera acción concreta de la comunidad.",
+      "PLACEHOLDER — segunda acción concreta.",
+      "PLACEHOLDER — tercera acción concreta."
+    ],
+    "invitacionItinerario": {
+      "nivelId": "0101",
+      "texto": "PLACEHOLDER — invitación a continuar el itinerario."
+    }
+  }
+}
