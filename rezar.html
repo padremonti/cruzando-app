@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1A1714">
+<title>CruzAndo · Rezar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
+  authDomain: "cruzando-app.firebaseapp.com",
+  projectId: "cruzando-app",
+  storageBucket: "cruzando-app.firebasestorage.app",
+  messagingSenderId: "408196948528",
+  appId: "1:408196948528:web:de291e8afc969252e943f5"
+};
+firebase.initializeApp(firebaseConfig);
+const _db   = firebase.firestore();
+const _auth = firebase.auth();
+</script>
+<script src="utils.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+/* ── Variables CSS ── */
+:root{
+  --bg:#E6DED3;--card:#FFFCF7;--border:#D9D1C7;
+  --text:#2B2622;--text-soft:#6B6259;--text-dim:#9B9389;
+  --input-bg:#FFFCF7;--sec-bg:#F5F0E8;--shadow:rgba(43,38,34,0.08);
+  --green:#34A853;--green-soft:rgba(52,168,83,0.12);
+  --lvl-bold:#FF7A00;--lvl-base:#FF7F09;--lvl-soft:#F69C49;
+  --lvl-mist:#FFA34E;--lvl-light:#FFCFA2;--lvl-ultra:rgba(255,122,0,0.07);
+  --goz-color:#E8A0A0;--lum-color:#01BBE1;--dol-color:#C0392B;--glo-color:#D4A017;
+  --brand:#01BBE1;
+  --bg-rgb:230,222,211;
+}
+.dark{
+  --bg:#1A1714;--card:#252119;--border:#3A3530;
+  --text:#E6DED3;--text-soft:#B8A898;--text-dim:#786858;
+  --input-bg:#2A2520;--sec-bg:#1E1B16;--shadow:rgba(0,0,0,0.3);
+  --green-soft:rgba(52,168,83,0.18);
+  --bg-rgb:26,23,20;
+}
+
+/* ── Base ── */
+html{font-size:18px}
+body{
+  font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);
+  line-height:1.7;min-height:100dvh;-webkit-font-smoothing:antialiased;
+  transition:background 0.4s,color 0.4s;
+  background-image:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/></filter><rect width='200' height='200' filter='url(%23n)' opacity='0.08'/></svg>"),
+    linear-gradient(135deg,rgba(192,57,43,0.07) 0%,rgba(255,122,0,0.06) 60%,transparent 100%);
+  background-size:200px 200px,100% 100%;background-blend-mode:multiply,normal;
+}
+.dark body{
+  background-image:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/></filter><rect width='200' height='200' filter='url(%23n)' opacity='0.07'/></svg>"),
+    radial-gradient(ellipse at 20% 85%,rgba(255,122,0,0.11) 0%,transparent 55%);
+  background-size:200px 200px,100% 100%;background-blend-mode:screen,normal;
+}
+
+/* ── Shell ── */
+.shell{max-width:480px;margin:0 auto;min-height:100dvh;position:relative}
+
+/* ── Pantallas ── */
+.screen{display:none}
+.screen.active{display:flex;flex-direction:column}
+#scr-rezar.active{height:100dvh;overflow:hidden}
+
+/* ── Loading / Error ── */
+.loading-screen,.error-screen{
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;min-height:100dvh;padding:40px 24px;text-align:center;
+}
+.spinner{
+  width:40px;height:40px;border:3px solid var(--border);
+  border-top-color:var(--lvl-bold);border-radius:50%;
+  animation:spin 0.8s linear infinite;margin-bottom:18px;
+}
+
+/* ── Animaciones ── */
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(22px) scale(0.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+@keyframes fadeInOut{0%{opacity:0;transform:translateX(-50%) translateY(-4px)}15%{opacity:1;transform:translateX(-50%) translateY(0)}80%{opacity:1}100%{opacity:0}}
+@keyframes navSpring{0%{transform:scale(1)}35%{transform:scale(0.78)}65%{transform:scale(1.18)}82%{transform:scale(0.95)}100%{transform:scale(1)}}
+@keyframes marianoSlide{0%{transform:translateX(200px);opacity:0}30%{transform:translateX(0);opacity:1}70%{transform:translateX(0);opacity:1}100%{transform:translateX(200px);opacity:0}}
+@keyframes metersFloat{0%{transform:translateY(0);opacity:0}30%{opacity:1}70%{opacity:1}100%{transform:translateY(-40px);opacity:0}}
+.fade-in{animation:fadeIn 0.4s ease both}
+
+/* ── Botones base ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 28px;border-radius:14px;border:none;cursor:pointer;font-family:inherit;font-size:0.88rem;font-weight:700;transition:all 0.2s;letter-spacing:0.3px}
+.btn:active{transform:scale(0.96)}
+.btn-primary{background:var(--lvl-bold);color:#fff;box-shadow:0 4px 14px rgba(0,0,0,0.15)}
+.btn-outline{background:transparent;border:2px solid var(--border);color:var(--text-soft)}
+.btn-block{width:100%}
+
+/* ══════════════════════════════════════
+   GAMIFICACIÓN — Mariano overlay
+   ══════════════════════════════════════ */
+.mariano-overlay{
+  position:fixed;top:0;right:0;bottom:0;width:100%;
+  pointer-events:none;z-index:90;
+  display:flex;align-items:center;justify-content:flex-end;padding-right:20px;
+}
+.mariano-slide{width:182px;height:auto;animation:marianoSlide 2.5s ease-in-out}
+.meters-float{
+  position:absolute;top:50%;right:220px;
+  font-size:1rem;font-weight:800;color:var(--green);
+  text-shadow:0 2px 8px rgba(52,168,83,0.4);
+  animation:metersFloat 2.5s ease-out;
+}
+.meters-float .extra-badge{
+  display:block;font-size:0.58rem;font-weight:800;
+  letter-spacing:1.5px;text-transform:uppercase;
+  color:#FFD700;text-shadow:0 1px 6px rgba(255,215,0,0.5);margin-bottom:2px;
+}
+
+/* ══════════════════════════════════════
+   APP NAV
+   ══════════════════════════════════════ */
+.app-nav{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);
+  width:100%;max-width:480px;z-index:250;
+  background:var(--bg);border-top:1px solid var(--border);
+  display:flex;align-items:stretch;
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+.app-nav.visible{transform:translateX(-50%) translateY(0)}
+.app-nav-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:4px;padding:10px 4px 12px;
+  background:none;border:none;cursor:pointer;font-family:inherit;
+  text-decoration:none;color:var(--text-dim);
+  transition:color 0.2s;-webkit-tap-highlight-color:transparent;
+}
+.app-nav-item.active{color:var(--lvl-bold)}
+.app-nav-item[disabled]{cursor:default;opacity:1}
+.app-nav-item.tapped .app-nav-icon{animation:navSpring 0.38s cubic-bezier(0.34,1.72,0.64,1) both}
+.app-nav-item.tapped{color:var(--lvl-bold)}
+.app-nav-icon{width:24px;height:24px;position:relative;display:flex;align-items:center;justify-content:center}
+.app-nav-item.active .app-nav-icon::before{content:'';position:absolute;inset:-5px;background:rgba(255,122,0,0.12);border-radius:10px}
+.app-nav-label{font-size:0.6rem;font-weight:600;letter-spacing:0.4px;text-transform:uppercase}
+
+/* ══════════════════════════════════════
+   CELEBRACIÓN
+   ══════════════════════════════════════ */
+.celebration-screen{text-align:center;padding:40px 24px;min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.maria-placeholder{
+  width:160px;height:160px;border-radius:50%;margin:0 auto 24px;
+  background:linear-gradient(135deg,var(--lvl-ultra),var(--lvl-light));
+  border:4px solid var(--lvl-soft);
+  display:flex;align-items:center;justify-content:center;
+  font-size:3.5rem;box-shadow:0 8px 32px var(--shadow);
+}
+.celebration-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.9rem;font-weight:600;margin-bottom:8px;line-height:1.15}
+.celebration-sub{font-size:0.88rem;color:var(--text-soft);margin-bottom:24px;line-height:1.7;max-width:300px}
+
+/* ══════════════════════════════════════
+   PANTALLAS INTERMEDIAS (prefs, modal inicio)
+   ══════════════════════════════════════ */
+#scr-prefs.active,#scr-modal-inicio.active{
+  display:flex;flex-direction:column;
+  min-height:100dvh;background:var(--bg);
+}
+.prefs-wrap{
+  display:flex;flex-direction:column;
+  padding:32px 24px;gap:0;
+  max-width:420px;width:100%;margin:0 auto;
+  flex:1;
+}
+.prefs-header{text-align:center;margin-bottom:32px}
+.prefs-icon{font-size:40px;margin-bottom:12px}
+.prefs-title{font-size:20px;font-weight:800;color:var(--text);margin-bottom:6px}
+.prefs-sub{font-size:13px;color:var(--text-dim)}
+.prefs-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 0;border-bottom:1px solid var(--border);gap:16px;
+}
+.prefs-label{font-size:14px;font-weight:600;color:var(--text);flex:1}
+.prefs-label small{display:block;font-size:11px;color:var(--text-dim);font-weight:400;margin-top:2px}
+.lang-select{display:flex;gap:6px}
+.lang-btn{
+  padding:6px 14px;border-radius:20px;
+  border:1px solid var(--border);background:transparent;
+  color:var(--text-soft);font-size:12px;font-weight:700;
+  cursor:pointer;font-family:inherit;
+}
+.lang-btn.active{background:var(--lvl-bold);border-color:var(--lvl-bold);color:#fff}
+.prefs-toggle{
+  width:44px;height:24px;border-radius:12px;
+  background:var(--border);position:relative;
+  cursor:pointer;flex-shrink:0;transition:background 0.2s;
+}
+.prefs-toggle.on{background:var(--lvl-bold)}
+.toggle-knob{
+  width:20px;height:20px;border-radius:50%;background:#fff;
+  position:absolute;top:2px;left:2px;transition:left 0.2s;
+}
+.prefs-toggle.on .toggle-knob{left:22px}
+.btn-prefs-start{
+  margin-top:32px;width:100%;padding:16px;border-radius:14px;
+  border:none;background:var(--lvl-bold);color:#fff;
+  font-family:inherit;font-size:16px;font-weight:800;
+  cursor:pointer;letter-spacing:0.5px;transition:all 0.2s;
+}
+.btn-prefs-start:active{transform:scale(0.97)}
+
+.modal-inicio-wrap{
+  display:flex;align-items:center;justify-content:center;
+  padding:32px 24px;flex:1;
+}
+.modal-inicio-box{
+  background:var(--card);border-radius:18px;
+  border:1px solid var(--border);
+  padding:28px 24px;width:100%;max-width:340px;text-align:center;
+}
+.modal-inicio-title{font-size:18px;font-weight:800;color:var(--text);margin-bottom:10px}
+.modal-inicio-sub{font-size:14px;color:var(--text-soft);line-height:1.6;margin-bottom:24px}
+.modal-btn-primary{
+  display:block;width:100%;padding:14px;border-radius:12px;
+  border:none;background:var(--lvl-bold);color:#fff;
+  font-family:inherit;font-size:14px;font-weight:700;
+  cursor:pointer;margin-bottom:10px;transition:all 0.2s;
+}
+.modal-btn-secondary{
+  display:block;width:100%;padding:14px;border-radius:12px;
+  border:1px solid var(--border);background:transparent;
+  color:var(--text-soft);font-family:inherit;
+  font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;
+}
+.modal-btn-primary:active,.modal-btn-secondary:active{transform:scale(0.97)}
+
+/* ══════════════════════════════════════
+   HERO — igual que orar.html
+   ══════════════════════════════════════ */
+.misterio-hero{flex:1;min-height:0;position:relative;overflow:hidden;background:#1A1714}
+.misterio-hero-img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block}
+.hero-placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0.18}
+.misterio-hero-grad{
+  position:absolute;bottom:0;left:0;right:0;height:55%;
+  background:linear-gradient(to top,rgba(0,0,0,0.82) 0%,rgba(0,0,0,0.60) 30%,rgba(0,0,0,0.25) 60%,transparent 100%);
+  pointer-events:none;z-index:2;
+}
+.misterio-hero-text{position:absolute;bottom:16px;left:18px;right:100px;z-index:3;pointer-events:none}
+.misterio-bloque-label{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--lvl-bold);margin-bottom:4px}
+.misterio-titulo{font-family:'Cormorant Garamond',Georgia,serif;font-size:2rem;font-weight:600;color:#fff;line-height:1.15;text-shadow:0 2px 12px rgba(0,0,0,0.5);margin-bottom:4px}
+.misterio-subtitulo{font-family:'Cormorant Garamond',Georgia,serif;font-size:1rem;font-style:italic;color:rgba(255,255,255,0.75);text-shadow:0 1px 6px rgba(0,0,0,0.5)}
+.hero-btn{
+  position:absolute;top:14px;width:43px;height:43px;border-radius:50%;
+  background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.18);
+  display:flex;align-items:center;justify-content:center;
+  color:rgba(230,222,211,0.85);cursor:pointer;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  -webkit-tap-highlight-color:transparent;transition:background 0.2s;z-index:4;
+  touch-action:manipulation;
+}
+.hero-btn svg{width:19px;height:19px}
+.hero-btn:active{background:rgba(0,0,0,0.55)}
+.hero-btn-left{left:14px}
+.hero-btn-right{right:14px}
+
+/* ── Cuentas del Rosario ── */
+.beads-col{
+  position:absolute;right:14px;top:50%;transform:translateY(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:6px;z-index:5;
+}
+.bead{
+  width:20px;height:20px;border-radius:50%;
+  border:1.5px solid rgba(255,255,255,0.25);
+  background:transparent;
+  transition:background 0.15s,border-color 0.15s;
+}
+.bead.lit{background:var(--lvl-bold);border-color:var(--lvl-bold)}
+.beads-col-label{font-size:9px;font-weight:700;color:rgba(255,255,255,0.35);letter-spacing:0.8px;margin-top:2px}
+
+/* ── Barra de progreso (no scrubable) ── */
+.progress-bar-wrap{height:3px;background:var(--border)}
+.progress-bar-fill{height:100%;background:var(--lvl-bold);width:0%;transition:width 0.2s linear}
+
+/* ── Tira de playlist ── */
+.playlist-strip{
+  display:flex;gap:0;overflow-x:auto;
+  padding:6px 14px;background:var(--sec-bg);
+  border-bottom:1px solid var(--border);
+  scrollbar-width:none;
+}
+.playlist-strip::-webkit-scrollbar{display:none}
+.pl-item{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;opacity:0.4;min-width:32px}
+.pl-item.active{opacity:1}
+.pl-item.done{opacity:0.65}
+.pl-dot{width:7px;height:7px;border-radius:50%;background:var(--border)}
+.pl-item.active .pl-dot{background:var(--lvl-bold)}
+.pl-item.done .pl-dot{background:#34A853}
+.pl-lbl{font-size:9px;color:var(--text-dim);text-align:center;white-space:nowrap}
+.pl-item.active .pl-lbl{color:var(--lvl-bold);font-weight:700}
+
+/* ── Toolbar inferior ── */
+.tools-bar{
+  display:flex;align-items:center;
+  padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));
+  background:var(--card);border-top:1px solid var(--border);gap:4px;
+  flex-shrink:0;
+}
+.tool-group{display:flex;gap:6px;flex:1}
+.tool-group.right{justify-content:flex-end}
+.tool-btn{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:8px 10px;border-radius:12px;border:1px solid var(--border);
+  background:var(--card);font-size:9px;font-weight:700;
+  color:var(--text-dim);cursor:pointer;min-width:52px;
+  letter-spacing:0.4px;font-family:inherit;
+  -webkit-tap-highlight-color:transparent;transition:all 0.2s;
+}
+.tool-btn:active{transform:scale(0.94)}
+.tool-btn.active{border-color:var(--lvl-soft);background:var(--lvl-ultra);color:var(--lvl-bold)}
+.play-btn-wrap{flex:0 0 auto;padding:0 6px}
+.play-btn{
+  width:58px;height:58px;border-radius:50%;
+  background:var(--lvl-bold);border:none;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+  transition:transform 0.15s,opacity 0.15s;
+}
+.play-btn:active{transform:scale(0.92)}
+.play-inner{
+  width:0;height:0;border-style:solid;
+  border-width:11px 0 11px 20px;
+  border-color:transparent transparent transparent #fff;
+  margin-left:4px;
+}
+.pause-inner{display:flex;gap:5px;align-items:center}
+.pause-inner div{width:5px;height:18px;background:#fff;border-radius:2px}
+
+/* ══════════════════════════════════════
+   POPUP — Bottom sheet (igual que orar.html)
+   ══════════════════════════════════════ */
+.tool-popup{
+  position:absolute;bottom:0;left:0;right:0;
+  background:var(--card);border-radius:18px 18px 0 0;
+  border-top:1px solid var(--border);
+  transform:translateY(100%);
+  transition:transform 0.3s ease;
+  z-index:20;max-height:70vh;display:flex;flex-direction:column;
+}
+.tool-popup.open{transform:translateY(0)}
+.tool-popup-header{
+  display:flex;align-items:center;padding:12px 16px 10px;gap:10px;
+  border-bottom:1px solid var(--border);flex-shrink:0;position:relative;
+}
+.popup-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--lvl-bold);flex:1}
+.popup-close-btn,
+.popup-close{
+  width:28px;height:28px;border-radius:50%;
+  border:1px solid var(--border);background:transparent;
+  color:var(--text-dim);font-size:12px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  -webkit-tap-highlight-color:transparent;flex-shrink:0;
+}
+.popup-close-btn:active,.popup-close:active{background:var(--sec-bg)}
+.tool-popup-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;color:var(--text)}
+.popup-text{font-size:15px;line-height:1.85;color:var(--text-soft)}
+.popup-reference{font-size:12px;font-weight:700;color:var(--lvl-bold);letter-spacing:0.3px;margin-bottom:12px}
+.popup-lyrics{white-space:pre-line;font-family:'Crimson Pro',Georgia,serif;font-size:1.1rem;line-height:1.7;font-style:italic;color:var(--text)}
+
+/* ── Audio mini-player en contemplar ── */
+.popup-audio-row{display:flex;align-items:center;gap:10px;padding:10px 0 14px;border-bottom:1px solid var(--border);margin-bottom:14px}
+.popup-play-btn{width:36px;height:36px;border-radius:50%;border:none;background:var(--lvl-bold);color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.popup-play-btn:active{opacity:0.8}
+.popup-audio-bar{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.popup-audio-fill{height:100%;background:var(--lvl-bold);width:0%;transition:width 0.2s linear}
+
+/* ── Preguntas de meditación (med-*) ── */
+.med-label-row{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+.med-dot{width:7px;height:7px;border-radius:50%}
+.med-label-text{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.8px}
+.med-question{font-size:15px;line-height:1.6;color:var(--text);margin-bottom:8px}
+.med-textarea{width:100%;min-height:80px;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-family:inherit;font-size:14px;resize:none;margin-bottom:20px}
+.med-textarea:focus{outline:none;border-color:var(--lvl-soft)}
+.q-block{margin-bottom:28px}
+.q-label{font-size:0.66rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
+.q-question{font-family:'Crimson Pro',Georgia,serif;font-size:1.2rem;font-weight:500;line-height:1.7;color:var(--text-soft);font-style:italic;margin-bottom:12px}
+.q-textarea{width:100%;min-height:110px;max-height:35vh;resize:vertical;overflow-y:auto;padding:14px;background:var(--sec-bg);border:1.5px solid var(--border);border-radius:12px;color:var(--text);font-family:'Crimson Pro',Georgia,serif;font-size:1.1rem;line-height:1.7}
+.q-textarea:focus{border-color:var(--lvl-soft);outline:none}
+.q-saved{font-size:0.72rem;color:var(--green);margin-top:5px;min-height:26px}
+.amen-btn{display:block;width:100%;margin-top:24px;padding:18px;border-radius:16px;border:none;cursor:pointer;font-family:'Cormorant Garamond',Georgia,serif;font-size:1.4rem;font-weight:600;background:var(--lvl-bold);color:#fff;letter-spacing:1px;transition:all 0.2s}
+.amen-btn:active{transform:scale(0.96)}
+
+/* ── Letanías / Final ── */
+.final-screen{padding:24px 20px 100px;overflow-y:auto;flex:1}
+.final-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.5rem;font-weight:600;color:var(--lvl-bold);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.final-track-indicator{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:12px}
+
+/* ── Modal de salida ── */
+.exit-modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.65);
+  display:none;align-items:center;justify-content:center;
+  z-index:100;padding:24px;
+}
+.exit-modal-overlay.open{display:flex}
+.exit-modal-box{
+  background:var(--card);border-radius:20px;
+  border:1px solid var(--border);
+  padding:28px 24px;width:100%;max-width:320px;text-align:center;
+}
+.exit-title{font-size:1rem;font-weight:700;margin-bottom:6px}
+.exit-sub{font-size:0.82rem;color:var(--text-soft);line-height:1.6;margin-bottom:20px}
+.exit-btn-cancel{
+  flex:1;padding:12px;border-radius:12px;border:1.5px solid var(--border);
+  background:transparent;font-family:inherit;font-size:0.85rem;font-weight:600;
+  color:var(--text-soft);cursor:pointer;transition:all 0.2s;
+}
+.exit-btn-confirm{
+  flex:1;padding:12px;border-radius:12px;border:none;
+  background:#C0392B;font-family:inherit;font-size:0.85rem;font-weight:600;
+  color:#fff;cursor:pointer;transition:all 0.2s;
+}
+.exit-btn-confirm:active,.exit-btn-cancel:active{transform:scale(0.96)}
+.exit-modal-title{font-size:18px;font-weight:800;color:var(--text);margin-bottom:8px}
+.exit-modal-sub{font-size:14px;color:var(--text-soft);line-height:1.6;margin-bottom:22px}
+.exit-modal-btns{display:flex;gap:10px}
+.mode-toggle-btn{
+  position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:6;
+  padding:4px 12px;border-radius:16px;
+  background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.2);
+  color:rgba(255,255,255,0.75);font-size:11px;font-weight:700;
+  text-decoration:none;letter-spacing:0.4px;
+}
+
+/* ── Fila de 5 puntos de misterio ── */
+.mystery-dots-row{display:flex;justify-content:center;gap:10px;padding:8px 16px 4px;background:var(--card)}
+.mystery-dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:background 0.2s}
+.mystery-dot.done{background:#34A853}
+.mystery-dot.active{background:var(--lvl-bold)}
+
+/* ── Handle del popup ── */
+.popup-handle{width:36px;height:4px;border-radius:2px;background:var(--border);margin:0 auto 2px}
+/* alias para popup-close (desde prompt Bloque 3) */
+.popup-close{background:none;border:none;cursor:pointer;color:var(--text-dim);font-size:1rem;padding:4px 8px;-webkit-tap-highlight-color:transparent}
+
+/* ── scr-letanias / layout final ── */
+#scr-letanias.active{display:flex;flex-direction:column;height:100dvh;overflow:hidden}
+.final-layout-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
+.final-layout-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px 12px;border-bottom:1px solid var(--border);
+  background:var(--card);flex-shrink:0;
+}
+.final-layout-title{font-size:16px;font-weight:800;color:var(--lvl-bold)}
+.play-btn-sm{width:42px;height:42px;border-radius:50%}
+.final-layout-text{
+  flex:1;overflow-y:auto;padding:20px;
+  font-size:16px;line-height:2;color:var(--text-soft);
+  -webkit-overflow-scrolling:touch;
+}
+
+/* ── Dev-nav (eliminar en producción) ── */
+#dev-nav{display:flex;justify-content:space-between;padding:6px 14px;background:var(--card);border-bottom:1px solid var(--border)}
+#dev-nav button{padding:4px 10px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text-dim);font-size:11px;cursor:pointer;font-family:inherit}
+#dev-nav button:active{background:var(--sec-bg)}
+
+@media(max-width:380px){html{font-size:16px}}
+</style>
+</head>
+<body class="dark">
+<div class="shell" id="app">
+
+  <!-- Overlay Mariano (gamificación) -->
+  <div id="mariano-overlay" class="mariano-overlay" style="display:none">
+    <img id="mariano-slide-img" class="mariano-slide" src="" alt="Mariano">
+    <div id="meters-float-text" class="meters-float"></div>
+  </div>
+
+  <!-- Modal de salida -->
+  <div id="exit-modal" class="exit-modal-overlay">
+    <div class="exit-modal-box">
+      <div style="font-size:32px;margin-bottom:12px">⏸</div>
+      <div class="exit-modal-title">Sesión en curso</div>
+      <div class="exit-modal-sub">
+        ¿Deseas salir? Perderás el progreso<br>de esta sesión.
+      </div>
+      <div class="exit-modal-btns">
+        <button class="exit-btn-cancel"  onclick="window._exitCancel()">Seguir rezando</button>
+        <button class="exit-btn-confirm" onclick="window._exitConfirm()">Salir</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PANTALLA: LOADING ═══ -->
+  <div class="screen active" id="scr-loading">
+    <div class="loading-screen">
+      <div class="spinner"></div>
+      <p style="font-size:0.88rem;color:var(--text-dim)">Preparando el Rosario…</p>
+    </div>
+  </div>
+
+  <!-- ═══ PANTALLA: ERROR ═══ -->
+  <div class="screen" id="scr-error">
+    <div class="error-screen">
+      <div style="font-size:3rem;margin-bottom:16px">📿</div>
+      <h2 style="font-size:1.1rem;margin-bottom:8px">No se encontró el nivel</h2>
+      <p id="error-msg" style="font-size:0.82rem;color:var(--text-dim);margin-bottom:20px"></p>
+      <a href="orar.html?c=0101" class="btn btn-primary">Volver a Orar</a>
+    </div>
+  </div>
+
+  <!-- ═══ PANTALLA: PREFERENCIAS ═══ -->
+  <div class="screen" id="scr-prefs">
+    <div class="prefs-wrap">
+
+      <div class="prefs-header">
+        <div class="prefs-icon">📿</div>
+        <div class="prefs-title">Preferencias de Rezo</div>
+        <p class="prefs-sub">Puedes cambiarlas después en Ajustes</p>
+      </div>
+
+      <!-- Idioma -->
+      <div class="prefs-row">
+        <div class="prefs-label">
+          Idioma del Rosario
+          <small>Oraciones vocales</small>
+        </div>
+        <div class="lang-select">
+          <button id="btn-lang-es" class="lang-btn active"
+                  onclick="window.setLang('espanol')">Español</button>
+          <button id="btn-lang-la" class="lang-btn"
+                  onclick="window.setLang('latin')">Latín</button>
+        </div>
+      </div>
+
+      <!-- Cantos -->
+      <div class="prefs-row">
+        <div class="prefs-label">
+          Cantos entre Misterios
+          <small>Al finalizar cada Misterio</small>
+        </div>
+        <div id="toggle-cantos" class="prefs-toggle on"
+             onclick="window.togglePref('cantos')">
+          <div class="toggle-knob"></div>
+        </div>
+      </div>
+
+      <!-- Letanías -->
+      <div class="prefs-row">
+        <div class="prefs-label">
+          Letanías al final
+          <small>Letanías · Salve · Oración conclusiva</small>
+        </div>
+        <div id="toggle-letanias" class="prefs-toggle"
+             onclick="window.togglePref('letanias')">
+          <div class="toggle-knob"></div>
+        </div>
+      </div>
+
+      <button class="btn-prefs-start" onclick="window.onPrefsStart()">
+        Comenzar el Rosario
+      </button>
+
+    </div>
+  </div>
+
+  <!-- ═══ PANTALLA: MODAL DE INICIO ═══ -->
+  <div class="screen" id="scr-modal-inicio">
+    <div class="modal-inicio-wrap">
+      <div class="modal-inicio-box">
+        <div style="font-size:32px;margin-bottom:12px">📿</div>
+        <div class="modal-inicio-title">Iniciar sesión de Rezo</div>
+        <p class="modal-inicio-sub">
+          Estás en el Misterio <strong id="modal-m-num"></strong> de 5.
+          ¿Desde dónde quieres comenzar?
+        </p>
+        <button class="modal-btn-primary" onclick="window._rezarDesdeAqui()">
+          Rezar desde aquí
+          (M<span id="modal-desde"></span>–M5)
+        </button>
+        <button class="modal-btn-secondary" onclick="window._rezarDesdeInicio()">
+          Rezar desde el inicio (M1–M5)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PANTALLA: SESIÓN PRINCIPAL ═══ -->
+  <div class="screen" id="scr-rezar">
+
+    <!-- ── Zona A: Hero + Popup ── -->
+    <div class="misterio-hero" id="misterio-hero">
+      <img class="misterio-hero-img" id="hero-img" src="" alt="">
+      <div class="hero-placeholder" id="hero-ph" style="display:none">
+        <svg viewBox="0 0 100 100" width="64" height="64" fill="none">
+          <rect x="46" y="5" width="8" height="90" fill="rgba(230,222,211,0.3)"/>
+          <rect x="5" y="42" width="90" height="8" fill="rgba(230,222,211,0.3)"/>
+        </svg>
+      </div>
+      <div class="misterio-hero-grad" id="hero-grad"></div>
+      <div class="misterio-hero-text">
+        <div class="misterio-bloque-label" id="hero-bloque-label"></div>
+        <div class="misterio-titulo"       id="hero-titulo"></div>
+        <div class="misterio-subtitulo"    id="hero-subtitulo"></div>
+      </div>
+
+      <!-- Toggle modo Rezar/Orar -->
+      <a id="tab-toggle-orar" class="mode-toggle-btn" href="orar.html">📖 Libro</a>
+
+      <!-- Botón tema (dark/light) -->
+      <button class="hero-btn hero-btn-left" id="btn-theme" title="Tema" onclick="window.toggleTheme()">
+        <svg id="theme-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg id="theme-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      </button>
+
+      <!-- Botón ajustes (prefs) -->
+      <button class="hero-btn hero-btn-right" id="btn-settings" title="Ajustes" onclick="window._openPrefs()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+        </svg>
+      </button>
+
+      <!-- Columna de 10 cuentas -->
+      <div class="beads-col" id="beads-col">
+        <div class="beads-col-label">CONTAR</div>
+      </div>
+
+      <!-- Popup bottom sheet -->
+      <div class="tool-popup" id="tool-popup">
+        <div class="tool-popup-header">
+          <div class="popup-handle"></div>
+          <span class="popup-title" id="popup-title"></span>
+          <button class="popup-close" id="popup-close" onclick="window.closeToolPopup()">✕</button>
+        </div>
+        <div class="tool-popup-body" id="tool-popup-body"></div>
+      </div>
+    </div><!-- /misterio-hero -->
+
+    <!-- ── Barra de progreso del track ── -->
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-fill"></div>
+    </div>
+
+    <!-- ── 5 puntos de misterio ── -->
+    <div class="mystery-dots-row" id="mystery-dots-row"></div>
+
+    <!-- ── Tira de playlist ── -->
+    <div class="playlist-strip" id="playlist-strip"></div>
+
+    <!-- ── Dev-nav TESTING — eliminar en producción ── -->
+    <div id="dev-nav">
+      <button onclick="window._devPrev()">← M anterior</button>
+      <span style="font-size:11px;color:var(--text-dim)">⚠ testing nav</span>
+      <button onclick="window._devNext()">M siguiente →</button>
+    </div>
+
+    <!-- ── Toolbar inferior ── -->
+    <div class="tools-bar" id="tools-bar">
+      <div class="tool-group">
+        <button class="tool-btn" id="tbtn-biblia" data-tool="biblia" onclick="window.openTool('biblia')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/>
+          </svg>
+          <span>Biblia</span>
+        </button>
+        <button class="tool-btn" id="tbtn-contemplar" data-tool="contemplar" onclick="window.openTool('contemplar')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+          </svg>
+          <span>Contemplar</span>
+        </button>
+      </div>
+
+      <div class="play-btn-wrap">
+        <button class="play-btn" id="btn-play-pause" onclick="window.togglePlay()">
+          <div class="play-inner"></div>
+        </button>
+      </div>
+
+      <div class="tool-group right">
+        <button class="tool-btn" id="tbtn-escribir" data-tool="escribir" onclick="window.openTool('escribir')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+          <span>Escribir</span>
+        </button>
+        <button class="tool-btn" id="btn-contar" onclick="window.countBead()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/>
+          </svg>
+          <span>Contar</span>
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /scr-rezar -->
+
+  <!-- ═══ PANTALLA: LETANÍAS / FINAL ═══ -->
+  <div class="screen" id="scr-letanias">
+    <div class="final-layout-wrap">
+      <div class="final-layout-header">
+        <div class="final-layout-title" id="final-layout-title"></div>
+        <button class="play-btn play-btn-sm" id="btn-play-pause-final" onclick="window.togglePlay()">
+          <div class="play-inner" id="play-icon-final"></div>
+        </button>
+      </div>
+      <div class="final-layout-text popup-lyrics" id="final-layout-text"></div>
+    </div>
+  </div>
+
+  <!-- ═══ PANTALLA: CELEBRACIÓN ═══ -->
+  <div class="screen" id="scr-celebration">
+    <div class="celebration-screen fade-in">
+      <div class="maria-placeholder">🙏</div>
+      <h2 class="celebration-title" id="celeb-title"></h2>
+      <p class="celebration-sub" id="celeb-sub"></p>
+      <button class="btn btn-primary btn-block" id="btn-celeb-home">Regresar a Orar</button>
+    </div>
+  </div>
+
+  <!-- ═══ APP NAV (swipe up) ═══ -->
+  <nav class="app-nav" id="app-nav">
+    <button class="app-nav-item" onclick="window._safeGoTo('index.html');navTap(this)">
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+      </div>
+      <span class="app-nav-label">Inicio</span>
+    </button>
+    <button class="app-nav-item" onclick="window._safeGoTo('orar.html');navTap(this)">
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="2" x2="12" y2="22"/><line x1="4" y1="9" x2="20" y2="9"/>
+        </svg>
+      </div>
+      <span class="app-nav-label">Orar</span>
+    </button>
+    <button class="app-nav-item" id="nav-audio-tab" onclick="window._safeGoTo('audio.html');navTap(this)">
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
+          <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/>
+          <path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+        </svg>
+      </div>
+      <span class="app-nav-label">Audio</span>
+    </button>
+    <button class="app-nav-item active" disabled>
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 12V9.5a2.5 2.5 0 015 0V12"/>
+          <path d="M9 10.5a2.5 2.5 0 015 0V13"/>
+          <path d="M14 11.5a2.5 2.5 0 015 0V15"/>
+          <path d="M4 14c0 3 2 5.5 5.5 7h5c3.5-1.5 5.5-4 5.5-7"/>
+        </svg>
+      </div>
+      <span class="app-nav-label">Rezar</span>
+    </button>
+    <button class="app-nav-item" onclick="window._safeGoTo('diario.html');navTap(this)">
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/>
+          <path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/>
+        </svg>
+      </div>
+      <span class="app-nav-label">Diario</span>
+    </button>
+  </nav>
+
+</div><!-- /shell -->
+
+<script>
+(function(){
+'use strict';
+
+/*
+ * rezar.html — Modo Rezo del Santo Rosario
+ *
+ * ANTES DE PRODUCCIÓN:
+ * [ ] Eliminar #dev-nav y sus funciones _devPrev / _devNext
+ * [ ] Subir audios globales al bucket R2/global/:
+ *       INICIO.mp3, MA.mp3, MB.mp3
+ *       LETANIAS.mp3, SALVE.mp3, ORACION_FINAL.mp3
+ *       L_INICIO.mp3, L_MA.mp3, L_MB.mp3
+ *       L_LETANIAS.mp3, L_SALVE.mp3, L_ORACION_FINAL.mp3
+ * [ ] Subir sfx/bead_click.mp3 al bucket R2
+ * [ ] Completar TXT_LETANIAS con el texto completo de las Letanías
+ * [ ] Verificar que TXT_SALVE y TXT_ORACION_FINAL están completos
+ * [ ] Probar en iOS Safari (autoplay policy)
+ * [ ] Probar en Android Chrome
+ * [ ] Verificar que el toggle 📖 Libro apunta correctamente
+ *     al misterio activo en orar.html
+ */
+
+/* ─── CONSTANTES ─── */
+const R2   = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev';
+const IMGB = 'https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev/';
+const MUSB = 'https://pub-faed94e375aa443e846e07f81ef93274.r2.dev/';
+
+const BLOCKS = ['gozosos','luminosos','dolorosos','gloriosos'];
+const BN  = {gozosos:'Gozosos',luminosos:'Luminosos',dolorosos:'Dolorosos',gloriosos:'Gloriosos'};
+const BFN = {gozosos:'Misterios Gozosos',luminosos:'Misterios Luminosos',dolorosos:'Misterios Dolorosos',gloriosos:'Misterios Gloriosos'};
+const BEM = {gozosos:'🌟',luminosos:'✨',dolorosos:'✝️',gloriosos:'👑'};
+const BCL = {gozosos:'#E8A0A0',luminosos:'#01BBE1',dolorosos:'#C0392B',gloriosos:'#D4A017'};
+const BCL_RGB = {gozosos:'232,160,160',luminosos:'1,187,225',dolorosos:'192,57,43',gloriosos:'212,160,23'};
+const BFM = {gozosos:1,luminosos:6,dolorosos:11,gloriosos:16};
+const TBG = {gozosos:'rgba(232,160,160,0.18)',luminosos:'rgba(1,187,225,0.15)',dolorosos:'rgba(192,57,43,0.15)',gloriosos:'rgba(212,160,23,0.15)'};
+const QL  = ['Por María hacia Jesús:','Desde el Hijo hacia el Padre:','Hijos y hermanos en el Espíritu:'];
+const QC  = ['#FF7A00','#C0392B','#27AE60'];
+const MR_REZO = 400;
+const MR_QF   = 650;
+const MR_QU   = 325;
+const MR_BNS  = 1000;
+
+const TXT_LETANIAS =
+`<b>Señor, ten piedad.</b> Señor, ten piedad.<br>
+<b>Cristo, ten piedad.</b> Cristo, ten piedad.<br>
+<b>Señor, ten piedad.</b> Señor, ten piedad.<br>
+<b>Cristo, óyenos.</b> Cristo, óyenos.<br>
+<b>Cristo, escúchanos.</b> Cristo, escúchanos.<br><br>
+<b>Dios, Padre celestial,</b> ten misericordia de nosotros.<br>
+<b>Dios, Hijo Redentor del mundo,</b> ten misericordia de nosotros.<br>
+<b>Dios, Espíritu Santo,</b> ten misericordia de nosotros.<br>
+<b>Santísima Trinidad, un solo Dios,</b> ten misericordia de nosotros.<br><br>
+<b>Santa María,</b> ruega por nosotros.<br>
+<b>Santa Madre de Dios,</b> ruega por nosotros.<br>
+<b>Santa Virgen de las vírgenes,</b> ruega por nosotros.<br>
+<b>Madre de Cristo,</b> ruega por nosotros.<br>
+<b>Madre de la Iglesia,</b> ruega por nosotros.<br>
+<b>Madre de la misericordia,</b> ruega por nosotros.<br>
+<b>Madre de la divina gracia,</b> ruega por nosotros.<br>
+<b>Madre de la esperanza,</b> ruega por nosotros.<br>
+<b>Madre purísima,</b> ruega por nosotros.<br>
+<b>Madre castísima,</b> ruega por nosotros.<br>
+<b>Madre inviolada,</b> ruega por nosotros.<br>
+<b>Madre inmaculada,</b> ruega por nosotros.<br>
+<b>Madre amable,</b> ruega por nosotros.<br>
+<b>Madre admirable,</b> ruega por nosotros.<br>
+<b>Madre del buen consejo,</b> ruega por nosotros.<br>
+<b>Madre del Creador,</b> ruega por nosotros.<br>
+<b>Madre del Salvador,</b> ruega por nosotros.<br>
+<b>Virgen prudentísima,</b> ruega por nosotros.<br>
+<b>Virgen digna de veneración,</b> ruega por nosotros.<br>
+<b>Virgen digna de alabanza,</b> ruega por nosotros.<br>
+<b>Virgen poderosa,</b> ruega por nosotros.<br>
+<b>Virgen clemente,</b> ruega por nosotros.<br>
+<b>Virgen fiel,</b> ruega por nosotros.<br>
+<b>Espejo de justicia,</b> ruega por nosotros.<br>
+<b>Trono de la Sabiduría,</b> ruega por nosotros.<br>
+<b>Causa de nuestra alegría,</b> ruega por nosotros.<br>
+<b>Vas espiritual,</b> ruega por nosotros.<br>
+<b>Vas honorable,</b> ruega por nosotros.<br>
+<b>Vas insigne de devoción,</b> ruega por nosotros.<br>
+<b>Rosa mística,</b> ruega por nosotros.<br>
+<b>Torre de David,</b> ruega por nosotros.<br>
+<b>Torre de marfil,</b> ruega por nosotros.<br>
+<b>Casa de oro,</b> ruega por nosotros.<br>
+<b>Arca de la Alianza,</b> ruega por nosotros.<br>
+<b>Puerta del cielo,</b> ruega por nosotros.<br>
+<b>Estrella de la mañana,</b> ruega por nosotros.<br>
+<b>Salud de los enfermos,</b> ruega por nosotros.<br>
+<b>Refugio de los pecadores,</b> ruega por nosotros.<br>
+<b>Consoladora de los afligidos,</b> ruega por nosotros.<br>
+<b>Auxilio de los cristianos,</b> ruega por nosotros.<br>
+<b>Reina de los Ángeles,</b> ruega por nosotros.<br>
+<b>Reina de los Patriarcas,</b> ruega por nosotros.<br>
+<b>Reina de los Profetas,</b> ruega por nosotros.<br>
+<b>Reina de los Apóstoles,</b> ruega por nosotros.<br>
+<b>Reina de los Mártires,</b> ruega por nosotros.<br>
+<b>Reina de los Confesores,</b> ruega por nosotros.<br>
+<b>Reina de las Vírgenes,</b> ruega por nosotros.<br>
+<b>Reina de todos los Santos,</b> ruega por nosotros.<br>
+<b>Reina concebida sin pecado original,</b> ruega por nosotros.<br>
+<b>Reina asunta al cielo,</b> ruega por nosotros.<br>
+<b>Reina del Santísimo Rosario,</b> ruega por nosotros.<br>
+<b>Reina de la familia,</b> ruega por nosotros.<br>
+<b>Reina de la paz,</b> ruega por nosotros.<br><br>
+<b>Cordero de Dios, que quitas el pecado del mundo,</b> perdónanos, Señor.<br>
+<b>Cordero de Dios, que quitas el pecado del mundo,</b> escúchanos, Señor.<br>
+<b>Cordero de Dios, que quitas el pecado del mundo,</b> ten misericordia de nosotros.<br><br>
+<i>Ruega por nosotros, Santa Madre de Dios,</i><br>
+<i>para que seamos dignos de alcanzar las promesas de Jesucristo. Amén.</i>`;
+
+const TXT_SALVE =
+`Dios te salve, Reina y Madre de misericordia,
+vida, dulzura y esperanza nuestra; Dios te salve.
+A ti llamamos los desterrados hijos de Eva;
+a ti suspiramos, gimiendo y llorando
+en este valle de lágrimas.
+Ea, pues, Señora, abogada nuestra,
+vuelve a nosotros esos tus ojos misericordiosos;
+y después de este destierro muéstranos a Jesús,
+fruto bendito de tu vientre.
+¡Oh clementísima, oh piadosa,
+oh dulce siempre Virgen María! Amén.`;
+
+const TXT_ORACION_FINAL =
+`Oh Dios, cuyo Hijo unigénito, con su vida,
+muerte y resurrección, nos obtuvo el premio
+de la salvación eterna, te rogamos que,
+meditando estos misterios del Santísimo Rosario
+de la Virgen María, imitemos lo que contienen
+y obtengamos lo que prometen.
+Por Jesucristo, nuestro Señor. Amén.`;
+
+/* ─── ESTADO ─── */
+let usr=null, data=null, prog={};
+let nivelId='0101', nivel=1, cua=1;
+let blk='gozosos', bIdx=0;
+let totalM=0;
+let playlist=[], plIdx=0;
+let rezarAudio=null, beadSfx=null;
+let beadCount=0;
+let currentTool=null;
+let pendingNav=null;
+let contAudio=null;
+let ans={0:'',1:'',2:''}, ansT={}, firstAns={0:false,1:false,2:false};
+
+/* ─── UTILS ─── */
+const $=id=>document.getElementById(id);
+const esc=s=>s?s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'):'';
+const mNum=(b,i)=>BFM[b]+i;
+const mData=(b,i)=>data?.misterios?.[b]?.[i]||null;
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el=$(id);if(el)el.classList.add('active');
+}
+function showLoading(){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const ld=$('scr-loading');if(ld)ld.classList.add('active');
+}
+function showError(msg){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const er=$('scr-error');
+  if(er){er.classList.add('active');const em=$('error-msg');if(em&&msg)em.textContent=msg;}
+}
+
+/* ─── THEME ─── */
+function initTheme(){applyTheme(localStorage.getItem('cruzando_theme')||'dark');}
+function applyTheme(t){
+  document.body.classList.toggle('dark',t==='dark');
+  document.body.classList.toggle('light',t!=='dark');
+  localStorage.setItem('cruzando_theme',t);
+  const sun=$('theme-sun'),moon=$('theme-moon');
+  if(sun)sun.style.display=t==='dark'?'':'none';
+  if(moon)moon.style.display=t==='dark'?'none':'';
+}
+function toggleTheme(){applyTheme(localStorage.getItem('cruzando_theme')==='dark'?'light':'dark');}
+window.toggleTheme=toggleTheme;
+
+/* ─── NAV ─── */
+function goTo(pg){
+  if(rezarAudio){rezarAudio.pause();rezarAudio.src='';}
+  location.href=location.origin+location.pathname.substring(0,location.pathname.lastIndexOf('/')+1)+pg;
+}
+window.goTo=goTo;
+
+function safeGoTo(pg){
+  if(rezarAudio&&!rezarAudio.paused){pendingNav=pg;showExitModal();}
+  else goTo(pg);
+}
+window.safeGoTo=safeGoTo;
+window._safeGoTo=safeGoTo;
+
+function showExitModal(){$('exit-modal').classList.add('open');}
+function hideExitModal(){$('exit-modal').classList.remove('open');pendingNav=null;}
+window._exitConfirm=function(){
+  if(rezarAudio)rezarAudio.pause();
+  const dest=pendingNav;
+  hideExitModal();
+  goTo(dest);
+};
+window._exitCancel=function(){
+  hideExitModal();
+  if(rezarAudio&&playlist.length>0){rezarAudio.play().catch(()=>{});updatePlayBtn();}
+};
+
+let _nc=0;
+function playNavChord(){
+  const CH=[[523,659,784],[659,784,988],[784,988,1175],[587,740,880]];
+  try{
+    const ac=new(window.AudioContext||window.webkitAudioContext)(),now=ac.currentTime,notes=CH[_nc++%4];
+    const mg=ac.createGain();mg.gain.setValueAtTime(0,now);mg.gain.linearRampToValueAtTime(0.07,now+0.018);mg.gain.exponentialRampToValueAtTime(0.001,now+0.4);mg.connect(ac.destination);
+    notes.forEach((f,j)=>{const o=ac.createOscillator(),g=ac.createGain();o.type=j?'triangle':'sine';o.frequency.value=f;g.gain.value=j?0.5:0.8;o.connect(g);g.connect(mg);o.start(now+j*0.012);o.stop(now+0.45);});
+  }catch(e){}
+}
+function navTap(el){if(window.CZSound)CZSound('navTap');playNavChord();el.classList.remove('tapped');void el.offsetWidth;el.classList.add('tapped');setTimeout(()=>el.classList.remove('tapped'),400);}
+window.navTap=navTap;
+
+function getMysteryBlock(n){
+  if(n<=5) return{block:'gozosos',  idx:n-1};
+  if(n<=10)return{block:'luminosos',idx:n-6};
+  if(n<=15)return{block:'dolorosos',idx:n-11};
+  return        {block:'gloriosos', idx:n-16};
+}
+
+/* ─── applyBlockAccent ─── */
+function applyBlockAccent(block){
+  const c=BCL[block]||BCL.gozosos,r=BCL_RGB[block]||BCL_RGB.gozosos;
+  const root=document.documentElement;
+  root.style.setProperty('--lvl-bold',c);
+  root.style.setProperty('--lvl-soft',c);
+  root.style.setProperty('--lvl-ultra',`rgba(${r},0.10)`);
+}
+
+/* ─── FIREBASE ─── */
+const FS=_db;
+const FSV=firebase.firestore.FieldValue;
+
+function _getTodayKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+
+async function addMeters(m){
+  totalM+=m;
+  const stored=parseInt(localStorage.getItem('cruzando_total_metros')||'0');
+  localStorage.setItem('cruzando_total_metros',stored+m);
+  const todayKey=_getTodayKey();
+  const _hist=JSON.parse(localStorage.getItem('cruzando_daily_hist')||'{}');
+  _hist[todayKey]=(_hist[todayKey]||0)+m;
+  localStorage.setItem('cruzando_daily_hist',JSON.stringify(_hist));
+  if(!usr)return;
+  try{await FS.collection('users').doc(usr.uid).update({totalMeters:FSV.increment(m)});}
+  catch(e){try{await FS.collection('users').doc(usr.uid).set({totalMeters:m},{merge:true});}catch(e2){}}
+  const dailyRef=FS.collection('users').doc(usr.uid).collection('dailyGoal').doc('data');
+  try{await dailyRef.update({[`historial.${todayKey}`]:FSV.increment(m)});}
+  catch(e){try{await dailyRef.set({historial:{[todayKey]:m}},{merge:true});}catch(e2){}}
+}
+
+/* ─── GAMIFICATION ─── */
+function showSlide(m,extra){
+  const ov=$('mariano-overlay'),img=$('mariano-slide-img'),fl=$('meters-float-text');
+  if(!ov)return;
+  img.src=IMGB+'mariano.webp';
+  fl.innerHTML=(extra?`<span class="extra-badge">${extra}</span>`:'')+`+${m}m`;
+  ov.style.display='flex';
+  setTimeout(()=>{ov.style.display='none';},2600);
+}
+
+/* ─── PREFS ─── */
+function rezarPrefs(){
+  try{return JSON.parse(localStorage.getItem('cruzando_rezar_prefs')||'{}');}
+  catch(e){return{};}
+}
+function saveRezarPrefs(p){
+  localStorage.setItem('cruzando_rezar_prefs',JSON.stringify(p));
+}
+function renderPrefs(){
+  const p=rezarPrefs();
+  const lang=p.idioma||'espanol';
+  const es=$('btn-lang-es'),la=$('btn-lang-la');
+  if(es)es.classList.toggle('active',lang==='espanol');
+  if(la)la.classList.toggle('active',lang==='latin');
+  const tc=$('toggle-cantos'),tl=$('toggle-letanias');
+  if(tc)tc.classList.toggle('on',p.cantos!==false);
+  if(tl)tl.classList.toggle('on',p.letanias===true);
+}
+window.setLang=function(lang){
+  const p=rezarPrefs();p.idioma=lang;saveRezarPrefs(p);renderPrefs();
+};
+window.togglePref=function(key){
+  const p=rezarPrefs();
+  if(key==='cantos')  p.cantos  =p.cantos===false?true:false;
+  if(key==='letanias')p.letanias=p.letanias===true?false:true;
+  saveRezarPrefs(p);renderPrefs();
+};
+window.onPrefsStart=function(){
+  const p=rezarPrefs();
+  if(!p.idioma){p.idioma='espanol';saveRezarPrefs(p);}
+  initSession();
+};
+window._openPrefs=function(){
+  renderPrefs();
+  show('scr-prefs');
+};
+
+/* ─── MODAL INICIO ─── */
+function showModalInicio(){
+  $('modal-m-num').textContent=bIdx+1;
+  $('modal-desde').textContent=bIdx+1;
+  show('scr-modal-inicio');
+}
+window._rezarDesdeAqui=function(){decideEntry();};
+window._rezarDesdeInicio=function(){bIdx=0;decideEntry();};
+
+/* ─── PARSE QUESTIONS ─── */
+function parseQ(text){
+  if(!text)return['','',''];
+  const out=[];let rem=text;
+  QL.forEach((lbl,i)=>{
+    const idx=rem.indexOf(lbl);
+    if(idx>=0){if(i>0)out.push(rem.substring(0,idx).trim());rem=rem.substring(idx+lbl.length).trim();}
+  });
+  out.push(rem.trim());
+  while(out.length<3)out.push('');
+  return out.slice(0,3);
+}
+
+/* ─── RENDER — BEADS ─── */
+function renderBeadsCol(){
+  const col=$('beads-col');
+  if(!col)return;
+  const label=col.querySelector('.beads-col-label');
+  col.innerHTML='';
+  for(let i=0;i<10;i++){
+    const d=document.createElement('div');
+    d.className='bead';
+    col.appendChild(d);
+  }
+  if(label)col.appendChild(label);
+}
+function resetBeads(){
+  beadCount=0;
+  document.querySelectorAll('#beads-col .bead').forEach(b=>b.classList.remove('lit'));
+}
+function countBead(){
+  if(beadCount>=10)return;
+  beadCount++;
+  const beads=document.querySelectorAll('#beads-col .bead');
+  if(beads[beadCount-1])beads[beadCount-1].classList.add('lit');
+  if(!beadSfx)beadSfx=new Audio(R2+'/sfx/bead_click.mp3');
+  beadSfx.currentTime=0;beadSfx.volume=0.6;beadSfx.play().catch(()=>{});
+  if(beadCount===10&&navigator.vibrate)navigator.vibrate(40);
+}
+window.countBead=countBead;
+
+/* ─── RENDER — MYSTERY DOTS ─── */
+function renderMysteryDots(){
+  const row=$('mystery-dots-row');if(!row)return;
+  const done=prog?.progress?.[blk]||[];
+  row.innerHTML=Array.from({length:5},(_,i)=>{
+    const cls=done[i]?'mystery-dot done':i===bIdx?'mystery-dot active':'mystery-dot';
+    return '<div class="'+cls+'"></div>';
+  }).join('');
+}
+
+/* ─── RENDER — PLAYLIST STRIP ─── */
+function updatePlaylistStrip(){
+  const strip=$('playlist-strip');if(!strip)return;
+  strip.innerHTML=playlist.map((t,i)=>{
+    const state=i<plIdx?'done':i===plIdx?'active':'';
+    const lbl=
+      t.type==='inicio'   ?'Inicio':
+      t.type==='misterio' ?'M'+(t.mIdx+1):
+      t.type==='canto'    ?'♪'+(t.mIdx+1):
+      t.type==='letanias' ?'Let.':
+      t.type==='salve'    ?'Salve':'Final';
+    return '<div class="pl-item '+state+'"><div class="pl-dot"></div><div class="pl-lbl">'+lbl+'</div></div>';
+  }).join('');
+  /* espejo en scr-letanias si existe */
+  const sf=$('playlist-strip-final');
+  if(sf)sf.innerHTML=strip.innerHTML;
+}
+
+/* ─── RENDER — CONTENIDO DEL MISTERIO ─── */
+function updateToggleHref(){
+  const tab=$('tab-toggle-orar');
+  if(tab)tab.href='orar.html?c='+nivelId+'&b='+blk+'&m='+mNum(blk,bIdx);
+}
+
+function updateMysteryContent(){
+  const md=mData(blk,bIdx),m=mNum(blk,bIdx);
+  const hi=$('hero-img');
+  hi.src=IMGB+'P_'+nivel+'_'+cua+'_'+m+'.webp';
+  hi.onerror=()=>{hi.style.display='none';$('hero-ph').style.display='flex';};
+  hi.onload =()=>{hi.style.display='';   $('hero-ph').style.display='none';};
+  $('hero-bloque-label').textContent=BEM[blk]+' '+BFN[blk];
+  $('hero-titulo').textContent      =md?.titulo    ||'Misterio '+(bIdx+1);
+  $('hero-subtitulo').textContent   =md?.subtitulo ||'';
+  applyBlockAccent(blk);
+  resetBeads();
+  renderMysteryDots();
+  if(currentTool)populatePopup(currentTool);
+  updateToggleHref();
+}
+
+/* ─── PLAY / PAUSE ─── */
+function updatePlayBtn(){
+  ['btn-play-pause','btn-play-pause-final'].forEach(id=>{
+    const btn=$(id);if(!btn||!rezarAudio)return;
+    btn.innerHTML=rezarAudio.paused
+      ?'<div class="play-inner"></div>'
+      :'<div class="pause-inner"><div></div><div></div></div>';
+  });
+}
+function togglePlay(){
+  if(!rezarAudio)return;
+  if(rezarAudio.paused)rezarAudio.play().catch(()=>{});
+  else rezarAudio.pause();
+  updatePlayBtn();
+}
+window.togglePlay=togglePlay;
+
+/* ─── SETTINGS ─── */
+function openSettings(){
+  renderPrefs();
+  const btn=document.querySelector('.btn-prefs-start');
+  if(btn){btn.textContent='Guardar y volver';btn.onclick=()=>show('scr-rezar');}
+  show('scr-prefs');
+}
+window.openSettings=openSettings;
+/* Alias para el botón del hero */
+window._openPrefs=openSettings;
+
+/* ─── POPUP ─── */
+const TOOL_ORDER_REZAR=['biblia','contemplar','escribir'];
+
+function openTool(t){
+  currentTool=t;
+  ['biblia','contemplar','escribir'].forEach(id=>{
+    const btn=$('tbtn-'+id);
+    if(btn)btn.classList.toggle('active',id===t);
+  });
+  $('popup-title').textContent={biblia:'Biblia',contemplar:'Contemplar',escribir:'Meditar y escribir'}[t]||t;
+  populatePopup(t);
+  $('tool-popup').classList.add('open');
+}
+window.openTool=openTool;
+
+function closeToolPopup(){
+  $('tool-popup').classList.remove('open');
+  ['biblia','contemplar','escribir'].forEach(id=>{
+    const btn=$('tbtn-'+id);if(btn)btn.classList.remove('active');
+  });
+  if(contAudio&&!contAudio.paused)contAudio.pause();
+  currentTool=null;
+}
+window.closeToolPopup=closeToolPopup;
+
+function populatePopup(t){
+  const md=mData(blk,bIdx),bd=$('tool-popup-body');
+  if(!bd)return;
+  if(t==='biblia'){
+    bd.innerHTML=
+      '<p class="popup-reference">'+esc(md?.referencia||'')+'</p>'+
+      '<p class="popup-text" style="margin-top:14px">'+esc(md?.evangelio||'')+'</p>';
+  } else if(t==='contemplar'){
+    let audioHtml='';
+    if(md?.audio_contemplacion){
+      audioHtml=
+        '<div class="popup-audio-row">'+
+          '<button class="popup-play-btn" id="cont-play-btn" onclick="window.toggleContAudio()">▶</button>'+
+          '<div class="popup-audio-bar"><div class="popup-audio-fill" id="cont-audio-fill"></div></div>'+
+        '</div>';
+    }
+    bd.innerHTML=audioHtml+'<p class="popup-text">'+esc(md?.contemplacion||'')+'</p>';
+    if(md?.audio_contemplacion)initContAudio(md.audio_contemplacion);
+  } else if(t==='escribir'){
+    bd.innerHTML=buildEscrHTML(md);
+    initEscrH(md);
+    loadRefs().then(r=>{
+      [0,1,2].forEach(qi=>{
+        const ta=$('qta'+qi);
+        if(ta){ta.value=r[qi]||'';ans[qi]=ta.value;firstAns[qi]=!!ta.value;}
+      });
+    });
+  }
+}
+
+/* ─── AUDIO DE CONTEMPLAR ─── */
+function initContAudio(src){
+  if(!contAudio){
+    contAudio=new Audio();
+    contAudio.addEventListener('timeupdate',()=>{
+      const pct=contAudio.duration?(contAudio.currentTime/contAudio.duration)*100:0;
+      const f=$('cont-audio-fill');if(f)f.style.width=pct.toFixed(1)+'%';
+    });
+    contAudio.addEventListener('ended',()=>{
+      const btn=$('cont-play-btn');if(btn)btn.textContent='▶';
+    });
+    contAudio.addEventListener('play',()=>{
+      const btn=$('cont-play-btn');if(btn)btn.textContent='⏸';
+    });
+    contAudio.addEventListener('pause',()=>{
+      const btn=$('cont-play-btn');if(btn)btn.textContent='▶';
+    });
+  }
+  if(contAudio.currentSrc!==src&&!(contAudio.src&&contAudio.src.endsWith(src.split('/').pop()))){
+    contAudio.src=src;contAudio.load();
+  }
+}
+function toggleContAudio(){
+  if(!contAudio)return;
+  if(contAudio.paused)contAudio.play().catch(()=>{});
+  else contAudio.pause();
+}
+window.toggleContAudio=toggleContAudio;
+
+function buildEscrHTML(md){
+  const qs=parseQ(md?.meditacion||'');
+  return qs.map((q,qi)=>
+    '<div class="q-block">'+
+    '<div class="q-label" style="color:'+QC[qi]+'">'+QL[qi]+'</div>'+
+    '<div class="q-question">'+esc(q)+'</div>'+
+    '<textarea class="q-textarea" id="qta'+qi+'" placeholder="Escribe tu respuesta…"></textarea>'+
+    '<div class="q-saved" id="qsv'+qi+'"></div>'+
+    '</div>').join('')+
+    '<button class="amen-btn" id="amen-esc">Amén</button>';
+}
+function initEscrH(md){
+  [0,1,2].forEach(qi=>{
+    const ta=$('qta'+qi);if(!ta)return;
+    ta.addEventListener('input',()=>{ans[qi]=ta.value;clearTimeout(ansT[qi]);ansT[qi]=setTimeout(()=>onWrite(qi,ta.value),2000);});
+  });
+  const ab=$('amen-esc');
+  if(ab)ab.onclick=async()=>{ab.textContent='✓ Guardado';ab.classList.add('done');for(let qi=0;qi<3;qi++)if(ans[qi])await onWrite(qi,ans[qi],true);};
+}
+async function onWrite(qi,text,force=false){
+  if(!text.trim())return;
+  await saveRef(qi,text);
+  if(!firstAns[qi]){firstAns[qi]=true;if(window.CZSound)CZSound('reflectionSaved');await addMeters(MR_QF);showSlide(MR_QF,'¡Primera respuesta!');}
+  else if(force){if(window.CZSound)CZSound('reflectionSaved');await addMeters(MR_QU);}
+  const sv=$('qsv'+qi);
+  if(sv){sv.textContent='✓ Guardado';setTimeout(()=>{if(sv)sv.textContent='';},2500);}
+}
+async function saveRef(qi,text){
+  if(!usr||!blk)return;
+  const md=mData(blk,bIdx),qs=parseQ(md?.meditacion||'');
+  try{
+    await FS.collection('users').doc(usr.uid).collection('reflections')
+      .doc(nivelId+'_'+blk+'_'+bIdx+'_q'+qi)
+      .set({nivelId,bloque:blk,misterioIdx:bIdx,questionIdx:qi,
+            question:qs[qi]||QL[qi]||'',text,
+            confirmedAt:FSV.serverTimestamp()},{merge:true});
+  }catch(e){console.error('[CruzAndo] saveRef:',e);}
+}
+async function loadRefs(){
+  if(!usr||!blk)return{0:'',1:'',2:''};
+  const r={0:'',1:'',2:''};
+  await Promise.all([0,1,2].map(async qi=>{
+    try{
+      const s=await FS.collection('users').doc(usr.uid).collection('reflections')
+        .doc(nivelId+'_'+blk+'_'+bIdx+'_q'+qi).get();
+      if(s.exists)r[qi]=s.data().text||'';
+    }catch(e){}
+  }));
+  return r;
+}
+
+/* ─── DEV NAV (TESTING — eliminar en producción) ─── */
+window._devPrev=()=>{
+  if(bIdx<=0)return;
+  bIdx--;
+  const i=playlist.findIndex(t=>t.type==='misterio'&&t.mIdx===bIdx);
+  if(i>=0)plIdx=i;
+  if(rezarAudio){rezarAudio.pause();rezarAudio.src=playlist[plIdx]?.src||'';rezarAudio.load();}
+  updateMysteryContent();updatePlaylistStrip();updatePlayBtn();
+};
+window._devNext=()=>{
+  if(bIdx>=4)return;
+  bIdx++;
+  const i=playlist.findIndex(t=>t.type==='misterio'&&t.mIdx===bIdx);
+  if(i>=0)plIdx=i;
+  if(rezarAudio){rezarAudio.pause();rezarAudio.src=playlist[plIdx]?.src||'';rezarAudio.load();}
+  updateMysteryContent();updatePlaylistStrip();updatePlayBtn();
+};
+
+/* ─── SWIPE — app-nav (swipe up para mostrar) ─── */
+let navHideTimer=null;
+function showAppNav(){
+  const nav=$('app-nav');if(!nav)return;
+  nav.classList.add('visible');
+  clearTimeout(navHideTimer);
+  navHideTimer=setTimeout(hideAppNav,3500);
+}
+function hideAppNav(){
+  const nav=$('app-nav');if(nav)nav.classList.remove('visible');
+  clearTimeout(navHideTimer);
+}
+function initNavSwipe(){
+  let sy=0,sx=0;
+  document.addEventListener('touchstart',e=>{sy=e.touches[0].clientY;sx=e.touches[0].clientX;},{passive:true});
+  document.addEventListener('touchend',e=>{
+    const dy=e.changedTouches[0].clientY-sy;
+    const dx=e.changedTouches[0].clientX-sx;
+    if(Math.abs(dy)>50&&Math.abs(dy)>Math.abs(dx)*1.5){
+      if(dy<0){
+        if($('tool-popup')?.classList.contains('open')){closeToolPopup();return;}
+        showAppNav();
+      }else{
+        hideAppNav();
+      }
+    }
+  },{passive:true});
+}
+
+/* ─── SWIPE — popup (horizontal entre herramientas) ─── */
+function initPopupSwipe(){
+  let sx=0,sy=0;
+  const pp=$('tool-popup');
+  pp.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;e.stopPropagation();},{passive:true});
+  pp.addEventListener('touchend',e=>{
+    const dx=e.changedTouches[0].clientX-sx;
+    const dy=e.changedTouches[0].clientY-sy;
+    e.stopPropagation();
+    if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)*1.5){
+      const i=TOOL_ORDER_REZAR.indexOf(currentTool),n=i+( dx<0?1:-1);
+      if(n<0||n>=TOOL_ORDER_REZAR.length)closeToolPopup();
+      else openTool(TOOL_ORDER_REZAR[n]);
+    } else if(dy>60&&Math.abs(dy)>Math.abs(dx)*1.5){
+      closeToolPopup();
+    }
+  },{passive:true});
+}
+
+/* ─── PLAYLIST ─── */
+function globalTrack(nombre){
+  const pfx=rezarPrefs().idioma==='latin'?'L_':'';
+  return R2+'/global/'+pfx+nombre;
+}
+
+function buildPlaylist(startIdx){
+  const p=rezarPrefs(),pl=[];
+  if(startIdx===0){
+    pl.push({id:'inicio',type:'inicio',mIdx:null,src:globalTrack('INICIO.mp3')});
+  }
+  for(let i=startIdx;i<5;i++){
+    const m=mNum(blk,i),ab=(i%2===0)?'MA':'MB';
+    pl.push({id:'misterio_'+i,type:'misterio',mIdx:i,src:globalTrack(ab+'.mp3')});
+    if(p.cantos!==false){
+      pl.push({id:'canto_'+i,type:'canto',mIdx:i,
+        src:MUSB+'M_'+nivel+'_'+cua+'_'+m+'.mp3'});
+    }
+  }
+  if(p.letanias){
+    pl.push({id:'letanias',type:'letanias',mIdx:null,src:globalTrack('LETANIAS.mp3')});
+    pl.push({id:'salve',   type:'salve',   mIdx:null,src:globalTrack('SALVE.mp3')});
+    pl.push({id:'final',   type:'final',   mIdx:null,src:globalTrack('ORACION_FINAL.mp3')});
+  }
+  return pl;
+}
+
+/* ─── COMPLETE MYSTERY ─── */
+async function completeMystery(){
+  if(window.CZSound)CZSound('mysteryClear');
+  if(!blk||!usr)return;
+  const dots=[...(prog?.progress?.[blk]||[null,null,null,null,null])];
+  if(dots[bIdx])return;
+  dots[bIdx]=Date.now();
+  if(!prog)prog={};if(!prog.progress)prog.progress={};
+  prog.progress[blk]=dots;
+  try{
+    await FS.collection('users').doc(usr.uid).collection('progress').doc(nivelId)
+      .set({progress:{[blk]:dots}},{merge:true});
+  }catch(e){console.error('[CruzAndo] completeMystery:',e);}
+  try{
+    await FS.collection('users').doc(usr.uid).collection('audioProgress').doc('current')
+      .set({nivel,cuaderno:cua,misterio:mNum(blk,bIdx)},{merge:true});
+  }catch(e){}
+  renderMysteryDots();
+  if(dots.every(Boolean)){
+    setTimeout(async()=>{
+      if(window.CZSound)CZSound('blockClear');
+      await addMeters(MR_BNS);
+      showSlide(MR_BNS,'¡Bloque completo!');
+    },600);
+  }
+}
+
+/* ─── AUDIO ─── */
+function initAudio(){
+  rezarAudio=new Audio();
+  rezarAudio.preload='auto';
+  rezarAudio.addEventListener('ended',onTrackEnded);
+  rezarAudio.addEventListener('timeupdate',()=>{
+    const pct=rezarAudio.duration?(rezarAudio.currentTime/rezarAudio.duration)*100:0;
+    const f=$('progress-fill');if(f)f.style.width=pct.toFixed(1)+'%';
+  });
+  rezarAudio.addEventListener('play', updatePlayBtn);
+  rezarAudio.addEventListener('pause',updatePlayBtn);
+  rezarAudio.addEventListener('error',()=>{
+    console.warn('[rezar] error cargando track',playlist[plIdx]?.src);
+    playNext();
+  });
+}
+
+async function onTrackEnded(){
+  const track=playlist[plIdx];
+  if(!track)return;
+  if(track.type==='misterio'){
+    await completeMystery();
+    await addMeters(MR_REZO);
+    showSlide(MR_REZO);
+  }
+  playNext();
+}
+
+function playNext(){
+  plIdx++;
+  if(plIdx>=playlist.length){onSessionComplete();return;}
+  const track=playlist[plIdx];
+  if(track.mIdx!==null&&track.mIdx!==bIdx){
+    bIdx=track.mIdx;
+    updateMysteryContent();
+  }
+  if(['letanias','salve','final'].includes(track.type)){
+    showFinalLayout(track.type);
+  }
+  rezarAudio.src=track.src;
+  rezarAudio.load();
+  rezarAudio.play().catch(()=>{updatePlayBtn();});
+  updatePlaylistStrip();
+  renderMysteryDots();
+}
+
+function showFinalLayout(type){
+  const hero=$('misterio-hero');
+  if(hero)hero.style.display='none';
+  const txt=
+    type==='letanias'?TXT_LETANIAS:
+    type==='salve'   ?TXT_SALVE:TXT_ORACION_FINAL;
+  const titles={letanias:'Letanías Lauretanas',salve:'Salve Regina',final:'Oración conclusiva'};
+  $('final-layout-title').textContent=titles[type]||'';
+  $('final-layout-text').innerHTML=txt;
+  show('scr-letanias');
+  updatePlayBtn();
+}
+
+function onSessionComplete(){
+  if(window.CZSound)CZSound('blockClear');
+  $('celeb-title').textContent='¡Rosario completado!';
+  $('celeb-sub').textContent='Has rezado los 5 Misterios '+BN[blk].toLowerCase()+'. ¡Buen camino, peregrino!';
+  $('btn-celeb-home').onclick=()=>goTo('orar.html?c='+nivelId);
+  show('scr-celebration');
+}
+
+/* ─── initSession ─── */
+function initSession(){
+  playlist=buildPlaylist(bIdx);
+  plIdx=0;beadCount=0;
+  ans={0:'',1:'',2:''};firstAns={0:false,1:false,2:false};
+
+  if(!rezarAudio)initAudio();
+
+  /* Restaurar hero si venimos de letanías */
+  const hero=$('misterio-hero');if(hero)hero.style.display='';
+
+  rezarAudio.src=playlist[0].src;
+  rezarAudio.load();
+
+  renderBeadsCol();
+  updateMysteryContent();
+  updatePlaylistStrip();
+  renderMysteryDots();
+  updatePlayBtn();
+  initNavSwipe();
+  initPopupSwipe();
+  show('scr-rezar');
+}
+
+/* ─── ENTRY HELPERS ─── */
+function decideEntry(){
+  if(!data){showError('No se encontraron los datos del nivel.');return;}
+  const tienePrefs=rezarPrefs().idioma!==undefined;
+  if(bIdx>0){showModalInicio();}
+  else if(!tienePrefs){renderPrefs();show('scr-prefs');}
+  else{initSession();}
+}
+
+async function loadAndEnter(nId,block,idx){
+  showLoading();
+  nivelId=nId;
+  nivel=parseInt(nivelId.slice(0,2))||1;
+  cua=parseInt(nivelId.slice(2,4))||1;
+  blk=block;
+  bIdx=idx;
+
+  try{
+    const snap=await FS.collection('users').doc(usr.uid).get();
+    const ud=snap.exists?snap.data():{};
+    window.resolvePlan&&window.resolvePlan(ud);
+    totalM=ud.totalMeters||0;
+  }catch(e){}
+
+  const base=location.origin+location.pathname.substring(0,location.pathname.lastIndexOf('/')+1);
+  try{const r=await fetch(base+'data/'+nivelId+'.json');if(r.ok)data=await r.json();}catch(e){}
+
+  try{
+    const snap=await FS.collection('users').doc(usr.uid).collection('progress').doc(nivelId).get();
+    prog=snap.exists?snap.data():{};
+  }catch(e){prog={};}
+
+  decideEntry();
+}
+
+/* ─── AUTH ─── */
+function initAuth(){
+  initTheme();
+  _auth.onAuthStateChanged(async u=>{
+    if(u){
+      usr=u;
+      const p=new URLSearchParams(location.search);
+      const mParam=p.get('misterio');
+      if(mParam){
+        const nId=p.get('c')||'0101';
+        const mn=parseInt(mParam)||1;
+        const {block,idx}=getMysteryBlock(mn);
+        await loadAndEnter(nId,block,idx);
+      } else {
+        await loadAndStart();
+      }
+    } else {
+      goTo('index.html');
+    }
+  });
+}
+
+async function loadAndStart(){
+  showLoading();
+  const p=new URLSearchParams(location.search);
+  nivelId=p.get('c')||'0101';
+  nivel=parseInt(nivelId.slice(0,2))||1;
+  cua=parseInt(nivelId.slice(2,4))||1;
+
+  try{
+    const snap=await FS.collection('users').doc(usr.uid).get();
+    const ud=snap.exists?snap.data():{};
+    window.resolvePlan&&window.resolvePlan(ud);
+    totalM=ud.totalMeters||0;
+  }catch(e){}
+
+  const base=location.origin+location.pathname.substring(0,location.pathname.lastIndexOf('/')+1);
+  try{const r=await fetch(base+'data/'+nivelId+'.json');if(r.ok)data=await r.json();}catch(e){}
+
+  try{
+    const snap=await FS.collection('users').doc(usr.uid).collection('progress').doc(nivelId).get();
+    prog=snap.exists?snap.data():{};
+  }catch(e){prog={};}
+
+  const bParam=p.get('b'),mParam=p.get('m');
+  if(bParam&&BLOCKS.includes(bParam)){
+    blk=bParam;
+    bIdx=Math.max(0,Math.min(4,parseInt(mParam||'0')-BFM[bParam]));
+  } else {
+    const pBlk=prog?.progress||{};let found=false;
+    for(const b of BLOCKS){
+      const dots=pBlk[b]||[null,null,null,null,null];
+      const done=dots.filter(Boolean).length;
+      if(done<5){blk=b;bIdx=Math.min(done,4);found=true;break;}
+    }
+    if(!found){blk=BLOCKS[0];bIdx=0;}
+  }
+
+  decideEntry();
+}
+
+initAuth();
+
+}());
+</script>
+<script src="sounds.js"></script>
+</body>
+</html>

@@ -1436,10 +1436,9 @@ body {
         <div class="modo-icon-wrap">📖</div>
         <div class="modo-info"><div class="modo-name">Libro</div><div class="modo-desc">Textos e interacciones escritas</div></div>
       </button>
-      <button class="popup-modo">
-        <div class="modo-icon-wrap" style="opacity:0.5">📿</div>
-        <div class="modo-info"><div class="modo-name" style="color:var(--text-dim)">Rezo</div><div class="modo-desc">Rosario del día</div></div>
-        <div class="modo-tag soon">Próximo</div>
+      <button class="popup-modo" id="popup-rezar">
+        <div class="modo-icon-wrap">📿</div>
+        <div class="modo-info"><div class="modo-name">Rezo</div><div class="modo-desc">Rosario rezado en voz baja</div></div>
       </button>
     </div>
   </div>
@@ -2338,6 +2337,52 @@ window._guardarMeta = async function(val) {
   if (btn) { btn.textContent = '✓ Guardado'; setTimeout(() => btn.textContent = 'Guardar meta', 2000); }
 };
 
+// ── Rezar — modal de selección de punto de entrada ────────────────
+var BFM_IDX = { gozosos:1, luminosos:6, dolorosos:11, gloriosos:16 };
+var BNM_IDX = { gozosos:'Gozosos', luminosos:'Luminosos', dolorosos:'Dolorosos', gloriosos:'Gloriosos' };
+
+function getMysteryBlockIdx(m) {
+  if (m <= 5)  return { block:'gozosos',   idx: m - 1 };
+  if (m <= 10) return { block:'luminosos',  idx: m - 6 };
+  if (m <= 15) return { block:'dolorosos',  idx: m - 11 };
+  return              { block:'gloriosos',  idx: m - 16 };
+}
+function esInicioDeBloqueRezo(m) { return [1,6,11,16].includes(m); }
+
+function irARezar(nivelId, misterioGlobal) {
+  var mb = getMysteryBlockIdx(misterioGlobal);
+  var block = mb.block, idx = mb.idx;
+  var url = 'rezar.html?c=' + nivelId + '&b=' + block + '&m=' + misterioGlobal;
+
+  if (esInicioDeBloqueRezo(misterioGlobal)) {
+    if (window.navigateTo) window.navigateTo(url);
+    return;
+  }
+
+  var misterioEnBloque = idx + 1;
+  document.getElementById('rezar-modal-bloque').textContent = BNM_IDX[block];
+  document.getElementById('rezar-modal-mnum').textContent   = misterioEnBloque;
+  document.getElementById('rezar-modal-mtotal').textContent = misterioGlobal;
+
+  window._rezarDestDesdeAqui   = url;
+  window._rezarDestDesdeInicio = 'rezar.html?c=' + nivelId + '&b=' + block + '&m=' + BFM_IDX[block];
+
+  document.getElementById('rezar-modal').style.display = 'flex';
+}
+window.irARezar = irARezar;
+
+window._goRezarDesdeAqui = function() {
+  document.getElementById('rezar-modal').style.display = 'none';
+  if (window.navigateTo) window.navigateTo(window._rezarDestDesdeAqui);
+};
+window._goRezarDesdeInicio = function() {
+  document.getElementById('rezar-modal').style.display = 'none';
+  if (window.navigateTo) window.navigateTo(window._rezarDestDesdeInicio);
+};
+window._cerrarRezarModal = function() {
+  document.getElementById('rezar-modal').style.display = 'none';
+};
+
 // ── Navegación ────────────────────────────────────────────────────
 window.openModal  = function(id) { document.getElementById(id).classList.add('open'); };
 window.closeModal = function(id) { document.getElementById(id).classList.remove('open'); };
@@ -2802,6 +2847,10 @@ function openMapPopup(gi, bi, mi) {
     closePopup();
     if (window.navigateTo) window.navigateTo('orar.html?c=' + _nId + '&misterio=' + _mis);
   };
+  document.getElementById('popup-rezar').onclick=function(){
+    closePopup();
+    irARezar(_nId, _mis);
+  };
   // Ocultar descripciones si el usuario ya pasó 1-1-5
   var _showDesc = (_nId === '0101' && _mis <= 5);
   document.querySelectorAll('.popup-modo .modo-desc').forEach(function(el) {
@@ -3043,5 +3092,56 @@ async function guardarMeta() {
 }
 </script>
 <script src="sounds.js"></script>
+
+<!-- Modal de inicio de sesión Rezar -->
+<div id="rezar-modal"
+     style="display:none; position:fixed; inset:0; z-index:200;
+            background:rgba(0,0,0,0.6);
+            align-items:center; justify-content:center; padding:24px;">
+  <div style="background:var(--card); border-radius:18px;
+              border:1px solid var(--border);
+              padding:28px 24px; width:100%;
+              max-width:340px; text-align:center;">
+    <div style="font-size:32px; margin-bottom:12px">📿</div>
+    <div style="font-size:18px; font-weight:800;
+                color:var(--text); margin-bottom:10px;">
+      ¿Desde dónde rezar?
+    </div>
+    <div style="font-size:14px; color:var(--text-soft);
+                line-height:1.6; margin-bottom:24px;">
+      Misterios <strong id="rezar-modal-bloque"></strong> ·
+      estás en el
+      <strong>Misterio <span id="rezar-modal-mnum"></span></strong>
+      de 5.
+    </div>
+    <button onclick="window._goRezarDesdeAqui()"
+            style="display:block; width:100%; padding:14px;
+                   border-radius:12px; border:none;
+                   background:var(--orange); color:#fff;
+                   font-family:inherit; font-size:14px;
+                   font-weight:700; cursor:pointer;
+                   margin-bottom:10px;">
+      Rezar desde el Misterio
+      <span id="rezar-modal-mtotal"></span>
+    </button>
+    <button onclick="window._goRezarDesdeInicio()"
+            style="display:block; width:100%; padding:14px;
+                   border-radius:12px;
+                   border:1px solid var(--border);
+                   background:transparent;
+                   color:var(--text-soft);
+                   font-family:inherit; font-size:14px;
+                   font-weight:600; cursor:pointer;
+                   margin-bottom:10px;">
+      Rezar desde el principio (M1–M5)
+    </button>
+    <button onclick="window._cerrarRezarModal()"
+            style="background:none; border:none;
+                   color:var(--text-dim); font-size:13px;
+                   cursor:pointer; padding:6px;">
+      Cancelar
+    </button>
+  </div>
+</div>
 </body>
 </html>
