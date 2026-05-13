@@ -101,13 +101,13 @@
       return tallerSnap.data().completed ? 'completado' : 'en_progreso';
     }
 
-    // Verificar si los 5 Misterios Dolorosos del nivel de desbloqueo están completados
+    // Verificar si los 5 Misterios Dolorosos del nivel de desbloqueo están completados.
+    // audio.html escribe: progress.dolorosos = [ts, ts, ts, ts, ts] (null = incompleto)
     if (progSnap.exists) {
-      var completedMysteries = progSnap.data().completedMysteries;
-      if (Array.isArray(completedMysteries)) {
-        if (DOLOROSOS.every(function (n) { return completedMysteries.indexOf(n) !== -1; })) {
-          return 'disponible';
-        }
+      var dolorosos = (progSnap.data().progress || {}).dolorosos;
+      if (Array.isArray(dolorosos) && dolorosos.length === 5 &&
+          dolorosos.every(function (x) { return x !== null && x !== undefined; })) {
+        return 'disponible';
       }
     }
 
