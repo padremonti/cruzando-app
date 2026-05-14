@@ -5,14 +5,201 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#1A0E04">
+<meta name="theme-color" content="#0d0d1a">
 <title>Oración · CruzAndo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+
+:root {
+  --bg:        #0d0d1a;
+  --card:      #1a1a2e;
+  --text:      #f0ede8;
+  --text-soft: rgba(240,237,232,0.55);
+  --border:    rgba(240,237,232,0.12);
+  --rojo:      #C0392B;
+}
+body.light {
+  --bg:        #faf8f5;
+  --card:      #f0ede8;
+  --text:      #1a1a1a;
+  --text-soft: rgba(26,26,26,0.5);
+  --border:    rgba(26,26,26,0.12);
+}
+
+html, body {
+  height:100%;
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Inter',sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* Slide-up al entrar */
+body {
+  animation:slideUp 0.35s ease-out;
+}
+@keyframes slideUp {
+  from { transform:translateY(100%); opacity:0; }
+  to   { transform:translateY(0);    opacity:1; }
+}
+
+/* Layout */
+#oracion-container {
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  padding:0 0 40px 0;
+  max-width:480px;
+  margin:0 auto;
+}
+
+/* Header */
+#oracion-header {
+  padding:20px 20px 0 20px;
+}
+#oracion-misterio-label {
+  font-family:'Inter',sans-serif;
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:0.08em;
+  color:var(--text-soft);
+  text-transform:uppercase;
+}
+
+/* Nombre del Misterio */
+#oracion-nombre {
+  font-family:'Lora',serif;
+  font-size:22px;
+  font-weight:600;
+  color:var(--text);
+  padding:16px 20px 0 20px;
+  line-height:1.3;
+}
+
+/* Separador decorativo */
+.oracion-divider {
+  width:40px;
+  height:2px;
+  background:var(--rojo);
+  margin:16px 20px;
+  border-radius:2px;
+}
+
+/* Texto de la intercesión */
+#oracion-texto {
+  font-family:'Lora',serif;
+  font-size:19px;
+  font-style:italic;
+  line-height:1.85;
+  color:var(--text);
+  padding:0 24px;
+  flex:1;
+}
+
+/* Audio player */
+#oracion-audio-player {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:20px 24px;
+  margin-top:16px;
+}
+#btn-audio-oracion {
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  border:none;
+  background:var(--rojo);
+  color:white;
+  font-size:18px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  -webkit-tap-highlight-color:transparent;
+  transition:opacity 0.2s;
+}
+#btn-audio-oracion:active { opacity:0.8; }
+#oracion-progreso-audio {
+  flex:1;
+  height:4px;
+  border-radius:2px;
+  background:var(--border);
+  position:relative;
+  cursor:pointer;
+}
+#oracion-progreso-fill {
+  height:100%;
+  border-radius:2px;
+  background:var(--rojo);
+  width:0%;
+  transition:width 0.5s linear;
+  pointer-events:none;
+}
+
+/* Botón Amén */
+#btn-amen {
+  display:block;
+  width:calc(100% - 48px);
+  margin:8px auto 0 auto;
+  padding:18px;
+  border-radius:28px;
+  border:none;
+  background:var(--rojo);
+  color:white;
+  font-family:'Lora',serif;
+  font-size:22px;
+  font-weight:600;
+  cursor:pointer;
+  text-align:center;
+  letter-spacing:0.05em;
+  -webkit-tap-highlight-color:transparent;
+  transition:opacity 0.2s, transform 0.15s;
+}
+#btn-amen:active { opacity:0.85; transform:scale(0.98); }
+
+/* Guía */
+#oracion-guia {
+  font-family:'Inter',sans-serif;
+  font-size:13px;
+  color:var(--text-soft);
+  text-align:center;
+  margin-top:12px;
+  padding:0 24px;
+  line-height:1.5;
+}
+</style>
 </head>
 <body>
+<script>(function(){ if(localStorage.getItem('cruzando_theme')==='light') document.body.classList.add('light'); })();</script>
 
-<div id="app"></div>
+<div id="oracion-container">
+
+  <div id="oracion-header">
+    <span id="oracion-misterio-label">Oración</span>
+  </div>
+
+  <h2 id="oracion-nombre">Cargando...</h2>
+
+  <div class="oracion-divider"></div>
+
+  <p id="oracion-texto"></p>
+
+  <div id="oracion-audio-player">
+    <button id="btn-audio-oracion" onclick="window.toggleAudioOracion()">▶</button>
+    <div id="oracion-progreso-audio" onclick="window.seekAudio(event)">
+      <div id="oracion-progreso-fill"></div>
+    </div>
+  </div>
+
+  <button id="btn-amen" onclick="window.completarOracion()">Amén</button>
+
+  <p id="oracion-guia">Toca "Amén" cuando hayas terminado de orar este Misterio</p>
+
+</div>
 
 <script type="module" src="rezar_taller.js"></script>
 </body>

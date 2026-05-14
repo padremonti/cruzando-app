@@ -459,6 +459,44 @@ body {
   display:none;
 }
 .footer-frase.visible { display:block; }
+
+/* ── Filtros de origen ── */
+.filtros-row {
+  display:flex; gap:8px; flex-wrap:wrap;
+}
+.filtro-pill {
+  padding:6px 16px; border-radius:20px;
+  border:1.5px solid var(--border);
+  background:transparent;
+  color:var(--text-soft);
+  font-family:inherit; font-size:0.75rem; font-weight:600;
+  cursor:pointer; letter-spacing:0.3px;
+  transition:all 0.18s;
+  -webkit-tap-highlight-color:transparent;
+}
+.filtro-pill.activo {
+  background:var(--orange);
+  border-color:var(--orange);
+  color:#fff;
+}
+.filtro-pill:not(.activo):active {
+  background:var(--card);
+  color:var(--text);
+}
+
+/* ── Chips de origen ── */
+.chip-retiro {
+  background:rgba(255,122,0,0.13);
+  color:var(--orange);
+}
+.chip-oracion {
+  background:rgba(76,175,125,0.13);
+  color:var(--green);
+}
+.chip-evaluacion {
+  background:rgba(1,187,225,0.13);
+  color:var(--lum);
+}
 </style>
 </head>
 <body>
@@ -488,6 +526,11 @@ body {
       </span>
       <input type="search" id="searchInput" placeholder="Buscar en mis reflexiones…" autocomplete="off" spellcheck="false">
       <button class="clear-search" id="clearSearch" aria-label="Limpiar búsqueda">✕</button>
+    </div>
+    <div class="filtros-row" id="filtrosRow">
+      <button class="filtro-pill activo" id="filtro-todas"  onclick="setFiltro('todas')">Todas</button>
+      <button class="filtro-pill"        id="filtro-retiro" onclick="setFiltro('retiro')">Retiros</button>
+      <button class="filtro-pill"        id="filtro-oracion" onclick="setFiltro('oracion')">Oración</button>
     </div>
     <div class="sort-row">
       <span class="sort-label" id="sortLabel">Mostrando más recientes primero</span>
@@ -694,6 +737,7 @@ function escapeHtml(s) {
 let allReflections = [];    // array con todos los docs
 let sortAsc        = false; // false = recientes primero
 let currentQuery   = '';
+let filtroOrigen   = 'todas'; // 'todas' | 'retiro' | 'oracion'
 
 /* ════════════════════════════════════════════════════
    NAVEGACIÓN
@@ -783,28 +827,43 @@ function renderList(items, query) {
         </div>`;
     }
 
-    const nivelLabel  = NIVEL_NAMES[r.nivelId] || (r.nivelId ? `Nivel ${r.nivelId}` : '');
-    const bloqueLabel = BLOQUE_NAMES[r.bloque]  || r.bloque || '';
-    const misterioLabel = (MISTERIO_ORDINAL[r.misterioIdx] || (r.misterioIdx != null ? `Misterio ${r.misterioIdx+1}` : '')) + (r.misterioIdx != null ? ' Misterio' : '');
-    const pregLabel   = PREGUNTA_NAMES[`q${r.questionIdx}`] || '';
-    const pregText    = r.question || '';
-    // Solo mostrar pregText si es diferente al label corto (reflexiones nuevas)
-    const showPregText = pregText && pregText !== pregLabel;
-    const dateLabel   = formatDate(r.confirmedAt);
-    const textHtml    = highlight(r.text || '', query);
-    const delay       = Math.min(idx * 40, 400);
+    const isTaller   = r.origen === 'taller' || r.origen === 'evaluacion_taller';
+    const dateLabel  = formatDate(r.confirmedAt);
+    const textHtml   = highlight(r.text || '', query);
+    const delay      = Math.min(idx * 40, 400);
+
+    let stripeClass, stripeStyle, metaHtml, misterioHtml, preguntaHtml;
+
+    if (isTaller) {
+      stripeClass = '';
+      stripeStyle = 'style="background:var(--orange);opacity:0.55"';
+      const origenChip = r.origen === 'evaluacion_taller'
+        ? '<span class="card-bloque-chip chip-evaluacion">Evaluación IA</span>'
+        : '<span class="card-bloque-chip chip-retiro">Retiro</span>';
+      metaHtml    = `<span class="card-nivel">${escapeHtml(r.tallerNombre)}</span>${origenChip}`;
+      misterioHtml = r.misterioNombre ? `<div class="card-misterio">${escapeHtml(r.misterioNombre)}</div>` : '';
+      preguntaHtml = r.question ? `<div class="card-pregunta">${highlight(r.question, query)}</div>` : '';
+    } else {
+      const nivelLabel   = NIVEL_NAMES[r.nivelId] || (r.nivelId ? `Nivel ${r.nivelId}` : '');
+      const bloqueLabel  = BLOQUE_NAMES[r.bloque]  || r.bloque || '';
+      const misterioLabel = (MISTERIO_ORDINAL[r.misterioIdx] || (r.misterioIdx != null ? `Misterio ${r.misterioIdx+1}` : '')) + (r.misterioIdx != null ? ' Misterio' : '');
+      const pregLabel    = PREGUNTA_NAMES[`q${r.questionIdx}`] || '';
+      const pregText     = r.question || '';
+      const showPregText = pregText && pregText !== pregLabel;
+      stripeClass = `stripe-${r.bloque}`;
+      stripeStyle = '';
+      metaHtml    = `<span class="card-nivel">${escapeHtml(nivelLabel)}</span><span class="card-bloque-chip chip-${r.bloque}">${escapeHtml(bloqueLabel)}</span>`;
+      misterioHtml = `<div class="card-misterio">${escapeHtml(misterioLabel)}</div>`;
+      preguntaHtml = `<div class="card-pregunta">${escapeHtml(pregLabel)}</div>${showPregText ? `<p class="card-question-text">${highlight(pregText, query)}</p>` : ''}`;
+    }
 
     html += `
       <div class="reflection-card" style="animation-delay:${delay}ms">
-        <div class="card-stripe stripe-${r.bloque}"></div>
+        <div class="card-stripe ${stripeClass}" ${stripeStyle}></div>
         <div class="card-body">
-          <div class="card-meta">
-            <span class="card-nivel">${escapeHtml(nivelLabel)}</span>
-            <span class="card-bloque-chip chip-${r.bloque}">${escapeHtml(bloqueLabel)}</span>
-          </div>
-          <div class="card-misterio">${escapeHtml(misterioLabel)}</div>
-          <div class="card-pregunta">${escapeHtml(pregLabel)}</div>
-          ${showPregText ? `<p class="card-question-text">${highlight(pregText, query)}</p>` : ''}
+          <div class="card-meta">${metaHtml}</div>
+          ${misterioHtml}
+          ${preguntaHtml}
           <p class="card-text">${textHtml}</p>
           <div class="card-date">${escapeHtml(dateLabel)}</div>
         </div>
@@ -820,10 +879,22 @@ function renderList(items, query) {
 function applyFilters() {
   let items = [...allReflections];
 
-  // Filtro de búsqueda
+  // Filtro de origen
+  if (filtroOrigen === 'retiro') {
+    items = items.filter(r => r.origen === 'taller' || r.origen === 'evaluacion_taller');
+  } else if (filtroOrigen === 'oracion') {
+    items = items.filter(r => !r.origen || r.origen === 'oracion');
+  }
+
+  // Filtro de búsqueda (incluye texto, pregunta y nombre del misterio)
   if (currentQuery) {
     const q = currentQuery.toLowerCase();
-    items = items.filter(r => (r.text||'').toLowerCase().includes(q));
+    items = items.filter(r =>
+      (r.text||'').toLowerCase().includes(q) ||
+      (r.question||'').toLowerCase().includes(q) ||
+      (r.misterioNombre||'').toLowerCase().includes(q) ||
+      (r.tallerNombre||'').toLowerCase().includes(q)
+    );
   }
 
   // Orden
@@ -850,6 +921,15 @@ function toggleSort() {
     label.textContent = 'Más antiguas';
     info.textContent  = 'Mostrando más recientes primero';
   }
+  applyFilters();
+}
+
+function setFiltro(origen) {
+  filtroOrigen = origen;
+  ['todas','retiro','oracion'].forEach(function(f) {
+    const btn = document.getElementById('filtro-' + f);
+    if (btn) btn.classList.toggle('activo', f === origen);
+  });
   applyFilters();
 }
 
@@ -910,13 +990,28 @@ auth.onAuthStateChanged(async (user) => {
   document.getElementById('listScreen').style.display = 'none';
 
   try {
-    const snap = await db
-      .collection('users')
-      .doc(user.uid)
-      .collection('reflections')
-      .get();
+    const [snapRefl, snapDiario] = await Promise.all([
+      db.collection('users').doc(user.uid).collection('reflections').get(),
+      db.collection('users').doc(user.uid).collection('diario').get()
+    ]);
 
-    allReflections = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const reflections = snapRefl.docs.map(d => ({ id: d.id, origen: d.data().origen || 'oracion', ...d.data() }));
+    const diarioEntries = snapDiario.docs.map(d => {
+      const data = d.data();
+      return {
+        id:             d.id,
+        confirmedAt:    data.fecha,
+        text:           data.texto,
+        question:       data.pregunta,
+        origen:         data.origen || 'taller',
+        tallerSlug:     data.tallerSlug  || '',
+        tallerNombre:   data.tallerNombre || '',
+        misterioNombre: data.misterioNombre || '',
+        misterioIndex:  data.misterioIndex,
+        preguntaIndex:  data.preguntaIndex
+      };
+    });
+    allReflections = [...reflections, ...diarioEntries];
 
     const total = allReflections.length;
     const chip  = document.getElementById('countChip');

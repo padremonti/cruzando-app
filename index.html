@@ -1034,6 +1034,55 @@ body {
 
 /* ══ POPUP META FALLIDA ══ */
 .meta-streak-sheet { width:100%; max-width:480px; background:var(--popup-bg); border-radius:26px 26px 0 0; border-top:1px solid var(--border); padding-bottom:env(safe-area-inset-bottom,24px); }
+
+/* ══ BANNER RETIRO EN PROGRESO ══ */
+.banner-retiro {
+  margin:12px 16px;
+  border-radius:16px;
+  background:linear-gradient(135deg,#1a1a2e 0%,#2d1b3d 100%);
+  border:1px solid rgba(192,57,43,0.3);
+  overflow:hidden;
+}
+.light .banner-retiro {
+  background:linear-gradient(135deg,#ede5f5 0%,#f0ddd8 100%);
+  border-color:rgba(192,57,43,0.25);
+}
+.banner-retiro-inner {
+  display:flex; align-items:center; gap:12px; padding:14px 16px;
+}
+.banner-retiro-icono { font-size:22px; flex-shrink:0; color:#C0392B; }
+.banner-retiro-texto { flex:1; min-width:0; }
+.banner-retiro-titulo {
+  font-family:'Inter',sans-serif; font-size:11px; font-weight:600;
+  color:rgba(255,255,255,0.5); margin-bottom:2px;
+}
+.light .banner-retiro-titulo { color:rgba(43,26,14,0.5); }
+.banner-retiro-sub {
+  font-family:'Lora',serif; font-size:14px; color:#fff;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.light .banner-retiro-sub { color:#2B1A0E; }
+.banner-retiro-btn {
+  background:#C0392B; color:#fff; border:none; border-radius:20px;
+  padding:8px 14px; font-family:'Inter',sans-serif;
+  font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap; flex-shrink:0;
+}
+.banner-retiro-btn:active { opacity:0.85; }
+
+/* ══ ESFERA NOTIFICACIÓN RECOMPENSA ══ */
+.esfera-notif {
+  position:absolute; top:-8px; right:-8px;
+  width:24px; height:24px; border-radius:50%;
+  background:#C0392B;
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; cursor:pointer;
+  animation:esferaPulso 1.5s ease-in-out infinite;
+  z-index:10; border:2px solid var(--bg);
+}
+@keyframes esferaPulso {
+  0%,100% { transform:scale(1);   box-shadow:0 0 0 0 rgba(192,57,43,0.4); }
+  50%      { transform:scale(1.1); box-shadow:0 0 0 6px rgba(192,57,43,0); }
+}
 </style>
 </head>
 <body>
@@ -1498,6 +1547,7 @@ import { getAuth, onAuthStateChanged,
          createUserWithEmailAndPassword,
          signOut }                 from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import { getFirestore, doc, getDoc, getDocs, collection,
+         query, where,
          setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 // ── CONFIGURACIÓN FIREBASE ────────────────────────────────────────
@@ -2018,11 +2068,100 @@ onAuthStateChanged(auth, async function(user) {
     var progreso  = (audioProgressSnap && audioProgressSnap.exists()) ? audioProgressSnap.data()  : null;
     var bookmark  = (bookmarkSnap      && bookmarkSnap.exists())      ? bookmarkSnap.data()        : null;
     renderTuCamino(bookmark, progreso, user);
+    verificarRetiroEnProgreso(user.uid);
+    verificarRecompensas(user.uid);
   } else {
     currentUser = null;
     showScreen('login');
   }
 });
+
+// ── Banner Retiro en Progreso ────────────────────────────────────
+async function verificarRetiroEnProgreso(uid) {
+  try {
+    const q = query(
+      collection(db, 'users', uid, 'talleres'),
+      where('completed', '==', false)
+    );
+    const snap = await getDocs(q);
+    if (snap.empty) return;
+
+    let masReciente = null;
+    snap.forEach(function(d) {
+      const datos = d.data();
+      if (!masReciente) { masReciente = datos; return; }
+      const ts1 = datos.lastSeenAt?.seconds || 0;
+      const ts2 = masReciente.lastSeenAt?.seconds || 0;
+      if (ts1 > ts2) masReciente = datos;
+    });
+    if (masReciente) mostrarBannerRetiro(masReciente);
+  } catch(e) {
+    console.warn('[index] retiro en progreso:', e);
+  }
+}
+
+function mostrarBannerRetiro(retiro) {
+  if (document.getElementById('banner-retiro')) return;
+
+  var slug = retiro.tallerSlug || '';
+  var nombre = retiro.tallerNombre || 'continúa donde te quedaste';
+
+  var banner = document.createElement('div');
+  banner.id = 'banner-retiro';
+  banner.className = 'banner-retiro';
+  banner.innerHTML =
+    '<div class="banner-retiro-inner">' +
+      '<span class="banner-retiro-icono">◆</span>' +
+      '<div class="banner-retiro-texto">' +
+        '<p class="banner-retiro-titulo">El Santuario te espera</p>' +
+        '<p class="banner-retiro-sub">' + nombre + '</p>' +
+      '</div>' +
+      '<button class="banner-retiro-btn" onclick="window.retomarRetiro(\'' + slug + '\')">Continuar →</button>' +
+    '</div>';
+
+  var container = document.getElementById('map-scroll');
+  if (container) {
+    container.insertBefore(banner, container.firstChild);
+  }
+}
+
+window.retomarRetiro = function(slug) {
+  location.href = 'sanar.html?retiro=' + slug + '&resume=true';
+};
+
+// ── Esferas de recompensa pendiente ─────────────────────────────
+async function verificarRecompensas(uid) {
+  try {
+    const q = query(
+      collection(db, 'users', uid, 'recompensas'),
+      where('vista', '==', false)
+    );
+    const snap = await getDocs(q);
+    if (snap.empty) return;
+
+    var pendientes = [];
+    snap.forEach(function(d) { pendientes.push(d.data().nivelId); });
+    if (pendientes.length > 0) mostrarEsferas(pendientes);
+  } catch(e) {
+    console.warn('[index] recompensas:', e);
+  }
+}
+
+function mostrarEsferas(niveles) {
+  niveles.forEach(function(nivelId) {
+    var nodo = document.querySelector('[data-nivel="' + nivelId + '"]');
+    if (!nodo) return;
+    if (nodo.querySelector('.esfera-notif')) return;
+
+    nodo.style.position = 'relative';
+    var esfera = document.createElement('div');
+    esfera.className = 'esfera-notif';
+    esfera.textContent = '🎁';
+    esfera.title = 'Tienes una recompensa';
+    esfera.onclick = function() { location.href = 'world.html'; };
+    nodo.appendChild(esfera);
+  });
+}
 
 // ── Banner "Tu Camino" ───────────────────────────────────────────
 function renderTuCamino(bookmark, progreso, user) {
@@ -2998,6 +3137,7 @@ function buildLevelPicker() {
 
       var orb = document.createElement('div');
       orb.className = 'nivel-orb' + (!isUnlocked ? ' locked' : '') + (isActive ? ' active' : '');
+      orb.setAttribute('data-nivel', nid);
       if (isUnlocked) {
         orb.style.cssText =
           'background:radial-gradient(circle at 35% 30%,' + m.color + 'ee,' + m.color + '77);' +
