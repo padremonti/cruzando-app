@@ -126,6 +126,17 @@ body {
 body.light .card-prog-wrap { background:rgba(0,0,0,0.08); }
 .card-prog-bar { height:100%; border-radius:2px; }
 
+/* Barra de progreso detallada (en_progreso) */
+.card-progreso-barra {
+  height: 3px; border-radius: 2px;
+  background: var(--border); margin: 6px 0 2px 0; overflow: hidden;
+}
+.card-progreso-fill { height: 100%; border-radius: 2px; transition: width 0.3s ease; }
+.card-progreso-texto {
+  font-family: 'Inter', sans-serif; font-size: 11px;
+  color: var(--text-soft); margin-bottom: 10px;
+}
+
 /* Footer de card */
 .card-footer { display:flex; align-items:center; gap:10px; min-height:40px; }
 .card-btn {

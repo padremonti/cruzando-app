@@ -152,8 +152,10 @@
       ? 'style="background:' + _hex2rgba(c, 0.07) + ';border-color:' + _hex2rgba(c, 0.38) + '"'
       : '';
 
+    var pct     = r._pct || 0;
     var progBar = estado === 'en_progreso'
-      ? '<div class="card-prog-wrap"><div class="card-prog-bar" style="background:' + c + ';width:40%"></div></div>'
+      ? '<div class="card-progreso-barra"><div class="card-progreso-fill" style="width:' + pct + '%;background:' + c + '"></div></div>' +
+        '<p class="card-progreso-texto">' + pct + '% completado</p>'
       : '';
 
     return [
@@ -247,6 +249,12 @@
 
         retiros.forEach(function (r, i) {
           r._estado = _calcEstado(r, progresos[i], talleres[i]);
+          if (r._estado === 'en_progreso' && talleres[i].exists) {
+            var lastCard = (talleres[i].data().lastCardIndex) || 0;
+            r._pct = Math.min(100, Math.round((lastCard / 48) * 100));
+          } else {
+            r._pct = 0;
+          }
         });
 
         _renderCatalogo(retiros);
@@ -304,8 +312,42 @@
   }
 
   function actualizarTitulo(texto) {
+    var tarjeta = _tarjetas[_indexActual];
+    var titulo  = texto;
+
+    if (tarjeta) {
+      var tipoLabels = {
+        portada_misterio: 'Misterio',
+        evangelio:        'Evangelio',
+        contemplacion:    'Contemplación',
+        actividad:        'Actividad',
+        oracion:          'Oración',
+        canto:            'Canto',
+        preguntas:        'Reflexión'
+      };
+      switch (tarjeta.tipo) {
+        case 'umbral':
+          titulo = (tarjeta.datos && tarjeta.datos.nombre) ? tarjeta.datos.nombre : texto;
+          break;
+        case 'portada_misterio':
+        case 'evangelio':
+        case 'contemplacion':
+        case 'actividad':
+        case 'oracion':
+        case 'canto':
+        case 'preguntas':
+          var mNum = (tarjeta.indice || 0) + 1;
+          var tipo = tipoLabels[tarjeta.tipo] || tarjeta.tipo;
+          titulo = 'Misterio ' + mNum + ' · ' + tipo;
+          break;
+        case 'cierre':
+          titulo = 'Cierre del retiro';
+          break;
+      }
+    }
+
     var el = document.getElementById('retiro-titulo');
-    if (el) el.textContent = texto;
+    if (el) el.textContent = titulo;
   }
 
   window.cerrarRetiro = function () {

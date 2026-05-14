@@ -2158,7 +2158,16 @@ function mostrarEsferas(niveles) {
     esfera.className = 'esfera-notif';
     esfera.textContent = '🎁';
     esfera.title = 'Tienes una recompensa';
-    esfera.onclick = function() { location.href = 'world.html'; };
+    esfera.onclick = function() {
+      var self = this;
+      self.style.animation = 'none';
+      self.style.transition = 'opacity 0.3s';
+      self.style.opacity = '0';
+      setTimeout(function() {
+        self.remove();
+        location.href = 'world.html';
+      }, 300);
+    };
     nodo.appendChild(esfera);
   });
 }
