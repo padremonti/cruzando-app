@@ -54,9 +54,66 @@
     _applyTheme(_isLight);
   };
 
+  /* ── BGM ── */
+
+  var _BGM_BASE = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/BGM/';
+  var _BGM_VOL  = 0.07;
+  var _bgmEl    = null;
+  var _bgmOn    = (function() {
+    try { return JSON.parse(localStorage.getItem('cruzando_prefs') || '{}').bgm !== false; }
+    catch(e) { return true; }
+  })();
+
+  function _bgmSlugToUrl(slug) {
+    var m = slug.match(/^s(\d+)_(\d+)$/);
+    return m ? _BGM_BASE + 'BGM_' + m[1] + '_' + m[2] + '.mp3' : null;
+  }
+
+  function _bgmStart(slug) {
+    if (!_bgmOn) return;
+    var url = _bgmSlugToUrl(slug);
+    if (!url) return;
+    if (!_bgmEl) {
+      _bgmEl = new Audio(url);
+      _bgmEl.loop   = true;
+      _bgmEl.volume = _BGM_VOL;
+    } else if (!_bgmEl.src.endsWith('BGM_' + slug.replace('s','').replace('_','_') + '.mp3')) {
+      _bgmEl.pause();
+      _bgmEl.src = url;
+    }
+    _bgmEl.play().catch(function() {});
+  }
+
+  function _bgmStop() {
+    if (_bgmEl) { _bgmEl.pause(); _bgmEl = null; }
+  }
+
+  function _bgmUpdateBtn() {
+    var btn = document.getElementById('btn-bgm-retiro');
+    if (!btn) return;
+    btn.classList.toggle('bgm-activo', _bgmOn);
+    btn.title = _bgmOn ? 'Silenciar música' : 'Activar música';
+  }
+
+  window.toggleBgmRetiro = function() {
+    _bgmOn = !_bgmOn;
+    try {
+      var p = JSON.parse(localStorage.getItem('cruzando_prefs') || '{}');
+      p.bgm = _bgmOn;
+      localStorage.setItem('cruzando_prefs', JSON.stringify(p));
+    } catch(e) {}
+    if (_bgmOn && window._retiroSlug) {
+      _bgmStart(window._retiroSlug);
+    } else if (_bgmEl) {
+      _bgmEl.pause();
+    }
+    _bgmUpdateBtn();
+  };
+
   /* ── Navegación ── */
 
   window.goTo = function (page) {
+    _bgmStop();
     location.href = _base() + page;
   };
 
@@ -280,6 +337,7 @@
   }
 
   window.volverHospederia = function () {
+    _bgmStop();
     var url = new URL(location.href);
     url.searchParams.delete('retiro');
     url.searchParams.delete('resume');
@@ -912,6 +970,11 @@
     _tarjetaCompletada = false;
     generarSegmentos(_tarjetas.length);
     mostrarTarjeta(_indexActual);
+    // Iniciar BGM del nivel correspondiente
+    if (window._retiroSlug) {
+      _bgmStart(window._retiroSlug);
+      _bgmUpdateBtn();
+    }
   }
 
   function mostrarTarjeta(index) {

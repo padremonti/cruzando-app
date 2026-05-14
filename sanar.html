@@ -257,6 +257,8 @@ body.light .card-prog-wrap { background:rgba(0,0,0,0.08); }
   transition:opacity 0.2s;
 }
 #retiro-controles button:active { opacity:0.7; }
+#btn-bgm-retiro { opacity:0.45; }
+#btn-bgm-retiro.bgm-activo { opacity:1; color:var(--orange); }
 
 /* ── Vista B — Barra de progreso segmentada ── */
 #retiro-progreso {
@@ -660,6 +662,7 @@ body.light .card-prog-wrap { background:rgba(0,0,0,0.08); }
     <div id="retiro-header">
       <span id="retiro-titulo">Cargando...</span>
       <div id="retiro-controles">
+        <button id="btn-bgm-retiro" onclick="window.toggleBgmRetiro()" title="Música de fondo">🎵</button>
         <button id="btn-play" onclick="window.toggleAudioRetiro()">▶</button>
         <button id="btn-cerrar" onclick="window.cerrarRetiro()">✕</button>
       </div>

@@ -269,6 +269,7 @@ body{
 .hero-btn svg{width:19px;height:19px}
 .hero-btn:active{background:rgba(0,0,0,0.55)}
 .hero-btn-left{left:14px}
+.hero-btn-left2{left:66px}
 .hero-btn-right{right:14px}
 
 /* ── Cuentas del Rosario ── */
@@ -622,8 +623,15 @@ body{
       <!-- Toggle modo Rezar/Orar -->
       <a id="tab-toggle-orar" class="mode-toggle-btn" href="orar.html">📖 Libro</a>
 
+      <!-- Botón BGM -->
+      <button class="hero-btn hero-btn-left" id="btn-bgm" title="Música de fondo" onclick="window.toggleBgm()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+        </svg>
+      </button>
+
       <!-- Botón tema (dark/light) -->
-      <button class="hero-btn hero-btn-left" id="btn-theme" title="Tema" onclick="window.toggleTheme()">
+      <button class="hero-btn hero-btn-left2" id="btn-theme" title="Tema" onclick="window.toggleTheme()">
         <svg id="theme-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
         <svg id="theme-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
       </button>
@@ -929,6 +937,10 @@ let blk='gozosos', bIdx=0;
 let totalM=0;
 let playlist=[], plIdx=0;
 let rezarAudio=null;
+let bgmEl=null;
+const BGM_VOL=0.07;
+const _prefs=()=>{try{return JSON.parse(localStorage.getItem('cruzando_prefs')||'{}');}catch(e){return{};}};
+let bgmOn=_prefs().bgm!==false;
 let beadCount=0;
 let currentTool=null;
 let pendingNav=null;
@@ -971,9 +983,27 @@ window.toggleTheme=toggleTheme;
 /* ─── NAV ─── */
 function goTo(pg){
   if(rezarAudio){rezarAudio.pause();rezarAudio.src='';}
+  stopBgm();
   location.href=location.origin+location.pathname.substring(0,location.pathname.lastIndexOf('/')+1)+pg;
 }
 window.goTo=goTo;
+
+/* ─── BGM ─── */
+function startBgm(){
+  if(!bgmOn)return;
+  const url=`${R2}/BGM/BGM_${nivel}_${cua}.mp3`;
+  if(!bgmEl){bgmEl=new Audio(url);bgmEl.loop=true;bgmEl.volume=BGM_VOL;}
+  else if(!bgmEl.src.endsWith(`BGM_${nivel}_${cua}.mp3`)){bgmEl.pause();bgmEl.src=url;}
+  bgmEl.play().catch(()=>{});
+}
+function stopBgm(){if(bgmEl){bgmEl.pause();}}
+function updateBgmBtn(){const b=$('btn-bgm');if(b)b.classList.toggle('bgm-on',bgmOn);}
+window.toggleBgm=function(){
+  bgmOn=!bgmOn;
+  const p=_prefs();p.bgm=bgmOn;localStorage.setItem('cruzando_prefs',JSON.stringify(p));
+  bgmOn?startBgm():stopBgm();
+  updateBgmBtn();
+};
 
 function safeGoTo(pg){
   if(rezarAudio&&!rezarAudio.paused){pendingNav=pg;showExitModal();}
@@ -1621,6 +1651,8 @@ function initSession(){
   initNavSwipe();
   initPopupSwipe();
   show('scr-rezar');
+  startBgm();
+  updateBgmBtn();
 }
 
 /* ─── ENTRY HELPERS ─── */

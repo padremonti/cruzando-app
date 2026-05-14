@@ -7,31 +7,31 @@
   "mundoNombre": "Cruz",
   "mundoColor": "#FF7A00",
   "nivelDesbloqueo": "0102",
-  "imagenHero": "https://pub-96c43f31...r2.dev/s1_2_hero.webp",
-  "audioBienvenida": "https://pub-cd28789...r2.dev/s1_2_intro.mp3",
+  "imagenHero": "https://pub-96c43f31c64d45e7a9b3c2891df46532.r2.dev/s1_2_hero.webp",
+  "audioBienvenida": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_intro.mp3",
   "introduccion": {
-    "texto": "PLACEHOLDER — texto de introducción temática del retiro.",
-    "audio": "https://pub-cd28789...r2.dev/s1_2_bienvenida.mp3"
+    "texto": "El duelo no es una enfermedad que se cura. Es un camino que se recorre.\n\nCuando perdemos a alguien amado —por muerte, separación o distancia—, cuando se cierra una etapa de vida que no volverá, cuando un sueño muere antes de nacer, el corazón humano entra en un territorio desconocido. Un lugar donde las palabras no alcanzan y el consuelo parece imposible.\n\nLa cultura moderna nos enseña a «superar» rápidamente el dolor, a «seguir adelante» como si nada hubiera pasado. Pero el duelo no se supera: se atraviesa. Y no se atraviesa en línea recta, sino en espiral —visitando una y otra vez los mismos lugares del corazón, cada vez desde una altura distinta.\n\nHoy te invito a nombrar tu pérdida sin vergüenza, sostener tu dolor sin huir, honrar lo que fue sin negarlo, y abrirte a la esperanza sin forzarla.\n\nNo caminarás solo. María va contigo.\n\nRespira hondo. Estás en un lugar seguro.",
+    "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_bienvenida.mp3"
   },
   "misterios": [
     {
       "numero": 1,
-      "tipo": "doloroso",
-      "nombre": "La Agonía en el Huerto",
-      "subtituloTematico": "PLACEHOLDER — subtítulo temático",
-      "imagenHero": "https://pub-96c43f31...r2.dev/s1_2_m1.webp",
+      "tipo": "gozoso",
+      "nombre": "La Presentación en el Templo",
+      "subtituloTematico": "Anticipación del dolor",
+      "imagenHero": "https://pub-96c43f31c64d45e7a9b3c2891df46532.r2.dev/s1_2_m1.webp",
       "evangelio": {
-        "texto": "PLACEHOLDER — texto del evangelio DHH.",
-        "referencia": "Lucas 22:39-44 (DHH)"
+        "texto": "Cuando se cumplieron los días de la purificación de ellos, según la ley de Moisés, llevaron al niño a Jerusalén para presentarlo al Señor. Había en Jerusalén un hombre llamado Simeón, justo y piadoso, que esperaba la consolación de Israel; y el Espíritu Santo estaba sobre él. Tomó al niño en sus brazos y bendijo a Dios. Luego dijo a María, su madre: «Este niño será causa de caída y de elevación para muchos en Israel; será signo de contradicción, y a ti misma una espada te atravesará el corazón».",
+        "referencia": "Lucas 2:22, 25, 28-29, 34-35 (DHH)"
       },
       "contemplacion": {
-        "texto": "PLACEHOLDER — texto de contemplación.",
-        "audio": "https://pub-cd28789...r2.dev/s1_2_1.mp3"
+        "texto": "María sostiene a su hijo recién nacido en el Templo. Todo es alegría, gratitud, promesa. Pero Simeón, movido por el Espíritu, pronuncia palabras que rompen la paz: una espada atravesará tu corazón.\n\nMaría no entiende del todo. Pero su corazón presiente que amar a este Niño le costará todo. Hay pérdidas que se anuncian mucho antes de ocurrir. Hay despedidas que empiezan a gestarse en el primer abrazo.\n\nMaría no huye de la profecía. La guarda en su corazón junto con el amor. Acepta amar sabiendo que amará hasta el dolor. Y esa aceptación no es resignación: es valentía.",
+        "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_1.mp3"
       },
       "actividades": [
         {
           "tipo": "nombrar_emocion",
-          "pregunta": "¿Qué sientes ahora mismo?",
+          "pregunta": "¿Qué sientes ahora mismo al comenzar este retiro?",
           "opciones": [
             "tristeza", "miedo", "esperanza",
             "gratitud", "confusión", "paz",
@@ -40,221 +40,221 @@
         },
         {
           "tipo": "completar_frase",
-          "enunciado": "Lo que más me cuesta soltar es ___."
+          "enunciado": "La pérdida que traigo hoy a este retiro es ___."
         },
         {
           "tipo": "escala_resonancia",
-          "pregunta": "¿Cuánto resuena esto contigo ahora?",
+          "pregunta": "¿Cuánto resuena contigo esta frase: «El duelo no se supera, se atraviesa»?",
           "etiquetas": ["Apenas", "Poco", "Algo", "Mucho", "Profundamente"]
         }
       ],
       "oracion": {
-        "texto": "PLACEHOLDER — texto de la intercesión.",
-        "audio": "https://pub-cd28789...r2.dev/s1_2_1_oracion.mp3"
+        "texto": "María, tú que supiste desde el principio que amar es aceptar la espada, ayúdame a no huir del dolor que ya presiento. Enséñame a amar sin condiciones, incluso cuando el amor anuncia despedida.",
+        "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_1_oracion.mp3"
       },
       "canto": {
-        "titulo": "PLACEHOLDER — título del canto",
-        "audio": "https://pub-cd28789...r2.dev/s1_2_1_canto.mp3",
-        "letra": "PLACEHOLDER — letra del canto."
+        "titulo": "Canto del Misterio 1",
+        "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_1_canto.mp3",
+        "letra": "PLACEHOLDER — letra del canto"
       },
       "preguntas": [
-        "PLACEHOLDER — primera pregunta de reflexión.",
-        "PLACEHOLDER — segunda pregunta de reflexión."
+        "¿Qué pérdida presientes pero aún no aceptas? ¿Qué dolor anticipas que tu corazón resiste nombrar?",
+        "¿Qué siente el Corazón Inmaculado de María al escuchar que una espada lo atravesará?"
       ]
     },
     {
       "numero": 2,
       "tipo": "doloroso",
-      "nombre": "La Flagelación",
-      "subtituloTematico": "PLACEHOLDER — subtítulo temático",
-      "imagenHero": "https://pub-96c43f31...r2.dev/s1_2_m2.webp",
+      "nombre": "La Agonía en el Huerto",
+      "subtituloTematico": "Negociación con el dolor",
+      "imagenHero": "https://pub-96c43f31c64d45e7a9b3c2891df46532.r2.dev/s1_2_m2.webp",
       "evangelio": {
-        "texto": "PLACEHOLDER — texto del evangelio DHH.",
-        "referencia": "Marcos 15:15 (DHH)"
+        "texto": "Jesús fue con sus discípulos a un lugar llamado Getsemaní, y les dijo: «Siéntense aquí mientras voy más allá a orar.» Se llevó a Pedro y a los dos hijos de Zebedeo, y comenzó a sentirse muy triste y angustiado. Les dijo: «Siento en mi alma una tristeza de muerte. Quédense aquí y permanezcan despiertos conmigo.» Yendo un poco más adelante, se inclinó hasta tocar el suelo con su frente, y oró así: «Padre mío, si es posible, líbrame de este trago amargo; pero que no se haga lo que yo quiero, sino lo que quieres tú.»",
+        "referencia": "Mateo 26:36-39 (DHH)"
       },
       "contemplacion": {
-        "texto": "PLACEHOLDER — texto de contemplación.",
-        "audio": "https://pub-cd28789...r2.dev/s1_2_2.mp3"
+        "texto": "Jesús suda sangre. Su cuerpo humano tiembla ante lo que viene. No quiere la Cruz. No quiere el abandono. No quiere morir.\n\nY sin embargo, dice: Padre, que se haga tu voluntad.\n\nEsta oración no es pasividad. Es la batalla más profunda del corazón humano: soltar el control, aceptar lo inaceptable, decir sí cuando todo el ser grita no.\n\nMaría, desde la distancia, siente el desgarro de su Hijo. Ella también ha orado mil veces: Padre, aparta de nosotros este cáliz. Pero sabe que hay pérdidas inevitables. Y que el amor verdadero no negocia condiciones, sino que se entrega incluso en la oscuridad.",
+        "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_2.mp3"
       },
       "actividades": [
         {
-          "tipo": "mapa_corporal",
-          "pregunta": "¿Dónde sientes esto en tu cuerpo?"
-        },
-        {
           "tipo": "dos_caras",
-          "pregunta": "¿Cuál de estas afirmaciones resuena más contigo ahora?",
-          "opcionA": "Necesito tiempo para sanar.",
-          "opcionB": "Necesito seguir adelante ya."
+          "pregunta": "¿Cuál de estas describe mejor dónde estás ahora?",
+          "opcionA": "Necesito más tiempo antes de soltar.",
+          "opcionB": "Ya sé que tengo que soltar, pero no puedo."
         },
         {
-          "tipo": "carta_breve",
-          "encabezado": "Escríbele dos líneas a Jesús sobre lo que acabas de contemplar."
+          "tipo": "completar_frase",
+          "enunciado": "Lo que sigo negociando con Dios sobre esta pérdida es ___."
+        },
+        {
+          "tipo": "mapa_corporal",
+          "pregunta": "¿Dónde sientes en tu cuerpo la resistencia a soltar?"
         }
       ],
       "oracion": {
-        "texto": "PLACEHOLDER — texto de la intercesión.",
-        "audio": "https://pub-cd28789...r2.dev/s1_2_2_oracion.mp3"
+        "texto": "Jesús, tú que sudaste sangre antes de soltar el control, acompáñame en mi propia agonía. Ayúdame a dejar de negociar con lo inevitable, y dame la fuerza para decir: que se haga tu voluntad.",
+        "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_2_oracion.mp3"
       },
       "canto": {
-        "titulo": "PLACEHOLDER — título del canto",
-        "audio": "https://pub-cd28789...r2.dev/s1_2_2_canto.mp3",
-        "letra": "PLACEHOLDER — letra del canto."
+        "titulo": "Canto del Misterio 2",
+        "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_2_canto.mp3",
+        "letra": "PLACEHOLDER — letra del canto"
       },
       "preguntas": [
-        "PLACEHOLDER — primera pregunta de reflexión.",
-        "PLACEHOLDER — segunda pregunta de reflexión."
+        "¿Qué parte de esta pérdida aún no quieres soltar? ¿Con qué realidad sigues negociando en tu corazón?",
+        "¿Qué batalla libra el Corazón de Jesús entre su voluntad humana y la voluntad del Padre?"
       ]
     },
     {
       "numero": 3,
       "tipo": "doloroso",
-      "nombre": "La Coronación de Espinas",
-      "subtituloTematico": "PLACEHOLDER — subtítulo temático",
-      "imagenHero": "https://pub-96c43f31...r2.dev/s1_2_m3.webp",
+      "nombre": "La Crucifixión",
+      "subtituloTematico": "Tocar fondo",
+      "imagenHero": "https://pub-96c43f31c64d45e7a9b3c2891df46532.r2.dev/s1_2_m3.webp",
       "evangelio": {
-        "texto": "PLACEHOLDER — texto del evangelio DHH.",
-        "referencia": "Mateo 27:28-30 (DHH)"
+        "texto": "Junto a la cruz de Jesús estaban su madre, la hermana de su madre, María esposa de Cleofás, y María Magdalena. Cuando Jesús vio a su madre, y junto a ella al discípulo a quien él amaba mucho, dijo a su madre: «Mujer, ahí tienes a tu hijo.» Luego le dijo al discípulo: «Ahí tienes a tu madre.» Desde entonces, ese discípulo la recibió en su casa.",
+        "referencia": "Juan 19:25-27 (DHH)"
       },
       "contemplacion": {
-        "texto": "PLACEHOLDER — texto de contemplación.",
-        "audio": "https://pub-cd28789...r2.dev/s1_2_3.mp3"
+        "texto": "María está de pie, sosteniendo lo insostenible. Ve morir a su Hijo, lentamente, en la Cruz. No puede hacer nada. No puede salvarlo. Solo puede estar ahí, presente en el horror.\n\nJesús, desde la Cruz, no la consuela con palabras vacías. No le dice: «No llores, todo estará bien.» En cambio, le da una nueva relación: Mujer, ahí tienes a tu hijo. Le entrega a Juan, como si dijera: El amor no termina aquí. Aunque me voy, el amor sigue. Ahora ama de otra forma.\n\nMaría recibe a Juan. Y en ese acto, acepta que Jesús se va. Acepta que el amor cambia de forma, pero no muere. Acepta sostener el cuerpo muerto de su Hijo y, al mismo tiempo, abrazar la vida que continúa.\n\nEste es el fondo del duelo: cuando ya no puedes hacer nada más que estar. Cuando el dolor es tan profundo que sientes que mueres con quien se va. Y aun así, respiras. Aun así, permaneces.",
+        "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_3.mp3"
       },
       "actividades": [
         {
-          "tipo": "seleccion_imagen",
-          "pregunta": "¿Cuál de estas imágenes describe mejor cómo llevas tu duelo ahora?",
-          "imagenes": [
-            "https://pub-96c43f31...r2.dev/s1_2_act3a.webp",
-            "https://pub-96c43f31...r2.dev/s1_2_act3b.webp",
-            "https://pub-96c43f31...r2.dev/s1_2_act3c.webp"
-          ]
-        },
-        {
-          "tipo": "antes_despues",
-          "enunciadoAntes": "Antes de esta contemplación pensaba...",
-          "enunciadoDespues": "Ahora pienso..."
-        },
-        {
           "tipo": "escala_dificultad",
-          "pregunta": "¿Qué tan difícil te resulta esto ahora?",
+          "pregunta": "¿Qué tan pesado se siente este dolor ahora?",
           "opciones": ["Puedo con ello", "Me cuesta", "Es muy pesado"]
+        },
+        {
+          "tipo": "la_palabra",
+          "instruccion": "Toca la palabra o frase que más te llega al corazón.",
+          "texto": "María solo puede estar ahí, presente en el horror. El amor no termina aquí. El amor cambia de forma, pero no muere. Aun así, respiras. Aun así, permaneces."
+        },
+        {
+          "tipo": "momento_silencio",
+          "invitacion": "Quédate en silencio con lo más pesado de tu duelo. No tienes que resolverlo. Solo estar.",
+          "duracion": 60,
+          "audioFondo": "https://pub-faed94c21a8e4b3d9f7c6e5d2a1b8c9f.r2.dev/silencio_suave.mp3"
         }
       ],
       "oracion": {
-        "texto": "PLACEHOLDER — texto de la intercesión.",
-        "audio": "https://pub-cd28789...r2.dev/s1_2_3_oracion.mp3"
+        "texto": "María, tú que sostuviste el cuerpo sin vida de tu Hijo, sostén mi corazón cuando ya no puedo más. Enséñame que estar presente en el dolor es la forma más profunda de amar.",
+        "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_3_oracion.mp3"
       },
       "canto": {
-        "titulo": "PLACEHOLDER — título del canto",
-        "audio": "https://pub-cd28789...r2.dev/s1_2_3_canto.mp3",
-        "letra": "PLACEHOLDER — letra del canto."
+        "titulo": "Canto del Misterio 3",
+        "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_3_canto.mp3",
+        "letra": "PLACEHOLDER — letra del canto"
       },
       "preguntas": [
-        "PLACEHOLDER — primera pregunta de reflexión.",
-        "PLACEHOLDER — segunda pregunta de reflexión."
+        "¿Qué me duele hasta el punto de sentir que muero? ¿Qué parte de mí muere con esta pérdida?",
+        "¿Qué siente el Corazón de María al recibir el cuerpo muerto de su Hijo en sus brazos?"
       ]
     },
     {
       "numero": 4,
-      "tipo": "doloroso",
-      "nombre": "Jesús con la Cruz a Cuestas",
-      "subtituloTematico": "PLACEHOLDER — subtítulo temático",
-      "imagenHero": "https://pub-96c43f31...r2.dev/s1_2_m4.webp",
+      "tipo": "glorioso",
+      "nombre": "La Resurrección",
+      "subtituloTematico": "Desorientación y nuevo comienzo",
+      "imagenHero": "https://pub-96c43f31c64d45e7a9b3c2891df46532.r2.dev/s1_2_m4.webp",
       "evangelio": {
-        "texto": "PLACEHOLDER — texto del evangelio DHH.",
-        "referencia": "Lucas 23:26-28 (DHH)"
+        "texto": "El primer día de la semana, María Magdalena fue al sepulcro muy temprano, cuando todavía estaba oscuro, y vio quitada la piedra que tapaba la entrada. Entonces se fue corriendo a donde estaban Simón Pedro y el otro discípulo, aquel a quien Jesús quería mucho, y les dijo: «¡Se han llevado del sepulcro al Señor, y no sabemos dónde lo han puesto!»",
+        "referencia": "Juan 20:1-2 (DHH)"
       },
       "contemplacion": {
-        "texto": "PLACEHOLDER — texto de contemplación.",
-        "audio": "https://pub-cd28789...r2.dev/s1_2_4.mp3"
+        "texto": "La tumba está vacía. María Magdalena busca el cuerpo de Jesús y no lo encuentra. Su primer pensamiento no es alegría, sino pánico: Se lo han llevado.\n\nCuando perdemos a alguien, buscamos su presencia en los lugares donde solía estar. Volvemos a los recuerdos como quien visita una tumba. Y a veces, incluso los recuerdos parecen esfumarse. La voz que tanto amábamos se vuelve difusa. El rostro se difumina en la memoria.\n\nPero la tumba vacía no es ausencia: es promesa. Jesús no está donde lo dejamos. No está en el pasado. Resucitó. Está vivo, de otra forma. Y nos pide que dejemos de buscar entre los muertos al que vive.\n\nMaría, la madre de Jesús, también visita interiormente esa tumba vacía. Y en su corazón comprende: el amor no se guarda en un sepulcro. El amor resucita. Toma nuevas formas. Se manifiesta en lugares inesperados.",
+        "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_4.mp3"
       },
       "actividades": [
         {
-          "tipo": "la_palabra",
-          "instruccion": "Toca la palabra o frase que más te impactó de esta contemplación.",
-          "texto": "PLACEHOLDER — párrafo corto de la contemplación para selección."
-        },
-        {
           "tipo": "pregunta_reconocimiento",
-          "pregunta": "¿Hay alguien en tu vida cuyo duelo estás cargando también?",
-          "opciones": ["Sí", "Tal vez", "No estoy seguro"]
+          "pregunta": "¿Hay momentos en que buscas la presencia de quien se fue en lugares donde ya no está?",
+          "opciones": ["Sí, con frecuencia", "A veces", "Ya no tanto"]
         },
         {
-          "tipo": "momento_silencio",
-          "duracion": 60,
-          "invitacion": "Quédate en silencio con lo que acabas de contemplar.",
-          "audioFondo": "https://pub-faed94...r2.dev/silencio_suave.mp3"
+          "tipo": "antes_despues",
+          "enunciadoAntes": "Antes de esta pérdida yo era...",
+          "enunciadoDespues": "Ahora me siento..."
+        },
+        {
+          "tipo": "seleccion_imagen",
+          "pregunta": "¿Cuál de estas imágenes describe mejor cómo llevas tu duelo ahora?",
+          "imagenes": [
+            "https://pub-96c43f31c64d45e7a9b3c2891df46532.r2.dev/s1_2_act4a.webp",
+            "https://pub-96c43f31c64d45e7a9b3c2891df46532.r2.dev/s1_2_act4b.webp",
+            "https://pub-96c43f31c64d45e7a9b3c2891df46532.r2.dev/s1_2_act4c.webp"
+          ]
         }
       ],
       "oracion": {
-        "texto": "PLACEHOLDER — texto de la intercesión.",
-        "audio": "https://pub-cd28789...r2.dev/s1_2_4_oracion.mp3"
+        "texto": "Jesús Resucitado, tú que no permaneciste en la tumba, libérame de buscar en el pasado lo que ya resucitó. Ayúdame a reconocer que el amor no muere, sino que se transforma y vive de otro modo.",
+        "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_4_oracion.mp3"
       },
       "canto": {
-        "titulo": "PLACEHOLDER — título del canto",
-        "audio": "https://pub-cd28789...r2.dev/s1_2_4_canto.mp3",
-        "letra": "PLACEHOLDER — letra del canto."
+        "titulo": "Canto del Misterio 4",
+        "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_4_canto.mp3",
+        "letra": "PLACEHOLDER — letra del canto"
       },
       "preguntas": [
-        "PLACEHOLDER — primera pregunta de reflexión.",
-        "PLACEHOLDER — segunda pregunta de reflexión."
+        "¿Dónde busco lo que ya no está? ¿Qué nueva forma toma el amor que recibí de quien se fue?",
+        "¿Qué siente el Corazón de María al saber que su Hijo ya no está en la tumba?"
       ]
     },
     {
       "numero": 5,
-      "tipo": "doloroso",
-      "nombre": "La Crucifixión",
-      "subtituloTematico": "PLACEHOLDER — subtítulo temático",
-      "imagenHero": "https://pub-96c43f31...r2.dev/s1_2_m5.webp",
+      "tipo": "glorioso",
+      "nombre": "Pentecostés",
+      "subtituloTematico": "Transformación del duelo en misión",
+      "imagenHero": "https://pub-96c43f31c64d45e7a9b3c2891df46532.r2.dev/s1_2_m5.webp",
       "evangelio": {
-        "texto": "PLACEHOLDER — texto del evangelio DHH.",
-        "referencia": "Juan 19:25-27 (DHH)"
+        "texto": "Todos ellos se reunían siempre para orar con algunas mujeres, con María la madre de Jesús, y con sus hermanos. Cuando llegó la fiesta de Pentecostés, estaban todos juntos en el mismo lugar. De repente, un gran ruido que venía del cielo, como de un viento fuerte, resonó en toda la casa donde ellos estaban. Y se les aparecieron lenguas como de fuego que se repartieron, y sobre cada uno de ellos se asentó una. Y todos quedaron llenos del Espíritu Santo.",
+        "referencia": "Hechos 1:14; 2:1-4 (DHH)"
       },
       "contemplacion": {
-        "texto": "PLACEHOLDER — texto de contemplación.",
-        "audio": "https://pub-cd28789...r2.dev/s1_2_5.mp3"
+        "texto": "María está en medio de la comunidad. Ha perdido a su Hijo, pero no está sola. Ha atravesado la espada, pero no está rota. Ha sostenido el cuerpo muerto, pero no se quedó en la tumba.\n\nAhora espera. Con los discípulos. En oración. Y el Espíritu desciende como fuego.\n\nEl mismo corazón que fue traspasado por la espada ahora arde con el Espíritu. El dolor no desaparece, pero se transforma. La herida se vuelve fuente de compasión. La pérdida se convierte en capacidad de acompañar a otros que sufren.\n\nMaría no «superó» la muerte de Jesús. Pero aprendió a vivir con esa ausencia, sostenida por el Espíritu y por la comunidad. Y desde ese lugar de dolor transformado, se convirtió en madre de la Iglesia naciente.\n\nEl duelo no termina. Pero puede convertirse en don. El amor que recibimos de quien se fue no se pierde: se multiplica cuando lo compartimos.",
+        "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_5.mp3"
       },
       "actividades": [
         {
-          "tipo": "completar_frase",
-          "enunciado": "Lo que le quiero entregar a Jesús en esta cruz es ___."
-        },
-        {
           "tipo": "escala_resonancia",
-          "pregunta": "¿Sientes que algo en ti ha cambiado durante este retiro?",
+          "pregunta": "¿Cuánto sientes que algo en ti ha comenzado a transformarse durante este retiro?",
           "etiquetas": ["Apenas", "Poco", "Algo", "Mucho", "Profundamente"]
         },
         {
           "tipo": "carta_breve",
-          "encabezado": "Escríbele a la persona que extrañas o que has perdido."
+          "encabezado": "Escríbele unas líneas a la persona o etapa que perdiste."
+        },
+        {
+          "tipo": "completar_frase",
+          "enunciado": "Lo que quiero llevar de este retiro en mi corazón esta semana es ___."
         }
       ],
       "oracion": {
-        "texto": "PLACEHOLDER — texto de la intercesión.",
-        "audio": "https://pub-cd28789...r2.dev/s1_2_5_oracion.mp3"
+        "texto": "Espíritu Santo, tú que transformaste el duelo de María en maternidad para la Iglesia, transforma mi dolor en compasión. Que el amor que recibí no muera conmigo, sino que se multiplique en servicio a los demás.",
+        "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_5_oracion.mp3"
       },
       "canto": {
-        "titulo": "PLACEHOLDER — título del canto",
-        "audio": "https://pub-cd28789...r2.dev/s1_2_5_canto.mp3",
-        "letra": "PLACEHOLDER — letra del canto."
+        "titulo": "Canto del Misterio 5",
+        "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_5_canto.mp3",
+        "letra": "PLACEHOLDER — letra del canto"
       },
       "preguntas": [
-        "PLACEHOLDER — primera pregunta de reflexión.",
-        "PLACEHOLDER — segunda pregunta de reflexión.",
-        "PLACEHOLDER — tercera pregunta de integración."
+        "¿Cómo el amor que recibí me transforma en don para otros? ¿Qué nueva vida puede nacer de este dolor?",
+        "¿Qué nuevo propósito nace en el Corazón de María después de la pérdida?",
+        "¿Qué don envía el Corazón de Jesús para que sus discípulos no se queden paralizados por el duelo?"
       ]
     }
   ],
   "cierre": {
     "comunidadSostiene": [
-      "PLACEHOLDER — primera acción concreta de la comunidad.",
-      "PLACEHOLDER — segunda acción concreta.",
-      "PLACEHOLDER — tercera acción concreta."
+      "Comparte con una persona de confianza algo de lo que escribiste en este retiro. No todo, solo lo que tu corazón quiera soltar. Escucha también su historia.",
+      "Ora por alguien que esté pasando por una pérdida. Reza una decena del Rosario ofreciéndola por esa persona. Incluso puedes decirle: «Hoy recé por ti.»",
+      "Agradece a alguien que te haya sostenido en tu duelo, aunque sea con su sola presencia. Un mensaje breve, una llamada, un abrazo."
     ],
     "invitacionItinerario": {
       "nivelId": "0101",
-      "texto": "PLACEHOLDER — invitación a continuar el itinerario."
+      "texto": "«Sanando el Duelo» fue una primera parada en el camino. Si algo se iluminó en ti, hay un sendero más profundo esperándote: CruzAndo la Cruz, el primer nivel del itinerario completo. Cuatro semanas peregrinas los Misterios del Rosario acompañando las dimensiones más hondas de tu vida. El camino sigue. Mariano te espera."
     }
   }
 }
