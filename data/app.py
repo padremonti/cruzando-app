@@ -1,14 +1,23 @@
+import logging
 import gradio as gr
 from gradio.themes import Soft
 
-from config import custom_css
-from json_utils import discover_json_files
+from styles import custom_css
+
+logging.basicConfig(
+    level=logging.WARNING,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    datefmt="%H:%M:%S",
+)
+from json_utils import discover_json_files, set_ai_text_generator
+from tts_utils import generate_ai_text
 from ui_tts import build_tab_tts, register_handlers_tts
 from ui_gestor import build_tab_editor, register_handlers_editor, build_tab_gestor, register_handlers_gestor
 from ui_batch import build_tab_batch, register_handlers_batch
 
 
 def main():
+    set_ai_text_generator(generate_ai_text)
     json_choices = discover_json_files()
 
     with gr.Blocks(

@@ -259,6 +259,26 @@ body {
 .pref-toggle.on { background:var(--orange); }
 .pref-toggle.on::after { transform:translateX(18px); }
 
+/* ── Créditos en Preferencias ── */
+.prefs-credits {
+  margin-top:20px; padding:14px 0 0;
+  border-top:1px solid var(--border);
+  text-align:center;
+}
+.prefs-credits-label {
+  font-size:0.68rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px;
+}
+.prefs-credits-producer {
+  font-size:0.9rem; font-weight:700; color:var(--text); margin-bottom:2px;
+}
+.prefs-credits-copy {
+  font-size:0.68rem; color:var(--text-dim);
+}
+.prefs-credits-link {
+  color:var(--orange); text-decoration:none;
+}
+.prefs-credits-link:hover { text-decoration:underline; }
+
 /* ── Modal base ── */
 .modal-overlay {
   display:none; position:fixed; inset:0; z-index:200;
@@ -1246,6 +1266,12 @@ body {
           </div>
         </div>
         <button class="btn-guardar-meta" id="btn-guardar-meta" onclick="guardarMeta()">Guardar meta</button>
+      </div>
+
+      <div class="prefs-credits">
+        <div class="prefs-credits-label">Producción de audio</div>
+        <div class="prefs-credits-producer"><a href="https://www.instagram.com/kicksound_lab?igsh=MzMyeHV0OXlqczA2&utm_source=qr" target="_blank" rel="noopener noreferrer" class="prefs-credits-link">KickSoundLab</a></div>
+        <div class="prefs-credits-copy">© Todos los derechos reservados</div>
       </div>
 
       <button class="btn-modal-close" onclick="closePrefs()" style="margin-top:20px">Cerrar</button>

@@ -1,8 +1,11 @@
 import json
+import logging
 from pathlib import Path
 
 import gradio as gr
 import requests
+
+logger = logging.getLogger(__name__)
 
 from config import (
     OPENAI_API_KEY,
@@ -18,10 +21,9 @@ from config import (
     SECTION_SPEEDS,
     BLOQUES,
     TTS_COST_PER_CHAR,
-    _PARSER_SYSTEM,
-    _MICRO_SYSTEM,
-    _ESTILO_SYSTEM,
+    AI_COST_PER_TOKEN,
 )
+from prompts import _PARSER_SYSTEM, _MICRO_SYSTEM, _ESTILO_SYSTEM
 from json_utils import (
     load_json_file,
     get_misterio_record,
@@ -49,25 +51,40 @@ def extract_output_text_from_responses_api(resp_json: dict) -> str:
     return "\n".join(chunks).strip()
 
 
-def generate_ai_text(json_file: str, bloque: str, misterio_en_bloque: int, section_name: str):
+def _call_responses_api(input_text: str, instructions: str = "", timeout: int = 180) -> tuple:
+    """Llama a la Responses API. Devuelve (text, cost_usd). Lanza gr.Error en fallo."""
     if not OPENAI_API_KEY:
         raise gr.Error("No encontré OPENAI_API_KEY en tu archivo .env")
+    headers = {"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"}
+    payload: dict = {"model": TEXT_MODEL, "input": input_text}
+    if instructions:
+        payload["instructions"] = instructions
+    try:
+        r = requests.post(RESPONSES_API_URL, headers=headers, json=payload, timeout=timeout)
+        r.raise_for_status()
+        resp_json = r.json()
+        text = extract_output_text_from_responses_api(resp_json)
+    except requests.HTTPError as e:
+        try:
+            detail = r.json()
+        except Exception:
+            detail = r.text
+        logger.warning("_call_responses_api HTTP error: %s", detail)
+        raise gr.Error(f"Error HTTP: {detail}") from e
+    except Exception as e:
+        logger.warning("_call_responses_api connection error: %s", e, exc_info=True)
+        raise gr.Error(f"Error de conexión: {e}") from e
+    if not text.strip():
+        raise gr.Error("La IA no devolvió texto útil.")
+    usage = resp_json.get("usage", {})
+    rates = AI_COST_PER_TOKEN.get(TEXT_MODEL, {"input": 0.0, "output": 0.0})
+    cost = (usage.get("input_tokens", 0) * rates["input"]
+            + usage.get("output_tokens", 0) * rates["output"])
+    return text, cost
 
-    if section_name not in ["Bienvenida", "Despedida"]:
-        raise gr.Error("La IA de texto en este flujo está pensada para Bienvenida y Despedida.")
 
-    data = load_json_file(json_file)
-    misterio_record = get_misterio_record(data, bloque, int(misterio_en_bloque))
-    nivel, cuaderno = parse_tema_id_to_level_and_cuaderno(data)
-    misterio_numero = int(misterio_record.get("numero", misterio_en_bloque))
-
-    subtitulo_bloque = data.get("subtitulos_bloque", {}).get(bloque, "")
-    titulo = misterio_record.get("titulo", "")
-    subtitulo = misterio_record.get("subtitulo", "")
-    referencia = misterio_record.get("referencia", "")
-
-    if section_name == "Bienvenida":
-        prompt = f"""
+def _build_bienvenida_prompt(titulo, subtitulo, bloque, subtitulo_bloque, referencia) -> str:
+    return f"""
 Eres el asistente de redacción del P. César Ricardo Montijo Rivas, sacerdote mexicano
 y creador de CruzAndo, una peregrinación espiritual gamificada basada en el Santo Rosario.
 Escribe un borrador de Bienvenida (START) que él revisará y editará.
@@ -113,8 +130,10 @@ ESTILO:
 Devuelve SOLO el texto de la Bienvenida, sin títulos, sin explicaciones,
 sin comillas envolventes.
 """
-    else:
-        prompt = f"""
+
+
+def _build_despedida_prompt(titulo, subtitulo, bloque, subtitulo_bloque, misterio_numero) -> str:
+    return f"""
 Eres el asistente de redacción del P. César Ricardo Montijo Rivas, sacerdote mexicano
 y creador de CruzAndo, una peregrinación espiritual gamificada basada en el Santo Rosario.
 Escribe un borrador de Despedida (BYE) que él revisará y editará.
@@ -162,39 +181,33 @@ Devuelve SOLO el texto de la Despedida, sin títulos, sin explicaciones,
 sin comillas envolventes.
 """
 
-    headers = {
-        "Authorization": f"Bearer {OPENAI_API_KEY}",
-        "Content-Type": "application/json",
-    }
 
-    payload = {
-        "model": TEXT_MODEL,
-        "input": prompt,
-    }
+def generate_ai_text(json_file: str, bloque: str, misterio_en_bloque: int, section_name: str):
+    if section_name not in ["Bienvenida", "Despedida"]:
+        raise gr.Error("La IA de texto en este flujo está pensada para Bienvenida y Despedida.")
 
-    try:
-        response = requests.post(RESPONSES_API_URL, headers=headers, json=payload, timeout=180)
-        response.raise_for_status()
-        result = response.json()
-        generated = extract_output_text_from_responses_api(result)
-    except requests.HTTPError as e:
-        detail = ""
-        try:
-            detail = response.json()
-        except Exception:
-            detail = response.text
-        raise gr.Error(f"Error HTTP al generar texto con IA:\n{detail}") from e
-    except Exception as e:
-        raise gr.Error(f"Error al generar texto con IA: {e}") from e
+    data = load_json_file(json_file)
+    misterio_record = get_misterio_record(data, bloque, int(misterio_en_bloque))
+    nivel, cuaderno = parse_tema_id_to_level_and_cuaderno(data)
+    misterio_numero = int(misterio_record.get("numero", misterio_en_bloque))
 
-    if not generated.strip():
-        raise gr.Error("La IA no devolvió texto útil.")
+    subtitulo_bloque = data.get("subtitulos_bloque", {}).get(bloque, "")
+    titulo = misterio_record.get("titulo", "")
+    subtitulo = misterio_record.get("subtitulo", "")
+    referencia = misterio_record.get("referencia", "")
+
+    if section_name == "Bienvenida":
+        prompt = _build_bienvenida_prompt(titulo, subtitulo, bloque, subtitulo_bloque, referencia)
+    else:
+        prompt = _build_despedida_prompt(titulo, subtitulo, bloque, subtitulo_bloque, misterio_numero)
+
+    generated, cost = _call_responses_api(prompt)
 
     info = f"Texto generado con IA para: {section_name} | Modelo texto: {TEXT_MODEL}"
     titulo_info = f"{titulo} — {subtitulo}"
     summary = build_context_summary(data, bloque, misterio_record)
 
-    return generated, info, nivel, cuaderno, misterio_numero, titulo_info, summary
+    return generated, info, nivel, cuaderno, misterio_numero, titulo_info, summary, cost
 
 
 def generate_audio(text: str, section_name: str, nivel: int, cuaderno: int, misterio: int, fin_texto: bool = True, speed: float = 1.0):
@@ -284,58 +297,19 @@ def generate_audio(text: str, section_name: str, nivel: int, cuaderno: int, mist
 
 
 def mejorar_estilo_con_ia(text: str):
-    if not OPENAI_API_KEY:
-        raise gr.Error("No encontré OPENAI_API_KEY en tu archivo .env")
     if not text or not text.strip():
         raise gr.Error("No hay texto en la caja para mejorar.")
-
-    headers = {"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"}
-    payload = {
-        "model": TEXT_MODEL,
-        "instructions": _ESTILO_SYSTEM,
-        "input": text.strip(),
-    }
-
-    try:
-        r = requests.post(RESPONSES_API_URL, headers=headers, json=payload, timeout=180)
-        r.raise_for_status()
-        result = extract_output_text_from_responses_api(r.json())
-    except requests.HTTPError as e:
-        try:
-            detail = r.json()
-        except Exception:
-            detail = r.text
-        raise gr.Error(f"Error HTTP al mejorar texto:\n{detail}") from e
-    except Exception as e:
-        raise gr.Error(f"Error al mejorar texto: {e}") from e
-
-    if not result.strip():
-        raise gr.Error("La IA no devolvió texto.")
-
-    return result, f"Texto mejorado con IA | Modelo: {TEXT_MODEL}"
+    result, cost = _call_responses_api(text.strip(), instructions=_ESTILO_SYSTEM)
+    return result, f"Texto mejorado con IA | Modelo: {TEXT_MODEL}", cost
 
 
 def parse_misterios_with_ai(raw_text: str):
-    if not OPENAI_API_KEY:
-        return "", "No encontré OPENAI_API_KEY."
     if not raw_text.strip():
         return "", "Pega el texto a parsear."
-    headers = {"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"}
-    payload = {"model": TEXT_MODEL, "instructions": _PARSER_SYSTEM, "input": raw_text}
     try:
-        r = requests.post(RESPONSES_API_URL, headers=headers, json=payload, timeout=180)
-        r.raise_for_status()
-        generated = extract_output_text_from_responses_api(r.json())
-    except requests.HTTPError as e:
-        try:
-            detail = r.json()
-        except Exception:
-            detail = r.text
-        return "", f"Error HTTP: {detail}"
-    except Exception as e:
-        return "", f"Error: {e}"
-    if not generated.strip():
-        return "", "La IA no devolvió texto."
+        generated, _ = _call_responses_api(raw_text, instructions=_PARSER_SYSTEM)
+    except gr.Error as e:
+        return "", str(e)
     try:
         parsed = json.loads(generated)
         return json.dumps(parsed, indent=2, ensure_ascii=False), f"{len(parsed)} misterio(s) parseados. Revisa antes de agregar."
@@ -344,8 +318,6 @@ def parse_misterios_with_ai(raw_text: str):
 
 
 def generate_micro_with_ai(nivel_id: str, intro_text: str, tension: str, cuaderno_name: str):
-    if not OPENAI_API_KEY:
-        return "", "No encontré OPENAI_API_KEY."
     if not nivel_id.strip():
         return "", "Indica el ID del nivel."
     filename = build_gestor_filename(nivel_id, "data")
@@ -377,22 +349,10 @@ def generate_micro_with_ai(nivel_id: str, intro_text: str, tension: str, cuadern
         f"INTRODUCCIÓN DEL CUADERNO:\n{intro_text}\n\n"
         f"DATOS DEL NIVEL (JSON):\n{json.dumps(context, ensure_ascii=False, indent=2)}"
     )
-    headers = {"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"}
-    payload = {"model": TEXT_MODEL, "instructions": _MICRO_SYSTEM, "input": user_input}
     try:
-        r = requests.post(RESPONSES_API_URL, headers=headers, json=payload, timeout=300)
-        r.raise_for_status()
-        generated = extract_output_text_from_responses_api(r.json())
-    except requests.HTTPError as e:
-        try:
-            detail = r.json()
-        except Exception:
-            detail = r.text
-        return "", f"Error HTTP: {detail}"
-    except Exception as e:
-        return "", f"Error: {e}"
-    if not generated.strip():
-        return "", "La IA no devolvió texto."
+        generated, _ = _call_responses_api(user_input, instructions=_MICRO_SYSTEM, timeout=300)
+    except gr.Error as e:
+        return "", str(e)
     try:
         parsed = json.loads(generated)
         parsed.setdefault("id", nivel_id.strip().zfill(4))

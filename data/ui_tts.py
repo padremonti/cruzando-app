@@ -107,8 +107,6 @@ def build_tab_tts(json_choices):
             )
             cost_reset_btn = gr.Button("🔄 Reiniciar contador", variant="secondary")
 
-    session_cost = gr.State(0.0)
-
     with gr.Accordion("✏️ Editar misterio actual", open=False):
         gr.Markdown(
             "Edita los campos del misterio cargado y guarda directamente al JSON. "
@@ -153,7 +151,7 @@ def build_tab_tts(json_choices):
         ac_save_btn, ac_save_status,
         nota_text, nota_save_btn, nota_status,
         notas_all_display, notas_reload_btn,
-        session_cost, cost_display, cost_reset_btn,
+        cost_display, cost_reset_btn,
     )
 
 
@@ -173,7 +171,8 @@ def register_handlers_tts(
     ac_save_btn, ac_save_status,
     nota_text, nota_save_btn, nota_status,
     notas_all_display, notas_reload_btn,
-    session_cost, cost_display, cost_reset_btn,
+    cost_display, cost_reset_btn,
+    session_cost,
 ):
     def update_speed_for_section(section):
         return SECTION_SPEEDS.get(section, 1.0)
@@ -243,16 +242,20 @@ def register_handlers_tts(
         outputs=[session_cost, cost_display],
     )
 
-    def _mejorar_and_track(text_input, history):
+    def _mejorar_and_track(text_input, history, session_cost_val):
         updated_history = push_to_history(text_input, history)
-        new_text, info = mejorar_estilo_con_ia(text_input)
+        new_text, info, op_cost = mejorar_estilo_con_ia(text_input)
+        new_total = session_cost_val + op_cost
         choices = build_history_choices(updated_history)
-        return new_text, info, updated_history, gr.update(choices=choices, value=None)
+        return (
+            new_text, info, updated_history, gr.update(choices=choices, value=None),
+            gr.update(value=format_cost(new_total, op_cost)), new_total,
+        )
 
     mejorar_btn.click(
         fn=_mejorar_and_track,
-        inputs=[text, tts_history],
-        outputs=[text, voice_info, tts_history, history_dropdown],
+        inputs=[text, tts_history, session_cost],
+        outputs=[text, voice_info, tts_history, history_dropdown, cost_display, session_cost],
     )
 
     history_restore_btn.click(

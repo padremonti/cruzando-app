@@ -1,9 +1,13 @@
 import json
+import logging
 import re
 import shutil
+import threading
 from pathlib import Path
 
 import gradio as gr
+
+logger = logging.getLogger(__name__)
 
 from config import (
     AUDIO_FORMAT,
@@ -22,6 +26,7 @@ from config import (
 )
 
 _json_cache: dict = {}
+_cache_lock = threading.Lock()
 
 
 def discover_json_files():
@@ -38,23 +43,26 @@ def reload_json_choices():
 def load_json_file(filename: str) -> dict:
     if not filename:
         raise gr.Error("No seleccionaste un archivo JSON.")
-    if filename in _json_cache:
-        return json.loads(json.dumps(_json_cache[filename]))
-    path = Path(filename)
-    if not path.exists():
-        raise gr.Error(f"No encontré el archivo: {filename}")
-    with open(path, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    _json_cache[filename] = data
-    return data
+    with _cache_lock:
+        if filename in _json_cache:
+            return json.loads(json.dumps(_json_cache[filename]))
+        path = Path(filename)
+        if not path.exists():
+            raise gr.Error(f"No encontré el archivo: {filename}")
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        _json_cache[filename] = data
+        return data
 
 
 def invalidate_cache(filename: str) -> None:
-    _json_cache.pop(filename, None)
+    with _cache_lock:
+        _json_cache.pop(filename, None)
 
 
 def clear_cache() -> None:
-    _json_cache.clear()
+    with _cache_lock:
+        _json_cache.clear()
 
 
 def parse_tema_id_to_level_and_cuaderno(data: dict):
@@ -166,45 +174,63 @@ def prepare_contemplacion_text(text: str) -> str:
     return "\n".join(lines)
 
 
+def _load_camino(rec, bloque, idx):
+    titulo_oficial = NOMBRES_OFICIALES.get((bloque, int(idx)), "")
+    return build_ubible_text(rec, titulo_oficial), "Texto litúrgico armado desde JSON (sin IA)"
+
+
+def _load_contemplacion(rec, bloque, idx):
+    return (
+        prepare_contemplacion_text(rec.get("contemplacion", "")),
+        "Texto base cargado desde JSON: contemplacion",
+    )
+
+
+def _load_pregunta_a(rec, bloque, idx):
+    qa, _, _ = split_meditacion_into_questions(rec.get("meditacion", ""))
+    return qa, "Texto base cargado desde JSON: meditacion → Pregunta A"
+
+
+def _load_pregunta_b(rec, bloque, idx):
+    _, qb, _ = split_meditacion_into_questions(rec.get("meditacion", ""))
+    return qb, "Texto base cargado desde JSON: meditacion → Pregunta B"
+
+
+def _load_pregunta_c(rec, bloque, idx):
+    _, _, qc = split_meditacion_into_questions(rec.get("meditacion", ""))
+    return qc, "Texto base cargado desde JSON: meditacion → Pregunta C"
+
+
+def _load_oracion_final(rec, bloque, idx):
+    raw = prepare_contemplacion_text(rec.get("intercesion", "").strip())
+    if raw and not re.search(r'am[eé]n\.?\s*$', raw, re.IGNORECASE):
+        raw += "\n\nAmén."
+    return raw, "Texto base cargado desde JSON: intercesion"
+
+
+_SECTION_LOADER: dict = {
+    "Camino y Palabra": _load_camino,
+    "Contemplacion":    _load_contemplacion,
+    "Pregunta A":       _load_pregunta_a,
+    "Pregunta B":       _load_pregunta_b,
+    "Pregunta C":       _load_pregunta_c,
+    "Oracion final":    _load_oracion_final,
+}
+
+
 def load_base_text(json_file: str, bloque: str, misterio_en_bloque: int, section_name: str):
     data = load_json_file(json_file)
     misterio_record = get_misterio_record(data, bloque, int(misterio_en_bloque))
     nivel, cuaderno = parse_tema_id_to_level_and_cuaderno(data)
     misterio_numero = int(misterio_record.get("numero", misterio_en_bloque))
 
-    text = ""
-    info = ""
-
-    if section_name == "Camino y Palabra":
-        titulo_oficial = NOMBRES_OFICIALES.get((bloque, int(misterio_en_bloque)), "")
-        text = build_ubible_text(misterio_record, titulo_oficial)
-        info = "Texto litúrgico armado desde JSON (sin IA)"
-    elif section_name == "Contemplacion":
-        text = prepare_contemplacion_text(misterio_record.get("contemplacion", ""))
-        info = "Texto base cargado desde JSON: contemplacion"
-    elif section_name == "Pregunta A":
-        qa, _, _ = split_meditacion_into_questions(misterio_record.get("meditacion", ""))
-        text = qa
-        info = "Texto base cargado desde JSON: meditacion → Pregunta A"
-    elif section_name == "Pregunta B":
-        _, qb, _ = split_meditacion_into_questions(misterio_record.get("meditacion", ""))
-        text = qb
-        info = "Texto base cargado desde JSON: meditacion → Pregunta B"
-    elif section_name == "Pregunta C":
-        _, _, qc = split_meditacion_into_questions(misterio_record.get("meditacion", ""))
-        text = qc
-        info = "Texto base cargado desde JSON: meditacion → Pregunta C"
-    elif section_name == "Oracion final":
-        raw = misterio_record.get("intercesion", "").strip()
-        raw = prepare_contemplacion_text(raw)
-        if raw and not re.search(r'am[eé]n\.?\s*$', raw, re.IGNORECASE):
-            raw += "\n\nAmén."
-        text = raw if raw else ""
-        info = "Texto base cargado desde JSON: intercesion"
-    elif section_name in ["Bienvenida", "Despedida"]:
-        info = "Esta sección no se carga desde JSON. Usa ✨ Generar texto con IA."
+    loader = _SECTION_LOADER.get(section_name)
+    if loader:
+        text, info = loader(misterio_record, bloque, misterio_en_bloque)
+    elif section_name in ("Bienvenida", "Despedida"):
+        text, info = "", "Esta sección no se carga desde JSON. Usa ✨ Generar texto con IA."
     else:
-        info = "No hay texto base para esta sección."
+        text, info = "", "No hay texto base para esta sección."
 
     summary = build_context_summary(data, bloque, misterio_record)
     titulo_info = f"{misterio_record.get('titulo', '')} — {misterio_record.get('subtitulo', '')}"
@@ -243,10 +269,22 @@ def preview_filename(section_name: str, nivel: int, cuaderno: int, misterio: int
     )
 
 
+_ai_text_generator = None
+
+
+def set_ai_text_generator(fn):
+    global _ai_text_generator
+    _ai_text_generator = fn
+
+
 def _auto_load_text(json_file, bloque, misterio_en_bloque, section_name):
-    from tts_utils import generate_ai_text  # lazy import to avoid circular dependency
     if section_name in ["Bienvenida", "Despedida"]:
-        return generate_ai_text(json_file, bloque, int(misterio_en_bloque), section_name)
+        if _ai_text_generator is None:
+            raise gr.Error("Generador de texto IA no inicializado.")
+        text, info, nivel, cuaderno, misterio, titulo_info, summary, *_ = (
+            _ai_text_generator(json_file, bloque, int(misterio_en_bloque), section_name)
+        )
+        return text, info, nivel, cuaderno, misterio, titulo_info, summary
     return load_base_text(json_file, bloque, int(misterio_en_bloque), section_name)
 
 
@@ -275,6 +313,7 @@ def load_context_and_text_with_fields(json_file, bloque, misterio_en_bloque, sec
         ac_meditacion    = rec.get("meditacion", "")
         ac_intercesion   = rec.get("intercesion", "")
     except Exception:
+        logger.warning("load_context_and_text_with_fields: no se pudieron leer campos del misterio", exc_info=True)
         ac_titulo = ac_subtitulo = ac_referencia = ""
         ac_evangelio = ac_contemplacion = ac_meditacion = ac_intercesion = ""
 
@@ -475,6 +514,25 @@ def gestor_a_load_misterio_fields(data, bloque_display: str, misterio_label: str
     )
 
 
+def _build_misterio_campos(titulo, subtitulo, referencia,
+                            evangelio, contemplacion, meditacion, intercesion) -> dict:
+    return {
+        "titulo":        titulo.strip()        if titulo        else "",
+        "subtitulo":     subtitulo.strip()     if subtitulo     else "",
+        "referencia":    referencia.strip()    if referencia    else "",
+        "evangelio":     evangelio             if evangelio     else "",
+        "contemplacion": contemplacion         if contemplacion else "",
+        "meditacion":    meditacion            if meditacion    else "",
+        "intercesion":   intercesion           if intercesion   else "",
+    }
+
+
+def _write_json(path: Path, data: dict, cache_key: str) -> None:
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+    invalidate_cache(cache_key)
+
+
 def save_misterio_from_accordion(json_file, bloque, misterio_en_bloque,
                                   titulo, subtitulo, referencia,
                                   evangelio, contemplacion, meditacion, intercesion):
@@ -492,21 +550,14 @@ def save_misterio_from_accordion(json_file, bloque, misterio_en_bloque,
     if idx_en_bloque < 0 or idx_en_bloque >= len(misterios):
         return f"Índice de misterio fuera de rango ({misterio_en_bloque}) en bloque '{bloque}'."
 
-    data["misterios"][bloque][idx_en_bloque].update({
-        "titulo":        titulo.strip()       if titulo        else "",
-        "subtitulo":     subtitulo.strip()    if subtitulo     else "",
-        "referencia":    referencia.strip()   if referencia    else "",
-        "evangelio":     evangelio            if evangelio     else "",
-        "contemplacion": contemplacion        if contemplacion else "",
-        "meditacion":    meditacion           if meditacion    else "",
-        "intercesion":   intercesion          if intercesion   else "",
-    })
+    data["misterios"][bloque][idx_en_bloque].update(
+        _build_misterio_campos(titulo, subtitulo, referencia,
+                               evangelio, contemplacion, meditacion, intercesion)
+    )
 
     try:
         path = Path(json_file)
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
-        invalidate_cache(json_file)
+        _write_json(path, data, json_file)
         num = data["misterios"][bloque][idx_en_bloque].get("numero", misterio_en_bloque)
         return f"Misterio {num} ({bloque}) guardado correctamente en {path.name}."
     except Exception as e:
@@ -529,20 +580,15 @@ def gestor_a_save_misterio(nivel_id, bloque_display, misterio_label, data,
     idx = next((i for i, m in enumerate(misterios) if m.get("numero") == num), None)
     if idx is None:
         return f"Misterio {num} no encontrado en el bloque '{bloque}'.", data
-    data["misterios"][bloque][idx].update({
-        "titulo":        titulo.strip()    if titulo        else "",
-        "subtitulo":     subtitulo.strip() if subtitulo     else "",
-        "referencia":    referencia.strip() if referencia   else "",
-        "evangelio":     evangelio         if evangelio     else "",
-        "contemplacion": contemplacion     if contemplacion else "",
-        "meditacion":    meditacion        if meditacion    else "",
-        "intercesion":   intercesion       if intercesion   else "",
-    })
+
+    data["misterios"][bloque][idx].update(
+        _build_misterio_campos(titulo, subtitulo, referencia,
+                               evangelio, contemplacion, meditacion, intercesion)
+    )
+
     filename = build_gestor_filename(nivel_id, "data")
     try:
-        with open(Path(filename), "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
-        invalidate_cache(filename)
+        _write_json(Path(filename), data, filename)
         return f"Misterio {num} guardado correctamente en {filename}.", data
     except Exception as e:
         return f"Error al guardar: {e}", data
@@ -712,6 +758,7 @@ def load_nota(json_file: str, bloque: str, misterio_en_bloque: int) -> str:
             notas = json.load(f)
         return notas.get(_nota_key(json_file, bloque, misterio_en_bloque), "")
     except Exception:
+        logger.warning("load_nota: error al leer %s", NOTAS_FILE, exc_info=True)
         return ""
 
 

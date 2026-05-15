@@ -1,6 +1,10 @@
+import logging
+
 import gradio as gr
 
 from config import BLOQUES, OUTPUT_DIR, SECTION_SPEEDS
+
+logger = logging.getLogger(__name__)
 from json_utils import (
     load_json_file,
     reload_json_choices,
@@ -172,6 +176,7 @@ def _batch_advance_and_prepare_next(state: dict):
     try:
         start_text, *_ = generate_ai_text(json_file, bloque, meb, "Bienvenida")
     except Exception as e:
+        logger.warning("_batch_advance_and_prepare_next: START generation failed", exc_info=True)
         start_text = f"[Error generando START: {e}]"
 
     return False, state, misterio_info, progress_html, start_text
@@ -242,6 +247,7 @@ def batch_iniciar(json_file, bloque, desde, fin_texto, state):
     try:
         start_text, *_ = generate_ai_text(json_file, bloque_actual, desde, "Bienvenida")
     except Exception as e:
+        logger.warning("batch_iniciar: START generation failed", exc_info=True)
         start_text = f"[Error generando START: {e}]"
 
     _dd_reset = gr.update(choices=[], visible=False)
@@ -258,11 +264,11 @@ def batch_iniciar(json_file, bloque, desde, fin_texto, state):
     )
 
 
-def batch_aprobar_start(start_text, state, session_cost_val):
-    _fail = ("", "", "", "", "", state or {}, gr.update(), gr.update(), gr.update(), gr.update(), None, gr.update(), session_cost_val or 0.0)
-    if not state or not state.get("activo"):
-        return _fail
-
+def _generate_all_sections(state: dict, start_text: str):
+    """Genera TTS para START + secciones centrales y texto IA para BYE.
+    Muta state (progress_misterio, audios_sesion, errores).
+    Devuelve (tts_lines, last_audio_path, batch_cost_total, bye_text).
+    """
     data = state["data"]
     bloque = state["bloque_actual"]
     meb = state["misterio_en_bloque"]
@@ -279,7 +285,10 @@ def batch_aprobar_start(start_text, state, session_cost_val):
     last_audio_path = None
     batch_cost_total = 0.0
 
-    ok, fn, audio_path, op_cost = _batch_try_generate_audio(start_text, "Bienvenida", nivel, cuaderno, misterio_global, fin_texto, SECTION_SPEEDS.get("Bienvenida", 1.0))
+    ok, fn, audio_path, op_cost = _batch_try_generate_audio(
+        start_text, "Bienvenida", nivel, cuaderno, misterio_global,
+        fin_texto, SECTION_SPEEDS.get("Bienvenida", 1.0),
+    )
     batch_cost_total += op_cost
     state["progress_misterio"]["START"] = ok
     if ok:
@@ -293,12 +302,16 @@ def batch_aprobar_start(start_text, state, session_cost_val):
         try:
             text_val, *_ = load_base_text(json_file, bloque, meb, section_name)
         except Exception as e:
+            logger.warning("_generate_all_sections: error cargando %s", section_name, exc_info=True)
             state["progress_misterio"][code] = False
             fn = build_standard_filename(section_name, nivel, cuaderno, misterio_global)
             state["errores"].append(f"{fn} — load: {e}")
             tts_lines.append(f"❌ {fn} — carga: {e}")
             continue
-        ok, fn, audio_path, op_cost = _batch_try_generate_audio(text_val, section_name, nivel, cuaderno, misterio_global, fin_texto, SECTION_SPEEDS.get(section_name, 1.0))
+        ok, fn, audio_path, op_cost = _batch_try_generate_audio(
+            text_val, section_name, nivel, cuaderno, misterio_global,
+            fin_texto, SECTION_SPEEDS.get(section_name, 1.0),
+        )
         batch_cost_total += op_cost
         state["progress_misterio"][code] = ok
         if ok:
@@ -309,17 +322,32 @@ def batch_aprobar_start(start_text, state, session_cost_val):
         tts_lines.append(("✅" if ok else "❌") + f" {fn}")
 
     try:
-        bye_text, *_ = generate_ai_text(json_file, bloque, meb, "Despedida")
+        bye_text, _, _, _, _, _, _, bye_cost = generate_ai_text(json_file, bloque, meb, "Despedida")
+        batch_cost_total += bye_cost
     except Exception as e:
+        logger.warning("_generate_all_sections: BYE generation failed", exc_info=True)
         bye_text = f"[Error generando BYE: {e}]"
+
+    return tts_lines, last_audio_path, batch_cost_total, bye_text
+
+
+def batch_aprobar_start(start_text, state, session_cost_val):
+    _fail = ("", "", "", "", "", state or {}, gr.update(), gr.update(), gr.update(), gr.update(), None, gr.update(), session_cost_val or 0.0)
+    if not state or not state.get("activo"):
+        return _fail
+
+    data = state["data"]
+    bloque = state["bloque_actual"]
+    meb = state["misterio_en_bloque"]
+
+    tts_lines, last_audio_path, batch_cost_total, bye_text = _generate_all_sections(state, start_text)
 
     progress_html = build_progress_html(state["progress_misterio"], data, bloque, meb)
     checklist_html = build_checklist_html(data)
-    tts_status = "\n".join(tts_lines)
     new_total = (session_cost_val or 0.0) + batch_cost_total
 
     return (
-        tts_status, progress_html, bye_text, state.get("log", ""), checklist_html, state,
+        "\n".join(tts_lines), progress_html, bye_text, state.get("log", ""), checklist_html, state,
         gr.update(interactive=False),
         gr.update(interactive=True),
         gr.update(interactive=False),
@@ -634,28 +662,40 @@ def register_handlers_batch(
         ],
     )
 
-    def _batch_mejorar_start(text, history):
+    def _batch_mejorar_start(text, history, session_cost_val):
         updated_history = push_to_history(text, history)
-        new_text, info = mejorar_estilo_con_ia(text)
+        new_text, info, op_cost = mejorar_estilo_con_ia(text)
+        new_total = (session_cost_val or 0.0) + op_cost
         choices = build_history_choices(updated_history)
-        return new_text, info, updated_history, gr.update(choices=choices, visible=len(updated_history) > 0)
+        return (
+            new_text, info, updated_history,
+            gr.update(choices=choices, visible=len(updated_history) > 0),
+            gr.update(value=_format_cost(new_total, op_cost)), new_total,
+        )
 
     batch_mejorar_start_btn.click(
         fn=_batch_mejorar_start,
-        inputs=[batch_start_text, batch_history_start],
-        outputs=[batch_start_text, batch_misterio_info, batch_history_start, batch_history_start_dd],
+        inputs=[batch_start_text, batch_history_start, session_cost],
+        outputs=[batch_start_text, batch_misterio_info, batch_history_start, batch_history_start_dd,
+                 batch_cost_display, session_cost],
     )
 
-    def _batch_mejorar_bye(text, history):
+    def _batch_mejorar_bye(text, history, session_cost_val):
         updated_history = push_to_history(text, history)
-        new_text, info = mejorar_estilo_con_ia(text)
+        new_text, info, op_cost = mejorar_estilo_con_ia(text)
+        new_total = (session_cost_val or 0.0) + op_cost
         choices = build_history_choices(updated_history)
-        return new_text, info, updated_history, gr.update(choices=choices, visible=len(updated_history) > 0)
+        return (
+            new_text, info, updated_history,
+            gr.update(choices=choices, visible=len(updated_history) > 0),
+            gr.update(value=_format_cost(new_total, op_cost)), new_total,
+        )
 
     batch_mejorar_bye_btn.click(
         fn=_batch_mejorar_bye,
-        inputs=[batch_bye_text, batch_history_bye],
-        outputs=[batch_bye_text, batch_misterio_info, batch_history_bye, batch_history_bye_dd],
+        inputs=[batch_bye_text, batch_history_bye, session_cost],
+        outputs=[batch_bye_text, batch_misterio_info, batch_history_bye, batch_history_bye_dd,
+                 batch_cost_display, session_cost],
     )
 
     batch_history_start_dd.change(
