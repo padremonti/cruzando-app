@@ -381,7 +381,7 @@ def load_base_text(json_file: str, bloque: str, misterio_en_bloque: int, section
         text = build_ubible_text(misterio_record, titulo_oficial)
         info = "Texto litúrgico armado desde JSON (sin IA)"
     elif section_name == "Contemplacion":
-        text = misterio_record.get("contemplacion", "")
+        text = prepare_contemplacion_text(misterio_record.get("contemplacion", ""))
         info = "Texto base cargado desde JSON: contemplacion"
     elif section_name == "Pregunta A":
         qa, _, _ = split_meditacion_into_questions(misterio_record.get("meditacion", ""))
@@ -397,6 +397,7 @@ def load_base_text(json_file: str, bloque: str, misterio_en_bloque: int, section
         info = "Texto base cargado desde JSON: meditacion → Pregunta C"
     elif section_name == "Oracion final":
         raw = misterio_record.get("intercesion", "").strip()
+        raw = prepare_contemplacion_text(raw)
         if raw and not re.search(r'am[eé]n\.?\s*$', raw, re.IGNORECASE):
             raw += "\n\nAmén."
         text = raw if raw else ""
@@ -426,6 +427,25 @@ def ensure_terminal_punctuation(text: str) -> str:
     if text and text[-1] not in ".!?…:;":
         text += "."
     return text
+
+
+def prepare_contemplacion_text(text: str) -> str:
+    """
+    Asegura que la primera línea no vacía termine con dos puntos cuando actúa
+    como título corto sin puntuación, para que la TTS haga una pausa natural
+    antes del cuerpo. No modifica el JSON fuente — solo el texto en la UI/pipeline.
+    """
+    if not text or not text.strip():
+        return text
+    lines = text.split("\n")
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if stripped[-1] not in ".!?…:;" and len(stripped) < 80:
+            lines[i] = stripped + ":"
+        break
+    return "\n".join(lines)
 
 
 def preview_filename(section_name: str, nivel: int, cuaderno: int, misterio: int):
@@ -563,8 +583,6 @@ def generate_ai_text(json_file: str, bloque: str, misterio_en_bloque: int, secti
     nivel, cuaderno = parse_tema_id_to_level_and_cuaderno(data)
     misterio_numero = int(misterio_record.get("numero", misterio_en_bloque))
 
-    mundo = data.get("mundo", "")
-    elemento = data.get("elemento", "")
     subtitulo_bloque = data.get("subtitulos_bloque", {}).get(bloque, "")
     titulo = misterio_record.get("titulo", "")
     subtitulo = misterio_record.get("subtitulo", "")
@@ -572,66 +590,98 @@ def generate_ai_text(json_file: str, bloque: str, misterio_en_bloque: int, secti
 
     if section_name == "Bienvenida":
         prompt = f"""
-Eres el asistente de redacción del P. César Ricardo Montijo Rivas, sacerdote mexicano y creador de CruzAndo, una peregrinación espiritual gamificada basada en el Santo Rosario. Debes escribir un borrador de START (Bienvenida) para una sesión de audio que él revisará y editará.
+Eres el asistente de redacción del P. César Ricardo Montijo Rivas, sacerdote mexicano
+y creador de CruzAndo, una peregrinación espiritual gamificada basada en el Santo Rosario.
+Escribe un borrador de Bienvenida (START) que él revisará y editará.
 
 CONTEXTO DEL MISTERIO:
-- Mundo: {mundo}
-- Elemento: {elemento}
-- Bloque: {bloque} — {subtitulo_bloque}
 - Misterio: {titulo}
-- Subtítulo del misterio: {subtitulo}
-- Referencia bíblica: {referencia}
+- Subtítulo: {subtitulo}
+- Bloque: {bloque} — {subtitulo_bloque}
+- Cita bíblica que se leerá en esta sesión: {referencia}
 
-ESTILO Y VOZ (imitar con fidelidad):
-- Voz femenina, maternal y cercana — como una guía que camina contigo, no que predica desde arriba.
-- Tono pastoral y cálido, nunca solemne ni teatral. Natural, como en conversación real.
-- Puedes abrir con una pregunta retórica o tensión espiritual que enganche al oyente antes de ubicarlo en el itinerario.
+ESTRUCTURA OBLIGATORIA (en este orden exacto, sin añadir secciones extra):
+
+1. SALUDO INICIAL — una sola frase coloquial, cálida y variada.
+   Puede ser una bienvenida directa, una pregunta que crea tensión espiritual,
+   una invitación a soltar el ruido del día, una metáfora del camino,
+   o una frase de complicidad pastoral.
+   Ejemplos de tono (no copiar literalmente):
+   "Bienvenido otra vez. Hoy el camino se abre un poco más."
+   "¿Y si hoy Dios quisiera hablarte desde algo muy sencillo?"
+   "Antes de seguir, suelta un poco el ruido del día."
+   "Hoy damos otro paso, aunque sea pequeño. También eso cuenta."
+   "Ven como estás. Dios sabe leer incluso tu cansancio."
+
+2. FRASE INTRODUCTORIA — una o dos frases inspiradas en el subtítulo del misterio
+   ("{subtitulo}"), que generen tensión espiritual o curiosidad contemplativa.
+   Debe hacer referencia explícita a la cita bíblica que se leerá,
+   indicando libro, capítulo y versículos en forma oral
+   (ej: "Lucas uno, versículos veintiséis al treinta y uno").
+
+3. CIERRE SIGNATURE — estas tres líneas exactas, sin modificar ni añadir nada después:
+Respira hondo.
+Abre tu corazón.
+Comencemos a cruzar.
+
+ESTILO:
+- Voz femenina, maternal y cercana. No predica: acompaña.
 - Segunda persona singular (tú), directa y personal.
-- Puedes mencionar el nombre del mundo, elemento o bloque con naturalidad en la primera o segunda frase.
-- Anuncia el misterio y la referencia bíblica de forma sencilla (ej: "Lucas dos, versículos uno al siete").
-- Las frases son cortas. Los párrafos también. Hay espacio entre las ideas.
-- Máximo 4-6 oraciones de contenido antes del cierre ritual.
+- Frases cortas. Párrafos cortos. Espacio entre ideas.
+- Sin academicismos, sin solemnidad, sin teatralidad.
+- Máximo 4-5 frases entre el saludo y el cierre signature.
+- El texto es para ser leído en voz alta: prioriza el ritmo oral.
 
-EJEMPLOS DE ESTILO DEL AUTOR (observa el tono y la estructura, no copies):
-Ejemplo 1: "Bienvenido a esta sesión de CruzAndo la Cruz, en el segundo nivel: pecado. A pesar de encontrarnos meditando los tiernos misterios de la infancia de Cristo, ya desde su nacimiento se enfrentó con un mundo oscuro, donde el egoísmo hace que cerremos las puertas a Dios. Vamos a meditar en Lucas 2, versículos del 1 al 7."
-Ejemplo 2: "Tal vez, muchas veces has escuchado y dicho la expresión: «Cordero de Dios que quita el pecado del mundo»... ¿qué significa esto? Vamos a sumergirnos en el misterio del Bautismo en el Jordán, escuchando Juan 1, versículos 29 y del 32 al 34."
-Ejemplo 3: "Muchas personas se suelen preguntar: ¿por qué Dios permitió que me hicieran daño?... Y la respuesta más liberadora que puedo darte es esta: Dios NO permitió el pecado: lo padeció contigo y por ti."
-
-CIERRE OBLIGATORIO — terminar SIEMPRE con estas tres líneas exactas, sin añadir nada después:
-
-Respira hondo…
-Abre tu corazón…
-Comencemos a cruzar…
+Devuelve SOLO el texto de la Bienvenida, sin títulos, sin explicaciones,
+sin comillas envolventes.
 """
     else:
         prompt = f"""
-Eres el asistente de redacción del P. César Ricardo Montijo Rivas, sacerdote mexicano y creador de CruzAndo, una peregrinación espiritual gamificada basada en el Santo Rosario. Debes escribir un borrador de BYE (Despedida) para una sesión de audio que él revisará y editará.
+Eres el asistente de redacción del P. César Ricardo Montijo Rivas, sacerdote mexicano
+y creador de CruzAndo, una peregrinación espiritual gamificada basada en el Santo Rosario.
+Escribe un borrador de Despedida (BYE) que él revisará y editará.
 
 CONTEXTO DEL MISTERIO:
-- Mundo: {mundo}
-- Elemento: {elemento}
-- Bloque: {bloque}
-- Subtítulo del bloque: {subtitulo_bloque}
 - Misterio: {titulo}
-- Subtítulo del misterio: {subtitulo}
+- Subtítulo: {subtitulo}
+- Bloque: {bloque} — {subtitulo_bloque}
+- Número global del misterio en este nivel: {misterio_numero} de 20
 
-ESTILO Y VOZ (imitar con fidelidad):
-- Voz femenina, maternal y cercana — como una guía que te acompaña al final del camino de hoy.
-- Tono alegre, esperanzador, con impulso hacia adelante. Nunca solemne ni pesado.
-- Estructura habitual: (1) remate contemplativo breve sobre el misterio recién rezado, (2) anticipo del próximo misterio o sesión como gancho, (3) opcionalmente: recordatorio del diario personal, (4) cierre festivo.
-- Las frases son cortas. Puede haber una pausa dramática ("...") entre ideas.
-- Segunda persona singular (tú), directa y personal.
-- Máximo 4-6 oraciones antes del cierre.
-- No sonar comercial ni genérico.
+ESTRUCTURA OBLIGATORIA (en este orden exacto):
 
-EJEMPLOS DE ESTILO DEL AUTOR (observa el tono y la estructura, no copies):
-Ejemplo 1: "El Salvador ya está aquí, liberándote de todo peso. Siente esa alegría en tu corazón. En la próxima sesión, vamos a reconocer cuántas veces hemos cerrado las puertas a Dios, y eso es justamente el pecado."
-Ejemplo 2: "Con cada Eucaristía, su sangre derramada nos recuerda que siempre hay un nuevo comienzo. Felicidades por recorrer los Misterios Luminosos cruzando el pecado. Ahora, has desbloqueado el canto: «Entra su Luz». A propósito, ¿has descubierto más sobre tu fe? Recuerda que puedes escribir tus reflexiones en tu diario personal."
-Ejemplo 3: "La Flagelación del Señor nos enseña a enfrentar el dolor con valentía, para interrumpir por siempre el ciclo de la venganza y la violencia. ¿Has escrito alguna reflexión que sea valiosa, para compartir con alguien? Recuerda que puedes consultarla en tu diario... En la próxima sesión vamos a entrar a un tema muy actual: la cultura de la cancelación. ¡Te espero pronto!"
+1. REMATE CONTEMPLATIVO — una o dos frases que recogen el fruto espiritual
+   del misterio recién rezado ("{titulo} — {subtitulo}").
+   Debe sonar como un eco de lo que el peregrino acaba de contemplar,
+   no como un resumen ni una conclusión moral.
 
-CIERRE OBLIGATORIO — terminar SIEMPRE con esta línea exacta, sin añadir nada después:
+2. ALUSIÓN AL DIARIO PERSONAL — incluir ÚNICAMENTE si {misterio_numero} == {misterio_numero}
+   y este es el número donde narrativamente encaja mejor entre 1 y 20.
+   La lógica: incluir esta alusión solo una vez en los 20 misterios del nivel,
+   en el misterio donde el remate contemplativo la haga fluir con naturalidad.
+   Si decides incluirla, una sola frase, ej:
+   "Si algo de este misterio tocó tu corazón, puedes escribirlo en tu diario."
+   Si no corresponde incluirla en este misterio, omite esta sección completamente.
 
+3. DESPEDIDA COLOQUIAL — una frase cálida de hasta pronto, variada,
+   que no suene genérica ni comercial.
+   Ejemplos de tono (no copiar literalmente):
+   "Que sigas caminando con esa misma presencia."
+   "Te espero en la próxima estación del camino."
+   "Hasta pronto, peregrino."
+   "Cuídate mucho, y nos vemos pronto."
+
+4. CIERRE FIJO — esta línea exacta, sin modificar:
 ¡Goza el camino, y que Dios te bendiga siempre!
+
+ESTILO:
+- Voz femenina, maternal y cercana. Alegre pero no eufórica.
+- Segunda persona singular (tú).
+- Frases cortas. Sin solemnidad. Sin alusiones al siguiente misterio o nivel.
+- El texto es para ser leído en voz alta: prioriza el ritmo oral.
+- Máximo 4-5 frases en total (sin contar el cierre fijo).
+
+Devuelve SOLO el texto de la Despedida, sin títulos, sin explicaciones,
+sin comillas envolventes.
 """
 
     headers = {
@@ -673,7 +723,7 @@ CIERRE OBLIGATORIO — terminar SIEMPRE con esta línea exacta, sin añadir nada
 # OpenAI: TTS
 # -------------------------------------------------------------------
 
-def generate_audio(text: str, section_name: str, nivel: int, cuaderno: int, misterio: int):
+def generate_audio(text: str, section_name: str, nivel: int, cuaderno: int, misterio: int, fin_texto: bool = True):
     if not OPENAI_API_KEY:
         raise gr.Error("No encontré OPENAI_API_KEY en tu archivo .env")
 
@@ -697,7 +747,8 @@ def generate_audio(text: str, section_name: str, nivel: int, cuaderno: int, mist
     voice = SECTION_VOICES[section_name]
 
     prepared_text = ensure_terminal_punctuation(text)
-    prepared_text = prepared_text + "\n\nFin del texto."
+    if fin_texto:
+        prepared_text = prepared_text + "\n\nFin del texto."
 
     instructions = (
         SECTION_INSTRUCTIONS[section_name]
@@ -1334,6 +1385,401 @@ def mejorar_estilo_con_ia(text: str):
 
 
 # -------------------------------------------------------------------
+# Batch — helpers y funciones
+# -------------------------------------------------------------------
+
+_BATCH_SECTIONS = [
+    ("START", "Bienvenida"),
+    ("UBIBLE", "Camino y Palabra"),
+    ("CONT",   "Contemplacion"),
+    ("QA",     "Pregunta A"),
+    ("QB",     "Pregunta B"),
+    ("QC",     "Pregunta C"),
+    ("PRAY",   "Oracion final"),
+    ("BYE",    "Despedida"),
+]
+_BATCH_CODES_ORDER = [code for code, _ in _BATCH_SECTIONS]
+
+
+def _batch_try_generate_audio(text, section_name, nivel, cuaderno, misterio, fin_texto):
+    if not text or not text.strip():
+        filename = build_standard_filename(section_name, nivel, cuaderno, misterio)
+        return False, f"{filename} — texto vacío"
+    try:
+        _, _, filename, _ = generate_audio(text, section_name, nivel, cuaderno, misterio, fin_texto)
+        return True, filename
+    except Exception as e:
+        filename = build_standard_filename(section_name, nivel, cuaderno, misterio)
+        msg = e.message if hasattr(e, "message") else str(e)
+        return False, f"{filename} — {msg}"
+
+
+def build_progress_html(progress_dict: dict, data: dict, bloque: str, misterio_en_bloque: int) -> str:
+    nivel, cuaderno = parse_tema_id_to_level_and_cuaderno(data)
+    misterios = get_misterios_for_block(data, bloque)
+    if misterios and 1 <= misterio_en_bloque <= len(misterios):
+        rec = misterios[misterio_en_bloque - 1]
+        misterio_global = int(rec.get("numero", misterio_en_bloque))
+    else:
+        misterio_global = misterio_en_bloque
+
+    parts = []
+    for code, section_name in _BATCH_SECTIONS:
+        status = progress_dict.get(code)
+        if status is None:
+            color, icon = "#e9ecef", "⬜"
+        elif status:
+            color, icon = "#d4edda", "✅"
+        else:
+            color, icon = "#f8d7da", "❌"
+        filename = build_standard_filename(section_name, nivel, cuaderno, misterio_global)
+        parts.append(
+            f'<span style="background:{color};padding:4px 8px;margin:3px;border-radius:4px;'
+            f'font-size:13px;display:inline-block;" title="{filename}">'
+            f'{icon} {code}</span>'
+        )
+    return "<div style='padding:8px 0;'>" + "".join(parts) + "</div>"
+
+
+def build_checklist_html(data: dict) -> str:
+    nivel, cuaderno = parse_tema_id_to_level_and_cuaderno(data)
+
+    header = (
+        '<tr style="background:#343a40;color:white;">'
+        '<th style="padding:6px 10px;text-align:left;">Misterio</th>'
+    )
+    for code, _ in _BATCH_SECTIONS:
+        header += f'<th style="padding:6px 8px;">{code}</th>'
+    header += "</tr>"
+
+    rows = []
+    total_present = 0
+    total_possible = 0
+
+    for bloque in BLOQUES:
+        misterios = get_misterios_for_block(data, bloque)
+        for i, rec in enumerate(misterios):
+            misterio_global = int(rec.get("numero", i + 1))
+            titulo = rec.get("titulo", f"Misterio {misterio_global}")
+            titulo_short = (titulo[:30] + "…") if len(titulo) > 30 else titulo
+            row_bg = "#f8f9fa" if misterio_global % 2 == 0 else "white"
+            cells = (
+                f'<td style="padding:5px 10px;white-space:nowrap;background:{row_bg};">'
+                f'#{misterio_global} {titulo_short}</td>'
+            )
+            for code, section_name in _BATCH_SECTIONS:
+                filename = build_standard_filename(section_name, nivel, cuaderno, misterio_global)
+                exists = (OUTPUT_DIR / filename).exists()
+                total_possible += 1
+                if exists:
+                    total_present += 1
+                    bg, icon = "#d4edda", "✅"
+                else:
+                    bg, icon = "#f8d7da", "❌"
+                cells += (
+                    f'<td style="background:{bg};text-align:center;padding:4px 8px;" '
+                    f'title="{filename}">{icon}</td>'
+                )
+            rows.append(f"<tr>{cells}</tr>")
+
+    footer = (
+        f'<tr style="font-weight:bold;background:#e9ecef;">'
+        f'<td colspan="{1 + len(_BATCH_SECTIONS)}" style="padding:6px 10px;text-align:right;">'
+        f"{total_present} / {total_possible} archivos presentes</td></tr>"
+    )
+    return (
+        '<table style="border-collapse:collapse;width:100%;font-size:13px;">'
+        + header + "".join(rows) + footer + "</table>"
+    )
+
+
+def _batch_misterio_info_str(state: dict) -> str:
+    data = state["data"]
+    bloque = state["bloque_actual"]
+    meb = state["misterio_en_bloque"]
+    misterios = get_misterios_for_block(data, bloque)
+    if misterios and 1 <= meb <= len(misterios):
+        rec = misterios[meb - 1]
+        titulo = rec.get("titulo", "")
+        subtitulo = rec.get("subtitulo", "")
+        misterio_global = int(rec.get("numero", meb))
+    else:
+        titulo = subtitulo = ""
+        misterio_global = meb
+    return (
+        f"📍 Bloque: {bloque} | Misterio {meb}/5 | Global #{misterio_global} | {titulo} — {subtitulo}\n"
+        f"🎵 Audios esta sesión: {state['audios_sesion']}/{state['total_posible_sesion']}"
+    )
+
+
+def _batch_advance_and_prepare_next(state: dict):
+    bloques_queue = state["bloques_queue"]
+    bloque_actual = state["bloque_actual"]
+    meb = state["misterio_en_bloque"]
+
+    if meb < 5:
+        state["misterio_en_bloque"] = meb + 1
+    else:
+        idx = bloques_queue.index(bloque_actual)
+        if idx + 1 < len(bloques_queue):
+            state["bloque_actual"] = bloques_queue[idx + 1]
+            state["misterio_en_bloque"] = 1
+        else:
+            state["activo"] = False
+            return True, state, None, None, None
+
+    state["progress_misterio"] = {c: None for c in _BATCH_CODES_ORDER}
+
+    data = state["data"]
+    json_file = state["json_file"]
+    bloque = state["bloque_actual"]
+    meb = state["misterio_en_bloque"]
+
+    misterio_info = _batch_misterio_info_str(state)
+    progress_html = build_progress_html(state["progress_misterio"], data, bloque, meb)
+
+    try:
+        start_text, *_ = generate_ai_text(json_file, bloque, meb, "Bienvenida")
+    except Exception as e:
+        start_text = f"[Error generando START: {e}]"
+
+    return False, state, misterio_info, progress_html, start_text
+
+
+def _batch_log_line(state: dict, misterio_global: int) -> str:
+    bloque = state["bloque_actual"]
+    meb = state["misterio_en_bloque"]
+    data = state["data"]
+    nivel = state["nivel"]
+    cuaderno = state["cuaderno"]
+    misterios = get_misterios_for_block(data, bloque)
+    rec = misterios[meb - 1] if misterios and 1 <= meb <= len(misterios) else {}
+    titulo = rec.get("titulo", "")
+
+    gen_count = sum(1 for v in state["progress_misterio"].values() if v is True)
+    err_count = sum(1 for v in state["progress_misterio"].values() if v is False)
+    err_names = [
+        build_standard_filename(sname, nivel, cuaderno, misterio_global)
+        for code, sname in _BATCH_SECTIONS
+        if state["progress_misterio"].get(code) is False
+    ]
+    err_suffix = (" ❌ " + " ".join(err_names)) if err_names else ""
+    return f"✔ {bloque} #{meb} — {titulo}: {gen_count} gen, {err_count} err{err_suffix}"
+
+
+def batch_iniciar(json_file, bloque, desde, fin_texto, state):
+    _fail = ("", "", "", "", "", "", "", state or {}, gr.update(interactive=False), gr.update(interactive=False))
+    if not json_file:
+        return _fail
+    try:
+        data = load_json_file(json_file)
+    except Exception as e:
+        return (f"Error: {e}",) + _fail[1:]
+
+    nivel, cuaderno = parse_tema_id_to_level_and_cuaderno(data)
+
+    bloques_queue = list(BLOQUES) if bloque == "Todos" else [bloque]
+    desde = max(1, min(5, int(desde)))
+    bloque_actual = bloques_queue[0]
+
+    total_misterios = (6 - desde) + (len(bloques_queue) - 1) * 5
+    total_posible_sesion = total_misterios * 8
+
+    new_state = {
+        "activo": True,
+        "bloques_queue": bloques_queue,
+        "bloque_actual": bloque_actual,
+        "misterio_en_bloque": desde,
+        "total_misterios": total_misterios,
+        "audios_sesion": 0,
+        "total_posible_sesion": total_posible_sesion,
+        "errores": [],
+        "progress_misterio": {c: None for c in _BATCH_CODES_ORDER},
+        "data": data,
+        "fin_texto": fin_texto,
+        "json_file": json_file,
+        "nivel": nivel,
+        "cuaderno": cuaderno,
+        "log": "",
+    }
+
+    misterio_info = _batch_misterio_info_str(new_state)
+    progress_html = build_progress_html(new_state["progress_misterio"], data, bloque_actual, desde)
+    checklist_html = build_checklist_html(data)
+
+    try:
+        start_text, *_ = generate_ai_text(json_file, bloque_actual, desde, "Bienvenida")
+    except Exception as e:
+        start_text = f"[Error generando START: {e}]"
+
+    return (
+        misterio_info, progress_html, start_text, "", "", "",
+        checklist_html, new_state,
+        gr.update(interactive=True),
+        gr.update(interactive=False),
+    )
+
+
+def batch_aprobar_start(start_text, state):
+    _fail = ("", "", "", "", "", state or {}, gr.update(), gr.update())
+    if not state or not state.get("activo"):
+        return _fail
+
+    data = state["data"]
+    bloque = state["bloque_actual"]
+    meb = state["misterio_en_bloque"]
+    nivel = state["nivel"]
+    cuaderno = state["cuaderno"]
+    fin_texto = state["fin_texto"]
+    json_file = state["json_file"]
+
+    misterios = get_misterios_for_block(data, bloque)
+    rec = misterios[meb - 1] if misterios and 1 <= meb <= len(misterios) else {}
+    misterio_global = int(rec.get("numero", meb))
+
+    tts_lines = []
+
+    # START
+    ok, fn = _batch_try_generate_audio(start_text, "Bienvenida", nivel, cuaderno, misterio_global, fin_texto)
+    state["progress_misterio"]["START"] = ok
+    if ok:
+        state["audios_sesion"] += 1
+    else:
+        state["errores"].append(fn)
+    tts_lines.append(("✅" if ok else "❌") + f" {fn}")
+
+    # UBIBLE, CONT, QA, QB, QC, PRAY
+    for code, section_name in _BATCH_SECTIONS[1:-1]:
+        try:
+            text_val, *_ = load_base_text(json_file, bloque, meb, section_name)
+        except Exception as e:
+            state["progress_misterio"][code] = False
+            fn = build_standard_filename(section_name, nivel, cuaderno, misterio_global)
+            state["errores"].append(f"{fn} — load: {e}")
+            tts_lines.append(f"❌ {fn} — carga: {e}")
+            continue
+        ok, fn = _batch_try_generate_audio(text_val, section_name, nivel, cuaderno, misterio_global, fin_texto)
+        state["progress_misterio"][code] = ok
+        if ok:
+            state["audios_sesion"] += 1
+        else:
+            state["errores"].append(fn)
+        tts_lines.append(("✅" if ok else "❌") + f" {fn}")
+
+    try:
+        bye_text, *_ = generate_ai_text(json_file, bloque, meb, "Despedida")
+    except Exception as e:
+        bye_text = f"[Error generando BYE: {e}]"
+
+    progress_html = build_progress_html(state["progress_misterio"], data, bloque, meb)
+    checklist_html = build_checklist_html(data)
+    tts_status = "\n".join(tts_lines)
+
+    return (
+        tts_status, progress_html, bye_text, state.get("log", ""), checklist_html, state,
+        gr.update(interactive=False),
+        gr.update(interactive=True),
+    )
+
+
+def batch_aprobar_bye(bye_text, state):
+    _empty_log = state.get("log", "") if state else ""
+    _fail = ("", "", "", "", "", _empty_log, "", state or {}, gr.update(), gr.update())
+    if not state or not state.get("activo"):
+        return _fail
+
+    data = state["data"]
+    bloque = state["bloque_actual"]
+    meb = state["misterio_en_bloque"]
+    nivel = state["nivel"]
+    cuaderno = state["cuaderno"]
+    fin_texto = state["fin_texto"]
+
+    misterios = get_misterios_for_block(data, bloque)
+    rec = misterios[meb - 1] if misterios and 1 <= meb <= len(misterios) else {}
+    misterio_global = int(rec.get("numero", meb))
+
+    ok, fn = _batch_try_generate_audio(bye_text, "Despedida", nivel, cuaderno, misterio_global, fin_texto)
+    state["progress_misterio"]["BYE"] = ok
+    if ok:
+        state["audios_sesion"] += 1
+    else:
+        state["errores"].append(fn)
+
+    state["log"] = state.get("log", "") + _batch_log_line(state, misterio_global) + "\n"
+    checklist_html = build_checklist_html(data)
+
+    completed, state, next_info, next_progress, next_start = _batch_advance_and_prepare_next(state)
+
+    if completed:
+        total = state["audios_sesion"]
+        n_err = len(state["errores"])
+        return (
+            f"🏁 Batch completado — {total} audios generados, {n_err} errores",
+            "<div>Batch completado.</div>",
+            "", "", "",
+            state["log"], checklist_html, state,
+            gr.update(interactive=False),
+            gr.update(interactive=False),
+        )
+    return (
+        next_info, next_progress, next_start, "", "",
+        state["log"], checklist_html, state,
+        gr.update(interactive=True),
+        gr.update(interactive=False),
+    )
+
+
+def batch_saltar(state):
+    _empty_log = state.get("log", "") if state else ""
+    _fail = ("", "", "", "", "", _empty_log, "", state or {}, gr.update(), gr.update())
+    if not state or not state.get("activo"):
+        return _fail
+
+    data = state["data"]
+    bloque = state["bloque_actual"]
+    meb = state["misterio_en_bloque"]
+    misterios = get_misterios_for_block(data, bloque)
+    rec = misterios[meb - 1] if misterios and 1 <= meb <= len(misterios) else {}
+    titulo = rec.get("titulo", "")
+
+    state["log"] = state.get("log", "") + f"⏭ Saltado: {bloque} #{meb} — {titulo}\n"
+    checklist_html = build_checklist_html(data)
+
+    completed, state, next_info, next_progress, next_start = _batch_advance_and_prepare_next(state)
+
+    if completed:
+        total = state["audios_sesion"]
+        n_err = len(state["errores"])
+        return (
+            f"🏁 Batch completado — {total} audios generados, {n_err} errores",
+            "<div>Batch completado.</div>",
+            "", "", "",
+            state["log"], checklist_html, state,
+            gr.update(interactive=False),
+            gr.update(interactive=False),
+        )
+    return (
+        next_info, next_progress, next_start, "", "",
+        state["log"], checklist_html, state,
+        gr.update(interactive=True),
+        gr.update(interactive=False),
+    )
+
+
+def batch_ver_estado(json_file, state):
+    data = (state or {}).get("data")
+    if not data:
+        if not json_file:
+            return ("<p>Selecciona un archivo JSON.</p>",)
+        try:
+            data = load_json_file(json_file)
+        except Exception as e:
+            return (f"<p>Error: {e}</p>",)
+    return (build_checklist_html(data),)
+
+
+# -------------------------------------------------------------------
 # UI
 # -------------------------------------------------------------------
 
@@ -1499,7 +1945,12 @@ with gr.Blocks(
                     )
                     with gr.Row():
                         mejorar_btn = gr.Button("✨ Mejorar estilo", variant="secondary")
-                        generate_btn = gr.Button("🎧 Generar audio", variant="primary")
+                        fin_texto_toggle = gr.Checkbox(
+                        label='Añadir "Fin del texto." al final',
+                        value=True,
+                        info='Evita que la TTS corte el audio antes de terminar. Desactiva para probar.',
+                    )
+                    generate_btn = gr.Button("🎧 Generar audio", variant="primary")
 
                 with gr.Column(scale=1):
                     gr.Markdown("### Resultado")
@@ -1675,6 +2126,65 @@ with gr.Blocks(
                     gestor_d_save_btn = gr.Button("💾 Guardar como {id}-micro.json")
                     gestor_d_status_save = gr.Textbox(label="Estado del guardado", lines=2)
 
+        # ============================================================
+        # TAB 4 — Batch
+        # ============================================================
+        with gr.Tab("Batch"):
+            batch_state = gr.State({})
+
+            gr.Markdown("### Configuración")
+            with gr.Row():
+                batch_json_file = gr.Dropdown(
+                    choices=json_choices,
+                    value=default_json,
+                    label="Archivo JSON",
+                )
+                batch_reload_btn = gr.Button("🔄", scale=0)
+            with gr.Row():
+                batch_bloque = gr.Radio(
+                    choices=["gozosos", "luminosos", "dolorosos", "gloriosos", "Todos"],
+                    value="gozosos",
+                    label="Bloque",
+                )
+                batch_fin_texto = gr.Checkbox(label='Añadir "Fin del texto."', value=True)
+                batch_start_desde = gr.Number(
+                    label="Comenzar desde misterio #",
+                    value=1,
+                    minimum=1,
+                    maximum=5,
+                    precision=0,
+                )
+            batch_start_config_btn = gr.Button("▶ Iniciar batch", variant="primary")
+
+            gr.Markdown("### Estado del nivel")
+            batch_checklist_btn = gr.Button("🔍 Ver estado del nivel")
+            batch_checklist = gr.HTML()
+
+            gr.Markdown("### Trabajo")
+            batch_misterio_info = gr.Textbox(
+                label="Misterio actual", interactive=False, lines=2
+            )
+            batch_progress_html = gr.HTML()
+            batch_start_text = gr.Textbox(label="Texto START (editable)", lines=10)
+            batch_start_btn = gr.Button(
+                "✅ Aprobar START y generar TTS central",
+                variant="primary",
+                interactive=False,
+            )
+            batch_tts_status = gr.Textbox(
+                label="TTS central", interactive=False, lines=4
+            )
+            batch_bye_text = gr.Textbox(label="Texto BYE (editable)", lines=8)
+            batch_bye_btn = gr.Button(
+                "✅ Aprobar BYE y continuar",
+                variant="primary",
+                interactive=False,
+            )
+            batch_skip_btn = gr.Button("⏭ Saltar este misterio")
+
+            gr.Markdown("### Log de sesión")
+            batch_log = gr.Textbox(label="Log de sesión", interactive=False, lines=15)
+
     # ----------------------------------------------------------------
     # Event handlers — TTS Maker
     # ----------------------------------------------------------------
@@ -1706,7 +2216,7 @@ with gr.Blocks(
 
     generate_btn.click(
         fn=generate_audio,
-        inputs=[text, section_name, nivel, cuaderno, misterio],
+        inputs=[text, section_name, nivel, cuaderno, misterio, fin_texto_toggle],
         outputs=[audio_output, result_output, filename_preview, download_output],
     )
 
@@ -1827,6 +2337,60 @@ with gr.Blocks(
         fn=save_micro_preview,
         inputs=[gestor_d_id, gestor_d_preview],
         outputs=[gestor_d_status_save],
+    )
+
+    # ----------------------------------------------------------------
+    # Event handlers — Batch
+    # ----------------------------------------------------------------
+    batch_reload_btn.click(
+        fn=reload_json_choices,
+        inputs=[],
+        outputs=[batch_json_file],
+    )
+
+    batch_start_config_btn.click(
+        fn=batch_iniciar,
+        inputs=[batch_json_file, batch_bloque, batch_start_desde, batch_fin_texto, batch_state],
+        outputs=[
+            batch_misterio_info, batch_progress_html, batch_start_text, batch_tts_status,
+            batch_bye_text, batch_log, batch_checklist, batch_state,
+            batch_start_btn, batch_bye_btn,
+        ],
+    )
+
+    batch_start_btn.click(
+        fn=batch_aprobar_start,
+        inputs=[batch_start_text, batch_state],
+        outputs=[
+            batch_tts_status, batch_progress_html, batch_bye_text, batch_log,
+            batch_checklist, batch_state, batch_start_btn, batch_bye_btn,
+        ],
+    )
+
+    batch_bye_btn.click(
+        fn=batch_aprobar_bye,
+        inputs=[batch_bye_text, batch_state],
+        outputs=[
+            batch_misterio_info, batch_progress_html, batch_start_text, batch_tts_status,
+            batch_bye_text, batch_log, batch_checklist, batch_state,
+            batch_start_btn, batch_bye_btn,
+        ],
+    )
+
+    batch_skip_btn.click(
+        fn=batch_saltar,
+        inputs=[batch_state],
+        outputs=[
+            batch_misterio_info, batch_progress_html, batch_start_text, batch_tts_status,
+            batch_bye_text, batch_log, batch_checklist, batch_state,
+            batch_start_btn, batch_bye_btn,
+        ],
+    )
+
+    batch_checklist_btn.click(
+        fn=batch_ver_estado,
+        inputs=[batch_json_file, batch_state],
+        outputs=[batch_checklist],
     )
 
 if __name__ == "__main__":
