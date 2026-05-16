@@ -1,0 +1,75 @@
+{
+  "tema": {
+    "id": "0601",
+    "mundo_slug": "amor",
+    "mundo_nombre": "CruzAndo el Amor",
+    "elemento_slug": "",
+    "siguiente": "0602",
+    "paleta": {
+      "bold": "#FF2663",
+      "base": "#EE6088",
+      "soft": "#F6668A",
+      "mist": "#F199B2",
+      "light": "#FFC6D6",
+      "ultra": "rgba(255,38,99,0.07)"
+    },
+    "bloques": {
+      "gozosos": {
+        "emoji": "🌟",
+        "color": "#D4A017"
+      },
+      "luminosos": {
+        "emoji": "✨",
+        "color": "#01BBE1"
+      },
+      "dolorosos": {
+        "emoji": "✝️",
+        "color": "#C0392B"
+      },
+      "gloriosos": {
+        "emoji": "👑",
+        "color": "#8E44AD"
+      }
+    }
+  },
+  "mundo": "CruzAndo el Amor",
+  "elemento": "",
+  "numero": "1",
+  "audio_rezo": "",
+  "subtitulos_bloque": {
+    "gozosos": "",
+    "luminosos": "",
+    "dolorosos": "",
+    "gloriosos": ""
+  },
+  "misterios": {
+    "gozosos": [
+      { "numero": 1, "titulo": "", "subtitulo": "", "referencia": "", "evangelio": "", "contemplacion": "", "meditacion": "", "intercesion": "" },
+      { "numero": 2, "titulo": "", "subtitulo": "", "referencia": "", "evangelio": "", "contemplacion": "", "meditacion": "", "intercesion": "" },
+      { "numero": 3, "titulo": "", "subtitulo": "", "referencia": "", "evangelio": "", "contemplacion": "", "meditacion": "", "intercesion": "" },
+      { "numero": 4, "titulo": "", "subtitulo": "", "referencia": "", "evangelio": "", "contemplacion": "", "meditacion": "", "intercesion": "" },
+      { "numero": 5, "titulo": "", "subtitulo": "", "referencia": "", "evangelio": "", "contemplacion": "", "meditacion": "", "intercesion": "" }
+    ],
+    "luminosos": [
+      { "numero": 6, "titulo": "", "subtitulo": "", "referencia": "", "evangelio": "", "contemplacion": "", "meditacion": "", "intercesion": "" },
+      { "numero": 7, "titulo": "", "subtitulo": "", "referencia": "", "evangelio": "", "contemplacion": "", "meditacion": "", "intercesion": "" },
+      { "numero": 8, "titulo": "", "subtitulo": "", "referencia": "", "evangelio": "", "contemplacion": "", "meditacion": "", "intercesion": "" },
+      { "numero": 9, "titulo": "", "subtitulo": "", "referencia": "", "evangelio": "", "contemplacion": "", "meditacion": "", "intercesion": "" },
+      { "numero": 10, "titulo": "", "subtitulo": "", "referencia": "", "evangelio": "", "contemplacion": "", "meditacion": "", "intercesion": "" }
+    ],
+    "dolorosos": [
+      { "numero": 11, "titulo": "", "subtitulo": "", "referencia": "", "evangelio": "", "contemplacion": "", "meditacion": "", "intercesion": "" },
+      { "numero": 12, "titulo": "", "subtitulo": "", "referencia": "", "evangelio": "", "contemplacion": "", "meditacion": "", "intercesion": "" },
+      { "numero": 13, "titulo": "", "subtitulo": "", "referencia": "", "evangelio": "", "contemplacion": "", "meditacion": "", "intercesion": "" },
+      { "numero": 14, "titulo": "", "subtitulo": "", "referencia": "", "evangelio": "", "contemplacion": "", "meditacion": "", "intercesion": "" },
+      { "numero": 15, "titulo": "", "subtitulo": "", "referencia": "", "evangelio": "", "contemplacion": "", "meditacion": "", "intercesion": "" }
+    ],
+    "gloriosos": [
+      { "numero": 16, "titulo": "", "subtitulo": "", "referencia": "", "evangelio": "", "contemplacion": "", "meditacion": "", "intercesion": "" },
+      { "numero": 17, "titulo": "", "subtitulo": "", "referencia": "", "evangelio": "", "contemplacion": "", "meditacion": "", "intercesion": "" },
+      { "numero": 18, "titulo": "", "subtitulo": "", "referencia": "", "evangelio": "", "contemplacion": "", "meditacion": "", "intercesion": "" },
+      { "numero": 19, "titulo": "", "subtitulo": "", "referencia": "", "evangelio": "", "contemplacion": "", "meditacion": "", "intercesion": "" },
+      { "numero": 20, "titulo": "", "subtitulo": "", "referencia": "", "evangelio": "", "contemplacion": "", "meditacion": "", "intercesion": "" }
+    ]
+  }
+}

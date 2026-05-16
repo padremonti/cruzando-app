@@ -210,7 +210,7 @@ def generate_ai_text(json_file: str, bloque: str, misterio_en_bloque: int, secti
     return generated, info, nivel, cuaderno, misterio_numero, titulo_info, summary, cost
 
 
-def generate_audio(text: str, section_name: str, nivel: int, cuaderno: int, misterio: int, fin_texto: bool = True, speed: float = 1.0):
+def generate_audio(text: str, section_name: str, nivel: int, cuaderno: int, misterio: int, speed: float = 1.0):
     if not OPENAI_API_KEY:
         raise gr.Error("No encontré OPENAI_API_KEY en tu archivo .env")
 
@@ -234,8 +234,6 @@ def generate_audio(text: str, section_name: str, nivel: int, cuaderno: int, mist
     voice = SECTION_VOICES[section_name]
 
     prepared_text = ensure_terminal_punctuation(text)
-    if fin_texto:
-        prepared_text = prepared_text + "\n\nFin del texto."
 
     instructions = (
         SECTION_INSTRUCTIONS[section_name]

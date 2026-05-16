@@ -78,13 +78,7 @@ def build_tab_tts(json_choices):
                     interactive=True,
                 )
                 history_restore_btn = gr.Button("↩ Restaurar esta versión", variant="secondary")
-            with gr.Row():
-                mejorar_btn = gr.Button("✨ Mejorar estilo", variant="secondary")
-                fin_texto_toggle = gr.Checkbox(
-                    label='Añadir "Fin del texto." al final',
-                    value=True,
-                    info='Evita que la TTS corte el audio antes de terminar. Desactiva para probar.',
-                )
+            mejorar_btn = gr.Button("✨ Mejorar estilo", variant="secondary")
             generate_btn = gr.Button("🎧 Generar audio", variant="primary")
 
         with gr.Column(scale=1):
@@ -143,7 +137,7 @@ def build_tab_tts(json_choices):
         json_file, reload_json_btn, bloque, misterio_en_bloque,
         nivel, cuaderno, misterio, load_context_btn, titulo_info, context_info,
         section_name, speed_slider, text, tts_history, history_dropdown, history_restore_btn,
-        mejorar_btn, fin_texto_toggle, generate_btn,
+        mejorar_btn, generate_btn,
         filename_preview, voice_info, audio_output, next_section_btn,
         result_output, download_output,
         ac_titulo, ac_subtitulo, ac_referencia,
@@ -163,7 +157,7 @@ def register_handlers_tts(
     json_file, reload_json_btn, bloque, misterio_en_bloque,
     nivel, cuaderno, misterio, load_context_btn, titulo_info, context_info,
     section_name, speed_slider, text, tts_history, history_dropdown, history_restore_btn,
-    mejorar_btn, fin_texto_toggle, generate_btn,
+    mejorar_btn, generate_btn,
     filename_preview, voice_info, audio_output, next_section_btn,
     result_output, download_output,
     ac_titulo, ac_subtitulo, ac_referencia,
@@ -217,10 +211,10 @@ def register_handlers_tts(
         outputs=[ac_save_status],
     )
 
-    def _generate_and_track(text_input, section, nivel, cuaderno, misterio, fin_texto, speed, history, session_cost_val):
+    def _generate_and_track(text_input, section, nivel, cuaderno, misterio, speed, history, session_cost_val):
         updated_history = push_to_history(text_input, history)
         audio, result, filename, download, op_cost = generate_audio(
-            text_input, section, nivel, cuaderno, misterio, fin_texto, speed
+            text_input, section, nivel, cuaderno, misterio, speed
         )
         new_total = session_cost_val + op_cost
         choices = build_history_choices(updated_history)
@@ -232,7 +226,7 @@ def register_handlers_tts(
 
     generate_btn.click(
         fn=_generate_and_track,
-        inputs=[text, section_name, nivel, cuaderno, misterio, fin_texto_toggle, speed_slider, tts_history, session_cost],
+        inputs=[text, section_name, nivel, cuaderno, misterio, speed_slider, tts_history, session_cost],
         outputs=[audio_output, result_output, filename_preview, download_output, tts_history, history_dropdown, cost_display, session_cost],
     )
 

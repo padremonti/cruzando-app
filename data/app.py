@@ -13,7 +13,7 @@ from json_utils import discover_json_files, set_ai_text_generator
 from tts_utils import generate_ai_text
 from ui_tts import build_tab_tts, register_handlers_tts
 from ui_gestor import build_tab_editor, register_handlers_editor, build_tab_gestor, register_handlers_gestor
-from ui_batch import build_tab_batch, register_handlers_batch
+from ui_batch import build_tab_batch, register_handlers_batch, build_tab_startbye, register_handlers_startbye
 
 
 def main():
@@ -45,10 +45,14 @@ def main():
             with gr.Tab("Batch"):
                 batch_comps = build_tab_batch(json_choices)
 
+            with gr.Tab("START / BYE"):
+                startbye_comps = build_tab_startbye(json_choices)
+
         register_handlers_tts(*tts_comps, session_cost)
         register_handlers_editor(*editor_comps)
         register_handlers_gestor(*gestor_comps)
         register_handlers_batch(*batch_comps, session_cost)
+        register_handlers_startbye(*startbye_comps, session_cost)
 
     demo.launch(
         inbrowser=True,

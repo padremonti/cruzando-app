@@ -675,6 +675,9 @@ def create_empty_structure(file_type: str, nivel_id: str, mundo: str, cuaderno: 
     return preview, f"Archivo creado: {filename}"
 
 
+_BLOQUE_OFFSET = {"gozosos": 0, "luminosos": 5, "dolorosos": 10, "gloriosos": 15}
+
+
 def add_misterios_to_block(nivel_id: str, bloque: str, parsed_text: str):
     if not nivel_id.strip():
         return "Indica el ID del nivel."
@@ -690,6 +693,14 @@ def add_misterios_to_block(nivel_id: str, bloque: str, parsed_text: str):
         return f"JSON inválido: línea {e.lineno} — {e.msg}"
     if not isinstance(new_items, list):
         return "Los datos parseados deben ser una lista JSON."
+
+    # El parser devuelve números locales 1-5; convertir a globales según bloque
+    offset = _BLOQUE_OFFSET.get(bloque, 0)
+    for m in new_items:
+        if "numero" in m:
+            local = int(m["numero"])
+            m["numero"] = local + offset
+
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
     existing = data.get("misterios", {}).get(bloque, [])
