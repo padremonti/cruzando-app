@@ -1242,6 +1242,14 @@ body {
         <button class="pref-toggle" id="pref-toggle-micro" onclick="prefToggleMicro()"></button>
       </div>
 
+      <div class="pref-toggle-row">
+        <div>
+          <div class="pref-toggle-label">Oraciones en latín</div>
+          <div class="pref-toggle-sub">Reza los misterios con las oraciones en latín</div>
+        </div>
+        <button class="pref-toggle" id="pref-toggle-latin" onclick="prefToggleLatin()"></button>
+      </div>
+
       <div class="pref-toggle-row" id="prefs-sounds-row">
         <div>
           <div class="pref-toggle-label">Sonidos de interfaz</div>
@@ -1671,6 +1679,7 @@ window.openPrefs = function() {
   document.getElementById('pref-toggle-theme').classList.toggle('on', !isLight);
   document.getElementById('pref-toggle-bgm').classList.toggle('on', p.bgm !== false);
   document.getElementById('pref-toggle-micro').classList.toggle('on', p.microInAudio !== false);
+  document.getElementById('pref-toggle-latin').classList.toggle('on', p.latinPrayer === true);
   var soundsToggle = document.getElementById('pref-toggle-sounds');
   if (soundsToggle) soundsToggle.classList.toggle('on', localStorage.getItem('cruzando_sounds') !== 'off');
   var slider = document.getElementById('prefs-meta-slider');
@@ -1695,6 +1704,10 @@ window.prefToggleBgm = function() {
 window.prefToggleMicro = function() {
   var p = getPrefs(); p.microInAudio = p.microInAudio === false ? true : false; setPrefs(p);
   document.getElementById('pref-toggle-micro').classList.toggle('on', p.microInAudio !== false);
+};
+window.prefToggleLatin = function() {
+  var p = getPrefs(); p.latinPrayer = !p.latinPrayer; setPrefs(p);
+  document.getElementById('pref-toggle-latin').classList.toggle('on', p.latinPrayer === true);
 };
 function toggleSounds() {
   const off = localStorage.getItem('cruzando_sounds') === 'off';

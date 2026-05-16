@@ -61,7 +61,7 @@ def build_tab_tts(json_choices):
                 value=1.0,
                 step=0.01,
                 label="⏱ Velocidad de lectura",
-                info="0.92–0.95 recomendado para Contemplación y Preguntas",
+                info="Ajusta solo si necesitas compensar distorsión del modelo.",
             )
             text = gr.Textbox(
                 label="Texto editable",

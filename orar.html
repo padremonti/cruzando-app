@@ -1297,7 +1297,11 @@ function showCelebration(){
 function toolUrl(t){
   const m=mNum(blk,bIdx);
   if(t==='contemplar')return`${R2}/cont/CONT_${nivel}_${cua}_${m}.mp3`;
-  if(t==='rezo')return data?.audio_rezo||`${R2}/global/rezo.mp3`;
+  if(t==='rezo'){
+    const _latin=prefs().latinPrayer===true;
+    const _file=bIdx%2===0?(_latin?'L_MA.mp3':'MA.mp3'):(_latin?'L_MB.mp3':'MB.mp3');
+    return`${R2}/global/${_file}`;
+  }
   if(t==='canto')return`${MUSB}M_${nivel}_${cua}_${m}.mp3`;
   return'';
 }

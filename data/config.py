@@ -194,12 +194,12 @@ SECTION_INSTRUCTIONS = {
 
 SECTION_SPEEDS: dict = {
     "Bienvenida":       1.0,
-    "Camino y Palabra": 0.95,
-    "Contemplacion":    0.92,
-    "Pregunta A":       0.93,
-    "Pregunta B":       0.93,
-    "Pregunta C":       0.93,
-    "Oracion final":    0.95,
+    "Camino y Palabra": 1.0,
+    "Contemplacion":    1.0,
+    "Pregunta A":       1.0,
+    "Pregunta B":       1.0,
+    "Pregunta C":       1.0,
+    "Oracion final":    1.0,
     "Despedida":        1.0,
 }
 
