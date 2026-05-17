@@ -3,7 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#1A0E04">
+<!-- PWA / Home Screen Icon -->
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="CruzAndo">
 <meta name="description" content="CruzAndo — Reza y contempla los 20 Misterios del Santo Rosario en un itinerario de formación espiritual. Peregrinar la vida con María hacia Jesucristo.">
 <title>CruzAndo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -469,12 +476,12 @@ body {
 }
 .tu-camino-row {
   display:flex; align-items:flex-start; gap:10px;
-  font-size:0.82rem; color:var(--text-soft); margin-bottom:7px; line-height:1.4;
+  font-size:1rem; color:var(--text-soft); margin-bottom:9px; line-height:1.5;
 }
 .tu-camino-icon { font-size:1rem; flex-shrink:0; margin-top:1px; }
-.tu-camino-label { color:var(--text-dim); font-size:0.75rem; display:block; }
-.tu-camino-nombre { color:var(--text); font-weight:500; }
-.tu-camino-coord { color:var(--text-dim); font-size:0.72rem; }
+.tu-camino-label { color:var(--text-dim); font-size:0.85rem; display:block; }
+.tu-camino-nombre { color:var(--text); font-weight:600; }
+.tu-camino-coord { color:var(--text-dim); font-size:0.82rem; }
 .tu-camino-btns { display:flex; flex-direction:column; gap:10px; margin-top:16px; }
 .tu-camino-btn-primary {
   width:100%; padding:13px; border-radius:12px; border:none;
@@ -489,6 +496,28 @@ body {
   font-size:0.88rem; font-weight:500; cursor:pointer; transition:opacity 0.2s;
 }
 .tu-camino-btn-secondary:active { opacity:0.7; }
+/* ── Tu Camino como acordeón ── */
+.tu-camino-trigger {
+  width:100%; display:flex; align-items:center; justify-content:space-between;
+  padding:14px 20px; background:none; border:none; cursor:pointer;
+  font-family:inherit; color:var(--text); text-align:left;
+  -webkit-tap-highlight-color:transparent;
+}
+.tu-camino-trigger-left { display:flex; align-items:center; gap:10px; }
+.tu-camino-trigger-icon { font-size:1.1rem; }
+.tu-camino-trigger-label {
+  font-family:'Crimson Pro',Georgia,serif; font-size:1.2rem;
+  font-weight:600; color:var(--text);
+}
+.tu-camino-chevron {
+  color:var(--text-dim); transition:transform 0.3s; flex-shrink:0;
+}
+.tu-camino-banner.open .tu-camino-chevron { transform:rotate(180deg); }
+.tu-camino-body {
+  max-height:0; overflow:hidden; transition:max-height 0.4s ease;
+}
+.tu-camino-banner.open .tu-camino-body { max-height:600px; }
+.tu-camino-body-inner { padding:0 20px 20px; }
 /* ── Cantos (próximamente) ── */
 .modulo-cantos {
   background:linear-gradient(145deg,#1A1206,#130D04);
@@ -627,15 +656,15 @@ body {
   background:rgba(255,122,0,0.15); border:1.5px solid rgba(255,122,0,0.3);
   display:flex; align-items:center; justify-content:center; flex-shrink:0;
 }
-.drawer-user-name { font-family:'Lora',serif; font-size:1rem; font-weight:600; color:var(--text); }
-.drawer-user-level { font-size:0.6rem; color:var(--text-dim); margin-top:1px; }
+.drawer-user-name { font-family:'Lora',serif; font-size:1.3rem; font-weight:600; color:var(--text); }
+.drawer-user-level { font-size:0.82rem; color:var(--text-dim); margin-top:2px; }
 .drawer-meters {
   margin-top:12px; display:flex; align-items:center; gap:8px;
   padding:8px 12px; border-radius:10px;
   background:rgba(255,122,0,0.08); border:1px solid rgba(255,122,0,0.15);
 }
-.drawer-meters-val { font-size:0.85rem; font-weight:800; color:var(--orange); }
-.drawer-meters-label { font-size:0.6rem; color:var(--text-dim); }
+.drawer-meters-val { font-size:1.1rem; font-weight:800; color:var(--orange); }
+.drawer-meters-label { font-size:0.78rem; color:var(--text-dim); }
 
 .drawer-nav { flex:1; padding:8px 0; overflow-y:auto; }
 
@@ -656,8 +685,8 @@ body {
 }
 .light .drawer-item-icon { background:rgba(0,0,0,0.06); }
 .drawer-item.active .drawer-item-icon { background:rgba(255,122,0,0.15); }
-.drawer-item-label { font-size:1rem; font-weight:700; color:var(--text); }
-.drawer-item-sub   { font-size:0.68rem; color:var(--text-dim); margin-top:2px; }
+.drawer-item-label { font-size:1.25rem; font-weight:700; color:var(--text); }
+.drawer-item-sub   { font-size:0.85rem; color:var(--text-dim); margin-top:3px; }
 .drawer-divider    { height:1px; background:var(--border); margin:6px 16px; }
 .drawer-item-badge {
   margin-left:auto; font-size:0.55rem; font-weight:700;
@@ -666,7 +695,7 @@ body {
 }
 .drawer-footer     { padding:16px 20px; border-top:1px solid var(--border); }
 .drawer-theme-row  { display:flex; align-items:center; justify-content:space-between; }
-.drawer-theme-label { font-size:0.75rem; color:var(--text-dim); font-weight:600; }
+.drawer-theme-label { font-size:0.95rem; color:var(--text-dim); font-weight:600; }
 .theme-switch {
   width:44px; height:26px; border-radius:13px;
   background:rgba(255,255,255,0.1); border:none;
@@ -734,13 +763,13 @@ body {
   font-size:0.52rem; font-weight:800; text-transform:uppercase;
   letter-spacing:0.9px; margin-bottom:9px; opacity:0.85;
 }
-.nivel-orbs { display:flex; gap:9px; }
+.nivel-orbs { display:flex; gap:14px; }
 .nivel-orb {
-  width:54px; height:54px; border-radius:50%;
+  width:92px; height:92px; border-radius:50%;
   display:flex; flex-direction:column; align-items:center; justify-content:center;
   cursor:pointer; border:2px solid transparent;
   transition:transform 0.15s, box-shadow 0.15s;
-  gap:2px; -webkit-tap-highlight-color:transparent;
+  gap:4px; -webkit-tap-highlight-color:transparent;
 }
 .nivel-orb.locked {
   background:rgba(255,255,255,0.05) !important;
@@ -752,13 +781,13 @@ body {
 }
 .nivel-orb:not(.locked):not(.active):active { transform:scale(0.91); }
 .nivel-orb-num {
-  font-size:0.85rem; font-weight:800; line-height:1;
+  font-size:1.45rem; font-weight:800; line-height:1;
   color:#fff;
 }
 .nivel-orb.locked .nivel-orb-num { color:rgba(255,255,255,0.2); }
 .nivel-orb-sub {
-  font-size:0.38rem; letter-spacing:0.2px; color:rgba(255,255,255,0.75);
-  max-width:46px; text-align:center; overflow:hidden;
+  font-size:0.62rem; letter-spacing:0.2px; color:rgba(255,255,255,0.75);
+  max-width:78px; text-align:center; overflow:hidden;
   text-overflow:ellipsis; white-space:nowrap;
 }
 .nivel-orb.locked .nivel-orb-sub { color:rgba(255,255,255,0.15); }
@@ -1377,26 +1406,6 @@ body {
       </button>
     </div>
 
-    <!-- Unit banner -->
-    <div class="unit-banner" onclick="toggleLevelPicker()">
-      <svg class="unit-banner-noise" viewBox="0 0 400 54" xmlns="http://www.w3.org/2000/svg">
-        <filter id="ubn"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
-        <rect width="400" height="54" filter="url(#ubn)" opacity="0.3"/>
-      </svg>
-      <div class="unit-banner-content">
-        <span id="orar-nivel-tag" style="display:none"></span>
-        <div class="unit-banner-title" id="orar-nivel-nombre">Cruz 1-1: Males</div>
-      </div>
-      <div class="unit-banner-right">
-        <span class="unit-progress-text" id="unit-progress-text" style="display:none">0/20</span>
-        <span class="unit-picker-chevron" id="unit-picker-chevron">▾</span>
-      </div>
-    </div>
-    <!-- Level picker -->
-    <div id="level-picker" class="level-picker">
-      <div class="level-picker-scroll" id="level-picker-scroll"></div>
-    </div>
-
     <!-- ── ODÓMETRO META DEL DÍA ── -->
     <div class="odometro-wrap" id="odometro-wrap">
       <div class="odometro-top">
@@ -1416,6 +1425,26 @@ body {
         </div>
         <div class="odometro-falta" id="odo-falta">faltan 1,850m</div>
       </div>
+    </div>
+
+    <!-- Unit banner -->
+    <div class="unit-banner" onclick="toggleLevelPicker()">
+      <svg class="unit-banner-noise" viewBox="0 0 400 54" xmlns="http://www.w3.org/2000/svg">
+        <filter id="ubn"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
+        <rect width="400" height="54" filter="url(#ubn)" opacity="0.3"/>
+      </svg>
+      <div class="unit-banner-content">
+        <span id="orar-nivel-tag" style="display:none"></span>
+        <div class="unit-banner-title" id="orar-nivel-nombre">Cruz 1-1: Males</div>
+      </div>
+      <div class="unit-banner-right">
+        <span class="unit-progress-text" id="unit-progress-text" style="display:none">0/20</span>
+        <span class="unit-picker-chevron" id="unit-picker-chevron">▾</span>
+      </div>
+    </div>
+    <!-- Level picker -->
+    <div id="level-picker" class="level-picker">
+      <div class="level-picker-scroll" id="level-picker-scroll"></div>
     </div>
 
     <!-- Map scroll -->
@@ -2228,9 +2257,9 @@ function renderTuCamino(bookmark, progreso, user) {
   }
 
   var bkName  = getMysteryName(bookmark.misterio || 1);
-  var bkCoord = bookmark.nivel + '-' + bookmark.cuaderno + '-' + bookmark.misterio;
+  var bkCoord = bookmark.nivel + '-' + bookmark.cuaderno;
   var prName  = progreso ? getMysteryName(progreso.misterio || 1) : null;
-  var prCoord = progreso ? (progreso.nivel + '-' + progreso.cuaderno + '-' + progreso.misterio) : null;
+  var prCoord = progreso ? (progreso.nivel + '-' + progreso.cuaderno) : null;
 
   var prRow = prName ? (
     '<div class="tu-camino-row">' +
@@ -2242,18 +2271,31 @@ function renderTuCamino(bookmark, progreso, user) {
   ) : '';
 
   wrap.innerHTML =
-    '<div class="tu-camino-banner anim-in">' +
-      '<div class="tu-camino-titulo">Tu Camino</div>' +
-      '<div class="tu-camino-row">' +
-        '<span class="tu-camino-icon">' + (bookmark.modo === 'libro' ? '📖' : '🎧') + '</span>' +
-        '<div><span class="tu-camino-label">Última vez</span>' +
-          '<span class="tu-camino-nombre">' + bkName + '</span> ' +
-          '<span class="tu-camino-coord">(' + bkCoord + ')</span></div>' +
-      '</div>' +
-      prRow +
-      '<div class="tu-camino-btns">' +
-        '<button class="tu-camino-btn-primary" id="btn-tc-continuar">Continuar donde lo dejé</button>' +
-        (prName ? '<button class="tu-camino-btn-secondary" id="btn-tc-avance">Ir a mi avance</button>' : '') +
+    '<div class="tu-camino-banner anim-in" id="tu-camino-acc">' +
+      '<button class="tu-camino-trigger" onclick="(function(){' +
+        'var b=document.getElementById(\'tu-camino-acc\');' +
+        'b.classList.toggle(\'open\');' +
+      '})()">' +
+        '<div class="tu-camino-trigger-left">' +
+          '<span class="tu-camino-trigger-icon">🧭</span>' +
+          '<span class="tu-camino-trigger-label">Tu Camino</span>' +
+        '</div>' +
+        '<svg class="tu-camino-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>' +
+      '</button>' +
+      '<div class="tu-camino-body">' +
+        '<div class="tu-camino-body-inner">' +
+          '<div class="tu-camino-row">' +
+            '<span class="tu-camino-icon">' + (bookmark.modo === 'libro' ? '📖' : '🎧') + '</span>' +
+            '<div><span class="tu-camino-label">Última vez</span>' +
+              '<span class="tu-camino-nombre">' + bkName + '</span> ' +
+              '<span class="tu-camino-coord">(' + bkCoord + ')</span></div>' +
+          '</div>' +
+          prRow +
+          '<div class="tu-camino-btns">' +
+            '<button class="tu-camino-btn-primary" id="btn-tc-continuar">Continuar donde lo dejé</button>' +
+            (prName ? '<button class="tu-camino-btn-secondary" id="btn-tc-avance">Ir a mi avance</button>' : '') +
+          '</div>' +
+        '</div>' +
       '</div>' +
     '</div>';
 
