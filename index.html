@@ -1476,15 +1476,6 @@ body {
 
   <!-- ═══ BOTTOM NAV BAR ═══ -->
   <nav class="app-nav" id="app-nav" style="display:none">
-    <button class="app-nav-item" onclick="navTap(this); navigateTo('orar.html?c=' + (window.currentNivelId || '0101'))">
-      <div class="app-nav-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="12" y1="2" x2="12" y2="22"/>
-          <line x1="4" y1="9" x2="20" y2="9"/>
-        </svg>
-      </div>
-      <span class="app-nav-label">Orar</span>
-    </button>
     <button class="app-nav-item" onclick="navTap(this); navigateTo('diario.html')">
       <div class="app-nav-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -1822,10 +1813,10 @@ function renderHome(userData) {
   var banner = document.getElementById('banner-premium');
   if (banner) banner.style.display = currentPlan === 'free' ? '' : 'none';
 
-  // Extras card — visible solo desde nivel 0201 en adelante
+  // Extras — desbloqueado según el avance real del usuario, no el nivel seleccionado
   var extrasCard = document.getElementById('extras-card');
   var extrasBtn  = document.getElementById('nav-extras-btn');
-  var extrasUnlocked = currentNivelId >= '0201';
+  var extrasUnlocked = (window.frontierNivelId || currentNivelId) >= '0201';
   if (extrasCard) extrasCard.style.display = extrasUnlocked ? '' : 'none';
   if (extrasBtn) {
     extrasBtn.disabled = !extrasUnlocked;
