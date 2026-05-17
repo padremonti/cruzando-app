@@ -972,7 +972,9 @@ function showScreen(name) {
 /* ════════════════════════════════════════════════════
    INICIALIZACIÓN FIREBASE
    ════════════════════════════════════════════════════ */
-firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
 const auth = firebase.auth();
 const db   = firebase.firestore();
 
