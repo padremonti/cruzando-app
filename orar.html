@@ -1011,7 +1011,7 @@ async function loadAndStart(){
 
   const bParam=p.get('b'),mParam=p.get('m');
   if(bParam&&BLOCKS.includes(bParam)){
-    blk=bParam; bIdx=Math.max(0,Math.min(4,parseInt(mParam)||0));
+    blk=bParam; bIdx=Math.max(0,Math.min(4,parseInt(mParam||'0')-BFM[bParam]));
   } else {
     // Sin bloque explícito: elegir el primer bloque/misterio incompleto del progreso
     const pBlk=prog?.progress||{};
