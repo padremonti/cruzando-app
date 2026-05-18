@@ -971,7 +971,8 @@ body {
 
 /* ── Imagen del misterio (duotono) ── */
 .popup-mystery-frame {
-  width:100%; flex:1; min-height:180px; position:relative; overflow:hidden;
+  width:75%; margin-left:auto; margin-right:auto;
+  flex:1; min-height:140px; position:relative; overflow:hidden;
   border-radius:13px; margin-bottom:12px;
   background:rgba(255,255,255,0.04);
   opacity:0; transition:opacity 0.4s ease;
@@ -995,16 +996,16 @@ body {
 
 .popup-badge {
   display:inline-flex; align-items:center; gap:5px;
-  padding:3px 10px; border-radius:20px; font-size:0.58rem; font-weight:700;
-  letter-spacing:0.4px; text-transform:uppercase; margin-bottom:8px;
+  padding:4px 12px; border-radius:20px; font-size:0.75rem; font-weight:700;
+  letter-spacing:0.4px; text-transform:uppercase; margin-bottom:10px;
 }
 .popup-name {
-  font-family:'Crimson Pro',serif; font-size:1.55rem; font-weight:700;
-  color:var(--text); line-height:1.05; margin-bottom:2px;
+  font-family:'Crimson Pro',serif; font-size:1.9rem; font-weight:700;
+  color:var(--text); line-height:1.05; margin-bottom:4px;
 }
-.popup-sub { font-size:0.65rem; color:var(--text-dim); }
+.popup-sub { font-size:0.85rem; color:var(--text-dim); }
 .popup-modos-title {
-  font-size:0.72rem; font-weight:700; letter-spacing:0.8px;
+  font-size:0.90rem; font-weight:700; letter-spacing:0.8px;
   text-transform:uppercase; color:var(--text-dim); padding:14px 20px 10px;
 }
 .popup-modo {
@@ -1024,9 +1025,9 @@ body {
 }
 .light .modo-icon-wrap { background:rgba(0,0,0,0.06); }
 .modo-info { flex:1; }
-.modo-name { font-size:1.05rem; font-weight:700; color:var(--text); margin-bottom:3px; }
-.modo-desc { font-size:0.82rem; color:var(--text-dim); }
-.modo-tag { font-size:0.68rem; font-weight:700; padding:4px 10px; border-radius:20px; background:rgba(255,122,0,0.15); color:var(--orange); flex-shrink:0; }
+.modo-name { font-size:1.2rem; font-weight:700; color:var(--text); margin-bottom:4px; }
+.modo-desc { font-size:1.0rem; color:var(--text-dim); }
+.modo-tag { font-size:0.78rem; font-weight:700; padding:5px 12px; border-radius:20px; background:rgba(255,122,0,0.15); color:var(--orange); flex-shrink:0; }
 .modo-tag.soon { background:rgba(255,255,255,0.06); color:var(--text-dim); }
 .light .modo-tag.soon { background:rgba(0,0,0,0.06); }
 
