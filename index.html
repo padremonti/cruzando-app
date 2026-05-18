@@ -2062,35 +2062,44 @@ function getMysteryName(misterio) {
 }
 
 async function getCurrentNivelFromFirestore(user) {
+  // 1. Bookmark de localStorage — instantáneo
   var bookmark = null;
   try {
     var bk = localStorage.getItem('cruzando_current_nivel');
     if (bk && /^\d{4}$/.test(bk)) bookmark = bk;
   } catch(e) {}
 
+  // 2. Frontier secuencial con early exit: solo lee hasta el primer nivel incompleto
   try {
-    var snaps = await Promise.all(
-      NIVELES_ORDER.map(function(id) {
-        return getDoc(doc(db, 'users', user.uid, 'progress', id));
-      })
-    );
     var frontier = NIVELES_ORDER[0];
-    for (var i = 0; i < snaps.length; i++) {
-      if (!snaps[i].exists()) { frontier = NIVELES_ORDER[i]; break; }
-      var d = snaps[i].data();
-      if (!d.progress) { frontier = NIVELES_ORDER[i]; break; }
+    for (var i = 0; i < NIVELES_ORDER.length; i++) {
+      var id   = NIVELES_ORDER[i];
+      var snap = await getDoc(doc(db, 'users', user.uid, 'progress', id));
+
+      if (!snap.exists()) { frontier = id; break; }
+
+      var d = snap.data();
+      if (!d || !d.progress) { frontier = id; break; }
+
       var allDone = BLOCKS.every(function(b) {
         return d.progress[b] && d.progress[b].every(function(x) { return x !== null; });
       });
-      frontier = NIVELES_ORDER[i];
+
+      frontier = id;
       if (!allDone) break;
+      if (i === NIVELES_ORDER.length - 1) frontier = id;
     }
+
+    try { localStorage.setItem('cruzando_frontier_nivel', frontier); } catch(e) {}
+
     window.frontierNivelId = frontier;
     return bookmark || frontier;
   } catch(e) {
     console.warn('[CruzAndo] getCurrentNivelFromFirestore:', e);
-    window.frontierNivelId = bookmark || '0101';
-    return bookmark || getCurrentNivel();
+    var cachedFrontier = null;
+    try { cachedFrontier = localStorage.getItem('cruzando_frontier_nivel'); } catch(e2) {}
+    window.frontierNivelId = cachedFrontier || bookmark || '0101';
+    return bookmark || cachedFrontier || getCurrentNivel();
   }
 }
 
@@ -2115,7 +2124,13 @@ onAuthStateChanged(auth, async function(user) {
     metrosHoy  = localHist[todayKey] ?? 0;
     window._dailyHist = localHist;
     updateOdometro();
-    renderHome({ displayName: user.displayName, email: user.email });
+    var _quickData = {
+      displayName: user.displayName || '',
+      email:       user.email || '',
+      totalMeters: parseInt(localStorage.getItem('cruzando_total_metros') || '0'),
+      plan:        localStorage.getItem('cruzando_plan_cache') || 'free'
+    };
+    renderHome(_quickData);
     showScreen('home');
 
     // ── PASO 2: todos los reads de Firestore EN PARALELO ──
@@ -2156,6 +2171,11 @@ onAuthStateChanged(auth, async function(user) {
     }
 
     renderHome(userData);
+    // Cachear plan y metros para la próxima carga rápida
+    try {
+      if (userData && userData.plan) localStorage.setItem('cruzando_plan_cache', userData.plan);
+      if (userData && userData.totalMeters) localStorage.setItem('cruzando_total_metros', String(userData.totalMeters));
+    } catch(e) {}
     // Diferir buildMap para no bloquear el primer paint
     requestAnimationFrame(function() {
       requestAnimationFrame(function() {
