@@ -947,6 +947,9 @@ body.light { --tb-circle-bg:var(--card); --tb-circle-border:var(--border); --tb-
   content:''; position:absolute; inset:-5px;
   background:rgba(255,122,0,0.12); border-radius:10px;
 }
+.nav-hide-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:10px 4px 12px;background:none;border:none;cursor:pointer;font-family:inherit;color:var(--text-dim);transition:color 0.2s;-webkit-tap-highlight-color:transparent}
+.nav-hide-btn:active{opacity:0.6}
+.nav-hide-icon{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.75rem;color:var(--text-dim)}
 .app-nav-label {
   font-size:0.6rem; font-weight:600; letter-spacing:0.4px;
   text-transform:uppercase;
@@ -1481,54 +1484,46 @@ body.light { --tb-circle-bg:var(--card); --tb-circle-border:var(--border); --tb-
 
 <!-- ── Bottom nav bar ── -->
 <nav class="app-nav" id="app-nav">
-  <button class="app-nav-item active" disabled>
-    <div class="app-nav-icon">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="12" y1="2" x2="12" y2="22"/>
-        <line x1="4" y1="9" x2="20" y2="9"/>
-      </svg>
-    </div>
-    <span class="app-nav-label">Orar</span>
-  </button>
+
   <button class="app-nav-item" onclick="navTap(this); navGuard('diario.html')">
     <div class="app-nav-icon">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/>
-        <path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/>
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
       </svg>
     </div>
     <span class="app-nav-label">Diario</span>
   </button>
-  <a class="nav-tab" id="tab-toggle-texto" href="#">
-    <div class="app-nav-icon">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-        <line x1="3" y1="6"  x2="21" y2="6"/>
-        <line x1="3" y1="12" x2="21" y2="12"/>
-        <line x1="3" y1="18" x2="15" y2="18"/>
-      </svg>
-    </div>
-    <span class="nav-tab-label">Texto</span>
-  </a>
-  <button class="app-nav-item" onclick="navTap(this); navGuard('sanar.html')">
+
+  <button class="app-nav-item" onclick="navTap(this); navGuard('rezar.html')">
     <div class="app-nav-icon">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 22s-8-5.5-8-11a8 8 0 0116 0c0 5.5-8 11-8 11z"/>
-        <path d="M9 11h6M12 8v6"/>
+        <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
       </svg>
     </div>
-    <span class="app-nav-label">Sanar</span>
+    <span class="app-nav-label">Rezar</span>
   </button>
+
+  <button class="nav-hide-btn" onclick="document.getElementById('app-nav').classList.remove('visible')">
+    <div class="nav-hide-icon">✕</div>
+  </button>
+
+  <button class="app-nav-item" onclick="navTap(this); navGuard('orar.html')">
+    <div class="app-nav-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/>
+      </svg>
+    </div>
+  </button>
+
   <button class="app-nav-item" onclick="navTap(this); navGuard('index.html')">
     <div class="app-nav-icon">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="3" width="7" height="7" rx="1"/>
-        <rect x="14" y="3" width="7" height="7" rx="1"/>
-        <rect x="3" y="14" width="7" height="7" rx="1"/>
-        <rect x="14" y="14" width="7" height="7" rx="1"/>
+        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
       </svg>
     </div>
     <span class="app-nav-label">Inicio</span>
   </button>
+
 </nav>
 
 <!-- ═══ POPUP: CONFIRMAR CAMBIO DE MISTERIO ═══ -->
