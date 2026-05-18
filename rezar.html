@@ -245,18 +245,45 @@ body{
 /* ══════════════════════════════════════
    HERO — igual que orar.html
    ══════════════════════════════════════ */
-.misterio-hero{flex:1;min-height:0;position:relative;overflow:hidden;background:#1A1714}
-.misterio-hero-img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block}
+.misterio-hero{
+  flex:1;min-height:0;position:relative;overflow:hidden;
+  background:rgb(var(--bg-rgb));
+  display:flex;align-items:center;justify-content:center;
+}
+.misterio-hero-img{
+  width:100%;height:auto;max-height:100%;
+  object-fit:contain;object-position:center;display:block;
+}
 .hero-placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0.18}
+#hero-tap-zone{
+  position:absolute;inset:0;z-index:1;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+}
 .misterio-hero-grad{
-  position:absolute;bottom:0;left:0;right:0;height:55%;
-  background:linear-gradient(to top,rgba(0,0,0,0.82) 0%,rgba(0,0,0,0.60) 30%,rgba(0,0,0,0.25) 60%,transparent 100%);
+  position:absolute;bottom:0;left:0;right:0;height:65%;
+  background:linear-gradient(
+    to top,
+    rgba(var(--bg-rgb),1.00)  0%,
+    rgba(var(--bg-rgb),0.85) 20%,
+    rgba(var(--bg-rgb),0.40) 50%,
+    transparent              100%
+  );
+  pointer-events:none;z-index:2;
+}
+.misterio-hero-grad-top{
+  position:absolute;top:0;left:0;right:0;height:40%;
+  background:linear-gradient(
+    to bottom,
+    rgba(var(--bg-rgb),1.00)  0%,
+    rgba(var(--bg-rgb),0.39) 50%,
+    transparent              100%
+  );
   pointer-events:none;z-index:2;
 }
 .misterio-hero-text{position:absolute;bottom:16px;left:18px;right:100px;z-index:3;pointer-events:none}
 .misterio-bloque-label{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--lvl-bold);margin-bottom:4px}
-.misterio-titulo{font-family:'Cormorant Garamond',Georgia,serif;font-size:2rem;font-weight:600;color:#fff;line-height:1.15;text-shadow:0 2px 12px rgba(0,0,0,0.5);margin-bottom:4px}
-.misterio-subtitulo{font-family:'Cormorant Garamond',Georgia,serif;font-size:1rem;font-style:italic;color:rgba(255,255,255,0.75);text-shadow:0 1px 6px rgba(0,0,0,0.5)}
+.misterio-titulo{font-family:'Cormorant Garamond',Georgia,serif;font-size:2rem;font-weight:600;color:#fff;line-height:1.15;text-shadow:0 1px 3px rgba(0,0,0,0.9),0 4px 16px rgba(0,0,0,0.85),0 8px 32px rgba(0,0,0,0.7);margin-bottom:4px}
+.misterio-subtitulo{font-family:'Cormorant Garamond',Georgia,serif;font-size:1rem;font-style:italic;color:rgba(255,255,255,0.75);text-shadow:0 1px 3px rgba(0,0,0,0.9),0 3px 12px rgba(0,0,0,0.8)}
 .hero-btn{
   position:absolute;top:14px;width:43px;height:43px;border-radius:50%;
   background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.18);
@@ -607,6 +634,7 @@ body{
     <!-- ── Zona A: Hero + Popup ── -->
     <div class="misterio-hero" id="misterio-hero">
       <img class="misterio-hero-img" id="hero-img" src="" alt="">
+      <div id="hero-tap-zone"></div>
       <div class="hero-placeholder" id="hero-ph" style="display:none">
         <svg viewBox="0 0 100 100" width="64" height="64" fill="none">
           <rect x="46" y="5" width="8" height="90" fill="rgba(230,222,211,0.3)"/>
@@ -614,6 +642,7 @@ body{
         </svg>
       </div>
       <div class="misterio-hero-grad" id="hero-grad"></div>
+      <div class="misterio-hero-grad-top"></div>
       <div class="misterio-hero-text">
         <div class="misterio-bloque-label" id="hero-bloque-label"></div>
         <div class="misterio-titulo"       id="hero-titulo"></div>
@@ -1653,6 +1682,14 @@ function initSession(){
   show('scr-rezar');
   startBgm();
   updateBgmBtn();
+
+  var tapZone = document.getElementById('hero-tap-zone');
+  if (tapZone) {
+    tapZone.onclick = function(e) {
+      e.stopPropagation();
+      window.countBead();
+    };
+  }
 }
 
 /* ─── ENTRY HELPERS ─── */
