@@ -1826,6 +1826,26 @@ function getTotalMetros() {
   return t;
 }
 
+// ── resolvePlan con fallback a localStorage cuando userData es null ──
+function resolvePlan(userData) {
+  if (!userData) return localStorage.getItem('cruzando_plan_cache') || 'free';
+
+  var plan = userData.plan || 'free';
+
+  if (plan === 'beta') {
+    var exp = userData.betaExpiresAt;
+    if (exp) {
+      var expMs = (typeof exp.toDate === 'function') ? exp.toDate().getTime()
+                : (exp.seconds ? exp.seconds * 1000 : new Date(exp).getTime());
+      if (Date.now() > expMs) return 'free';
+    }
+    return 'beta';
+  }
+  if (plan === 'premium' || plan === 'pro') return 'premium';
+  return 'free';
+}
+window.resolvePlan = resolvePlan;
+
 // ── Renderizar home ───────────────────────────────────────────────
 function renderHome(userData) {
   // Plan
@@ -2187,7 +2207,7 @@ onAuthStateChanged(auth, async function(user) {
       localStorage.setItem('cruzando_frontier_nivel', window.frontierNivelId || currentNivelId);
       localStorage.setItem('cruzando_done_count',     String(window.DONE_COUNT || 0));
       localStorage.setItem('cruzando_chest_state',    JSON.stringify(window.chestState || []));
-      if (userData && userData.plan)        localStorage.setItem('cruzando_plan_cache',   userData.plan);
+      if (userData)                          localStorage.setItem('cruzando_plan_cache',   resolvePlan(userData));
       if (userData && userData.totalMeters) localStorage.setItem('cruzando_total_metros', String(userData.totalMeters));
     } catch(e) {}
     // Redibujar mapa con datos reales (silencioso — el usuario ya ve el mapa cacheado)
