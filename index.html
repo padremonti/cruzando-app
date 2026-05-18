@@ -14,6 +14,9 @@
 <meta name="description" content="CruzAndo — Reza y contempla los 20 Misterios del Santo Rosario en un itinerario de formación espiritual. Peregrinar la vida con María hacia Jesucristo.">
 <title>CruzAndo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://firestore.googleapis.com">
+<link rel="preconnect" href="https://www.gstatic.com">
+<link rel="dns-prefetch" href="https://firestore.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600;700&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
@@ -2098,54 +2101,57 @@ function showScreen(name) {
 onAuthStateChanged(auth, async function(user) {
   if (user) {
     currentUser = user;
-    var userData = await ensureUserDoc(user);
-    window._lastUserData = userData;
-    // Cargar en paralelo: nivel actual + audioProgress + bookmark
-    var results = await Promise.all([
+
+    // ── PASO 1: mostrar pantalla inmediatamente con datos locales ──
+    metaMetros = parseInt(localStorage.getItem(META_KEY)) || META_DEFAULT;
+    todayKey   = getTodayKey();
+    const localHist = JSON.parse(localStorage.getItem(HISTORIAL_KEY) || '{}');
+    metrosHoy  = localHist[todayKey] ?? 0;
+    window._dailyHist = localHist;
+    updateOdometro();
+    renderHome({ displayName: user.displayName, email: user.email });
+    showScreen('home');
+
+    // ── PASO 2: todos los reads de Firestore EN PARALELO ──
+    const [
+      userData,
+      nivelId,
+      audioProgressSnap,
+      bookmarkSnap,
+      ,
+      goalSnap
+    ] = await Promise.all([
+      ensureUserDoc(user),
       getCurrentNivelFromFirestore(user),
       getDoc(doc(db, 'users', user.uid, 'audioProgress', 'current')).catch(function() { return null; }),
-      getDoc(doc(db, 'users', user.uid, 'bookmark', 'current')).catch(function() { return null; })
+      getDoc(doc(db, 'users', user.uid, 'bookmark',      'current')).catch(function() { return null; }),
+      Promise.resolve(null),
+      getDoc(doc(db, 'users', user.uid, 'dailyGoal', 'data')).catch(function() { return null; })
     ]);
-    currentNivelId = results[0];
-    window.currentNivelId = currentNivelId;
-    var audioProgressSnap = results[1];
-    var bookmarkSnap      = results[2];
 
-    // Leer progreso del nivel activo desde Firestore (fuente de verdad para DONE_COUNT del mapa)
+    window._lastUserData  = userData;
+    currentNivelId        = nivelId;
+    window.currentNivelId = currentNivelId;
+
+    // ── PASO 3: progress del nivel activo (necesita nivelId del paso 2) ──
     try {
       var progSnap = await getDoc(doc(db, 'users', user.uid, 'progress', currentNivelId));
       window._firestoreProgress = progSnap.exists() ? progSnap.data() : null;
     } catch(e) { window._firestoreProgress = null; }
 
-    // ── Cargar meta diaria ──
-    todayKey = getTodayKey();
-    try {
-      const goalRef  = doc(db, 'users', user.uid, 'dailyGoal', 'data');
-      const goalSnap = await getDoc(goalRef);
-      const localHist = JSON.parse(localStorage.getItem(HISTORIAL_KEY) || '{}');
-      if (goalSnap.exists()) {
-        const gd = goalSnap.data();
-        metaMetros = gd.metaMetros ?? META_DEFAULT;
-        // Tomar el máximo entre Firestore y localStorage por si el write de otra página falló
-        metrosHoy  = Math.max(gd.historial?.[todayKey] ?? 0, localHist[todayKey] ?? 0);
-        window._dailyHist = gd.historial ?? {};
-      } else {
-        metaMetros = META_DEFAULT;
-        metrosHoy  = localHist[todayKey] ?? 0;
-        window._dailyHist = localHist;
-      }
-    } catch(e) {
-      metaMetros = parseInt(localStorage.getItem(META_KEY)) || META_DEFAULT;
-      const hist = JSON.parse(localStorage.getItem(HISTORIAL_KEY) || '{}');
-      metrosHoy  = hist[todayKey] ?? 0;
-      window._dailyHist = hist;
+    // ── PASO 4: actualizar UI con datos reales ──
+    if (goalSnap && goalSnap.exists()) {
+      const gd = goalSnap.data();
+      metaMetros = gd.metaMetros ?? META_DEFAULT;
+      metrosHoy  = Math.max(gd.historial?.[todayKey] ?? 0, localHist[todayKey] ?? 0);
+      window._dailyHist = gd.historial ?? {};
+      updateOdometro();
+      checkMetaStreak();
     }
-    updateOdometro();
-    checkMetaStreak();
 
     renderHome(userData);
-    showScreen('home');
     if (window.buildMap) window.buildMap();
+
     window._refreshHome = function() {
       renderHome(window._lastUserData || userData);
       if (window.buildMap) window.buildMap();
@@ -2157,12 +2163,15 @@ onAuthStateChanged(auth, async function(user) {
         window._firestoreProgress = snap.exists() ? snap.data() : null;
       } catch(e) { window._firestoreProgress = null; }
     };
-    // Mostrar banner "Tu Camino" si bookmark difiere del frente lineal
-    var progreso  = (audioProgressSnap && audioProgressSnap.exists()) ? audioProgressSnap.data()  : null;
-    var bookmark  = (bookmarkSnap      && bookmarkSnap.exists())      ? bookmarkSnap.data()        : null;
+
+    var progreso = (audioProgressSnap && audioProgressSnap.exists()) ? audioProgressSnap.data() : null;
+    var bookmark = (bookmarkSnap      && bookmarkSnap.exists())      ? bookmarkSnap.data()      : null;
     renderTuCamino(bookmark, progreso, user);
+
+    // No críticas — sin await para no bloquear
     verificarRetiroEnProgreso(user.uid);
     verificarRecompensas(user.uid);
+
   } else {
     currentUser = null;
     showScreen('login');
