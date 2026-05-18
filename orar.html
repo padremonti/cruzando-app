@@ -312,7 +312,7 @@ body{
 :root{--tb-circle-bg:rgb(var(--bg-rgb));--tb-circle-border:rgba(255,255,255,0.45);--tb-icon:rgba(255,255,255,0.75);--tb-bead:rgba(255,255,255,0.22)}
 body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon:var(--text-dim);--tb-bead:var(--card)}
 .tool-btn{display:flex;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:0;touch-action:manipulation}
-.tool-btn-circle{width:48px;height:48px;border-radius:50%;border:3px solid var(--tb-circle-border);background:var(--tb-circle-bg);display:flex;align-items:center;justify-content:center;color:var(--tb-icon);transition:background 0.2s,border-color 0.2s,color 0.2s,transform 0.15s;position:relative;z-index:1}
+.tool-btn-circle{width:48px;height:48px;border-radius:50%;border:3px solid var(--tb-circle-border);background:rgb(var(--bg-rgb));display:flex;align-items:center;justify-content:center;color:var(--tb-icon);transition:background 0.2s,border-color 0.2s,color 0.2s,transform 0.15s;position:relative;z-index:1}
 .tool-btn.active .tool-btn-circle{background:var(--lvl-bold);border-color:var(--lvl-bold);color:#fff}
 .tool-btn:active .tool-btn-circle{transform:scale(0.92)}
 /* Línea de rosario que atraviesa los círculos */
@@ -608,7 +608,13 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
       </button>
       <button class="tool-btn" data-tool="suplica">
         <div class="tool-btn-circle">
-          <span style="font-size:20px;line-height:1">🙏</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 6.5V3a1 1 0 012 0v5"/>
+            <path d="M11 3.5V2a1 1 0 012 0v4.5"/>
+            <path d="M13 4V2.5a1 1 0 012 0V7"/>
+            <path d="M7 7.5V5a1 1 0 012 0v5.5"/>
+            <path d="M7 10.5c0 0-1.5 1-1.5 4S7 19 9 21h6c2 0 3.5-2 3.5-5s-1-5-1-5l-2-3.5"/>
+          </svg>
         </div>
       </button>
     </div>
