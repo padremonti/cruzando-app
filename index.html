@@ -769,6 +769,7 @@ body {
   cursor:pointer; border:2px solid transparent;
   transition:transform 0.15s, box-shadow 0.15s;
   gap:4px; -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation; user-select:none;
 }
 .nivel-orb.locked {
   background:rgba(255,255,255,0.05) !important;
@@ -781,13 +782,13 @@ body {
 .nivel-orb:not(.locked):not(.active):active { transform:scale(0.91); }
 .nivel-orb-num {
   font-size:1.45rem; font-weight:800; line-height:1;
-  color:#fff;
+  color:#fff; pointer-events:none;
 }
 .nivel-orb.locked .nivel-orb-num { color:rgba(255,255,255,0.2); }
 .nivel-orb-sub {
   font-size:0.62rem; letter-spacing:0.2px; color:rgba(255,255,255,0.75);
   max-width:78px; text-align:center; overflow:hidden;
-  text-overflow:ellipsis; white-space:nowrap;
+  text-overflow:ellipsis; white-space:nowrap; pointer-events:none;
 }
 .nivel-orb.locked .nivel-orb-sub { color:rgba(255,255,255,0.15); }
 
@@ -3443,7 +3444,25 @@ function toggleLevelPicker() {
   else openLevelPicker();
 }
 
+function playOrbSelect() {
+  try {
+    var ac = new (window.AudioContext || window.webkitAudioContext)();
+    var now = ac.currentTime;
+    var master = ac.createGain();
+    master.gain.setValueAtTime(0.09, now);
+    master.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
+    master.connect(ac.destination);
+    [[880, 0], [1108, 0.065]].forEach(function(pair) {
+      var o = ac.createOscillator(), g = ac.createGain();
+      o.type = 'sine'; o.frequency.value = pair[0];
+      g.gain.value = 1; o.connect(g); g.connect(master);
+      o.start(now + pair[1]); o.stop(now + 0.35);
+    });
+  } catch(e) {}
+}
+
 function selectNivel(id) {
+  playOrbSelect();
   closeLevelPicker();
   window.currentNivelId = id;
   try { localStorage.setItem('cruzando_current_nivel', id); } catch(e) {}
