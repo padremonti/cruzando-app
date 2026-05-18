@@ -799,9 +799,15 @@ body {
 .map-scroll {
   flex:1; overflow-y:auto; overflow-x:hidden;
   -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain; scrollbar-width:none;
+  contain:strict;
 }
 .map-scroll::-webkit-scrollbar { display:none; }
-.map-canvas { position:relative; width:100%; }
+.map-canvas {
+  position:relative; width:100%;
+  transform:translateZ(0);
+  will-change:transform;
+}
 
 /* ══ NODO ══ */
 .map-node {
@@ -2150,7 +2156,12 @@ onAuthStateChanged(auth, async function(user) {
     }
 
     renderHome(userData);
-    if (window.buildMap) window.buildMap();
+    // Diferir buildMap para no bloquear el primer paint
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        if (window.buildMap) window.buildMap();
+      });
+    });
 
     window._refreshHome = function() {
       renderHome(window._lastUserData || userData);
@@ -3103,14 +3114,12 @@ function buildBioma(canvas, totalH, cuaderno, color) {
   bg.style.cssText = 'position:absolute;inset:0;z-index:0;transition:background 0.4s;background:' + GRAD[idx] + ',var(--map-bg,#0E0602);';
   canvas.appendChild(bg);
 
-  // Capa de ruido SVG con frecuencia distinta por cuaderno
-  var ns = document.createElementNS('http://www.w3.org/2000/svg','svg');
-  ns.setAttribute('viewBox','0 0 375 ' + totalH);
-  ns.setAttribute('width','375'); ns.setAttribute('height',totalH);
-  ns.style.cssText = 'position:absolute;top:0;left:0;z-index:1;pointer-events:none;opacity:0.1;';
-  ns.innerHTML = '<defs><filter id="bn' + idx + '"><feTurbulence type="fractalNoise" baseFrequency="' + FREQ[idx] + '" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter></defs>' +
-    '<rect width="375" height="' + totalH + '" filter="url(#bn' + idx + ')"/>';
-  canvas.appendChild(ns);
+  // Textura CSS de puntos — costo de render cero vs. feTurbulence
+  var noise = document.createElement('div');
+  noise.style.cssText = 'position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0.06;' +
+    'background-image:radial-gradient(circle,rgba(255,255,255,0.8) 1px,transparent 1px);' +
+    'background-size:18px 18px;';
+  canvas.appendChild(noise);
 }
 
 /* ══ POPUP MISTERIO ══ */
