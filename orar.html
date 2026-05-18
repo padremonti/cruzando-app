@@ -309,10 +309,10 @@ body{
   border-top:1px solid var(--border);
 }
 /* ── Variables de contraste para toolbar (dark default → light override) ── */
-:root{--tb-circle-bg:rgba(255,255,255,0.06);--tb-circle-border:rgba(255,255,255,0.22);--tb-icon:rgba(255,255,255,0.62);--tb-bead:rgba(255,255,255,0.16)}
+:root{--tb-circle-bg:rgb(var(--bg-rgb));--tb-circle-border:rgba(255,255,255,0.45);--tb-icon:rgba(255,255,255,0.75);--tb-bead:rgba(255,255,255,0.22)}
 body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon:var(--text-dim);--tb-bead:var(--card)}
 .tool-btn{display:flex;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:0;touch-action:manipulation}
-.tool-btn-circle{width:48px;height:48px;border-radius:50%;border:2px solid var(--tb-circle-border);background:var(--tb-circle-bg);display:flex;align-items:center;justify-content:center;color:var(--tb-icon);transition:background 0.2s,border-color 0.2s,color 0.2s,transform 0.15s;position:relative;z-index:1}
+.tool-btn-circle{width:48px;height:48px;border-radius:50%;border:3px solid var(--tb-circle-border);background:var(--tb-circle-bg);display:flex;align-items:center;justify-content:center;color:var(--tb-icon);transition:background 0.2s,border-color 0.2s,color 0.2s,transform 0.15s;position:relative;z-index:1}
 .tool-btn.active .tool-btn-circle{background:var(--lvl-bold);border-color:var(--lvl-bold);color:#fff}
 .tool-btn:active .tool-btn-circle{transform:scale(0.92)}
 /* Línea de rosario que atraviesa los círculos */
@@ -557,14 +557,7 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
       </button>
       <button class="tool-btn" data-tool="suplica">
         <div class="tool-btn-circle">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 12V9.5a2.5 2.5 0 015 0V12"/>
-            <path d="M9 10.5a2.5 2.5 0 015 0V13"/>
-            <path d="M14 11.5a2.5 2.5 0 015 0V15"/>
-            <path d="M4 14c0 3 2 5.5 5.5 7h5c3.5-1.5 5.5-4 5.5-7"/>
-            <line x1="9" y1="12" x2="9" y2="19"/>
-            <line x1="14" y1="13" x2="14" y2="20"/>
-          </svg>
+          <span style="font-size:20px;line-height:1">🙏</span>
         </div>
       </button>
     </div>

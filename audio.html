@@ -442,7 +442,7 @@ body {
 }
 
 /* ── Variables de contraste para toolbar (dark default → light override) ── */
-:root { --tb-circle-bg:rgba(255,255,255,0.06); --tb-circle-border:rgba(255,255,255,0.22); --tb-icon:rgba(255,255,255,0.62); --tb-bead:rgba(255,255,255,0.16); }
+:root { --tb-circle-bg:rgb(var(--bg-rgb)); --tb-circle-border:rgba(255,255,255,0.45); --tb-icon:rgba(255,255,255,0.75); --tb-bead:rgba(255,255,255,0.22); }
 body.light { --tb-circle-bg:var(--card); --tb-circle-border:var(--border); --tb-icon:var(--text-dim); --tb-bead:var(--card); }
 
 /* ── Audio Toolbar (5 botones estilo rosario) ── */
@@ -476,7 +476,7 @@ body.light { --tb-circle-bg:var(--card); --tb-circle-border:var(--border); --tb-
 .atb-circle {
   width: 48px; height: 48px;
   border-radius: 50%;
-  border: 2px solid var(--tb-circle-border);
+  border: 3px solid var(--tb-circle-border);
   background: var(--tb-circle-bg);
   display: flex;
   align-items: center;
