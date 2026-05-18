@@ -721,10 +721,6 @@ body {
   border:1.5px solid rgba(255,122,0,0.2); background:rgba(255,122,0,0.1);
   cursor:pointer; user-select:none; -webkit-tap-highlight-color:transparent;
 }
-.unit-banner-noise {
-  position:absolute; inset:0; width:100%; height:100%;
-  opacity:0.15; z-index:0; pointer-events:none;
-}
 .unit-banner-content { position:relative; z-index:1; flex:1; }
 .unit-banner-label {
   font-size:0.58rem; font-weight:800; letter-spacing:1px;
@@ -1472,10 +1468,6 @@ body {
 
     <!-- Unit banner -->
     <div class="unit-banner" onclick="toggleLevelPicker()">
-      <svg class="unit-banner-noise" viewBox="0 0 400 54" xmlns="http://www.w3.org/2000/svg">
-        <filter id="ubn"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
-        <rect width="400" height="54" filter="url(#ubn)" opacity="0.3"/>
-      </svg>
       <div class="unit-banner-content">
         <span id="orar-nivel-tag" style="display:none"></span>
         <div class="unit-banner-title" id="orar-nivel-nombre">Cruz 1-1: Males</div>
@@ -2124,6 +2116,18 @@ onAuthStateChanged(auth, async function(user) {
     metrosHoy  = localHist[todayKey] ?? 0;
     window._dailyHist = localHist;
     updateOdometro();
+
+    var _cachedNivel    = localStorage.getItem('cruzando_current_nivel') || '0101';
+    var _cachedFrontier = localStorage.getItem('cruzando_frontier_nivel') || _cachedNivel;
+    var _cachedDone     = parseInt(localStorage.getItem('cruzando_done_count') || '0');
+    var _cachedChest    = JSON.parse(localStorage.getItem('cruzando_chest_state') || 'null');
+
+    currentNivelId         = _cachedNivel;
+    window.currentNivelId  = _cachedNivel;
+    window.frontierNivelId = _cachedFrontier;
+    window.DONE_COUNT      = _cachedDone;
+    window.chestState      = _cachedChest || ['locked','locked','locked','locked'];
+
     var _quickData = {
       displayName: user.displayName || '',
       email:       user.email || '',
@@ -2132,6 +2136,10 @@ onAuthStateChanged(auth, async function(user) {
     };
     renderHome(_quickData);
     showScreen('home');
+
+    requestAnimationFrame(function() {
+      if (window.buildMap) window.buildMap();
+    });
 
     // ── PASO 2: todos los reads de Firestore EN PARALELO ──
     const [
@@ -2171,16 +2179,18 @@ onAuthStateChanged(auth, async function(user) {
     }
 
     renderHome(userData);
-    // Cachear plan y metros para la próxima carga rápida
+    // Cachear estado completo para el próximo arranque instantáneo
     try {
-      if (userData && userData.plan) localStorage.setItem('cruzando_plan_cache', userData.plan);
+      localStorage.setItem('cruzando_current_nivel',  currentNivelId);
+      localStorage.setItem('cruzando_frontier_nivel', window.frontierNivelId || currentNivelId);
+      localStorage.setItem('cruzando_done_count',     String(window.DONE_COUNT || 0));
+      localStorage.setItem('cruzando_chest_state',    JSON.stringify(window.chestState || []));
+      if (userData && userData.plan)        localStorage.setItem('cruzando_plan_cache',   userData.plan);
       if (userData && userData.totalMeters) localStorage.setItem('cruzando_total_metros', String(userData.totalMeters));
     } catch(e) {}
-    // Diferir buildMap para no bloquear el primer paint
+    // Redibujar mapa con datos reales (silencioso — el usuario ya ve el mapa cacheado)
     requestAnimationFrame(function() {
-      requestAnimationFrame(function() {
-        if (window.buildMap) window.buildMap();
-      });
+      if (window.buildMap) window.buildMap();
     });
 
     window._refreshHome = function() {
