@@ -229,19 +229,19 @@ body{
   border:1px solid var(--border);
   padding:28px 24px;width:100%;max-width:340px;text-align:center;
 }
-.modal-inicio-title{font-size:18px;font-weight:800;color:var(--text);margin-bottom:10px}
-.modal-inicio-sub{font-size:14px;color:var(--text-soft);line-height:1.6;margin-bottom:24px}
+.modal-inicio-title{font-size:24px;font-weight:800;color:var(--text);margin-bottom:12px;font-family:'Cormorant Garamond',Georgia,serif}
+.modal-inicio-sub{font-size:18px;color:var(--text-soft);line-height:1.6;margin-bottom:28px}
 .modal-btn-primary{
-  display:block;width:100%;padding:14px;border-radius:12px;
+  display:block;width:100%;padding:16px;border-radius:12px;
   border:none;background:var(--lvl-bold);color:#fff;
-  font-family:inherit;font-size:14px;font-weight:700;
+  font-family:inherit;font-size:18px;font-weight:700;
   cursor:pointer;margin-bottom:10px;transition:all 0.2s;
 }
 .modal-btn-secondary{
-  display:block;width:100%;padding:14px;border-radius:12px;
+  display:block;width:100%;padding:16px;border-radius:12px;
   border:1px solid var(--border);background:transparent;
   color:var(--text-soft);font-family:inherit;
-  font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;
+  font-size:17px;font-weight:600;cursor:pointer;transition:all 0.2s;
 }
 .modal-btn-primary:active,.modal-btn-secondary:active{transform:scale(0.97)}
 
@@ -1188,8 +1188,8 @@ function showModalInicio(){
   $('modal-desde').textContent=bIdx+1;
   show('scr-modal-inicio');
 }
-window._rezarDesdeAqui=function(){decideEntry();};
-window._rezarDesdeInicio=function(){bIdx=0;decideEntry();};
+window._rezarDesdeAqui   = function(){ show('scr-main'); initSession(); };
+window._rezarDesdeInicio = function(){ bIdx=0; show('scr-main'); initSession(); };
 
 /* ─── PARSE QUESTIONS ─── */
 function parseQ(text){
@@ -1727,8 +1727,8 @@ function initSession(){
 function decideEntry(){
   if(!data){showError('No se encontraron los datos del nivel.');return;}
   const tienePrefs=rezarPrefs().idioma!==undefined;
-  if(bIdx>0){showModalInicio();}
-  else if(!tienePrefs){renderPrefs();show('scr-prefs');}
+  if(!tienePrefs){renderPrefs();show('scr-prefs');}
+  else if(bIdx>0){showModalInicio();}
   else{initSession();}
 }
 
