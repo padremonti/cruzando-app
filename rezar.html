@@ -530,13 +530,13 @@ body{
   <div id="exit-modal" class="exit-modal-overlay">
     <div class="exit-modal-box">
       <div style="font-size:32px;margin-bottom:12px">⏸</div>
-      <div class="exit-modal-title">Sesión en curso</div>
-      <div class="exit-modal-sub">
+      <div class="exit-modal-title" id="exit-modal-title">Sesión en curso</div>
+      <div class="exit-modal-sub" id="exit-modal-sub">
         ¿Deseas salir? Perderás el progreso<br>de esta sesión.
       </div>
       <div class="exit-modal-btns">
-        <button class="exit-btn-cancel"  onclick="window._exitCancel()">Seguir rezando</button>
-        <button class="exit-btn-confirm" onclick="window._exitConfirm()">Salir</button>
+        <button class="exit-btn-cancel"  id="exit-btn-cancel"  onclick="window._exitCancel()">Seguir rezando</button>
+        <button class="exit-btn-confirm" id="exit-btn-confirm" onclick="window._exitConfirm()">Salir</button>
       </div>
     </div>
   </div>
@@ -791,7 +791,7 @@ body{
       <span class="app-nav-label">Diario</span>
     </button>
 
-    <button class="app-nav-item" onclick="window._safeGoTo('orar.html');navTap(this)">
+    <button class="app-nav-item" onclick="navTap(this);window.safeGoTo('orar.html',{seamless:true,label:'Libro'})">
       <div class="app-nav-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/>
@@ -804,7 +804,7 @@ body{
       <div class="nav-hide-icon">✕</div>
     </button>
 
-    <button class="app-nav-item" id="nav-audio-tab" onclick="window._safeGoTo('audio.html');navTap(this)">
+    <button class="app-nav-item" id="nav-audio-tab" onclick="navTap(this);window.safeGoTo('audio.html',{seamless:true,label:'Audio'})">
       <div class="app-nav-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/>
@@ -1035,14 +1035,44 @@ window.toggleBgm=function(){
   updateBgmBtn();
 };
 
-function safeGoTo(pg){
-  if(rezarAudio&&!rezarAudio.paused){pendingNav=pg;showExitModal();}
-  else goTo(pg);
+function _urlConMisterio(base) {
+  var m = mNum(blk, bIdx);
+  return base + '?c=' + nivelId + '&b=' + blk + '&m=' + m;
+}
+window._urlConMisterio = _urlConMisterio;
+
+function safeGoTo(pg, opts) {
+  var dest = (opts && opts.seamless)
+    ? _urlConMisterio(pg)
+    : pg;
+  if (rezarAudio && !rezarAudio.paused) {
+    pendingNav = dest;
+    _showExitModalModo(opts && opts.label ? opts.label : null);
+  } else {
+    goTo(dest);
+  }
 }
 window.safeGoTo=safeGoTo;
 window._safeGoTo=safeGoTo;
 
-function showExitModal(){$('exit-modal').classList.add('open');}
+function showExitModal(){ _showExitModalModo(null); }
+
+function _showExitModalModo(label) {
+  var titulo = label
+    ? '¿Cambiar a modo ' + label + '?'
+    : 'Sesión en curso';
+  var sub = label
+    ? 'Se pausará el audio y continuarás en el Misterio ' + (bIdx + 1) + '.'
+    : '¿Deseas salir? Perderás el progreso<br>de esta sesión.';
+  var btnConfirm = label ? 'Sí, cambiar' : 'Salir';
+  var btnCancel  = label ? 'Seguir rezando' : 'Seguir rezando';
+  $('exit-modal-title').textContent = titulo;
+  $('exit-modal-sub').innerHTML     = sub;
+  $('exit-btn-confirm').textContent = btnConfirm;
+  $('exit-btn-cancel').textContent  = btnCancel;
+  $('exit-modal').classList.add('open');
+}
+
 function hideExitModal(){$('exit-modal').classList.remove('open');pendingNav=null;}
 window._exitConfirm=function(){
   if(rezarAudio)rezarAudio.pause();
