@@ -801,10 +801,10 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
       <div class="nav-hide-icon">✕</div>
     </button>
 
-    <button class="app-nav-item" id="nav-audio-tab" onclick="navTap(this);window.safeGoTo('audio.html',{seamless:true,label:'Audio'})">
+    <button class="app-nav-item" onclick="navTap(this);window.safeGoTo('audio.html',{seamless:true,label:'Audio'})">
       <div class="app-nav-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/>
+          <path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3z"/><path d="M3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/>
         </svg>
       </div>
       <span class="app-nav-label">Audio</span>
@@ -1034,6 +1034,9 @@ window.toggleBgm=function(){
 
 function _urlConMisterio(base) {
   var m = mNum(blk, bIdx);
+  if (base.indexOf('audio.html') !== -1) {
+    return 'audio.html?nivel=' + nivel + '&cuaderno=' + cua + '&misterio=' + m;
+  }
   return base + '?c=' + nivelId + '&b=' + blk + '&m=' + m;
 }
 window._urlConMisterio = _urlConMisterio;

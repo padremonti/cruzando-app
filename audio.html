@@ -1494,10 +1494,10 @@ body.light { --tb-circle-bg:var(--card); --tb-circle-border:var(--border); --tb-
     <span class="app-nav-label">Diario</span>
   </button>
 
-  <button class="app-nav-item" onclick="navTap(this); navGuard('rezar.html')">
+  <button class="app-nav-item" id="nav-rezar-btn" onclick="navTap(this); navGuardSeamless('rezar')">
     <div class="app-nav-icon">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
+        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
       </svg>
     </div>
     <span class="app-nav-label">Rezar</span>
@@ -1507,12 +1507,13 @@ body.light { --tb-circle-bg:var(--card); --tb-circle-border:var(--border); --tb-
     <div class="nav-hide-icon">✕</div>
   </button>
 
-  <button class="app-nav-item" onclick="navTap(this); navGuard('orar.html')">
+  <button class="app-nav-item" id="nav-libro-btn" onclick="navTap(this); navGuardSeamless('libro')">
     <div class="app-nav-icon">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/>
       </svg>
     </div>
+    <span class="app-nav-label">Libro</span>
   </button>
 
   <button class="app-nav-item" onclick="navTap(this); navGuard('index.html')">
@@ -1527,7 +1528,7 @@ body.light { --tb-circle-bg:var(--card); --tb-circle-border:var(--border); --tb-
 </nav>
 
 <!-- ═══ POPUP: CONFIRMAR CAMBIO DE MISTERIO ═══ -->
-<div id="nav-confirm-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.65);display:flex;align-items:center;justify-content:center;z-index:500;opacity:0;pointer-events:none;backdrop-filter:blur(4px);transition:opacity 0.2s;">
+<div id="mystery-nav-confirm" style="position:fixed;inset:0;background:rgba(0,0,0,0.65);display:flex;align-items:center;justify-content:center;z-index:500;opacity:0;pointer-events:none;backdrop-filter:blur(4px);transition:opacity 0.2s;">
   <div id="nav-confirm-box" style="background:#252119;border:1px solid #3A3530;border-radius:18px;padding:24px 22px 18px;width:280px;text-align:center;transform:scale(0.95);transition:transform 0.2s;">
     <p style="font-family:'Crimson Pro',Georgia,serif;font-size:1.15rem;font-weight:600;color:#E6DED3;margin-bottom:6px;">¿Cambiar de Misterio?</p>
     <p style="font-size:0.72rem;color:#786858;margin-bottom:18px;">Se detendrá la reproducción actual</p>
@@ -1891,7 +1892,7 @@ let _pendingNavAction = null;
 
 function showNavConfirm(action) {
   _pendingNavAction = action;
-  const overlay = document.getElementById('nav-confirm-overlay');
+  const overlay = document.getElementById('mystery-nav-confirm');
   const box     = document.getElementById('nav-confirm-box');
   overlay.style.opacity = '1';
   overlay.style.pointerEvents = 'auto';
@@ -1899,7 +1900,7 @@ function showNavConfirm(action) {
 }
 
 function hideNavConfirm() {
-  const overlay = document.getElementById('nav-confirm-overlay');
+  const overlay = document.getElementById('mystery-nav-confirm');
   const box     = document.getElementById('nav-confirm-box');
   overlay.style.opacity = '0';
   overlay.style.pointerEvents = 'none';
@@ -1913,7 +1914,7 @@ document.getElementById('nav-confirm-btn').addEventListener('click', () => {
   hideNavConfirm();
   if (action) action();
 });
-document.getElementById('nav-confirm-overlay').addEventListener('click', e => {
+document.getElementById('mystery-nav-confirm').addEventListener('click', e => {
   if (e.target === e.currentTarget) hideNavConfirm();
 });
 
@@ -3654,8 +3655,11 @@ window.goTo   = goTo;
 let _navConfirmDest = null;
 function navGuard(dest) {
   const sessionActive = currentTrack >= 0 && !sessionCompleted;
-  if (!sessionActive) { goTo(dest); return; }
+  const isAudioPlaying = audioEl && !audioEl.paused;
+  if (!sessionActive && !isAudioPlaying) { goTo(dest); return; }
   _navConfirmDest = dest;
+  var titleEl = document.querySelector('#nav-confirm-overlay .nav-confirm-title');
+  if (titleEl) titleEl.textContent = '¿Salir del modo Audio?';
   document.getElementById('nav-confirm-overlay').classList.add('open');
 }
 function closeNavConfirm() {
@@ -3669,9 +3673,33 @@ function confirmNavExit() {
   bgmStop();
   goTo(dest);
 }
-window.navGuard       = navGuard;
-window.closeNavConfirm = closeNavConfirm;
-window.confirmNavExit  = confirmNavExit;
+function navGuardSeamless(modo) {
+  var dest;
+  var BFM = {gozosos:1, luminosos:6, dolorosos:11, gloriosos:16};
+  if (nivelId && blk !== null) {
+    var m = currentGlobalMystery || (BFM[blk] + bIdx);
+    dest = modo === 'rezar'
+      ? 'rezar.html?c=' + nivelId + '&b=' + blk + '&m=' + m
+      : 'orar.html?c='  + nivelId + '&b=' + blk + '&m=' + m;
+  } else {
+    dest = modo === 'rezar' ? 'rezar.html' : 'orar.html';
+  }
+  var sessionActive = currentTrack >= 0 && !sessionCompleted;
+  var audioPlaying  = audioEl && !audioEl.paused;
+  if (sessionActive && audioPlaying) {
+    var modeLabel = modo === 'rezar' ? 'modo Rezar' : 'modo Libro';
+    _navConfirmDest = dest;
+    var titleEl = document.querySelector('#nav-confirm-overlay .nav-confirm-title');
+    if (titleEl) titleEl.textContent = '¿Cambiar a ' + modeLabel + '?';
+    document.getElementById('nav-confirm-overlay').classList.add('open');
+  } else {
+    goTo(dest);
+  }
+}
+window.navGuard          = navGuard;
+window.closeNavConfirm   = closeNavConfirm;
+window.confirmNavExit    = confirmNavExit;
+window.navGuardSeamless  = navGuardSeamless;
 
 // ════════════════════════════════════════════
 // INIT
