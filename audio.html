@@ -2933,6 +2933,8 @@ function goTrack(idx) {
     updatePlayPauseBtn();
   });
 
+  setupAudioMediaSession(currentSession && currentSession.mysteryData);
+
   // Marcar segmento visual como activo (solo si no es silence y no está ya done)
   if (!track.silence) {
     const segEl = $('pseg-' + track.seg);
@@ -3139,6 +3141,22 @@ function bgmStop() {
   bgmSource   = null;
   bgmGainNode = null;
   bgmLoaded   = false;
+}
+
+function setupAudioMediaSession(mysteryData) {
+  if (!('mediaSession' in navigator)) return;
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title:  mysteryData ? mysteryData.titulo : 'CruzAndo',
+    artist: 'Santo Rosario · Audio',
+    album:  'CruzAndo',
+    artwork: [{ src: 'icon-512.png', sizes: '512x512', type: 'image/png' }]
+  });
+  navigator.mediaSession.setActionHandler('play',  function() {
+    if (audioEl) { audioEl.play().catch(()=>{}); isPlaying = true; updatePlayPauseBtn(); }
+  });
+  navigator.mediaSession.setActionHandler('pause', function() {
+    if (audioEl) { audioEl.pause(); isPlaying = false; updatePlayPauseBtn(); }
+  });
 }
 
 function bgmToggle() {
@@ -3747,6 +3765,19 @@ window.navGuardSeamless  = navGuardSeamless;
     }, { passive: true });
   }
 })();
+
+// iOS: reanudar AudioContext del BGM cuando la pantalla se desbloquea
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState !== 'visible') return;
+  if (bgmAudioCtx && bgmAudioCtx.state === 'suspended') {
+    bgmAudioCtx.resume().then(function() {
+      if (bgmGainNode && isPlaying) bgmFadeTo(BGM_VOL, 400);
+    }).catch(function(){});
+  }
+  if (bgmEl && bgmEl.paused && isPlaying && bgmEnabled) {
+    bgmEl.play().catch(function(){});
+  }
+});
 
 initAuth();
 </script>

@@ -1359,6 +1359,7 @@ function updateToggleHref(){
 }
 
 function updateMysteryContent(){
+  setupMediaSession();
   const md=mData(blk,bIdx),m=mNum(blk,bIdx);
   const hi=$('hero-img');
   hi.src=IMGB+'P_'+nivel+'_'+cua+'_'+m+'.webp';
@@ -1667,6 +1668,22 @@ function initAudio(){
   });
 }
 
+function setupMediaSession() {
+  if (!('mediaSession' in navigator)) return;
+  var md = mData(blk, bIdx);
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title:  md ? md.titulo : 'CruzAndo',
+    artist: 'Santo Rosario',
+    album:  'CruzAndo · ' + (BN[blk] || ''),
+    artwork: [{ src: 'icon-512.png', sizes: '512x512', type: 'image/png' }]
+  });
+  navigator.mediaSession.setActionHandler('play',         function() { rezarAudio.play().catch(()=>{}); updatePlayBtn(); });
+  navigator.mediaSession.setActionHandler('pause',        function() { rezarAudio.pause(); updatePlayBtn(); });
+  navigator.mediaSession.setActionHandler('nexttrack',    function() { playNext(); });
+  navigator.mediaSession.setActionHandler('previoustrack',function() { /* no retroceder */ });
+}
+window.setupMediaSession = setupMediaSession;
+
 async function onTrackEnded(){
   const track=playlist[plIdx];
   if(!track)return;
@@ -1772,6 +1789,7 @@ function initSession(){
   show('scr-rezar');
   startBgm();
   updateBgmBtn();
+  setupMediaSession();
 
   var tapZone = document.getElementById('hero-tap-zone');
   if (tapZone) {
@@ -1877,6 +1895,21 @@ async function loadAndStart(){
 
   decideEntry();
 }
+
+// iOS: reanudar BGM si la pantalla fue bloqueada y vuelve
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState !== 'visible') return;
+  if (bgmOn && bgmEl && bgmEl.paused) {
+    bgmEl.play().catch(function(){});
+  }
+});
+
+// iOS: reanudar AudioContext del BGM al desbloquear pantalla
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'visible' && bgmAudioCtx) {
+    bgmAudioCtx.resume().catch(function(){});
+  }
+});
 
 initAuth();
 
