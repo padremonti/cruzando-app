@@ -764,7 +764,8 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
       <div class="maria-placeholder">🙏</div>
       <h2 class="celebration-title" id="celeb-title"></h2>
       <p class="celebration-sub" id="celeb-sub"></p>
-      <button class="btn btn-primary btn-block" id="btn-celeb-home">Regresar a Orar</button>
+      <button class="btn btn-primary btn-block" id="btn-celeb-home" style="margin-bottom:12px">Siguiente</button>
+      <button class="btn btn-secondary btn-block" id="btn-celeb-index" style="opacity:0.7">Ir al inicio</button>
     </div>
   </div>
 
@@ -1588,6 +1589,12 @@ async function completeMystery(){
     await FS.collection('users').doc(usr.uid).collection('audioProgress').doc('current')
       .set({nivel,cuaderno:cua,misterio:mNum(blk,bIdx)},{merge:true});
   }catch(e){}
+  try{
+    await FS.collection('users').doc(usr.uid).collection('bookmark').doc('current')
+      .set({nivelId,nivel,cuaderno:cua,bloque:blk,misterio:mNum(blk,bIdx),
+            modo:'rezar',savedAt:new Date()},{merge:true});
+  }catch(e){}
+  try{localStorage.setItem('cruzando_progress_cache_dirty','true');}catch(_){}
   renderMysteryDots();
   if(dots.every(Boolean)){
     setTimeout(async()=>{
@@ -1655,13 +1662,44 @@ function showFinalLayout(type){
   $('final-layout-text').innerHTML=txt;
   show('scr-letanias');
   updatePlayBtn();
+  // Los misterios ya están guardados — actualizar texto del modal de salida
+  var exitTitle   = document.getElementById('exit-modal-title');
+  var exitSub     = document.getElementById('exit-modal-sub');
+  var exitConfirm = document.getElementById('exit-btn-confirm');
+  var exitCancel  = document.getElementById('exit-btn-cancel');
+  if(exitTitle)   exitTitle.textContent  = 'Oraciones finales';
+  if(exitSub)     exitSub.innerHTML      = 'Tus 5 Misterios ya están guardados.<br>¿Deseas salir ahora?';
+  if(exitConfirm) exitConfirm.textContent = 'Sí, salir';
+  if(exitCancel)  exitCancel.textContent  = 'Continuar';
 }
 
 function onSessionComplete(){
   if(window.CZSound)CZSound('blockClear');
-  $('celeb-title').textContent='¡Rosario completado!';
-  $('celeb-sub').textContent='Has rezado los 5 Misterios '+BN[blk].toLowerCase()+'. ¡Buen camino, peregrino!';
-  $('btn-celeb-home').onclick=()=>goTo('orar.html?c='+nivelId);
+
+  var blkIdx   = BLOCKS.indexOf(blk);
+  var nextBlk  = BLOCKS[blkIdx + 1] || null;
+  var nextUrl  = nextBlk
+    ? ('rezar.html?c=' + nivelId + '&b=' + nextBlk + '&m=' + (BFM[nextBlk] || 1))
+    : null;
+
+  $('celeb-title').textContent = '¡Rosario completado!';
+  $('celeb-sub').textContent   = 'Has rezado los 5 Misterios ' + BN[blk].toLowerCase() + '. ¡Buen camino, peregrino!';
+
+  var btnPrimary = $('btn-celeb-home');
+  if(nextUrl){
+    btnPrimary.textContent = 'Rezar ' + BN[nextBlk];
+    btnPrimary.onclick     = ()=>goTo(nextUrl);
+  } else {
+    btnPrimary.textContent = 'Ir al inicio';
+    btnPrimary.onclick     = ()=>goTo('index.html');
+  }
+
+  var btnSec = $('btn-celeb-index');
+  if(btnSec){
+    btnSec.style.display = nextUrl ? '' : 'none';
+    btnSec.onclick       = ()=>goTo('index.html');
+  }
+
   show('scr-celebration');
 }
 
