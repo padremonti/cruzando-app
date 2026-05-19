@@ -844,6 +844,18 @@ const R2   = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev';
 const IMGB = 'https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev/';
 const MUSB = 'https://pub-faed94e375aa443e846e07f81ef93274.r2.dev/';
 
+// ── Mariano poses ──────────────────────────
+const MARIANO_WALK  = IMGB + 'mariano_01.webp';
+const MARIANO_CELEB = IMGB + 'mariano_celeb.webp';
+const MARIANO_TOTAL = 10;
+var   _marianoIdx   = 0;
+
+function marianoNext() {
+  _marianoIdx = (_marianoIdx % MARIANO_TOTAL) + 1;
+  var n = _marianoIdx < 10 ? '0' + _marianoIdx : '' + _marianoIdx;
+  return IMGB + 'mariano_' + n + '.webp';
+}
+
 const BLOCKS = ['gozosos','luminosos','dolorosos','gloriosos'];
 const BN  = {gozosos:'Gozosos',luminosos:'Luminosos',dolorosos:'Dolorosos',gloriosos:'Gloriosos'};
 const BFN = {gozosos:'Misterios Gozosos',luminosos:'Misterios Luminosos',dolorosos:'Misterios Dolorosos',gloriosos:'Misterios Gloriosos'};
@@ -1177,7 +1189,7 @@ async function addMeters(m){
 function showSlide(m,extra){
   const ov=$('mariano-overlay'),img=$('mariano-slide-img'),fl=$('meters-float-text');
   if(!ov)return;
-  img.src=IMGB+'mariano.webp';
+  img.src=marianoNext();
   fl.innerHTML=(extra?`<span class="extra-badge">${extra}</span>`:'')+`+${m}m`;
   ov.style.display='flex';
   setTimeout(()=>{ov.style.display='none';},2600);
@@ -1762,11 +1774,15 @@ function onSessionComplete(){
     btnSec.onclick       = ()=>goTo('index.html');
   }
 
+  var grandImg = $('mariano-slide-img');
+  if (grandImg) grandImg.src = MARIANO_CELEB;
   show('scr-celebration');
 }
 
 /* ─── initSession ─── */
 function initSession(){
+  var walkImg = $('mariano-slide-img');
+  if (walkImg) walkImg.src = MARIANO_WALK;
   playlist=buildPlaylist(bIdx);
   plIdx=0;beadCount=0;
   ans={0:'',1:'',2:''};firstAns={0:false,1:false,2:false};

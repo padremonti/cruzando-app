@@ -1615,6 +1615,19 @@ const googleProvider = new GoogleAuthProvider();
 
 const R2_BASE   = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev';
 const IMG_BASE  = 'https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev/';
+
+// ── Mariano poses ──────────────────────────
+const MARIANO_WALK  = IMG_BASE + 'mariano_01.webp';
+const MARIANO_CELEB = IMG_BASE + 'mariano_celeb.webp';
+const MARIANO_TOTAL = 10;
+var   _marianoIdx   = 0;
+
+function marianoNext() {
+  _marianoIdx = (_marianoIdx % MARIANO_TOTAL) + 1;
+  var n = _marianoIdx < 10 ? '0' + _marianoIdx : '' + _marianoIdx;
+  return IMG_BASE + 'mariano_' + n + '.webp';
+}
+
 const AUDIO_FOLDERS = {
   start:  R2_BASE + '/start/',
   ubible: R2_BASE + '/ubible/',
@@ -2850,6 +2863,11 @@ function goTrack(idx) {
 
   stopAudio();
   currentTrack = idx;
+
+  if (idx === 0) {
+    var walkImg = $('mariano-slide-img');
+    if (walkImg) walkImg.src = MARIANO_WALK;
+  }
 
   const track = playlist[idx];
 
