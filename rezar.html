@@ -508,10 +508,6 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
   -webkit-overflow-scrolling:touch;
 }
 
-/* ── Dev-nav (eliminar en producción) ── */
-#dev-nav{display:flex;justify-content:space-between;padding:6px 14px;background:var(--card);border-bottom:1px solid var(--border)}
-#dev-nav button{padding:4px 10px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text-dim);font-size:11px;cursor:pointer;font-family:inherit}
-#dev-nav button:active{background:var(--sec-bg)}
 
 @media(max-width:380px){html{font-size:16px}}
 </style>
@@ -706,12 +702,6 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
     <!-- ── Tira de playlist ── -->
     <div class="playlist-strip" id="playlist-strip"></div>
 
-    <!-- ── Dev-nav TESTING — eliminar en producción ── -->
-    <div id="dev-nav">
-      <button onclick="window._devPrev()">← M anterior</button>
-      <span style="font-size:11px;color:var(--text-dim)">⚠ testing nav</span>
-      <button onclick="window._devNext()">M siguiente →</button>
-    </div>
 
     <!-- ── Toolbar inferior ── -->
     <div class="tools-bar" id="tools-bar">
@@ -1501,23 +1491,6 @@ async function loadRefs(){
   return r;
 }
 
-/* ─── DEV NAV (TESTING — eliminar en producción) ─── */
-window._devPrev=()=>{
-  if(bIdx<=0)return;
-  bIdx--;
-  const i=playlist.findIndex(t=>t.type==='misterio'&&t.mIdx===bIdx);
-  if(i>=0)plIdx=i;
-  if(rezarAudio){rezarAudio.pause();rezarAudio.src=playlist[plIdx]?.src||'';rezarAudio.load();}
-  updateMysteryContent();updatePlaylistStrip();updatePlayBtn();
-};
-window._devNext=()=>{
-  if(bIdx>=4)return;
-  bIdx++;
-  const i=playlist.findIndex(t=>t.type==='misterio'&&t.mIdx===bIdx);
-  if(i>=0)plIdx=i;
-  if(rezarAudio){rezarAudio.pause();rezarAudio.src=playlist[plIdx]?.src||'';rezarAudio.load();}
-  updateMysteryContent();updatePlaylistStrip();updatePlayBtn();
-};
 
 /* ─── SWIPE — app-nav (swipe up para mostrar) ─── */
 let navHideTimer=null;
