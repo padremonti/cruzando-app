@@ -1180,6 +1180,49 @@ function playHeroCanto(canto) {
   const curEl   = document.getElementById('hero-cur');
   const durEl   = document.getElementById('hero-dur');
   playCantoAudio(url, playBtn, barFill, curEl, durEl);
+  setupCantoMediaSession(canto);
+}
+
+function setupCantoMediaSession(canto) {
+  if (!('mediaSession' in navigator) || !canto) return;
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title:  canto.titulo || 'CruzAndo',
+    artist: 'Santo Rosario · Canto',
+    album:  'CruzAndo',
+    artwork: [{ src: 'icon-512.png', sizes: '512x512', type: 'image/png' }]
+  });
+  navigator.mediaSession.setActionHandler('play', function() {
+    if (activeAudio) {
+      activeAudio.play().catch(function(){});
+      setPlayIcon(activePlayBtn, true);
+      document.getElementById('cantos-hero')?.classList.add('playing');
+    }
+  });
+  navigator.mediaSession.setActionHandler('pause', function() {
+    if (activeAudio) {
+      activeAudio.pause();
+      setPlayIcon(activePlayBtn, false);
+      document.getElementById('cantos-hero')?.classList.remove('playing');
+    }
+  });
+  navigator.mediaSession.setActionHandler('nexttrack', function() {
+    var next = currentIdx + 1;
+    if (navCantos.length && next < navCantos.length) {
+      currentIdx = next;
+      updateHero(navCantos[currentIdx]); renderDots(); updateNavBtns();
+      saveBookmark(navCantos[currentIdx]);
+      playHeroCanto(navCantos[currentIdx]);
+    }
+  });
+  navigator.mediaSession.setActionHandler('previoustrack', function() {
+    var prev = currentIdx - 1;
+    if (navCantos.length && prev >= 0) {
+      currentIdx = prev;
+      updateHero(navCantos[currentIdx]); renderDots(); updateNavBtns();
+      saveBookmark(navCantos[currentIdx]);
+      playHeroCanto(navCantos[currentIdx]);
+    }
+  });
 }
 
 document.getElementById('hero-bar-wrap').onclick = (e) => {
@@ -1836,6 +1879,15 @@ onAuthStateChanged(auth, async user => {
         '<button class="btn-orar" onclick="goTo(\'audio.html\')">Ir a orar</button></div>';
     }
   }, 8000);
+});
+
+// iOS: reanudar audio si la pantalla fue bloqueada y vuelve
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState !== 'visible') return;
+  var heroEl = document.getElementById('cantos-hero');
+  if (activeAudio && activeAudio.paused && heroEl && heroEl.classList.contains('playing')) {
+    activeAudio.play().catch(function(){});
+  }
 });
 </script>
 <script src="sounds.js"></script>
