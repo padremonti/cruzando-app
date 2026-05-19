@@ -1328,6 +1328,7 @@ async function completeMystery(){
   try{
     await FS.collection('users').doc(usr.uid).collection('progress').doc(nivelId)
       .set({progress:{[blk]:dots}},{merge:true});
+    try{localStorage.setItem('cruzando_progress_cache_dirty','true');}catch(_){}
   }catch(e){console.error('[CruzAndo] completeMystery:',e);}
   // Sincronizar cursor de audio para que ambos modos compartan posición
   try{

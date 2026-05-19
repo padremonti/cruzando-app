@@ -1796,6 +1796,23 @@ function todayLabel() {
   return dias[d.getDay()] + ' ' + d.getDate() + ' de ' + meses[d.getMonth()];
 }
 
+// ── Cache de progreso por nivel ──────────────────────────────────
+function getProgressCache(nivelId) {
+  try {
+    var raw = localStorage.getItem('cruzando_progress_' + nivelId);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) { return null; }
+}
+function setProgressCache(nivelId, data) {
+  try { localStorage.setItem('cruzando_progress_' + nivelId, JSON.stringify(data)); } catch(e) {}
+}
+function isProgressCacheDirty() {
+  return localStorage.getItem('cruzando_progress_cache_dirty') === 'true';
+}
+function clearProgressCacheDirty() {
+  try { localStorage.removeItem('cruzando_progress_cache_dirty'); } catch(e) {}
+}
+
 // ── Leer progreso local ───────────────────────────────────────────
 function getCurrentNivel() {
   var keys = Object.keys(localStorage).filter(function(k) { return k.startsWith('cruzando_nivel_'); });
@@ -2130,116 +2147,125 @@ function showScreen(name) {
 
 // ── Auth state ────────────────────────────────────────────────────
 onAuthStateChanged(auth, async function(user) {
-  if (user) {
-    currentUser = user;
+  if (!user) { currentUser = null; showScreen('login'); return; }
+  currentUser = user;
 
-    // ── PASO 1: mostrar pantalla inmediatamente con datos locales ──
-    metaMetros = parseInt(localStorage.getItem(META_KEY)) || META_DEFAULT;
-    todayKey   = getTodayKey();
-    const localHist = JSON.parse(localStorage.getItem(HISTORIAL_KEY) || '{}');
-    metrosHoy  = localHist[todayKey] ?? 0;
-    window._dailyHist = localHist;
-    updateOdometro();
+  // ══ FASE 1: pintar todo desde localStorage — sin red ══════════════
+  metaMetros      = parseInt(localStorage.getItem(META_KEY)) || META_DEFAULT;
+  todayKey        = getTodayKey();
+  var localHist   = JSON.parse(localStorage.getItem(HISTORIAL_KEY) || '{}');
+  metrosHoy       = localHist[todayKey] ?? 0;
+  window._dailyHist = localHist;
+  updateOdometro();
 
-    var _cachedNivel    = localStorage.getItem('cruzando_current_nivel') || '0101';
-    var _cachedFrontier = localStorage.getItem('cruzando_frontier_nivel') || _cachedNivel;
-    var _cachedDone     = parseInt(localStorage.getItem('cruzando_done_count') || '0');
-    var _cachedChest    = JSON.parse(localStorage.getItem('cruzando_chest_state') || 'null');
+  var _cNivel     = localStorage.getItem('cruzando_current_nivel')   || '0101';
+  var _cFrontier  = localStorage.getItem('cruzando_frontier_nivel')  || _cNivel;
+  var _cDone      = parseInt(localStorage.getItem('cruzando_done_count') || '0');
+  var _cChest     = JSON.parse(localStorage.getItem('cruzando_chest_state') || 'null');
+  var _cPlan      = localStorage.getItem('cruzando_plan_cache')      || 'free';
+  var _cMeters    = parseInt(localStorage.getItem('cruzando_total_metros') || '0');
 
-    currentNivelId         = _cachedNivel;
-    window.currentNivelId  = _cachedNivel;
-    window.frontierNivelId = _cachedFrontier;
-    window.DONE_COUNT      = _cachedDone;
-    window.chestState      = _cachedChest || ['locked','locked','locked','locked'];
+  currentNivelId         = _cNivel;
+  window.currentNivelId  = _cNivel;
+  window.frontierNivelId = _cFrontier;
+  window.DONE_COUNT      = _cDone;
+  window.chestState      = _cChest || ['locked','locked','locked','locked'];
 
-    var _quickData = {
-      displayName: user.displayName || '',
-      email:       user.email || '',
-      totalMeters: parseInt(localStorage.getItem('cruzando_total_metros') || '0'),
-      plan:        localStorage.getItem('cruzando_plan_cache') || 'free'
-    };
-    renderHome(_quickData);
+  var _cProgress = getProgressCache(_cNivel);
+  window._firestoreProgress = _cProgress;
+
+  var _hasCache = !!localStorage.getItem('cruzando_plan_cache');
+
+  if (_hasCache) {
+    renderHome({ displayName: user.displayName || '', email: user.email || '',
+                 plan: _cPlan, totalMeters: _cMeters });
     showScreen('home');
+    requestAnimationFrame(function() { if (window.buildMap) window.buildMap(); });
+  } else {
+    showScreen('home');
+    var mc = document.getElementById('map-canvas');
+    if (mc) mc.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:180px;color:var(--text-dim);font-size:0.9rem;font-family:\'Crimson Pro\',serif">Cargando tu camino...</div>';
+  }
 
-    requestAnimationFrame(function() {
-      if (window.buildMap) window.buildMap();
-    });
+  // ══ FASE 2: Firestore en background — solo si el cache puede estar desactualizado ══
+  var dirty = isProgressCacheDirty();
 
-    // ── PASO 2: todos los reads de Firestore EN PARALELO ──
-    const [
-      userData,
-      nivelId,
-      audioProgressSnap,
-      bookmarkSnap,
-      ,
-      goalSnap
-    ] = await Promise.all([
-      ensureUserDoc(user),
-      getCurrentNivelFromFirestore(user),
-      getDoc(doc(db, 'users', user.uid, 'audioProgress', 'current')).catch(function() { return null; }),
-      getDoc(doc(db, 'users', user.uid, 'bookmark',      'current')).catch(function() { return null; }),
-      Promise.resolve(null),
-      getDoc(doc(db, 'users', user.uid, 'dailyGoal', 'data')).catch(function() { return null; })
-    ]);
+  var userData = await ensureUserDoc(user);
+  window._lastUserData = userData;
 
-    window._lastUserData  = userData;
+  var realPlan = resolvePlan(userData);
+
+  if (dirty || !_hasCache) {
+    var nivelId = await getCurrentNivelFromFirestore(user);
     currentNivelId        = nivelId;
-    window.currentNivelId = currentNivelId;
+    window.currentNivelId = nivelId;
 
-    // ── PASO 3: progress del nivel activo (necesita nivelId del paso 2) ──
     try {
       var progSnap = await getDoc(doc(db, 'users', user.uid, 'progress', currentNivelId));
-      window._firestoreProgress = progSnap.exists() ? progSnap.data() : null;
-    } catch(e) { window._firestoreProgress = null; }
+      var progData = progSnap.exists() ? progSnap.data() : null;
+      window._firestoreProgress = progData;
+      if (progData) setProgressCache(currentNivelId, progData);
+    } catch(e) { window._firestoreProgress = _cProgress; }
 
-    // ── PASO 4: actualizar UI con datos reales ──
-    if (goalSnap && goalSnap.exists()) {
-      const gd = goalSnap.data();
+    clearProgressCacheDirty();
+  }
+
+  try {
+    var goalSnap = await getDoc(doc(db, 'users', user.uid, 'dailyGoal', 'data'));
+    if (goalSnap.exists()) {
+      var gd = goalSnap.data();
       metaMetros = gd.metaMetros ?? META_DEFAULT;
       metrosHoy  = Math.max(gd.historial?.[todayKey] ?? 0, localHist[todayKey] ?? 0);
       window._dailyHist = gd.historial ?? {};
       updateOdometro();
       checkMetaStreak();
     }
+  } catch(e) {}
 
-    renderHome(userData);
-    // Cachear estado completo para el próximo arranque instantáneo
+  // ══ FASE 3: re-render con datos reales ══
+  renderHome(Object.assign({}, userData, { plan: realPlan }));
+
+  try {
+    localStorage.setItem('cruzando_plan_cache',    realPlan);
+    localStorage.setItem('cruzando_total_metros',  String(userData.totalMeters || 0));
+    localStorage.setItem('cruzando_current_nivel', currentNivelId);
+    localStorage.setItem('cruzando_frontier_nivel', window.frontierNivelId || currentNivelId);
+    localStorage.setItem('cruzando_done_count',    String(window.DONE_COUNT || 0));
+    localStorage.setItem('cruzando_chest_state',   JSON.stringify(window.chestState || []));
+    setProgressCache(currentNivelId, window._firestoreProgress);
+  } catch(e) {}
+
+  requestAnimationFrame(function() { if (window.buildMap) window.buildMap(); });
+
+  window._refreshHome = function() {
+    renderHome(window._lastUserData || userData);
+    if (window.buildMap) window.buildMap();
+  };
+  window._fetchProgressForNivel = async function(id) {
+    var cached = getProgressCache(id);
+    if (cached) { window._firestoreProgress = cached; return; }
+    if (!currentUser) { window._firestoreProgress = null; return; }
     try {
-      localStorage.setItem('cruzando_current_nivel',  currentNivelId);
-      localStorage.setItem('cruzando_frontier_nivel', window.frontierNivelId || currentNivelId);
-      localStorage.setItem('cruzando_done_count',     String(window.DONE_COUNT || 0));
-      localStorage.setItem('cruzando_chest_state',    JSON.stringify(window.chestState || []));
-      if (userData)                          localStorage.setItem('cruzando_plan_cache',   resolvePlan(userData));
-      if (userData && userData.totalMeters) localStorage.setItem('cruzando_total_metros', String(userData.totalMeters));
-    } catch(e) {}
-    // Redibujar mapa con datos reales (silencioso — el usuario ya ve el mapa cacheado)
-    requestAnimationFrame(function() {
-      if (window.buildMap) window.buildMap();
-    });
+      var snap = await getDoc(doc(db, 'users', currentUser.uid, 'progress', id));
+      var data = snap.exists() ? snap.data() : null;
+      window._firestoreProgress = data;
+      if (data) setProgressCache(id, data);
+    } catch(e) { window._firestoreProgress = null; }
+  };
 
-    window._refreshHome = function() {
-      renderHome(window._lastUserData || userData);
-      if (window.buildMap) window.buildMap();
-    };
-    window._fetchProgressForNivel = async function(id) {
-      if (!currentUser) { window._firestoreProgress = null; return; }
-      try {
-        var snap = await getDoc(doc(db, 'users', currentUser.uid, 'progress', id));
-        window._firestoreProgress = snap.exists() ? snap.data() : null;
-      } catch(e) { window._firestoreProgress = null; }
-    };
-
-    var progreso = (audioProgressSnap && audioProgressSnap.exists()) ? audioProgressSnap.data() : null;
-    var bookmark = (bookmarkSnap      && bookmarkSnap.exists())      ? bookmarkSnap.data()      : null;
+  try {
+    var [audioSnap, bookSnap] = await Promise.all([
+      getDoc(doc(db, 'users', user.uid, 'audioProgress', 'current')).catch(function() { return null; }),
+      getDoc(doc(db, 'users', user.uid, 'bookmark',      'current')).catch(function() { return null; })
+    ]);
+    var progreso = (audioSnap && audioSnap.exists()) ? audioSnap.data() : null;
+    var bookmark = (bookSnap  && bookSnap.exists())  ? bookSnap.data()  : null;
     renderTuCamino(bookmark, progreso, user);
+  } catch(e) {}
 
-    // No críticas — sin await para no bloquear
+  if (user && user.uid) {
     verificarRetiroEnProgreso(user.uid);
     verificarRecompensas(user.uid);
-
-  } else {
-    currentUser = null;
-    showScreen('login');
   }
 });
 

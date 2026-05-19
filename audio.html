@@ -2205,6 +2205,7 @@ async function syncToOrarProgress(nivel, cuaderno, misterio) {
 
     prog[block][blockIdx] = Date.now();
     await setDoc(ref, { progress: prog }, { merge: true });
+    try { localStorage.setItem('cruzando_progress_cache_dirty', 'true'); } catch(_) {}
   } catch(e) {
     console.warn('[CruzAndo] syncToOrarProgress:', e);
   }
