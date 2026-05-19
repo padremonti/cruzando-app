@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<link rel="icon" type="image/png" href="/cruzando-app/icon-192.png">
+<link rel="shortcut icon" href="/cruzando-app/icon-192.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -3675,12 +3677,16 @@ function confirmNavExit() {
 }
 function navGuardSeamless(modo) {
   var dest;
-  var BFM = {gozosos:1, luminosos:6, dolorosos:11, gloriosos:16};
-  if (nivelId && blk !== null) {
-    var m = currentGlobalMystery || (BFM[blk] + bIdx);
+  var src = currentSession || audioProgress;
+  if (src && src.nivel) {
+    var n   = src.nivel;
+    var c   = src.cuaderno;
+    var m   = src.misterio;
+    var blk = src.block || (m <= 5 ? 'gozosos' : m <= 10 ? 'luminosos' : m <= 15 ? 'dolorosos' : 'gloriosos');
+    var nId = String(n).padStart(2,'0') + String(c).padStart(2,'0');
     dest = modo === 'rezar'
-      ? 'rezar.html?c=' + nivelId + '&b=' + blk + '&m=' + m
-      : 'orar.html?c='  + nivelId + '&b=' + blk + '&m=' + m;
+      ? 'rezar.html?c=' + nId + '&b=' + blk + '&m=' + m
+      : 'orar.html?c='  + nId + '&b=' + blk + '&m=' + m;
   } else {
     dest = modo === 'rezar' ? 'rezar.html' : 'orar.html';
   }

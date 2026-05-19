@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<link rel="icon" type="image/png" href="/cruzando-app/icon-192.png">
+<link rel="shortcut icon" href="/cruzando-app/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#1A1714">
@@ -700,7 +702,7 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
       <span class="app-nav-label">Diario</span>
     </button>
 
-    <button class="app-nav-item" onclick="navTap(this);goTo('rezar.html?c='+nivelId+'&b='+blk+'&m='+mNum(blk,bIdx))">
+    <button class="app-nav-item" onclick="navTap(this);navToRezar()">
       <div class="app-nav-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
@@ -713,7 +715,7 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
       <div class="nav-hide-icon">✕</div>
     </button>
 
-    <button class="app-nav-item" id="nav-audio-btn" onclick="navTap(this);goTo('audio.html?nivel='+nivel+'&cuaderno='+cua+'&misterio='+currentGlobalMystery)">
+    <button class="app-nav-item" id="nav-audio-btn" onclick="navTap(this);navToAudio()">
       <div class="app-nav-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3z"/><path d="M3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/>
@@ -909,6 +911,9 @@ function playNavChord(){
 }
 function navTap(el){if(window.CZSound)CZSound('navTap');playNavChord();el.classList.remove('tapped');void el.offsetWidth;el.classList.add('tapped');setTimeout(()=>el.classList.remove('tapped'),400);}
 window.navTap=navTap; window.goTo=goTo;
+// Funciones de navegación que cierran sobre las vars del IIFE
+window.navToRezar = function(){ goTo('rezar.html?c='+nivelId+'&b='+blk+'&m='+mNum(blk,bIdx)); };
+window.navToAudio = function(){ goTo('audio.html?nivel='+nivel+'&cuaderno='+cua+'&misterio='+currentGlobalMystery); };
 
 /* ─── FIREBASE (compat) ─── */
 const FS=_db;
