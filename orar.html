@@ -1458,7 +1458,7 @@ function openVP(t){
   $('voice-player').style.display='';
   if(window.CZSound)CZSound('playStart');
   if(t==='canto'){
-    if(bgmEl) bgmEl.pause();
+    if(bgmEl){ bgmFadeTo(0, 400); setTimeout(function(){ if(bgmEl) bgmEl.pause(); }, 420); }
   } else {
     bgmDuck();
   }
@@ -1469,22 +1469,33 @@ function closeVP(){
   if(libro) libro.pause();
   $('voice-player').style.display='none';
   $('popup-voice-btn').classList.remove('playing');
-  if(bgmOn && bgmEl && bgmEl.paused) bgmEl.play().catch(()=>{});
-  bgmUnduck();
+  var pvbN = document.getElementById('pvb-normal');
+  var pvbP = document.getElementById('pvb-playing');
+  if(pvbN) pvbN.style.display = '';
+  if(pvbP) pvbP.style.display = 'none';
+  if(bgmOn && bgmEl){
+    if(bgmEl.paused) bgmEl.play().catch(()=>{});
+    bgmUnduck();
+  }
 }
 function vpToggle(){
-  if(!libro)return;
+  if(!libro) return;
   if(libro.paused){
     if(!libro.src||libro.src===location.href) openVP(tool);
     else {
       libro.play().catch(()=>{});
-      if(tool==='canto'){ if(bgmEl) bgmEl.pause(); }
-      else bgmDuck();
+      if(tool==='canto'){
+        if(bgmEl){ bgmFadeTo(0, 400); setTimeout(function(){ if(bgmEl) bgmEl.pause(); }, 420); }
+      } else {
+        bgmDuck();
+      }
     }
   } else {
     libro.pause();
-    if(bgmOn && bgmEl && bgmEl.paused) bgmEl.play().catch(()=>{});
-    bgmUnduck();
+    if(bgmOn && bgmEl){
+      if(bgmEl.paused) bgmEl.play().catch(()=>{});
+      bgmUnduck();
+    }
   }
   vpUpd();
 }
@@ -1501,9 +1512,8 @@ function vpUpd(){
 }
 function onAudioEnd(){
   vpUpd();
-  if(tool==='canto'){
-    if(bgmOn && bgmEl){ bgmEl.play().catch(()=>{}); bgmUnduck(); }
-  } else {
+  if(bgmOn && bgmEl){
+    if(bgmEl.paused) bgmEl.play().catch(()=>{});
     bgmUnduck();
   }
   if(!tool||awd.has(tool))return;
@@ -1514,7 +1524,7 @@ function onAudioEnd(){
 
 /* ─── BGM ─── */
 var BGM_NORMAL = 0.04;
-var BGM_DUCK   = 0.008;
+var BGM_DUCK   = 0.005;
 var _bgmFadeTimer = null;
 
 function bgmFadeTo(targetVol, ms) {
@@ -1537,7 +1547,7 @@ function bgmFadeTo(targetVol, ms) {
 }
 
 function bgmDuck()   { bgmFadeTo(BGM_DUCK,   300); }
-function bgmUnduck() { bgmFadeTo(BGM_NORMAL, 600); }
+function bgmUnduck() { bgmFadeTo(BGM_NORMAL, 800); }
 
 function toggleBgm(){
   bgmOn=!bgmOn;const p=prefs();p.bgm=bgmOn;localStorage.setItem('cruzando_prefs',JSON.stringify(p));
