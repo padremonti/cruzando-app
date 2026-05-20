@@ -27,6 +27,7 @@ firebase.initializeApp(firebaseConfig);
 const _db   = firebase.firestore();
 const _auth = firebase.auth();
 </script>
+<script src="plan-utils.js"></script>
 <script src="utils.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -1167,13 +1168,11 @@ function applyBlockAccent(block){
 const FS=_db;
 const FSV=firebase.firestore.FieldValue;
 
-function _getTodayKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
-
 async function addMeters(m){
   totalM+=m;
   const stored=parseInt(localStorage.getItem('cruzando_total_metros')||'0');
   localStorage.setItem('cruzando_total_metros',stored+m);
-  const todayKey=_getTodayKey();
+  const todayKey=getTodayKey();
   const _hist=JSON.parse(localStorage.getItem('cruzando_daily_hist')||'{}');
   _hist[todayKey]=(_hist[todayKey]||0)+m;
   localStorage.setItem('cruzando_daily_hist',JSON.stringify(_hist));
@@ -1836,7 +1835,8 @@ async function loadAndEnter(nId,block,idx){
   try{
     const snap=await FS.collection('users').doc(usr.uid).get();
     const ud=snap.exists?snap.data():{};
-    window.resolvePlan&&window.resolvePlan(ud);
+    const _plan=window.effectivePlan?window.effectivePlan():(window.resolvePlan?window.resolvePlan(ud):'free');
+    if(window.requirePremiumAccess&&!window.requirePremiumAccess('rezar',_plan))return;
     totalM=ud.totalMeters||0;
   }catch(e){}
 
@@ -1883,7 +1883,8 @@ async function loadAndStart(){
   try{
     const snap=await FS.collection('users').doc(usr.uid).get();
     const ud=snap.exists?snap.data():{};
-    window.resolvePlan&&window.resolvePlan(ud);
+    const _plan=window.effectivePlan?window.effectivePlan():(window.resolvePlan?window.resolvePlan(ud):'free');
+    if(window.requirePremiumAccess&&!window.requirePremiumAccess('rezar',_plan))return;
     totalM=ud.totalMeters||0;
   }catch(e){}
 

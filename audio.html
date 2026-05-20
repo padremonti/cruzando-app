@@ -1283,6 +1283,7 @@ body.light { --tb-circle-bg:var(--card); --tb-circle-border:var(--border); --tb-
 .nav-confirm-btn.secondary{background:var(--card2,rgba(255,255,255,0.06));border:1px solid var(--border);color:var(--text);}
 .nav-confirm-btn.danger{background:#C0392B;color:#fff;}
 </style>
+<script src="plan-utils.js"></script>
 </head>
 <body>
 <div class="shell">
@@ -2029,6 +2030,38 @@ async function loadUserAndStart(skipProgressRead = false) {
     console.warn('Error leyendo plan (asumiendo premium):', e.message);
   }
 
+  // ── Si es Free: leer freeProgress y forzar misterio del itinerario ──────────
+  if (userPlan === 'free') {
+    try {
+      const fpSnap = await getDoc(doc(db, 'users', uid, 'freeProgress', 'current'));
+      const fpData = fpSnap.exists()
+        ? fpSnap.data()
+        : { nivelId: '0101', misterio: 1, completedToday: false, fechaHoy: '' };
+
+      // Reset diario si cambió la fecha
+      const hoy = window.getTodayKey ? window.getTodayKey() : new Date().toISOString().slice(0, 10);
+      if (fpData.fechaHoy !== hoy) {
+        fpData.completedToday = false;
+        fpData.fechaHoy = hoy;
+      }
+
+      window._freeProg = fpData;
+      try { localStorage.setItem('cruzando_free_prog', JSON.stringify(fpData)); } catch(_) {}
+
+      // Forzar el misterio del Free — ignorar cualquier parámetro URL
+      const fNivel    = parseInt(fpData.nivelId.slice(0, 2), 10);
+      const fCuaderno = parseInt(fpData.nivelId.slice(2, 4), 10);
+      if (!audioProgress) audioProgress = { nivel: 1, cuaderno: 1, misterio: 1, firstAnswered: [false, false, false], history: [] };
+      audioProgress.nivel    = fNivel;
+      audioProgress.cuaderno = fCuaderno;
+      audioProgress.misterio = fpData.misterio || 1;
+
+    } catch(e) {
+      console.warn('[CruzAndo] Error leyendo freeProgress:', e);
+      window._freeProg = { nivelId: '0101', misterio: 1, completedToday: false, fechaHoy: '' };
+    }
+  }
+
   // Leer audioProgress (omitir si ya está en memoria y skipProgressRead=true)
   if (!skipProgressRead) {
     try {
@@ -2172,6 +2205,33 @@ function showDailyLimit() {
   show('scr-daily-limit');
 }
 
+function showFreeVuelveManana() {
+  const overlay = document.getElementById('free-manana-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+
+  if (audioEl) { audioEl.pause(); isPlaying = false; }
+  bgmStop();
+  if (typeof updatePlayUI === 'function') updatePlayUI();
+
+  function tick() {
+    const now      = new Date();
+    const midnight = new Date(now);
+    midnight.setHours(24, 0, 0, 0);
+    const diff = Math.max(0, midnight - now);
+    const hh   = Math.floor(diff / 3600000);
+    const mm   = Math.floor((diff % 3600000) / 60000);
+    const ss   = Math.floor((diff % 60000) / 1000);
+    const pad  = n => String(n).padStart(2, '0');
+    const el   = document.getElementById('free-countdown');
+    if (el) el.textContent = pad(hh) + ':' + pad(mm) + ':' + pad(ss);
+    if (diff > 0) setTimeout(tick, 1000);
+    else window.location.reload(); // Medianoche — recargar para el nuevo día
+  }
+  tick();
+}
+window.showFreeVuelveManana = showFreeVuelveManana;
+
 async function saveAudioProgress() {
   if (!currentUser) return;
   try {
@@ -2224,15 +2284,10 @@ async function syncToOrarProgress(nivel, cuaderno, misterio) {
   }
 }
 
-function _getTodayKey() {
-  const d = new Date();
-  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-}
-
 async function addMetersToFirestore(meters) {
   if (!currentUser) return;
   // Siempre persistir en localStorage — fuente de verdad para el odómetro
-  const todayKey = _getTodayKey();
+  const todayKey = getTodayKey();
   const _hist = JSON.parse(localStorage.getItem('cruzando_daily_hist') || '{}');
   _hist[todayKey] = (_hist[todayKey] || 0) + meters;
   localStorage.setItem('cruzando_daily_hist', JSON.stringify(_hist));
@@ -3383,6 +3438,49 @@ async function completeSession() {
   stopAudio();
   bgmStop();
 
+  // ── Lógica especial para Free ──────────────────────────────────────────────
+  if (userPlan === 'free') {
+    const fp  = window._freeProg || { completedToday: false };
+    const hoy = window.getTodayKey ? window.getTodayKey() : new Date().toISOString().slice(0, 10);
+
+    if (fp.completedToday) {
+      showFreeVuelveManana();
+      return;
+    }
+
+    // Primera vez hoy — calcular siguiente misterio en el itinerario
+    const curNivelId  = String(audioProgress.nivel).padStart(2, '0') +
+                        String(audioProgress.cuaderno).padStart(2, '0');
+    const curMisterio = audioProgress.misterio;
+    let nextMisterio  = curMisterio + 1;
+    let nextNivelId   = curNivelId;
+    if (nextMisterio > 20) {
+      nextMisterio = 1;
+      const _NORDER  = window.NIVELES_ORDER || [];
+      const _NSTATUS = window.NIVEL_STATUS  || {};
+      const _idx = _NORDER.indexOf(curNivelId);
+      for (let i = _idx + 1; i < _NORDER.length; i++) {
+        if (_NSTATUS[_NORDER[i]] === 'published') { nextNivelId = _NORDER[i]; break; }
+      }
+    }
+
+    try {
+      await setDoc(doc(db, 'users', currentUser.uid, 'freeProgress', 'current'), {
+        nivelId:        nextNivelId,
+        misterio:       nextMisterio,
+        completedToday: true,
+        fechaHoy:       hoy,
+        completedAt:    serverTimestamp()
+      });
+      window._freeProg = { nivelId: nextNivelId, misterio: nextMisterio, completedToday: true, fechaHoy: hoy };
+      try { localStorage.setItem('cruzando_free_prog', JSON.stringify(window._freeProg)); } catch(_) {}
+    } catch(e) { console.warn('[CruzAndo] Error guardando freeProgress:', e); }
+
+    try { localStorage.setItem('cruzando_progress_cache_dirty', 'true'); } catch(_) {}
+    window._freeShowMananaAfterCelebration = true;
+    // Sin return: el flujo normal continúa para registrar metros y mostrar celebración
+  }
+
   // Registrar en historial
   if (window.CZSound) CZSound('mysteryClear');
   const { nivel, cuaderno, misterio, block, blockIdx } = currentSession;
@@ -3476,7 +3574,7 @@ async function completeSession() {
   const s = 'width:100%;padding:15px;border-radius:14px;font-family:Inter,sans-serif;font-size:1rem;font-weight:700;cursor:pointer;margin-bottom:10px;display:block;';
   if (userPlan === 'free') {
     actions.innerHTML =
-      '<button onclick="window.showDailyLimit()" style="' + s + 'background:var(--lvl-bold);color:#fff;border:none;">Volver mañana 🙏</button>' +
+      '<button onclick="window.showFreeVuelveManana()" style="' + s + 'background:var(--lvl-bold);color:#fff;border:none;">Volver mañana 🙏</button>' +
       '<button onclick="window._repeatSession()" style="' + s + 'background:var(--card);color:var(--text-soft);border:1.5px solid var(--border);">🔄 Repetir sesión</button>';
   } else {
     actions.innerHTML =
@@ -3486,6 +3584,12 @@ async function completeSession() {
 
   $('scr-complete').classList.add('open');
   $('fab-questions') && ($('fab-questions').style.display = 'none');
+
+  // Si era Free completando por primera vez hoy: mostrar overlay tras la celebración
+  if (window._freeShowMananaAfterCelebration) {
+    window._freeShowMananaAfterCelebration = false;
+    setTimeout(showFreeVuelveManana, 2000);
+  }
 }
 
 function closeEpilogo() {
@@ -3812,6 +3916,47 @@ initAuth();
       <button class="nav-confirm-btn danger" onclick="confirmNavExit()">Salir</button>
     </div>
   </div>
+</div>
+
+<!-- ── Overlay Free: Vuelve mañana ── -->
+<div id="free-manana-overlay" style="display:none;position:fixed;inset:0;
+  background:var(--bg);z-index:9999;flex-direction:column;align-items:center;
+  justify-content:center;padding:32px;text-align:center;">
+  <div style="font-size:3.5rem;margin-bottom:20px">🌙</div>
+  <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:2rem;
+    font-weight:600;color:var(--text);line-height:1.2;margin-bottom:14px">
+    ¡Buen camino, peregrino!
+  </div>
+  <div style="font-family:'Crimson Pro',Georgia,serif;font-size:1.2rem;
+    color:var(--text-soft);line-height:1.7;margin-bottom:32px;max-width:320px">
+    Has completado tu Misterio del día.<br>
+    Mañana podrás continuar con el siguiente.
+  </div>
+  <div style="font-size:0.7rem;font-weight:700;letter-spacing:2px;
+    text-transform:uppercase;color:var(--text-dim);margin-bottom:8px">
+    Próximo Misterio en
+  </div>
+  <div id="free-countdown" style="font-family:'Cormorant Garamond',Georgia,serif;
+    font-size:3.2rem;font-weight:600;color:var(--brand);margin-bottom:40px;
+    letter-spacing:2px">
+    00:00:00
+  </div>
+  <button onclick="window.location.href='index.html'"
+    style="padding:16px 40px;border-radius:28px;border:none;
+    background:var(--brand);color:#fff;
+    font-family:'Cormorant Garamond',Georgia,serif;
+    font-size:1.4rem;font-weight:600;cursor:pointer;
+    -webkit-tap-highlight-color:transparent;">
+    Ir al inicio
+  </button>
+  <button onclick="document.getElementById('free-manana-overlay').style.display='none'; window._repeatSession();"
+    style="margin-top:14px;padding:13px 40px;border-radius:28px;
+    background:none;border:1.5px solid var(--border);color:var(--text-soft);
+    font-family:'Cormorant Garamond',Georgia,serif;
+    font-size:1.2rem;font-weight:600;cursor:pointer;
+    -webkit-tap-highlight-color:transparent;">
+    🔄 Repetir sesión
+  </button>
 </div>
 
 </body>

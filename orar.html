@@ -458,6 +458,7 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
 .nav-tab-label{font-size:0.6rem;font-weight:600;letter-spacing:0.4px;text-transform:uppercase;font-family:inherit}
 #tab-toggle-audio,#tab-toggle-texto{color:var(--lvl-bold)}
 </style>
+<script src="plan-utils.js"></script>
 </head>
 <body>
 <div class="shell" id="app">
@@ -931,15 +932,13 @@ window.navToAudio = function(){ goTo('audio.html?nivel='+nivel+'&cuaderno='+cua+
 const FS=_db;
 const FSV=firebase.firestore.FieldValue;
 
-function _getTodayKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
-
 async function addMeters(m){
   totalM+=m;
   const stored=parseInt(localStorage.getItem('cruzando_total_metros')||'0');
   localStorage.setItem('cruzando_total_metros',stored+m);
   const mv=$('meters-value'); if(mv) mv.textContent=totalM.toLocaleString('es-MX')+'m';
   // Siempre persistir en localStorage — fuente de verdad para el odómetro
-  const todayKey=_getTodayKey();
+  const todayKey=getTodayKey();
   const _hist=JSON.parse(localStorage.getItem('cruzando_daily_hist')||'{}');
   _hist[todayKey]=(_hist[todayKey]||0)+m;
   localStorage.setItem('cruzando_daily_hist',JSON.stringify(_hist));
@@ -1012,7 +1011,8 @@ async function loadAndStart(){
   try{
     const snap=await FS.collection('users').doc(usr.uid).get();
     const ud=snap.exists?snap.data():{};
-    window.resolvePlan&&(window.resolvePlan(ud));
+    const _plan=window.effectivePlan?window.effectivePlan():(window.resolvePlan?window.resolvePlan(ud):'free');
+    if(window.requirePremiumAccess&&!window.requirePremiumAccess('libro',_plan))return;
     totalM=ud.totalMeters||0;
     const mv=$('meters-value');if(mv)mv.textContent=totalM.toLocaleString('es-MX')+'m';
   }catch(e){}

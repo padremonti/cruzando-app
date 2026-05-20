@@ -188,6 +188,19 @@ body {
   letter-spacing:0.8px; padding:2px 8px; border-radius:10px;
   background:rgba(255,122,0,0.15); color:var(--orange);
 }
+.dev-sim-btn {
+  width:100%; padding:8px 12px; border-radius:8px;
+  border:1px solid rgba(255,200,0,0.2); background:none;
+  color:rgba(255,200,0,0.6); font-size:0.78rem; font-weight:600;
+  font-family:inherit; cursor:pointer; text-align:left;
+  -webkit-tap-highlight-color:transparent;
+  transition:background 0.2s;
+}
+.dev-sim-btn.dev-active {
+  background:rgba(255,200,0,0.12);
+  border-color:rgba(255,200,0,0.45);
+  color:rgba(255,200,0,1);
+}
 .dark-toggle {
   width:36px; height:20px; border-radius:10px;
   background:var(--card); border:1px solid var(--border);
@@ -1176,6 +1189,7 @@ body {
   50%      { transform:scale(1.1); box-shadow:0 0 0 6px rgba(192,57,43,0); }
 }
 </style>
+<script src="plan-utils.js"></script>
 </head>
 <body>
 <!-- DRAWER OVERLAY -->
@@ -1244,6 +1258,21 @@ body {
       <div><div class="drawer-item-label">Cerrar sesión</div><div class="drawer-item-sub">Salir de mi cuenta</div></div>
     </button>
   </nav>
+
+  <!-- Panel Developer — solo visible si plan === 'developer' -->
+  <div id="dev-panel" style="display:none;margin:16px 0 8px;padding:14px;
+    background:rgba(255,200,0,0.07);border:1px dashed rgba(255,200,0,0.3);border-radius:12px;">
+    <div style="font-size:0.6rem;font-weight:800;letter-spacing:1.5px;
+      color:rgba(255,200,0,0.6);margin-bottom:10px;text-transform:uppercase">&#x2699;&#xFE0F; Developer</div>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <button id="dev-btn-dev"  onclick="window._setViewAs(null)"
+        class="dev-sim-btn dev-active">&#x1F468;&#x200D;&#x1F4BB; Vista developer</button>
+      <button id="dev-btn-prem" onclick="window._setViewAs('premium')"
+        class="dev-sim-btn">&#x2B50; Simular Premium</button>
+      <button id="dev-btn-free" onclick="window._setViewAs('free')"
+        class="dev-sim-btn">&#x26AA; Simular Free</button>
+    </div>
+  </div>
 
   <div class="drawer-footer">
     <div class="drawer-theme-row">
@@ -1524,7 +1553,7 @@ body {
       </div>
       <span class="app-nav-label">Diario</span>
     </button>
-    <button class="app-nav-item" onclick="navTap(this); navigateTo('cantos.html')">
+    <button class="app-nav-item" id="nav-cantos-btn" onclick="navTap(this); navigateTo('cantos.html')">
       <div class="app-nav-icon" style="position:relative">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
@@ -1533,7 +1562,7 @@ body {
       </div>
       <span class="app-nav-label">Cantos</span>
     </button>
-    <button class="app-nav-item" onclick="navTap(this); navigateTo('sanar.html')">
+    <button class="app-nav-item" id="nav-sanar-btn" onclick="navTap(this); navigateTo('sanar.html')">
       <div class="app-nav-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 22s-8-5.5-8-11a8 8 0 0116 0c0 5.5-8 11-8 11z"/>
@@ -1670,6 +1699,14 @@ const fbApp = initializeApp(FIREBASE_CONFIG);
 const auth  = getAuth(fbApp);
 const db    = getFirestore(fbApp);
 
+// ── Aliases de plan-utils.js (cargado como script regular antes del módulo) ──
+const resolvePlan      = window.resolvePlan;
+const getTodayKey      = window.getTodayKey;
+const isPremiumOrAbove = window.isPremiumOrAbove;
+const canAccessModo    = window.canAccessModo;
+const effectivePlan    = window.effectivePlan;
+const nivelAccesible   = window.nivelAccesible;
+
 // ── Nombres de niveles ────────────────────────────────────────────
 var NIVEL_NAMES = {
   '0101':'Cruz 1-1: Males',      '0102':'Cruz 1-2: Pecado',
@@ -1775,13 +1812,7 @@ function toggleSounds() {
 }
 window.toggleSounds = toggleSounds;
 
-// ── Helpers de fecha ─────────────────────────────────────────────
-function getTodayKey() {
-  const d = new Date();
-  return d.getFullYear() + '-' +
-    String(d.getMonth()+1).padStart(2,'0') + '-' +
-    String(d.getDate()).padStart(2,'0');
-}
+// getTodayKey, resolvePlan, isPremiumOrAbove, canAccessModo → plan-utils.js
 
 function greetingTime() {
   var h = new Date().getHours();
@@ -1845,28 +1876,12 @@ function getTotalMetros() {
   return t;
 }
 
-// ── resolvePlan con fallback a localStorage cuando userData es null ──
-function resolvePlan(userData) {
-  if (!userData) return localStorage.getItem('cruzando_plan_cache') || 'free';
-
-  var plan = userData.plan || 'free';
-
-  if (plan === 'beta') {
-    var exp = userData.betaExpiresAt;
-    if (exp) {
-      var expMs = (typeof exp.toDate === 'function') ? exp.toDate().getTime()
-                : (exp.seconds ? exp.seconds * 1000 : new Date(exp).getTime());
-      if (Date.now() > expMs) return 'free';
-    }
-    return 'beta';
-  }
-  if (plan === 'premium' || plan === 'pro') return 'premium';
-  return 'free';
-}
-window.resolvePlan = resolvePlan;
-
 // ── Renderizar home ───────────────────────────────────────────────
 function renderHome(userData) {
+  // Limpiar ?blocked= de la URL y guardar el modo para mostrarlo en el banner
+  var _blockedMode = new URLSearchParams(location.search).get('blocked');
+  if (_blockedMode) history.replaceState(null, '', location.pathname);
+
   // Plan
   currentPlan = resolvePlan(userData);
   window.currentPlan = currentPlan;
@@ -1879,24 +1894,71 @@ function renderHome(userData) {
   // Mostrar bottom nav
   var nav = document.getElementById('app-nav');
   if (nav) nav.style.display = '';
-  var chipEl = document.getElementById('plan-chip');
-  if (chipEl) {
-    chipEl.textContent = currentPlan === 'premium' ? 'Premium' : currentPlan === 'beta' ? 'Beta' : 'Free';
-    chipEl.className   = currentPlan === 'premium' ? 'plan-chip-premium' : currentPlan === 'beta' ? 'plan-chip-beta' : 'plan-chip-free';
-  }
+  var plan   = effectivePlan ? effectivePlan() : currentPlan;
+  var isPrem = isPremiumOrAbove ? isPremiumOrAbove(plan) : false;
 
   // Banner premium — solo para free
   var banner = document.getElementById('banner-premium');
-  if (banner) banner.style.display = currentPlan === 'free' ? '' : 'none';
+  if (banner) banner.style.display = plan === 'free' ? '' : 'none';
+  if (_blockedMode && banner && plan === 'free') {
+    banner.style.display = '';
+    var _modoNombres = { libro:'Libro', rezar:'Orar', cantos:'Cantos', sanar:'Sanar', extras:'Extras' };
+    var _bmsg = banner.querySelector('.blocked-redirect-msg');
+    if (!_bmsg) {
+      _bmsg = document.createElement('p');
+      _bmsg.className = 'blocked-redirect-msg';
+      _bmsg.style.cssText = 'margin:6px 0 0;font-size:0.85rem;color:rgba(255,255,255,0.9);';
+      banner.appendChild(_bmsg);
+    }
+    _bmsg.textContent = '«' + (_modoNombres[_blockedMode] || _blockedMode) + '» requiere plan Premium.';
+    setTimeout(function() { banner.scrollIntoView({ behavior:'smooth', block:'center' }); }, 350);
+  }
 
-  // Extras — desbloqueado según el avance real del usuario, no el nivel seleccionado
-  var extrasCard = document.getElementById('extras-card');
-  var extrasBtn  = document.getElementById('nav-extras-btn');
-  var extrasUnlocked = (window.frontierNivelId || currentNivelId) >= '0201';
+  // Dev panel — solo para developer
+  var devPanel = document.getElementById('dev-panel');
+  if (devPanel) devPanel.style.display = (currentPlan === 'developer') ? '' : 'none';
+
+  // ── Bloquear nav según plan ──────────────────────────────────
+  function _applyNavAccess(id, modo) {
+    var btn = document.getElementById(id);
+    if (!btn) return;
+    var allowed = canAccessModo ? canAccessModo(modo, plan) : isPrem;
+    btn.style.opacity       = allowed ? '' : '0.35';
+    btn.style.pointerEvents = allowed ? '' : 'none';
+    btn.title = allowed ? '' : 'Disponible con plan Premium';
+  }
+  _applyNavAccess('nav-cantos-btn', 'cantos');
+  _applyNavAccess('nav-sanar-btn',  'sanar');
+  _applyNavAccess('nav-extras-btn', 'extras');
+
+  // Extras — además verificar progreso suficiente
+  var extrasCard     = document.getElementById('extras-card');
+  var extrasUnlocked = isPrem && (window.frontierNivelId || currentNivelId) >= '0201';
   if (extrasCard) extrasCard.style.display = extrasUnlocked ? '' : 'none';
-  if (extrasBtn) {
+  var extrasBtn = document.getElementById('nav-extras-btn');
+  if (extrasBtn && !isPrem) {
+    extrasBtn.disabled = true;
+    extrasBtn.style.opacity = '0.35';
+    extrasBtn.style.pointerEvents = 'none';
+  } else if (extrasBtn) {
     extrasBtn.disabled = !extrasUnlocked;
-    extrasBtn.style.opacity = extrasUnlocked ? '' : '0.4';
+    extrasBtn.style.opacity      = extrasUnlocked ? '' : '0.4';
+    extrasBtn.style.pointerEvents = extrasUnlocked ? '' : 'none';
+  }
+
+  // ── Plan chip: soporta 'developer' ──────────────────────────
+  var chipEl = document.getElementById('plan-chip');
+  if (chipEl) {
+    var chipText = plan === 'premium'   ? 'Premium'
+      : plan === 'beta'      ? 'Beta'
+      : plan === 'developer' ? 'Dev'
+      : 'Free';
+    var chipClass = plan === 'premium'   ? 'plan-chip-premium'
+      : plan === 'beta'      ? 'plan-chip-beta'
+      : plan === 'developer' ? 'plan-chip-beta'
+      : 'plan-chip-free';
+    chipEl.textContent = chipText;
+    chipEl.className   = chipClass;
   }
 
   // Nombre
@@ -2009,6 +2071,21 @@ async function checkCantosNuevos(uid) {
     if (meta && count > 0) meta.textContent = count + ' canto' + (count > 1 ? 's' : '') + ' desbloqueado' + (count > 1 ? 's' : '');
   } catch(e) { console.warn('[cantos check]', e); }
 }
+
+// ── Prompt de upgrade para modos bloqueados ───────────────────────
+function _showUpgradePrompt(modo) {
+  var banner = document.getElementById('banner-premium');
+  if (banner) {
+    banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    banner.style.animation = 'none';
+    setTimeout(function() {
+      banner.style.animation = '';
+      banner.style.boxShadow = '0 0 0 3px var(--orange)';
+      setTimeout(function() { banner.style.boxShadow = ''; }, 1500);
+    }, 10);
+  }
+}
+window._showUpgradePrompt = _showUpgradePrompt;
 
 // ── Crear doc de usuario en Firestore ────────────────────────────
 async function ensureUserDoc(user, extraData) {
@@ -3238,18 +3315,49 @@ function openMapPopup(gi, bi, mi) {
   var _niv = parseInt(_nId.substring(0,2), 10);
   var _cuad = parseInt(_nId.substring(2,4), 10);
   var _mis = gi + 1; // misterio 1-20
-  document.getElementById('popup-audio').onclick=function(){
+  var _plan = effectivePlan ? effectivePlan() : 'free';
+
+  document.getElementById('popup-audio').onclick = function() {
     closePopup();
     if (window.navigateTo) window.navigateTo('audio.html?nivel=' + _niv + '&cuaderno=' + _cuad + '&misterio=' + _mis);
   };
-  document.getElementById('popup-orar').onclick=function(){
+
+  document.getElementById('popup-orar').onclick = function() {
+    if (!canAccessModo('libro', _plan)) { _showUpgradePrompt('Libro'); return; }
     closePopup();
     if (window.navigateTo) window.navigateTo('orar.html?c=' + _nId + '&misterio=' + _mis);
   };
-  document.getElementById('popup-rezar').onclick=function(){
+
+  document.getElementById('popup-rezar').onclick = function() {
+    if (!canAccessModo('rezar', _plan)) { _showUpgradePrompt('Rezo'); return; }
     closePopup();
     irARezar(_nId, _mis);
   };
+
+  // Indicador visual en botones bloqueados
+  var _libroAllowed = canAccessModo ? canAccessModo('libro', _plan) : true;
+  var _rezarAllowed = canAccessModo ? canAccessModo('rezar', _plan) : true;
+  var _popupOrar  = document.getElementById('popup-orar');
+  var _popupRezar = document.getElementById('popup-rezar');
+  if (_popupOrar) {
+    _popupOrar.style.opacity = _libroAllowed ? '' : '0.45';
+    var _lockOrar = _popupOrar.querySelector('.modo-lock') || document.createElement('span');
+    _lockOrar.className   = 'modo-lock';
+    _lockOrar.textContent = _libroAllowed ? '' : '🔒';
+    _lockOrar.style.cssText = 'font-size:0.75rem;margin-left:auto;';
+    if (!_libroAllowed && !_popupOrar.querySelector('.modo-lock')) _popupOrar.appendChild(_lockOrar);
+    if (_libroAllowed) { var _ex = _popupOrar.querySelector('.modo-lock'); if (_ex) _ex.remove(); }
+  }
+  if (_popupRezar) {
+    _popupRezar.style.opacity = _rezarAllowed ? '' : '0.45';
+    var _lockRezar = _popupRezar.querySelector('.modo-lock') || document.createElement('span');
+    _lockRezar.className   = 'modo-lock';
+    _lockRezar.textContent = _rezarAllowed ? '' : '🔒';
+    _lockRezar.style.cssText = 'font-size:0.75rem;margin-left:auto;';
+    if (!_rezarAllowed && !_popupRezar.querySelector('.modo-lock')) _popupRezar.appendChild(_lockRezar);
+    if (_rezarAllowed) { var _ex2 = _popupRezar.querySelector('.modo-lock'); if (_ex2) _ex2.remove(); }
+  }
+
   // Ocultar descripciones si el usuario ya pasó 1-1-5
   var _showDesc = (_nId === '0101' && _mis <= 5);
   document.querySelectorAll('.popup-modo .modo-desc').forEach(function(el) {
@@ -3350,11 +3458,29 @@ function closeDrawer() {
   document.getElementById('drawer-overlay').classList.remove('open');
 }
 
-window.buildMap    = buildMap;
-window.openDrawer  = openDrawer;
-window.closeDrawer = closeDrawer;
-window.closePopup  = closePopup;
+window.buildMap      = buildMap;
+window.openDrawer    = openDrawer;
+window.closeDrawer   = closeDrawer;
+window.closePopup    = closePopup;
 window.closeTreasure = closeTreasure;
+
+// ── Simulación de plan para Developer ────────────────────────────
+window._setViewAs = function(simulatedPlan) {
+  window._viewAs = simulatedPlan;
+  // Actualizar botones del dev panel
+  document.querySelectorAll('.dev-sim-btn').forEach(function(b) {
+    b.classList.remove('dev-active');
+  });
+  var activeId = simulatedPlan === 'premium' ? 'dev-btn-prem'
+               : simulatedPlan === 'free'    ? 'dev-btn-free'
+               : 'dev-btn-dev';
+  var activeBtn = document.getElementById(activeId);
+  if (activeBtn) activeBtn.classList.add('dev-active');
+  // Re-renderizar con plan simulado
+  if (window._refreshHome) window._refreshHome();
+  if (window.buildLevelPicker) window.buildLevelPicker();
+  if (window.buildMap) window.buildMap();
+};
 
 /* ══ CATÁLOGO DE RETIROS ══ */
 var RETIROS_MAP = [

@@ -274,8 +274,14 @@
     var uid  = user.uid;
     var uRef = _db.collection('users').doc(uid);
 
-    // Fetch del índice de retiros
-    return fetch(_base() + 'data/santuario_index.json')
+    return uRef.get().then(function(uSnap) {
+      var ud    = uSnap.exists ? uSnap.data() : {};
+      var _plan = window.effectivePlan ? window.effectivePlan() : (window.resolvePlan ? window.resolvePlan(ud) : 'free');
+      if (window.requirePremiumAccess && !window.requirePremiumAccess('sanar', _plan)) {
+        return Promise.reject('blocked');
+      }
+      return fetch(_base() + 'data/santuario_index.json');
+    })
       .then(function (res) {
         if (!res.ok) throw new Error('HTTP ' + res.status);
         return res.json();

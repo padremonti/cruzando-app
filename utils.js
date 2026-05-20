@@ -1,27 +1,13 @@
-/* CruzAndo — shared membership helpers */
+/* CruzAndo — shared helpers (plan lógica → plan-utils.js) */
 (function () {
   'use strict';
 
-  function resolvePlan(userData) {
-    if (!userData) return 'free';
-    var plan = (userData.plan || '').toLowerCase().trim();
-    if (plan === 'premium' || plan === 'pro') return 'premium';
-    if (plan === 'beta') {
-      if (!userData.betaExpiresAt) return 'free';
-      var expires = userData.betaExpiresAt.toDate
-        ? userData.betaExpiresAt.toDate()
-        : new Date(userData.betaExpiresAt);
-      return new Date() <= expires ? 'beta' : 'free';
-    }
-    return 'free';
-  }
-
+  // resolvePlan vive en plan-utils.js (cargado antes que este archivo).
   function isPremium(userData) {
-    return resolvePlan(userData) !== 'free';
+    return window.resolvePlan(userData) !== 'free';
   }
 
-  window.resolvePlan = resolvePlan;
-  window.isPremium   = isPremium;
+  window.isPremium = isPremium;
 
   /* ── Skins catalog (espejo del catalog JSON para aplicar sin fetch) ── */
   var SKINS_CATALOG = {
