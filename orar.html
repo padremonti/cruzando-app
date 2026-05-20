@@ -654,13 +654,31 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
       </div>
       <div class="voice-player-controls">
         <button class="vp-btn" id="vp-rewind">
-          <div class="vp-circle">−15s</div>
+          <div class="vp-circle">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.36"/>
+              <text x="12" y="14" text-anchor="middle" font-size="5" fill="currentColor" stroke="none" font-family="Inter,sans-serif" font-weight="700">15</text>
+            </svg>
+          </div>
         </button>
         <button class="vp-btn" id="vp-play-pause">
-          <div class="vp-circle primary" id="vp-play-icon">▶</div>
+          <div class="vp-circle primary" id="vp-play-icon">
+            <svg id="vp-svg-play" width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5,3 19,12 5,21"/>
+            </svg>
+            <svg id="vp-svg-pause" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="display:none">
+              <rect x="5" y="3" width="4" height="18" rx="1"/>
+              <rect x="15" y="3" width="4" height="18" rx="1"/>
+            </svg>
+          </div>
         </button>
         <button class="vp-btn" id="vp-forward">
-          <div class="vp-circle">+15s</div>
+          <div class="vp-circle">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.49-3.36"/>
+              <text x="12" y="14" text-anchor="middle" font-size="5" fill="currentColor" stroke="none" font-family="Inter,sans-serif" font-weight="700">15</text>
+            </svg>
+          </div>
         </button>
         <div class="vp-speed-wrap">
           <select class="vp-speed" id="vp-speed">
@@ -1421,7 +1439,15 @@ function initVP(){
     var rect=$('vp-progress-bar').getBoundingClientRect();
     libro.currentTime=((e.clientX-rect.left)/rect.width)*libro.duration;
   };
-  $('popup-voice-btn').onclick=()=>openVP(tool);
+  $('popup-voice-btn').onclick = function() {
+    var vp = $('voice-player');
+    var isOpen = vp && vp.style.display !== 'none';
+    if (isOpen) {
+      closeVP();
+    } else {
+      openVP(tool);
+    }
+  };
   $('popup-close').onclick=()=>closeToolPopup();
 }
 function openVP(t){
@@ -1431,24 +1457,55 @@ function openVP(t){
   if(libro.src!==url){libro.src=url;libro.load();}
   $('voice-player').style.display='';
   if(window.CZSound)CZSound('playStart');
+  if(t==='canto'){
+    if(bgmEl) bgmEl.pause();
+  } else {
+    bgmDuck();
+  }
   libro.play().catch(()=>{});
   vpUpd();
 }
-function closeVP(){if(libro)libro.pause();$('voice-player').style.display='none';$('popup-voice-btn').classList.remove('playing');}
+function closeVP(){
+  if(libro) libro.pause();
+  $('voice-player').style.display='none';
+  $('popup-voice-btn').classList.remove('playing');
+  if(bgmOn && bgmEl && bgmEl.paused) bgmEl.play().catch(()=>{});
+  bgmUnduck();
+}
 function vpToggle(){
   if(!libro)return;
-  if(libro.paused){if(!libro.src||libro.src===location.href)openVP(tool);else libro.play().catch(()=>{});}
-  else libro.pause();
+  if(libro.paused){
+    if(!libro.src||libro.src===location.href) openVP(tool);
+    else {
+      libro.play().catch(()=>{});
+      if(tool==='canto'){ if(bgmEl) bgmEl.pause(); }
+      else bgmDuck();
+    }
+  } else {
+    libro.pause();
+    if(bgmOn && bgmEl && bgmEl.paused) bgmEl.play().catch(()=>{});
+    bgmUnduck();
+  }
   vpUpd();
 }
 function vpUpd(){
-  const icon=$('vp-play-icon');if(!libro||!icon)return;
-  icon.textContent=libro.paused?'▶':'⏸';
-  $('popup-voice-btn').classList.toggle('playing',!libro.paused);
-  libro.onpause=libro.onplay=vpUpd;
+  if(!libro) return;
+  var isPaused = libro.paused;
+  var svgPlay  = document.getElementById('vp-svg-play');
+  var svgPause = document.getElementById('vp-svg-pause');
+  if (svgPlay)  svgPlay.style.display  = isPaused  ? '' : 'none';
+  if (svgPause) svgPause.style.display = !isPaused ? '' : 'none';
+  var pbtn = $('popup-voice-btn');
+  if (pbtn) pbtn.classList.toggle('playing', !isPaused);
+  libro.onpause = libro.onplay = vpUpd;
 }
 function onAudioEnd(){
   vpUpd();
+  if(tool==='canto'){
+    if(bgmOn && bgmEl){ bgmEl.play().catch(()=>{}); bgmUnduck(); }
+  } else {
+    bgmUnduck();
+  }
   if(!tool||awd.has(tool))return;
   awd.add(tool);
   const tm={contemplar:MR_CONT,rezo:MR_REZO,canto:MR_CANTO}[tool];
@@ -1456,6 +1513,32 @@ function onAudioEnd(){
 }
 
 /* ─── BGM ─── */
+var BGM_NORMAL = 0.04;
+var BGM_DUCK   = 0.008;
+var _bgmFadeTimer = null;
+
+function bgmFadeTo(targetVol, ms) {
+  if (!bgmEl) return;
+  if (_bgmFadeTimer) clearInterval(_bgmFadeTimer);
+  var startVol = bgmEl.volume;
+  var steps    = 20;
+  var stepMs   = ms / steps;
+  var stepVol  = (targetVol - startVol) / steps;
+  var i = 0;
+  _bgmFadeTimer = setInterval(function() {
+    i++;
+    bgmEl.volume = Math.max(0, Math.min(1, startVol + stepVol * i));
+    if (i >= steps) {
+      bgmEl.volume = targetVol;
+      clearInterval(_bgmFadeTimer);
+      _bgmFadeTimer = null;
+    }
+  }, stepMs);
+}
+
+function bgmDuck()   { bgmFadeTo(BGM_DUCK,   300); }
+function bgmUnduck() { bgmFadeTo(BGM_NORMAL, 600); }
+
 function toggleBgm(){
   bgmOn=!bgmOn;const p=prefs();p.bgm=bgmOn;localStorage.setItem('cruzando_prefs',JSON.stringify(p));
   $('btn-bgm').classList.toggle('bgm-on',bgmOn);
@@ -1465,7 +1548,7 @@ function startBgm(){
   if(!bgmOn)return;
   const url=`${R2}/BGM/BGM_${nivel}_${cua}.mp3`;
   const trackId=`BGM_${nivel}_${cua}.mp3`;
-  if(!bgmEl){bgmEl=new Audio(url);bgmEl.loop=true;bgmEl.volume=0.07;}
+  if(!bgmEl){bgmEl=new Audio(url);bgmEl.loop=true;bgmEl.volume=BGM_NORMAL;}
   else if(!bgmEl.src.endsWith(trackId)){bgmEl.pause();bgmEl.src=url;}
   bgmEl.play().catch(()=>{});
 }
@@ -1486,7 +1569,6 @@ function initSwipe(){
     const dy=e.changedTouches[0].clientY-sy;
     e.stopPropagation();
     if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)*1.5){goToolAdj(dx<0?1:-1);}
-    else if(dy>60&&Math.abs(dy)>Math.abs(dx)*1.5){closeToolPopup();}
   },{passive:true});
 
   // scr-home ya no existe; el swipe horizontal desde scr-orar lleva a index.html
