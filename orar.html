@@ -1522,28 +1522,55 @@ function onAudioEnd(){
   if(tm){addMeters(tm);showSlide(tm,TN[tool]);}
 }
 
-/* ─── BGM ─── */
-var BGM_NORMAL = 0.04;
-var BGM_DUCK   = 0.005;
-var _bgmFadeTimer = null;
+/* ─── BGM con Web Audio API (funciona en iOS standalone) ─── */
+var BGM_NORMAL  = 0.04;
+var BGM_DUCK    = 0.005;
+var _bgmCtx     = null;
+var _bgmGain    = null;
+var _bgmSource  = null;
+var _bgmFadeRAF = null;
+
+function _bgmEnsureCtx() {
+  if (_bgmCtx) return;
+  try {
+    _bgmCtx  = new (window.AudioContext || window.webkitAudioContext)();
+    _bgmGain = _bgmCtx.createGain();
+    _bgmGain.gain.value = BGM_NORMAL;
+    _bgmGain.connect(_bgmCtx.destination);
+    if (bgmEl) {
+      bgmEl.crossOrigin = 'anonymous';
+      _bgmSource = _bgmCtx.createMediaElementSource(bgmEl);
+      _bgmSource.connect(_bgmGain);
+    }
+  } catch(e) {
+    console.warn('Web Audio no disponible, usando volume fallback:', e);
+    _bgmCtx = null;
+  }
+}
 
 function bgmFadeTo(targetVol, ms) {
   if (!bgmEl) return;
-  if (_bgmFadeTimer) clearInterval(_bgmFadeTimer);
-  var startVol = bgmEl.volume;
-  var steps    = 20;
-  var stepMs   = ms / steps;
-  var stepVol  = (targetVol - startVol) / steps;
-  var i = 0;
-  _bgmFadeTimer = setInterval(function() {
-    i++;
-    bgmEl.volume = Math.max(0, Math.min(1, startVol + stepVol * i));
-    if (i >= steps) {
-      bgmEl.volume = targetVol;
-      clearInterval(_bgmFadeTimer);
-      _bgmFadeTimer = null;
+  var duration = (ms || 400) / 1000;
+  if (_bgmGain && _bgmCtx) {
+    if (_bgmCtx.state === 'suspended') _bgmCtx.resume();
+    var now = _bgmCtx.currentTime;
+    _bgmGain.gain.cancelScheduledValues(now);
+    _bgmGain.gain.setValueAtTime(_bgmGain.gain.value, now);
+    _bgmGain.gain.linearRampToValueAtTime(
+      Math.max(0.0001, Math.min(1, targetVol)), now + duration
+    );
+  } else {
+    if (_bgmFadeRAF) cancelAnimationFrame(_bgmFadeRAF);
+    var startVol  = bgmEl.volume;
+    var startTime = performance.now();
+    function step() {
+      var elapsed = performance.now() - startTime;
+      var t = Math.min(1, elapsed / (ms || 400));
+      try { bgmEl.volume = Math.max(0, Math.min(1, startVol + (targetVol - startVol) * t)); } catch(e) {}
+      if (t < 1) _bgmFadeRAF = requestAnimationFrame(step);
     }
-  }, stepMs);
+    _bgmFadeRAF = requestAnimationFrame(step);
+  }
 }
 
 function bgmDuck()   { bgmFadeTo(BGM_DUCK,   300); }
@@ -1555,12 +1582,22 @@ function toggleBgm(){
   bgmOn?startBgm():(bgmEl&&bgmEl.pause());
 }
 function startBgm(){
-  if(!bgmOn)return;
-  const url=`${R2}/BGM/BGM_${nivel}_${cua}.mp3`;
-  const trackId=`BGM_${nivel}_${cua}.mp3`;
-  if(!bgmEl){bgmEl=new Audio(url);bgmEl.loop=true;bgmEl.volume=BGM_NORMAL;}
-  else if(!bgmEl.src.endsWith(trackId)){bgmEl.pause();bgmEl.src=url;}
-  bgmEl.play().catch(()=>{});
+  if(!bgmOn) return;
+  const url     = `${R2}/BGM/BGM_${nivel}_${cua}.mp3`;
+  const trackId = `BGM_${nivel}_${cua}.mp3`;
+  if(!bgmEl){
+    bgmEl = new Audio(url);
+    bgmEl.loop = true;
+    bgmEl.crossOrigin = 'anonymous';
+    try { bgmEl.volume = BGM_NORMAL; } catch(e) {}
+  } else if(!bgmEl.src.endsWith(trackId)){
+    bgmEl.pause();
+    _bgmSource = null;
+    bgmEl.src = url;
+  }
+  bgmEl.play().catch(()=>{}).then(function() {
+    _bgmEnsureCtx();
+  });
 }
 
 function goToolAdj(dir){
