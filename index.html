@@ -2087,6 +2087,19 @@ function _showUpgradePrompt(modo) {
 }
 window._showUpgradePrompt = _showUpgradePrompt;
 
+function showFreeVuelveManana() {
+  var el = document.createElement('div');
+  el.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:rgba(30,30,30,0.95);color:#fff;padding:12px 20px;border-radius:12px;font-size:0.85rem;font-family:\'Crimson Pro\',serif;z-index:9999;max-width:280px;text-align:center;line-height:1.4;box-shadow:0 4px 20px rgba(0,0,0,0.4)';
+  el.textContent = '¡Ya rezaste hoy! Vuelve mañana para continuar.';
+  document.body.appendChild(el);
+  setTimeout(function() {
+    el.style.transition = 'opacity 0.4s';
+    el.style.opacity = '0';
+    setTimeout(function() { if (el.parentNode) el.parentNode.removeChild(el); }, 400);
+  }, 2800);
+}
+window.showFreeVuelveManana = showFreeVuelveManana;
+
 // ── Crear doc de usuario en Firestore ────────────────────────────
 async function ensureUserDoc(user, extraData) {
   try {
@@ -2248,6 +2261,12 @@ onAuthStateChanged(auth, async function(user) {
   window.DONE_COUNT      = _cDone;
   window.chestState      = _cChest || ['locked','locked','locked','locked'];
 
+  // FASE 1: cargar freeProgress desde localStorage si está disponible
+  try {
+    var _fpCached = localStorage.getItem('cruzando_free_prog');
+    window._freeProg = _fpCached ? JSON.parse(_fpCached) : null;
+  } catch(e) { window._freeProg = null; }
+
   var _cProgress = getProgressCache(_cNivel);
   window._firestoreProgress = _cProgress;
 
@@ -2298,6 +2317,28 @@ onAuthStateChanged(auth, async function(user) {
       checkMetaStreak();
     }
   } catch(e) {}
+
+  // ── freeProgress desde Firestore ─────────────────────────────────
+  if (realPlan === 'free' || (window._viewAs === 'free')) {
+    try {
+      var fpSnap = await getDoc(doc(db, 'users', currentUser.uid, 'freeProgress', 'current'));
+      var fpData = fpSnap.exists() ? fpSnap.data()
+        : { nivelId:'0101', misterio:1, completedToday:false, fechaHoy:'' };
+      var hoy = window.getTodayKey ? window.getTodayKey() : new Date().toISOString().slice(0,10);
+      if (fpData.fechaHoy !== hoy) {
+        fpData.completedToday = false;
+        fpData.fechaHoy = hoy;
+      }
+      window._freeProg = fpData;
+      try { localStorage.setItem('cruzando_free_prog', JSON.stringify(fpData)); } catch(e) {}
+    } catch(e) {
+      var _cached = localStorage.getItem('cruzando_free_prog');
+      window._freeProg = _cached ? JSON.parse(_cached)
+        : { nivelId:'0101', misterio:1, completedToday:false, fechaHoy:'' };
+    }
+  } else {
+    window._freeProg = null;
+  }
 
   // ══ FASE 3: re-render con datos reales ══
   renderHome(Object.assign({}, userData, { plan: realPlan }));
@@ -3071,13 +3112,35 @@ function buildMap() {
   });
 
   var activeDrawn = false;
+  var _plan = window.effectivePlan ? window.effectivePlan() : 'free';
+  var _isFree = (_plan === 'free');
+
+  // Para Free: el único misterio activo es el que marca freeProgress
+  var _freeActiveGi = -1;
+  if (_isFree && window._freeProg) {
+    var _fp    = window._freeProg;
+    var _fpNId = _fp.nivelId || '0101';
+    var _cNId  = window.currentNivelId || '0101';
+    if (_fpNId === _cNId) {
+      _freeActiveGi = (_fp.misterio || 1) - 1; // globalIdx es 0-based
+    }
+  }
+
   mPts.forEach(function(pt) {
     var gi = pt.globalIdx; var bi = pt.bi; var mi = pt.mi;
     var bloque = BLOQUES_MAP[bi]; var nombre = bloque.misterios[mi];
-    var doneCount = window.DONE_COUNT;
-    var isDone   = gi < doneCount;
-    var isActive = gi === doneCount;
-    var isLocked = gi > doneCount;
+
+    var isDone, isActive, isLocked;
+    if (_isFree) {
+      isDone   = false;
+      isActive = (gi === _freeActiveGi);
+      isLocked = (gi !== _freeActiveGi);
+    } else {
+      var doneCount = window.DONE_COUNT;
+      isDone   = gi < doneCount;
+      isActive = gi === doneCount;
+      isLocked = gi > doneCount;
+    }
 
     var node = document.createElement('div');
     node.className = 'map-node' + (isLocked ? ' locked' : '');
@@ -3318,6 +3381,20 @@ function openMapPopup(gi, bi, mi) {
   var _plan = effectivePlan ? effectivePlan() : 'free';
 
   document.getElementById('popup-audio').onclick = function() {
+    var plan = window.effectivePlan ? window.effectivePlan() : 'free';
+    if (plan === 'free') {
+      var fp    = window._freeProg || {};
+      var fpNId = fp.nivelId || '0101';
+      var fpM   = fp.misterio || 1;
+      if (_nId !== fpNId || _mis !== fpM) {
+        _showUpgradePrompt('Audio');
+        return;
+      }
+      if (fp.completedToday) {
+        window.showFreeVuelveManana && window.showFreeVuelveManana();
+        return;
+      }
+    }
     closePopup();
     if (window.navigateTo) window.navigateTo('audio.html?nivel=' + _niv + '&cuaderno=' + _cuad + '&misterio=' + _mis);
   };
@@ -3356,6 +3433,32 @@ function openMapPopup(gi, bi, mi) {
     _lockRezar.style.cssText = 'font-size:0.75rem;margin-left:auto;';
     if (!_rezarAllowed && !_popupRezar.querySelector('.modo-lock')) _popupRezar.appendChild(_lockRezar);
     if (_rezarAllowed) { var _ex2 = _popupRezar.querySelector('.modo-lock'); if (_ex2) _ex2.remove(); }
+  }
+
+  // Indicador visual en botón Audio para Free
+  var _planAudio = window.effectivePlan ? window.effectivePlan() : 'free';
+  if (_planAudio === 'free') {
+    var _fpA    = window._freeProg || {};
+    var _isMio  = (_nId === (_fpA.nivelId || '0101') && _mis === (_fpA.misterio || 1));
+    var _audioBtn = document.getElementById('popup-audio');
+    if (_audioBtn) {
+      _audioBtn.style.opacity       = _isMio ? '' : '0.35';
+      _audioBtn.style.pointerEvents = _isMio ? '' : 'none';
+      var _lockAudio = _audioBtn.querySelector('.modo-lock') || document.createElement('span');
+      _lockAudio.className    = 'modo-lock';
+      _lockAudio.textContent  = _isMio ? '' : '🔒';
+      _lockAudio.style.cssText = 'font-size:0.75rem;margin-left:auto;';
+      if (!_isMio && !_audioBtn.querySelector('.modo-lock')) _audioBtn.appendChild(_lockAudio);
+      if (_isMio)  { var _exA = _audioBtn.querySelector('.modo-lock'); if (_exA) _exA.remove(); }
+    }
+  } else {
+    // Para planes superiores: restaurar apariencia por si se cambió el plan
+    var _audioBtnR = document.getElementById('popup-audio');
+    if (_audioBtnR) {
+      _audioBtnR.style.opacity = '';
+      _audioBtnR.style.pointerEvents = '';
+      var _exAR = _audioBtnR.querySelector('.modo-lock'); if (_exAR) _exAR.remove();
+    }
   }
 
   // Ocultar descripciones si el usuario ya pasó 1-1-5
