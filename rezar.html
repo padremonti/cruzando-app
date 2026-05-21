@@ -112,7 +112,7 @@ body{
    ══════════════════════════════════════ */
 .mariano-overlay{
   position:fixed;top:0;right:0;bottom:0;width:100%;
-  pointer-events:none;z-index:90;
+  pointer-events:none;z-index:300;
   display:flex;align-items:center;justify-content:flex-end;padding-right:20px;
 }
 .mariano-slide{width:182px;height:auto;animation:marianoSlide 2.5s ease-in-out}
@@ -1209,11 +1209,21 @@ async function addMeters(m){
 /* ─── GAMIFICATION ─── */
 function showSlide(m,extra){
   const ov=$('mariano-overlay'),img=$('mariano-slide-img'),fl=$('meters-float-text');
-  if(!ov)return;
-  img.src=marianoNext();
-  fl.innerHTML=(extra?`<span class="extra-badge">${extra}</span>`:'')+`+${m}m`;
-  ov.style.display='flex';
-  setTimeout(()=>{ov.style.display='none';},2600);
+  if(!ov||!img||!fl) return;
+
+  img.classList.remove('mariano-slide');
+  fl.classList.remove('meters-float');
+  void img.offsetWidth;
+
+  img.src = marianoNext();
+  fl.innerHTML = (extra?`<span class="extra-badge">${extra}</span>`:'')+`+${m}m`;
+
+  img.classList.add('mariano-slide');
+  fl.classList.add('meters-float');
+
+  ov.style.display = 'flex';
+  clearTimeout(ov._hideTimer);
+  ov._hideTimer = setTimeout(()=>{ ov.style.display='none'; }, 2600);
 }
 
 /* ─── PREFS ─── */

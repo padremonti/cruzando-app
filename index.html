@@ -233,7 +233,7 @@ body {
   animation:spin 0.8s linear infinite;
 }
 @keyframes spin { to { transform:rotate(360deg); } }
-.loading-text { font-size:0.78rem; color:var(--text-dim); }
+.loading-text { font-family: 'Crimson Pro', serif; font-size: 1.2rem; font-style: italic; color: var(--text-soft); max-width: 260px; margin: 12px auto 0; text-align: center; }
 
 /* ── Pantalla de login ── */
 #scr-login {
@@ -1244,7 +1244,7 @@ body {
       <div class="drawer-item-icon">🌿</div>
       <div><div class="drawer-item-label">Sanar</div><div class="drawer-item-sub">Talleres de acompañamiento</div></div>
     </button>
-    <button class="drawer-item" id="drawer-extras-btn" onclick="closeDrawer(); playTap(); navigateTo('extras.html')">
+    <button class="drawer-item" id="drawer-extras-btn" onclick="closeDrawer(); playTap(); goToExtras()">
       <div class="drawer-item-icon">⭐</div>
       <div><div class="drawer-item-label">Extras</div><div class="drawer-item-sub">Canjea tus metros</div></div>
     </button>
@@ -1288,7 +1288,7 @@ body {
   <!-- ═══ CARGA ═══ -->
   <div id="scr-loading">
     <div class="spinner"></div>
-    <div class="loading-text">Cargando…</div>
+    <div class="loading-text" id="loading-text-idx">Cargando…</div>
   </div>
 
   <!-- ═══ LOGIN ═══ -->
@@ -1571,7 +1571,7 @@ body {
       </div>
       <span class="app-nav-label">Sanar</span>
     </button>
-    <button class="app-nav-item" id="nav-extras-btn" onclick="navTap(this); navigateTo('extras.html')">
+    <button class="app-nav-item" id="nav-extras-btn" onclick="navTap(this); goToExtras()">
       <div class="app-nav-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
@@ -1726,6 +1726,17 @@ var NIVEL_NAMES = {
 };
 window.NIVEL_NAMES = NIVEL_NAMES;
 
+var NIVEL_STATUS = {
+  '0101':'published','0102':'published','0103':'published','0104':'published',
+  '0201':'dev','0202':'dev','0203':'dev','0204':'dev',
+  '0301':'dev','0302':'dev','0303':'dev','0304':'dev',
+  '0401':'dev','0402':'dev','0403':'dev','0404':'dev',
+  '0501':'dev','0502':'dev','0503':'dev','0504':'dev',
+  '0601':'dev','0602':'dev','0603':'dev','0604':'dev',
+  '0701':'dev','0702':'empty','0703':'empty','0704':'empty',
+};
+window.NIVEL_STATUS = NIVEL_STATUS;
+
 // ── Constantes de meta diaria ─────────────────────────────────────
 const META_DEFAULT   = 1850;
 const META_MAX       = 7000;
@@ -1789,6 +1800,30 @@ window.openPrefs = function() {
 window.closePrefs = function() {
   document.getElementById('modal-prefs').classList.remove('open');
 };
+
+var _idxLoadingMsgs = [
+  'Preparando tu camino…',
+  'Cargando tus avances…',
+  'Un momento de silencio…',
+  'Abriendo el mapa…',
+  'Buscando tus metros…',
+  'Casi listo…'
+];
+var _idxLoadingTimer = null;
+function startLoadingMsgs() {
+  var el = document.getElementById('loading-text-idx');
+  if (el) el.textContent = _idxLoadingMsgs[0];
+  var idx = 0;
+  if (_idxLoadingTimer) clearInterval(_idxLoadingTimer);
+  _idxLoadingTimer = setInterval(function() {
+    idx = (idx + 1) % _idxLoadingMsgs.length;
+    var e = document.getElementById('loading-text-idx');
+    if (e) e.textContent = _idxLoadingMsgs[idx];
+  }, 5000);
+}
+function _stopLoadingMsgs() {
+  if (_idxLoadingTimer) { clearInterval(_idxLoadingTimer); _idxLoadingTimer = null; }
+}
 window.prefToggleTheme = function() {
   isLight = !isLight; applyTheme(isLight);
   document.getElementById('pref-toggle-theme').classList.toggle('on', !isLight);
@@ -1879,8 +1914,11 @@ function getTotalMetros() {
 // ── Renderizar home ───────────────────────────────────────────────
 function renderHome(userData) {
   // Limpiar ?blocked= de la URL y guardar el modo para mostrarlo en el banner
-  var _blockedMode = new URLSearchParams(location.search).get('blocked');
+  var _urlParams   = new URLSearchParams(location.search);
+  var _blockedMode = _urlParams.get('blocked');
   if (_blockedMode) history.replaceState(null, '', location.pathname);
+  var _msgParam = _urlParams.get('msg');
+  if (_msgParam) history.replaceState(null, '', location.pathname);
 
   // Plan
   currentPlan = resolvePlan(userData);
@@ -2087,6 +2125,159 @@ function _showUpgradePrompt(modo) {
 }
 window._showUpgradePrompt = _showUpgradePrompt;
 
+function _showRetiroFreePrompt() {
+  var b = BLOQUES_MAP[0]; var c = b ? b.color : '#FF7A00';
+  document.getElementById('popup-bg').style.background =
+    'radial-gradient(ellipse at 30% 60%,' + c + '35 0%,transparent 60%)';
+  var badge = document.getElementById('popup-badge');
+  if (badge) { badge.textContent = 'Sanar'; badge.style.cssText = 'background:' + c + '22;color:' + c + ';border:1px solid ' + c + '44;'; }
+  var nameEl = document.getElementById('popup-name');
+  if (nameEl) nameEl.textContent = 'Retiros de Sanar';
+  var subEl = document.getElementById('popup-sub');
+  if (subEl) subEl.textContent = 'Espacios de oración para cada nivel';
+  var frameEl = document.getElementById('popup-mystery-frame');
+  if (frameEl) frameEl.style.display = 'none';
+  _injectFreeMotiv(
+    'Este retiro está disponible para ti en modo Premium.',
+    'Espacios de oración para acompañar el duelo, la tristeza, el enojo, el perdón... Momentos para detenerse y dejar que el Rosario sane lo que duele.'
+  );
+  _openPopupSheet();
+}
+window._showRetiroFreePrompt = _showRetiroFreePrompt;
+
+function _injectFreeMotiv(msg, submsg) {
+  var sheet = document.querySelector('.popup-sheet');
+  if (!sheet) return;
+  var existing = document.getElementById('popup-free-motiv');
+  if (existing) existing.remove();
+  var div = document.createElement('div');
+  div.id = 'popup-free-motiv';
+  div.style.cssText = 'padding:4px 20px 8px;';
+  div.innerHTML =
+    '<p style="font-family:\'Crimson Pro\',Georgia,serif;font-size:28px;' +
+    'line-height:1.6;color:var(--text-soft);font-style:italic;margin-bottom:' + (submsg ? '12px' : '20px') + '">' +
+    msg + '</p>' +
+    (submsg ? '<p style="font-family:\'Crimson Pro\',Georgia,serif;font-size:22px;' +
+    'line-height:1.6;color:var(--text-dim);margin-bottom:20px">' + submsg + '</p>' : '') +
+    '<button onclick="window._goToFreeActiveMisterio()" ' +
+    'style="width:100%;padding:16px;border-radius:14px;border:none;' +
+    'background:var(--brand,#FF7A00);color:#fff;' +
+    'font-family:\'Cormorant Garamond\',Georgia,serif;' +
+    'font-size:1.3rem;font-weight:600;cursor:pointer;' +
+    '-webkit-tap-highlight-color:transparent;">' +
+    'Ir a mi Misterio actual →' +
+    '</button>';
+  sheet.appendChild(div);
+}
+window._injectFreeMotiv = _injectFreeMotiv;
+
+function _openPopupSheet() {
+  var sheet   = document.querySelector('.popup-sheet');
+  var overlay = document.getElementById('popup-overlay');
+  if (sheet) { sheet.style.transition = 'none'; sheet.style.transform = 'translateY(100%)'; }
+  overlay.classList.add('open');
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() {
+      if (sheet) { sheet.style.transition = ''; sheet.style.transform = ''; }
+    });
+  });
+}
+window._openPopupSheet = _openPopupSheet;
+
+function goToExtras() {
+  var plan = window.effectivePlan ? window.effectivePlan() : 'free';
+  if (plan === 'developer') { navigateTo('extras.html'); return; }
+  _showExtrasComingSoon();
+}
+window.goToExtras = goToExtras;
+
+function _showExtrasComingSoon() {
+  var badge = document.getElementById('popup-badge');
+  if (badge) { badge.textContent = 'Extras'; badge.style.cssText = 'background:rgba(1,187,225,0.12);color:#01BBE1;border:1px solid rgba(1,187,225,0.3);'; }
+  var nameEl = document.getElementById('popup-name');
+  if (nameEl) nameEl.textContent = 'Extras · Próximamente';
+  var subEl = document.getElementById('popup-sub');
+  if (subEl) subEl.textContent = 'Contenido especial en preparación';
+  var frameEl = document.getElementById('popup-mystery-frame');
+  if (frameEl) frameEl.style.display = 'none';
+  document.getElementById('popup-bg').style.background =
+    'radial-gradient(ellipse at 30% 60%,rgba(1,187,225,0.2) 0%,transparent 60%)';
+  ['popup-audio','popup-orar','popup-rezar'].forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.style.display = 'none';
+  });
+  var mt = document.getElementById('popup-modos-title');
+  if (mt) mt.style.display = 'none';
+  var sheet = document.querySelector('.popup-sheet');
+  var existing = document.getElementById('popup-free-motiv');
+  if (existing) existing.remove();
+  var div = document.createElement('div');
+  div.id = 'popup-free-motiv';
+  div.style.cssText = 'padding:8px 20px 16px;text-align:center;';
+  div.innerHTML =
+    '<div style="font-size:2.5rem;margin-bottom:16px">🚧</div>' +
+    '<p style="font-family:\'Crimson Pro\',Georgia,serif;font-size:26px;' +
+    'line-height:1.65;color:var(--text-soft);font-style:italic;margin-bottom:20px">' +
+    'La sección Extras está en preparación. Pronto encontrarás aquí contenido especial para tu camino.</p>' +
+    '<button onclick="closePopup();var ex=document.getElementById(\'popup-free-motiv\');' +
+    'if(ex)ex.remove();[\'popup-audio\',\'popup-orar\',\'popup-rezar\'].forEach(function(id)' +
+    '{var el=document.getElementById(id);if(el)el.style.display=\'\'});' +
+    'var mt=document.getElementById(\'popup-modos-title\');if(mt)mt.style.display=\'\';" ' +
+    'style="padding:14px 32px;border-radius:28px;border:1.5px solid var(--border);' +
+    'background:none;color:var(--text-dim);font-family:\'Inter\',sans-serif;' +
+    'font-size:0.9rem;cursor:pointer;">Cerrar</button>';
+  if (sheet) sheet.appendChild(div);
+  _openPopupSheet();
+}
+window._showExtrasComingSoon = _showExtrasComingSoon;
+
+function _showNivelComingSoon(nivelId) {
+  closeLevelPicker();
+  var nombre = (window.NIVEL_NAMES || {})[nivelId] || ('Nivel ' + nivelId);
+  var mundo = parseInt((nivelId || '0101').slice(0,2), 10);
+  var mundoNombre = ['','Cruz','Emociones','Mente','Corazón','Relaciones','Amor','Tiempo'][mundo] || ('Mundo ' + mundo);
+
+  var badge = document.getElementById('popup-badge');
+  if (badge) { badge.textContent = mundoNombre; badge.style.cssText = 'background:rgba(255,122,0,0.1);color:#FF7A00;border:1px solid rgba(255,122,0,0.3);'; }
+  var nameEl = document.getElementById('popup-name');
+  if (nameEl) nameEl.textContent = nombre;
+  var subEl = document.getElementById('popup-sub');
+  if (subEl) subEl.textContent = 'En desarrollo · Próximamente';
+  var frameEl = document.getElementById('popup-mystery-frame');
+  if (frameEl) frameEl.style.display = 'none';
+  document.getElementById('popup-bg').style.background =
+    'radial-gradient(ellipse at 30% 60%,rgba(255,122,0,0.15) 0%,transparent 60%)';
+
+  ['popup-audio','popup-orar','popup-rezar'].forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.style.display = 'none';
+  });
+  var mt = document.getElementById('popup-modos-title');
+  if (mt) mt.style.display = 'none';
+
+  var sheet = document.querySelector('.popup-sheet');
+  var existing = document.getElementById('popup-free-motiv');
+  if (existing) existing.remove();
+
+  var div = document.createElement('div');
+  div.id = 'popup-free-motiv';
+  div.style.cssText = 'padding:8px 20px 16px;text-align:center;';
+  div.innerHTML =
+    '<div style="font-size:2.5rem;margin-bottom:16px">🚧</div>' +
+    '<p style="font-family:\'Crimson Pro\',Georgia,serif;font-size:26px;' +
+    'line-height:1.65;color:var(--text-soft);font-style:italic;margin-bottom:20px">' +
+    'El nivel <strong style="font-style:normal;color:var(--text)">' + nombre + '</strong> ' +
+    'está en preparación. Pronto podrás continuar tu camino aquí.</p>' +
+    '<button onclick="closePopup();var ex=document.getElementById(\'popup-free-motiv\');' +
+    'if(ex)ex.remove();[\'popup-audio\',\'popup-orar\',\'popup-rezar\'].forEach(function(id)' +
+    '{var el=document.getElementById(id);if(el)el.style.display=\'\'});' +
+    'var mt=document.getElementById(\'popup-modos-title\');if(mt)mt.style.display=\'\';" ' +
+    'style="padding:14px 32px;border-radius:28px;border:1.5px solid var(--border);' +
+    'background:none;color:var(--text-dim);font-family:\'Inter\',sans-serif;' +
+    'font-size:0.9rem;cursor:pointer;">Cerrar</button>';
+  if (sheet) sheet.appendChild(div);
+  _openPopupSheet();
+}
+window._showNivelComingSoon = _showNivelComingSoon;
+
 function showFreeVuelveManana() {
   var el = document.createElement('div');
   el.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:rgba(30,30,30,0.95);color:#fff;padding:12px 20px;border-radius:12px;font-size:0.85rem;font-family:\'Crimson Pro\',serif;z-index:9999;max-width:280px;text-align:center;line-height:1.4;box-shadow:0 4px 20px rgba(0,0,0,0.4)';
@@ -2228,6 +2419,7 @@ async function getCurrentNivelFromFirestore(user) {
 
 // ── Mostrar pantalla ──────────────────────────────────────────────
 function showScreen(name) {
+  _stopLoadingMsgs();
   document.getElementById('scr-loading').style.display = 'none';
   document.getElementById('scr-login').classList.remove('active');
   document.getElementById('scr-home').classList.remove('active');
@@ -2236,6 +2428,7 @@ function showScreen(name) {
 }
 
 // ── Auth state ────────────────────────────────────────────────────
+startLoadingMsgs();
 onAuthStateChanged(auth, async function(user) {
   if (!user) { currentUser = null; showScreen('login'); return; }
   currentUser = user;
@@ -3102,11 +3295,17 @@ function buildMap() {
       rNode.style.cssText = 'top:' + p.y + 'px;left:' + (p.x + offsetX) + 'px;transform:translate(-50%,-50%)';
       rNode.innerHTML = _retiroSvg(retiro.tipo, retiro.color) +
         '<span class="retiro-node-label">' + retiro.nombre.replace('Sanando ', '') + '</span>';
-      if (desbloqueado) {
-        rNode.onclick = (function(slug) {
-          return function() { if (window.CZSound) CZSound('beadTap'); navigateTo('sanar.html?retiro=' + slug); };
-        })(retiro.slug);
-      }
+      var _planRetiro = window.effectivePlan ? window.effectivePlan() : 'free';
+      rNode.onclick = (function(slug, desbloq, planR) {
+        return function() {
+          if (window.CZSound) CZSound('beadTap');
+          if (!desbloq || planR === 'free') {
+            _showRetiroFreePrompt();
+          } else {
+            navigateTo('sanar.html?retiro=' + slug);
+          }
+        };
+      })(retiro.slug, desbloqueado, _planRetiro);
       canvas.appendChild(rNode);
     }
   });
@@ -3168,9 +3367,7 @@ function buildMap() {
       '<div class="' + sphereClass + '" style="' + sphereStyle + '">' + iconHtml + '</div>' +
       '<div class="node-label"><div class="node-label-name" style="color:' + labelColor + '">' + nombre + '</div></div>';
 
-    if (!isLocked) {
-      (function(gi,bi,mi){ node.onclick = function(){ if(window.CZSound) CZSound('beadTap'); openMapPopup(gi,bi,mi); }; })(gi,bi,mi);
-    }
+    (function(gi,bi,mi){ node.onclick = function(){ if(window.CZSound) CZSound('beadTap'); openMapPopup(gi,bi,mi); }; })(gi,bi,mi);
     canvas.appendChild(node);
 
     if (isActive && !activeDrawn) {
@@ -3349,22 +3546,14 @@ function openMapPopup(gi, bi, mi) {
   var _plan = window.effectivePlan ? window.effectivePlan() : 'free';
   var _isFree = (_plan === 'free');
 
-  // ── Para Free: si no es su misterio actual → popup motivacional ──
-  if (_isFree) {
-    var _freeActiveGi = -1;
-    if (window._freeProg) {
-      var _fp    = window._freeProg;
-      var _fpNId = _fp.nivelId || '0101';
-      var _mpts  = window._lastMapPts || [];
-      _mpts.forEach(function(pt) {
-        var ptNId = String(pt.nivel||1).padStart(2,'0') + String(pt.cuaderno||1).padStart(2,'0');
-        if (ptNId === _fpNId && pt.globalMisterioInNivel === ((_fp.misterio || 1) - 1)) _freeActiveGi = pt.globalIdx;
-      });
-    }
-    if (gi !== _freeActiveGi) {
-      _openFreeMotivPopup(gi, bi, mi, _freeActiveGi);
-      return;
-    }
+  // ── Calcular si este misterio es el actual del Free ──
+  var _isFreeActive = false;
+  if (_isFree && window._freeProg) {
+    var _fp    = window._freeProg;
+    var _fpNId = _fp.nivelId || '0101';
+    var _fpM   = _fp.misterio || 1;
+    var _nId2  = window.currentNivelId || '0101';
+    _isFreeActive = (_nId2 === _fpNId && (gi + 1) === _fpM);
   }
 
   var b=BLOQUES_MAP[bi], c=b.color;
@@ -3488,22 +3677,32 @@ function openMapPopup(gi, bi, mi) {
     el.style.display = _showDesc ? '' : 'none';
   });
 
-  var _sheet = document.querySelector('.popup-sheet');
-  var _overlay = document.getElementById('popup-overlay');
-  // Colocar el sheet fuera de pantalla sin transición, luego animar a posición 0
-  if (_sheet) {
-    _sheet.style.transition = 'none';
-    _sheet.style.transform = 'translateY(100%)';
+  // ── Para Free: ocultar botones y mostrar mensaje si no es su misterio ──
+  var _existingMotiv = document.getElementById('popup-free-motiv');
+  if (_existingMotiv) _existingMotiv.remove();
+
+  var _audioBtn   = document.getElementById('popup-audio');
+  var _orarBtn    = document.getElementById('popup-orar');
+  var _rezarBtn   = document.getElementById('popup-rezar');
+  var _modasTitle = document.getElementById('popup-modos-title');
+
+  if (_isFree && !_isFreeActive) {
+    if (_audioBtn)   _audioBtn.style.display   = 'none';
+    if (_orarBtn)    _orarBtn.style.display     = 'none';
+    if (_rezarBtn)   _rezarBtn.style.display    = 'none';
+    if (_modasTitle) _modasTitle.style.display  = 'none';
+    _injectFreeMotiv(
+      'Con Premium puedes orar todos los Misterios que desees cada día, en modo Audio, Libro o Rezo, sin límites.',
+      null
+    );
+  } else {
+    if (_audioBtn)   _audioBtn.style.display   = '';
+    if (_orarBtn)    _orarBtn.style.display     = '';
+    if (_rezarBtn)   _rezarBtn.style.display    = '';
+    if (_modasTitle) _modasTitle.style.display  = '';
   }
-  _overlay.classList.add('open');
-  requestAnimationFrame(function() {
-    requestAnimationFrame(function() {
-      if (_sheet) {
-        _sheet.style.transition = '';
-        _sheet.style.transform = '';
-      }
-    });
-  });
+
+  _openPopupSheet();
 }
 function closePopup() {
   var sheet = document.querySelector('.popup-sheet');
@@ -3568,20 +3767,18 @@ function _openFreeMotivPopup(gi, bi, mi, freeActiveGi) {
 
 window._goToFreeActiveMisterio = function() {
   closePopup();
-  document.getElementById('popup-audio').style.display = '';
-  document.getElementById('popup-orar').style.display  = '';
-  document.getElementById('popup-rezar').style.display = '';
-  var title = document.querySelector('.popup-modos-title');
-  if (title) title.style.display = '';
+  ['popup-audio','popup-orar','popup-rezar'].forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.style.display = '';
+  });
+  var mt = document.getElementById('popup-modos-title');
+  if (mt) mt.style.display = '';
   var ex = document.getElementById('popup-free-motiv');
   if (ex) ex.remove();
-
   if (!window._freeProg) return;
   var fp   = window._freeProg;
-  var niv  = parseInt(fp.nivelId.slice(0,2), 10);
-  var cuad = parseInt(fp.nivelId.slice(2,4), 10);
-  var m    = fp.misterio || 1;
-  window.navigateTo('audio.html?nivel=' + niv + '&cuaderno=' + cuad + '&misterio=' + m);
+  var niv  = parseInt((fp.nivelId || '0101').slice(0,2), 10);
+  var cuad = parseInt((fp.nivelId || '0101').slice(2,4), 10);
+  navigateTo('audio.html?nivel=' + niv + '&cuaderno=' + cuad + '&misterio=' + (fp.misterio || 1));
 };
 
 (function() {
@@ -3834,6 +4031,15 @@ function playOrbSelect() {
 
 function selectNivel(id) {
   playOrbSelect();
+
+  // ── Aviso si el nivel está en desarrollo ──────────────────
+  var st   = (window.NIVEL_STATUS || {})[id] || 'published';
+  var plan = window.effectivePlan ? window.effectivePlan() : 'free';
+  if (plan !== 'developer' && (st === 'dev' || st === 'empty')) {
+    _showNivelComingSoon(id);
+    return;
+  }
+
   closeLevelPicker();
   window.currentNivelId = id;
   try { localStorage.setItem('cruzando_current_nivel', id); } catch(e) {}

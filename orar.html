@@ -239,7 +239,7 @@ body{
 @keyframes luxParticleFly{0%{transform:translate(0,0) scale(1);opacity:0.8}100%{transform:translate(var(--x),var(--y)) scale(0);opacity:0}}
 .meters-display{display:flex;align-items:center;gap:6px;background:var(--sec-bg);padding:6px 12px;border-radius:12px;border:1.5px solid var(--border)}
 .meters-display span{font-size:0.82rem;font-weight:700;color:var(--lvl-bold)}
-.mariano-overlay{position:fixed;top:0;right:0;bottom:0;width:100%;pointer-events:none;z-index:90;display:flex;align-items:center;justify-content:flex-end;padding-right:20px}
+.mariano-overlay{position:fixed;top:0;right:0;bottom:0;width:100%;pointer-events:none;z-index:300;display:flex;align-items:center;justify-content:flex-end;padding-right:20px}
 .mariano-slide{width:182px;height:auto;animation:marianoSlide 2.5s ease-in-out}
 @keyframes marianoSlide{0%{transform:translateX(200px);opacity:0}30%{transform:translateX(0);opacity:1}70%{transform:translateX(0);opacity:1}100%{transform:translateX(200px);opacity:0}}
 .meters-float{position:absolute;top:50%;right:220px;font-size:1rem;font-weight:800;color:var(--green);text-shadow:0 2px 8px rgba(52,168,83,0.4);animation:metersFloat 2.5s ease-out}
@@ -970,11 +970,21 @@ async function addMeters(m){
 /* ─── GAMIFICATION ─── */
 function showSlide(m,extra){
   const ov=$('mariano-overlay'),img=$('mariano-slide-img'),fl=$('meters-float-text');
-  if(!ov) return;
-  img.src=marianoNext();
-  fl.innerHTML=(extra?`<span class="extra-badge">${extra}</span>`:'')+`+${m}m`;
-  ov.style.display='flex';
-  setTimeout(()=>{ov.style.display='none';},2600);
+  if(!ov||!img||!fl) return;
+
+  img.classList.remove('mariano-slide');
+  fl.classList.remove('meters-float');
+  void img.offsetWidth;
+
+  img.src = marianoNext();
+  fl.innerHTML = (extra?`<span class="extra-badge">${extra}</span>`:'')+`+${m}m`;
+
+  img.classList.add('mariano-slide');
+  fl.classList.add('meters-float');
+
+  ov.style.display = 'flex';
+  clearTimeout(ov._hideTimer);
+  ov._hideTimer = setTimeout(()=>{ ov.style.display='none'; }, 2600);
 }
 
 /* ─── PARSE QUESTIONS ─── */

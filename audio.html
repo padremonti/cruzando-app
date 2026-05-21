@@ -205,7 +205,13 @@ body {
   color: var(--lvl-bold);
   margin-bottom: 8px;
 }
-.loading-msg { font-size: 0.82rem; color: var(--text-dim); margin-top: 6px; }
+.loading-msg { font-family: 'Crimson Pro', serif; font-size: 1.25rem; font-style: italic; color: var(--text-soft); max-width: 280px; margin-top: 12px; text-align: center; }
+.mariano-overlay{position:fixed;top:0;right:0;bottom:0;width:100%;pointer-events:none;z-index:300;display:flex;align-items:center;justify-content:flex-end;padding-right:20px}
+.mariano-slide{width:182px;height:auto;animation:marianoSlide 2.5s ease-in-out}
+@keyframes marianoSlide{0%{transform:translateX(200px);opacity:0}30%{transform:translateX(0);opacity:1}70%{transform:translateX(0);opacity:1}100%{transform:translateX(200px);opacity:0}}
+.meters-float{position:absolute;top:50%;right:220px;font-size:1rem;font-weight:800;color:var(--green);text-shadow:0 2px 8px rgba(52,168,83,0.4);animation:metersFloat 2.5s ease-out}
+.meters-float .extra-badge{display:block;font-size:0.58rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#FFD700;text-shadow:0 1px 6px rgba(255,215,0,0.5);margin-bottom:2px}
+@keyframes metersFloat{0%{transform:translateY(0);opacity:0}30%{opacity:1}70%{opacity:1}100%{transform:translateY(-40px);opacity:0}}
 .spinner {
   width: 36px; height: 36px;
   border: 3px solid var(--border);
@@ -1628,6 +1634,21 @@ function marianoNext() {
   return IMG_BASE + 'mariano_' + n + '.webp';
 }
 
+function showSlide(m,extra){
+  const ov=$('mariano-overlay'),img=$('mariano-slide-img'),fl=$('meters-float-text');
+  if(!ov||!img||!fl)return;
+  img.classList.remove('mariano-slide');
+  fl.classList.remove('meters-float');
+  void img.offsetWidth;
+  img.src=marianoNext();
+  fl.innerHTML=(extra?`<span class="extra-badge">${extra}</span>`:'')+`+${m}m`;
+  img.classList.add('mariano-slide');
+  fl.classList.add('meters-float');
+  ov.style.display='flex';
+  clearTimeout(ov._hideTimer);
+  ov._hideTimer=setTimeout(()=>{ov.style.display='none';},2600);
+}
+
 const AUDIO_FOLDERS = {
   start:  R2_BASE + '/start/',
   ubible: R2_BASE + '/ubible/',
@@ -1794,9 +1815,28 @@ function show(id) {
   $(id).classList.add('active');
 }
 
+var _loadingMsgs = [
+  'Preparando tu camino…',
+  'Cargando el misterio…',
+  'Un momento de silencio…',
+  'Abriendo el cuaderno…',
+  'Buscando tus avances…',
+  'Casi listo…'
+];
+var _loadingRotTimer = null;
 function setMsg(msg) {
-  const el = $('loading-msg');
+  var el = $('loading-msg');
   if (el) el.textContent = msg;
+  if (_loadingRotTimer) { clearInterval(_loadingRotTimer); _loadingRotTimer = null; }
+  var idx = 0;
+  _loadingRotTimer = setInterval(function() {
+    idx = (idx + 1) % _loadingMsgs.length;
+    var e = $('loading-msg');
+    if (e) e.textContent = _loadingMsgs[idx];
+  }, 5000);
+}
+function _stopLoadingRotation() {
+  if (_loadingRotTimer) { clearInterval(_loadingRotTimer); _loadingRotTimer = null; }
 }
 
 function showToast(text) {
@@ -2029,38 +2069,6 @@ async function loadUserAndStart(skipProgressRead = false) {
     console.warn('Error leyendo plan (asumiendo premium):', e.message);
   }
 
-  // ── Si es Free: leer freeProgress y forzar misterio del itinerario ──────────
-  if (userPlan === 'free') {
-    try {
-      const fpSnap = await getDoc(doc(db, 'users', uid, 'freeProgress', 'current'));
-      const fpData = fpSnap.exists()
-        ? fpSnap.data()
-        : { nivelId: '0101', misterio: 1, completedToday: false, fechaHoy: '' };
-
-      // Reset diario si cambió la fecha
-      const hoy = window.getTodayKey ? window.getTodayKey() : new Date().toISOString().slice(0, 10);
-      if (fpData.fechaHoy !== hoy) {
-        fpData.completedToday = false;
-        fpData.fechaHoy = hoy;
-      }
-
-      window._freeProg = fpData;
-      try { localStorage.setItem('cruzando_free_prog', JSON.stringify(fpData)); } catch(_) {}
-
-      // Forzar el misterio del Free — ignorar cualquier parámetro URL
-      const fNivel    = parseInt(fpData.nivelId.slice(0, 2), 10);
-      const fCuaderno = parseInt(fpData.nivelId.slice(2, 4), 10);
-      if (!audioProgress) audioProgress = { nivel: 1, cuaderno: 1, misterio: 1, firstAnswered: [false, false, false], history: [] };
-      audioProgress.nivel    = fNivel;
-      audioProgress.cuaderno = fCuaderno;
-      audioProgress.misterio = fpData.misterio || 1;
-
-    } catch(e) {
-      console.warn('[CruzAndo] Error leyendo freeProgress:', e);
-      window._freeProg = { nivelId: '0101', misterio: 1, completedToday: false, fechaHoy: '' };
-    }
-  }
-
   // Leer audioProgress (omitir si ya está en memoria y skipProgressRead=true)
   if (!skipProgressRead) {
     try {
@@ -2114,6 +2122,70 @@ async function loadUserAndStart(skipProgressRead = false) {
     try { localStorage.setItem('cruzando_current_nivel', String(_pN).padStart(2,'0') + String(_pC).padStart(2,'0')); } catch(e) {}
     history.replaceState({}, '', 'audio.html');
     goDirectly = true;
+  }
+
+  // ── Si es Free: forzar misterio del itinerario y verificar acceso ────────────
+  if (userPlan === 'free') {
+    try {
+      var fpSnap2 = await getDoc(doc(db, 'users', uid, 'freeProgress', 'current'));
+      var fpData2 = fpSnap2.exists()
+        ? fpSnap2.data()
+        : { nivelId: '0101', misterio: 1, completedToday: false, fechaHoy: '' };
+
+      var hoy2 = window.getTodayKey ? window.getTodayKey() : new Date().toISOString().slice(0, 10);
+      if (fpData2.fechaHoy !== hoy2) { fpData2.completedToday = false; fpData2.fechaHoy = hoy2; }
+
+      window._freeProg = fpData2;
+      try { localStorage.setItem('cruzando_free_prog', JSON.stringify(fpData2)); } catch(_) {}
+
+      var fNivel2    = parseInt((fpData2.nivelId || '0101').slice(0, 2), 10);
+      var fCuaderno2 = parseInt((fpData2.nivelId || '0101').slice(2, 4), 10);
+      var fMisterio2 = fpData2.misterio || 1;
+
+      // Si los parámetros URL no coinciden con el misterio del Free → redirigir
+      var _spFree = new URLSearchParams(location.search);
+      var _urlNF  = parseInt(_spFree.get('nivel')    || '0', 10);
+      var _urlCF  = parseInt(_spFree.get('cuaderno') || '0', 10);
+      var _urlMF  = parseInt(_spFree.get('misterio') || '0', 10);
+      if (_urlNF && _urlCF && _urlMF &&
+          (_urlNF !== fNivel2 || _urlCF !== fCuaderno2 || _urlMF !== fMisterio2)) {
+        window.location.replace(
+          'audio.html?nivel=' + fNivel2 + '&cuaderno=' + fCuaderno2 + '&misterio=' + fMisterio2
+        );
+        return;
+      }
+
+      // Siempre sobreescribir audioProgress con el misterio del Free
+      if (!audioProgress) audioProgress = { nivel:1, cuaderno:1, misterio:1, firstAnswered:[false,false,false], history:[] };
+      audioProgress.nivel    = fNivel2;
+      audioProgress.cuaderno = fCuaderno2;
+      audioProgress.misterio = fMisterio2;
+
+      // Si ya completó hoy → mostrar overlay después de cargar
+      if (fpData2.completedToday) {
+        await buildSession();
+        setTimeout(function() {
+          if (window.showFreeVuelveManana) window.showFreeVuelveManana();
+          else if (window.showDailyLimit)  window.showDailyLimit();
+        }, 400);
+        return;
+      }
+
+    } catch(e) {
+      console.warn('[CruzAndo] Error leyendo freeProgress:', e);
+      window._freeProg = { nivelId:'0101', misterio:1, completedToday:false, fechaHoy:'' };
+    }
+  }
+
+  // Verificar que el nivel resuelto esté publicado
+  var _nivelStatus = (window.NIVEL_STATUS || {});
+  var _reqNivelId  = String((audioProgress && audioProgress.nivel) || 1).padStart(2,'0') +
+                     String((audioProgress && audioProgress.cuaderno) || 1).padStart(2,'0');
+  var _stReq  = _nivelStatus[_reqNivelId] || 'published';
+  var _planAu = userPlan || 'free';
+  if (_planAu !== 'developer' && (_stReq === 'dev' || _stReq === 'empty')) {
+    window.location.replace('index.html?msg=nivel_en_desarrollo');
+    return;
   }
 
   console.log('userPlan:', userPlan, '| misterio:', audioProgress.nivel, audioProgress.cuaderno, audioProgress.misterio);
@@ -2201,6 +2273,7 @@ function showDailyLimit() {
     '<button onclick="window._repeatSession()" style="' + s + 'background:var(--lvl-bold);color:#fff;border:none;">🔄 Repetir sesión</button>' +
     '<button onclick="window._goHome()" style="' + s + 'background:var(--card);color:var(--text-soft);border:1.5px solid var(--border);">Ir al inicio</button>' +
     '</div>';
+  _stopLoadingRotation();
   show('scr-daily-limit');
 }
 
@@ -2519,6 +2592,7 @@ function startPlayerSession(prepBlock) {
     if (prepHero) prepHero.style.display = 'none';
   }
 
+  _stopLoadingRotation();
   show('scr-session');
 }
 
@@ -2574,6 +2648,7 @@ function renderMicroAudio(b, nivelId) {
         blockMicroDone = true;
         await saveMicroDone(b, nivelId);
         await addMetersToFirestore(METERS_MICRO);
+        showSlide(METERS_MICRO, '¡Micro completado!');
         sessionMeters += METERS_MICRO;
         closeMicro();
         startPlayerSession(null);
@@ -2652,6 +2727,7 @@ function playMicroIntroThenMicro(block, nivelId) {
   // Ocultar barra inferior (aún no hay sesión activa)
   const controls = document.querySelector('#scr-session .audio-bottom');
   if (controls) controls.style.visibility = 'hidden';
+  _stopLoadingRotation();
   show('scr-session');
 
   const url = AUDIO_FOLDERS['rezo'] + 'micro_' + block + '.mp3';
@@ -3499,6 +3575,7 @@ async function completeSession() {
     audioProgress.blockBonuses = blockBonuses;
     sessionMeters += METERS_BLOCK_BONUS;
     await addMetersToFirestore(METERS_BLOCK_BONUS);
+    showSlide(METERS_BLOCK_BONUS, '¡Bloque completo!');
     if (window.CZSound) CZSound('blockClear');
     setTimeout(() => showToast(`+${METERS_BLOCK_BONUS}m · ¡Bloque ${BLOCK_NAMES[block]} completado!`), 400);
   }
@@ -3698,6 +3775,7 @@ async function awardQuestionMeters(qi, value) {
     const earned = METERS_Q_FIRST;
     sessionMeters += earned;
     await addMetersToFirestore(earned);
+    showSlide(earned);
     $('session-meters-display').textContent = `${sessionMeters.toLocaleString('es-MX')}m esta sesión`;
     const el = $(`q-meters-${qi}`);
     if (el) { el.textContent = `+${earned}m ganados`; el.classList.add('earned'); }
@@ -3709,6 +3787,7 @@ async function awardQuestionMeters(qi, value) {
       el.textContent = `+${METERS_Q_UPDATE}m`;
       el.classList.add('earned');
       await addMetersToFirestore(METERS_Q_UPDATE);
+      showSlide(METERS_Q_UPDATE, '¡Primera respuesta!');
       sessionMeters += METERS_Q_UPDATE;
       $('session-meters-display').textContent = `${sessionMeters.toLocaleString('es-MX')}m esta sesión`;
     }
@@ -3956,6 +4035,12 @@ initAuth();
     -webkit-tap-highlight-color:transparent;">
     🔄 Repetir sesión
   </button>
+</div>
+
+<!-- Mariano slide-in -->
+<div class="mariano-overlay" id="mariano-overlay" style="display:none">
+  <img id="mariano-slide-img" class="mariano-slide" src="" alt="Mariano">
+  <div class="meters-float" id="meters-float-text"></div>
 </div>
 
 </body>
