@@ -19,24 +19,34 @@
 *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
 
 :root {
-  --bg:        #1A0E04;
-  --bg2:       #120A02;
-  --card:      #2C1810;
-  --border:    #4A2E1A;
-  --text:      #F0E6DA;
-  --text-soft: #C4A882;
-  --text-dim:  #7A5C40;
-  --orange:    #FF7A00;
-  --green:     #4CAF7D;
+  --bg:            #002931;
+  --bg-rgb:        0,41,49;
+  --bg2:           #120A02;
+  --card:          #2C1810;
+  --border:        #4A2E1A;
+  --text:          #F0E6DA;
+  --text-soft:     #C4A882;
+  --text-dim:      #7A5C40;
+  --orange:        #FF7A00;
+  --green:         #4CAF7D;
+  --brand:         #02BBE0;
+  --brand-soft:    #43DDF8;
+  --brand-ultra:   rgba(2,187,224,0.12);
+  --brand-glow:    rgba(2,187,224,0.25);
 }
 body.light {
-  --bg:        #F5F0E8;
-  --bg2:       #EDE5D8;
-  --card:      #FFFCF7;
-  --border:    #D9CFC4;
-  --text:      #2B2622;
-  --text-soft: #6B6259;
-  --text-dim:  #9B9389;
+  --bg:            #E6DED3;
+  --bg-rgb:        230,222,211;
+  --bg2:           #EDE5D8;
+  --card:          #FFFCF7;
+  --border:        #D9CFC4;
+  --text:          #2B2622;
+  --text-soft:     #6B6259;
+  --text-dim:      #9B9389;
+  --brand:         #02BBE0;
+  --brand-soft:    #43DDF8;
+  --brand-ultra:   rgba(2,187,224,0.10);
+  --brand-glow:    rgba(2,187,224,0.20);
 }
 
 html { font-size:18px; }
@@ -173,7 +183,7 @@ body.light .card-prog-wrap { background:rgba(0,0,0,0.08); }
 .spinner-wrap { display:flex; align-items:center; justify-content:center; min-height:50dvh; }
 .spinner {
   width:32px; height:32px; border:3px solid var(--border);
-  border-top-color:var(--orange); border-radius:50%;
+  border-top-color:var(--brand, #02BBE0); border-radius:50%;
   animation:spin 0.8s linear infinite;
 }
 @keyframes spin { to { transform:rotate(360deg); } }

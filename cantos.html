@@ -19,21 +19,26 @@
 /* ── Reset & vars ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg:        #1A0E04;
-  --card:      #231508;
-  --border:    rgba(255,255,255,0.09);
-  --text:      #F5EDE4;
-  --text-soft: #C8B8AA;
-  --text-dim:  #806858;
-  --orange:    #FF7A00;
-  --green:     #4CAF50;
+  --bg:            #002931;
+  --bg-rgb:        0,41,49;
+  --card:          #231508;
+  --border:        rgba(255,255,255,0.09);
+  --text:          #F5EDE4;
+  --text-soft:     #C8B8AA;
+  --text-dim:      #806858;
+  --orange:        #FF7A00;
+  --green:         #4CAF50;
   --block-color:      #E8A0A0;
   --block-color-glow: rgba(232,160,160,0.35);
   --block-color-bg:   rgba(232,160,160,0.18);
   --rosa:   #E8A0A0;
-  --azul:   #01BBE1;
+  --azul:   #02BBE0;
   --rojo:   #C0392B;
   --dorado: #D4A017;
+  --brand:         #02BBE0;
+  --brand-soft:    #43DDF8;
+  --brand-ultra:   rgba(2,187,224,0.12);
+  --brand-glow:    rgba(2,187,224,0.25);
 }
 body {
   background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif;
@@ -41,12 +46,17 @@ body {
   display: flex; flex-direction: column;
 }
 body.light {
-  --bg:        #E6DED3;
-  --card:      #F5EDE4;
-  --border:    rgba(0,0,0,0.1);
-  --text:      #1A0E04;
-  --text-soft: #4A3828;
-  --text-dim:  #9A8878;
+  --bg:            #E6DED3;
+  --bg-rgb:        230,222,211;
+  --card:          #F5EDE4;
+  --border:        rgba(0,0,0,0.1);
+  --text:          #1A0E04;
+  --text-soft:     #4A3828;
+  --text-dim:      #9A8878;
+  --brand:         #02BBE0;
+  --brand-soft:    #43DDF8;
+  --brand-ultra:   rgba(2,187,224,0.10);
+  --brand-glow:    rgba(2,187,224,0.20);
 }
 
 /* ── Header ── */
