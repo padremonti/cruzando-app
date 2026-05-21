@@ -937,6 +937,9 @@ const db   = getFirestore(app);
 
 const CANTOS_BASE       = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/cantos/';
 const EXTRAS_CANTOS_BASE = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/extras/';
+const INTERSTITIAL_BASE  = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/interstitials/';
+const INTERSTITIAL_TOTAL = 4;
+const INTERSTITIAL_KEY   = 'cruzando_interstitial_fecha';
 const BLOCK_COLORS = {
   gozosos:  { color:'#E8A0A0', glow:'rgba(232,160,160,0.35)', bg:'rgba(232,160,160,0.18)', label:'MISTERIOS GOZOSOS' },
   luminosos:{ color:'#01BBE1', glow:'rgba(1,187,225,0.3)',    bg:'rgba(1,187,225,0.15)',   label:'MISTERIOS LUMINOSOS' },
@@ -1824,11 +1827,118 @@ async function backfillCantos(uid) {
   }, { passive: true });
 })();
 
+// ── Textos de los interstitials (coinciden con los mp3) ──────
+var INTERSTITIAL_TEXTS = [
+  '¿Sabías que puedes contemplar cada Misterio, no solo escucharlo?\n\nEn el modo Libro, texto bíblico, reflexión y preguntas que tocan el corazón... a tu ritmo, en silencio, con profundidad.',
+  '¿Y si pudieras rezar los cinco Misterios, no solo uno?\n\nCon el modo Rezo acompañas a María en un bloque completo. Avanzas más, llegas más lejos.',
+  '¿Sientes que un Misterio al día es poco para ti?\n\nCon CruzAndo Premium puedes recorrer tantos Misterios como quieras cada día. Sin límites.',
+  'En cada nivel del itinerario hay un retiro esperándote.\n\nLa sección Sanar: espacios de oración para el duelo, la tristeza, el enojo, el perdón, el cansancio...'
+];
+
+function _shouldShowInterstitial(plan) {
+  if (plan !== 'free') return false;
+  var hoy    = window.getTodayKey ? window.getTodayKey()
+             : new Date().toISOString().slice(0,10);
+  var ultimo = localStorage.getItem(INTERSTITIAL_KEY) || '';
+  return ultimo !== hoy;
+}
+
+function _getInterstitialIdx() {
+  var last = parseInt(localStorage.getItem('cruzando_interstitial_idx') || '-1');
+  var next = (last + 1) % INTERSTITIAL_TOTAL;
+  localStorage.setItem('cruzando_interstitial_idx', String(next));
+  return next;
+}
+
+var _interstitialAudio = null;
+
+function _showInterstitial(onClose) {
+  var overlay = document.getElementById('interstitial-overlay');
+  if (!overlay) { onClose(); return; }
+
+  var idx  = _getInterstitialIdx();
+  var url  = INTERSTITIAL_BASE + 'interstitial_0' + (idx + 1) + '.mp3';
+  var text = INTERSTITIAL_TEXTS[idx];
+
+  var bodyEl = document.getElementById('interstitial-body');
+  if (bodyEl) bodyEl.innerHTML = text.replace(/\n\n/g, '<br><br>');
+
+  overlay.style.display = 'flex';
+
+  var hoy = window.getTodayKey ? window.getTodayKey()
+          : new Date().toISOString().slice(0,10);
+  localStorage.setItem(INTERSTITIAL_KEY, hoy);
+
+  _interstitialAudio = new Audio(url);
+  _interstitialAudio.play().catch(function(){});
+
+  var skipBtn    = document.getElementById('interstitial-skip');
+  var counterEl  = document.getElementById('interstitial-counter');
+  var progressEl = document.getElementById('interstitial-progress');
+  var skipSecs   = 10;
+  var elapsed    = 0;
+
+  var _ticker = setInterval(function() {
+    elapsed++;
+    var remaining = Math.max(0, skipSecs - elapsed);
+    if (counterEl) counterEl.textContent = remaining > 0 ? remaining : '';
+    if (elapsed >= skipSecs) {
+      if (skipBtn)   skipBtn.style.display   = '';
+      if (counterEl) counterEl.style.display = 'none';
+      clearInterval(_ticker);
+    }
+  }, 1000);
+
+  if (_interstitialAudio) {
+    _interstitialAudio.addEventListener('timeupdate', function() {
+      if (!_interstitialAudio.duration) return;
+      var pct = (_interstitialAudio.currentTime / _interstitialAudio.duration) * 100;
+      if (progressEl) progressEl.style.width = pct + '%';
+    });
+    _interstitialAudio.addEventListener('ended', function() {
+      clearInterval(_ticker);
+      if (skipBtn)    skipBtn.style.display   = '';
+      if (counterEl)  counterEl.style.display = 'none';
+      if (progressEl) progressEl.style.width  = '100%';
+    });
+  }
+
+  window._closeInterstitial = function() {
+    clearInterval(_ticker);
+    if (_interstitialAudio) { _interstitialAudio.pause(); _interstitialAudio = null; }
+    overlay.style.display = 'none';
+    onClose();
+  };
+}
+
 // Auth + carga
 onAuthStateChanged(auth, async user => {
   if (!user) {
     goTo('index.html'); return;
   }
+
+  // ── Verificar plan y mostrar interstitial si aplica ──────────
+  var userPlan = 'free';
+  try {
+    var userSnap = await getDoc(doc(db, 'users', user.uid));
+    userPlan = userSnap.exists()
+      ? (window.resolvePlan ? window.resolvePlan(userSnap.data()) : 'free')
+      : 'free';
+    localStorage.setItem('cruzando_plan_cache', userPlan);
+  } catch(e) {
+    userPlan = localStorage.getItem('cruzando_plan_cache') || 'free';
+  }
+
+  if (_shouldShowInterstitial(userPlan)) {
+    _showInterstitial(function() {
+      _loadCantos(user);
+    });
+  } else {
+    _loadCantos(user);
+  }
+});
+
+async function _loadCantos(user) {
   try {
     const [unlockedSnap, extrasSnap, bmarkSnap] = await Promise.all([
       getDocs(collection(db, 'users', user.uid, 'unlockedCantos')),
@@ -1880,7 +1990,7 @@ onAuthStateChanged(auth, async user => {
         '<button class="btn-orar" onclick="goTo(\'audio.html\')">Ir a orar</button></div>';
     }
   }, 8000);
-});
+}
 
 // iOS: reanudar audio si la pantalla fue bloqueada y vuelve
 document.addEventListener('visibilitychange', function() {
@@ -1891,6 +2001,45 @@ document.addEventListener('visibilitychange', function() {
   }
 });
 </script>
+<!-- ── Interstitial Free ── -->
+<div id="interstitial-overlay" style="display:none;position:fixed;inset:0;
+  background:var(--bg);z-index:9999;flex-direction:column;align-items:center;
+  justify-content:center;padding:40px 28px;text-align:center;">
+
+  <!-- Ícono CruzAndo -->
+  <img src="icon-192.png" alt="CruzAndo"
+    style="width:72px;height:72px;border-radius:50%;margin-bottom:24px;opacity:0.9;">
+
+  <!-- Texto que se inyecta por JS -->
+  <div id="interstitial-body" style="font-family:'Crimson Pro',Georgia,serif;
+    font-size:22px;line-height:1.75;color:var(--text);max-width:340px;
+    margin-bottom:40px;font-style:italic;">
+  </div>
+
+  <!-- Barra de progreso del audio -->
+  <div style="width:100%;max-width:280px;height:3px;background:var(--border);
+    border-radius:2px;margin-bottom:32px;overflow:hidden;">
+    <div id="interstitial-progress" style="height:100%;background:var(--brand);
+      width:0%;transition:width 0.5s linear;border-radius:2px;"></div>
+  </div>
+
+  <!-- Botón skip — aparece a los 10s -->
+  <button id="interstitial-skip" onclick="window._closeInterstitial()"
+    style="display:none;padding:12px 32px;border-radius:28px;border:1px solid var(--border);
+    background:none;color:var(--text-dim);font-family:'Inter',sans-serif;
+    font-size:0.85rem;cursor:pointer;-webkit-tap-highlight-color:transparent;">
+    Continuar a la biblioteca →
+  </button>
+
+  <!-- Contador antes del skip -->
+  <div id="interstitial-counter"
+    style="font-family:'Inter',sans-serif;font-size:0.75rem;
+    color:var(--text-dim);letter-spacing:1px;">
+    10
+  </div>
+
+</div>
+
 <script src="sounds.js"></script>
 </body>
 </html>
