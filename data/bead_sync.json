@@ -1,0 +1,57 @@
+{
+  "L_MA": [
+    { "bead": 0,  "label": "Padrenuestro", "start": 0.0, "end": 28.67 },
+    { "bead": 1,  "label": "Ave María 1",  "start": 28.68, "end": 46.69 },
+    { "bead": 2,  "label": "Ave María 2",  "start": 46.70, "end": 64.66 },
+    { "bead": 3,  "label": "Ave María 3",  "start": 64.67, "end": 82.04 },
+    { "bead": 4,  "label": "Ave María 4",  "start": 82.05, "end": 100.92 },
+    { "bead": 5,  "label": "Ave María 5",  "start": 100.93, "end": 118.86 },
+    { "bead": 6,  "label": "Ave María 6",  "start": 118.87, "end": 136.89 },
+    { "bead": 7,  "label": "Ave María 7",  "start": 136.90, "end": 155.00 },
+    { "bead": 8,  "label": "Ave María 8",  "start": 155.01, "end": 173.02 },
+    { "bead": 9,  "label": "Ave María 9",  "start": 173.03, "end": 191.04 },
+    { "bead": 10, "label": "Ave María 10", "start": 191.05, "end": 209.07  }
+  ],
+
+  "L_MB": [
+    { "bead": 0,  "label": "Padrenuestro", "start": 0.0, "end": 29.050 },
+    { "bead": 1,  "label": "Ave María 1",  "start": 29.055, "end": 47.40 },
+    { "bead": 2,  "label": "Ave María 2",  "start": 47.429, "end": 65.035 },
+    { "bead": 3,  "label": "Ave María 3",  "start": 65.036, "end": 83.035 },
+    { "bead": 4,  "label": "Ave María 4",  "start": 83.036, "end": 101.027 },
+    { "bead": 5,  "label": "Ave María 5",  "start": 101.028, "end": 119.032 },
+    { "bead": 6,  "label": "Ave María 6",  "start": 119.033, "end": 137.033 },
+    { "bead": 7,  "label": "Ave María 7",  "start": 137.034, "end": 155.023 },
+    { "bead": 8,  "label": "Ave María 8",  "start": 155.024, "end": 173.014 },
+    { "bead": 9,  "label": "Ave María 9",  "start": 173.015, "end": 191.016 },
+    { "bead": 10, "label": "Ave María 10", "start": 191.017, "end": 209.015 }
+  ],
+
+  "MA": [
+    { "bead": 0,  "label": "Padrenuestro", "start": 0.0, "end": 22.970 },
+    { "bead": 1,  "label": "Ave María 1",  "start": 22.971, "end": 39.631 },
+    { "bead": 2,  "label": "Ave María 2",  "start": 39.632, "end": 55.560 },
+    { "bead": 3,  "label": "Ave María 3",  "start": 55.561, "end": 71.023 },
+    { "bead": 4,  "label": "Ave María 4",  "start": 71.024, "end": 87.041 },
+    { "bead": 5,  "label": "Ave María 5",  "start": 87.042, "end": 103.031 },
+    { "bead": 6,  "label": "Ave María 6",  "start": 103.032, "end": 120.052 },
+    { "bead": 7,  "label": "Ave María 7",  "start": 120.053, "end": 135.604 },
+    { "bead": 8,  "label": "Ave María 8",  "start": 135.605, "end": 151.757 },
+    { "bead": 9,  "label": "Ave María 9",  "start": 151.758, "end": 168.479 },
+    { "bead": 10, "label": "Ave María 10", "start": 168.480, "end": 184.790 }
+  ],
+
+  "MB": [
+    { "bead": 0,  "label": "Padrenuestro", "start": 0.0, "end": 22.354 },
+    { "bead": 1,  "label": "Ave María 1",  "start": 22.355, "end": 40.249 },
+    { "bead": 2,  "label": "Ave María 2",  "start": 40.250, "end": 58.177 },
+    { "bead": 3,  "label": "Ave María 3",  "start": 58.178, "end": 75.668 },
+    { "bead": 4,  "label": "Ave María 4",  "start": 75.669, "end": 93.750 },
+    { "bead": 5,  "label": "Ave María 5",  "start": 93.751, "end": 111.672 },
+    { "bead": 6,  "label": "Ave María 6",  "start": 111.673, "end": 129.445 },
+    { "bead": 7,  "label": "Ave María 7",  "start": 129.446, "end": 147.403 },
+    { "bead": 8,  "label": "Ave María 8",  "start": 147.404, "end": 166.019 },
+    { "bead": 9,  "label": "Ave María 9",  "start": 166.020, "end": 183.890 },
+    { "bead": 10, "label": "Ave María 10", "start": 183.891, "end": 201.305 }
+  ]
+}

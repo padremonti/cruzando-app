@@ -346,22 +346,65 @@ body{
   box-shadow:0 0 8px rgba(255,122,0,0.5);
   animation:bead-pop 0.18s ease-out;
 }
-.bead.rhombus{
-  border-radius:0;
-  transform:rotate(45deg);
-  width:20px;height:20px;
+.bead.active{background:transparent;border-color:var(--lvl-bold);box-shadow:0 0 0 3px rgba(var(--lvl-bold-rgb,255,122,0),0.25);animation:beadPulse 1s ease-in-out infinite}
+@keyframes beadPulse{0%,100%{box-shadow:0 0 0 2px rgba(var(--lvl-bold-rgb,255,122,0),0.25)}50%{box-shadow:0 0 0 5px rgba(var(--lvl-bold-rgb,255,122,0),0.45)}}
+.bead.lit-correct{background:var(--lvl-bold);border-color:var(--lvl-bold);animation:bead-pop 0.18s ease-out}
+.bead.lit-normal{background:var(--lvl-bold);border-color:var(--lvl-bold)}
+.bead.lit-spam{background:#888;border-color:#888}
+.bead.lit-white{background:rgba(255,255,255,0.85);border-color:rgba(255,255,255,0.85)}
+@keyframes beadGold{0%{box-shadow:0 0 0 0 rgba(255,215,0,0)}30%{box-shadow:0 0 0 8px rgba(255,215,0,0.6)}100%{box-shadow:0 0 0 14px rgba(255,215,0,0)}}
+.bead.gold-flash{animation:bead-pop 0.18s ease-out,beadGold 0.7s ease-out}
+@keyframes beadBonusFloat{0%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-28px)}}
+.bead-pater {
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.55);
+  background: rgba(255,255,255,0.15);
+  transition: background 0.18s, border-color 0.18s;
+  margin-bottom: 4px;
 }
-.bead.rhombus.lit{
-  background:var(--lvl-bold);border-color:var(--lvl-bold);
-  box-shadow:0 0 8px rgba(255,122,0,0.5);
-  animation:bead-pop 0.18s ease-out;
+.bead-pater.lit {
+  background: var(--lvl-bold);
+  border-color: var(--lvl-bold);
+  box-shadow: 0 0 10px rgba(var(--lvl-bold-rgb,2,187,224), 0.6);
+  animation: bead-pop 0.18s ease-out;
+}
+@keyframes bead-pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+.bead-lux-cross {
+  display: none;
+  margin-top: 6px;
+  flex-direction: column;
+  align-items: center;
+}
+.bead-lux-cross.show {
+  display: flex;
+  animation: luxAppear 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+@keyframes luxAppear {
+  0%   { opacity: 0; transform: scale(0.4); }
+  60%  { opacity: 1; transform: scale(1.15); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.lux-glow {
+  position: relative;
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+}
+.lux-glow::before {
+  content: '';
+  position: absolute; inset: -8px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.35) 0%, transparent 70%);
+  animation: luxPulse 1.4s ease-in-out infinite;
+}
+@keyframes luxPulse {
+  0%, 100% { opacity: 0.4; transform: scale(0.9); }
+  50%       { opacity: 1;   transform: scale(1.15); }
 }
 .beads-col-label{font-size:9px;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:0.8px;margin-top:4px;text-transform:uppercase}
-@keyframes bead-pop{
-  0%{transform:scale(1)}
-  40%{transform:scale(1.25)}
-  100%{transform:scale(1)}
-}
 
 /* ── Barra de progreso (no scrubable) ── */
 .progress-bar-wrap{height:3px;background:var(--border)}
@@ -1188,6 +1231,22 @@ let pendingNav=null;
 let contAudio=null;
 let ans={0:'',1:'',2:''}, ansT={}, firstAns={0:false,1:false,2:false};
 
+var _beadSync     = null;
+var _beadTimer    = null;
+var _beadActive   = -1;
+var _beadTapTimes = {};
+var _beadSpam     = {};
+var _currentSyncKey = null;
+
+async function loadBeadSync(){
+  if(_beadSync)return;
+  try{
+    const base=location.origin+location.pathname.substring(0,location.pathname.lastIndexOf('/')+1);
+    const r=await fetch(base+'data/bead_sync.json');
+    if(r.ok)_beadSync=await r.json();
+  }catch(e){_beadSync={};}
+}
+
 /* ─── UTILS ─── */
 const $=id=>document.getElementById(id);
 const esc=s=>s?s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'):'';
@@ -1614,18 +1673,118 @@ function renderBeadsCol(){
   if(!col)return;
   const label=col.querySelector('.beads-col-label');
   col.innerHTML='';
+
+  // 1. Bead Padrenuestro — círculo pequeño arriba
+  const pater=document.createElement('div');
+  pater.className='bead-pater';
+  pater.id='bead-pater';
+  col.appendChild(pater);
+
+  // 2. Separador visual
+  const sep=document.createElement('div');
+  sep.style.cssText='width:1px;height:8px;background:rgba(255,255,255,0.15);margin:0 auto';
+  col.appendChild(sep);
+
+  // 3. 10 beads Ave María — todos círculos
   for(let i=0;i<10;i++){
     const d=document.createElement('div');
-    var isRhombus=(i===0||i===8||i===9);
-    d.className='bead'+(isRhombus?' rhombus':'');
+    d.className='bead';
     col.appendChild(d);
   }
+
+  // 4. Cruz Lux — oculta hasta completar
+  const lux=document.createElement('div');
+  lux.className='bead-lux-cross';
+  lux.id='bead-lux-cross';
+  lux.innerHTML=
+    '<div class="lux-glow">' +
+      '<svg width="28" height="28" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' +
+        '<rect x="46.2" y="0" width="7.6" height="100" fill="white" opacity="0.95"/>' +
+        '<rect x="0" y="36" width="100" height="7.6" fill="white" opacity="0.95"/>' +
+      '</svg>' +
+    '</div>';
+  col.appendChild(lux);
+
   if(label)col.appendChild(label);
 }
 function resetBeads(){
   beadCount=0;
   document.querySelectorAll('#beads-col .bead').forEach(b=>b.classList.remove('lit'));
+  const pater=$('bead-pater');
+  if(pater)pater.classList.remove('lit');
+  const lux=$('bead-lux-cross');
+  if(lux)lux.classList.remove('show');
 }
+function _updateSyncKey(trackUrl){
+  if(!_beadSync||!trackUrl){_currentSyncKey=null;return;}
+  const name=trackUrl.split('/').pop().replace(/\?.*$/,'').replace(/\.mp3$/i,'');
+  _currentSyncKey=_beadSync[name]?name:null;
+}
+
+function _getBeadEl(idx){
+  // idx 0 = pater, 1-10 = ave marías
+  if(idx===0)return $('bead-pater');
+  const beads=document.querySelectorAll('#beads-col .bead');
+  return beads[idx-1]||null;
+}
+
+function _tickBeads(){
+  if(!rezarAudio||!_currentSyncKey||!_beadSync)return;
+  const t=rezarAudio.currentTime;
+  const windows=_beadSync[_currentSyncKey];
+  if(!windows)return;
+  let active=-1;
+  for(let i=0;i<windows.length;i++){
+    if(t>=windows[i].start&&t<=windows[i].end){active=i;break;}
+  }
+  if(active===_beadActive)return;
+  // deactivate old
+  if(_beadActive>=0){
+    const old=_getBeadEl(_beadActive);
+    if(old)old.classList.remove('active');
+  }
+  _beadActive=active;
+  if(active>=0){
+    const el=_getBeadEl(active);
+    if(el&&!el.classList.contains('lit-correct')&&!el.classList.contains('lit-normal')){
+      el.classList.add('active');
+    }
+  }
+}
+
+function _startBeadTimer(){
+  _stopBeadTimer();
+  _beadActive=-1;
+  _beadTapTimes={};
+  _beadSpam={};
+  _beadTimer=setInterval(_tickBeads,80);
+}
+
+function _stopBeadTimer(){
+  if(_beadTimer){clearInterval(_beadTimer);_beadTimer=null;}
+  if(_beadActive>=0){
+    const el=_getBeadEl(_beadActive);
+    if(el)el.classList.remove('active');
+    _beadActive=-1;
+  }
+}
+
+function _playBeadFail(){
+  try{
+    const ac=new(window.AudioContext||window.webkitAudioContext)();
+    const osc=ac.createOscillator();
+    const gain=ac.createGain();
+    osc.connect(gain);gain.connect(ac.destination);
+    osc.type='sine';
+    osc.frequency.setValueAtTime(440,ac.currentTime);
+    osc.frequency.linearRampToValueAtTime(220,ac.currentTime+0.25);
+    gain.gain.setValueAtTime(0.18,ac.currentTime);
+    gain.gain.linearRampToValueAtTime(0,ac.currentTime+0.25);
+    osc.start();osc.stop(ac.currentTime+0.25);
+    setTimeout(()=>{try{ac.close();}catch(e){}},400);
+  }catch(e){}
+}
+
 function playBeadSound(){
   try{
     const ac=new(window.AudioContext||window.webkitAudioContext)();
@@ -1672,6 +1831,23 @@ function playBeadComplete(){
   }catch(e){}
 }
 
+function _showBeadBonus(beadEl){
+  if(!beadEl)return;
+  const el=document.createElement('div');
+  el.textContent='+25m';
+  el.style.cssText='position:absolute;left:50%;transform:translate(-50%,0);font-size:0.7rem;font-weight:700;color:var(--lvl-bold);pointer-events:none;animation:beadBonusFloat 0.9s ease-out forwards;z-index:10;';
+  beadEl.style.position='relative';
+  beadEl.appendChild(el);
+  setTimeout(()=>{el.remove();},950);
+}
+
+function _onBeadComplete(){
+  const lux=$('bead-lux-cross');
+  if(lux){lux.classList.remove('show');void lux.offsetWidth;lux.classList.add('show');}
+  playBeadComplete();
+  if(navigator.vibrate)navigator.vibrate([30,60,30,60,80]);
+}
+
 function countBead(){
   // ── Onboarding: finalizar solo cuando estamos en step 1 (tooltip contar) ─
   if (window._obRezarStep === 1) {
@@ -1683,15 +1859,69 @@ function countBead(){
     _obRezarFinalizar();
   }
 
-  if(beadCount>=10)return;
+  if(beadCount>=11)return;
+
+  // índice sincronizable: bead 0 = pater, 1-10 = ave marías
+  const syncIdx = beadCount; // antes del incremento
+  const now = Date.now();
+
+  // Anti-spam: < 3000ms en la misma cuenta = spam
+  const lastTap = _beadTapTimes[syncIdx] || 0;
+  const isSpam  = (now - lastTap) < 3000 && lastTap > 0;
+  _beadTapTimes[syncIdx] = now;
+
+  // Detectar si el tap cae dentro de la ventana de sincronía
+  let isOnTime = false;
+  if(_currentSyncKey && _beadSync && rezarAudio){
+    const windows = _beadSync[_currentSyncKey];
+    if(windows && windows[syncIdx]){
+      const t = rezarAudio.currentTime;
+      isOnTime = t >= windows[syncIdx].start && t <= windows[syncIdx].end;
+    }
+  }
+
   beadCount++;
-  const beads=document.querySelectorAll('#beads-col .bead');
-  if(beads[beadCount-1])beads[beadCount-1].classList.add('lit');
-  if(beadCount===10){
-    playBeadComplete();
-    if(navigator.vibrate)navigator.vibrate([30,60,30]);
-  }else{
+  const el = _getBeadEl(syncIdx);
+
+  if(isSpam){
+    if(el){
+      el.classList.remove('active','lit-correct','lit-normal','lit-white');
+      el.classList.add('lit-spam');
+    }
+    _playBeadFail();
+    if(navigator.vibrate)navigator.vibrate([80]);
+    return;
+  }
+
+  // Quitar estado active del bead actual
+  if(el)el.classList.remove('active');
+
+  if(beadCount<=10){
+    // Taps 1–10
+    if(el){
+      if(isOnTime){
+        el.classList.add('lit-correct','gold-flash');
+        _showBeadBonus(el);
+        addMeters(25);
+      } else {
+        el.classList.add('lit-normal');
+      }
+    }
     playBeadSound();
+    if(navigator.vibrate)navigator.vibrate([40]);
+  } else {
+    // Tap 11 — último + cruz lux
+    const lastBead=_getBeadEl(10);
+    if(lastBead){
+      if(isOnTime){
+        lastBead.classList.add('lit-correct','gold-flash');
+        _showBeadBonus(lastBead);
+        addMeters(25);
+      } else {
+        lastBead.classList.add('lit-normal');
+      }
+    }
+    _onBeadComplete();
   }
 }
 window.countBead=countBead;
@@ -2108,6 +2338,7 @@ function playNext(){
     showFinalLayout(track.type);
   }
   rezarAudio.src=track.src;
+  _updateSyncKey(track.src);
   rezarAudio.load();
   rezarAudio.play().catch(()=>{updatePlayBtn();});
   updatePlaylistStrip();
@@ -2137,6 +2368,7 @@ function showFinalLayout(type){
 }
 
 function onSessionComplete(){
+  _stopBeadTimer();
   if(window.CZSound)CZSound('blockClear');
 
   var blkIdx   = BLOCKS.indexOf(blk);
@@ -2197,7 +2429,9 @@ function initSession(){
   const hero=$('misterio-hero');if(hero)hero.style.display='';
 
   rezarAudio.src=playlist[0].src;
+  _updateSyncKey(playlist[0].src);
   rezarAudio.load();
+  _startBeadTimer();
 
   renderBeadsCol();
   updateMysteryContent();
@@ -2264,6 +2498,7 @@ function decideEntry(){
 
 async function loadAndEnter(nId,block,idx){
   showLoading();
+  await loadBeadSync();
   nivelId=nId;
   nivel=parseInt(nivelId.slice(0,2))||1;
   cua=parseInt(nivelId.slice(2,4))||1;
