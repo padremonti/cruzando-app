@@ -3458,7 +3458,8 @@ function buildMap() {
       var offsetX       = (retiro.tipo === 'albergue') ? -80 : 80;
       var rNode = document.createElement('div');
       rNode.className = 'retiro-node' + (desbloqueado ? '' : ' bloqueado');
-      rNode.style.cssText = 'top:' + p.y + 'px;left:' + (p.x + offsetX) + 'px;transform:translate(-50%,-50%)';
+      var retiroOffsetY = (retiro.tipo === 'albergue') ? -60 : 60;
+      rNode.style.cssText = 'top:' + (p.y + retiroOffsetY) + 'px;left:' + (p.x + offsetX) + 'px;transform:translate(-50%,-50%)';
       rNode.innerHTML = _retiroSvg(retiro.tipo, retiro.color) +
         '<span class="retiro-node-label">' + retiro.nombre.replace('Sanando ', '') + '</span>';
       var _planRetiro = window.effectivePlan ? window.effectivePlan() : 'free';

@@ -324,6 +324,11 @@ body{
 .hero-btn-left{left:14px}
 .hero-btn-left2{left:66px}
 .hero-btn-right{right:14px}
+.prep-hero{position:absolute;top:12px;left:40px;right:40px;z-index:10}
+.prep-hero-btn{width:100%;height:46px;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 14px;background:rgba(0,0,0,0.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1.5px solid rgba(255,255,255,0.25);border-radius:23px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;overflow:hidden}
+.prep-hero-btn:active{opacity:0.7}
+.prep-hero-kicker{font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--lvl-bold);flex-shrink:0}
+.prep-hero-name{font-size:1rem;color:rgba(255,255,255,0.92);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* ── Cuentas del Rosario ── */
 .beads-col{
@@ -386,7 +391,7 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
 .tools-bar{
   position:relative;
   display:flex;justify-content:space-around;align-items:center;
-  padding:8px 12px env(safe-area-inset-bottom,8px);
+  padding:8px 12px calc(env(safe-area-inset-bottom,8px) + 10px);
   background:var(--card);border-top:1px solid var(--border);
   flex-shrink:0;
 }
@@ -883,6 +888,13 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
           <button class="popup-close" id="popup-close" onclick="window.closeToolPopup()">✕</button>
         </div>
         <div class="tool-popup-body" id="tool-popup-body"></div>
+      </div>
+      <!-- Banner micro-aprendizaje -->
+      <div class="prep-hero" id="prep-hero-rezar" style="display:none">
+        <button class="prep-hero-btn" id="btn-prep-hero-rezar">
+          <span class="prep-hero-kicker">✦ Preparación</span>
+          <span class="prep-hero-name" id="prep-hero-rezar-name"></span>
+        </button>
       </div>
     </div><!-- /misterio-hero -->
 
@@ -1540,8 +1552,48 @@ function showModalInicio(){
     }, 500);
   })();
 }
-window._rezarDesdeAqui   = function(){ show('scr-main'); initSession(); };
-window._rezarDesdeInicio = function(){ bIdx=0; show('scr-main'); initSession(); };
+// ── Micro-aprendizaje en Rezar ────────────────────────────────
+var _microDataRezar = null;
+
+async function loadMicroRezar() {
+  if (_microDataRezar) return;
+  try {
+    var base = location.origin + location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1);
+    var r = await fetch(base + 'data/' + nivelId + '-micro.json');
+    if (r.ok) _microDataRezar = await r.json();
+  } catch(e) {}
+}
+
+function checkMicroRezar() {
+  var prepDiv  = $('prep-hero-rezar');
+  var prepName = $('prep-hero-rezar-name');
+  var prepBtn  = $('btn-prep-hero-rezar');
+  if (!prepDiv || !_microDataRezar) { if(prepDiv) prepDiv.style.display='none'; return; }
+
+  if (bIdx !== 0) { prepDiv.style.display='none'; return; }
+
+  var blkData = (_microDataRezar.bloques || [])[BLOCKS.indexOf(blk)];
+  if (!blkData) { prepDiv.style.display='none'; return; }
+
+  var microKey = 'cruzando_micro_rezar_' + nivelId + '_' + blk;
+  if (localStorage.getItem(microKey) === 'done') { prepDiv.style.display='none'; return; }
+
+  if (prepName) prepName.textContent = blkData.subtitulo || blkData.titulo || blk;
+  prepDiv.style.display = '';
+
+  if (prepBtn) {
+    prepBtn.onclick = function() {
+      localStorage.setItem(microKey, 'done');
+      prepDiv.style.display = 'none';
+      var base = location.origin + location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1);
+      window.location.href = base + 'orar.html?c=' + nivelId + '&micro=' + BLOCKS.indexOf(blk);
+    };
+  }
+}
+window.checkMicroRezar = checkMicroRezar;
+
+window._rezarDesdeAqui   = function() { show('scr-main'); initSession(); loadMicroRezar().then(function() { checkMicroRezar(); }); };
+window._rezarDesdeInicio = function() { bIdx=0; show('scr-main'); initSession(); loadMicroRezar().then(function() { checkMicroRezar(); }); };
 
 /* ─── PARSE QUESTIONS ─── */
 function parseQ(text){
@@ -2196,6 +2248,9 @@ function initSession(){
       window.countBead();
     };
   }
+
+  // Cargar y verificar micro
+  loadMicroRezar().then(function() { checkMicroRezar(); });
 }
 
 /* ─── ENTRY HELPERS ─── */

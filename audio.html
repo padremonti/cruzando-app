@@ -463,7 +463,7 @@ body.light { --tb-circle-bg:var(--card); --tb-circle-border:var(--border); --tb-
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding: 8px 12px env(safe-area-inset-bottom, 8px);
+  padding: 8px 12px calc(env(safe-area-inset-bottom, 8px) + 10px);
   position: relative;
 }
 .audio-tools-bar::before {
@@ -1185,11 +1185,11 @@ body.light { --tb-circle-bg:var(--card); --tb-circle-border:var(--border); --tb-
 .hero-nav-btn:active{background:rgba(0,0,0,0.55);transform:scale(0.92)}
 
 /* ── Preparación en el hero (pill) ── */
-.prep-hero{position:absolute;top:10px;left:54px;right:54px;z-index:10}
-.prep-hero-btn{width:100%;height:34px;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 8px;background:rgba(0,0,0,0.42);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.15);border-radius:17px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;overflow:hidden}
+.prep-hero{position:absolute;top:12px;left:40px;right:40px;z-index:10}
+.prep-hero-btn{width:100%;height:46px;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 14px;background:rgba(0,0,0,0.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1.5px solid rgba(255,255,255,0.25);border-radius:23px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;overflow:hidden}
 .prep-hero-btn:active{opacity:0.7}
-.prep-hero-kicker{font-size:0.58rem;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--lvl-bold);flex-shrink:0}
-.prep-hero-name{font-size:0.75rem;color:rgba(255,255,255,0.8);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prep-hero-kicker{font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--lvl-bold);flex-shrink:0}
+.prep-hero-name{font-size:1rem;color:rgba(255,255,255,0.92);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* ── Botón de Preparación (ya completado el micro) ── */
 .prep-btn-wrap { padding: 12px 0 4px; }
