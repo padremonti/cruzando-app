@@ -1240,7 +1240,7 @@ body {
   to   { transform: translateX(0);     opacity: 1; }
 }
 #ob-mariano-img {
-  width: 140px; height: auto;
+  width: 280px; height: auto;
   filter: drop-shadow(0 8px 24px rgba(0,0,0,0.4));
 }
 #ob-bocadillo {
@@ -1299,18 +1299,18 @@ body {
   gap: 20px; max-width: 320px; width: 100%;
 }
 #ob-bloque1-mariano {
-  width: 160px; height: auto;
+  width: 320px; height: auto;
   filter: drop-shadow(0 8px 24px rgba(0,0,0,0.35));
   animation: obMarianoEntra 0.7s ease 0.3s both;
 }
 #ob-bloque1-titulo {
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 2.2rem; font-weight: 700;
+  font-size: 2.6rem; font-weight: 700;
   color: var(--text); line-height: 1.2; margin-bottom: 6px;
 }
 #ob-bloque1-sub {
   font-family: 'Crimson Pro', Georgia, serif;
-  font-size: 1.2rem; line-height: 1.6;
+  font-size: 1.5rem; line-height: 1.6;
   color: var(--text-soft); font-style: italic;
 }
 #ob-bloque1-metros {
@@ -2630,9 +2630,8 @@ onAuthStateChanged(auth, async function(user) {
 
   // ── Onboarding: mostrar splash si es la primera vez ──
   await _obSync(db, user.uid).catch(function(){});
-  if (!_obDone('mapSeen')) {
-    setTimeout(function() { _obMostrarSplash(); }, 600);
-  }
+  var _esPrimera = !_obDone('mapSeen');
+  setTimeout(function() { _obMostrarSplash(_esPrimera); }, 600);
 
   // ══ FASE 2: Firestore en background — solo si el cache puede estar desactualizado ══
   var dirty = isProgressCacheDirty();
@@ -4019,9 +4018,8 @@ var _OB_MUNDO_COLORS = [
   '#FF7A00','#01BBE1','#8E44AD',
   '#C0392B','#27AE60','#E91E8C','#D4A017'
 ];
-var IMGB_OB = 'https://pub-96c43f31282a4c40bf3f9c808f8e6c94.r2.dev/';
 
-function _obMostrarSplash() {
+function _obMostrarSplash(esPrimeraVez) {
   var sp = document.getElementById('ob-splash');
   if (!sp) return;
 
@@ -4047,10 +4045,34 @@ function _obMostrarSplash() {
     });
   }
 
+  var line1 = document.getElementById('ob-splash-line1');
+  var line2 = document.getElementById('ob-splash-line2');
+  if (line1) line1.textContent = 'Peregrinar la vida';
+  if (line2) line2.textContent = 'con el Santo Rosario.';
+
+  var marianoWrap = document.getElementById('ob-mariano-wrap');
+  var comenzarBtn = document.getElementById('ob-comenzar-btn');
+  if (marianoWrap) marianoWrap.style.display = esPrimeraVez ? 'flex' : 'none';
+  if (comenzarBtn) comenzarBtn.style.display = esPrimeraVez ? 'block' : 'none';
+
+  var _imgBase = 'https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev/';
   var img = document.getElementById('ob-mariano-img');
-  if (img) img.src = IMGB_OB + 'mariano_01.webp';
+  if (img) img.src = _imgBase + 'mariano_01.webp';
 
   sp.style.display = 'flex';
+
+  if (!esPrimeraVez) {
+    clearTimeout(sp._autoClose);
+    sp._autoClose = setTimeout(function() {
+      sp.style.transition = 'opacity 0.6s';
+      sp.style.opacity = '0';
+      setTimeout(function() {
+        sp.style.display = 'none';
+        sp.style.opacity = '';
+        sp.style.transition = '';
+      }, 600);
+    }, 3000);
+  }
 }
 window._obMostrarSplash = _obMostrarSplash;
 
