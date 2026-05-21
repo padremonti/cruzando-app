@@ -82,6 +82,8 @@
   // Comprueba si un nivelId (ej. '0101') es accesible para el plan dado.
   function nivelAccesible(nivelId, plan) {
     if (isPremiumOrAbove(plan)) return true;
+    // Onboarding zone: 0101 misterios 1-5 siempre accesibles
+    if (window._obAlwaysFree && window._obAlwaysFree(nivelId, 1)) return true;
     // Free: solo Mundo 1
     return nivelId.startsWith('01');
   }
@@ -136,6 +138,10 @@
   // Avanza al siguiente misterio en el itinerario Free y escribe en Firestore.
   // db, setDoc, doc, serverTimestamp: instancias de Firebase del archivo que llama.
   async function advanceFreeMisterio(uid, currentNivelId, currentMisterio, db, setDoc, doc, serverTimestamp) {
+    // No consumir el "misterio del día" si es zona de onboarding (replayable)
+    if (window._obAlwaysFree && window._obAlwaysFree(currentNivelId, currentMisterio)) {
+      return;
+    }
     var nextMisterio = currentMisterio + 1;
     var nextNivelId  = currentNivelId;
 
@@ -194,5 +200,160 @@
   window.advanceFreeMisterio    = advanceFreeMisterio;
   window.requirePremiumAccess   = requirePremiumAccess;
   // window.effectivePlan y window._setViewAs ya asignados arriba directamente
+
+  // ─────────────────────────────────────────────
+  //  ONBOARDING FLAGS
+  // ─────────────────────────────────────────────
+  var _OB_KEY    = 'cruzando_onboarding';
+  var _OB_FIELDS = ['mapSeen', 'audioSeen', 'libroSeen', 'rezarSeen', 'bloque1Done'];
+
+  function _obCache() {
+    try { return JSON.parse(localStorage.getItem(_OB_KEY) || '{}'); }
+    catch (e) { return {}; }
+  }
+
+  function _obSaveCache(obj) {
+    try { localStorage.setItem(_OB_KEY, JSON.stringify(obj)); } catch (e) {}
+  }
+
+  function _obDone(key) {
+    return !!_obCache()[key];
+  }
+  window._obDone = _obDone;
+
+  function _obSet(key, db, uid) {
+    var cache = _obCache();
+    cache[key] = true;
+    _obSaveCache(cache);
+
+    if (db && uid) {
+      try {
+        var fsm = window._fbFirestore || {};
+        var docFn = fsm.doc; var setDocFn = fsm.setDoc; var stFn = fsm.serverTimestamp;
+        if (!docFn || !setDocFn) return;
+        var ref     = docFn(db, 'users', uid, 'profile', 'onboarding');
+        var payload = {};
+        payload[key]        = true;
+        payload['updatedAt'] = stFn ? stFn() : null;
+        setDocFn(ref, payload, { merge: true }).catch(function (e) {
+          console.warn('[OB] Firestore write failed:', e);
+        });
+      } catch (e) {}
+    }
+  }
+  window._obSet = _obSet;
+
+  async function _obSync(db, uid) {
+    if (!db || !uid) return;
+    var cache   = _obCache();
+    var allDone = _OB_FIELDS.every(function (f) { return !!cache[f]; });
+    if (allDone) return;
+
+    try {
+      var fsm = window._fbFirestore || {};
+      var docFn = fsm.doc; var getDocFn = fsm.getDoc;
+      if (!docFn || !getDocFn) return;
+      var snap = await getDocFn(docFn(db, 'users', uid, 'profile', 'onboarding'));
+      if (!snap.exists()) return;
+      var remote = snap.data();
+      var merged = Object.assign({}, cache);
+      _OB_FIELDS.forEach(function (f) { if (remote[f] === true) merged[f] = true; });
+      _obSaveCache(merged);
+    } catch (e) {
+      console.warn('[OB] Firestore sync failed:', e);
+    }
+  }
+  window._obSync = _obSync;
+
+  function _obZone(nivelId, misterio) {
+    return nivelId === '0101' && misterio >= 1 && misterio <= 5;
+  }
+  window._obZone = _obZone;
+
+  function _obAlwaysFree(nivelId, misterio) {
+    return nivelId === '0101' && misterio >= 1 && misterio <= 5;
+  }
+  window._obAlwaysFree = _obAlwaysFree;
+
+  // Módulo Firestore registrado por cada página al iniciar Firebase
+  window._fbFirestore = window._fbFirestore || {};
+
+  // ─────────────────────────────────────────────
+  //  ONBOARDING CIERRE BLOQUE 1
+  // ─────────────────────────────────────────────
+
+  function _obConfetti(containerId) {
+    var container = document.getElementById(containerId);
+    if (!container) return;
+    var COLORS = ['#FF7A00','#FFD700','#01BBE1','#8E44AD','#27AE60','#E91E8C','#C0392B'];
+    container.innerHTML = '';
+    for (var i = 0; i < 48; i++) {
+      var piece  = document.createElement('div');
+      var color  = COLORS[i % COLORS.length];
+      var left   = Math.random() * 100;
+      var delay  = (Math.random() * 1.8).toFixed(2);
+      var size   = 6 + Math.random() * 8;
+      piece.style.cssText =
+        'position:absolute;top:-20px;left:' + left + '%;' +
+        'width:' + size + 'px;height:' + size + 'px;' +
+        'border-radius:' + (Math.random() > 0.5 ? '50%' : '2px') + ';' +
+        'background:' + color + ';' +
+        'animation:confettiFall 2.8s ease-out ' + delay + 's forwards;' +
+        'opacity:0.9;';
+      container.appendChild(piece);
+    }
+  }
+  window._obConfetti = _obConfetti;
+
+  function _obBloque1Mostrar(metros, plan, imgBase) {
+    var ov = document.getElementById('ob-bloque1-overlay');
+    if (!ov) return;
+
+    var img = document.getElementById('ob-bloque1-mariano');
+    if (img) img.src = (imgBase || '') + 'mariano_celeb.webp';
+
+    var metrosEl = document.getElementById('ob-bloque1-metros');
+    if (metrosEl && metros) metrosEl.textContent = '+' + metros + 'm · Bloque completado';
+    else if (metrosEl) metrosEl.textContent = '¡Primer bloque completado!';
+
+    var freeMsg = document.getElementById('ob-bloque1-free-msg');
+    if (freeMsg) freeMsg.style.display = (plan === 'free') ? 'block' : 'none';
+
+    _obConfetti('ob-bloque1-confetti');
+    ov.style.display = 'flex';
+  }
+  window._obBloque1Mostrar = _obBloque1Mostrar;
+
+  function _obBloque1Cerrar(irInicio) {
+    var ov = document.getElementById('ob-bloque1-overlay');
+    if (ov) {
+      ov.style.transition = 'opacity 0.5s';
+      ov.style.opacity = '0';
+      setTimeout(function() {
+        ov.style.display = 'none';
+        ov.style.opacity = '';
+        ov.style.transition = '';
+      }, 500);
+    }
+    if (irInicio) {
+      if (window.navigateTo) window.navigateTo('index.html');
+      else if (window.goTo) window.goTo('index.html');
+      else window.location.href = 'index.html';
+    }
+  }
+  window._obBloque1Cerrar = _obBloque1Cerrar;
+
+  function _obCheckBloque1(nivelId, misterio, metros, plan, imgBase, db, uid) {
+    if (nivelId !== '0101') return;
+    if (misterio !== 5) return;
+    if (window._obDone && window._obDone('bloque1Done')) return;
+
+    if (window._obSet) _obSet('bloque1Done', db, uid);
+
+    setTimeout(function() {
+      _obBloque1Mostrar(metros, plan, imgBase);
+    }, 1200);
+  }
+  window._obCheckBloque1 = _obCheckBloque1;
 
 }());

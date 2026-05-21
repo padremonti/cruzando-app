@@ -1287,6 +1287,132 @@ body.light { --tb-circle-bg:var(--card); --tb-circle-border:var(--border); --tb-
 .nav-confirm-btn{flex:1;padding:12px 8px;border-radius:13px;font-size:0.82rem;font-weight:700;cursor:pointer;border:none;font-family:inherit;}
 .nav-confirm-btn.secondary{background:var(--card2,rgba(255,255,255,0.06));border:1px solid var(--border);color:var(--text);}
 .nav-confirm-btn.danger{background:#C0392B;color:#fff;}
+
+/* ── Onboarding Audio ── */
+#ob-audio-wrap {
+  position: fixed; bottom: 80px; right: 0;
+  display: flex; align-items: flex-end;
+  z-index: 400; pointer-events: none;
+  animation: obMarianoEntra 0.6s ease forwards;
+}
+#ob-audio-mariano {
+  width: 130px; height: auto;
+  filter: drop-shadow(0 6px 18px rgba(0,0,0,0.4));
+  flex-shrink: 0;
+}
+#ob-audio-bocadillo {
+  position: absolute; right: 122px; bottom: 48px;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 16px 16px 4px 16px;
+  padding: 14px 16px;
+  max-width: 210px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+  pointer-events: auto;
+}
+#ob-audio-bocadillo-text {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1.05rem; line-height: 1.55;
+  color: var(--text); font-style: italic;
+  margin-bottom: 10px;
+}
+#ob-audio-bocadillo-btn {
+  width: 100%; padding: 9px;
+  border-radius: 10px; border: none;
+  background: var(--brand, #FF7A00);
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem; font-weight: 600;
+  cursor: pointer;
+}
+#ob-tooltip-play {
+  position: fixed;
+  bottom: 134px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--brand, #FF7A00);
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem; font-weight: 700;
+  padding: 8px 16px; border-radius: 20px;
+  display: flex; align-items: center; gap: 6px;
+  z-index: 401; pointer-events: none;
+  animation: obPulse 1.4s ease-in-out infinite;
+  white-space: nowrap;
+}
+@keyframes obPulse {
+  0%, 100% { transform: translateX(-50%) scale(1);   opacity: 1; }
+  50%       { transform: translateX(-50%) scale(1.06); opacity: 0.85; }
+}
+@keyframes obMarianoEntra {
+  from { transform: translateX(160px); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+@keyframes obFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes confettiFall {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 0.9; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+/* ── Onboarding Cierre Bloque 1 ── */
+#ob-bloque1-overlay {
+  position: fixed; inset: 0; z-index: 800;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 32px 24px; overflow: hidden;
+  animation: obFadeIn 0.6s ease forwards;
+}
+#ob-bloque1-confetti { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+#ob-bloque1-content {
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column;
+  align-items: center; text-align: center;
+  gap: 20px; max-width: 320px; width: 100%;
+}
+#ob-bloque1-mariano {
+  width: 160px; height: auto;
+  filter: drop-shadow(0 8px 24px rgba(0,0,0,0.35));
+  animation: obMarianoEntra 0.7s ease 0.3s both;
+}
+#ob-bloque1-titulo {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 2.2rem; font-weight: 700;
+  color: var(--text); line-height: 1.2; margin-bottom: 6px;
+}
+#ob-bloque1-sub {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1.2rem; line-height: 1.6;
+  color: var(--text-soft); font-style: italic;
+}
+#ob-bloque1-metros {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.5rem; font-weight: 800;
+  color: var(--brand, #FF7A00); letter-spacing: -0.5px;
+}
+#ob-bloque1-btns { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+#ob-bloque1-btn-continuar {
+  width: 100%; padding: 16px; border-radius: 32px; border: none;
+  background: var(--brand, #FF7A00); color: #fff;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.3rem; font-weight: 600; cursor: pointer;
+  box-shadow: 0 4px 20px rgba(255,122,0,0.3);
+}
+#ob-bloque1-btn-inicio {
+  width: 100%; padding: 12px; border-radius: 32px;
+  border: 1.5px solid var(--border); background: none;
+  color: var(--text-dim); font-family: 'Inter', sans-serif;
+  font-size: 0.9rem; cursor: pointer;
+}
+#ob-bloque1-free-msg {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1rem; line-height: 1.6;
+  color: var(--text-dim); font-style: italic;
+  padding: 12px 16px; border: 1px dashed var(--border);
+  border-radius: 12px; max-width: 280px;
+}
 </style>
 <script src="plan-utils.js"></script>
 </head>
@@ -1614,6 +1740,7 @@ const app  = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
+window._fbFirestore = { doc, getDoc, setDoc, serverTimestamp };
 
 // ════════════════════════════════════════════
 // CONSTANTES
@@ -1632,6 +1759,58 @@ function marianoNext() {
   _marianoIdx = (_marianoIdx % MARIANO_TOTAL) + 1;
   var n = _marianoIdx < 10 ? '0' + _marianoIdx : '' + _marianoIdx;
   return IMG_BASE + 'mariano_' + n + '.webp';
+}
+
+// ── Onboarding Audio ─────────────────────────────────────────
+function _obAudioMostrar(texto, btnLabel, onCerrar) {
+  var wrap = $('ob-audio-wrap');
+  var img  = $('ob-audio-mariano');
+  var txt  = $('ob-audio-bocadillo-text');
+  var btn  = $('ob-audio-bocadillo-btn');
+  if (!wrap || !img || !txt || !btn) return;
+
+  img.src = IMG_BASE + 'mariano_01.webp';
+  txt.innerHTML = texto;
+  btn.textContent = btnLabel || 'Entendido →';
+
+  wrap.style.animation = 'none';
+  void wrap.offsetWidth;
+  wrap.style.animation = '';
+
+  wrap.style.display = 'flex';
+  window._obAudioOnCerrar = onCerrar || null;
+}
+window._obAudioMostrar = _obAudioMostrar;
+
+function _obAudioCerrar() {
+  var wrap = $('ob-audio-wrap');
+  if (wrap) {
+    wrap.style.transition = 'opacity 0.4s, transform 0.4s';
+    wrap.style.opacity = '0';
+    wrap.style.transform = 'translateX(160px)';
+    setTimeout(function() {
+      wrap.style.display = 'none';
+      wrap.style.opacity = '';
+      wrap.style.transform = '';
+      wrap.style.transition = '';
+    }, 400);
+  }
+  _obTooltipPlayOcultar();
+  if (window._obAudioOnCerrar) {
+    var cb = window._obAudioOnCerrar;
+    window._obAudioOnCerrar = null;
+    cb();
+  }
+}
+window._obAudioCerrar = _obAudioCerrar;
+
+function _obTooltipPlayMostrar() {
+  var el = $('ob-tooltip-play');
+  if (el) el.style.display = 'flex';
+}
+function _obTooltipPlayOcultar() {
+  var el = $('ob-tooltip-play');
+  if (el) el.style.display = 'none';
 }
 
 function showSlide(m,extra){
@@ -2068,6 +2247,7 @@ async function loadUserAndStart(skipProgressRead = false) {
   } catch(e) {
     console.warn('Error leyendo plan (asumiendo premium):', e.message);
   }
+  _obSync(db, uid).catch(function() {});
 
   // Leer audioProgress (omitir si ya está en memoria y skipProgressRead=true)
   if (!skipProgressRead) {
@@ -2594,6 +2774,23 @@ function startPlayerSession(prepBlock) {
 
   _stopLoadingRotation();
   show('scr-session');
+
+  // ── Onboarding: bocadillo al entrar ──────────────────────────
+  (function() {
+    var _nivelId  = String(audioProgress.nivel  || 1).padStart(2,'0') +
+                    String(audioProgress.cuaderno || 1).padStart(2,'0');
+    var _misterio = audioProgress.misterio || 1;
+    if (!window._obZone || !window._obZone(_nivelId, _misterio)) return;
+    if (window._obDone && window._obDone('audioSeen')) return;
+
+    setTimeout(function() {
+      _obAudioMostrar(
+        'Toca ▶ para empezar tu camino.<br>La voz te guiará paso a paso.',
+        'Entendido →',
+        function() { _obTooltipPlayMostrar(); }
+      );
+    }, 800);
+  })();
 }
 
 // ════════════════════════════════════════════
@@ -3337,6 +3534,16 @@ function updateBgmBtn() {
 }
 
 function togglePlayPause() {
+  // Onboarding: ocultar tooltip y marcar flag al primer play
+  _obTooltipPlayOcultar();
+  if (window._obZone && window._obDone && !window._obDone('audioSeen')) {
+    var _obNId = String(audioProgress.nivel || 1).padStart(2,'0') +
+                 String(audioProgress.cuaderno || 1).padStart(2,'0');
+    if (window._obZone(_obNId, audioProgress.misterio || 1)) {
+      if (window._obSet) _obSet('audioSeen', db, currentUser ? currentUser.uid : null);
+    }
+  }
+
   if (!audioEl) {
     if (currentTrack < 0) startPlaylist();
     return;
@@ -3556,6 +3763,26 @@ async function completeSession() {
     // Sin return: el flujo normal continúa para registrar metros y mostrar celebración
   }
 
+  // ── Onboarding: mensaje al completar primer misterio ─────────
+  (function() {
+    var _nivelId  = String(audioProgress.nivel  || 1).padStart(2,'0') +
+                    String(audioProgress.cuaderno || 1).padStart(2,'0');
+    var _misterio = audioProgress.misterio || 1;
+    if (!window._obZone || !window._obZone(_nivelId, _misterio)) return;
+    if (!window._obDone || window._obDone('audioSeen')) return;
+
+    setTimeout(function() {
+      var img = $('ob-audio-mariano');
+      if (img) img.src = IMG_BASE + 'mariano_celeb.webp';
+      _obAudioMostrar(
+        '¡Tus primeros metros ganados!<br>Mañana te espera el Modo Libro.',
+        '¡Gracias! →',
+        null
+      );
+      if (window._obSet) _obSet('audioSeen', db, currentUser ? currentUser.uid : null);
+    }, 1200);
+  })();
+
   // Registrar en historial
   if (window.CZSound) CZSound('mysteryClear');
   const { nivel, cuaderno, misterio, block, blockIdx } = currentSession;
@@ -3578,6 +3805,21 @@ async function completeSession() {
     showSlide(METERS_BLOCK_BONUS, '¡Bloque completo!');
     if (window.CZSound) CZSound('blockClear');
     setTimeout(() => showToast(`+${METERS_BLOCK_BONUS}m · ¡Bloque ${BLOCK_NAMES[block]} completado!`), 400);
+  }
+
+  // ── Onboarding: cierre bloque 1 ──────────────────────────────
+  if (window._obCheckBloque1) {
+    const _obNId = String(audioProgress.nivel  || 1).padStart(2,'0') +
+                   String(audioProgress.cuaderno || 1).padStart(2,'0');
+    _obCheckBloque1(
+      _obNId,
+      audioProgress.misterio || 1,
+      sessionMeters,
+      userPlan,
+      IMG_BASE,
+      db,
+      currentUser ? currentUser.uid : null
+    );
   }
 
   /* Medalla automática: completar el bloque gloriosos del cuaderno 4 desbloquea la medalla del Mundo */
@@ -4041,6 +4283,37 @@ initAuth();
 <div class="mariano-overlay" id="mariano-overlay" style="display:none">
   <img id="mariano-slide-img" class="mariano-slide" src="" alt="Mariano">
   <div class="meters-float" id="meters-float-text"></div>
+</div>
+
+<!-- ═══ ONBOARDING CIERRE BLOQUE 1 ═══ -->
+<div id="ob-bloque1-overlay" style="display:none">
+  <div id="ob-bloque1-confetti"></div>
+  <div id="ob-bloque1-content">
+    <img id="ob-bloque1-mariano" src="" alt="Mariano">
+    <div id="ob-bloque1-texto">
+      <p id="ob-bloque1-titulo">¡Ya eres peregrino!</p>
+      <p id="ob-bloque1-sub">Has completado tu primer bloque.<br>El camino acaba de comenzar.</p>
+      <p id="ob-bloque1-metros"></p>
+    </div>
+    <div id="ob-bloque1-btns">
+      <button id="ob-bloque1-btn-continuar" onclick="window._obBloque1Cerrar(false)">Continuar el camino →</button>
+      <button id="ob-bloque1-btn-inicio" onclick="window._obBloque1Cerrar(true)">Ir al inicio</button>
+    </div>
+    <p id="ob-bloque1-free-msg" style="display:none">Con Premium, los 560 Misterios te esperan.</p>
+  </div>
+</div>
+
+<!-- ═══ ONBOARDING AUDIO ═══ -->
+<div id="ob-audio-wrap" style="display:none">
+  <img id="ob-audio-mariano" src="" alt="Mariano">
+  <div id="ob-audio-bocadillo">
+    <p id="ob-audio-bocadillo-text"></p>
+    <button id="ob-audio-bocadillo-btn" onclick="window._obAudioCerrar()">Entendido →</button>
+  </div>
+</div>
+<div id="ob-tooltip-play" style="display:none">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+  Toca ▶ para empezar
 </div>
 
 </body>

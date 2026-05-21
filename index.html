@@ -19,7 +19,7 @@
 <link rel="preconnect" href="https://firestore.googleapis.com">
 <link rel="preconnect" href="https://www.gstatic.com">
 <link rel="dns-prefetch" href="https://firestore.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600;700&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600;700&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
 
@@ -1188,6 +1188,157 @@ body {
   0%,100% { transform:scale(1);   box-shadow:0 0 0 0 rgba(192,57,43,0.4); }
   50%      { transform:scale(1.1); box-shadow:0 0 0 6px rgba(192,57,43,0); }
 }
+
+/* ── Onboarding Splash ── */
+#ob-splash {
+  position: fixed; inset: 0; z-index: 900;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 32px 24px;
+  overflow: hidden;
+}
+#ob-splash-anim {
+  position: absolute; inset: 0;
+  pointer-events: none; overflow: hidden;
+}
+.ob-orb {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0;
+  animation: obOrbRise var(--dur) ease-in-out var(--delay) forwards;
+}
+@keyframes obOrbRise {
+  0%   { transform: translateY(110vh) scale(0.6); opacity: 0; }
+  30%  { opacity: 0.55; }
+  70%  { opacity: 0.4; }
+  100% { transform: translateY(-20vh) scale(1.1); opacity: 0; }
+}
+#ob-splash-text {
+  text-align: center; z-index: 1;
+  opacity: 0; animation: obFadeIn 0.8s ease 0.6s forwards;
+}
+#ob-splash-line1 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.9rem; font-weight: 400;
+  color: var(--text-soft); font-style: italic;
+  line-height: 1.3; margin-bottom: 4px;
+}
+#ob-splash-line2 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 2.1rem; font-weight: 600;
+  color: var(--text); line-height: 1.3;
+}
+#ob-mariano-wrap {
+  position: absolute; bottom: 120px; right: 0;
+  display: flex; align-items: flex-end; gap: 0;
+  opacity: 0; animation: obMarianoEntra 0.6s ease 2.2s forwards;
+  z-index: 2;
+}
+@keyframes obMarianoEntra {
+  from { transform: translateX(120px); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+#ob-mariano-img {
+  width: 140px; height: auto;
+  filter: drop-shadow(0 8px 24px rgba(0,0,0,0.4));
+}
+#ob-bocadillo {
+  position: absolute; right: 130px; bottom: 60px;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 16px 16px 4px 16px;
+  padding: 12px 16px;
+  max-width: 200px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  opacity: 0; animation: obFadeIn 0.5s ease 2.8s forwards;
+}
+#ob-bocadillo-text {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1rem; line-height: 1.5;
+  color: var(--text); font-style: italic;
+}
+#ob-comenzar-btn {
+  position: absolute; bottom: 48px;
+  left: 50%; transform: translateX(-50%);
+  padding: 16px 40px;
+  border-radius: 32px; border: none;
+  background: var(--brand, #FF7A00);
+  color: #fff;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.4rem; font-weight: 600;
+  cursor: pointer; z-index: 2;
+  opacity: 0; animation: obFadeIn 0.5s ease 3.4s forwards;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 4px 24px rgba(255,122,0,0.35);
+}
+#ob-comenzar-btn:active { transform: translateX(-50%) scale(0.96); }
+@keyframes obFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes confettiFall {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 0.9; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+/* ── Onboarding Cierre Bloque 1 ── */
+#ob-bloque1-overlay {
+  position: fixed; inset: 0; z-index: 800;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 32px 24px; overflow: hidden;
+  animation: obFadeIn 0.6s ease forwards;
+}
+#ob-bloque1-confetti { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+#ob-bloque1-content {
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column;
+  align-items: center; text-align: center;
+  gap: 20px; max-width: 320px; width: 100%;
+}
+#ob-bloque1-mariano {
+  width: 160px; height: auto;
+  filter: drop-shadow(0 8px 24px rgba(0,0,0,0.35));
+  animation: obMarianoEntra 0.7s ease 0.3s both;
+}
+#ob-bloque1-titulo {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 2.2rem; font-weight: 700;
+  color: var(--text); line-height: 1.2; margin-bottom: 6px;
+}
+#ob-bloque1-sub {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1.2rem; line-height: 1.6;
+  color: var(--text-soft); font-style: italic;
+}
+#ob-bloque1-metros {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.5rem; font-weight: 800;
+  color: var(--brand, #FF7A00); letter-spacing: -0.5px;
+}
+#ob-bloque1-btns { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+#ob-bloque1-btn-continuar {
+  width: 100%; padding: 16px; border-radius: 32px; border: none;
+  background: var(--brand, #FF7A00); color: #fff;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.3rem; font-weight: 600; cursor: pointer;
+  box-shadow: 0 4px 20px rgba(255,122,0,0.3);
+}
+#ob-bloque1-btn-inicio {
+  width: 100%; padding: 12px; border-radius: 32px;
+  border: 1.5px solid var(--border); background: none;
+  color: var(--text-dim); font-family: 'Inter', sans-serif;
+  font-size: 0.9rem; cursor: pointer;
+}
+#ob-bloque1-free-msg {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1rem; line-height: 1.6;
+  color: var(--text-dim); font-style: italic;
+  padding: 12px 16px; border: 1px dashed var(--border);
+  border-radius: 12px; max-width: 280px;
+}
 </style>
 <script src="plan-utils.js"></script>
 </head>
@@ -1698,6 +1849,7 @@ const LAUNCH_DISCOUNT   = "LAUNCH50"; // código de 50% OFF lanzamiento
 const fbApp = initializeApp(FIREBASE_CONFIG);
 const auth  = getAuth(fbApp);
 const db    = getFirestore(fbApp);
+window._fbFirestore = { doc, getDoc, setDoc, serverTimestamp };
 
 // ── Aliases de plan-utils.js (cargado como script regular antes del módulo) ──
 const resolvePlan      = window.resolvePlan;
@@ -2474,6 +2626,12 @@ onAuthStateChanged(auth, async function(user) {
     showScreen('home');
     var mc = document.getElementById('map-canvas');
     if (mc) mc.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:180px;color:var(--text-dim);font-size:0.9rem;font-family:\'Crimson Pro\',serif">Cargando tu camino...</div>';
+  }
+
+  // ── Onboarding: mostrar splash si es la primera vez ──
+  await _obSync(db, user.uid).catch(function(){});
+  if (!_obDone('mapSeen')) {
+    setTimeout(function() { _obMostrarSplash(); }, 600);
   }
 
   // ══ FASE 2: Firestore en background — solo si el cache puede estar desactualizado ══
@@ -3855,6 +4013,61 @@ function closeDrawer() {
 window.buildMap      = buildMap;
 window.openDrawer    = openDrawer;
 window.closeDrawer   = closeDrawer;
+
+// ── Onboarding Splash ─────────────────────────────────────────────
+var _OB_MUNDO_COLORS = [
+  '#FF7A00','#01BBE1','#8E44AD',
+  '#C0392B','#27AE60','#E91E8C','#D4A017'
+];
+var IMGB_OB = 'https://pub-96c43f31282a4c40bf3f9c808f8e6c94.r2.dev/';
+
+function _obMostrarSplash() {
+  var sp = document.getElementById('ob-splash');
+  if (!sp) return;
+
+  var anim = document.getElementById('ob-splash-anim');
+  if (anim) {
+    anim.innerHTML = '';
+    _OB_MUNDO_COLORS.forEach(function(color, i) {
+      [0, 1].forEach(function(j) {
+        var orb = document.createElement('div');
+        orb.className = 'ob-orb';
+        var size = 60 + Math.random() * 80;
+        var left = 5 + Math.random() * 85;
+        var dur  = 3.5 + Math.random() * 2.5;
+        var del  = (i * 0.3 + j * 1.1).toFixed(2);
+        orb.style.cssText =
+          'width:' + size + 'px;height:' + size + 'px;' +
+          'left:' + left + '%;bottom:-120px;' +
+          'background:' + color + ';' +
+          '--dur:' + dur + 's;--delay:' + del + 's;' +
+          'filter:blur(2px);';
+        anim.appendChild(orb);
+      });
+    });
+  }
+
+  var img = document.getElementById('ob-mariano-img');
+  if (img) img.src = IMGB_OB + 'mariano_01.webp';
+
+  sp.style.display = 'flex';
+}
+window._obMostrarSplash = _obMostrarSplash;
+
+function _obCerrarSplash() {
+  var sp = document.getElementById('ob-splash');
+  if (!sp) return;
+  sp.style.transition = 'opacity 0.5s';
+  sp.style.opacity = '0';
+  setTimeout(function() {
+    sp.style.display = 'none';
+    sp.style.opacity = '';
+    sp.style.transition = '';
+    if (window._obSet) _obSet('mapSeen', db, currentUser ? currentUser.uid : null);
+    if (window.navigateTo) navigateTo('audio.html?nivel=1&cuaderno=1&misterio=1');
+  }, 500);
+}
+window._obCerrarSplash = _obCerrarSplash;
 window.closePopup    = closePopup;
 window.closeTreasure = closeTreasure;
 
@@ -4121,6 +4334,41 @@ async function guardarMeta() {
       Cancelar
     </button>
   </div>
+</div>
+<!-- ═══ ONBOARDING CIERRE BLOQUE 1 ═══ -->
+<div id="ob-bloque1-overlay" style="display:none">
+  <div id="ob-bloque1-confetti"></div>
+  <div id="ob-bloque1-content">
+    <img id="ob-bloque1-mariano" src="" alt="Mariano">
+    <div id="ob-bloque1-texto">
+      <p id="ob-bloque1-titulo">¡Ya eres peregrino!</p>
+      <p id="ob-bloque1-sub">Has completado tu primer bloque.<br>El camino acaba de comenzar.</p>
+      <p id="ob-bloque1-metros"></p>
+    </div>
+    <div id="ob-bloque1-btns">
+      <button id="ob-bloque1-btn-continuar" onclick="window._obBloque1Cerrar(false)">Continuar el camino →</button>
+      <button id="ob-bloque1-btn-inicio" onclick="window._obBloque1Cerrar(true)">Ir al inicio</button>
+    </div>
+    <p id="ob-bloque1-free-msg" style="display:none">Con Premium, los 560 Misterios te esperan.</p>
+  </div>
+</div>
+
+<!-- ═══ ONBOARDING SPLASH ═══ -->
+<div id="ob-splash" style="display:none">
+  <div id="ob-splash-anim"></div>
+  <div id="ob-splash-text">
+    <p id="ob-splash-line1">Peregrinar la vida,</p>
+    <p id="ob-splash-line2">Misterio a Misterio.</p>
+  </div>
+  <div id="ob-mariano-wrap">
+    <img id="ob-mariano-img" src="" alt="Mariano">
+    <div id="ob-bocadillo">
+      <span id="ob-bocadillo-text">Bienvenido, peregrino.<br>Tu primer paso te espera.</span>
+    </div>
+  </div>
+  <button id="ob-comenzar-btn" onclick="window._obCerrarSplash()">
+    Comenzar →
+  </button>
 </div>
 </body>
 </html>

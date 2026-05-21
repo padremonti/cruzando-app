@@ -26,6 +26,21 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const _db   = firebase.firestore();
 const _auth = firebase.auth();
+window._fbFirestore = {
+  doc: function(db) {
+    var segs = Array.prototype.slice.call(arguments, 1);
+    var ref = db;
+    for (var i = 0; i < segs.length; i++) {
+      ref = (i % 2 === 0) ? ref.collection(segs[i]) : ref.doc(segs[i]);
+    }
+    return ref;
+  },
+  getDoc: function(ref) { return ref.get(); },
+  setDoc: function(ref, data, opts) {
+    return opts && opts.merge ? ref.set(data, { merge: true }) : ref.set(data);
+  },
+  serverTimestamp: function() { return firebase.firestore.FieldValue.serverTimestamp(); }
+};
 </script>
 <script src="plan-utils.js"></script>
 <script src="utils.js"></script>
@@ -536,6 +551,161 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
 
 
 @media(max-width:380px){html{font-size:16px}}
+
+/* ── Onboarding Rezar ── */
+#ob-rezar-wrap {
+  position: fixed; bottom: 80px; right: 0;
+  display: flex; align-items: flex-end;
+  z-index: 400; pointer-events: none;
+  animation: obMarianoEntra 0.6s ease forwards;
+}
+#ob-rezar-mariano {
+  width: 130px; height: auto;
+  filter: drop-shadow(0 6px 18px rgba(0,0,0,0.4));
+  flex-shrink: 0;
+}
+#ob-rezar-bocadillo {
+  position: absolute; right: 122px; bottom: 48px;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 16px 16px 4px 16px;
+  padding: 14px 16px; max-width: 210px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+  pointer-events: auto;
+}
+#ob-rezar-bocadillo-text {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1.05rem; line-height: 1.55;
+  color: var(--text); font-style: italic;
+  margin-bottom: 10px;
+}
+#ob-rezar-bocadillo-btn {
+  width: 100%; padding: 9px;
+  border-radius: 10px; border: none;
+  background: var(--brand, #FF7A00);
+  color: #fff; font-family: 'Inter', sans-serif;
+  font-size: 0.82rem; font-weight: 600; cursor: pointer;
+}
+#ob-rezar-tooltip {
+  position: fixed; bottom: 130px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg);
+  border: 1.5px solid var(--lvl-bold, #FF7A00);
+  border-radius: 14px; padding: 12px 16px;
+  max-width: 240px; width: 90%;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  z-index: 401; text-align: center;
+  animation: obFadeInUp 0.3s ease forwards;
+}
+#ob-rezar-tooltip p {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1rem; line-height: 1.5;
+  color: var(--text); font-style: italic;
+  margin-bottom: 10px;
+}
+#ob-rezar-tooltip button {
+  padding: 8px 20px; border-radius: 20px;
+  border: none; background: var(--brand, #FF7A00);
+  color: #fff; font-size: 0.8rem; font-weight: 700;
+  cursor: pointer;
+}
+#ob-modal-tooltip {
+  position: fixed; bottom: 200px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 14px; padding: 14px 18px;
+  max-width: 260px; width: 90%;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  z-index: 500; text-align: center;
+  animation: obFadeInUp 0.35s ease forwards;
+}
+#ob-modal-tooltip p {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1rem; line-height: 1.5;
+  color: var(--text); font-style: italic;
+  margin-bottom: 10px;
+}
+#ob-modal-tooltip button {
+  padding: 8px 20px; border-radius: 20px;
+  border: none; background: var(--brand, #FF7A00);
+  color: #fff; font-size: 0.8rem; font-weight: 700;
+  cursor: pointer;
+}
+@keyframes obFadeInUp {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+@keyframes obMarianoEntra {
+  from { transform: translateX(160px); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+@keyframes obFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes confettiFall {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 0.9; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+/* ── Onboarding Cierre Bloque 1 ── */
+#ob-bloque1-overlay {
+  position: fixed; inset: 0; z-index: 800;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 32px 24px; overflow: hidden;
+  animation: obFadeIn 0.6s ease forwards;
+}
+#ob-bloque1-confetti { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+#ob-bloque1-content {
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column;
+  align-items: center; text-align: center;
+  gap: 20px; max-width: 320px; width: 100%;
+}
+#ob-bloque1-mariano {
+  width: 160px; height: auto;
+  filter: drop-shadow(0 8px 24px rgba(0,0,0,0.35));
+  animation: obMarianoEntra 0.7s ease 0.3s both;
+}
+#ob-bloque1-titulo {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 2.2rem; font-weight: 700;
+  color: var(--text); line-height: 1.2; margin-bottom: 6px;
+}
+#ob-bloque1-sub {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1.2rem; line-height: 1.6;
+  color: var(--text-soft); font-style: italic;
+}
+#ob-bloque1-metros {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.5rem; font-weight: 800;
+  color: var(--brand, #FF7A00); letter-spacing: -0.5px;
+}
+#ob-bloque1-btns { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+#ob-bloque1-btn-continuar {
+  width: 100%; padding: 16px; border-radius: 32px; border: none;
+  background: var(--brand, #FF7A00); color: #fff;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.3rem; font-weight: 600; cursor: pointer;
+  box-shadow: 0 4px 20px rgba(255,122,0,0.3);
+}
+#ob-bloque1-btn-inicio {
+  width: 100%; padding: 12px; border-radius: 32px;
+  border: 1.5px solid var(--border); background: none;
+  color: var(--text-dim); font-family: 'Inter', sans-serif;
+  font-size: 0.9rem; cursor: pointer;
+}
+#ob-bloque1-free-msg {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1rem; line-height: 1.6;
+  color: var(--text-dim); font-style: italic;
+  padding: 12px 16px; border: 1px dashed var(--border);
+  border-radius: 12px; max-width: 280px;
+}
 </style>
 </head>
 <body class="dark">
@@ -1263,11 +1433,106 @@ window._openPrefs=function(){
   show('scr-prefs');
 };
 
+// ── Onboarding Rezar ─────────────────────────────────────────
+function _obRezarMostrar(texto, btnLabel, onCerrar) {
+  var wrap = $('ob-rezar-wrap');
+  var img  = $('ob-rezar-mariano');
+  var txt  = $('ob-rezar-bocadillo-text');
+  var btn  = $('ob-rezar-bocadillo-btn');
+  if (!wrap || !img || !txt || !btn) return;
+  img.src = MARIANO_WALK;
+  txt.innerHTML = texto;
+  btn.textContent = btnLabel || 'Entendido →';
+  wrap.style.animation = 'none';
+  void wrap.offsetWidth;
+  wrap.style.animation = '';
+  wrap.style.display = 'flex';
+  window._obRezarOnCerrar = onCerrar || null;
+}
+window._obRezarMostrar = _obRezarMostrar;
+
+function _obRezarCerrar() {
+  var wrap = $('ob-rezar-wrap');
+  if (wrap) {
+    wrap.style.transition = 'opacity 0.4s, transform 0.4s';
+    wrap.style.opacity = '0';
+    wrap.style.transform = 'translateX(160px)';
+    setTimeout(function() {
+      wrap.style.display = 'none';
+      wrap.style.opacity = '';
+      wrap.style.transform = '';
+      wrap.style.transition = '';
+    }, 400);
+  }
+  if (window._obRezarOnCerrar) {
+    var cb = window._obRezarOnCerrar;
+    window._obRezarOnCerrar = null;
+    cb();
+  }
+}
+window._obRezarCerrar = _obRezarCerrar;
+
+function _obRezarTooltipMostrar(texto) {
+  var el  = $('ob-rezar-tooltip');
+  var txt = $('ob-rezar-tooltip-text');
+  if (!el || !txt) return;
+  txt.textContent = texto;
+  el.style.animation = 'none';
+  void el.offsetWidth;
+  el.style.animation = '';
+  el.style.display = 'block';
+}
+window._obRezarTooltipMostrar = _obRezarTooltipMostrar;
+
+function _obRezarTooltipCerrar() {
+  var el = $('ob-rezar-tooltip');
+  if (el) el.style.display = 'none';
+  // Pasar al tooltip sobre btn-contar
+  var btnContar = $('btn-contar');
+  if (btnContar) {
+    btnContar.style.outline = '2.5px solid var(--brand, #FF7A00)';
+    btnContar.style.outlineOffset = '3px';
+  }
+  _obRezarTooltipMostrar('Toca aquí para contar cada Ave María. El Rosario avanza solo.');
+}
+window._obRezarTooltipCerrar = _obRezarTooltipCerrar;
+
+function _obModalTooltipCerrar() {
+  var el = $('ob-modal-tooltip');
+  if (el) {
+    el.style.transition = 'opacity 0.3s';
+    el.style.opacity = '0';
+    setTimeout(function() {
+      if (el) { el.style.display = 'none'; el.style.opacity = ''; el.style.transition = ''; }
+    }, 300);
+  }
+}
+window._obModalTooltipCerrar = _obModalTooltipCerrar;
+
+function _obRezarFinalizar() {
+  var el = $('ob-rezar-tooltip');
+  if (el) el.style.display = 'none';
+  var btnContar = $('btn-contar');
+  if (btnContar) { btnContar.style.outline = ''; btnContar.style.outlineOffset = ''; }
+  if (window._obSet) _obSet('rezarSeen', window._obDB, window._obUID);
+}
+window._obRezarFinalizar = _obRezarFinalizar;
+
 /* ─── MODAL INICIO ─── */
 function showModalInicio(){
   $('modal-m-num').textContent=bIdx+1;
   $('modal-desde').textContent=bIdx+1;
   show('scr-modal-inicio');
+
+  // ── Onboarding: explicar los dos botones de inicio ────────────
+  (function() {
+    if (!window._obZone || !window._obZone(nivelId, mNum(blk, bIdx))) return;
+    if (window._obDone && window._obDone('rezarSeen')) return;
+    setTimeout(function() {
+      var el = $('ob-modal-tooltip');
+      if (el) el.style.display = 'block';
+    }, 500);
+  })();
 }
 window._rezarDesdeAqui   = function(){ show('scr-main'); initSession(); };
 window._rezarDesdeInicio = function(){ bIdx=0; show('scr-main'); initSession(); };
@@ -1350,6 +1615,16 @@ function playBeadComplete(){
 }
 
 function countBead(){
+  // ── Onboarding: primera vez que cuenta → finalizar onboarding ─
+  var btnC = $('btn-contar');
+  if (btnC && btnC.style.outline) {
+    btnC.style.outline = '';
+    btnC.style.outlineOffset = '';
+    var _obRTel = $('ob-rezar-tooltip');
+    if (_obRTel) _obRTel.style.display = 'none';
+    _obRezarFinalizar();
+  }
+
   if(beadCount>=10)return;
   beadCount++;
   const beads=document.querySelectorAll('#beads-col .bead');
@@ -1431,6 +1706,14 @@ function updatePlayBtn(){
   });
 }
 function togglePlay(){
+  // ── Onboarding: quitar resaltado del play al tocarlo ─────────
+  var btnP = $('btn-play-pause');
+  if (btnP && btnP.style.outline) {
+    btnP.style.outline = '';
+    btnP.style.outlineOffset = '';
+    _obRezarTooltipCerrar();
+  }
+
   if(!rezarAudio)return;
   if(rezarAudio.paused)rezarAudio.play().catch(()=>{});
   else rezarAudio.pause();
@@ -1824,6 +2107,21 @@ function onSessionComplete(){
 
   var grandImg = $('mariano-slide-img');
   if (grandImg) grandImg.src = MARIANO_CELEB;
+
+  // ── Onboarding: cierre bloque 1 ──────────────────────────────
+  if (window._obCheckBloque1) {
+    var _obMisNum = bIdx + 1;
+    _obCheckBloque1(
+      nivelId,
+      _obMisNum,
+      null,
+      window.effectivePlan ? window.effectivePlan() : 'free',
+      IMGB,
+      FS,
+      usr ? usr.uid : null
+    );
+  }
+
   show('scr-celebration');
 }
 
@@ -1851,6 +2149,28 @@ function initSession(){
   initNavSwipe();
   initPopupSwipe();
   show('scr-rezar');
+
+  // ── Onboarding Rezar ─────────────────────────────────────────
+  (function() {
+    if (!window._obZone || !window._obZone(nivelId, mNum(blk, bIdx))) return;
+    if (window._obDone && window._obDone('rezarSeen')) return;
+    _obModalTooltipCerrar();
+    setTimeout(function() {
+      _obRezarMostrar(
+        'Como en comunidad.<br>El tiempo no se controla, solo se vive.',
+        'Ver cómo funciona →',
+        function() {
+          var btnPlay = $('btn-play-pause');
+          if (btnPlay) {
+            btnPlay.style.outline = '2.5px solid var(--brand, #FF7A00)';
+            btnPlay.style.outlineOffset = '4px';
+          }
+          _obRezarTooltipMostrar('Puedes pausar, pero no adelantar ni retroceder. El rezo tiene su propio ritmo.');
+        }
+      );
+    }, 700);
+  })();
+
   startBgm();
   updateBgmBtn();
   setupMediaSession();
@@ -1906,6 +2226,9 @@ function initAuth(){
   _auth.onAuthStateChanged(async u=>{
     if(u){
       usr=u;
+      window._obDB  = FS;
+      window._obUID = u.uid;
+      _obSync(_db, u.uid).catch(function() {});
       const p=new URLSearchParams(location.search);
       const mParam=p.get('misterio');
       if(mParam){
@@ -1981,6 +2304,40 @@ initAuth();
 
 }());
 </script>
+<!-- ═══ ONBOARDING CIERRE BLOQUE 1 ═══ -->
+<div id="ob-bloque1-overlay" style="display:none">
+  <div id="ob-bloque1-confetti"></div>
+  <div id="ob-bloque1-content">
+    <img id="ob-bloque1-mariano" src="" alt="Mariano">
+    <div id="ob-bloque1-texto">
+      <p id="ob-bloque1-titulo">¡Ya eres peregrino!</p>
+      <p id="ob-bloque1-sub">Has completado tu primer bloque.<br>El camino acaba de comenzar.</p>
+      <p id="ob-bloque1-metros"></p>
+    </div>
+    <div id="ob-bloque1-btns">
+      <button id="ob-bloque1-btn-continuar" onclick="window._obBloque1Cerrar(false)">Continuar el camino →</button>
+      <button id="ob-bloque1-btn-inicio" onclick="window._obBloque1Cerrar(true)">Ir al inicio</button>
+    </div>
+    <p id="ob-bloque1-free-msg" style="display:none">Con Premium, los 560 Misterios te esperan.</p>
+  </div>
+</div>
+
+<!-- ═══ ONBOARDING REZAR ═══ -->
+<div id="ob-rezar-wrap" style="display:none">
+  <img id="ob-rezar-mariano" src="" alt="Mariano">
+  <div id="ob-rezar-bocadillo">
+    <p id="ob-rezar-bocadillo-text"></p>
+    <button id="ob-rezar-bocadillo-btn" onclick="window._obRezarCerrar()">Entendido →</button>
+  </div>
+</div>
+<div id="ob-rezar-tooltip" style="display:none">
+  <p id="ob-rezar-tooltip-text"></p>
+  <button onclick="window._obRezarTooltipCerrar()">Entendido →</button>
+</div>
+<div id="ob-modal-tooltip" style="display:none">
+  <p>Puedes rezar desde donde estás, o empezar desde el Misterio 1 y rezar el bloque completo.</p>
+  <button onclick="window._obModalTooltipCerrar()">Entendido →</button>
+</div>
 <script src="sounds.js"></script>
 </body>
 </html>
