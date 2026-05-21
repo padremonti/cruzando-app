@@ -908,16 +908,16 @@ body {
 }
 .retiro-node:active { transform: translate(-50%,-50%) scale(0.93) !important; }
 .retiro-node-svg {
-  width: 52px;
-  height: 52px;
-  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.35));
+  width: 68px;
+  height: 68px;
+  filter: drop-shadow(0 3px 8px rgba(0,0,0,0.4));
 }
 .retiro-node-label {
-  font-size: 0.6rem;
+  font-size: 0.65rem;
   font-weight: 700;
   color: var(--text-soft);
   text-align: center;
-  max-width: 68px;
+  max-width: 80px;
   line-height: 1.3;
   text-transform: uppercase;
   letter-spacing: 0.4px;
@@ -3132,9 +3132,9 @@ function buildMap() {
 
     var isDone, isActive, isLocked;
     if (_isFree) {
-      isDone   = false;
+      isDone   = (gi < _freeActiveGi);  // nodos pasados se ven como done
       isActive = (gi === _freeActiveGi);
-      isLocked = (gi !== _freeActiveGi);
+      isLocked = false;                 // nunca ocultar — todos visibles
     } else {
       var doneCount = window.DONE_COUNT;
       isDone   = gi < doneCount;
@@ -3346,6 +3346,27 @@ function buildBioma(canvas, totalH, cuaderno, color) {
 var IMG_BASE_IDX = 'https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev/';
 
 function openMapPopup(gi, bi, mi) {
+  var _plan = window.effectivePlan ? window.effectivePlan() : 'free';
+  var _isFree = (_plan === 'free');
+
+  // ── Para Free: si no es su misterio actual → popup motivacional ──
+  if (_isFree) {
+    var _freeActiveGi = -1;
+    if (window._freeProg) {
+      var _fp    = window._freeProg;
+      var _fpNId = _fp.nivelId || '0101';
+      var _mpts  = window._lastMapPts || [];
+      _mpts.forEach(function(pt) {
+        var ptNId = String(pt.nivel||1).padStart(2,'0') + String(pt.cuaderno||1).padStart(2,'0');
+        if (ptNId === _fpNId && pt.globalMisterioInNivel === ((_fp.misterio || 1) - 1)) _freeActiveGi = pt.globalIdx;
+      });
+    }
+    if (gi !== _freeActiveGi) {
+      _openFreeMotivPopup(gi, bi, mi, _freeActiveGi);
+      return;
+    }
+  }
+
   var b=BLOQUES_MAP[bi], c=b.color;
   document.getElementById('popup-bg').style.background='radial-gradient(ellipse at 30% 60%,' + c + '35 0%,transparent 60%)';
   var badge=document.getElementById('popup-badge');
@@ -3489,6 +3510,79 @@ function closePopup() {
   if (sheet) sheet.style.transform = '';
   document.getElementById('popup-overlay').classList.remove('open');
 }
+
+function _openFreeMotivPopup(gi, bi, mi, freeActiveGi) {
+  var b      = BLOQUES_MAP[bi];
+  var c      = b.color;
+  var nombre = b.misterios[mi];
+  var isPast = (freeActiveGi >= 0 && gi < freeActiveGi);
+
+  document.getElementById('popup-bg').style.background =
+    'radial-gradient(ellipse at 30% 60%,' + c + '35 0%,transparent 60%)';
+  var badge = document.getElementById('popup-badge');
+  badge.textContent = b.name;
+  badge.style.cssText = 'background:' + c + '22;color:' + c + ';border:1px solid ' + c + '44;';
+  document.getElementById('popup-name').textContent = nombre;
+  document.getElementById('popup-sub').textContent  =
+    isPast ? 'Misterio completado ✓' : 'Misterio bloqueado';
+
+  document.getElementById('popup-audio').style.display = 'none';
+  document.getElementById('popup-orar').style.display  = 'none';
+  document.getElementById('popup-rezar').style.display = 'none';
+  var title = document.querySelector('.popup-modos-title');
+  if (title) title.style.display = 'none';
+
+  var sheet = document.querySelector('.popup-sheet');
+  var existing = document.getElementById('popup-free-motiv');
+  if (existing) existing.remove();
+
+  var msg = isPast
+    ? '¿Añoras volver a orar este Misterio con mayor profundidad? Con Premium puedes regresar a cualquier sesión pasada en modo Audio, Libro o Rezo.'
+    : 'Con Premium puedes orar todos los Misterios que desees cada día, en modo Audio, Libro o Rezo, sin límites.';
+
+  var motivDiv = document.createElement('div');
+  motivDiv.id  = 'popup-free-motiv';
+  motivDiv.style.cssText = 'padding:20px 20px 8px;';
+  motivDiv.innerHTML =
+    '<p style="font-family:\'Crimson Pro\',Georgia,serif;font-size:19px;' +
+    'line-height:1.7;color:var(--text-soft);margin-bottom:20px;font-style:italic;">' +
+    msg + '</p>' +
+    '<button onclick="window._goToFreeActiveMisterio()" ' +
+    'style="width:100%;padding:16px;border-radius:14px;border:none;' +
+    'background:var(--brand);color:#fff;font-family:\'Cormorant Garamond\',serif;' +
+    'font-size:1.3rem;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent;">' +
+    'Ir a mi Misterio actual →' +
+    '</button>';
+  if (sheet) sheet.appendChild(motivDiv);
+
+  var overlay = document.getElementById('popup-overlay');
+  var s = document.querySelector('.popup-sheet');
+  if (s) { s.style.transition = 'none'; s.style.transform = 'translateY(100%)'; }
+  if (overlay) overlay.classList.add('open');
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() {
+      if (s) { s.style.transition = ''; s.style.transform = ''; }
+    });
+  });
+}
+
+window._goToFreeActiveMisterio = function() {
+  closePopup();
+  document.getElementById('popup-audio').style.display = '';
+  document.getElementById('popup-orar').style.display  = '';
+  document.getElementById('popup-rezar').style.display = '';
+  var title = document.querySelector('.popup-modos-title');
+  if (title) title.style.display = '';
+  var ex = document.getElementById('popup-free-motiv');
+  if (ex) ex.remove();
+
+  if (!window._freeProg) return;
+  var fp   = window._freeProg;
+  var niv  = parseInt(fp.nivelId.slice(0,2), 10);
+  var cuad = parseInt(fp.nivelId.slice(2,4), 10);
+  var m    = fp.misterio || 1;
+  window.navigateTo('audio.html?nivel=' + niv + '&cuaderno=' + cuad + '&misterio=' + m);
+};
 
 (function() {
   var sheet = document.querySelector('.popup-sheet');
