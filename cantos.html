@@ -950,6 +950,8 @@ const EXTRAS_CANTOS_BASE = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/
 const INTERSTITIAL_BASE  = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/interstitials/';
 const INTERSTITIAL_TOTAL = 4;
 const INTERSTITIAL_KEY   = 'cruzando_interstitial_fecha';
+var _cantoPlayCount     = 0;
+var _INTERSTITIAL_EVERY = 4;
 const BLOCK_COLORS = {
   gozosos:  { color:'#E8A0A0', glow:'rgba(232,160,160,0.35)', bg:'rgba(232,160,160,0.18)', label:'MISTERIOS GOZOSOS' },
   luminosos:{ color:'#01BBE1', glow:'rgba(1,187,225,0.3)',    bg:'rgba(1,187,225,0.15)',   label:'MISTERIOS LUMINOSOS' },
@@ -1542,6 +1544,31 @@ function playCantoAudio(url, playBtn, barFill, curEl, durEl) {
     barFill.style.width = '0%';
     curEl.textContent  = '0:00';
     activeAudio = null; activePlayBtn = null;
+
+    // ── Interstitial periódico cada 4 tracks (solo Free) ──────────
+    var _plan = window.effectivePlan ? window.effectivePlan() : 'free';
+    if (_plan === 'free') {
+      _cantoPlayCount++;
+      if (_cantoPlayCount % _INTERSTITIAL_EVERY === 0) {
+        _showInterstitial(function() {
+          if (autoplayEnabled && navCantos.length > 1) {
+            const next = currentIdx + 1;
+            if (next < navCantos.length) {
+              currentIdx = next;
+              updateHero(navCantos[currentIdx]);
+              renderDots(); updateNavBtns();
+              saveBookmark(navCantos[currentIdx]);
+              playHeroCanto(navCantos[currentIdx]);
+            } else {
+              heroBounce('right');
+            }
+          }
+        }, false);
+        return;
+      }
+    }
+
+    // ── Autoplay normal ───────────────────────────────────────────
     if (autoplayEnabled && navCantos.length > 1) {
       const next = currentIdx + 1;
       if (next < navCantos.length) {
@@ -1862,7 +1889,7 @@ function _getInterstitialIdx() {
 
 var _interstitialAudio = null;
 
-function _showInterstitial(onClose) {
+function _showInterstitial(onClose, markAsShownToday) {
   var overlay = document.getElementById('interstitial-overlay');
   if (!overlay) { onClose(); return; }
 
@@ -1875,9 +1902,12 @@ function _showInterstitial(onClose) {
 
   overlay.style.display = 'flex';
 
-  var hoy = window.getTodayKey ? window.getTodayKey()
-          : new Date().toISOString().slice(0,10);
-  localStorage.setItem(INTERSTITIAL_KEY, hoy);
+  // Solo marcar "visto hoy" si es el interstitial inicial (no el periódico)
+  if (markAsShownToday !== false) {
+    var hoy = window.getTodayKey ? window.getTodayKey()
+            : new Date().toISOString().slice(0,10);
+    localStorage.setItem(INTERSTITIAL_KEY, hoy);
+  }
 
   _interstitialAudio = new Audio(url);
   _interstitialAudio.play().catch(function(){});
@@ -1928,21 +1958,25 @@ onAuthStateChanged(auth, async user => {
   }
 
   // ── Verificar plan y mostrar interstitial si aplica ──────────
-  var userPlan = 'free';
+  var _resolvedPlan = 'free';
   try {
     var userSnap = await getDoc(doc(db, 'users', user.uid));
-    userPlan = userSnap.exists()
+    _resolvedPlan = userSnap.exists()
       ? (window.resolvePlan ? window.resolvePlan(userSnap.data()) : 'free')
       : 'free';
-    localStorage.setItem('cruzando_plan_cache', userPlan);
+    window.currentPlan = _resolvedPlan;
+    localStorage.setItem('cruzando_plan_cache', _resolvedPlan);
   } catch(e) {
-    userPlan = localStorage.getItem('cruzando_plan_cache') || 'free';
+    window.currentPlan = localStorage.getItem('cruzando_plan_cache') || 'free';
+    _resolvedPlan = window.currentPlan;
   }
+  // effectivePlan() respeta simulación vía sessionStorage('cruzando_view_as')
+  var userPlan = window.effectivePlan ? window.effectivePlan() : _resolvedPlan;
 
   if (_shouldShowInterstitial(userPlan)) {
     _showInterstitial(function() {
       _loadCantos(user);
-    });
+    }, true);
   } else {
     _loadCantos(user);
   }

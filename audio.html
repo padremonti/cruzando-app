@@ -450,7 +450,7 @@ body {
   position: relative;
   z-index: 2;
   flex: 0 0 auto;
-  background: var(--audio-bottom-bg, var(--card));
+  background: var(--card);
   border-top: 1px solid var(--border);
 }
 
@@ -1892,7 +1892,7 @@ const ORDS       = ['Primer','Segundo','Tercer','Cuarto','Quinto',
 const DAY_BLOCKS = { 0:'gloriosos', 1:'gozosos', 2:'dolorosos', 3:'gloriosos', 4:'luminosos', 5:'dolorosos', 6:'gozosos' };
 
 // Color temático de la barra inferior por bloque (igual que orar.html TBG)
-const TBG_AUDIO = {gozosos:'rgba(232,160,160,0.18)',luminosos:'rgba(1,187,225,0.15)',dolorosos:'rgba(192,57,43,0.15)',gloriosos:'rgba(212,160,23,0.15)'};
+const TBG_AUDIO = {gozosos:'var(--card)',luminosos:'var(--card)',dolorosos:'var(--card)',gloriosos:'var(--card)'};
 
 // Colores por bloque
 const BLOCK_COLORS = {
@@ -2973,9 +2973,6 @@ function renderSession() {
 
   // Color de bloque
   applyBlockColor(block);
-  const ab = document.querySelector('.audio-bottom');
-  if (ab) ab.style.setProperty('--audio-bottom-bg', TBG_AUDIO[block] || 'var(--card)');
-
   renderWelcomeOverlay();
 
   // Ordinal por bloque (1°–5°, no global 1–20)
@@ -3364,6 +3361,9 @@ let bgmSource    = null;
 let bgmGainNode  = null;
 let bgmFadeTimer = null;
 let _bgmUnlockAttached = false;
+let _bgmDuckCtx  = null;
+let _bgmDuckGain = null;
+const BGM_DUCK_RATIO = 0.08;
 
 function bgmClearFade() {
   if (bgmFadeTimer) { clearTimeout(bgmFadeTimer); bgmFadeTimer = null; }
@@ -3388,21 +3388,7 @@ function bgmInit() {
   bgmEl.oncanplaythrough = () => {
     if (bgmLoaded) return; // evitar doble setup
     bgmLoaded = true;
-
-    // Crear contexto Web Audio y conectar GainNode
-    try {
-      bgmAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      bgmSource   = bgmAudioCtx.createMediaElementSource(bgmEl);
-      bgmGainNode = bgmAudioCtx.createGain();
-      bgmGainNode.gain.value = 0; // arrancar en silencio
-      bgmSource.connect(bgmGainNode);
-      bgmGainNode.connect(bgmAudioCtx.destination);
-    } catch(e) {
-      // Fallback: usar .volume nativo si Web Audio falla
-      console.warn('Web Audio API no disponible, usando volume nativo');
-      bgmGainNode = null;
-    }
-
+    bgmEl.volume = 0;
     if (bgmEnabled && !isCanto(currentTrack)) {
       bgmResume();
     }
@@ -3420,18 +3406,47 @@ function bgmInit() {
 }
 
 function bgmSetGain(value) {
-  // Controla ganancia vía Web Audio si disponible, o .volume nativo
-  if (bgmGainNode) {
-    bgmGainNode.gain.value = Math.max(0, Math.min(1, value));
-  } else if (bgmEl) {
+  if (bgmEl) {
     bgmEl.volume = Math.max(0, Math.min(1, value));
   }
 }
 
 function bgmGetGain() {
-  if (bgmGainNode) return bgmGainNode.gain.value;
   if (bgmEl) return bgmEl.volume;
   return 0;
+}
+
+function _bgmEnsureDuckCtx() {
+  if (_bgmDuckCtx) return;
+  try {
+    _bgmDuckCtx  = new (window.AudioContext || window.webkitAudioContext)();
+    var src      = _bgmDuckCtx.createMediaElementSource(bgmEl);
+    _bgmDuckGain = _bgmDuckCtx.createGain();
+    _bgmDuckGain.gain.value = 1.0;
+    src.connect(_bgmDuckGain);
+    _bgmDuckGain.connect(_bgmDuckCtx.destination);
+  } catch(e) {
+    _bgmDuckCtx = null; _bgmDuckGain = null;
+  }
+}
+
+function bgmDuck() {
+  _bgmEnsureDuckCtx();
+  if (_bgmDuckGain && _bgmDuckCtx) {
+    _bgmDuckGain.gain.cancelScheduledValues(_bgmDuckCtx.currentTime);
+    _bgmDuckGain.gain.linearRampToValueAtTime(BGM_DUCK_RATIO, _bgmDuckCtx.currentTime + 0.3);
+  } else if (bgmEl) {
+    bgmEl.volume = BGM_VOL * BGM_DUCK_RATIO;
+  }
+}
+
+function bgmUnduck() {
+  if (_bgmDuckGain && _bgmDuckCtx) {
+    _bgmDuckGain.gain.cancelScheduledValues(_bgmDuckCtx.currentTime);
+    _bgmDuckGain.gain.linearRampToValueAtTime(1.0, _bgmDuckCtx.currentTime + 0.8);
+  } else if (bgmEl) {
+    bgmEl.volume = BGM_VOL;
+  }
 }
 
 function bgmFadeTo(target, durationMs, onDone) {
@@ -3469,10 +3484,6 @@ function bgmResume() {
   bgmClearFade();
   if (!bgmEl || !bgmEnabled) return;
 
-  // Reanudar contexto si fue suspendido (política autoplay)
-  if (bgmAudioCtx && bgmAudioCtx.state === 'suspended') {
-    bgmAudioCtx.resume().catch(() => {});
-  }
   if (bgmEl.paused) {
     bgmEl.play().catch(() => {});
   }
@@ -3490,6 +3501,11 @@ function bgmStop() {
   if (bgmAudioCtx) {
     bgmAudioCtx.close().catch(() => {});
     bgmAudioCtx = null;
+  }
+  if (_bgmDuckCtx) {
+    _bgmDuckCtx.close().catch(() => {});
+    _bgmDuckCtx  = null;
+    _bgmDuckGain = null;
   }
   bgmSource   = null;
   bgmGainNode = null;
@@ -4219,10 +4235,8 @@ window.navGuardSeamless  = navGuardSeamless;
 // iOS: reanudar AudioContext del BGM cuando la pantalla se desbloquea
 document.addEventListener('visibilitychange', function() {
   if (document.visibilityState !== 'visible') return;
-  if (bgmAudioCtx && bgmAudioCtx.state === 'suspended') {
-    bgmAudioCtx.resume().then(function() {
-      if (bgmGainNode && isPlaying) bgmFadeTo(BGM_VOL, 400);
-    }).catch(function(){});
+  if (_bgmDuckCtx && _bgmDuckCtx.state === 'suspended') {
+    _bgmDuckCtx.resume().catch(function(){});
   }
   if (bgmEl && bgmEl.paused && isPlaying && bgmEnabled) {
     bgmEl.play().catch(function(){});
