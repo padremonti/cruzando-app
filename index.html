@@ -2626,6 +2626,11 @@ onAuthStateChanged(auth, async function(user) {
 
   var _hasCache = !!localStorage.getItem('cruzando_plan_cache');
 
+  // ── Onboarding splash: leer cache LOCAL primero (sin esperar Firestore) ──
+  var _esPrimera = !_obDone('mapSeen');
+  _obMostrarSplash(_esPrimera);   // mostrar ANTES de pintar el mapa
+
+  // Pintar home debajo del splash (invisible para el usuario)
   if (_hasCache) {
     renderHome({ displayName: user.displayName || '', email: user.email || '',
                  plan: _cPlan, totalMeters: _cMeters });
@@ -2637,10 +2642,8 @@ onAuthStateChanged(auth, async function(user) {
     if (mc) mc.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:180px;color:var(--text-dim);font-size:0.9rem;font-family:\'Crimson Pro\',serif">Cargando tu camino...</div>';
   }
 
-  // ── Onboarding: mostrar splash si es la primera vez ──
-  await _obSync(db, user.uid).catch(function(){});
-  var _esPrimera = !_obDone('mapSeen');
-  setTimeout(function() { _obMostrarSplash(_esPrimera); }, 600);
+  // Sincronizar flags de onboarding con Firestore en background (no bloquea)
+  _obSync(db, user.uid).catch(function(){});
 
   // ══ FASE 2: Firestore en background — solo si el cache puede estar desactualizado ══
   var dirty = isProgressCacheDirty();
