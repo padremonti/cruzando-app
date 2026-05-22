@@ -14,11 +14,14 @@ from tts_utils import generate_ai_text
 from ui_tts import build_tab_tts, register_handlers_tts
 from ui_gestor import build_tab_editor, register_handlers_editor, build_tab_gestor, register_handlers_gestor
 from ui_batch import build_tab_batch, register_handlers_batch, build_tab_startbye, register_handlers_startbye
+from ui_talleres import build_tab_talleres, register_handlers_talleres
+from tts_talleres import discover_taller_json_files
 
 
 def main():
     set_ai_text_generator(generate_ai_text)
-    json_choices = discover_json_files()
+    json_choices    = discover_json_files()
+    taller_choices  = discover_taller_json_files()
 
     with gr.Blocks(
         title="CruzAndo TTS Maker",
@@ -48,11 +51,15 @@ def main():
             with gr.Tab("START / BYE"):
                 startbye_comps = build_tab_startbye(json_choices)
 
+            with gr.Tab("Talleres (Sanar)"):
+                talleres_comps = build_tab_talleres(taller_choices)
+
         register_handlers_tts(*tts_comps, session_cost)
         register_handlers_editor(*editor_comps)
         register_handlers_gestor(*gestor_comps)
         register_handlers_batch(*batch_comps, session_cost)
         register_handlers_startbye(*startbye_comps, session_cost)
+        register_handlers_talleres(*talleres_comps, session_cost)
 
     demo.launch(
         inbrowser=True,

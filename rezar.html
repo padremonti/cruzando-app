@@ -354,10 +354,10 @@ body{
   box-shadow:0 0 8px rgba(255,122,0,0.5);
   animation:bead-pop 0.18s ease-out;
 }
-.bead.active,.bead-pater.active{background:transparent;border-color:var(--lvl-bold);box-shadow:0 0 0 4px rgba(var(--lvl-bold-rgb,2,187,224),0.35);animation:beadPulse 0.9s ease-in-out infinite}
+.bead.active,.bead-pater.active{background:transparent;border-color:var(--lvl-bold);animation:beadPulse 0.9s ease-in-out infinite}
 @keyframes beadPulse{0%,100%{box-shadow:0 0 0 3px rgba(var(--lvl-bold-rgb,2,187,224),0.25);transform:scale(1)}50%{box-shadow:0 0 0 8px rgba(var(--lvl-bold-rgb,2,187,224),0.5);transform:scale(1.15)}}
-.bead.lit-correct{background:var(--lvl-bold);border-color:var(--lvl-bold);animation:bead-pop 0.18s ease-out}
-.bead.lit-normal{background:var(--lvl-bold);border-color:var(--lvl-bold)}
+.bead.lit-correct,.bead-pater.lit-correct{background:var(--lvl-bold);border-color:var(--lvl-bold);animation:beadPulse 0.9s ease-in-out infinite}
+.bead.lit-normal,.bead-pater.lit-normal{background:var(--lvl-bold);border-color:var(--lvl-bold);animation:beadPulse 0.9s ease-in-out infinite}
 .bead.lit-spam{background:#888;border-color:#888}
 .bead.lit-white{background:rgba(255,255,255,0.85);border-color:rgba(255,255,255,0.85)}
 @keyframes beadGold{0%{box-shadow:0 0 0 0 rgba(255,215,0,0)}30%{box-shadow:0 0 0 8px rgba(255,215,0,0.6)}100%{box-shadow:0 0 0 14px rgba(255,215,0,0)}}
@@ -1801,6 +1801,7 @@ function _tickBeads(){
     var old=_getBeadEl(_beadActive);
     if(old){
       old.classList.remove('active');
+      old.style.animation='none';
       var wasSpam=old.classList.contains('lit-spam');
       var wasTapped=old.classList.contains('lit-correct')||
                     old.classList.contains('lit-normal')||
@@ -2553,12 +2554,9 @@ function initSession(){
   setupMediaSession();
 
   var tapZone = document.getElementById('hero-tap-zone');
-  if (tapZone) tapZone.onclick = null;
-
-  var heroImgEl = document.getElementById('hero-img');
-  if (heroImgEl) {
-    heroImgEl.style.cursor = 'pointer';
-    heroImgEl.onclick = function(e) {
+  if (tapZone) {
+    tapZone.onclick = function(e) {
+      if (e.target.closest('.hero-btn') || e.target.closest('.prep-hero')) return;
       e.stopPropagation();
       window.countBead();
     };
