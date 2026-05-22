@@ -1243,10 +1243,18 @@ var _currentSyncKey = null;
 async function loadBeadSync(){
   if(_beadSync)return;
   try{
-    const base=location.origin+location.pathname.substring(0,location.pathname.lastIndexOf('/')+1);
-    const r=await fetch(base+'data/bead_sync.json');
-    if(r.ok)_beadSync=await r.json();
-  }catch(e){_beadSync={};}
+    const r=await fetch('./data/bead_sync.json');
+    if(r.ok){
+      _beadSync=await r.json();
+      console.log('[BeadSync] cargado, keys:',Object.keys(_beadSync));
+    } else {
+      console.warn('[BeadSync] HTTP',r.status);
+      _beadSync={};
+    }
+  }catch(e){
+    console.warn('[BeadSync] fetch error:',e);
+    _beadSync={};
+  }
 }
 
 /* ─── UTILS ─── */
@@ -1793,8 +1801,6 @@ function _tickBeads(){
 function _startBeadTimer(){
   _stopBeadTimer();
   _beadActive=-1;
-  _beadTapTimes={};
-  _beadSpam={};
   _beadTimer=setInterval(_tickBeads,80);
 }
 
@@ -2469,10 +2475,9 @@ function initSession(){
   const hero=$('misterio-hero');if(hero)hero.style.display='';
 
   rezarAudio.src=playlist[0].src;
-  _updateSyncKey(playlist[0].src); // INICIO.mp3 → key=null → beads ocultos
+  _updateSyncKey(playlist[0].src); // INICIO → beads ocultos; MA/MB los mostrará
   rezarAudio.load();
 
-  renderBeadsCol();
   updateMysteryContent();
   updatePlaylistStrip();
   renderMysteryDots();
@@ -2529,10 +2534,12 @@ function initSession(){
 /* ─── ENTRY HELPERS ─── */
 function decideEntry(){
   if(!data){showError('No se encontraron los datos del nivel.');return;}
-  const tienePrefs=rezarPrefs().idioma!==undefined;
-  if(!tienePrefs){renderPrefs();show('scr-prefs');}
-  else if(bIdx>0){showModalInicio();}
-  else{initSession();}
+  loadBeadSync().then(function(){
+    const tienePrefs=rezarPrefs().idioma!==undefined;
+    if(!tienePrefs){renderPrefs();show('scr-prefs');}
+    else if(bIdx>0){showModalInicio();}
+    else{initSession();}
+  });
 }
 
 async function loadAndEnter(nId,block,idx){
