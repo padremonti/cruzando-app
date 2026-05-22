@@ -1716,9 +1716,23 @@ function resetBeads(){
   if(lux)lux.classList.remove('show');
 }
 function _updateSyncKey(trackUrl){
-  if(!_beadSync||!trackUrl){_currentSyncKey=null;return;}
-  const name=trackUrl.split('/').pop().replace(/\?.*$/,'').replace(/\.mp3$/i,'');
-  _currentSyncKey=_beadSync[name]?name:null;
+  if(!_beadSync||!trackUrl){
+    _currentSyncKey=null;
+    _stopBeadTimer();
+    return;
+  }
+  var name=trackUrl.split('/').pop().replace(/\?.*$/,'').replace(/\.mp3$/i,'').toUpperCase();
+  var found=Object.keys(_beadSync).find(function(k){return k.toUpperCase()===name;})||null;
+  _currentSyncKey=found;
+  console.log('[BeadSync] trackUrl:',trackUrl,'→ name:',name,'→ key:',_currentSyncKey);
+  if(_currentSyncKey){
+    _beadActive=-1;
+    _beadTapTimes={};
+    _beadSpam={};
+    _startBeadTimer();
+  } else {
+    _stopBeadTimer();
+  }
 }
 
 function _getBeadEl(idx){
@@ -1729,23 +1743,28 @@ function _getBeadEl(idx){
 }
 
 function _tickBeads(){
-  if(!rezarAudio||!_currentSyncKey||!_beadSync)return;
-  const t=rezarAudio.currentTime;
-  const windows=_beadSync[_currentSyncKey];
+  if(!rezarAudio||rezarAudio.paused||!_currentSyncKey||!_beadSync)return;
+  var t=rezarAudio.currentTime;
+  var windows=_beadSync[_currentSyncKey];
   if(!windows)return;
-  let active=-1;
-  for(let i=0;i<windows.length;i++){
+  var active=-1;
+  for(var i=0;i<windows.length;i++){
     if(t>=windows[i].start&&t<=windows[i].end){active=i;break;}
   }
   if(active===_beadActive)return;
-  // deactivate old
   if(_beadActive>=0){
-    const old=_getBeadEl(_beadActive);
-    if(old)old.classList.remove('active');
+    var old=_getBeadEl(_beadActive);
+    if(old){
+      old.classList.remove('active');
+      var wasTapped=old.classList.contains('lit-correct')||
+                    old.classList.contains('lit-normal')||
+                    old.classList.contains('lit-spam');
+      if(!wasTapped)old.classList.add('lit-white');
+    }
   }
   _beadActive=active;
   if(active>=0){
-    const el=_getBeadEl(active);
+    var el=_getBeadEl(active);
     if(el&&!el.classList.contains('lit-correct')&&!el.classList.contains('lit-normal')){
       el.classList.add('active');
     }
@@ -1862,26 +1881,28 @@ function countBead(){
   if(beadCount>=11)return;
 
   // índice sincronizable: bead 0 = pater, 1-10 = ave marías
-  const syncIdx = beadCount; // antes del incremento
-  const now = Date.now();
+  var beadIdx = beadCount; // antes del incremento
+  var now = Date.now();
 
   // Anti-spam: < 3000ms en la misma cuenta = spam
-  const lastTap = _beadTapTimes[syncIdx] || 0;
-  const isSpam  = (now - lastTap) < 3000 && lastTap > 0;
-  _beadTapTimes[syncIdx] = now;
+  var lastTap = _beadTapTimes[beadIdx] || 0;
+  var isSpam  = (now - lastTap) < 3000 && lastTap > 0;
+  _beadTapTimes[beadIdx] = now;
 
   // Detectar si el tap cae dentro de la ventana de sincronía
-  let isOnTime = false;
-  if(_currentSyncKey && _beadSync && rezarAudio){
-    const windows = _beadSync[_currentSyncKey];
-    if(windows && windows[syncIdx]){
-      const t = rezarAudio.currentTime;
-      isOnTime = t >= windows[syncIdx].start && t <= windows[syncIdx].end;
+  var isOnTime=false;
+  if(_beadSync&&_currentSyncKey&&rezarAudio&&!rezarAudio.paused){
+    var windows=_beadSync[_currentSyncKey];
+    var wIdx=beadIdx;
+    if(windows&&windows[wIdx]){
+      var t=rezarAudio.currentTime;
+      var w=windows[wIdx];
+      isOnTime=(t>=w.start&&t<=w.end);
     }
   }
 
   beadCount++;
-  const el = _getBeadEl(syncIdx);
+  var el = _getBeadEl(beadIdx);
 
   if(isSpam){
     if(el){
@@ -1911,7 +1932,7 @@ function countBead(){
     if(navigator.vibrate)navigator.vibrate([40]);
   } else {
     // Tap 11 — último + cruz lux
-    const lastBead=_getBeadEl(10);
+    var lastBead=_getBeadEl(10);
     if(lastBead){
       if(isOnTime){
         lastBead.classList.add('lit-correct','gold-flash');
