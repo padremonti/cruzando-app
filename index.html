@@ -4064,8 +4064,11 @@ function _obMostrarSplash(esPrimeraVez) {
   if (line2) line2.textContent = 'con el Santo Rosario.';
 
   var marianoWrap = document.getElementById('ob-mariano-wrap');
+  var bocadillo   = document.getElementById('ob-bocadillo');
   var comenzarBtn = document.getElementById('ob-comenzar-btn');
-  if (marianoWrap) marianoWrap.style.display = esPrimeraVez ? 'flex' : 'none';
+
+  if (marianoWrap) marianoWrap.style.display = 'flex';
+  if (bocadillo)   bocadillo.style.display   = esPrimeraVez ? 'block' : 'none';
   if (comenzarBtn) comenzarBtn.style.display = esPrimeraVez ? 'block' : 'none';
 
   var _imgBase = 'https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev/';
@@ -4074,9 +4077,12 @@ function _obMostrarSplash(esPrimeraVez) {
 
   sp.style.display = 'flex';
 
-  if (!esPrimeraVez) {
-    clearTimeout(sp._autoClose);
-    sp._autoClose = setTimeout(function() {
+  clearTimeout(sp._autoClose);
+  var _duracion = esPrimeraVez ? 4000 : 3000;
+  sp._autoClose = setTimeout(function() {
+    if (esPrimeraVez) {
+      _obCerrarSplash();
+    } else {
       sp.style.transition = 'opacity 0.6s';
       sp.style.opacity = '0';
       setTimeout(function() {
@@ -4084,8 +4090,8 @@ function _obMostrarSplash(esPrimeraVez) {
         sp.style.opacity = '';
         sp.style.transition = '';
       }, 600);
-    }, 3000);
-  }
+    }
+  }, _duracion);
 }
 window._obMostrarSplash = _obMostrarSplash;
 
