@@ -2628,7 +2628,11 @@ onAuthStateChanged(auth, async function(user) {
 
   // ── Onboarding splash: leer cache LOCAL primero (sin esperar Firestore) ──
   var _esPrimera = !_obDone('mapSeen');
-  _obMostrarSplash(_esPrimera);   // mostrar ANTES de pintar el mapa
+  var _splashYaMostrado = sessionStorage.getItem('cruzando_splash_shown');
+  if (!_splashYaMostrado) {
+    sessionStorage.setItem('cruzando_splash_shown', '1');
+    _obMostrarSplash(_esPrimera);
+  }
 
   // Pintar home debajo del splash (invisible para el usuario)
   if (_hasCache) {
@@ -4068,8 +4072,9 @@ function _obMostrarSplash(esPrimeraVez) {
   var comenzarBtn = document.getElementById('ob-comenzar-btn');
 
   if (marianoWrap) marianoWrap.style.display = 'flex';
-  if (bocadillo)   bocadillo.style.display   = esPrimeraVez ? 'block' : 'none';
-  if (comenzarBtn) comenzarBtn.style.display = esPrimeraVez ? 'block' : 'none';
+  var _mostrarOnboarding = esPrimeraVez && !sessionStorage.getItem('cruzando_onboarding_done');
+  if (bocadillo)   bocadillo.style.display   = _mostrarOnboarding ? 'block' : 'none';
+  if (comenzarBtn) comenzarBtn.style.display = _mostrarOnboarding ? 'block' : 'none';
 
   var _imgBase = 'https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev/';
   var img = document.getElementById('ob-mariano-img');
@@ -4078,9 +4083,9 @@ function _obMostrarSplash(esPrimeraVez) {
   sp.style.display = 'flex';
 
   clearTimeout(sp._autoClose);
-  var _duracion = esPrimeraVez ? 4000 : 3000;
+  var _duracion = _mostrarOnboarding ? 4000 : 3000;
   sp._autoClose = setTimeout(function() {
-    if (esPrimeraVez) {
+    if (_mostrarOnboarding) {
       _obCerrarSplash();
     } else {
       sp.style.transition = 'opacity 0.6s';
@@ -4104,6 +4109,7 @@ function _obCerrarSplash() {
     sp.style.display = 'none';
     sp.style.opacity = '';
     sp.style.transition = '';
+    sessionStorage.setItem('cruzando_onboarding_done', '1');
     if (window._obSet) _obSet('mapSeen', db, currentUser ? currentUser.uid : null);
     if (window.navigateTo) navigateTo('audio.html?nivel=1&cuaderno=1&misterio=1');
   }, 500);
