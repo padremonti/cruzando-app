@@ -51,7 +51,7 @@ window._fbFirestore = {
 :root{
   --bg:#E6DED3;--bg-rgb:230,222,211;--card:#FFFCF7;--border:#D9D1C7;
   --text:#2B2622;--text-soft:#6B6259;--text-dim:#9B9389;
-  --input-bg:#FFFCF7;--sec-bg:#F5F0E8;--shadow:rgba(43,38,34,0.08);
+  --input-bg:#FFFCF7;--sec-bg:#EDE5D8;--shadow:rgba(43,38,34,0.08);
   --green:#34A853;--green-soft:rgba(52,168,83,0.12);
   --lvl-bold:#02BBE0;--lvl-base:#FF7F09;--lvl-soft:#43DDF8;
   --lvl-mist:#FFA34E;--lvl-light:#C3F5FE;--lvl-ultra:rgba(2,187,224,0.10);
@@ -61,9 +61,15 @@ window._fbFirestore = {
   --brand-ultra:rgba(2,187,224,0.10);--brand-glow:rgba(2,187,224,0.20);
 }
 .dark{
-  --bg:#002931;--bg-rgb:0,41,49;--card:#004C5B;--border:rgba(67,221,248,0.15);
+  --bg:#002931;
+  --bg-rgb:0,41,49;
+  --card:#004C5B;
+  --card2:#003845;
+  --border:rgba(67,221,248,0.15);
+  --sec-bg:#003845;
+  --input-bg:#004C5B;
+  --shadow:rgba(0,0,0,0.35);
   --text:#E6DED3;--text-soft:#B8A898;--text-dim:#786858;
-  --input-bg:#2A2520;--sec-bg:#1E1B16;--shadow:rgba(0,0,0,0.3);
   --green-soft:rgba(52,168,83,0.18);
   --brand:#02BBE0;--brand-soft:#43DDF8;
   --brand-ultra:rgba(2,187,224,0.12);--brand-glow:rgba(2,187,224,0.25);
@@ -355,6 +361,12 @@ body{
 @keyframes beadGold{0%{box-shadow:0 0 0 0 rgba(255,215,0,0)}30%{box-shadow:0 0 0 8px rgba(255,215,0,0.6)}100%{box-shadow:0 0 0 14px rgba(255,215,0,0)}}
 .bead.gold-flash{animation:bead-pop 0.18s ease-out,beadGold 0.7s ease-out}
 @keyframes beadBonusFloat{0%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-28px)}}
+.bead-pater.active{background:transparent;border-color:var(--lvl-bold);box-shadow:0 0 0 3px rgba(var(--lvl-bold-rgb,2,187,224),0.25);animation:beadPulse 1s ease-in-out infinite}
+.bead-pater.lit-correct{background:var(--lvl-bold);border-color:var(--lvl-bold);animation:bead-pop 0.18s ease-out}
+.bead-pater.lit-normal{background:var(--lvl-bold);border-color:var(--lvl-bold)}
+.bead-pater.lit-white{background:rgba(255,255,255,0.85);border-color:rgba(255,255,255,0.85)}
+.bead-pater.lit-spam{background:#888;border-color:#888}
+.bead-pater.gold-flash{animation:bead-pop 0.18s ease-out,beadGold 0.7s ease-out}
 .bead-pater {
   width: 20px; height: 20px; border-radius: 50%;
   border: 2px solid rgba(255,255,255,0.55);
@@ -1779,6 +1791,8 @@ function _tickBeads(){
     if(t>=windows[i].start&&t<=windows[i].end){active=i;break;}
   }
   if(active===_beadActive)return;
+
+  // El bead anterior terminó su ventana
   if(_beadActive>=0){
     var old=_getBeadEl(_beadActive);
     if(old){
@@ -1786,14 +1800,38 @@ function _tickBeads(){
       var wasTapped=old.classList.contains('lit-correct')||
                     old.classList.contains('lit-normal')||
                     old.classList.contains('lit-spam');
-      if(!wasTapped)old.classList.add('lit-white');
+      if(!wasTapped){
+        old.classList.add('lit-white');
+        if(beadCount===_beadActive)beadCount=_beadActive+1;
+      }
     }
   }
+
   _beadActive=active;
+
   if(active>=0){
+    // Iluminar en blanco todos los beads saltados
+    while(beadCount<active){
+      var skipped=_getBeadEl(beadCount);
+      if(skipped){
+        skipped.classList.remove('active');
+        if(!skipped.classList.contains('lit-correct')&&
+           !skipped.classList.contains('lit-normal')&&
+           !skipped.classList.contains('lit-spam')){
+          skipped.classList.add('lit-white');
+        }
+      }
+      beadCount++;
+    }
+
     var el=_getBeadEl(active);
-    if(el&&!el.classList.contains('lit-correct')&&!el.classList.contains('lit-normal')){
-      el.classList.add('active');
+    if(el){
+      if(!el.classList.contains('lit-correct')&&
+         !el.classList.contains('lit-normal')&&
+         !el.classList.contains('lit-spam')&&
+         !el.classList.contains('lit-white')){
+        el.classList.add('active');
+      }
     }
   }
 }
@@ -1938,9 +1976,6 @@ function countBead(){
     if(navigator.vibrate)navigator.vibrate([80]);
     return;
   }
-
-  // Quitar estado active del bead actual
-  if(el)el.classList.remove('active');
 
   if(beadCount<=10){
     // Taps 1–10
