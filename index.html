@@ -2627,7 +2627,9 @@ onAuthStateChanged(auth, async function(user) {
   var _hasCache = !!localStorage.getItem('cruzando_plan_cache');
 
   // ── Onboarding splash: leer cache LOCAL primero (sin esperar Firestore) ──
-  var _esPrimera = !_obDone('mapSeen');
+  var _obFlagsCache = {};
+  try { _obFlagsCache = JSON.parse(localStorage.getItem('cruzando_onboarding') || '{}'); } catch(e) {}
+  var _esPrimera = !_obFlagsCache['mapSeen'];
   var _splashYaMostrado = sessionStorage.getItem('cruzando_splash_shown');
   if (!_splashYaMostrado) {
     sessionStorage.setItem('cruzando_splash_shown', '1');
@@ -4072,7 +4074,10 @@ function _obMostrarSplash(esPrimeraVez) {
   var comenzarBtn = document.getElementById('ob-comenzar-btn');
 
   if (marianoWrap) marianoWrap.style.display = 'flex';
-  var _mostrarOnboarding = esPrimeraVez && !sessionStorage.getItem('cruzando_onboarding_done');
+  var _obCache = {};
+  try { _obCache = JSON.parse(localStorage.getItem('cruzando_onboarding') || '{}'); } catch(e) {}
+  var _mapSeenLocal = !!_obCache['mapSeen'];
+  var _mostrarOnboarding = !_mapSeenLocal && !sessionStorage.getItem('cruzando_onboarding_done');
   if (bocadillo)   bocadillo.style.display   = _mostrarOnboarding ? 'block' : 'none';
   if (comenzarBtn) comenzarBtn.style.display = _mostrarOnboarding ? 'block' : 'none';
 
@@ -4110,6 +4115,11 @@ function _obCerrarSplash() {
     sp.style.opacity = '';
     sp.style.transition = '';
     sessionStorage.setItem('cruzando_onboarding_done', '1');
+    try {
+      var _oc = JSON.parse(localStorage.getItem('cruzando_onboarding') || '{}');
+      _oc['mapSeen'] = true;
+      localStorage.setItem('cruzando_onboarding', JSON.stringify(_oc));
+    } catch(e) {}
     if (window._obSet) _obSet('mapSeen', db, currentUser ? currentUser.uid : null);
     if (window.navigateTo) navigateTo('audio.html?nivel=1&cuaderno=1&misterio=1');
   }, 500);

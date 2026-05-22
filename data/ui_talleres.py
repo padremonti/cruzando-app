@@ -179,7 +179,7 @@ def register_handlers_talleres(
         else:
             out_fname = build_taller_filename(filename, section, idx + 1)
 
-        audio_path, op_cost = generate_taller_audio(text_input, out_fname, speed)
+        audio_path, op_cost = generate_taller_audio(text_input, out_fname, section, speed)
         new_total = session_cost_val + op_cost
         result = (
             f"Archivo: {out_fname}\n"

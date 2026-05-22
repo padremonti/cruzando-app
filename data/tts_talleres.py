@@ -11,6 +11,7 @@ import requests
 from config import (
     OPENAI_API_KEY, AUDIO_API_URL, TTS_MODEL, AUDIO_FORMAT,
     OUTPUT_DIR, TTS_COST_PER_CHAR,
+    SECTION_VOICES, SECTION_INSTRUCTIONS,
 )
 
 logger = logging.getLogger(__name__)
@@ -26,12 +27,17 @@ TALLER_SECTIONS = [
     ("oracion",       "Oración"),
 ]
 
-TALLER_VOICE = "nova"
-TALLER_INSTRUCTIONS = (
-    "Voz femenina, maternal, cálida y contemplativa. "
-    "Habla despacio, con pausas naturales entre párrafos. "
-    "Tono de acompañamiento pastoral, no de locución comercial."
-)
+TALLER_VOICES = {
+    "bienvenida":    SECTION_VOICES["Bienvenida"],      # nova
+    "contemplacion": SECTION_VOICES["Contemplacion"],   # alloy
+    "oracion":       SECTION_VOICES["Oracion final"],   # onyx
+}
+
+TALLER_INSTRUCTIONS_MAP = {
+    "bienvenida":    SECTION_INSTRUCTIONS["Bienvenida"],
+    "contemplacion": SECTION_INSTRUCTIONS["Contemplacion"],
+    "oracion":       SECTION_INSTRUCTIONS["Oracion final"],
+}
 
 
 def discover_taller_json_files() -> list:
@@ -107,6 +113,7 @@ def misterio_choices(data: dict) -> list:
 def generate_taller_audio(
     text: str,
     out_filename: str,
+    section_type: str = "contemplacion",
     speed: float = 1.0,
 ) -> tuple:
     """Genera el MP3 y lo guarda en OUTPUT_DIR. Devuelve (path, cost)."""
@@ -115,6 +122,9 @@ def generate_taller_audio(
     if not text or not text.strip():
         raise gr.Error("El texto está vacío.")
 
+    voice        = TALLER_VOICES.get(section_type, TALLER_VOICES["contemplacion"])
+    instructions = TALLER_INSTRUCTIONS_MAP.get(section_type, TALLER_INSTRUCTIONS_MAP["contemplacion"])
+
     out_path = OUTPUT_DIR / out_filename
     headers = {
         "Authorization": f"Bearer {OPENAI_API_KEY}",
@@ -122,10 +132,10 @@ def generate_taller_audio(
     }
     payload = {
         "model": TTS_MODEL,
-        "voice": TALLER_VOICE,
+        "voice": voice,
         "input": text.strip(),
         "response_format": AUDIO_FORMAT,
-        "instructions": TALLER_INSTRUCTIONS,
+        "instructions": instructions,
         "speed": round(speed, 2),
     }
     try:
