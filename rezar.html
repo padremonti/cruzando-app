@@ -919,8 +919,10 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
       </button>
 
       <!-- Columna de 10 cuentas -->
-      <div class="beads-col" id="beads-col">
-        <div class="beads-col-label">CONTAR</div>
+      <div id="beads-col-wrap" style="display:none">
+        <div class="beads-col" id="beads-col">
+          <div class="beads-col-label">CONTAR</div>
+        </div>
       </div>
 
       <!-- Popup bottom sheet -->
@@ -1718,21 +1720,38 @@ function resetBeads(){
 function _updateSyncKey(trackUrl){
   if(!_beadSync||!trackUrl){
     _currentSyncKey=null;
-    _stopBeadTimer();
+    _hideBeadsCol();
     return;
   }
   var name=trackUrl.split('/').pop().replace(/\?.*$/,'').replace(/\.mp3$/i,'').toUpperCase();
   var found=Object.keys(_beadSync).find(function(k){return k.toUpperCase()===name;})||null;
+  var changed=(found!==_currentSyncKey);
   _currentSyncKey=found;
-  console.log('[BeadSync] trackUrl:',trackUrl,'→ name:',name,'→ key:',_currentSyncKey);
-  if(_currentSyncKey){
-    _beadActive=-1;
-    _beadTapTimes={};
-    _beadSpam={};
+
+  if(found){
+    if(changed){
+      beadCount=0;
+      _beadActive=-1;
+      _beadTapTimes={};
+      _beadSpam={};
+      renderBeadsCol();
+    }
+    _showBeadsCol();
     _startBeadTimer();
   } else {
+    _hideBeadsCol();
     _stopBeadTimer();
   }
+  console.log('[BeadSync] track:',name,'→ key:',_currentSyncKey);
+}
+
+function _showBeadsCol(){
+  var col=$('beads-col-wrap');
+  if(col)col.style.display='flex';
+}
+function _hideBeadsCol(){
+  var col=$('beads-col-wrap');
+  if(col)col.style.display='none';
 }
 
 function _getBeadEl(idx){
@@ -2450,9 +2469,8 @@ function initSession(){
   const hero=$('misterio-hero');if(hero)hero.style.display='';
 
   rezarAudio.src=playlist[0].src;
-  _updateSyncKey(playlist[0].src);
+  _updateSyncKey(playlist[0].src); // INICIO.mp3 → key=null → beads ocultos
   rezarAudio.load();
-  _startBeadTimer();
 
   renderBeadsCol();
   updateMysteryContent();
