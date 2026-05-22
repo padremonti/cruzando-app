@@ -354,10 +354,13 @@ body{
   box-shadow:0 0 8px rgba(255,122,0,0.5);
   animation:bead-pop 0.18s ease-out;
 }
-.bead.active,.bead-pater.active{background:transparent;border-color:var(--lvl-bold);animation:beadPulse 0.9s ease-in-out infinite}
+.bead.active,.bead-pater.active,
+.bead.lit-correct,.bead-pater.lit-correct,
+.bead.lit-normal,.bead-pater.lit-normal{border-color:var(--lvl-bold);animation:beadPulse 0.9s ease-in-out infinite}
 @keyframes beadPulse{0%,100%{box-shadow:0 0 0 3px rgba(var(--lvl-bold-rgb,2,187,224),0.25);transform:scale(1)}50%{box-shadow:0 0 0 8px rgba(var(--lvl-bold-rgb,2,187,224),0.5);transform:scale(1.15)}}
-.bead.lit-correct,.bead-pater.lit-correct{background:var(--lvl-bold);border-color:var(--lvl-bold);animation:beadPulse 0.9s ease-in-out infinite}
-.bead.lit-normal,.bead-pater.lit-normal{background:var(--lvl-bold);border-color:var(--lvl-bold);animation:beadPulse 0.9s ease-in-out infinite}
+.bead.active,.bead-pater.active{background:transparent}
+.bead.lit-correct,.bead-pater.lit-correct,
+.bead.lit-normal,.bead-pater.lit-normal{background:var(--lvl-bold)}
 .bead.lit-spam{background:#888;border-color:#888}
 .bead.lit-white{background:rgba(255,255,255,0.85);border-color:rgba(255,255,255,0.85)}
 @keyframes beadGold{0%{box-shadow:0 0 0 0 rgba(255,215,0,0)}30%{box-shadow:0 0 0 8px rgba(255,215,0,0.6)}100%{box-shadow:0 0 0 14px rgba(255,215,0,0)}}
@@ -2402,6 +2405,15 @@ function setupMediaSession() {
   navigator.mediaSession.setActionHandler('previoustrack',function() { /* no retroceder */ });
 }
 window.setupMediaSession = setupMediaSession;
+
+// Reanudar AudioContext al desbloquear pantalla
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'visible') {
+    if (bgmAudioCtx && bgmAudioCtx.state === 'suspended') {
+      bgmAudioCtx.resume().catch(function(){});
+    }
+  }
+});
 
 async function onTrackEnded(){
   const track=playlist[plIdx];

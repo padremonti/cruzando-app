@@ -1897,6 +1897,19 @@ function toggleBgm(){
   $('btn-bgm').classList.toggle('bgm-on',bgmOn);
   bgmOn?startBgm():(bgmEl&&bgmEl.pause());
 }
+// Reanudar AudioContext al desbloquear pantalla
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'visible') {
+    if (_bgmCtx && _bgmCtx.state === 'suspended') {
+      _bgmCtx.resume().catch(function(){});
+    }
+    // Reanudar BGM si estaba sonando antes del bloqueo
+    if (bgmOn && bgmEl && bgmEl.paused) {
+      bgmEl.play().catch(function(){});
+    }
+  }
+});
+
 function startBgm(){
   if(!bgmOn) return;
   const url     = `${R2}/BGM/BGM_${nivel}_${cua}.mp3`;
