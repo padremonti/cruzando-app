@@ -1509,7 +1509,8 @@ function openToolPopup(t){
   $('popup-voice-btn').style.display=['contemplar','rezo','canto'].includes(t)?'':'none';
   populatePopup(t);
   $('tool-popup').classList.add('open');
-  if(t==='suplica'){var bd=$('tool-popup-body');if(bd)bd.scrollTop=0;}
+  var bd=$('tool-popup-body');
+  if(bd) bd.scrollTop=0;
 }
 function closeToolPopup(){
   $('tool-popup').classList.remove('open');
@@ -1867,8 +1868,8 @@ function onAudioEnd(){
 }
 
 /* ─── BGM con Web Audio API (funciona en iOS standalone) ─── */
-var BGM_NORMAL  = 0.04;
-var BGM_DUCK    = 0.005;
+var BGM_NORMAL  = 0.12;
+var BGM_DUCK    = 0.03;
 var _bgmCtx     = null;
 var _bgmGain    = null;
 var _bgmSource  = null;
@@ -1879,7 +1880,8 @@ function _bgmEnsureCtx() {
   try {
     _bgmCtx  = new (window.AudioContext || window.webkitAudioContext)();
     _bgmGain = _bgmCtx.createGain();
-    _bgmGain.gain.value = BGM_NORMAL;
+    _bgmGain.gain.value = 0;
+    _bgmGain.gain.linearRampToValueAtTime(BGM_NORMAL, _bgmCtx.currentTime + 1.5);
     _bgmGain.connect(_bgmCtx.destination);
     if (bgmEl) {
       bgmEl.crossOrigin = 'anonymous';
@@ -1946,7 +1948,7 @@ function startBgm(){
     bgmEl = new Audio(url);
     bgmEl.loop = true;
     bgmEl.crossOrigin = 'anonymous';
-    try { bgmEl.volume = BGM_NORMAL; } catch(e) {}
+    try { bgmEl.volume = 1.0; } catch(e) {}
   } else if(!bgmEl.src.endsWith(trackId)){
     bgmEl.pause();
     _bgmSource = null;
