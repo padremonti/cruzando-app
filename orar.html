@@ -397,6 +397,8 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
 .q-textarea:focus{border-color:var(--lvl-soft);outline:none}
 .q-saved{font-size:0.72rem;color:var(--green);margin-top:5px;min-height:26px}
 .amen-btn{display:block;width:100%;margin-top:24px;padding:18px;border-radius:16px;border:none;cursor:pointer;font-family:'Cormorant Garamond',Georgia,serif;font-size:1.6rem;font-weight:600;background:var(--lvl-bold);color:#fff;letter-spacing:1px;transition:all 0.2s;box-shadow:0 4px 16px rgba(0,0,0,0.12)}
+.popup-close-bottom{display:block;width:100%;margin-top:20px;padding:14px;border-radius:16px;border:1.5px solid var(--border);background:none;color:var(--text-dim);font-family:'Inter',sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;text-align:center;transition:background 0.15s;-webkit-tap-highlight-color:transparent}
+.popup-close-bottom:active{background:var(--border)}
 .amen-btn:active{transform:scale(0.96)}
 .amen-btn.done{background:var(--green)}
 .mystery-done-pill{display:flex;align-items:center;gap:10px;padding:14px 16px;background:var(--green-soft);border-radius:14px;border:1.5px solid rgba(52,168,83,0.2);margin-top:20px}
@@ -1504,6 +1506,7 @@ function openToolPopup(t){
   $('popup-voice-btn').style.display=['contemplar','rezo','canto'].includes(t)?'':'none';
   populatePopup(t);
   $('tool-popup').classList.add('open');
+  if(t==='suplica'){var bd=$('tool-popup-body');if(bd)bd.scrollTop=0;}
 }
 function closeToolPopup(){
   $('tool-popup').classList.remove('open');
@@ -1514,14 +1517,21 @@ function closeToolPopup(){
   tool=null;
 }
 
+function _closeBtn(){
+  return '<button class="popup-close-bottom" onclick="closeToolPopup()">✕ Cerrar</button>';
+}
+
 function populatePopup(t){
   const md=mData(blk,bIdx),bd=$('tool-popup-body');
   switch(t){
     case 'palabra':
-      bd.innerHTML=`<p class="popup-reference">${esc(md?.referencia||'')}</p><p class="popup-text" style="margin-top:12px">${esc(md?.evangelio||'Texto no disponible')}</p>`;
+      bd.innerHTML=`<p class="popup-reference">${esc(md?.referencia||'')}</p>`+
+        `<p class="popup-text" style="margin-top:12px">${esc(md?.evangelio||'Texto no disponible')}</p>`+
+        _closeBtn();
       break;
     case 'contemplar':
-      bd.innerHTML=`<p class="popup-text">${esc(md?.contemplacion||'Contemplación no disponible')}</p>`;
+      bd.innerHTML=`<p class="popup-text">${esc(md?.contemplacion||'Contemplación no disponible')}</p>`+
+        _closeBtn();
       break;
     case 'rezo':{
       const done=!!(prog?.progress?.[blk]?.[bIdx]);
@@ -1571,14 +1581,16 @@ por los siglos de los siglos. Amén.
       bd.innerHTML=`<p class="popup-lyrics">${ORACIONES}</p>`+
         (done
           ?`<div class="mystery-done-pill"><span class="done-check">✓</span><div><div class="done-txt">Misterio rezado</div><div class="done-date">${new Date(ts).toLocaleDateString('es-MX',{month:'short',day:'numeric'})}</div></div></div>`
-          :`<button class="amen-btn" id="amen-rezo">Amén — Misterio rezado</button>`);
+          :`<button class="amen-btn" id="amen-rezo">Amén — Misterio rezado</button>`)+
+        _closeBtn();
       if(!done){$('amen-rezo').onclick=async()=>{await completeMystery();populatePopup('rezo');};}
       break;
     }
     case 'canto':{
       const canto=cantoJ?.cantos?.[blk]?.[bIdx];
       bd.innerHTML=(canto?.titulo?`<p class="popup-song-title">${esc(canto.titulo)}</p>`:'')+
-        `<p class="popup-lyrics">${esc(canto?.letra||'Letra no disponible')}</p>`;
+        `<p class="popup-lyrics">${esc(canto?.letra||'Letra no disponible')}</p>`+
+        _closeBtn();
       break;
     }
     case 'escribir':
@@ -1621,7 +1633,19 @@ function initEscrH(md){
     ta.addEventListener('input',()=>{ans[qi]=ta.value;clearTimeout(ansT[qi]);ansT[qi]=setTimeout(()=>onWrite(qi,ta.value),2000);});
   });
   const ab=$('amen-esc');
-  if(ab)ab.onclick=async()=>{ab.textContent='✓ Guardado';ab.classList.add('done');for(let qi=0;qi<3;qi++)if(ans[qi])await onWrite(qi,ans[qi],true);};
+  if(ab)ab.onclick=async()=>{
+    ab.textContent='✓ Guardado';ab.classList.add('done');
+    for(let qi=0;qi<3;qi++)if(ans[qi])await onWrite(qi,ans[qi],true);
+    var existing=$('tool-popup-body').querySelector('.popup-close-bottom');
+    if(!existing){
+      var closeEl=document.createElement('button');
+      closeEl.className='popup-close-bottom';
+      closeEl.textContent='✕ Cerrar';
+      closeEl.onclick=closeToolPopup;
+      $('tool-popup-body').appendChild(closeEl);
+      setTimeout(function(){closeEl.scrollIntoView({behavior:'smooth',block:'nearest'});},150);
+    }
+  };
 }
 async function onWrite(qi,text,force=false){
   if(!text.trim())return;
