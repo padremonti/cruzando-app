@@ -1953,30 +1953,28 @@ function _showInterstitial(onClose, markAsShownToday) {
 
 // Auth + carga
 onAuthStateChanged(auth, async user => {
-  if (!user) {
-    goTo('index.html'); return;
-  }
+  if (!user) { goTo('index.html'); return; }
 
-  // ── Verificar plan y mostrar interstitial si aplica ──────────
-  var _resolvedPlan = 'free';
+  // Resolver plan real desde Firestore
+  var _basePlan = 'free';
   try {
     var userSnap = await getDoc(doc(db, 'users', user.uid));
-    _resolvedPlan = userSnap.exists()
+    _basePlan = userSnap.exists()
       ? (window.resolvePlan ? window.resolvePlan(userSnap.data()) : 'free')
       : 'free';
-    window.currentPlan = _resolvedPlan;
-    localStorage.setItem('cruzando_plan_cache', _resolvedPlan);
+    window.currentPlan = _basePlan;
+    localStorage.setItem('cruzando_plan_cache', _basePlan);
   } catch(e) {
-    window.currentPlan = localStorage.getItem('cruzando_plan_cache') || 'free';
-    _resolvedPlan = window.currentPlan;
+    _basePlan = localStorage.getItem('cruzando_plan_cache') || 'free';
+    window.currentPlan = _basePlan;
   }
-  // effectivePlan() respeta simulación vía sessionStorage('cruzando_view_as')
-  var userPlan = window.effectivePlan ? window.effectivePlan() : _resolvedPlan;
+
+  // effectivePlan() respeta la simulación del drawer developer
+  var userPlan = window.effectivePlan ? window.effectivePlan() : _basePlan;
+  console.log('[Cantos] basePlan:', _basePlan, '| effectivePlan:', userPlan); // ← debug
 
   if (_shouldShowInterstitial(userPlan)) {
-    _showInterstitial(function() {
-      _loadCantos(user);
-    }, true);
+    _showInterstitial(function() { _loadCantos(user); }, true);
   } else {
     _loadCantos(user);
   }
