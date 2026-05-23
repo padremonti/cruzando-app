@@ -132,9 +132,10 @@ body {
   gap:4px; padding:10px 4px 12px;
   background:none; border:none; cursor:pointer;
   font-family:inherit; text-decoration:none;
-  color:var(--text-dim); transition:color 0.2s;
+  color:rgba(67,221,248,0.45); transition:color 0.2s;
   -webkit-tap-highlight-color:transparent;
 }
+body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 .app-nav-item:active { opacity:1; }
 .app-nav-item.active { color:#43DDF8; }
 .app-nav-item[disabled] { cursor:default; opacity:1; }

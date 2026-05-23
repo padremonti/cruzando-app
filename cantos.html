@@ -338,10 +338,12 @@ body.light .sheet-letra .sep-line { color: var(--text-dim); }
 .app-nav-item {
   flex: 1; background: none; border: none; cursor: pointer;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 3px; padding: 4px 2px; color: var(--text-dim);
+  gap: 3px; padding: 4px 2px; color: rgba(67,221,248,0.45);
   font-family: inherit; transition: color 0.15s;
 }
-.app-nav-item.active { color: var(--orange); }
+body.light .app-nav-item { color: rgba(0,41,49,0.45); }
+.app-nav-item.active { color: #43DDF8; }
+.app-nav-item.tapped { color: #43DDF8; }
 .app-nav-item[disabled] { cursor: default; opacity: 1; }
 .app-nav-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; }
 .app-nav-label { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.3px; }

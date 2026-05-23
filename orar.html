@@ -231,7 +231,8 @@ body{
 /* ── Bottom nav ── */
 .app-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:480px;z-index:250;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:stretch;padding-bottom:env(safe-area-inset-bottom,0px);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:transform 0.35s cubic-bezier(0.4,0,0.2,1)}
 .app-nav.visible{transform:translateX(-50%) translateY(0)}
-.app-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:10px 4px 12px;background:none;border:none;cursor:pointer;font-family:inherit;text-decoration:none;color:var(--text-dim);transition:color 0.2s;-webkit-tap-highlight-color:transparent}
+.app-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:10px 4px 12px;background:none;border:none;cursor:pointer;font-family:inherit;text-decoration:none;color:rgba(67,221,248,0.45);transition:color 0.2s;-webkit-tap-highlight-color:transparent}
+body.light .app-nav-item{color:rgba(0,41,49,0.45)}
 .app-nav-item:active{opacity:1}
 .app-nav-item.active{color:var(--lvl-bold)}
 .app-nav-item[disabled]{cursor:default;opacity:1}
