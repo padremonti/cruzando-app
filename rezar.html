@@ -1247,7 +1247,7 @@ let rezarAudio=null;
 let bgmEl=null;
 let bgmAudioCtx=null;
 let bgmGainNode=null;
-const BGM_VOL=0.07;
+const BGM_VOL=0.12;
 const _prefs=()=>{try{return JSON.parse(localStorage.getItem('cruzando_prefs')||'{}');}catch(e){return{};}};
 let bgmOn=_prefs().bgm!==false;
 let beadCount=0;
@@ -1340,7 +1340,7 @@ function startBgm(){
     bgmEl = new Audio(url);
     bgmEl.loop = true;
     bgmEl.crossOrigin = 'anonymous';
-    bgmEl.volume = 0;
+    bgmEl.volume = 1.0;
     bgmEl.addEventListener('canplaythrough', function() {
       try {
         if (!bgmAudioCtx) bgmAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1360,7 +1360,7 @@ function startBgm(){
     bgmGainNode = null;
     bgmAudioCtx = null;
     bgmEl.src = url;
-    bgmEl.volume = 0;
+    bgmEl.volume = 1.0;
     bgmEl.play().catch(function(){});
     setTimeout(function(){ bgmFadeTo(BGM_VOL, 800); }, 200);
   } else {
