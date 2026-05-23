@@ -1967,7 +1967,7 @@ function countBead(){
 
   // ── Anti-spam: no permitir avanzar más allá del bead activo en el audio ──
   if(_beadSync && _currentSyncKey && _beadActive >= 0){
-    var _maxAllowed = _beadActive + 1;
+    var _maxAllowed = _beadActive;
     if(beadIdx > _maxAllowed){
       _playBeadFail();
       if(navigator.vibrate) navigator.vibrate([80]);
