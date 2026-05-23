@@ -4132,6 +4132,14 @@ window.closeTreasure = closeTreasure;
 // ── Simulación de plan para Developer ────────────────────────────
 window._setViewAs = function(simulatedPlan) {
   window._viewAs = simulatedPlan;
+
+  // Persistir en sessionStorage para que otras páginas lo lean
+  if (simulatedPlan) {
+    sessionStorage.setItem('cruzando_view_as', simulatedPlan);
+  } else {
+    sessionStorage.removeItem('cruzando_view_as');
+  }
+
   // Actualizar botones del dev panel
   document.querySelectorAll('.dev-sim-btn').forEach(function(b) {
     b.classList.remove('dev-active');
@@ -4141,6 +4149,7 @@ window._setViewAs = function(simulatedPlan) {
                : 'dev-btn-dev';
   var activeBtn = document.getElementById(activeId);
   if (activeBtn) activeBtn.classList.add('dev-active');
+
   // Re-renderizar con plan simulado
   if (window._refreshHome) window._refreshHome();
   if (window.buildLevelPicker) window.buildLevelPicker();
