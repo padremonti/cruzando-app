@@ -1963,7 +1963,25 @@ function countBead(){
   var beadIdx = beadCount; // antes del incremento
   var now = Date.now();
 
-  // Anti-spam: < 3000ms en la misma cuenta = spam
+  // ── Anti-spam: no permitir avanzar más allá del bead activo en el audio ──
+  if(_beadSync && _currentSyncKey && _beadActive >= 0){
+    var _maxAllowed = _beadActive + 1;
+    if(beadIdx > _maxAllowed){
+      _playBeadFail();
+      if(navigator.vibrate) navigator.vibrate([80]);
+      var _activeEl = _getBeadEl(_beadActive);
+      if(_activeEl && !_activeEl.classList.contains('lit-correct') &&
+                      !_activeEl.classList.contains('lit-normal') &&
+                      !_activeEl.classList.contains('lit-spam')){
+        _activeEl.classList.remove('active');
+        _activeEl.classList.add('lit-spam');
+        _activeEl.style.animation = 'none';
+      }
+      return;
+    }
+  }
+
+  // Anti-spam clásico: doble tap en el mismo bead en < 3s
   var lastTap = _beadTapTimes[beadIdx] || 0;
   var isSpam  = (now - lastTap) < 3000 && lastTap > 0;
   _beadTapTimes[beadIdx] = now;
@@ -1973,11 +1991,12 @@ function countBead(){
     if(elS){
       elS.classList.remove('active','lit-correct','lit-normal','lit-white');
       elS.classList.add('lit-spam');
+      elS.style.animation = 'none';
     }
     _beadSpam[beadIdx]=true;
     _playBeadFail();
     if(navigator.vibrate)navigator.vibrate([80]);
-    return; // NO incrementar beadCount
+    return;
   }
 
   // Detectar si el tap cae dentro de la ventana de sincronía
