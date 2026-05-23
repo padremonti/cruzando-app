@@ -366,12 +366,12 @@ body{
 @keyframes beadGold{0%{box-shadow:0 0 0 0 rgba(255,215,0,0)}30%{box-shadow:0 0 0 8px rgba(255,215,0,0.6)}100%{box-shadow:0 0 0 14px rgba(255,215,0,0)}}
 .bead.gold-flash{animation:bead-pop 0.18s ease-out,beadGold 0.7s ease-out}
 @keyframes beadBonusFloat{0%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-28px)}}
-.bead-pater.active{background:transparent;border-color:var(--lvl-bold);box-shadow:0 0 0 3px rgba(var(--lvl-bold-rgb,2,187,224),0.25);animation:beadPulse 1s ease-in-out infinite}
-.bead-pater.lit-correct{background:var(--lvl-bold);border-color:var(--lvl-bold);animation:bead-pop 0.18s ease-out}
-.bead-pater.lit-normal{background:var(--lvl-bold);border-color:var(--lvl-bold)}
-.bead-pater.lit-white{background:rgba(255,255,255,0.85);border-color:rgba(255,255,255,0.85)}
-.bead-pater.lit-spam{background:#888;border-color:#888}
-.bead-pater.gold-flash{animation:bead-pop 0.18s ease-out,beadGold 0.7s ease-out}
+.bead-pater.active    {background:transparent}
+.bead-pater.lit-correct{background:var(--lvl-bold)}
+.bead-pater.lit-normal {background:var(--lvl-bold)}
+.bead-pater.lit-white  {background:rgba(255,255,255,0.85);border-color:rgba(255,255,255,0.85);animation:none}
+.bead-pater.lit-spam   {background:#888;border-color:#888;animation:none}
+.bead-pater.gold-flash {animation:bead-pop 0.18s ease-out,beadGold 0.7s ease-out}
 .bead-pater {
   width: 20px; height: 20px; border-radius: 50%;
   border: 2px solid rgba(255,255,255,0.55);
@@ -1804,7 +1804,6 @@ function _tickBeads(){
     var old=_getBeadEl(_beadActive);
     if(old){
       old.classList.remove('active');
-      old.style.animation='none';
       var wasSpam=old.classList.contains('lit-spam');
       var wasTapped=old.classList.contains('lit-correct')||
                     old.classList.contains('lit-normal')||
