@@ -1517,6 +1517,7 @@ function closeToolPopup(){
   $('popup-voice-btn').classList.remove('playing');
   tool=null;
 }
+window.closeToolPopup = closeToolPopup;
 
 function _closeBtn(){
   return '<button class="popup-close-bottom" onclick="closeToolPopup()">✕ Cerrar</button>';
