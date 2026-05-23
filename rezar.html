@@ -2026,6 +2026,10 @@ function countBead(){
       } else {
         el.classList.add('lit-normal');
       }
+      // Forzar animación beadPulse — el bead sigue activo aunque ya fue tapado
+      el.classList.remove('active');
+      void el.offsetWidth;
+      el.classList.add('active');
     }
     playBeadSound();
     if(navigator.vibrate)navigator.vibrate([40]);
@@ -2040,6 +2044,10 @@ function countBead(){
       } else {
         lastBead.classList.add('lit-normal');
       }
+      // Forzar animación
+      lastBead.classList.remove('active');
+      void lastBead.offsetWidth;
+      lastBead.classList.add('active');
     }
     _onBeadComplete();
   }
