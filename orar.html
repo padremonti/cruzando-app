@@ -347,7 +347,7 @@ body.light .app-nav-item{color:rgba(0,41,49,0.45)}
 }
 /* ── Variables de contraste para toolbar (dark default → light override) ── */
 :root{--tb-circle-bg:rgb(var(--bg-rgb));--tb-circle-border:rgba(255,255,255,0.45);--tb-icon:rgba(255,255,255,0.75);--tb-bead:rgba(255,255,255,0.22)}
-body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon:var(--text-dim);--tb-bead:var(--card)}
+body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon:var(--text-dim);--tb-bead:rgba(0,41,49,0.18)}
 .tool-btn{display:flex;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:0;touch-action:manipulation}
 .tool-btn-circle{width:48px;height:48px;border-radius:50%;border:3px solid var(--tb-circle-border);background:rgb(var(--bg-rgb));display:flex;align-items:center;justify-content:center;color:var(--tb-icon);transition:background 0.2s,border-color 0.2s,color 0.2s,transform 0.15s;position:relative;z-index:1}
 .tool-btn.active .tool-btn-circle{background:var(--lvl-bold);border-color:var(--lvl-bold);color:#fff}
@@ -978,7 +978,7 @@ function applyBlockAccent(block){
   root.style.setProperty('--lvl-ultra',`rgba(${r},0.10)`);
 }
 const BFM = {gozosos:1,luminosos:6,dolorosos:11,gloriosos:16};
-const TBG = {gozosos:'rgba(232,160,160,0.18)',luminosos:'rgba(1,187,225,0.15)',dolorosos:'rgba(192,57,43,0.15)',gloriosos:'rgba(212,160,23,0.15)'};
+const TBG = {gozosos:'var(--card)',luminosos:'var(--card)',dolorosos:'var(--card)',gloriosos:'var(--card)'};
 const TN  = {palabra:'La Palabra',contemplar:'Contemplar',rezo:'Rezo',canto:'Canto',escribir:'Escribir',suplica:'Súplica'};
 const TOOL_ORDER = ['palabra','contemplar','rezo','canto','escribir','suplica'];
 const QL  = ['Por María hacia Jesús:','Desde el Hijo hacia el Padre:','Hijos y hermanos en el Espíritu:'];
