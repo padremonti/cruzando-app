@@ -36,9 +36,11 @@
   // ── canAccessModo ────────────────────────────────────────────────────────────
   // modo: 'audio' | 'libro' | 'rezar' | 'cantos' | 'sanar' | 'extras'
   //       | 'badges' | 'logros' | 'metros'
-  function canAccessModo(modo, plan) {
+  // nivelId: opcional — en 0101 Free tiene acceso completo a todos los modos
+  function canAccessModo(modo, plan, nivelId) {
     if (plan === 'developer') return true;
     var isPrem = isPremiumOrAbove(plan);
+    if (plan === 'free' && nivelId === '0101') return true;
     if (modo === 'audio')   return true;
     if (modo === 'libro')   return isPrem;
     if (modo === 'rezar')   return isPrem;
@@ -271,7 +273,7 @@
   window._obZone = _obZone;
 
   function _obAlwaysFree(nivelId, misterio) {
-    return nivelId === '0101' && misterio >= 1 && misterio <= 5;
+    return nivelId === '0101';
   }
   window._obAlwaysFree = _obAlwaysFree;
 
@@ -310,7 +312,7 @@
     if (!ov) return;
 
     var img = document.getElementById('ob-bloque1-mariano');
-    if (img) img.src = (imgBase || '') + 'mariano_celeb.webp';
+    if (img) img.src = (imgBase || 'https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev/') + 'mariano_celeb.webp';
 
     var metrosEl = document.getElementById('ob-bloque1-metros');
     if (metrosEl && metros) metrosEl.textContent = '+' + metros + 'm · Bloque completado';

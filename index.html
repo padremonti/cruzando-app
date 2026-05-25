@@ -1055,6 +1055,12 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 .modo-desc { font-size:1.0rem; color:var(--text-dim); }
 .modo-tag { font-size:0.78rem; font-weight:700; padding:5px 12px; border-radius:20px; background:rgba(255,122,0,0.15); color:var(--orange); flex-shrink:0; }
 .modo-tag.soon { background:rgba(255,255,255,0.06); color:var(--text-dim); }
+.premium-chip {
+  display:inline-block; margin-left:8px; padding:2px 8px;
+  border-radius:10px; background:rgba(2,187,224,0.15); color:#02BBE0;
+  font-size:0.65rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:0.5px; vertical-align:middle;
+}
 .light .modo-tag.soon { background:rgba(0,0,0,0.06); }
 
 /* ══ POPUP TESORO ══ */
@@ -1413,6 +1419,10 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     <button class="drawer-item" onclick="closeDrawer(); openPrefs()">
       <div class="drawer-item-icon">⚙️</div>
       <div><div class="drawer-item-label">Preferencias</div><div class="drawer-item-sub">Tema, audio, micro</div></div>
+    </button>
+    <button class="drawer-item" onclick="window._resetOnboarding()">
+      <div class="drawer-item-icon">🎓</div>
+      <div><div class="drawer-item-label">Reactivar tutoriales</div><div class="drawer-item-sub">Volver a ver los pasos iniciales</div></div>
     </button>
     <button class="drawer-item" id="btn-perfil" onclick="closeDrawer()">
       <div class="drawer-item-icon">🚪</div>
@@ -3733,6 +3743,8 @@ function openMapPopup(gi, bi, mi) {
     _isFreeActive = (_nId2 === _fpNId && (gi + 1) === _fpM);
   }
 
+  if (_isFree && (window.currentNivelId || '0101') === '0102') _showFree0102Info();
+
   var b=BLOQUES_MAP[bi], c=b.color;
   document.getElementById('popup-bg').style.background='radial-gradient(ellipse at 30% 60%,' + c + '35 0%,transparent 60%)';
   var badge=document.getElementById('popup-badge');
@@ -3787,20 +3799,20 @@ function openMapPopup(gi, bi, mi) {
   };
 
   document.getElementById('popup-orar').onclick = function() {
-    if (!canAccessModo('libro', _plan)) { _showUpgradePrompt('Libro'); return; }
+    if (!canAccessModo('libro', _plan, _nId)) { _showUpgradePrompt('Libro'); return; }
     closePopup();
     if (window.navigateTo) window.navigateTo('orar.html?c=' + _nId + '&misterio=' + _mis);
   };
 
   document.getElementById('popup-rezar').onclick = function() {
-    if (!canAccessModo('rezar', _plan)) { _showUpgradePrompt('Rezo'); return; }
+    if (!canAccessModo('rezar', _plan, _nId)) { _showUpgradePrompt('Rezo'); return; }
     closePopup();
     irARezar(_nId, _mis);
   };
 
   // Indicador visual en botones bloqueados
-  var _libroAllowed = canAccessModo ? canAccessModo('libro', _plan) : true;
-  var _rezarAllowed = canAccessModo ? canAccessModo('rezar', _plan) : true;
+  var _libroAllowed = canAccessModo ? canAccessModo('libro', _plan, _nId) : true;
+  var _rezarAllowed = canAccessModo ? canAccessModo('rezar', _plan, _nId) : true;
   var _popupOrar  = document.getElementById('popup-orar');
   var _popupRezar = document.getElementById('popup-rezar');
   if (_popupOrar) {
@@ -3854,16 +3866,32 @@ function openMapPopup(gi, bi, mi) {
     el.style.display = _showDesc ? '' : 'none';
   });
 
-  // ── Para Free: ocultar botones y mostrar mensaje si no es su misterio ──
+  // ── Para Free: controlar visibilidad de botones según nivel ──
   var _existingMotiv = document.getElementById('popup-free-motiv');
   if (_existingMotiv) _existingMotiv.remove();
 
-  var _audioBtn   = document.getElementById('popup-audio');
-  var _orarBtn    = document.getElementById('popup-orar');
-  var _rezarBtn   = document.getElementById('popup-rezar');
-  var _modasTitle = document.getElementById('popup-modos-title');
+  var _audioBtn    = document.getElementById('popup-audio');
+  var _orarBtn     = document.getElementById('popup-orar');
+  var _rezarBtn    = document.getElementById('popup-rezar');
+  var _modasTitle  = document.getElementById('popup-modos-title');
+  var _nivelIdPopup = window.currentNivelId || '0101';
 
-  if (_isFree && !_isFreeActive) {
+  // Limpiar chips Premium previos
+  [_orarBtn, _rezarBtn].forEach(function(btn) {
+    if (!btn) return;
+    var ch = btn.querySelector('.premium-chip'); if (ch) ch.remove();
+    btn.style.opacity = ''; btn.style.pointerEvents = '';
+  });
+
+  if (_isFree && _nivelIdPopup === '0101') {
+    // Nivel 0101: Free tiene acceso completo
+    if (_audioBtn)   _audioBtn.style.display   = '';
+    if (_orarBtn)    _orarBtn.style.display     = '';
+    if (_rezarBtn)   _rezarBtn.style.display    = '';
+    if (_modasTitle) _modasTitle.style.display  = '';
+
+  } else if (_isFree && !_isFreeActive) {
+    // 0102+: no es su misterio del día — ocultar todo
     if (_audioBtn)   _audioBtn.style.display   = 'none';
     if (_orarBtn)    _orarBtn.style.display     = 'none';
     if (_rezarBtn)   _rezarBtn.style.display    = 'none';
@@ -3872,7 +3900,30 @@ function openMapPopup(gi, bi, mi) {
       'Con Premium puedes orar todos los Misterios que desees cada día, en modo Audio, Libro o Rezo, sin límites.',
       null
     );
+
+  } else if (_isFree && _isFreeActive) {
+    // 0102+: es su misterio del día — audio libre, libro/rezar con chip Premium
+    if (_audioBtn)   _audioBtn.style.display   = '';
+    if (_modasTitle) _modasTitle.style.display  = '';
+    if (_orarBtn) {
+      _orarBtn.style.display = '';
+      _orarBtn.style.opacity = '0.45';
+      _orarBtn.style.pointerEvents = 'none';
+      var _chipO = document.createElement('span');
+      _chipO.className = 'premium-chip'; _chipO.textContent = 'Premium';
+      _orarBtn.appendChild(_chipO);
+    }
+    if (_rezarBtn) {
+      _rezarBtn.style.display = '';
+      _rezarBtn.style.opacity = '0.45';
+      _rezarBtn.style.pointerEvents = 'none';
+      var _chipR = document.createElement('span');
+      _chipR.className = 'premium-chip'; _chipR.textContent = 'Premium';
+      _rezarBtn.appendChild(_chipR);
+    }
+
   } else {
+    // Premium / beta / developer: mostrar todo
     if (_audioBtn)   _audioBtn.style.display   = '';
     if (_orarBtn)    _orarBtn.style.display     = '';
     if (_rezarBtn)   _rezarBtn.style.display    = '';
@@ -4128,6 +4179,69 @@ function _obCerrarSplash() {
 window._obCerrarSplash = _obCerrarSplash;
 window.closePopup    = closePopup;
 window.closeTreasure = closeTreasure;
+
+function _showFree0102Info() {
+  var flag = 'cruzando_free_0102_shown';
+  if (localStorage.getItem(flag)) return;
+  localStorage.setItem(flag, '1');
+
+  var wrap      = document.getElementById('ob-mariano-wrap');
+  var bocadillo = document.getElementById('ob-bocadillo');
+  var texto     = document.getElementById('ob-bocadillo-text');
+  var btn       = document.getElementById('ob-comenzar-btn');
+  if (!wrap || !bocadillo || !texto) return;
+
+  texto.innerHTML = 'A partir de aquí, el modo Audio te da un Misterio cada día.<br>Con Premium, avanzas sin límites.';
+  bocadillo.style.display = 'block';
+  if (btn) btn.style.display = 'none';
+
+  var img = document.getElementById('ob-mariano-img');
+  if (img) img.src = 'https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev/mariano_01.webp';
+  wrap.style.display = 'flex';
+  wrap.style.animation = 'none';
+  void wrap.offsetWidth;
+  wrap.style.animation = '';
+
+  setTimeout(function() {
+    bocadillo.style.display = 'none';
+    wrap.style.transition = 'opacity 0.5s, transform 0.5s';
+    wrap.style.opacity = '0';
+    wrap.style.transform = 'translateX(160px)';
+    setTimeout(function() {
+      wrap.style.display = 'none';
+      wrap.style.opacity = '';
+      wrap.style.transform = '';
+      wrap.style.transition = '';
+    }, 500);
+  }, 5000);
+}
+window._showFree0102Info = _showFree0102Info;
+
+function _resetOnboarding() {
+  localStorage.removeItem('cruzando_onboarding');
+  localStorage.removeItem('cruzando_onboarding_done');
+  localStorage.removeItem('cruzando_free_0102_shown');
+  sessionStorage.removeItem('cruzando_onboarding_done');
+  sessionStorage.removeItem('cruzando_splash_shown');
+
+  if (currentUser && db && window._fbFirestore) {
+    var _fs = window._fbFirestore;
+    try {
+      _fs.setDoc(
+        _fs.doc(db, 'users', currentUser.uid, 'profile', 'onboarding'),
+        {},
+        { merge: false }
+      ).catch(function(){});
+    } catch(e) {}
+  }
+
+  closeDrawer();
+  setTimeout(function() {
+    if (window.showToast) showToast('✓ Tutoriales reactivados — se mostrarán en tu próxima sesión');
+    else alert('Tutoriales reactivados. Se mostrarán en tu próxima sesión.');
+  }, 300);
+}
+window._resetOnboarding = _resetOnboarding;
 
 // ── Simulación de plan para Developer ────────────────────────────
 window._setViewAs = function(simulatedPlan) {
