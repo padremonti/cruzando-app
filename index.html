@@ -3087,9 +3087,21 @@ document.getElementById('btn-premium-continuar').addEventListener('click', async
   }
 
   // Caso 2: ir a Stripe Checkout
-  // (Se implementa en la siguiente fase con Stripe)
-  // Por ahora mostramos un mensaje informativo
-  alert('El pago con Stripe se activará próximamente. Por ahora usa el código BETA2026 si eres beta tester.');
+  var plan = document.querySelector('input[name="plan"]:checked')?.value || 'mensual';
+  var btn  = this;
+  btn.disabled    = true;
+  btn.textContent = 'Redirigiendo a Stripe…';
+
+  try {
+    var createCheckoutSession = firebase.functions().httpsCallable('createCheckoutSession');
+    var result = await createCheckoutSession({ plan: plan });
+    window.location.href = result.data.url;
+  } catch(e) {
+    console.error('Checkout error:', e);
+    btn.disabled    = false;
+    btn.textContent = 'Intentar de nuevo';
+    alert('Hubo un error al iniciar el pago. Por favor intenta de nuevo.');
+  }
 });
 
 // ── Meta diaria: guardar metros de hoy ───────────────────────────

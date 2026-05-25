@@ -1,5 +1,9 @@
-const functions = require('firebase-functions');
-const OpenAI    = require('openai');
+const functions             = require('firebase-functions');
+const { defineSecret }      = require('firebase-functions/params');
+const OpenAI                = require('openai');
+
+const STRIPE_SECRET_KEY     = defineSecret('STRIPE_SECRET_KEY');
+const STRIPE_WEBHOOK_SECRET = defineSecret('STRIPE_WEBHOOK_SECRET');
 
 // La API key se configura manualmente con:
 // firebase functions:config:set openai.key="..."
@@ -94,4 +98,102 @@ exports.evaluarRetiro = functions
         feedback: 'Has completado este retiro con honestidad y valentía. Lo que has contemplado hoy es semilla — dale tiempo para crecer en tu corazón esta semana.'
       };
     }
+  });
+
+// ══════════════════════════════════════════════════════
+// STRIPE — Checkout + Webhook
+// ══════════════════════════════════════════════════════
+
+const admin = require('firebase-admin');
+
+if (!admin.apps.length) admin.initializeApp();
+const db = admin.firestore();
+
+const PRICE_IDS = {
+  mensual: 'price_1TIcVOCRd4PM0jIp9oEF54j4',
+  anual:   'price_1TIca0CRd4PM0jIparwSPFfT',
+};
+
+// ── 1. Crear sesión de Checkout ───────────────────────
+exports.createCheckoutSession = functions
+  .region('us-central1')
+  .runWith({ secrets: ['STRIPE_SECRET_KEY'] })
+  .https.onCall(async (data, context) => {
+
+    const stripe = require('stripe')(STRIPE_SECRET_KEY.value());
+
+    if (!context.auth) {
+      throw new functions.https.HttpsError('unauthenticated', 'Debes iniciar sesión.');
+    }
+
+    const { plan } = data;
+    const priceId  = PRICE_IDS[plan];
+    if (!priceId) {
+      throw new functions.https.HttpsError('invalid-argument', 'Plan no válido.');
+    }
+
+    const uid   = context.auth.uid;
+    const email = context.auth.token.email || '';
+
+    const session = await stripe.checkout.sessions.create({
+      mode:                 'subscription',
+      payment_method_types: ['card'],
+      customer_email:       email,
+      line_items:           [{ price: priceId, quantity: 1 }],
+      success_url:          'https://cruzando.app/?checkout=success',
+      cancel_url:           'https://cruzando.app/?checkout=cancel',
+      metadata:             { uid },
+      subscription_data:    { metadata: { uid } },
+    });
+
+    return { url: session.url };
+  });
+
+// ── 2. Webhook — actualizar plan en Firestore ─────────
+exports.stripeWebhook = functions
+  .region('us-central1')
+  .runWith({ secrets: ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET'] })
+  .https.onRequest(async (req, res) => {
+
+    const stripe = require('stripe')(STRIPE_SECRET_KEY.value());
+    const sig    = req.headers['stripe-signature'];
+    const secret = STRIPE_WEBHOOK_SECRET.value();
+    let event;
+
+    try {
+      event = stripe.webhooks.constructEvent(req.rawBody, sig, secret);
+    } catch (err) {
+      console.error('Webhook signature error:', err.message);
+      return res.status(400).send('Webhook error: ' + err.message);
+    }
+
+    const uid = event?.data?.object?.metadata?.uid
+             || event?.data?.object?.subscription_data?.metadata?.uid;
+
+    if (!uid) {
+      console.warn('No uid en metadata, evento ignorado:', event.type);
+      return res.json({ received: true });
+    }
+
+    const userRef = db.collection('users').doc(uid);
+
+    switch (event.type) {
+
+      case 'checkout.session.completed':
+      case 'invoice.paid':
+        await userRef.set({ plan: 'premium', stripeUpdatedAt: new Date().toISOString() }, { merge: true });
+        console.log('Plan → premium:', uid);
+        break;
+
+      case 'customer.subscription.deleted':
+      case 'invoice.payment_failed':
+        await userRef.set({ plan: 'free', stripeUpdatedAt: new Date().toISOString() }, { merge: true });
+        console.log('Plan → free:', uid);
+        break;
+
+      default:
+        console.log('Evento ignorado:', event.type);
+    }
+
+    res.json({ received: true });
   });
