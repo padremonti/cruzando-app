@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Soporte — CruzAndo</title>
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#002931;--card:#004C5B;--brand:#02BBE0;--brand2:#43DDF8;--text:#F0EAE2;--soft:#C8BFB5;--dim:#9A9088;--border:rgba(67,221,248,0.15)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:'Crimson Pro',Georgia,serif;font-size:1.1rem;line-height:1.8;min-height:100vh}
+  header{background:var(--card);border-bottom:1px solid var(--border);padding:20px 24px;display:flex;align-items:center;gap:16px}
+  .logo-name{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.5rem;font-weight:600;color:var(--brand2)}
+  .back-link{margin-left:auto;color:var(--brand);text-decoration:none;font-size:.9rem;font-family:sans-serif}
+  main{max-width:640px;margin:0 auto;padding:64px 24px 80px;text-align:center}
+  h1{font-family:'Cormorant Garamond',Georgia,serif;font-size:2.4rem;font-weight:600;color:var(--brand2);margin-bottom:16px}
+  .subtitle{color:var(--soft);font-size:1.2rem;margin-bottom:48px;font-style:italic}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:32px;margin-bottom:20px;text-align:left}
+  .card-icon{font-size:2rem;margin-bottom:12px}
+  .card h2{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.4rem;color:var(--brand);margin-bottom:8px}
+  .card p{color:var(--soft);margin-bottom:12px;font-size:1rem}
+  .card a{color:var(--brand2);text-decoration:none;font-weight:600;font-size:1.05rem}
+  .card a:hover{color:var(--brand)}
+  .response-time{font-size:.85rem;color:var(--dim);font-family:sans-serif;margin-top:8px}
+  footer{text-align:center;padding:24px;color:var(--dim);font-size:.85rem;border-top:1px solid var(--border);font-family:sans-serif}
+  footer a{color:var(--brand)}
+</style>
+</head>
+<body>
+<header>
+  <svg width="32" height="32" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect x="46.2" y="0" width="7.6" height="100" fill="#02BBE0"/>
+    <rect x="0" y="36" width="100" height="7.6" fill="#02BBE0"/>
+  </svg>
+  <span class="logo-name">CruzAndo</span>
+  <a href="/" class="back-link">← Inicio</a>
+</header>
+
+<main>
+  <h1>Soporte</h1>
+  <p class="subtitle">Estamos aquí para ayudarte en tu camino.</p>
+
+  <div class="card">
+    <div class="card-icon">✉️</div>
+    <h2>Escríbenos por correo</h2>
+    <p>Para dudas sobre tu cuenta, suscripción, problemas técnicos o cualquier otra consulta:</p>
+    <a href="mailto:contacto@cruzando.app">contacto@cruzando.app</a>
+    <p class="response-time">Tiempo de respuesta: 1-3 días hábiles</p>
+  </div>
+
+  <div class="card">
+    <div class="card-icon">🔒</div>
+    <h2>Privacidad y datos personales</h2>
+    <p>Para ejercer tus derechos ARCO (acceso, rectificación, cancelación u oposición) sobre tus datos personales:</p>
+    <a href="mailto:contacto@cruzando.app">contacto@cruzando.app</a>
+    <p class="response-time">Responderemos en un plazo máximo de 20 días hábiles</p>
+  </div>
+
+  <div class="card">
+    <div class="card-icon">💳</div>
+    <h2>Cancelar suscripción</h2>
+    <p>Para cancelar tu suscripción Premium, escríbenos indicando el correo de tu cuenta:</p>
+    <a href="mailto:contacto@cruzando.app">contacto@cruzando.app</a>
+    <p class="response-time">También puedes cancelar desde tu perfil dentro de la app</p>
+  </div>
+
+  <div class="card">
+    <div class="card-icon">📋</div>
+    <h2>Documentos legales</h2>
+    <p style="margin-bottom:6px"><a href="/privacidad.html">Política de Privacidad</a></p>
+    <p style="margin-bottom:0"><a href="/terminos.html">Términos de Servicio</a></p>
+  </div>
+</main>
+
+<footer>
+  CruzAndo — Peregrinar la vida con el Santo Rosario &nbsp;·&nbsp;
+  <a href="/privacidad.html">Privacidad</a> &nbsp;·&nbsp;
+  <a href="/terminos.html">Términos</a>
+</footer>
+</body>
+</html>
