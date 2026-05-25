@@ -1031,7 +1031,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 }
 .micro-card-contenido {
   font-family: 'Crimson Pro', Georgia, serif;
-  font-size: 1.2rem; font-weight: 400; line-height: 1.75; color: var(--text); flex: 1;
+  font-size: 1.45rem; font-weight: 400; line-height: 1.75; color: var(--text); flex: 1;
 }
 .micro-card-footer {
   display: flex; justify-content: space-between; align-items: center;
@@ -1048,12 +1048,12 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 }
 .micro-q-texto {
   font-family: 'Crimson Pro', Georgia, serif;
-  font-size: 36px; font-weight: 500; line-height: 1.7; color: var(--text); margin-bottom: 20px;
+  font-size: 40px; font-weight: 500; line-height: 1.7; color: var(--text); margin-bottom: 20px;
 }
 .micro-option {
-  width: 100%; padding: 13px 16px; border-radius: 14px;
+  width: 100%; padding: 15px 16px; border-radius: 14px;
   border: 1.5px solid var(--border); background: transparent;
-  color: var(--text); font-family: inherit; font-size: 0.88rem;
+  color: var(--text); font-family: inherit; font-size: 1.1rem;
   cursor: pointer; text-align: left; display: flex; align-items: center; gap: 10px;
   transition: all 0.2s; margin-bottom: 10px;
 }
@@ -1067,7 +1067,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 .micro-eco {
   margin-top: 10px; padding: 12px 14px; border-radius: 12px;
   background: rgba(255,122,0,0.06); border: 1px solid rgba(255,122,0,0.15);
-  font-family: 'Crimson Pro', Georgia, serif; font-size: 1.05rem; color: var(--text-soft);
+  font-family: 'Crimson Pro', Georgia, serif; font-size: 1.25rem; color: var(--text-soft);
   display: flex; align-items: flex-start; gap: 8px;
 }
 .micro-eco-emoji { font-size: 1.3rem; flex-shrink: 0; margin-top: 1px; }
@@ -1077,11 +1077,11 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 .micro-final-cross { margin-bottom: 24px; }
 .micro-final-titulo {
   font-family: 'Crimson Pro', Georgia, serif;
-  font-size: 1.6rem; font-weight: 600; color: var(--text); margin-bottom: 10px;
+  font-size: 1.9rem; font-weight: 600; color: var(--text); margin-bottom: 10px;
 }
 .micro-final-sub {
   font-family: 'Crimson Pro', Georgia, serif;
-  font-size: 1.1rem; color: var(--text-soft); line-height: 1.6; margin-bottom: 20px;
+  font-size: 1.3rem; color: var(--text-soft); line-height: 1.6; margin-bottom: 20px;
 }
 .micro-metros-chip {
   display: inline-block; padding: 6px 14px; border-radius: 20px;
@@ -1090,16 +1090,16 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 }
 .micro-nav { margin-top: 18px; display: flex; flex-direction: column; gap: 10px; }
 .micro-btn-primary {
-  width: 100%; padding: 15px; border-radius: 14px;
+  width: 100%; padding: 17px; border-radius: 14px;
   background: var(--lvl-bold); color: #fff; border: none;
-  font-family: inherit; font-size: 0.95rem; font-weight: 700; cursor: pointer;
+  font-family: inherit; font-size: 1.1rem; font-weight: 700; cursor: pointer;
   transition: opacity 0.2s; -webkit-tap-highlight-color: transparent;
 }
 .micro-btn-primary:active { opacity: 0.85; }
 .micro-btn-outline {
-  width: 100%; padding: 13px; border-radius: 14px;
+  width: 100%; padding: 15px; border-radius: 14px;
   background: transparent; color: var(--text-soft);
-  border: 1.5px solid var(--border); font-family: inherit; font-size: 0.88rem;
+  border: 1.5px solid var(--border); font-family: inherit; font-size: 1rem;
   cursor: pointer; -webkit-tap-highlight-color: transparent;
 }
 
@@ -1195,10 +1195,10 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 
 /* ── Preparación en el hero (pill) ── */
 .prep-hero{position:absolute;top:12px;left:40px;right:40px;z-index:10}
-.prep-hero-btn{width:100%;height:46px;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 14px;background:rgba(0,0,0,0.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1.5px solid rgba(255,255,255,0.25);border-radius:23px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;overflow:hidden}
+.prep-hero-btn{width:100%;height:54px;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 14px;background:rgba(var(--bg-rgb),0.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:2px solid var(--lvl-bold);border-radius:27px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.35)}
 .prep-hero-btn:active{opacity:0.7}
-.prep-hero-kicker{font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--lvl-bold);flex-shrink:0}
-.prep-hero-name{font-size:1rem;color:rgba(255,255,255,0.92);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prep-hero-kicker{font-size:0.85rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--lvl-bold);flex-shrink:0}
+.prep-hero-name{font-size:1.15rem;font-weight:600;color:rgba(255,255,255,0.92);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* ── Botón de Preparación (ya completado el micro) ── */
 .prep-btn-wrap { padding: 12px 0 4px; }
@@ -2915,6 +2915,7 @@ function renderMicroAudio(b, nivelId) {
     p.opciones.forEach((o, oi) => {
       $('micro-opt-' + oi).onclick = () => {
         if (seleccion !== null) return;
+        _playBubble();
         seleccion = oi;
         p.opciones.forEach((_, i) => {
           if (i === oi) { $('micro-opt-' + i).classList.add('selected'); $('micro-circ-' + i).textContent = '✓'; }
@@ -4114,6 +4115,24 @@ function goTo(page) {
   const base = location.origin + location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1);
   location.href = base + page;
 }
+
+function _playBubble() {
+  try {
+    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    var osc  = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(520, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(820, ctx.currentTime + 0.12);
+    gain.gain.setValueAtTime(0.18, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.18);
+  } catch(e) {}
+}
+window._playBubble = _playBubble;
 
 let _navChord = 0;
 function playNavChord() {
