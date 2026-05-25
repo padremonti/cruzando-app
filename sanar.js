@@ -45,7 +45,7 @@
     if (sun)  sun.style.display  = light ? 'none'  : 'block';
     if (moon) moon.style.display = light ? 'block' : 'none';
     var meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.content = light ? '#F5F0E8' : '#1A0E04';
+    if (meta) meta.content = light ? '#E6DED3' : '#002931';
     localStorage.setItem('cruzando_theme', light ? 'light' : 'dark');
   }
 
@@ -65,8 +65,11 @@
   })();
 
   function _bgmSlugToUrl(slug) {
-    var m = slug.match(/^s(\d+)_(\d+)$/);
-    return m ? _BGM_BASE + 'BGM_' + m[1] + '_' + m[2] + '.mp3' : null;
+    var m1 = slug.match(/^sanar_(\d+)_(\d+)$/);
+    if (m1) return _BGM_BASE + 'BGM_' + m1[1] + '_' + m1[2] + '.mp3';
+    var m2 = slug.match(/^s(\d+)_(\d+)$/);
+    if (m2) return _BGM_BASE + 'BGM_' + m2[1] + '_' + m2[2] + '.mp3';
+    return null;
   }
 
   function _bgmStart(slug) {
@@ -149,26 +152,16 @@
 
   var DOLOROSOS = [11, 12, 13, 14, 15];
 
-  function _calcEstado(retiro, progSnap, tallerSnap) {
-    // Contenido pendiente → siempre bloqueado sin importar el progreso
+  function _calcEstado(retiro, progSnap, tallerSnap, userPlan) {
     if (retiro.estado === 'pendiente') return 'bloqueado';
 
-    // Taller iniciado o completado tiene prioridad
     if (tallerSnap.exists) {
       return tallerSnap.data().completed ? 'completado' : 'en_progreso';
     }
 
-    // Verificar si los 5 Misterios Dolorosos del nivel de desbloqueo están completados.
-    // audio.html escribe: progress.dolorosos = [ts, ts, ts, ts, ts] (null = incompleto)
-    if (progSnap.exists) {
-      var dolorosos = (progSnap.data().progress || {}).dolorosos;
-      if (Array.isArray(dolorosos) && dolorosos.length === 5 &&
-          dolorosos.every(function (x) { return x !== null && x !== undefined; })) {
-        return 'disponible';
-      }
-    }
+    if (userPlan === 'free') return 'bloqueado';
 
-    return 'bloqueado';
+    return 'disponible';
   }
 
   /* ── Render de cards ── */
@@ -277,6 +270,7 @@
     return uRef.get().then(function(uSnap) {
       var ud    = uSnap.exists ? uSnap.data() : {};
       var _plan = window.effectivePlan ? window.effectivePlan() : (window.resolvePlan ? window.resolvePlan(ud) : 'free');
+      window._userPlan = _plan;
       if (window.requirePremiumAccess && !window.requirePremiumAccess('sanar', _plan)) {
         return Promise.reject('blocked');
       }
@@ -311,7 +305,7 @@
         var talleres  = results[2];
 
         retiros.forEach(function (r, i) {
-          r._estado = _calcEstado(r, progresos[i], talleres[i]);
+          r._estado = _calcEstado(r, progresos[i], talleres[i], window._userPlan || 'free');
           if (r._estado === 'en_progreso' && talleres[i].exists) {
             var lastCard = (talleres[i].data().lastCardIndex) || 0;
             r._pct = Math.min(100, Math.round((lastCard / 48) * 100));
