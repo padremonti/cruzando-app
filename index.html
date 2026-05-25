@@ -4158,34 +4158,30 @@ window._setViewAs = function(simulatedPlan) {
 
 /* ══ CATÁLOGO DE RETIROS ══ */
 var RETIROS_MAP = [
-  // Mundo 1 — Cruz
-  { slug:'s1_2', nombre:'Sanando el Duelo',           tipo:'santuario',  nivelDesbloqueo:'0102', mundo:1, color:'#FF7A00' },
-  { slug:'s1_3', nombre:'Sanando el Perdón',          tipo:'albergue',   nivelDesbloqueo:'0103', mundo:1, color:'#FF7A00' },
-  { slug:'s1_4', nombre:'Sanando la Enfermedad',      tipo:'monasterio', nivelDesbloqueo:'0104', mundo:1, color:'#FF7A00' },
-  // Mundo 2 — Emociones
-  { slug:'s2_2', nombre:'Sanando el Enojo',           tipo:'santuario',  nivelDesbloqueo:'0202', mundo:2, color:'#01BBE1' },
-  { slug:'s2_3', nombre:'Sanando el Miedo',           tipo:'albergue',   nivelDesbloqueo:'0203', mundo:2, color:'#01BBE1' },
-  { slug:'s2_4', nombre:'Sanando la Tristeza',        tipo:'monasterio', nivelDesbloqueo:'0204', mundo:2, color:'#01BBE1' },
-  // Mundo 3 — Mente
-  { slug:'s3_2', nombre:'Sanando el Trauma',          tipo:'santuario',  nivelDesbloqueo:'0302', mundo:3, color:'#8E44AD' },
-  { slug:'s3_3', nombre:'Sanando la Crítica',         tipo:'albergue',   nivelDesbloqueo:'0303', mundo:3, color:'#8E44AD' },
-  { slug:'s3_4', nombre:'Sanando la Mentira',         tipo:'monasterio', nivelDesbloqueo:'0304', mundo:3, color:'#8E44AD' },
-  // Mundo 4 — Corazón
-  { slug:'s4_2', nombre:'Sanando el Cansancio',       tipo:'santuario',  nivelDesbloqueo:'0402', mundo:4, color:'#C0392B' },
-  { slug:'s4_3', nombre:'Sanando la Adicción',        tipo:'albergue',   nivelDesbloqueo:'0403', mundo:4, color:'#C0392B' },
-  { slug:'s4_4', nombre:'Sanando la Crisis',          tipo:'monasterio', nivelDesbloqueo:'0404', mundo:4, color:'#C0392B' },
-  // Mundo 5 — Relaciones
-  { slug:'s5_2', nombre:'Sanando mi Infancia Herida', tipo:'santuario',  nivelDesbloqueo:'0502', mundo:5, color:'#27AE60' },
-  { slug:'s5_3', nombre:'Sanando la Soledad',         tipo:'albergue',   nivelDesbloqueo:'0503', mundo:5, color:'#27AE60' },
-  { slug:'s5_4', nombre:'Sanando el Nido Vacío',      tipo:'monasterio', nivelDesbloqueo:'0504', mundo:5, color:'#27AE60' },
-  // Mundo 6 — Amor
-  { slug:'s6_2', nombre:'Sanando el Desamor',         tipo:'santuario',  nivelDesbloqueo:'0602', mundo:6, color:'#E91E8C' },
-  { slug:'s6_3', nombre:'Sanando la Infidelidad',     tipo:'albergue',   nivelDesbloqueo:'0603', mundo:6, color:'#E91E8C' },
-  { slug:'s6_4', nombre:'Sanando el Divorcio',        tipo:'monasterio', nivelDesbloqueo:'0604', mundo:6, color:'#E91E8C' },
-  // Mundo 7 — Tiempo
-  { slug:'s7_2', nombre:'Sanando el Estrés',          tipo:'santuario',  nivelDesbloqueo:'0702', mundo:7, color:'#D4A017' },
-  { slug:'s7_3', nombre:'Sanando el Aburrimiento',    tipo:'albergue',   nivelDesbloqueo:'0703', mundo:7, color:'#D4A017' },
-  { slug:'s7_4', nombre:'Sanando la Vejez',           tipo:'monasterio', nivelDesbloqueo:'0704', mundo:7, color:'#D4A017' },
+  // Mundo 1 — disponibles desde 0101
+  { slug:'sanar_1_1', nombre:'Sanando el Duelo',           tipo:'santuario',  nivelDesbloqueo:'0101', mundo:1, color:'#FF7A00' },
+  { slug:'sanar_1_2', nombre:'Sanando el Perdón',          tipo:'albergue',   nivelDesbloqueo:'0101', mundo:1, color:'#FF7A00' },
+  { slug:'sanar_1_3', nombre:'Sanando la Enfermedad',      tipo:'monasterio', nivelDesbloqueo:'0101', mundo:1, color:'#FF7A00' },
+  // Mundo 2 — disponibles desde 0201
+  { slug:'sanar_2_1', nombre:'Sanando el Enojo',           tipo:'santuario',  nivelDesbloqueo:'0201', mundo:2, color:'#01BBE1' },
+  { slug:'sanar_2_2', nombre:'Sanando el Miedo',           tipo:'albergue',   nivelDesbloqueo:'0201', mundo:2, color:'#01BBE1' },
+  { slug:'sanar_2_3', nombre:'Sanando la Tristeza',        tipo:'monasterio', nivelDesbloqueo:'0201', mundo:2, color:'#01BBE1' },
+  // Mundo 3 — disponibles desde 0301
+  { slug:'sanar_3_1', nombre:'Sanando el Trauma',          tipo:'santuario',  nivelDesbloqueo:'0301', mundo:3, color:'#8E44AD' },
+  { slug:'sanar_3_2', nombre:'Sanando la Crítica',         tipo:'albergue',   nivelDesbloqueo:'0301', mundo:3, color:'#8E44AD' },
+  { slug:'sanar_3_3', nombre:'Sanando la Mentira',         tipo:'monasterio', nivelDesbloqueo:'0301', mundo:3, color:'#8E44AD' },
+  // Mundo 4 — disponibles desde 0401
+  { slug:'sanar_4_1', nombre:'Sanando el Cansancio',       tipo:'santuario',  nivelDesbloqueo:'0401', mundo:4, color:'#C0392B' },
+  { slug:'sanar_4_2', nombre:'Sanando la Adicción',        tipo:'albergue',   nivelDesbloqueo:'0401', mundo:4, color:'#C0392B' },
+  { slug:'sanar_4_3', nombre:'Sanando la Crisis',          tipo:'monasterio', nivelDesbloqueo:'0401', mundo:4, color:'#C0392B' },
+  // Mundo 5 — disponibles desde 0501
+  { slug:'sanar_5_1', nombre:'Sanando la Soledad',         tipo:'santuario',  nivelDesbloqueo:'0501', mundo:5, color:'#27AE60' },
+  { slug:'sanar_5_2', nombre:'Sanando la Infancia Herida', tipo:'albergue',   nivelDesbloqueo:'0501', mundo:5, color:'#27AE60' },
+  { slug:'sanar_5_3', nombre:'Sanando el Nido Vacío',      tipo:'monasterio', nivelDesbloqueo:'0501', mundo:5, color:'#27AE60' },
+  // Mundo 6 — disponibles desde 0601
+  { slug:'sanar_6_1', nombre:'Sanando el Divorcio',        tipo:'santuario',  nivelDesbloqueo:'0601', mundo:6, color:'#E91E8C' },
+  { slug:'sanar_6_2', nombre:'Sanando la Infidelidad',     tipo:'albergue',   nivelDesbloqueo:'0601', mundo:6, color:'#E91E8C' },
+  { slug:'sanar_6_3', nombre:'Sanando el Desamor',         tipo:'monasterio', nivelDesbloqueo:'0601', mundo:6, color:'#E91E8C' },
 ];
 
 /* ══ LEVEL PICKER ══ */

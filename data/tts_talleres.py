@@ -1,4 +1,4 @@
-"""Utilidades TTS para talleres de sanar.html (s{mundo}_{retiro}.json)"""
+"""Utilidades TTS para talleres de sanar.html (sanar_{mundo}_{retiro}.json)"""
 
 import json
 import logging
@@ -14,12 +14,15 @@ from config import (
     SECTION_VOICES, SECTION_INSTRUCTIONS,
 )
 
+TALLER_OUTPUT_DIR = OUTPUT_DIR / "talleres"
+TALLER_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
 logger = logging.getLogger(__name__)
 
 # Convención de nombres
-# s{m}_{r}_bienvenida.mp3     → introduccion.texto
-# s{m}_{r}_{N}.mp3            → misterios[N].contemplacion.texto
-# s{m}_{r}_{N}_oracion.mp3   → misterios[N].oracion.texto
+# sanar_{m}_{r}_bienvenida.mp3   → introduccion.texto
+# sanar_{m}_{r}_{N}.mp3          → misterios[N].contemplacion.texto
+# sanar_{m}_{r}_{N}_oracion.mp3  → misterios[N].oracion.texto
 
 TALLER_SECTIONS = [
     ("bienvenida",    "Bienvenida del taller"),
@@ -41,8 +44,8 @@ TALLER_INSTRUCTIONS_MAP = {
 
 
 def discover_taller_json_files() -> list:
-    """Busca archivos s*.json en el directorio actual."""
-    return sorted(p.name for p in Path(".").glob("s*.json"))
+    """Busca archivos sanar_*.json en el directorio actual."""
+    return sorted(p.name for p in Path(".").glob("sanar_*.json"))
 
 
 def load_taller_json(filename: str) -> dict:
@@ -62,11 +65,10 @@ def save_taller_json(filename: str, data: dict) -> None:
 
 
 def get_slug_parts(filename: str) -> tuple:
-    """s1_2.json → mundo=1, retiro=2"""
-    stem = Path(filename).stem  # "s1_2"
-    parts = stem.lstrip("s").split("_")
-    if len(parts) >= 2:
-        return parts[0], parts[1]
+    """sanar_1_1.json → mundo=1, retiro=1"""
+    parts = Path(filename).stem.split("_")  # ["sanar", "1", "1"]
+    if len(parts) >= 3:
+        return parts[1], parts[2]
     return "1", "1"
 
 
@@ -75,7 +77,7 @@ def build_taller_filename(filename: str, section_type: str, misterio_num: int = 
     section_type: 'bienvenida' | 'contemplacion' | 'oracion'
     misterio_num: requerido para contemplacion y oracion
     """
-    stem = Path(filename).stem  # "s1_2"
+    stem = Path(filename).stem  # "sanar_1_1"
     if section_type == "bienvenida":
         return f"{stem}_bienvenida.mp3"
     elif section_type == "contemplacion":
@@ -125,7 +127,7 @@ def generate_taller_audio(
     voice        = TALLER_VOICES.get(section_type, TALLER_VOICES["contemplacion"])
     instructions = TALLER_INSTRUCTIONS_MAP.get(section_type, TALLER_INSTRUCTIONS_MAP["contemplacion"])
 
-    out_path = OUTPUT_DIR / out_filename
+    out_path = TALLER_OUTPUT_DIR / out_filename
     headers = {
         "Authorization": f"Bearer {OPENAI_API_KEY}",
         "Content-Type": "application/json",
@@ -178,12 +180,12 @@ def check_audio_status(filename: str, data: dict) -> str:
     """Revisa qué audios existen ya en OUTPUT_DIR."""
     stem = Path(filename).stem
     lines = []
-    f_bien = OUTPUT_DIR / f"{stem}_bienvenida.mp3"
+    f_bien = TALLER_OUTPUT_DIR / f"{stem}_bienvenida.mp3"
     lines.append(f"{'✅' if f_bien.exists() else '❌'} {stem}_bienvenida.mp3")
     for i, m in enumerate(data.get("misterios", []), start=1):
         nombre = m.get("nombre", f"Misterio {i}")[:30]
-        f_cont = OUTPUT_DIR / f"{stem}_{i}.mp3"
-        f_orac = OUTPUT_DIR / f"{stem}_{i}_oracion.mp3"
+        f_cont = TALLER_OUTPUT_DIR / f"{stem}_{i}.mp3"
+        f_orac = TALLER_OUTPUT_DIR / f"{stem}_{i}_oracion.mp3"
         lines.append(f"  {'✅' if f_cont.exists() else '❌'} {stem}_{i}.mp3  ({nombre})")
         lines.append(f"  {'✅' if f_orac.exists() else '❌'} {stem}_{i}_oracion.mp3")
     return "\n".join(lines)

@@ -51,7 +51,7 @@ def main():
             with gr.Tab("START / BYE"):
                 startbye_comps = build_tab_startbye(json_choices)
 
-            with gr.Tab("Talleres (Sanar)"):
+            with gr.Tab("🏥 Talleres · Sanar"):
                 talleres_comps = build_tab_talleres(taller_choices)
 
         register_handlers_tts(*tts_comps, session_cost)

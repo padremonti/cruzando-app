@@ -216,13 +216,31 @@ body.light {
 .hero-play-circle:active { transform: scale(0.93); opacity: 0.85; }
 .hero-player-bars { flex: 1; }
 .hero-bar-wrap {
-  height: 3px; background: rgba(255,255,255,0.2); border-radius: 2px;
-  cursor: pointer; overflow: hidden; margin-bottom: 5px;
+  height: 44px;
+  display: flex; align-items: center;
+  background: transparent;
+  cursor: pointer; margin-bottom: 0;
+  position: relative;
+}
+.hero-bar-track {
+  position: absolute; left: 0; right: 0;
+  height: 3px; background: rgba(255,255,255,0.2);
+  border-radius: 2px; pointer-events: none;
 }
 .hero-bar-fill {
-  height: 100%; background: rgba(255,255,255,0.9);
-  border-radius: 2px; width: 0%; transition: width 0.3s linear;
+  height: 3px; background: rgba(255,255,255,0.9);
+  border-radius: 2px; width: 0%;
+  transition: width 0.1s linear;
+  pointer-events: none;
+  position: absolute; left: 0; top: 50%; transform: translateY(-50%);
 }
+.hero-bar-thumb {
+  position: absolute; top: 50%; transform: translate(-50%, -50%);
+  width: 14px; height: 14px; border-radius: 50%;
+  background: #fff; pointer-events: none;
+  opacity: 0; transition: opacity 0.15s;
+}
+.hero-bar-wrap.dragging .hero-bar-thumb { opacity: 1; }
 .hero-time-row {
   font-size: 0.68rem; color: rgba(255,255,255,0.6);
   display: flex; justify-content: space-between;
@@ -790,10 +808,10 @@ body.light .tool-btn svg { background: rgba(0,0,0,0.04); }
   </section>
 
   <div class="controls-bar">
-    <div class="progress-track" id="hero-bar-wrap">
-      <div class="progress-fill" id="hero-bar-fill">
-        <div class="progress-thumb"></div>
-      </div>
+    <div class="hero-bar-wrap" id="hero-bar-wrap">
+      <div class="hero-bar-track"></div>
+      <div class="hero-bar-fill" id="hero-bar-fill"></div>
+      <div class="hero-bar-thumb" id="hero-bar-thumb"></div>
     </div>
     <div class="time-row">
       <span id="hero-cur">0:00</span>
@@ -1243,10 +1261,56 @@ function setupCantoMediaSession(canto) {
   });
 }
 
-document.getElementById('hero-bar-wrap').onclick = (e) => {
-  if (activeAudio && activePlayBtn === document.getElementById('hero-play-btn'))
-    seekCanto(e, activeAudio, document.getElementById('hero-bar-wrap'));
-};
+(function() {
+  var barWrap   = document.getElementById('hero-bar-wrap');
+  var barFillEl = document.getElementById('hero-bar-fill');
+  var thumbEl   = document.getElementById('hero-bar-thumb');
+  var _dragging = false;
+
+  function _seekFromEvent(clientX) {
+    if (!activeAudio || !activeAudio.duration) return;
+    var rect = barWrap.getBoundingClientRect();
+    var pct  = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    activeAudio.currentTime = pct * activeAudio.duration;
+    barFillEl.style.transition = 'none';
+    barFillEl.style.width = (pct * 100) + '%';
+    if (thumbEl) thumbEl.style.left = (pct * 100) + '%';
+    setTimeout(function() { barFillEl.style.transition = ''; }, 150);
+  }
+
+  barWrap.addEventListener('touchstart', function(e) {
+    _dragging = true;
+    barWrap.classList.add('dragging');
+    _seekFromEvent(e.touches[0].clientX);
+  }, { passive: true });
+
+  barWrap.addEventListener('touchmove', function(e) {
+    if (!_dragging) return;
+    e.preventDefault();
+    _seekFromEvent(e.touches[0].clientX);
+  }, { passive: false });
+
+  barWrap.addEventListener('touchend', function() {
+    _dragging = false;
+    barWrap.classList.remove('dragging');
+  });
+
+  barWrap.addEventListener('mousedown', function(e) {
+    _dragging = true;
+    barWrap.classList.add('dragging');
+    _seekFromEvent(e.clientX);
+    document.addEventListener('mousemove', _onMouseMove);
+    document.addEventListener('mouseup',   _onMouseUp);
+  });
+
+  function _onMouseMove(e) { if (_dragging) _seekFromEvent(e.clientX); }
+  function _onMouseUp() {
+    _dragging = false;
+    barWrap.classList.remove('dragging');
+    document.removeEventListener('mousemove', _onMouseMove);
+    document.removeEventListener('mouseup',   _onMouseUp);
+  }
+})();
 
 // Swipe down para cerrar el sheet de letra
 (function() {
@@ -1554,8 +1618,11 @@ function playCantoAudio(url, playBtn, barFill, curEl, durEl) {
 
   audio.ontimeupdate = () => {
     if (!audio.duration) return;
-    barFill.style.width = (audio.currentTime / audio.duration * 100) + '%';
+    var pct = audio.currentTime / audio.duration * 100;
+    barFill.style.width = pct + '%';
     curEl.textContent = fmt(audio.currentTime);
+    var thumb = document.getElementById('hero-bar-thumb');
+    if (thumb) thumb.style.left = pct + '%';
   };
   audio.onloadedmetadata = () => { durEl.textContent = fmt(audio.duration); };
   audio.onended = () => {
