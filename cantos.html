@@ -1577,18 +1577,16 @@ function fmt(s) {
 }
 
 function _doAutoplay() {
-  if (autoplayEnabled && navCantos.length > 1) {
-    const next = currentIdx + 1;
-    if (next < navCantos.length) {
-      currentIdx = next;
-      updateHero(navCantos[currentIdx]);
-      renderDots();
-      updateNavBtns();
-      saveBookmark(navCantos[currentIdx]);
-      playHeroCanto(navCantos[currentIdx]);
-    } else {
-      heroBounce('right');
-    }
+  const next = currentIdx + 1;
+  if (next < navCantos.length) {
+    currentIdx = next;
+    updateHero(navCantos[currentIdx]);
+    renderDots();
+    updateNavBtns();
+    saveBookmark(navCantos[currentIdx]);
+    playHeroCanto(navCantos[currentIdx]);
+  } else {
+    heroBounce('right');
   }
 }
 window._doAutoplay = _doAutoplay;
@@ -1636,12 +1634,14 @@ function playCantoAudio(url, playBtn, barFill, curEl, durEl) {
     if (_planNow === 'free') {
       _cantoPlayCount++;
       if (_cantoPlayCount % _INTERSTITIAL_EVERY === 0) {
-        _showInterstitial(function() { _doAutoplay(); }, false);
+        _showInterstitial(function() {
+          if (autoplayEnabled && navCantos.length > 1) _doAutoplay();
+        }, false);
         return;
       }
     }
 
-    _doAutoplay();
+    if (autoplayEnabled && navCantos.length > 1) _doAutoplay();
   };
   audio.onerror = () => { setPlayIcon(playBtn, false); activeAudio = null; };
 
@@ -2018,6 +2018,12 @@ function _showInterstitial(onClose, markAsShownToday) {
       if (skipBtn)    skipBtn.style.display   = '';
       if (counterEl)  counterEl.style.display = 'none';
       if (progressEl) progressEl.style.width  = '100%';
+      var _autoCloseTimer = setTimeout(function() {
+        if (window._closeInterstitial) window._closeInterstitial();
+      }, 3000);
+      if (skipBtn) skipBtn.addEventListener('click', function() {
+        clearTimeout(_autoCloseTimer);
+      }, { once: true });
     });
   }
 
@@ -2145,10 +2151,10 @@ document.addEventListener('visibilitychange', function() {
 
   <!-- Botón skip — aparece a los 10s -->
   <button id="interstitial-skip" onclick="window._closeInterstitial()"
-    style="display:none;padding:12px 32px;border-radius:28px;border:1px solid var(--border);
-    background:none;color:var(--text-dim);font-family:'Inter',sans-serif;
-    font-size:0.85rem;cursor:pointer;-webkit-tap-highlight-color:transparent;">
-    Continuar a la biblioteca →
+    style="display:none;padding:12px 32px;border-radius:28px;border:1.5px solid var(--brand);
+    background:none;color:var(--brand);font-family:'Inter',sans-serif;
+    font-size:0.9rem;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent;">
+    Continuar →
   </button>
 
   <!-- Contador antes del skip -->
