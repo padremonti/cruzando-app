@@ -950,7 +950,7 @@ const db   = getFirestore(app);
 const CANTOS_BASE       = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/cantos/';
 const EXTRAS_CANTOS_BASE = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/extras/';
 const INTERSTITIAL_BASE  = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/interstitials/';
-const INTERSTITIAL_TOTAL = 4;
+const INTERSTITIAL_TOTAL = 10;
 const INTERSTITIAL_KEY   = 'cruzando_interstitial_fecha';
 var _cantoPlayCount     = 0;
 var _INTERSTITIAL_EVERY = 4;
@@ -1860,10 +1860,26 @@ async function backfillCantos(uid) {
 
 // ── Textos de los interstitials (coinciden con los mp3) ──────
 var INTERSTITIAL_TEXTS = [
+  // 01 — Modo Libro
   '¿Sabías que puedes contemplar cada Misterio, no solo escucharlo?\n\nEn el modo Libro, texto bíblico, reflexión y preguntas que tocan el corazón... a tu ritmo, en silencio, con profundidad.',
+  // 02 — Modo Rezo
   '¿Y si pudieras rezar los cinco Misterios, no solo uno?\n\nCon el modo Rezo acompañas a María en un bloque completo. Avanzas más, llegas más lejos.',
+  // 03 — Sin límites
   '¿Sientes que un Misterio al día es poco para ti?\n\nCon CruzAndo Premium puedes recorrer tantos Misterios como quieras cada día. Sin límites.',
-  'En cada nivel del itinerario hay un retiro esperándote.\n\nLa sección Sanar: espacios de oración para el duelo, la tristeza, el enojo, el perdón, el cansancio...'
+  // 04 — Sanar general
+  'En cada nivel del itinerario hay un retiro esperándote.\n\nLa sección Sanar: espacios de oración para el duelo, la tristeza, el enojo, el perdón, el cansancio...',
+  // 05 — Taller Duelo
+  'En el camino, hay momentos en que el peso del duelo se hace presente.\nEl Rosario puede acompañarte en ese dolor.\n\nEn CruzAndo encontrarás el retiro Sanando el Duelo — cinco misterios para caminar la pérdida con María.\nDisponible en modo Premium.',
+  // 06 — Taller Perdón
+  'Hay cargas que no son tuyas, pero que llevas igual.\nEl perdón no es olvidar — es soltar.\n\nEn CruzAndo encontrarás el retiro Sanando el Perdón — cinco misterios para dejar ir lo que pesa.\nDisponible en modo Premium.',
+  // 07 — Taller Enfermedad
+  'La enfermedad también es un camino.\nNo tienes que recorrerlo solo.\n\nEn CruzAndo encontrarás el retiro Sanando la Enfermedad — cinco misterios para encontrar a Dios en el dolor del cuerpo.\nDisponible en modo Premium.',
+  // 08 — Diario
+  'Cada misterio que rezas deja algo en ti. ¿Lo has escrito?\n\nEn tu Diario de CruzAndo puedes guardar tus reflexiones, tus preguntas, lo que el camino va dejando en tu corazón.\nEs tuyo. Y es gratis para todos.\n\nVisita tu Diario — te está esperando.',
+  // 09 — Metros y logros
+  '¿Sabías que cada vez que oras, lees, escribes o escuchas un canto estás ganando metros en tu camino?\n\nEn modo Premium, cada interacción cuenta — contemplar, rezar, responder preguntas, completar bloques.\nTodo suma. Todo vale.\n\nSigue caminando con Premium.',
+  // 10 — Acceso a niveles anteriores
+  '¿Hay algún misterio que quisieras volver a contemplar?\n\nCon Premium puedes regresar a cualquier misterio que ya recorriste — escucharlo de nuevo, rezarlo, releer tu reflexión.\nEl camino no se borra. Siempre puedes volver.\n\nDesbloquea todo con Premium.',
 ];
 
 function _shouldShowInterstitial(plan) {
@@ -1888,7 +1904,8 @@ function _showInterstitial(onClose, markAsShownToday) {
   if (!overlay) { onClose(); return; }
 
   var idx  = _getInterstitialIdx();
-  var url  = INTERSTITIAL_BASE + 'interstitial_0' + (idx + 1) + '.mp3';
+  var n    = idx + 1;
+  var url  = INTERSTITIAL_BASE + 'interstitial_' + (n < 10 ? '0' + n : n) + '.mp3';
   var text = INTERSTITIAL_TEXTS[idx];
 
   var bodyEl = document.getElementById('interstitial-body');
