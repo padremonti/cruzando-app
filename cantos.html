@@ -1512,6 +1512,23 @@ function fmt(s) {
   return m + ':' + String(sec).padStart(2,'0');
 }
 
+function _doAutoplay() {
+  if (autoplayEnabled && navCantos.length > 1) {
+    const next = currentIdx + 1;
+    if (next < navCantos.length) {
+      currentIdx = next;
+      updateHero(navCantos[currentIdx]);
+      renderDots();
+      updateNavBtns();
+      saveBookmark(navCantos[currentIdx]);
+      playHeroCanto(navCantos[currentIdx]);
+    } else {
+      heroBounce('right');
+    }
+  }
+}
+window._doAutoplay = _doAutoplay;
+
 function playCantoAudio(url, playBtn, barFill, curEl, durEl) {
   // Destruir completamente el audio anterior antes de crear el nuevo
   if (activeAudio) {
@@ -1547,42 +1564,17 @@ function playCantoAudio(url, playBtn, barFill, curEl, durEl) {
     curEl.textContent  = '0:00';
     activeAudio = null; activePlayBtn = null;
 
-    // ── Interstitial periódico cada 4 tracks (solo Free) ──────────
-    var _plan = window.effectivePlan ? window.effectivePlan() : 'free';
-    if (_plan === 'free') {
+    // ── Interstitial periódico cada N tracks (solo Free) ──────────
+    var _planNow = window.effectivePlan ? window.effectivePlan() : 'premium';
+    if (_planNow === 'free') {
       _cantoPlayCount++;
       if (_cantoPlayCount % _INTERSTITIAL_EVERY === 0) {
-        _showInterstitial(function() {
-          if (autoplayEnabled && navCantos.length > 1) {
-            const next = currentIdx + 1;
-            if (next < navCantos.length) {
-              currentIdx = next;
-              updateHero(navCantos[currentIdx]);
-              renderDots(); updateNavBtns();
-              saveBookmark(navCantos[currentIdx]);
-              playHeroCanto(navCantos[currentIdx]);
-            } else {
-              heroBounce('right');
-            }
-          }
-        }, false);
+        _showInterstitial(function() { _doAutoplay(); }, false);
         return;
       }
     }
 
-    // ── Autoplay normal ───────────────────────────────────────────
-    if (autoplayEnabled && navCantos.length > 1) {
-      const next = currentIdx + 1;
-      if (next < navCantos.length) {
-        currentIdx = next;
-        updateHero(navCantos[currentIdx]);
-        renderDots(); updateNavBtns();
-        saveBookmark(navCantos[currentIdx]);
-        playHeroCanto(navCantos[currentIdx]);
-      } else {
-        heroBounce('right');
-      }
-    }
+    _doAutoplay();
   };
   audio.onerror = () => { setPlayIcon(playBtn, false); activeAudio = null; };
 
