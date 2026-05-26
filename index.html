@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<link rel="icon" type="image/png" href="/cruzando-app/icon-192.png">
-<link rel="shortcut icon" href="/cruzando-app/icon-192.png">
+<link rel="icon" type="image/png" href="/icon-192.png">
+<link rel="shortcut icon" href="/icon-192.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -2608,7 +2608,8 @@ onAuthStateChanged(auth, async function(user) {
     localStorage.removeItem('cruzando_plan_cache');
     localStorage.removeItem('cruzando_current_nivel');
     localStorage.removeItem('cruzando_frontier_nivel');
-    history.replaceState({}, '', '/cruzando-app/');
+    history.replaceState({}, '', '/');
+    window._forceFirestorePlan = true;
   }
 
   if (!user) { currentUser = null; showScreen('login'); return; }
@@ -2626,7 +2627,9 @@ onAuthStateChanged(auth, async function(user) {
   var _cFrontier  = localStorage.getItem('cruzando_frontier_nivel')  || _cNivel;
   var _cDone      = parseInt(localStorage.getItem('cruzando_done_count') || '0');
   var _cChest     = JSON.parse(localStorage.getItem('cruzando_chest_state') || 'null');
-  var _cPlan      = localStorage.getItem('cruzando_plan_cache')      || 'free';
+  var _cPlan      = window._forceFirestorePlan
+    ? 'free'
+    : (localStorage.getItem('cruzando_plan_cache') || 'free');
   var _cMeters    = parseInt(localStorage.getItem('cruzando_total_metros') || '0');
 
   currentNivelId         = _cNivel;
@@ -2741,7 +2744,18 @@ onAuthStateChanged(auth, async function(user) {
     setProgressCache(currentNivelId, window._firestoreProgress);
   } catch(e) {}
 
-  requestAnimationFrame(function() { if (window.buildMap) window.buildMap(); });
+  if (window._forceFirestorePlan) {
+    window._forceFirestorePlan = false;
+    renderHome(Object.assign({}, userData, { plan: realPlan }));
+    requestAnimationFrame(function() {
+      if (window.buildMap) window.buildMap();
+      var bannerPremium = document.getElementById('banner-premium');
+      if (bannerPremium) bannerPremium.style.display = 'none';
+      if (window.showToast) showToast('¡Bienvenido a CruzAndo Premium! 🎉');
+    });
+  } else {
+    requestAnimationFrame(function() { if (window.buildMap) window.buildMap(); });
+  }
 
   window._refreshHome = function() {
     renderHome(window._lastUserData || userData);
