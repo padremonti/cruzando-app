@@ -1,0 +1,47 @@
+[debug] [2026-05-26T00:18:45.980Z] ----------------------------------------------------------------------
+[debug] [2026-05-26T00:18:45.981Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\Usuario\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only functions:createCheckoutSession
+[debug] [2026-05-26T00:18:45.981Z] CLI Version:   15.18.0
+[debug] [2026-05-26T00:18:45.981Z] Platform:      win32
+[debug] [2026-05-26T00:18:45.982Z] Node Version:  v22.15.0
+[debug] [2026-05-26T00:18:45.982Z] Time:          Mon May 25 2026 18:18:45 GMT-0600 (hora estándar central)
+[debug] [2026-05-26T00:18:45.982Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-05-26T00:18:47.242Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-05-26T00:18:47.242Z] > authorizing via signed-in user (padrecesarmontijo@gmail.com)
+[debug] [2026-05-26T00:18:47.242Z] [iam] checking project cruzando-app for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]
+[debug] [2026-05-26T00:18:47.243Z] Checked if tokens are valid: true, expires at: 1779756118905
+[debug] [2026-05-26T00:18:47.243Z] Checked if tokens are valid: true, expires at: 1779756118905
+[debug] [2026-05-26T00:18:47.243Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/cruzando-app:testIamPermissions [none]
+[debug] [2026-05-26T00:18:47.243Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/cruzando-app:testIamPermissions  x-goog-user-project=cruzando-app
+[debug] [2026-05-26T00:18:47.244Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/cruzando-app:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2026-05-26T00:18:47.679Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/cruzando-app:testIamPermissions 200
+[debug] [2026-05-26T00:18:47.679Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/cruzando-app:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2026-05-26T00:18:47.679Z] Checked if tokens are valid: true, expires at: 1779756118905
+[debug] [2026-05-26T00:18:47.679Z] Checked if tokens are valid: true, expires at: 1779756118905
+[debug] [2026-05-26T00:18:47.679Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/cruzando-app/serviceAccounts/cruzando-app@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2026-05-26T00:18:47.679Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/cruzando-app/serviceAccounts/cruzando-app@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2026-05-26T00:18:48.187Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/cruzando-app/serviceAccounts/cruzando-app@appspot.gserviceaccount.com:testIamPermissions 200
+[debug] [2026-05-26T00:18:48.188Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/cruzando-app/serviceAccounts/cruzando-app@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[info] 
+[info] === Deploying to 'cruzando-app'...
+[info] 
+[info] i  deploying functions 
+[debug] [2026-05-26T00:18:48.191Z] Checked if tokens are valid: true, expires at: 1779756118905
+[debug] [2026-05-26T00:18:48.192Z] Checked if tokens are valid: true, expires at: 1779756118905
+[debug] [2026-05-26T00:18:48.192Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/cruzando-app [none]
+[debug] [2026-05-26T00:18:48.311Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/cruzando-app 200
+[debug] [2026-05-26T00:18:48.311Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/cruzando-app {"projectNumber":"408196948528","projectId":"cruzando-app","lifecycleState":"ACTIVE","name":"cruzando-app","labels":{"firebase":"enabled","firebase-core":"disabled"},"createTime":"2026-04-04T19:39:24.916Z"}
+[info] i  functions: preparing codebase default for deployment 
+[info] i  functions: ensuring required API cloudfunctions.googleapis.com is enabled... 
+[info] i  functions: ensuring required API cloudbuild.googleapis.com is enabled... 
+[info] i  artifactregistry: ensuring required API artifactregistry.googleapis.com is enabled... 
+[debug] [2026-05-26T00:18:48.314Z] Checked if tokens are valid: true, expires at: 1779756118905
+[debug] [2026-05-26T00:18:48.314Z] Checked if tokens are valid: true, expires at: 1779756118905
+[debug] [2026-05-26T00:18:48.314Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/cruzando-app/adminSdkConfig [none]
+[debug] [2026-05-26T00:18:48.703Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/cruzando-app/adminSdkConfig 200
+[debug] [2026-05-26T00:18:48.703Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/cruzando-app/adminSdkConfig {"projectId":"cruzando-app","storageBucket":"cruzando-app.firebasestorage.app"}
+[debug] [2026-05-26T00:18:48.704Z] Checked if tokens are valid: true, expires at: 1779756118905
+[debug] [2026-05-26T00:18:48.704Z] Checked if tokens are valid: true, expires at: 1779756118905
+[debug] [2026-05-26T00:18:48.704Z] >>> [apiv2][query] GET https://runtimeconfig.googleapis.com/v1beta1/projects/cruzando-app/configs [none]
+[debug] [2026-05-26T00:18:49.111Z] <<< [apiv2][status] GET https://runtimeconfig.googleapis.com/v1beta1/projects/cruzando-app/configs 200
+[debug] [2026-05-26T00:18:49.111Z] <<< [apiv2][body] GET https://runtimeconfig.googleapis.com/v1beta1/projects/cruzando-app/configs {}
