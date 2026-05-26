@@ -57,7 +57,7 @@ body {
   -webkit-font-smoothing:antialiased;
   transition:background 0.3s, color 0.3s;
 }
-.shell { max-width:480px; margin:0 auto; min-height:100dvh; padding-bottom:82px; }
+.shell { max-width:480px; margin:0 auto; min-height:100dvh; padding-bottom:140px; }
 
 /* ── Header ── */
 .header {
@@ -293,13 +293,14 @@ body.light .card-prog-wrap { background:rgba(0,0,0,0.08); }
 #retiro-tarjetas {
   position:fixed; top:56px; left:0; right:0; bottom:0;
   overflow:hidden;
+  padding-bottom:80px;
 }
 
 /* ── 5C: Tarjetas ── */
 .tarjeta {
   width:100%; height:100%;
   display:flex; align-items:center; justify-content:center;
-  background:var(--bg); padding:24px; box-sizing:border-box;
+  background:var(--bg); padding:24px 24px 100px; box-sizing:border-box;
 }
 .tarjeta-inner { max-width:480px; width:100%; text-align:center; }
 .tarjeta-tipo {
@@ -361,8 +362,8 @@ body.light .card-prog-wrap { background:rgba(0,0,0,0.08); }
   overflow-y:auto; align-items:flex-start; padding-top:32px;
 }
 .tarjeta-texto-lora {
-  font-family:'Crimson Pro',Georgia,serif; font-size:36px;
-  line-height:1.7; color:var(--text); margin-bottom:24px;
+  font-family:'Crimson Pro',Georgia,serif; font-size:24px;
+  line-height:1.75; color:var(--text); margin-bottom:24px;
 }
 .tarjeta-texto-cita {
   font-style:italic;
@@ -402,7 +403,7 @@ body.light .card-prog-wrap { background:rgba(0,0,0,0.08); }
   width:100%; min-height:100px; border-radius:12px;
   border:1.5px solid var(--border);
   background:var(--card); color:var(--text);
-  font-family:'Crimson Pro',Georgia,serif; font-size:30px; line-height:1.6;
+  font-family:'Crimson Pro',Georgia,serif; font-size:22px; line-height:1.6;
   padding:12px 16px; resize:vertical; box-sizing:border-box;
 }
 .textarea-reflexion:focus { outline:none; border-color:var(--orange); }
@@ -680,7 +681,14 @@ body.light .card-prog-wrap { background:rgba(0,0,0,0.08); }
       <span id="retiro-titulo">Cargando...</span>
       <div id="retiro-controles">
         <button id="btn-bgm-retiro" onclick="window.toggleBgmRetiro()" title="Música de fondo">🎵</button>
-        <button id="btn-play" onclick="window.toggleAudioRetiro()">▶</button>
+        <button id="btn-play" onclick="window.toggleAudioRetiro()">
+          <svg id="icon-play" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="display:block">
+            <polygon points="5 3 19 12 5 21 5 3"/>
+          </svg>
+          <svg id="icon-pause" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="display:none">
+            <rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>
+          </svg>
+        </button>
         <button id="btn-cerrar" onclick="window.cerrarRetiro()">✕</button>
       </div>
     </div>

@@ -454,8 +454,10 @@
   }
 
   function actualizarBotonPlay(reproduciendo) {
-    var btn = document.getElementById('btn-play');
-    if (btn) btn.textContent = reproduciendo ? '⏸' : '▶';
+    var iconPlay  = document.getElementById('icon-play');
+    var iconPause = document.getElementById('icon-pause');
+    if (iconPlay)  iconPlay.style.display  = reproduciendo ? 'none'  : 'block';
+    if (iconPause) iconPause.style.display = reproduciendo ? 'block' : 'none';
   }
 
   window.toggleAudioRetiro = function () {
