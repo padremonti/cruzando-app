@@ -349,7 +349,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 .modal-switch span { color:var(--orange); }
 .btn-modal-close {
   display:block; margin:16px auto 0; background:none; border:none;
-  font-size:0.78rem; color:var(--text-dim); cursor:pointer; font-family:inherit;
+  font-size:0.85rem; color:var(--text-soft); cursor:pointer; font-family:inherit;
 }
 
 /* ── Modal Premium ── */
@@ -2608,6 +2608,8 @@ onAuthStateChanged(auth, async function(user) {
     localStorage.removeItem('cruzando_plan_cache');
     localStorage.removeItem('cruzando_current_nivel');
     localStorage.removeItem('cruzando_frontier_nivel');
+    sessionStorage.removeItem('cruzando_view_as');
+    window._viewAs = null;
     history.replaceState({}, '', '/');
     window._forceFirestorePlan = true;
   }
@@ -2755,6 +2757,16 @@ onAuthStateChanged(auth, async function(user) {
     });
   } else {
     requestAnimationFrame(function() { if (window.buildMap) window.buildMap(); });
+  }
+
+  if (_checkoutResult === 'success') {
+    setTimeout(function() {
+      renderHome(Object.assign({}, userData, { plan: realPlan }));
+      if (window.buildMap) window.buildMap();
+      var bannerPremium = document.getElementById('banner-premium');
+      if (bannerPremium) bannerPremium.style.display = 'none';
+      if (window.showToast) showToast('¡Bienvenido a CruzAndo Premium! 🎉');
+    }, 500);
   }
 
   window._refreshHome = function() {
