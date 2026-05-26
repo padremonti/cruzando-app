@@ -126,6 +126,10 @@ exports.createCheckoutSession = functions
       throw new functions.https.HttpsError('unauthenticated', 'Debes iniciar sesión.');
     }
 
+    const stripeKey = STRIPE_SECRET_KEY.value();
+    console.log('Stripe key presente:', !!stripeKey, '| longitud:', stripeKey?.length, '| prefijo:', stripeKey?.substring(0, 7));
+    console.log('Plan recibido:', data.plan);
+
     const { plan } = data;
     const priceId  = PRICE_IDS[plan];
     if (!priceId) {
