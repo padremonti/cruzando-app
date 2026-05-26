@@ -2603,6 +2603,14 @@ function showScreen(name) {
 // ── Auth state ────────────────────────────────────────────────────
 startLoadingMsgs();
 onAuthStateChanged(auth, async function(user) {
+  var _checkoutResult = new URLSearchParams(location.search).get('checkout');
+  if (_checkoutResult === 'success') {
+    localStorage.removeItem('cruzando_plan_cache');
+    localStorage.removeItem('cruzando_current_nivel');
+    localStorage.removeItem('cruzando_frontier_nivel');
+    history.replaceState({}, '', '/cruzando-app/');
+  }
+
   if (!user) { currentUser = null; showScreen('login'); return; }
   currentUser = user;
 
