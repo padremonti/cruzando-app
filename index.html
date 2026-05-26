@@ -1831,6 +1831,20 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 </div>
 
 <script src="utils.js"></script>
+<!-- Firebase compat — solo para firebase.functions().httpsCallable() -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-functions-compat.js"></script>
+<script>
+  firebase.initializeApp({
+    apiKey:            "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
+    authDomain:        "cruzando-app.firebaseapp.com",
+    projectId:         "cruzando-app",
+    storageBucket:     "cruzando-app.firebasestorage.app",
+    messagingSenderId: "408196948528",
+    appId:             "1:408196948528:web:de291e8afc969252e943f5"
+  });
+</script>
+
 <script type="module">
 // ── Firebase SDK ──────────────────────────────────────────────────
 import { initializeApp }           from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
