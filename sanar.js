@@ -76,11 +76,12 @@
     if (!_bgmOn) return;
     var url = _bgmSlugToUrl(slug);
     if (!url) return;
+    var _bgmExpected = url;
     if (!_bgmEl) {
       _bgmEl = new Audio(url);
       _bgmEl.loop   = true;
       _bgmEl.volume = _BGM_VOL;
-    } else if (!_bgmEl.src.endsWith('BGM_' + slug.replace('s','').replace('_','_') + '.mp3')) {
+    } else if (!_bgmEl.src.endsWith(_bgmExpected.split('/').pop())) {
       _bgmEl.pause();
       _bgmEl.src = url;
     }

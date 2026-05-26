@@ -25,7 +25,7 @@
         "referencia": "Lucas 2:22, 25, 28-29, 34-35 (DHH)"
       },
       "contemplacion": {
-        "texto": "María sostiene a su hijo recién nacido en el Templo. Todo es alegría, gratitud, promesa. Pero Simeón, movido por el Espíritu, pronuncia palabras que rompen la paz: una espada atravesará tu corazón.\n\nMaría no entiende del todo. Pero su corazón presiente que amar a este Niño le costará todo. Hay pérdidas que se anuncian mucho antes de ocurrir. Hay despedidas que empiezan a gestarse en el primer abrazo.\n\nMaría no huye de la profecía. La guarda en su corazón junto con el amor. Acepta amar sabiendo que amará hasta el dolor. Y esa aceptación no es resignación: es valentía.",
+        "texto": "Jesús suda sangre. Su cuerpo humano tiembla ante lo que viene. No quiere la Cruz. No quiere el abandono. No quiere morir.\nY sin embargo, dice: Padre, que se haga tu voluntad.\n\nEsta oración no es pasividad. Es la batalla más profunda del corazón humano: soltar el control, aceptar lo inaceptable, decir sí cuando todo el ser grita no.\n\nMaría, desde la distancia, siente el desgarro de su Hijo. Ella también ha orado mil veces: Padre, aparta de nosotros este cáliz. Pero sabe que hay pérdidas inevitables. Y que el amor verdadero no negocia condiciones, sino que se entrega incluso en la oscuridad.",
         "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_1.mp3"
       },
       "actividades": [
@@ -33,9 +33,14 @@
           "tipo": "nombrar_emocion",
           "pregunta": "¿Qué sientes ahora mismo al comenzar este retiro?",
           "opciones": [
-            "tristeza", "miedo", "esperanza",
-            "gratitud", "confusión", "paz",
-            "enojo", "ternura"
+            "tristeza",
+            "miedo",
+            "esperanza",
+            "gratitud",
+            "confusión",
+            "paz",
+            "enojo",
+            "ternura"
           ]
         },
         {
@@ -45,11 +50,17 @@
         {
           "tipo": "escala_resonancia",
           "pregunta": "¿Cuánto resuena contigo esta frase: «El duelo no se supera, se atraviesa»?",
-          "etiquetas": ["Apenas", "Poco", "Algo", "Mucho", "Profundamente"]
+          "etiquetas": [
+            "Apenas",
+            "Poco",
+            "Algo",
+            "Mucho",
+            "Profundamente"
+          ]
         }
       ],
       "oracion": {
-        "texto": "María, tú que supiste desde el principio que amar es aceptar la espada, ayúdame a no huir del dolor que ya presiento. Enséñame a amar sin condiciones, incluso cuando el amor anuncia despedida.",
+        "texto": "María, tú que supiste desde el principio que amar es aceptar la espada, ayúdame a no huir del dolor que ya presiento. Enséñame a amar sin condiciones, incluso cuando el amor anuncia despedida. Amén.",
         "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_1_oracion.mp3"
       },
       "canto": {
@@ -73,7 +84,7 @@
         "referencia": "Mateo 26:36-39 (DHH)"
       },
       "contemplacion": {
-        "texto": "Jesús suda sangre. Su cuerpo humano tiembla ante lo que viene. No quiere la Cruz. No quiere el abandono. No quiere morir.\n\nY sin embargo, dice: Padre, que se haga tu voluntad.\n\nEsta oración no es pasividad. Es la batalla más profunda del corazón humano: soltar el control, aceptar lo inaceptable, decir sí cuando todo el ser grita no.\n\nMaría, desde la distancia, siente el desgarro de su Hijo. Ella también ha orado mil veces: Padre, aparta de nosotros este cáliz. Pero sabe que hay pérdidas inevitables. Y que el amor verdadero no negocia condiciones, sino que se entrega incluso en la oscuridad.",
+        "texto": "Jesús suda sangre. Su cuerpo humano tiembla ante lo que viene. No quiere la Cruz. No quiere el abandono. No quiere morir.\n\nY sin embargo, dice: Padre, que se haga tu voluntad, no la mía.\n\nEsta oración no es pasividad. Es la batalla más profunda del corazón humano: soltar el control, aceptar lo inaceptable, decir sí cuando todo el ser grita no.\n\nMaría, desde la distancia, siente el desgarro de su Hijo. Ella también ha orado mil veces: Padre, aparta de nosotros este cáliz. Pero sabe que hay pérdidas inevitables. Y que el amor verdadero no negocia condiciones, sino que se entrega incluso en la oscuridad.",
         "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_2.mp3"
       },
       "actividades": [
@@ -93,7 +104,7 @@
         }
       ],
       "oracion": {
-        "texto": "Jesús, tú que sudaste sangre antes de soltar el control, acompáñame en mi propia agonía. Ayúdame a dejar de negociar con lo inevitable, y dame la fuerza para decir: que se haga tu voluntad.",
+        "texto": "Jesús, tú que sudaste sangre antes de soltar el control, acompáñame en mi propia agonía. Ayúdame a dejar de negociar con lo inevitable, y dame la fuerza para decir: que se haga tu voluntad. Amén.",
         "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_2_oracion.mp3"
       },
       "canto": {
@@ -124,7 +135,11 @@
         {
           "tipo": "escala_dificultad",
           "pregunta": "¿Qué tan pesado se siente este dolor ahora?",
-          "opciones": ["Puedo con ello", "Me cuesta", "Es muy pesado"]
+          "opciones": [
+            "Puedo con ello",
+            "Me cuesta",
+            "Es muy pesado"
+          ]
         },
         {
           "tipo": "la_palabra",
@@ -139,7 +154,7 @@
         }
       ],
       "oracion": {
-        "texto": "María, tú que sostuviste el cuerpo sin vida de tu Hijo, sostén mi corazón cuando ya no puedo más. Enséñame que estar presente en el dolor es la forma más profunda de amar.",
+        "texto": "María, tú que sostuviste el cuerpo sin vida de tu Hijo, sostén mi corazón cuando ya no puedo más. Enséñame que estar presente en el dolor es la forma más profunda de amar. Amén.",
         "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_3_oracion.mp3"
       },
       "canto": {
@@ -170,7 +185,11 @@
         {
           "tipo": "pregunta_reconocimiento",
           "pregunta": "¿Hay momentos en que buscas la presencia de quien se fue en lugares donde ya no está?",
-          "opciones": ["Sí, con frecuencia", "A veces", "Ya no tanto"]
+          "opciones": [
+            "Sí, con frecuencia",
+            "A veces",
+            "Ya no tanto"
+          ]
         },
         {
           "tipo": "antes_despues",
@@ -188,7 +207,7 @@
         }
       ],
       "oracion": {
-        "texto": "Jesús Resucitado, tú que no permaneciste en la tumba, libérame de buscar en el pasado lo que ya resucitó. Ayúdame a reconocer que el amor no muere, sino que se transforma y vive de otro modo.",
+        "texto": "Jesús Resucitado, tú que no permaneciste en la tumba, libérame de buscar en el pasado lo que ya resucitó. Ayúdame a reconocer que el amor no muere, sino que se transforma y vive de otro modo. Amén.",
         "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_4_oracion.mp3"
       },
       "canto": {
@@ -219,7 +238,13 @@
         {
           "tipo": "escala_resonancia",
           "pregunta": "¿Cuánto sientes que algo en ti ha comenzado a transformarse durante este retiro?",
-          "etiquetas": ["Apenas", "Poco", "Algo", "Mucho", "Profundamente"]
+          "etiquetas": [
+            "Apenas",
+            "Poco",
+            "Algo",
+            "Mucho",
+            "Profundamente"
+          ]
         },
         {
           "tipo": "carta_breve",
@@ -231,7 +256,7 @@
         }
       ],
       "oracion": {
-        "texto": "Espíritu Santo, tú que transformaste el duelo de María en maternidad para la Iglesia, transforma mi dolor en compasión. Que el amor que recibí no muera conmigo, sino que se multiplique en servicio a los demás.",
+        "texto": "Espíritu Santo, tú que transformaste el duelo de María en maternidad para la Iglesia, transforma mi dolor en compasión. Que el amor que recibí no muera conmigo, sino que se multiplique en servicio a los demás. Amén.",
         "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_5_oracion.mp3"
       },
       "canto": {
