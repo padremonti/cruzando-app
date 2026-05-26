@@ -1,17 +1,17 @@
 {
-  "slug": "s1_2",
+  "slug": "sanar_1_1",
   "nombre": "Sanando el Duelo",
   "tipo": "santuario",
   "icono": "◆",
   "mundo": 1,
   "mundoNombre": "Cruz",
   "mundoColor": "#FF7A00",
-  "nivelDesbloqueo": "0102",
-  "imagenHero": "https://pub-96c43f31c64d45e7a9b3c2891df46532.r2.dev/s1_2_hero.webp",
-  "audioBienvenida": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_intro.mp3",
+  "nivelDesbloqueo": "0101",
+  "imagenHero": "https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev/sanar_1_1_hero.webp",
+  "audioBienvenida": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/talleres/sanar_1_1_intro.mp3",
   "introduccion": {
     "texto": "El duelo no es una enfermedad que se cura. Es un camino que se recorre.\n\nCuando perdemos a alguien amado —por muerte, separación o distancia—, cuando se cierra una etapa de vida que no volverá, cuando un sueño muere antes de nacer, el corazón humano entra en un territorio desconocido. Un lugar donde las palabras no alcanzan y el consuelo parece imposible.\n\nLa cultura moderna nos enseña a «superar» rápidamente el dolor, a «seguir adelante» como si nada hubiera pasado. Pero el duelo no se supera: se atraviesa. Y no se atraviesa en línea recta, sino en espiral —visitando una y otra vez los mismos lugares del corazón, cada vez desde una altura distinta.\n\nHoy te invito a nombrar tu pérdida sin vergüenza, sostener tu dolor sin huir, honrar lo que fue sin negarlo, y abrirte a la esperanza sin forzarla.\n\nNo caminarás solo. María va contigo.\n\nRespira hondo. Estás en un lugar seguro.",
-    "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_bienvenida.mp3"
+    "audio": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/talleres/sanar_1_1_bienvenida.mp3"
   },
   "misterios": [
     {
@@ -19,14 +19,14 @@
       "tipo": "gozoso",
       "nombre": "La Presentación en el Templo",
       "subtituloTematico": "Anticipación del dolor",
-      "imagenHero": "https://pub-96c43f31c64d45e7a9b3c2891df46532.r2.dev/s1_2_m1.webp",
+      "imagenHero": "https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev/sanar_1_1_m1.webp",
       "evangelio": {
         "texto": "Cuando se cumplieron los días de la purificación de ellos, según la ley de Moisés, llevaron al niño a Jerusalén para presentarlo al Señor. Había en Jerusalén un hombre llamado Simeón, justo y piadoso, que esperaba la consolación de Israel; y el Espíritu Santo estaba sobre él. Tomó al niño en sus brazos y bendijo a Dios. Luego dijo a María, su madre: «Este niño será causa de caída y de elevación para muchos en Israel; será signo de contradicción, y a ti misma una espada te atravesará el corazón».",
         "referencia": "Lucas 2:22, 25, 28-29, 34-35 (DHH)"
       },
       "contemplacion": {
         "texto": "Jesús suda sangre. Su cuerpo humano tiembla ante lo que viene. No quiere la Cruz. No quiere el abandono. No quiere morir.\nY sin embargo, dice: Padre, que se haga tu voluntad.\n\nEsta oración no es pasividad. Es la batalla más profunda del corazón humano: soltar el control, aceptar lo inaceptable, decir sí cuando todo el ser grita no.\n\nMaría, desde la distancia, siente el desgarro de su Hijo. Ella también ha orado mil veces: Padre, aparta de nosotros este cáliz. Pero sabe que hay pérdidas inevitables. Y que el amor verdadero no negocia condiciones, sino que se entrega incluso en la oscuridad.",
-        "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_1.mp3"
+        "audio": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/talleres/sanar_1_1_1.mp3"
       },
       "actividades": [
         {
@@ -61,11 +61,11 @@
       ],
       "oracion": {
         "texto": "María, tú que supiste desde el principio que amar es aceptar la espada, ayúdame a no huir del dolor que ya presiento. Enséñame a amar sin condiciones, incluso cuando el amor anuncia despedida. Amén.",
-        "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_1_oracion.mp3"
+        "audio": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/talleres/sanar_1_1_1_oracion.mp3"
       },
       "canto": {
         "titulo": "Canto del Misterio 1",
-        "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_1_canto.mp3",
+        "audio": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/talleres/sanar_1_1_1_canto.mp3",
         "letra": "PLACEHOLDER — letra del canto"
       },
       "preguntas": [
@@ -78,14 +78,14 @@
       "tipo": "doloroso",
       "nombre": "La Agonía en el Huerto",
       "subtituloTematico": "Negociación con el dolor",
-      "imagenHero": "https://pub-96c43f31c64d45e7a9b3c2891df46532.r2.dev/s1_2_m2.webp",
+      "imagenHero": "https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev/sanar_1_1_m2.webp",
       "evangelio": {
         "texto": "Jesús fue con sus discípulos a un lugar llamado Getsemaní, y les dijo: «Siéntense aquí mientras voy más allá a orar.» Se llevó a Pedro y a los dos hijos de Zebedeo, y comenzó a sentirse muy triste y angustiado. Les dijo: «Siento en mi alma una tristeza de muerte. Quédense aquí y permanezcan despiertos conmigo.» Yendo un poco más adelante, se inclinó hasta tocar el suelo con su frente, y oró así: «Padre mío, si es posible, líbrame de este trago amargo; pero que no se haga lo que yo quiero, sino lo que quieres tú.»",
         "referencia": "Mateo 26:36-39 (DHH)"
       },
       "contemplacion": {
         "texto": "Jesús suda sangre. Su cuerpo humano tiembla ante lo que viene. No quiere la Cruz. No quiere el abandono. No quiere morir.\n\nY sin embargo, dice: Padre, que se haga tu voluntad, no la mía.\n\nEsta oración no es pasividad. Es la batalla más profunda del corazón humano: soltar el control, aceptar lo inaceptable, decir sí cuando todo el ser grita no.\n\nMaría, desde la distancia, siente el desgarro de su Hijo. Ella también ha orado mil veces: Padre, aparta de nosotros este cáliz. Pero sabe que hay pérdidas inevitables. Y que el amor verdadero no negocia condiciones, sino que se entrega incluso en la oscuridad.",
-        "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_2.mp3"
+        "audio": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/talleres/sanar_1_1_2.mp3"
       },
       "actividades": [
         {
@@ -105,11 +105,11 @@
       ],
       "oracion": {
         "texto": "Jesús, tú que sudaste sangre antes de soltar el control, acompáñame en mi propia agonía. Ayúdame a dejar de negociar con lo inevitable, y dame la fuerza para decir: que se haga tu voluntad. Amén.",
-        "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_2_oracion.mp3"
+        "audio": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/talleres/sanar_1_1_2_oracion.mp3"
       },
       "canto": {
         "titulo": "Canto del Misterio 2",
-        "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_2_canto.mp3",
+        "audio": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/talleres/sanar_1_1_2_canto.mp3",
         "letra": "PLACEHOLDER — letra del canto"
       },
       "preguntas": [
@@ -122,14 +122,14 @@
       "tipo": "doloroso",
       "nombre": "La Crucifixión",
       "subtituloTematico": "Tocar fondo",
-      "imagenHero": "https://pub-96c43f31c64d45e7a9b3c2891df46532.r2.dev/s1_2_m3.webp",
+      "imagenHero": "https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev/sanar_1_1_m3.webp",
       "evangelio": {
         "texto": "Junto a la cruz de Jesús estaban su madre, la hermana de su madre, María esposa de Cleofás, y María Magdalena. Cuando Jesús vio a su madre, y junto a ella al discípulo a quien él amaba mucho, dijo a su madre: «Mujer, ahí tienes a tu hijo.» Luego le dijo al discípulo: «Ahí tienes a tu madre.» Desde entonces, ese discípulo la recibió en su casa.",
         "referencia": "Juan 19:25-27 (DHH)"
       },
       "contemplacion": {
         "texto": "María está de pie, sosteniendo lo insostenible. Ve morir a su Hijo, lentamente, en la Cruz. No puede hacer nada. No puede salvarlo. Solo puede estar ahí, presente en el horror.\n\nJesús, desde la Cruz, no la consuela con palabras vacías. No le dice: «No llores, todo estará bien.» En cambio, le da una nueva relación: Mujer, ahí tienes a tu hijo. Le entrega a Juan, como si dijera: El amor no termina aquí. Aunque me voy, el amor sigue. Ahora ama de otra forma.\n\nMaría recibe a Juan. Y en ese acto, acepta que Jesús se va. Acepta que el amor cambia de forma, pero no muere. Acepta sostener el cuerpo muerto de su Hijo y, al mismo tiempo, abrazar la vida que continúa.\n\nEste es el fondo del duelo: cuando ya no puedes hacer nada más que estar. Cuando el dolor es tan profundo que sientes que mueres con quien se va. Y aun así, respiras. Aun así, permaneces.",
-        "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_3.mp3"
+        "audio": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/talleres/sanar_1_1_3.mp3"
       },
       "actividades": [
         {
@@ -155,11 +155,11 @@
       ],
       "oracion": {
         "texto": "María, tú que sostuviste el cuerpo sin vida de tu Hijo, sostén mi corazón cuando ya no puedo más. Enséñame que estar presente en el dolor es la forma más profunda de amar. Amén.",
-        "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_3_oracion.mp3"
+        "audio": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/talleres/sanar_1_1_3_oracion.mp3"
       },
       "canto": {
         "titulo": "Canto del Misterio 3",
-        "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_3_canto.mp3",
+        "audio": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/talleres/sanar_1_1_3_canto.mp3",
         "letra": "PLACEHOLDER — letra del canto"
       },
       "preguntas": [
@@ -172,14 +172,14 @@
       "tipo": "glorioso",
       "nombre": "La Resurrección",
       "subtituloTematico": "Desorientación y nuevo comienzo",
-      "imagenHero": "https://pub-96c43f31c64d45e7a9b3c2891df46532.r2.dev/s1_2_m4.webp",
+      "imagenHero": "https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev/sanar_1_1_m4.webp",
       "evangelio": {
         "texto": "El primer día de la semana, María Magdalena fue al sepulcro muy temprano, cuando todavía estaba oscuro, y vio quitada la piedra que tapaba la entrada. Entonces se fue corriendo a donde estaban Simón Pedro y el otro discípulo, aquel a quien Jesús quería mucho, y les dijo: «¡Se han llevado del sepulcro al Señor, y no sabemos dónde lo han puesto!»",
         "referencia": "Juan 20:1-2 (DHH)"
       },
       "contemplacion": {
         "texto": "La tumba está vacía. María Magdalena busca el cuerpo de Jesús y no lo encuentra. Su primer pensamiento no es alegría, sino pánico: Se lo han llevado.\n\nCuando perdemos a alguien, buscamos su presencia en los lugares donde solía estar. Volvemos a los recuerdos como quien visita una tumba. Y a veces, incluso los recuerdos parecen esfumarse. La voz que tanto amábamos se vuelve difusa. El rostro se difumina en la memoria.\n\nPero la tumba vacía no es ausencia: es promesa. Jesús no está donde lo dejamos. No está en el pasado. Resucitó. Está vivo, de otra forma. Y nos pide que dejemos de buscar entre los muertos al que vive.\n\nMaría, la madre de Jesús, también visita interiormente esa tumba vacía. Y en su corazón comprende: el amor no se guarda en un sepulcro. El amor resucita. Toma nuevas formas. Se manifiesta en lugares inesperados.",
-        "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_4.mp3"
+        "audio": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/talleres/sanar_1_1_4.mp3"
       },
       "actividades": [
         {
@@ -200,19 +200,19 @@
           "tipo": "seleccion_imagen",
           "pregunta": "¿Cuál de estas imágenes describe mejor cómo llevas tu duelo ahora?",
           "imagenes": [
-            "https://pub-96c43f31c64d45e7a9b3c2891df46532.r2.dev/s1_2_act4a.webp",
-            "https://pub-96c43f31c64d45e7a9b3c2891df46532.r2.dev/s1_2_act4b.webp",
-            "https://pub-96c43f31c64d45e7a9b3c2891df46532.r2.dev/s1_2_act4c.webp"
+            "https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev/sanar_1_1_act4a.webp",
+            "https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev/sanar_1_1_act4b.webp",
+            "https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev/sanar_1_1_act4c.webp"
           ]
         }
       ],
       "oracion": {
         "texto": "Jesús Resucitado, tú que no permaneciste en la tumba, libérame de buscar en el pasado lo que ya resucitó. Ayúdame a reconocer que el amor no muere, sino que se transforma y vive de otro modo. Amén.",
-        "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_4_oracion.mp3"
+        "audio": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/talleres/sanar_1_1_4_oracion.mp3"
       },
       "canto": {
         "titulo": "Canto del Misterio 4",
-        "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_4_canto.mp3",
+        "audio": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/talleres/sanar_1_1_4_canto.mp3",
         "letra": "PLACEHOLDER — letra del canto"
       },
       "preguntas": [
@@ -225,14 +225,14 @@
       "tipo": "glorioso",
       "nombre": "Pentecostés",
       "subtituloTematico": "Transformación del duelo en misión",
-      "imagenHero": "https://pub-96c43f31c64d45e7a9b3c2891df46532.r2.dev/s1_2_m5.webp",
+      "imagenHero": "https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev/sanar_1_1_m5.webp",
       "evangelio": {
         "texto": "Todos ellos se reunían siempre para orar con algunas mujeres, con María la madre de Jesús, y con sus hermanos. Cuando llegó la fiesta de Pentecostés, estaban todos juntos en el mismo lugar. De repente, un gran ruido que venía del cielo, como de un viento fuerte, resonó en toda la casa donde ellos estaban. Y se les aparecieron lenguas como de fuego que se repartieron, y sobre cada uno de ellos se asentó una. Y todos quedaron llenos del Espíritu Santo.",
         "referencia": "Hechos 1:14; 2:1-4 (DHH)"
       },
       "contemplacion": {
         "texto": "María está en medio de la comunidad. Ha perdido a su Hijo, pero no está sola. Ha atravesado la espada, pero no está rota. Ha sostenido el cuerpo muerto, pero no se quedó en la tumba.\n\nAhora espera. Con los discípulos. En oración. Y el Espíritu desciende como fuego.\n\nEl mismo corazón que fue traspasado por la espada ahora arde con el Espíritu. El dolor no desaparece, pero se transforma. La herida se vuelve fuente de compasión. La pérdida se convierte en capacidad de acompañar a otros que sufren.\n\nMaría no «superó» la muerte de Jesús. Pero aprendió a vivir con esa ausencia, sostenida por el Espíritu y por la comunidad. Y desde ese lugar de dolor transformado, se convirtió en madre de la Iglesia naciente.\n\nEl duelo no termina. Pero puede convertirse en don. El amor que recibimos de quien se fue no se pierde: se multiplica cuando lo compartimos.",
-        "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_5.mp3"
+        "audio": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/talleres/sanar_1_1_5.mp3"
       },
       "actividades": [
         {
@@ -257,11 +257,11 @@
       ],
       "oracion": {
         "texto": "Espíritu Santo, tú que transformaste el duelo de María en maternidad para la Iglesia, transforma mi dolor en compasión. Que el amor que recibí no muera conmigo, sino que se multiplique en servicio a los demás. Amén.",
-        "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_5_oracion.mp3"
+        "audio": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/talleres/sanar_1_1_5_oracion.mp3"
       },
       "canto": {
         "titulo": "Canto del Misterio 5",
-        "audio": "https://pub-cd28789c83f544d5b4563c3e1d8b3a92.r2.dev/s1_2_5_canto.mp3",
+        "audio": "https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/talleres/sanar_1_1_5_canto.mp3",
         "letra": "PLACEHOLDER — letra del canto"
       },
       "preguntas": [
