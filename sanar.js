@@ -330,14 +330,6 @@
   var slug   = params.get('retiro') || '';
   var resume = params.get('resume') === 'true';
 
-  // Normalizar formato antiguo s1_2 → sanar_1_1
-  var _slugM = slug.match(/^s(\d+)_(\d+)$/);
-  if (_slugM) slug = 'sanar_' + _slugM[1] + '_' + _slugM[2];
-  if (params.get('retiro') && params.get('retiro') !== slug) {
-    var _newUrl = location.pathname + '?retiro=' + slug + (resume ? '&resume=true' : '');
-    history.replaceState({}, '', _newUrl);
-  }
-
   if (slug) {
     document.getElementById('vista-hospederia').style.display = 'none';
     document.getElementById('vista-retiro').style.display     = 'block';
