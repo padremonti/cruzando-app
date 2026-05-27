@@ -1,0 +1,30 @@
+[debug] [2026-05-27T00:41:36.583Z] ----------------------------------------------------------------------
+[debug] [2026-05-27T00:41:36.585Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\Usuario\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js functions:secrets:set STRIPE_WEBHOOK_SECRET
+[debug] [2026-05-27T00:41:36.586Z] CLI Version:   15.18.0
+[debug] [2026-05-27T00:41:36.586Z] Platform:      win32
+[debug] [2026-05-27T00:41:36.586Z] Node Version:  v22.15.0
+[debug] [2026-05-27T00:41:36.586Z] Time:          Tue May 26 2026 18:41:36 GMT-0600 (hora estándar central)
+[debug] [2026-05-27T00:41:36.586Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-05-27T00:41:36.714Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-05-27T00:41:36.714Z] > authorizing via signed-in user (padrecesarmontijo@gmail.com)
+[debug] [2026-05-27T00:41:36.714Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-05-27T00:41:36.714Z] > authorizing via signed-in user (padrecesarmontijo@gmail.com)
+[debug] [2026-05-27T00:41:36.714Z] [iam] checking project cruzando-app for permissions ["firebase.projects.get","secretmanager.secrets.create","secretmanager.secrets.get","secretmanager.secrets.update","secretmanager.versions.add"]
+[debug] [2026-05-27T00:41:36.715Z] Checked if tokens are valid: true, expires at: 1779845821095
+[debug] [2026-05-27T00:41:36.715Z] Checked if tokens are valid: true, expires at: 1779845821095
+[debug] [2026-05-27T00:41:36.716Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/cruzando-app:testIamPermissions [none]
+[debug] [2026-05-27T00:41:36.716Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/cruzando-app:testIamPermissions  x-goog-user-project=cruzando-app
+[debug] [2026-05-27T00:41:36.716Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/cruzando-app:testIamPermissions {"permissions":["firebase.projects.get","secretmanager.secrets.create","secretmanager.secrets.get","secretmanager.secrets.update","secretmanager.versions.add"]}
+[debug] [2026-05-27T00:41:37.114Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/cruzando-app:testIamPermissions 200
+[debug] [2026-05-27T00:41:37.114Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/cruzando-app:testIamPermissions {"permissions":["firebase.projects.get","secretmanager.secrets.create","secretmanager.secrets.get","secretmanager.secrets.update","secretmanager.versions.add"]}
+[debug] [2026-05-27T00:41:37.115Z] Checked if tokens are valid: true, expires at: 1779845821095
+[debug] [2026-05-27T00:41:37.115Z] Checked if tokens are valid: true, expires at: 1779845821095
+[debug] [2026-05-27T00:41:37.115Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/cruzando-app [none]
+[debug] [2026-05-27T00:41:37.235Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/cruzando-app 200
+[debug] [2026-05-27T00:41:37.235Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/cruzando-app {"projectNumber":"408196948528","projectId":"cruzando-app","lifecycleState":"ACTIVE","name":"cruzando-app","labels":{"firebase":"enabled","firebase-core":"disabled"},"createTime":"2026-04-04T19:39:24.916Z"}
+[debug] [2026-05-27T00:41:37.236Z] Checked if tokens are valid: true, expires at: 1779845821095
+[debug] [2026-05-27T00:41:37.236Z] Checked if tokens are valid: true, expires at: 1779845821095
+[debug] [2026-05-27T00:41:37.236Z] >>> [apiv2][query] GET https://secretmanager.googleapis.com/v1/projects/cruzando-app/secrets/STRIPE_WEBHOOK_SECRET [none]
+[debug] [2026-05-27T00:41:37.493Z] <<< [apiv2][status] GET https://secretmanager.googleapis.com/v1/projects/cruzando-app/secrets/STRIPE_WEBHOOK_SECRET 200
+[debug] [2026-05-27T00:41:37.493Z] <<< [apiv2][body] GET https://secretmanager.googleapis.com/v1/projects/cruzando-app/secrets/STRIPE_WEBHOOK_SECRET {"name":"projects/408196948528/secrets/STRIPE_WEBHOOK_SECRET","replication":{"automatic":{}},"createTime":"2026-05-25T23:43:18.747651Z","labels":{"firebase-managed":"functions"},"etag":"\"1652acf171ad52\""}

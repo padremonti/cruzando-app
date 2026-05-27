@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<link rel="icon" type="image/png" href="/icon-192.png">
+<link rel="shortcut icon" href="/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#002931">
+<title>CruzAndo · Taller</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
+  authDomain: "cruzando-app.firebaseapp.com",
+  projectId: "cruzando-app",
+  storageBucket: "cruzando-app.firebasestorage.app",
+  messagingSenderId: "408196948528",
+  appId: "1:408196948528:web:de291e8afc969252e943f5"
+};
+firebase.initializeApp(firebaseConfig);
+const _db   = firebase.firestore();
+const _auth = firebase.auth();
+window._fbFirestore = {
+  doc: function(db) {
+    var segs = Array.prototype.slice.call(arguments, 1);
+    var ref = db;
+    for (var i = 0; i < segs.length; i++) {
+      ref = (i % 2 === 0) ? ref.collection(segs[i]) : ref.doc(segs[i]);
+    }
+    return ref;
+  },
+  getDoc: function(ref) { return ref.get(); },
+  setDoc: function(ref, data, opts) {
+    return opts && opts.merge ? ref.set(data, { merge: true }) : ref.set(data);
+  },
+  serverTimestamp: function() { return firebase.firestore.FieldValue.serverTimestamp(); }
+};
+</script>
+<script src="plan-utils.js"></script>
+<script src="utils.js"></script>
+<style>
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+
+/* ── Variables CSS ── */
+:root {
+  --bg:#E6DED3; --bg-rgb:230,222,211; --card:#FFFCF7; --border:#D9D1C7;
+  --text:#2B2622; --text-soft:#6B6259; --text-dim:#9B9389;
+  --input-bg:#FFFCF7; --sec-bg:#EDE5D8; --shadow:rgba(43,38,34,0.08);
+  --brand:#02BBE0; --brand-soft:#43DDF8;
+  --brand-ultra:rgba(2,187,224,0.10); --brand-glow:rgba(2,187,224,0.20);
+  --orange:#FF7A00;
+}
+.dark {
+  --bg:#002931; --bg-rgb:0,41,49; --card:#004C5B; --card2:#003845;
+  --border:rgba(67,221,248,0.2); --sec-bg:#003845; --input-bg:#004C5B;
+  --shadow:rgba(0,0,0,0.35);
+  --text:#F0EAE2; --text-soft:#C8BFB5; --text-dim:#9A9088;
+  --brand:#02BBE0; --brand-soft:#43DDF8;
+  --brand-ultra:rgba(2,187,224,0.12); --brand-glow:rgba(2,187,224,0.25);
+}
+
+/* ── Base ── */
+html { font-size:18px; }
+body {
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--bg); color:var(--text);
+  line-height:1.7; min-height:100dvh;
+  -webkit-font-smoothing:antialiased;
+  transition:background 0.4s, color 0.4s;
+}
+.shell { max-width:480px; margin:0 auto; min-height:100dvh; padding-bottom:100px; }
+
+/* ── Cabecera con textura de mundo ── */
+.mundo-textura {
+  position:relative; overflow:hidden;
+  min-height:180px;
+  display:flex; flex-direction:column;
+  align-items:flex-start; justify-content:flex-end;
+  padding:24px 20px 20px;
+}
+.mundo-textura::before {
+  content:'';
+  position:absolute; inset:0;
+  background:var(--mundo-color, #FF7A00);
+  opacity:0.15;
+}
+.mundo-textura::after {
+  content:'';
+  position:absolute; inset:0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+  opacity:0.4;
+}
+
+.rt-bloque-chip {
+  position:relative; z-index:1;
+  display:inline-block; margin-bottom:10px;
+  padding:4px 12px; border-radius:20px;
+  font-size:0.72rem; font-weight:700; letter-spacing:0.5px;
+  text-transform:uppercase;
+  background:rgba(255,255,255,0.15); color:var(--text-soft);
+  border:1px solid rgba(255,255,255,0.2);
+}
+.rt-titulo {
+  position:relative; z-index:1;
+  font-family:'Cormorant Garamond',Georgia,serif;
+  font-size:1.9rem; font-weight:600; line-height:1.2;
+  color:var(--text); margin-bottom:6px;
+}
+.rt-subtitulo {
+  position:relative; z-index:1;
+  font-size:0.85rem; color:var(--text-soft);
+}
+
+/* ── Cuerpo ── */
+.rt-body { padding:0 0 160px; }
+
+.rt-seccion {
+  padding:24px 20px;
+  border-bottom:1px solid var(--border);
+}
+.rt-seccion:last-child { border-bottom:none; }
+
+.rt-sec-label {
+  font-size:0.65rem; font-weight:800; letter-spacing:1.5px;
+  text-transform:uppercase; color:var(--mundo-color, var(--brand));
+  margin-bottom:12px;
+}
+
+.rt-referencia {
+  font-size:0.78rem; font-weight:600; color:var(--text-dim);
+  margin-bottom:10px; letter-spacing:0.3px;
+}
+
+.rt-texto {
+  font-family:'Crimson Pro',Georgia,serif;
+  font-size:1.2rem; line-height:1.75;
+  color:var(--text); white-space:pre-line;
+}
+.rt-texto-oracion {
+  font-style:italic; color:rgba(255,255,255,0.92);
+}
+
+/* ── Botón de audio ── */
+.rt-audio-btn {
+  display:inline-flex; align-items:center; gap:8px;
+  margin-top:16px; padding:10px 20px;
+  border-radius:10px; border:1.5px solid var(--brand);
+  background:transparent; color:var(--brand);
+  font-family:'Inter',sans-serif; font-size:0.85rem;
+  font-weight:600; cursor:pointer;
+  transition:background 0.2s, color 0.2s;
+}
+.rt-audio-btn:active { background:var(--brand); color:#fff; }
+
+/* ── Sección Rezo ── */
+.rt-sec-rezo { text-align:center; }
+
+.rt-rezo-controls {
+  display:flex; justify-content:center;
+  margin-top:20px;
+}
+
+#rt-btn-play {
+  width:72px; height:72px; border-radius:50%;
+  border:none; cursor:pointer;
+  background:var(--brand);
+  color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 4px 20px var(--brand-glow);
+  transition:transform 0.15s, box-shadow 0.15s;
+}
+#rt-btn-play:active { transform:scale(0.93); box-shadow:none; }
+
+/* ── Navegación inferior ── */
+.rt-nav-btns {
+  position:fixed; bottom:0; left:0; right:0;
+  max-width:480px; margin:0 auto;
+  padding:12px 20px 28px;
+  background:linear-gradient(to top, var(--bg) 70%, transparent);
+  display:flex; flex-direction:column; gap:8px;
+  z-index:100;
+}
+
+.rt-btn-primary {
+  width:100%; padding:16px;
+  border-radius:14px; border:none; cursor:pointer;
+  background:var(--brand); color:#fff;
+  font-family:'Cormorant Garamond',Georgia,serif;
+  font-size:1.2rem; font-weight:600;
+  transition:opacity 0.2s;
+}
+.rt-btn-primary:active { opacity:0.85; }
+
+.rt-btn-secondary {
+  width:100%; padding:12px;
+  border-radius:14px; border:1.5px solid var(--border);
+  background:transparent; color:var(--text-soft);
+  font-family:'Inter',sans-serif; font-size:0.9rem;
+  cursor:pointer; transition:border-color 0.2s;
+}
+.rt-btn-secondary:active { border-color:var(--brand); }
+
+/* ── Cuentas del Rosario (copiado de rezar.html) ── */
+#rt-beads-col-wrap { display:flex; justify-content:center; margin:16px 0; }
+#rt-beads-col { display:flex; flex-direction:column; align-items:center; gap:8px; }
+.bead{
+  width:28px;height:28px;border-radius:50%;
+  border:2px solid rgba(255,255,255,0.35);
+  background:rgba(255,255,255,0.08);
+  transition:background 0.18s,border-color 0.18s,transform 0.12s;
+}
+.bead.active,.bead-pater.active{border-color:var(--lvl-bold);background:transparent;animation:beadPulse 0.9s ease-in-out infinite}
+.bead.active.lit-correct,.bead-pater.active.lit-correct,
+.bead.active.lit-normal,.bead-pater.active.lit-normal{border-color:var(--lvl-bold);background:var(--lvl-bold);animation:beadPulseFilled 0.9s ease-in-out infinite}
+.bead.lit-correct,.bead-pater.lit-correct,
+.bead.lit-normal,.bead-pater.lit-normal{border-color:var(--lvl-bold);background:var(--lvl-bold)}
+@keyframes beadPulse{0%,100%{box-shadow:0 0 0 3px rgba(var(--lvl-bold-rgb,2,187,224),0.25);transform:scale(1)}50%{box-shadow:0 0 0 8px rgba(var(--lvl-bold-rgb,2,187,224),0.5);transform:scale(1.15)}}
+@keyframes beadPulseFilled{0%,100%{box-shadow:0 0 0 3px rgba(var(--lvl-bold-rgb,2,187,224),0.25);transform:scale(1)}50%{box-shadow:0 0 0 8px rgba(var(--lvl-bold-rgb,2,187,224),0.5);transform:scale(1.15)}}
+.bead.lit-spam,.bead-pater.lit-spam{background:#888;border-color:#888;animation:none}
+.bead.lit-white,.bead-pater.lit-white{background:rgba(255,255,255,0.85);border-color:rgba(255,255,255,0.85);animation:none}
+@keyframes beadGold{0%{box-shadow:0 0 0 0 rgba(255,215,0,0)}30%{box-shadow:0 0 0 8px rgba(255,215,0,0.6)}100%{box-shadow:0 0 0 14px rgba(255,215,0,0)}}
+.bead.gold-flash,.bead-pater.gold-flash{animation:bead-pop 0.18s ease-out,beadGold 0.7s ease-out}
+@keyframes bead-pop{0%{transform:scale(1)}40%{transform:scale(1.3)}100%{transform:scale(1)}}
+.bead-pater.active{background:transparent}
+.bead-pater{
+  width:20px;height:20px;border-radius:50%;
+  border:2px solid rgba(255,255,255,0.55);
+  background:rgba(255,255,255,0.15);
+  transition:background 0.18s,border-color 0.18s;
+  margin-bottom:4px;
+}
+.bead-lux-cross{display:none;margin-top:6px;flex-direction:column;align-items:center;}
+.bead-lux-cross.show{display:flex;animation:luxAppear 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards;}
+.bead-lux-cross.show .lux-glow svg{
+  filter:drop-shadow(0 0 6px rgba(255,255,255,0.9)) drop-shadow(0 0 14px rgba(255,255,255,0.5));
+  animation:luxGlowPulse 1.2s ease-in-out infinite;
+}
+@keyframes luxGlowPulse{0%,100%{filter:drop-shadow(0 0 4px rgba(255,255,255,0.7))}50%{filter:drop-shadow(0 0 14px rgba(255,255,255,1)) drop-shadow(0 0 28px rgba(67,221,248,0.6))}}
+@keyframes luxAppear{0%{opacity:0;transform:scale(0.4)}60%{opacity:1;transform:scale(1.15)}100%{opacity:1;transform:scale(1)}}
+.lux-glow{position:relative;width:36px;height:36px;display:flex;align-items:center;justify-content:center;}
+.lux-glow::before{
+  content:'';position:absolute;inset:-8px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,0.35) 0%,transparent 70%);
+  animation:luxPulse 1.4s ease-in-out infinite;
+}
+@keyframes luxPulse{0%,100%{opacity:0.4;transform:scale(0.9)}50%{opacity:1;transform:scale(1.15)}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div id="scr-rezar-taller">
+    <!-- Cabecera con textura de mundo -->
+    <div class="mundo-textura" id="rt-header">
+      <div class="rt-bloque-chip" id="rt-chip"></div>
+      <h1 class="rt-titulo" id="rt-titulo"></h1>
+      <p class="rt-subtitulo" id="rt-subtitulo"></p>
+    </div>
+
+    <div class="rt-body" id="rt-body">
+      <!-- Sección 1: Bíblico -->
+      <section class="rt-seccion" id="rt-sec-biblico">
+        <div class="rt-sec-label">Palabra</div>
+        <p class="rt-referencia" id="rt-ref"></p>
+        <p class="rt-texto" id="rt-biblico"></p>
+      </section>
+
+      <!-- Sección 2: Contemplación -->
+      <section class="rt-seccion" id="rt-sec-contemplacion">
+        <div class="rt-sec-label">Contemplación</div>
+        <p class="rt-texto" id="rt-contemplacion"></p>
+        <button class="rt-audio-btn" id="rt-btn-cont-audio">▶ Escuchar</button>
+      </section>
+
+      <!-- Sección 3: Rezo (beads) -->
+      <section class="rt-seccion rt-sec-rezo" id="rt-sec-rezo">
+        <div class="rt-sec-label">Rezo</div>
+        <div id="rt-beads-col-wrap" style="display:none">
+          <div id="rt-beads-col"></div>
+        </div>
+        <div class="rt-rezo-controls">
+          <button id="rt-btn-play" onclick="window.rtTogglePlay()">
+            <svg id="rt-icon-play" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            <svg id="rt-icon-pause" width="28" height="28" viewBox="0 0 24 24" fill="currentColor" style="display:none">
+              <rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>
+            </svg>
+          </button>
+        </div>
+        <audio id="rt-rezo-audio" preload="auto"></audio>
+      </section>
+
+      <!-- Sección 4: Canto -->
+      <section class="rt-seccion" id="rt-sec-canto" style="display:none">
+        <div class="rt-sec-label">Canto</div>
+        <button class="rt-audio-btn" id="rt-btn-canto-audio">▶ Escuchar el canto</button>
+        <audio id="rt-canto-audio" preload="auto"></audio>
+      </section>
+
+      <!-- Sección 5: Oración final -->
+      <section class="rt-seccion" id="rt-sec-oracion" style="display:none">
+        <div class="rt-sec-label">Oración</div>
+        <p class="rt-texto rt-texto-oracion" id="rt-oracion-texto"></p>
+        <button class="rt-audio-btn" id="rt-btn-oracion-audio">▶ Escuchar la oración</button>
+        <audio id="rt-oracion-audio" preload="auto"></audio>
+      </section>
+    </div>
+
+    <!-- Botones de navegación -->
+    <div class="rt-nav-btns" id="rt-nav-btns" style="display:none">
+      <button class="rt-btn-primary" id="rt-btn-continuar" onclick="window.rtContinuar()">
+        Continuar al Misterio <span id="rt-num-siguiente"></span> →
+      </button>
+      <button class="rt-btn-secondary" id="rt-btn-salir" onclick="window.rtGuardarYSalir()">
+        Guardar y salir
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Tema (inmediato, antes de render) ─────────────────────────
+(function () {
+  var saved = localStorage.getItem('cruzando_theme');
+  if (saved === 'light') document.documentElement.classList.remove('dark');
+  else                   document.documentElement.classList.add('dark');
+})();
+
+// ── Globals ───────────────────────────────────────────────────
+var RT_R2_AUDIO  = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/talleres/';
+var RT_R2_MUSIC  = 'https://pub-faed94e375aa443e846e07f81ef93274.r2.dev/';
+var MUNDO_COLORS = {1:'#FF7A00',2:'#01BBE1',3:'#8E44AD',4:'#C0392B',5:'#27AE60',6:'#E91E8C',7:'#D4A017'};
+
+var _rtRetiroSlug    = '';
+var _rtMisterioIdx   = 0;
+var _rtData          = null;
+var _rtMisterio      = null;
+var _rtRezoAudio     = null;
+var _rtBeadSync      = null;
+var _rtBeadCount     = 0;
+var _rtBeadActive    = -1;
+var _rtBeadTimer     = null;
+var _rtCurrentSyncKey = null;
+var _rtBeadTapTimes  = {};
+var _rtBeadSpam      = {};
+var _rtUID           = null;
+var _rtDB            = null;
+var TOTAL_MISTERIOS  = 5;
+
+// ── DOMContentLoaded ─────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async function () {
+  var params       = new URLSearchParams(location.search);
+  _rtRetiroSlug    = params.get('retiro') || '';
+  _rtMisterioIdx   = parseInt(params.get('misterio') || '0', 10);
+
+  if (!_rtRetiroSlug) { window.location.href = 'sanar.html'; return; }
+
+  // Cargar JSON del taller
+  var base = location.origin + location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1);
+  var res  = await fetch(base + 'data/' + _rtRetiroSlug + '.json');
+  _rtData     = await res.json();
+  _rtMisterio = _rtData.misterios[_rtMisterioIdx];
+
+  // Cargar bead_sync.json (no bloqueante si falta)
+  try {
+    var bsRes   = await fetch(base + 'data/bead_sync.json');
+    _rtBeadSync = await bsRes.json();
+  } catch (e) { _rtBeadSync = null; }
+
+  // Aplicar color del mundo
+  var mundoColor = _rtData.mundoColor || MUNDO_COLORS[_rtData.mundo] || '#FF7A00';
+  document.documentElement.style.setProperty('--mundo-color', mundoColor);
+  document.documentElement.style.setProperty('--lvl-bold',    mundoColor);
+
+  // Poblar secciones
+  _rtPoblarHeader();
+  _rtPoblarBiblico();
+  _rtPoblarContemplacion();
+  _rtPoblarRezo();
+  _rtPoblarCanto();
+  _rtPoblarOracion();
+
+  // Auth
+  _auth.onAuthStateChanged(function (user) {
+    if (!user) { window.location.href = 'index.html'; return; }
+    _rtUID = user.uid;
+    _rtDB  = _db;
+    _rtGuardarProgreso({ rezandoMisterio: _rtMisterioIdx, rezandoAt: new Date().toISOString() });
+  });
+});
+
+// ── Poblar secciones ─────────────────────────────────────────
+function _rtPoblarHeader() {
+  document.getElementById('rt-chip').textContent       = _rtData.nombre || '';
+  document.getElementById('rt-titulo').textContent     = _rtMisterio.nombre || '';
+  document.getElementById('rt-subtitulo').textContent  = _rtMisterio.subtitulo || '';
+}
+
+function _rtPoblarBiblico() {
+  document.getElementById('rt-ref').textContent     = _rtMisterio.evangelio?.referencia || '';
+  document.getElementById('rt-biblico').textContent = _rtMisterio.evangelio?.texto || '';
+}
+
+function _rtPoblarContemplacion() {
+  document.getElementById('rt-contemplacion').textContent = _rtMisterio.contemplacion?.texto || '';
+  var audioUrl = _rtMisterio.contemplacion?.audio || '';
+  _rtSetupAudioBtn('rt-btn-cont-audio', audioUrl, null);
+}
+
+function _rtPoblarRezo() {
+  var prefs = {};
+  try { prefs = JSON.parse(localStorage.getItem('cruzando_rezar_prefs') || '{}'); } catch(e) {}
+  var pfx = prefs.idioma === 'latin' ? 'L_' : '';
+  var ab  = (_rtMisterioIdx % 2 === 0) ? 'MA' : 'MB';
+  var trackName = pfx + ab;
+  var audioUrl  = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/global/' + trackName + '.mp3';
+
+  var audioEl = document.getElementById('rt-rezo-audio');
+  audioEl.src = audioUrl;
+
+  _rtCurrentSyncKey = trackName;
+  _rtRenderBeads();
+
+  document.getElementById('rt-beads-col-wrap').style.display = 'flex';
+
+  audioEl.addEventListener('ended', function () {
+    _rtStopBeadTimer();
+    document.getElementById('rt-sec-canto').style.display = '';
+    document.getElementById('rt-sec-canto').scrollIntoView({ behavior: 'smooth' });
+  });
+}
+
+window.rtTogglePlay = function () {
+  var audio     = document.getElementById('rt-rezo-audio');
+  var iconPlay  = document.getElementById('rt-icon-play');
+  var iconPause = document.getElementById('rt-icon-pause');
+  if (audio.paused) {
+    audio.play();
+    iconPlay.style.display  = 'none';
+    iconPause.style.display = 'block';
+    _rtStartBeadTimer();
+  } else {
+    audio.pause();
+    iconPlay.style.display  = 'block';
+    iconPause.style.display = 'none';
+  }
+};
+
+function _rtRenderBeads() {
+  var col = document.getElementById('rt-beads-col');
+  if (!col) return;
+  col.innerHTML = '';
+
+  var pater = document.createElement('div');
+  pater.className = 'bead-pater'; pater.id = 'rt-bead-pater';
+  col.appendChild(pater);
+
+  var sep = document.createElement('div');
+  sep.style.cssText = 'width:1px;height:8px;background:rgba(255,255,255,0.15);margin:0 auto';
+  col.appendChild(sep);
+
+  for (var i = 0; i < 10; i++) {
+    var d = document.createElement('div');
+    d.className = 'bead';
+    col.appendChild(d);
+  }
+
+  var lux = document.createElement('div');
+  lux.className = 'bead-lux-cross'; lux.id = 'rt-bead-lux';
+  lux.innerHTML = '<div class="lux-glow"><svg width="28" height="28" viewBox="0 0 100 100"><rect x="46.2" y="0" width="7.6" height="100" fill="white"/><rect x="0" y="36" width="100" height="7.6" fill="white"/></svg></div>';
+  col.appendChild(lux);
+}
+
+function _rtGetBeadEl(idx) {
+  if (idx === 0) return document.getElementById('rt-bead-pater');
+  return document.querySelectorAll('#rt-beads-col .bead')[idx - 1] || null;
+}
+
+function _rtStartBeadTimer() {
+  _rtStopBeadTimer();
+  _rtBeadTimer = setInterval(_rtTickBeads, 80);
+}
+
+function _rtStopBeadTimer() {
+  if (_rtBeadTimer) { clearInterval(_rtBeadTimer); _rtBeadTimer = null; }
+}
+
+function _rtTickBeads() {
+  var audio = document.getElementById('rt-rezo-audio');
+  if (!audio || audio.paused || !_rtBeadSync || !_rtCurrentSyncKey) return;
+  var t       = audio.currentTime;
+  var windows = _rtBeadSync[_rtCurrentSyncKey];
+  if (!windows) return;
+
+  var active = -1;
+  for (var i = 0; i < windows.length; i++) {
+    if (t >= windows[i].start && t <= windows[i].end) { active = i; break; }
+  }
+  if (active === _rtBeadActive) return;
+
+  if (_rtBeadActive >= 0) {
+    var old = _rtGetBeadEl(_rtBeadActive);
+    if (old) {
+      old.classList.remove('active');
+      var wasTapped = old.classList.contains('lit-correct') || old.classList.contains('lit-normal') || old.classList.contains('lit-spam');
+      if (!wasTapped) old.classList.add('lit-white');
+    }
+  }
+  _rtBeadActive = active;
+  if (active >= 0) {
+    var el = _rtGetBeadEl(active);
+    if (el) {
+      var finished = el.classList.contains('lit-spam') || el.classList.contains('lit-white');
+      if (!finished) { el.classList.remove('active'); void el.offsetWidth; el.classList.add('active'); }
+    }
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  document.getElementById('rt-header').addEventListener('click', function () {
+    window.rtCountBead();
+  });
+});
+
+window.rtCountBead = function () {
+  if (_rtBeadCount >= 11) return;
+  var beadIdx = _rtBeadCount;
+  var now = Date.now();
+
+  if (_rtBeadSync && _rtCurrentSyncKey && _rtBeadActive >= 0) {
+    if (beadIdx > _rtBeadActive) { _rtPlayFail(); return; }
+  }
+
+  var lastTap = _rtBeadTapTimes[beadIdx] || 0;
+  if ((now - lastTap) < 3000 && lastTap > 0) {
+    _rtBeadSpam[beadIdx] = true;
+    var elS = _rtGetBeadEl(beadIdx);
+    if (elS) { elS.classList.remove('active'); elS.classList.add('lit-spam'); elS.style.animation = 'none'; }
+    _rtPlayFail();
+    return;
+  }
+  _rtBeadTapTimes[beadIdx] = now;
+  _rtBeadCount++;
+
+  var isOnTime = false;
+  if (_rtBeadSync && _rtCurrentSyncKey) {
+    var audio2 = document.getElementById('rt-rezo-audio');
+    var wins = _rtBeadSync[_rtCurrentSyncKey];
+    if (wins && wins[beadIdx] && audio2) {
+      var t2 = audio2.currentTime;
+      isOnTime = (t2 >= wins[beadIdx].start && t2 <= wins[beadIdx].end);
+    }
+  }
+
+  var el2 = _rtGetBeadEl(beadIdx);
+  if (el2) {
+    if (isOnTime) {
+      el2.classList.add('lit-correct', 'gold-flash');
+      if (window.addMeters) window.addMeters(25);
+      setTimeout(function () { if (el2) el2.classList.remove('gold-flash'); }, 700);
+    } else {
+      el2.classList.add('lit-normal');
+    }
+    el2.classList.remove('active');
+    void el2.offsetWidth;
+    el2.classList.add('active');
+  }
+
+  if (_rtBeadCount === 11) {
+    var lux = document.getElementById('rt-bead-lux');
+    if (lux) { lux.classList.remove('show'); void lux.offsetWidth; lux.classList.add('show'); }
+  }
+};
+
+function _rtPlayFail() {
+  try {
+    var ctx  = new (window.AudioContext || window.webkitAudioContext)();
+    var osc  = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(440, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(180, ctx.currentTime + 0.25);
+    gain.gain.setValueAtTime(0.35, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+    osc.start(); osc.stop(ctx.currentTime + 0.3);
+  } catch(e) {}
+}
+
+function _rtPoblarCanto() {
+  var audioUrl = _rtMisterio.canto?.audio || '';
+  if (!audioUrl) return;
+  document.getElementById('rt-sec-canto').style.display = '';
+  _rtSetupAudioBtn('rt-btn-canto-audio', audioUrl, document.getElementById('rt-canto-audio'));
+}
+
+function _rtPoblarOracion() {
+  document.getElementById('rt-oracion-texto').textContent = _rtMisterio.oracion?.texto || '';
+  var audioUrl = _rtMisterio.oracion?.audio || '';
+  _rtSetupAudioBtn('rt-btn-oracion-audio', audioUrl, document.getElementById('rt-oracion-audio'));
+  document.getElementById('rt-sec-oracion').style.display = '';
+  document.getElementById('rt-nav-btns').style.display = '';
+  var siguiente = _rtMisterioIdx + 1;
+  document.getElementById('rt-num-siguiente').textContent = siguiente < TOTAL_MISTERIOS ? (siguiente + 1) : '';
+  if (siguiente >= TOTAL_MISTERIOS) {
+    document.getElementById('rt-btn-continuar').textContent = 'Completar retiro ✓';
+  }
+}
+
+function _rtSetupAudioBtn(btnId, url, audioEl) {
+  var btn = document.getElementById(btnId);
+  if (!btn || !url) { if (btn) btn.style.display = 'none'; return; }
+  var audio = audioEl || new Audio();
+  audio.src = url;
+  btn.onclick = function () {
+    if (audio.paused) {
+      audio.play();
+      btn.textContent = '⏸ Pausar';
+    } else {
+      audio.pause();
+      btn.textContent = '▶ Escuchar';
+    }
+  };
+}
+
+// ── Guardar progreso en Firestore ─────────────────────────────
+function _rtGuardarProgreso(extra) {
+  if (!_rtUID || !_rtDB) return;
+  var data = Object.assign({
+    tallerSlug: _rtRetiroSlug,
+    lastSeenAt: new Date().toISOString()
+  }, extra || {});
+  _rtDB.collection('users').doc(_rtUID)
+    .collection('talleres').doc(_rtRetiroSlug)
+    .set(data, { merge: true })
+    .catch(function (e) { console.warn('rt progreso:', e); });
+}
+
+// ── Guardar y salir ───────────────────────────────────────────
+window.rtGuardarYSalir = function () {
+  _rtGuardarProgreso({ rezandoMisterio: _rtMisterioIdx });
+  window.location.href = 'sanar.html?retiro=' + _rtRetiroSlug + '&resume=true';
+};
+
+// ── Continuar al siguiente misterio ──────────────────────────
+window.rtContinuar = function () {
+  var siguiente = _rtMisterioIdx + 1;
+  _rtGuardarProgreso({ rezandoCompletado: firebase.firestore.FieldValue.arrayUnion(_rtMisterioIdx) });
+  if (siguiente >= TOTAL_MISTERIOS) {
+    _rtGuardarProgreso({ completed: true, completedAt: new Date().toISOString() });
+    window.location.href = 'sanar.html?retiro=' + _rtRetiroSlug + '&completado=true';
+  } else {
+    window.location.href = 'sanar.html?retiro=' + _rtRetiroSlug + '&misterio=' + siguiente;
+  }
+};
+</script>
+</body>
+</html>
