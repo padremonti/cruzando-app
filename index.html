@@ -1424,6 +1424,24 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
       <div class="drawer-item-icon">🎓</div>
       <div><div class="drawer-item-label">Reactivar tutoriales</div><div class="drawer-item-sub">Volver a ver los pasos iniciales</div></div>
     </button>
+    <button class="drawer-item" id="btn-gestionar-suscripcion"
+      style="display:none"
+      onclick="window._abrirPortalStripe()">
+      <div class="drawer-item-icon">💳</div>
+      <div>
+        <div class="drawer-item-label">Gestionar suscripción</div>
+        <div class="drawer-item-sub">Cambiar o cancelar tu plan</div>
+      </div>
+    </button>
+    <button class="drawer-item" id="btn-soporte-suscripcion"
+      style="display:none"
+      onclick="window.location.href='mailto:contacto@cruzando.app?subject=Cancelar%20suscripci%C3%B3n%20CruzAndo'">
+      <div class="drawer-item-icon">✉️</div>
+      <div>
+        <div class="drawer-item-label">Cancelar por correo</div>
+        <div class="drawer-item-sub">contacto@cruzando.app</div>
+      </div>
+    </button>
     <button class="drawer-item" id="btn-perfil" onclick="closeDrawer()">
       <div class="drawer-item-icon">🚪</div>
       <div><div class="drawer-item-label">Cerrar sesión</div><div class="drawer-item-sub">Salir de mi cuenta</div></div>
@@ -2107,6 +2125,8 @@ function renderHome(userData) {
   if (nav) nav.style.display = '';
   var plan   = effectivePlan ? effectivePlan() : currentPlan;
   var isPrem = isPremiumOrAbove ? isPremiumOrAbove(plan) : false;
+
+  _updateSuscripcionBtns(plan);
 
   // Banner premium — solo para free
   var banner = document.getElementById('banner-premium');
@@ -4291,6 +4311,31 @@ function _resetOnboarding() {
   }, 300);
 }
 window._resetOnboarding = _resetOnboarding;
+
+// ── Portal de suscripción Stripe ─────────────────────────────────
+window._abrirPortalStripe = async function () {
+  var btn = document.getElementById('btn-gestionar-suscripcion');
+  if (btn) { btn.style.opacity = '0.5'; btn.style.pointerEvents = 'none'; }
+  try {
+    var { getFunctions, httpsCallable } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-functions.js');
+    var fns = getFunctions(fbApp, 'us-central1');
+    var createPortalSession = httpsCallable(fns, 'createPortalSession');
+    var result = await createPortalSession({});
+    window.location.href = result.data.url;
+  } catch (e) {
+    console.error('Portal error:', e);
+    if (btn) { btn.style.opacity = ''; btn.style.pointerEvents = ''; }
+    alert('No se pudo abrir el portal. Escribe a contacto@cruzando.app para gestionar tu suscripción.');
+  }
+};
+
+function _updateSuscripcionBtns(plan) {
+  var isPrem = plan === 'premium' || plan === 'beta';
+  var btnGestionar = document.getElementById('btn-gestionar-suscripcion');
+  var btnSoporte   = document.getElementById('btn-soporte-suscripcion');
+  if (btnGestionar) btnGestionar.style.display = isPrem ? '' : 'none';
+  if (btnSoporte)   btnSoporte.style.display   = isPrem ? '' : 'none';
+}
 
 // ── Simulación de plan para Developer ────────────────────────────
 window._setViewAs = function(simulatedPlan) {

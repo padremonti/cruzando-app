@@ -184,10 +184,15 @@ exports.stripeWebhook = functions
     switch (event.type) {
 
       case 'checkout.session.completed':
-      case 'invoice.paid':
-        await userRef.set({ plan: 'premium', stripeUpdatedAt: new Date().toISOString() }, { merge: true });
+      case 'invoice.paid': {
+        var updateData = { plan: 'premium', stripeUpdatedAt: new Date().toISOString() };
+        if (event.data.object.customer) {
+          updateData.stripeCustomerId = event.data.object.customer;
+        }
+        await userRef.set(updateData, { merge: true });
         console.log('Plan → premium:', uid);
         break;
+      }
 
       case 'customer.subscription.deleted':
       case 'invoice.payment_failed':
@@ -200,4 +205,32 @@ exports.stripeWebhook = functions
     }
 
     res.json({ received: true });
+  });
+
+// ── 3. Portal de gestión de suscripción ──────────────────
+exports.createPortalSession = functions
+  .region('us-central1')
+  .runWith({ secrets: ['STRIPE_SECRET_KEY'] })
+  .https.onCall(async (data, context) => {
+
+    if (!context.auth) {
+      throw new functions.https.HttpsError('unauthenticated', 'Debes iniciar sesión.');
+    }
+
+    const stripe = require('stripe')(STRIPE_SECRET_KEY.value());
+    const uid    = context.auth.uid;
+
+    const userDoc    = await db.collection('users').doc(uid).get();
+    const customerId = userDoc.data()?.stripeCustomerId;
+
+    if (!customerId) {
+      throw new functions.https.HttpsError('not-found', 'No se encontró una suscripción activa.');
+    }
+
+    const session = await stripe.billingPortal.sessions.create({
+      customer:   customerId,
+      return_url: 'https://cruzando.app/',
+    });
+
+    return { url: session.url };
   });
