@@ -110,8 +110,8 @@ if (!admin.apps.length) admin.initializeApp();
 const db = admin.firestore();
 
 const PRICE_IDS = {
-  mensual: 'price_1TIcVOCRd4PM0jIp9oEF54j4',
-  anual:   'price_1TIca0CRd4PM0jIparwSPFfT',
+  mensual: 'price_1TbO3hCDSMAtjE9eb0Y8Je4X',
+  anual:   'price_1TbO2rCDSMAtjE9ewW8WOqtN',
 };
 
 // ── 1. Crear sesión de Checkout ───────────────────────
