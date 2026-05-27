@@ -910,61 +910,17 @@
     }
   };
 
-  /* ── Modal de oración ── */
+  /* ── Navegar a rezar_taller ── */
 
-  function abrirOracion(datos, mIndex) {
-    var urlParams = new URLSearchParams();
-
-    // Buscar el nombre del Misterio en el array de tarjetas
-    var nombreMisterio = datos.nombre || '';
-    if (!nombreMisterio) {
-      for (var i = 0; i < _tarjetas.length; i++) {
-        var t = _tarjetas[i];
-        if (t.tipo === 'portada_misterio' && t.indice === mIndex && t.datos) {
-          nombreMisterio = t.datos.nombre || 'Oración';
-          break;
-        }
-      }
+  window.irARezarTaller = function (misterioIdx) {
+    var slug = window._retiroSlug || '';
+    if (slug && window._uid && window._db) {
+      window._db.collection('users').doc(window._uid)
+        .collection('talleres').doc(slug)
+        .set({ rezandoMisterio: misterioIdx, lastSeenAt: new Date().toISOString() }, { merge: true })
+        .catch(function () {});
     }
-    if (!nombreMisterio) nombreMisterio = 'Oración';
-
-    urlParams.set('nombre', nombreMisterio);
-    urlParams.set('texto',  datos.texto || '');
-    urlParams.set('audio',  datos.audio || '');
-
-    var ancho = Math.min(480, screen.width);
-    var alto  = Math.min(700, screen.height);
-    var left  = Math.floor((screen.width  - ancho) / 2);
-    var top   = Math.floor((screen.height - alto)  / 2);
-
-    var popup = window.open(
-      _base() + 'rezar_taller.html?' + urlParams.toString(),
-      'oracion_taller',
-      'width=' + ancho + ',height=' + alto +
-      ',left=' + left + ',top=' + top +
-      ',resizable=no,scrollbars=yes'
-    );
-
-    if (!popup) return; // popup bloqueado — silencioso
-
-    window.addEventListener('message', function handler(e) {
-      if (e.origin !== location.origin) return;
-      if (e.data && e.data.tipo === 'oracion_completada') {
-        window.removeEventListener('message', handler);
-        window.marcarCompletada();
-      }
-    });
-  }
-
-  window.abrirOracionModal = function (mIndex) {
-    var tarjetaOracion = null;
-    for (var i = 0; i < _tarjetas.length; i++) {
-      if (_tarjetas[i].tipo === 'oracion' && _tarjetas[i].indice === mIndex) {
-        tarjetaOracion = _tarjetas[i];
-        break;
-      }
-    }
-    if (tarjetaOracion) abrirOracion(tarjetaOracion.datos, mIndex);
+    window.location.href = 'rezar_taller.html?retiro=' + slug + '&misterio=' + misterioIdx;
   };
 
   function iniciarMotor(tarjetas, indexInicial) {
@@ -1083,8 +1039,9 @@
           <div class="tarjeta-inner tarjeta-inner-centrada">
             <p class="tarjeta-tipo" style="color:rgba(255,255,255,.5)">Oración</p>
             <p class="tarjeta-texto-lora" style="color:white;font-style:italic;font-size:17px">${tarjeta.datos.texto}</p>
-            <button class="btn-amen" onclick="window.abrirOracionModal(${tarjeta.indice})">Abrir en oración</button>
-            <p style="font-family:Inter,sans-serif;font-size:13px;color:rgba(255,255,255,.4);margin-top:12px">Toca para rezar este Misterio</p>
+            <button class="btn-amen" onclick="window.irARezarTaller(${tarjeta.indice})">
+              Rezar este Misterio →
+            </button>
           </div>
         </div>`;
         break;
