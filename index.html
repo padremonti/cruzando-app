@@ -1886,6 +1886,7 @@ const LAUNCH_DISCOUNT   = "LAUNCH50"; // código de 50% OFF lanzamiento
 
 // ── Init ──────────────────────────────────────────────────────────
 const fbApp = initializeApp(FIREBASE_CONFIG);
+window.fbApp = fbApp;
 const auth  = getAuth(fbApp);
 const db    = getFirestore(fbApp);
 window._fbFirestore = { doc, getDoc, setDoc, serverTimestamp };
@@ -3149,7 +3150,8 @@ document.getElementById('btn-premium-continuar').addEventListener('click', async
 
   try {
     const { getFunctions, httpsCallable } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-functions.js');
-    const fnSvc = getFunctions(fbApp, 'us-central1');
+    const _fbApp = window.fbApp || fbApp;
+    const fnSvc = getFunctions(_fbApp, 'us-central1');
     const createCheckoutSession = httpsCallable(fnSvc, 'createCheckoutSession');
     const result = await createCheckoutSession({ plan: plan });
     window.location.href = result.data.url;
@@ -4318,7 +4320,8 @@ window._abrirPortalStripe = async function () {
   if (btn) { btn.style.opacity = '0.5'; btn.style.pointerEvents = 'none'; }
   try {
     var { getFunctions, httpsCallable } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-functions.js');
-    var fns = getFunctions(fbApp, 'us-central1');
+    var _fbApp = window.fbApp || fbApp;
+    var fns = getFunctions(_fbApp, 'us-central1');
     var createPortalSession = httpsCallable(fns, 'createPortalSession');
     var result = await createPortalSession({});
     window.location.href = result.data.url;
