@@ -64,18 +64,27 @@ body {
 /* ── Header textura ── */
 .rt-header {
   position:relative; overflow:hidden;
-  min-height:160px; padding:32px 20px 24px;
+  min-height:260px; padding:32px 20px 24px;
   display:flex; flex-direction:column;
   justify-content:flex-end; gap:6px;
 }
 .rt-header::before {
   content:''; position:absolute; inset:0;
-  background:var(--mundo-color, #FF7A00); opacity:0.12;
+  background-image: url('https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev/estampa_sanar/medjugorge_1.jpeg');
+  background-size:cover; background-position:center top;
+  opacity:0.55;
 }
 .rt-header::after {
   content:''; position:absolute; inset:0;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+  background:linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.65) 100%);
+  z-index:1;
 }
+.rt-header .rt-chip,
+.rt-header .rt-titulo,
+.rt-header .rt-subtitulo { position:relative; z-index:2; }
+.rt-header .rt-chip   { color:rgba(255,255,255,0.85); }
+.rt-header .rt-titulo { color:#FFFFFF; text-shadow:0 1px 8px rgba(0,0,0,0.4); }
+.rt-header .rt-subtitulo { color:rgba(255,255,255,0.75); }
 .rt-chip {
   font-family:'Inter',sans-serif; font-size:0.65rem; font-weight:800;
   text-transform:uppercase; letter-spacing:1.5px;
@@ -204,6 +213,7 @@ body {
 @keyframes beadGold { 0%{box-shadow:0 0 0 0 rgba(255,215,0,0)} 30%{box-shadow:0 0 0 8px rgba(255,215,0,0.6)} 100%{box-shadow:0 0 0 14px rgba(255,215,0,0)} }
 .bead.gold-flash,.bead-pater.gold-flash { animation:bead-pop 0.18s ease-out,beadGold 0.7s ease-out }
 @keyframes bead-pop { 0%{transform:scale(1)} 40%{transform:scale(1.3)} 100%{transform:scale(1)} }
+@keyframes beadBonusFloat{0%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-28px)}}
 .bead-pater.active { background:transparent }
 .bead-pater {
   width:20px; height:20px; border-radius:50%;
@@ -227,6 +237,8 @@ body {
   animation:luxPulse 1.4s ease-in-out infinite;
 }
 @keyframes luxPulse { 0%,100%{opacity:0.4;transform:scale(0.9)} 50%{opacity:1;transform:scale(1.15)} }
+.rt-bead-lux,.bead-lux-cross{opacity:0;pointer-events:none}
+.rt-bead-lux.show,.bead-lux-cross.show{opacity:1;animation:luxAppear 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards}
 </style>
 </head>
 <body>
@@ -236,6 +248,7 @@ body {
   <div id="rt-scr-rezo">
 
     <div class="rt-header" id="rt-header">
+      <div id="rt-tap-zone" style="position:absolute;inset:0;z-index:5;cursor:pointer;-webkit-tap-highlight-color:transparent;"></div>
       <div class="rt-chip" id="rt-chip"></div>
       <h1 class="rt-titulo" id="rt-titulo"></h1>
       <p class="rt-subtitulo" id="rt-subtitulo"></p>
@@ -448,7 +461,7 @@ document.addEventListener('DOMContentLoaded', async function () {
   });
 
   // Tap en header = contar bead
-  document.getElementById('rt-header').addEventListener('click', function () {
+  document.getElementById('rt-tap-zone').addEventListener('click', function () {
     window.rtCountBead();
   });
 });
@@ -612,21 +625,68 @@ function _rtTickBeads() {
   }
 }
 
+function _rtShowBeadBonus(beadEl) {
+  if (!beadEl) return;
+  var el = document.createElement('div');
+  el.textContent = '+25m';
+  el.style.cssText = 'position:absolute;left:50%;transform:translate(-50%,0);font-size:0.7rem;font-weight:700;color:var(--lvl-bold);pointer-events:none;animation:beadBonusFloat 0.9s ease-out forwards;z-index:10;';
+  beadEl.style.position = 'relative';
+  beadEl.appendChild(el);
+  setTimeout(function () { el.remove(); }, 950);
+}
+
+function _rtPlayBeadSound() {
+  try {
+    var ac = new (window.AudioContext || window.webkitAudioContext)();
+    var now = ac.currentTime;
+    var master = ac.createGain();
+    master.gain.setValueAtTime(0, now);
+    master.gain.linearRampToValueAtTime(0.22, now + 0.008);
+    master.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
+    master.connect(ac.destination);
+    var osc1 = ac.createOscillator(), g1 = ac.createGain();
+    osc1.type = 'sine'; osc1.frequency.value = 432; g1.gain.value = 0.7;
+    osc1.connect(g1); g1.connect(master); osc1.start(now); osc1.stop(now + 0.9);
+    var osc2 = ac.createOscillator(), g2 = ac.createGain();
+    osc2.type = 'sine'; osc2.frequency.value = 864; g2.gain.value = 0.25;
+    osc2.connect(g2); g2.connect(master); osc2.start(now); osc2.stop(now + 0.6);
+    var bufSize = Math.floor(ac.sampleRate * 0.04);
+    var buf = ac.createBuffer(1, bufSize, ac.sampleRate);
+    var bd = buf.getChannelData(0);
+    for (var i = 0; i < bufSize; i++) bd[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufSize, 18);
+    var noise = ac.createBufferSource(); noise.buffer = buf;
+    var bpf = ac.createBiquadFilter(); bpf.type = 'bandpass'; bpf.frequency.value = 1800; bpf.Q.value = 1.2;
+    var gn = ac.createGain(); gn.gain.value = 0.35;
+    noise.connect(bpf); bpf.connect(gn); gn.connect(master);
+    noise.start(now); noise.stop(now + 0.04);
+    setTimeout(function () { try { ac.close(); } catch (e) {} }, 1100);
+  } catch (e) {}
+}
+
 window.rtCountBead = function () {
   if (_rtBeadCount >= 11) return;
   var beadIdx = _rtBeadCount;
   var now     = Date.now();
 
   if (_rtBeadSync && _rtCurrentSyncKey && _rtBeadActive >= 0) {
-    if (beadIdx > _rtBeadActive) { _rtPlayFail(); return; }
+    if (beadIdx > _rtBeadActive) {
+      _rtPlayFail();
+      if (navigator.vibrate) navigator.vibrate([80]);
+      return;
+    }
   }
 
   var lastTap = _rtBeadTapTimes[beadIdx] || 0;
   if ((now - lastTap) < 3000 && lastTap > 0) {
     _rtBeadSpam[beadIdx] = true;
     var elS = _rtGetBeadEl(beadIdx);
-    if (elS) { elS.classList.remove('active'); elS.classList.add('lit-spam'); elS.style.animation = 'none'; }
+    if (elS) {
+      elS.classList.remove('active', 'lit-correct', 'lit-normal', 'lit-white');
+      elS.classList.add('lit-spam');
+      elS.style.animation = 'none';
+    }
     _rtPlayFail();
+    if (navigator.vibrate) navigator.vibrate([80]);
     return;
   }
   _rtBeadTapTimes[beadIdx] = now;
@@ -646,14 +706,16 @@ window.rtCountBead = function () {
   if (el2) {
     if (isOnTime) {
       el2.classList.add('lit-correct', 'gold-flash');
+      _rtShowBeadBonus(el2);
       if (window.addMeters) window.addMeters(25);
-      setTimeout(function () { if (el2) el2.classList.remove('gold-flash'); }, 700);
     } else {
       el2.classList.add('lit-normal');
     }
     el2.classList.remove('active');
     void el2.offsetWidth;
     el2.classList.add('active');
+    _rtPlayBeadSound();
+    if (navigator.vibrate) navigator.vibrate([40]);
   }
 
   if (_rtBeadCount === 11) {
