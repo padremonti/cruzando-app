@@ -304,6 +304,12 @@
       -webkit-tap-highlight-color: transparent;
     }
     .nodo-santuario:active { transform: scale(0.92); }
+    .nodo-santuario.wp-locked { opacity:0.4; cursor:default; pointer-events:none; }
+    @keyframes waypointPulse {
+      0%,100% { box-shadow:0 0 0 0 currentColor; }
+      50%      { box-shadow:0 0 0 5px transparent; }
+    }
+    .nodo-santuario.wp-open { animation:waypointPulse 2.4s ease-in-out infinite; }
 
     .nodo-label-santuario {
       max-width: 72px;

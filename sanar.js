@@ -4,6 +4,93 @@
 
   /* ── Helpers ── */
 
+  var _userProgress   = {};
+  var _retiroProgress = {};
+
+  function isPremium() {
+    return window._userPlan && window._userPlan !== 'free';
+  }
+
+  function isRetiroAvailable(retiroMundo) {
+    if (!isPremium()) return false;
+    if (retiroMundo === 1) return true;
+    var prefix = String(retiroMundo).padStart(2, '0');
+    for (var c = 1; c <= 4; c++) {
+      var id = prefix + String(c).padStart(2, '0');
+      if (_userProgress && _userProgress[id]) return true;
+    }
+    return false;
+  }
+
+  var RETIROS = [
+    { id:'s1_2', mundo:1, tipo:'santuario',  nombre:'Sanando el Duelo',          json:'s1_2.json' },
+    { id:'s1_3', mundo:1, tipo:'albergue',   nombre:'Sanando el Perdón',         json:'s1_3.json' },
+    { id:'s1_4', mundo:1, tipo:'monasterio', nombre:'Sanando la Enfermedad',     json:'s1_4.json' },
+    { id:'s2_2', mundo:2, tipo:'santuario',  nombre:'Sanando el Enojo',          json:'s2_2.json' },
+    { id:'s2_3', mundo:2, tipo:'albergue',   nombre:'Sanando el Miedo',          json:'s2_3.json' },
+    { id:'s2_4', mundo:2, tipo:'monasterio', nombre:'Sanando la Tristeza',       json:'s2_4.json' },
+    { id:'s3_2', mundo:3, tipo:'santuario',  nombre:'Sanando el Trauma',         json:'s3_2.json' },
+    { id:'s3_3', mundo:3, tipo:'albergue',   nombre:'Sanando la Crítica',        json:'s3_3.json' },
+    { id:'s3_4', mundo:3, tipo:'monasterio', nombre:'Sanando la Mentira',        json:'s3_4.json' },
+    { id:'s4_2', mundo:4, tipo:'santuario',  nombre:'Sanando el Cansancio',      json:'s4_2.json' },
+    { id:'s4_3', mundo:4, tipo:'albergue',   nombre:'Sanando la Adicción',       json:'s4_3.json' },
+    { id:'s4_4', mundo:4, tipo:'monasterio', nombre:'Sanando la Crisis',         json:'s4_4.json' },
+    { id:'s5_2', mundo:5, tipo:'santuario',  nombre:'Sanando mi Infancia Herida',json:'s5_2.json' },
+    { id:'s5_3', mundo:5, tipo:'albergue',   nombre:'Sanando la Soledad',        json:'s5_3.json' },
+    { id:'s5_4', mundo:5, tipo:'monasterio', nombre:'Sanando el Nido Vacío',     json:'s5_4.json' },
+    { id:'s6_2', mundo:6, tipo:'santuario',  nombre:'Sanando el Desamor',        json:'s6_2.json' },
+    { id:'s6_3', mundo:6, tipo:'albergue',   nombre:'Sanando la Infidelidad',    json:'s6_3.json' },
+    { id:'s6_4', mundo:6, tipo:'monasterio', nombre:'Sanando el Divorcio',       json:'s6_4.json' },
+    { id:'s7_2', mundo:7, tipo:'santuario',  nombre:'Sanando el Estrés',         json:'s7_2.json' },
+    { id:'s7_3', mundo:7, tipo:'albergue',   nombre:'Sanando el Aburrimiento',   json:'s7_3.json' },
+    { id:'s7_4', mundo:7, tipo:'monasterio', nombre:'Sanando la Vejez',          json:'s7_4.json' },
+  ];
+
+  var RETIRO_ICONS = {
+    santuario:  '◆',
+    albergue:   '⬡',
+    monasterio: '✦'
+  };
+
+  var RETIRO_STATUS_TEXT = {
+    available:  'Este retiro está abierto para ti',
+    locked:     'Lo encontrarás más adelante en tu camino',
+    inProgress: 'Sigues en retiro',
+    completed:  'Has cruzado esto'
+  };
+
+  function renderRetiros() {
+    var container = document.getElementById('retiros-list');
+    if (!container) return;
+    var mundos = {};
+    RETIROS.forEach(function(r) {
+      if (!mundos[r.mundo]) mundos[r.mundo] = [];
+      mundos[r.mundo].push(r);
+    });
+    var html = '';
+    Object.keys(mundos).forEach(function(m) {
+      var available = isRetiroAvailable(parseInt(m));
+      html += '<div class="retiro-grupo" data-mundo="' + m + '">';
+      mundos[m].forEach(function(r) {
+        var status = !available ? 'locked'
+                   : (_retiroProgress[r.id] && _retiroProgress[r.id].completed ? 'completed'
+                   : (_retiroProgress[r.id] && _retiroProgress[r.id].started   ? 'inProgress'
+                   : 'available'));
+        html += '<div class="retiro-card retiro-' + status + '" ' +
+                (status !== 'locked' ? 'onclick="window.abrirRetiro(\'' + r.id + '\')"' : '') + '>' +
+                '<span class="retiro-icon">' + RETIRO_ICONS[r.tipo] + '</span>' +
+                '<div class="retiro-info">' +
+                '<div class="retiro-nombre">' + r.nombre + '</div>' +
+                '<div class="retiro-status-text">' + RETIRO_STATUS_TEXT[status] + '</div>' +
+                '</div></div>';
+      });
+      html += '</div>';
+    });
+    container.innerHTML = html;
+  }
+
+  window.renderRetiros = renderRetiros;
+
   function formatContempl(text) {
     if (!text) return '';
     var nl = text.indexOf('\n');

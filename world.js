@@ -341,11 +341,19 @@ const _db   = getFirestore(_app);
     });
   }
 
+  // ── Disponibilidad de santuarios ────────────────────────────────
+  function isSantuarioAvailable(mundoId) {
+    return (NIVELES[mundoId] || []).some(function(n) {
+      return _estadoNodos[n.id] !== 'bloqueado';
+    });
+  }
+
   // ── Render de un Mundo ───────────────────────────────────────────
   function renderMundo(mundo) {
     const niveles    = NIVELES[mundo.id]    || [];
     const santuarios = SANTUARIOS[mundo.id] || [];
     const color      = mundo.color;
+    const sanAvail   = isSantuarioAvailable(mundo.id);
 
     const nodosHtml = niveles.map(function(nivel, i) {
       const esPrimero = i === 0;
@@ -393,10 +401,10 @@ const _db   = getFirestore(_app);
       const santuarioHtml = santuario
         ? '<div class="nodo-fila-santuario">' +
             '<div class="linea-vertical" style="background:' + color + '44"></div>' +
-            '<div class="nodo-santuario"' +
+            '<div class="nodo-santuario' + (sanAvail ? ' wp-open' : ' wp-locked') + '"' +
               ' data-slug="' + slug + '"' +
-              ' style="border-color:' + color + '88;color:' + color + '"' +
-              ' onclick="window.tapSantuario(\'' + slug + '\')">' +
+              ' style="border-color:' + (sanAvail ? color + '88' : 'var(--border)') + ';color:' + (sanAvail ? color : 'var(--text-soft)') + '"' +
+              (sanAvail ? ' onclick="window.tapSantuario(\'' + slug + '\')"' : '') + '>' +
               santuario.icono +
             '</div>' +
             '<p class="nodo-label nodo-label-santuario">' + santuario.nombre + '</p>' +
