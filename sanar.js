@@ -2,6 +2,17 @@
 (function () {
   'use strict';
 
+  /* ── Helpers ── */
+
+  function formatContempl(text) {
+    if (!text) return '';
+    var nl = text.indexOf('\n');
+    if (nl === -1) return text.replace(/\n/g, '<br>');
+    var title = text.slice(0, nl).replace(/\.\s*$/, '');
+    var body  = text.slice(nl + 1).replace(/\n/g, '<br>');
+    return '<strong class="contempl-title">' + title + '</strong><br>' + body;
+  }
+
   /* ── Firebase ── */
 
   var _db, _auth;
@@ -1015,7 +1026,7 @@
         html = `<div class="tarjeta tarjeta-contenido">
           <div class="tarjeta-inner">
             <p class="tarjeta-tipo">Contemplación</p>
-            <p class="tarjeta-texto-lora">${tarjeta.datos.texto}</p>
+            <p class="tarjeta-texto-lora">${formatContempl(tarjeta.datos.texto)}</p>
             <button class="btn-secundario" onclick="window.marcarCompletada()"
               id="btn-continuar-cont" style="opacity:0;pointer-events:none">
               Continuar →

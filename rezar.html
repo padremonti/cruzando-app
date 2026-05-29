@@ -518,6 +518,7 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
 .popup-close-btn:active{background:var(--sec-bg)}
 .tool-popup-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;color:var(--text)}
 .popup-text{font-family:'Crimson Pro',Georgia,serif;font-size:36px;line-height:1.7;color:var(--text)}
+.contempl-title{display:block;font-weight:700;margin-bottom:10px;line-height:1.4;font-style:normal}
 .popup-reference{font-family:'Crimson Pro',Georgia,serif;font-size:26px;color:var(--text-dim);font-style:italic;margin-bottom:12px}
 .popup-lyrics{white-space:pre-line;font-family:'Crimson Pro',Georgia,serif;font-size:36px;line-height:1.7;font-style:italic;color:var(--text)}
 
@@ -1284,6 +1285,14 @@ async function loadBeadSync(){
 /* ─── UTILS ─── */
 const $=id=>document.getElementById(id);
 const esc=s=>s?s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'):'';
+function formatContempl(text) {
+  if (!text) return '';
+  var nl = text.indexOf('\n');
+  if (nl === -1) return esc(text);
+  var title = text.slice(0, nl).replace(/\.\s*$/, '');
+  var body  = text.slice(nl + 1);
+  return '<strong class="contempl-title">' + esc(title) + '</strong><br>' + esc(body);
+}
 const mNum=(b,i)=>BFM[b]+i;
 const mData=(b,i)=>data?.misterios?.[b]?.[i]||null;
 
@@ -2202,7 +2211,7 @@ function populatePopup(t){
           '<div class="popup-audio-bar"><div class="popup-audio-fill" id="cont-audio-fill"></div></div>'+
         '</div>';
     }
-    bd.innerHTML=audioHtml+'<p class="popup-text">'+esc(md?.contemplacion||'')+'</p>';
+    bd.innerHTML=audioHtml+'<p class="popup-text">'+formatContempl(md?.contemplacion||'')+'</p>';
     if(md?.audio_contemplacion)initContAudio(md.audio_contemplacion);
   } else if(t==='escribir'){
     bd.innerHTML=buildEscrHTML(md);

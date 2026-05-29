@@ -390,6 +390,7 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
 
 /* Contenido del popup — modo libro */
 .popup-text{font-family:'Crimson Pro',Georgia,serif;font-size:36px;line-height:1.7;color:var(--text)}
+.contempl-title{display:block;font-weight:700;font-size:1rem;color:var(--text);margin-bottom:10px;line-height:1.4;font-style:normal;}
 .popup-reference{font-family:'Crimson Pro',Georgia,serif;font-size:26px;color:var(--text-dim);font-style:italic;margin-bottom:12px}
 .popup-song-title{font-family:'Crimson Pro',Georgia,serif;font-size:36px;font-weight:600;color:var(--text);margin-bottom:14px}
 .popup-lyrics{white-space:pre-line;font-family:'Crimson Pro',Georgia,serif;font-size:36px;line-height:1.7;font-style:italic;color:var(--text)}
@@ -1064,6 +1065,14 @@ async function loadCuaderno(nId){
 /* ─── UTILS ─── */
 const $=id=>document.getElementById(id);
 const esc=s=>s?s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'):'';
+function formatContempl(text) {
+  if (!text) return '';
+  var nl = text.indexOf('\n');
+  if (nl === -1) return esc(text);
+  var title = text.slice(0, nl).replace(/\.\s*$/, '');
+  var body  = text.slice(nl + 1);
+  return '<strong class="contempl-title">' + esc(title) + '</strong><br>' + esc(body);
+}
 const prefs=()=>{try{return JSON.parse(localStorage.getItem('cruzando_prefs')||'{}');}catch(e){return{};}};
 const mNum=(b,i)=>BFM[b]+i;
 const mData=(b,i)=>data?.misterios?.[b]?.[i]||null;
@@ -1536,7 +1545,7 @@ function populatePopup(t){
         _closeBtn();
       break;
     case 'contemplar':
-      bd.innerHTML=`<p class="popup-text">${esc(md?.contemplacion||'Contemplación no disponible')}</p>`+
+      bd.innerHTML=`<p class="popup-text">${formatContempl(md?.contemplacion||'Contemplación no disponible')}</p>`+
         _closeBtn();
       break;
     case 'rezo':{
