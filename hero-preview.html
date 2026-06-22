@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CruzAndo — Hero Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,400;1,600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #0d0d0d;
+  color: #e8e0d6;
+  font-family: -apple-system, system-ui, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 24px;
+  padding: 32px 24px;
+}
+
+/* ── Phone frames ── */
+.phone-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.theme-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.25);
+}
+.phone {
+  width: 300px;
+  height: 580px;
+  border-radius: 40px;
+  border: 2px solid rgba(255,255,255,0.1);
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.8);
+}
+
+/* Exactamente los mismos valores CSS que usa la app */
+.phone.dark {
+  --bg-rgb: 0,41,49;
+  background: rgb(0,41,49);
+  --lvl-bold: #02BBE0;
+}
+.phone.light {
+  --bg-rgb: 230,222,211;
+  background: rgb(230,222,211);
+  border-color: rgba(0,0,0,0.08);
+  --lvl-bold: #02BBE0;
+}
+
+/* Imagen hero */
+.hero-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: none;
+}
+.hero-img.loaded { display: block; }
+
+/* Placeholder */
+.hero-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.ph-icon { font-size: 3.5rem; opacity: 0.15; }
+.phone.dark  .ph-hint { color: rgba(230,222,211,0.25); font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; text-align: center; padding: 0 30px; line-height: 1.8; }
+.phone.light .ph-hint { color: rgba(0,41,49,0.25);     font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; text-align: center; padding: 0 30px; line-height: 1.8; }
+
+/* ── Gradientes — idénticos a audio.html / orar.html / rezar.html ── */
+.hero-grad-top {
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 24%;
+  background: linear-gradient(
+    to bottom,
+    rgba(var(--bg-rgb), 1.00)  0%,
+    rgba(var(--bg-rgb), 1.00) 33%,
+    rgba(var(--bg-rgb), 1.00) 66%,
+    rgba(var(--bg-rgb), 0.00) 100%
+  );
+  pointer-events: none; z-index: 2;
+}
+.hero-grad-bot {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 25%;
+  background: linear-gradient(
+    to top,
+    rgba(var(--bg-rgb), 1.00)  0%,
+    rgba(var(--bg-rgb), 1.00) 20%,
+    rgba(var(--bg-rgb), 1.00) 45%,
+    rgba(var(--bg-rgb), 1.00) 70%,
+    rgba(var(--bg-rgb), 0.77) 90%,
+    transparent               100%
+  );
+  pointer-events: none; z-index: 2;
+}
+
+/* ── Texto superpuesto ── */
+.hero-text {
+  position: absolute;
+  bottom: 16px; left: 18px; right: 18px;
+  z-index: 3; pointer-events: none;
+}
+.bloque-label {
+  font-size: 0.65rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 2px;
+  color: var(--lvl-bold);
+  margin-bottom: 4px;
+}
+.titulo {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 2rem; font-weight: 600;
+  line-height: 1.15; margin-bottom: 4px;
+}
+.subtitulo {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 30px; font-style: italic;
+}
+
+.phone.dark .titulo {
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.9), 0 4px 16px rgba(0,0,0,0.85), 0 8px 32px rgba(0,0,0,0.7);
+}
+.phone.dark .subtitulo {
+  color: rgba(255,255,255,0.75);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.9), 0 3px 12px rgba(0,0,0,0.8);
+}
+.phone.light .titulo {
+  color: #002931;
+  text-shadow: 0 0 8px rgba(255,255,255,1), 0 0 16px rgba(255,255,255,0.95), 0 0 32px rgba(255,255,255,0.8);
+}
+.phone.light .subtitulo {
+  color: #002931;
+  text-shadow: 0 0 8px rgba(255,255,255,1), 0 0 16px rgba(255,255,255,0.95), 0 0 32px rgba(255,255,255,0.8);
+}
+
+/* Drop highlight */
+body.drag-over .phone { border-color: rgba(2,187,224,0.6); }
+
+/* ── Panel de controles ── */
+.controls {
+  width: 270px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 22px;
+}
+.panel {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 14px;
+}
+.ptitle {
+  font-size: 9px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1.5px;
+  color: rgba(255,255,255,0.28);
+  margin-bottom: 11px;
+}
+
+/* Cargador */
+.upload-btn {
+  width: 100%; padding: 9px;
+  background: rgba(2,187,224,0.08);
+  border: 1px solid rgba(2,187,224,0.22);
+  border-radius: 8px;
+  color: #02BBE0; font-size: 11px; font-weight: 700;
+  cursor: pointer; letter-spacing: 0.5px;
+  transition: background 0.15s;
+}
+.upload-btn:hover { background: rgba(2,187,224,0.16); }
+
+/* Navegación entre imágenes */
+.nav-row {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin-top: 10px;
+}
+.nav-btn {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.6); font-size: 15px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.nav-btn:hover:not(:disabled) { background: rgba(255,255,255,0.12); }
+.nav-btn:disabled { opacity: 0.22; cursor: default; }
+.nav-count {
+  font-size: 11px; font-weight: 600;
+  color: rgba(255,255,255,0.35);
+  min-width: 44px; text-align: center;
+}
+.img-name {
+  font-size: 9px; color: rgba(255,255,255,0.3);
+  text-align: center; margin-top: 7px;
+  word-break: break-all; line-height: 1.6;
+  min-height: 14px;
+}
+
+/* Campos de texto */
+.field-row { margin-bottom: 9px; }
+.field-row:last-child { margin-bottom: 0; }
+.field-lbl { font-size: 9px; color: rgba(255,255,255,0.35); margin-bottom: 4px; }
+.field-input {
+  width: 100%; padding: 6px 9px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 6px;
+  color: #e6ded3; font-size: 12px;
+  outline: none; font-family: inherit;
+}
+.field-input:focus {
+  border-color: rgba(2,187,224,0.45);
+  background: rgba(255,255,255,0.09);
+}
+
+/* Instrucción de teclado */
+.kbd-hint {
+  font-size: 9px; color: rgba(255,255,255,0.2);
+  text-align: center; line-height: 1.8;
+  padding-top: 2px;
+}
+</style>
+</head>
+<body>
+
+<!-- Teléfono oscuro -->
+<div class="phone-col">
+  <div class="theme-label">Oscuro</div>
+  <div class="phone dark">
+    <img class="hero-img" id="img-dark" alt="">
+    <div class="hero-placeholder" id="ph-dark">
+      <div class="ph-icon">🕊️</div>
+      <div class="ph-hint">Cargá imágenes<br>con el panel →</div>
+    </div>
+    <div class="hero-grad-top"></div>
+    <div class="hero-grad-bot"></div>
+    <div class="hero-text">
+      <div class="bloque-label" id="lbl-dark">Misterios Luminosos · 4</div>
+      <div class="titulo"       id="tit-dark">La Transfiguración</div>
+      <div class="subtitulo"   id="sub-dark">CruzAndo la Cruz · Nivel 1</div>
+    </div>
+  </div>
+</div>
+
+<!-- Teléfono claro -->
+<div class="phone-col">
+  <div class="theme-label">Claro</div>
+  <div class="phone light">
+    <img class="hero-img" id="img-light" alt="">
+    <div class="hero-placeholder" id="ph-light">
+      <div class="ph-icon">🕊️</div>
+      <div class="ph-hint">Cargá imágenes<br>con el panel →</div>
+    </div>
+    <div class="hero-grad-top"></div>
+    <div class="hero-grad-bot"></div>
+    <div class="hero-text">
+      <div class="bloque-label" id="lbl-light">Misterios Luminosos · 4</div>
+      <div class="titulo"       id="tit-light">La Transfiguración</div>
+      <div class="subtitulo"   id="sub-light">CruzAndo la Cruz · Nivel 1</div>
+    </div>
+  </div>
+</div>
+
+<!-- Controles -->
+<div class="controls">
+
+  <div class="panel">
+    <div class="ptitle">Imágenes</div>
+    <input type="file" id="img-picker" accept="image/*" multiple style="display:none">
+    <button class="upload-btn" onclick="document.getElementById('img-picker').click()">
+      ＋ Cargar imágenes
+    </button>
+    <div class="nav-row">
+      <button class="nav-btn" id="btn-prev" onclick="navigate(-1)" disabled>←</button>
+      <div class="nav-count" id="nav-count">— / —</div>
+      <button class="nav-btn" id="btn-next" onclick="navigate(1)"  disabled>→</button>
+    </div>
+    <div class="img-name" id="img-name"></div>
+    <div class="kbd-hint">← → para navegar entre imágenes</div>
+  </div>
+
+  <div class="panel">
+    <div class="ptitle">Texto superpuesto</div>
+    <div class="field-row">
+      <div class="field-lbl">Etiqueta de bloque</div>
+      <input class="field-input" id="in-bloque" value="Misterios Luminosos · 4" oninput="updateText()">
+    </div>
+    <div class="field-row">
+      <div class="field-lbl">Título</div>
+      <input class="field-input" id="in-titulo" value="La Transfiguración" oninput="updateText()">
+    </div>
+    <div class="field-row">
+      <div class="field-lbl">Subtítulo</div>
+      <input class="field-input" id="in-sub" value="CruzAndo la Cruz · Nivel 1" oninput="updateText()">
+    </div>
+  </div>
+
+</div>
+
+<script>
+var files = [];
+var urls  = [];
+var idx   = 0;
+
+document.getElementById('img-picker').addEventListener('change', function(e) {
+  loadFiles(Array.from(e.target.files));
+});
+
+function loadFiles(arr) {
+  urls.forEach(function(u) { URL.revokeObjectURL(u); });
+  files = arr.filter(function(f) { return f.type.startsWith('image/'); });
+  if (!files.length) return;
+  urls = files.map(function(f) { return URL.createObjectURL(f); });
+  idx = 0;
+  showImage(0);
+}
+
+function showImage(i) {
+  var url  = urls[i];
+  var name = files[i].name;
+
+  ['dark', 'light'].forEach(function(t) {
+    var img = document.getElementById('img-' + t);
+    var ph  = document.getElementById('ph-'  + t);
+    img.classList.remove('loaded');
+    img.onload  = function() { img.classList.add('loaded'); ph.style.display = 'none'; };
+    img.onerror = function() { img.classList.remove('loaded'); ph.style.display = 'flex'; };
+    img.src = url;
+  });
+
+  document.getElementById('img-name').textContent  = name;
+  document.getElementById('nav-count').textContent = (i + 1) + ' / ' + files.length;
+  document.getElementById('btn-prev').disabled = (i === 0);
+  document.getElementById('btn-next').disabled = (i === files.length - 1);
+}
+
+function navigate(dir) {
+  var next = idx + dir;
+  if (next < 0 || next >= files.length) return;
+  idx = next;
+  showImage(idx);
+}
+
+function updateText() {
+  var bloque = document.getElementById('in-bloque').value;
+  var titulo = document.getElementById('in-titulo').value;
+  var sub    = document.getElementById('in-sub').value;
+  ['dark', 'light'].forEach(function(t) {
+    document.getElementById('lbl-' + t).textContent = bloque;
+    document.getElementById('tit-' + t).textContent = titulo;
+    document.getElementById('sub-' + t).textContent = sub;
+  });
+}
+
+// Teclado ← →
+document.addEventListener('keydown', function(e) {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.key === 'ArrowLeft')  navigate(-1);
+  if (e.key === 'ArrowRight') navigate(1);
+});
+
+// Drag & drop en cualquier parte de la página
+document.addEventListener('dragenter', function() { document.body.classList.add('drag-over'); });
+document.addEventListener('dragleave', function(e) {
+  if (!e.relatedTarget || e.relatedTarget === document.documentElement)
+    document.body.classList.remove('drag-over');
+});
+document.addEventListener('dragover',  function(e) { e.preventDefault(); });
+document.addEventListener('drop', function(e) {
+  e.preventDefault();
+  document.body.classList.remove('drag-over');
+  loadFiles(Array.from(e.dataTransfer.files));
+});
+</script>
+</body>
+</html>

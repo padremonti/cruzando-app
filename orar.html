@@ -1770,7 +1770,7 @@ function toolUrl(t){
     const _file=bIdx%2===0?(_latin?'L_MA.mp3':'MA.mp3'):(_latin?'L_MB.mp3':'MB.mp3');
     return`${R2}/global/${_file}`;
   }
-  if(t==='canto')return`${MUSB}M_${nivel}_${cua}_${m}.mp3`;
+  if(t==='canto')return`${MUSB}m4a/M_${nivel}_${cua}_${m}.m4a`;
   return'';
 }
 function fmtTime(s){var m=Math.floor(s/60),sec=Math.floor(s%60);return m+':'+(sec<10?'0':'')+sec;}

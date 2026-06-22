@@ -1850,7 +1850,7 @@ const AUDIO_FOLDERS = {
   ubible: R2_BASE + '/ubible/',
   cont:   R2_BASE + '/cont/',
   rezo:   R2_BASE + '/global/',
-  music:  'https://pub-faed94e375aa443e846e07f81ef93274.r2.dev/',
+  music:  'https://pub-faed94e375aa443e846e07f81ef93274.r2.dev/m4a/',
   q:      R2_BASE + '/q/',
   pray:   R2_BASE + '/pray/',
   bye:    R2_BASE + '/bye/'
@@ -2697,7 +2697,7 @@ async function buildSession() {
     { label:'Contemplación',   file:'pausa.mp3',                  folder:'rezo',   seg:3, silence:true },
     { label:'Rezo',            file:_rezaFile,                    folder:'rezo',   seg:4 },
     { label:'Rezo',            file:'pausa.mp3',                  folder:'rezo',   seg:4, silence:true },
-    { label:'Canto',           file:`M_${n}_${c}_${m}.mp3`,      folder:'music',  seg:5 },
+    { label:'Canto',           file:`M_${n}_${c}_${m}.m4a`,      folder:'music',  seg:5 },
     { label:'Canto',           file:'pausa.mp3',                  folder:'rezo',   seg:5, silence:true },
     // ── Separador de Meditación ──
     { label:'Meditación',      file:'meditacion.mp3',             folder:'rezo',   seg:6 },
@@ -3893,7 +3893,7 @@ async function completeSession() {
   CANTOS_DATA     = null; // forzar recarga si cambió de nivel
   const cantosData = await loadCantos(nivelId);
   const canto      = getCanto(cantosData, block, blockIdx);
-  const cantoUrl   = AUDIO_FOLDERS['music'] + `M_${nivel}_${cuaderno}_${misterio}.mp3`;
+  const cantoUrl   = AUDIO_FOLDERS['music'] + `M_${nivel}_${cuaderno}_${misterio}.m4a`;
   renderEpilogo(canto, cantoUrl);
 
   // Desbloqueo de canto de bloque al completar los 5 misterios
