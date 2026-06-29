@@ -779,9 +779,16 @@ body.light .popup-close-bottom{border-color:var(--border);color:var(--text-dim)}
       </button>
       <button class="tool-btn" data-tool="rezo">
         <div class="tool-btn-circle">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="2" x2="12" y2="22"/><line x1="4" y1="9" x2="20" y2="9"/>
-          </svg>
+          <span class="rezo-ic rezo-ic-play">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="6 4 20 12 6 20 6 4"/>
+            </svg>
+          </span>
+          <span class="rezo-ic rezo-ic-pause" style="display:none">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="9" y1="4" x2="9" y2="20"/><line x1="15" y1="4" x2="15" y2="20"/>
+            </svg>
+          </span>
         </div>
       </button>
       <button class="tool-btn" data-tool="canto">
@@ -984,7 +991,7 @@ function applyBlockAccent(block){
 const BFM = {gozosos:1,luminosos:6,dolorosos:11,gloriosos:16};
 const TBG = {gozosos:'var(--card)',luminosos:'var(--card)',dolorosos:'var(--card)',gloriosos:'var(--card)'};
 const TN  = {palabra:'La Palabra',contemplar:'Contemplar',rezo:'Rezo',canto:'Canto',escribir:'Escribir',suplica:'Súplica'};
-const TOOL_ORDER = ['palabra','contemplar','rezo','canto','escribir','suplica'];
+const TOOL_ORDER = ['palabra','contemplar','canto','escribir','suplica'];
 const QL  = ['Por María hacia Jesús:','Desde el Hijo hacia el Padre:','Hijos y hermanos en el Espíritu:'];
 const QC  = ['#FF7A00','#C0392B','#27AE60'];
 const MR_REZO=1200, MR_CONT=800, MR_CANTO=600, MR_QF=650, MR_QU=325, MR_BNS=1000, MR_MICRO=600;
@@ -1157,7 +1164,7 @@ async function addMeters(m){
 var _OB_TOOLS_STEPS = [
   { tool: 'palabra',    text: 'La Palabra: el texto bíblico del Misterio. Léelo despacio, deja que hable.' },
   { tool: 'contemplar', text: 'Contemplar: la imagen y el texto del Misterio. Detente aquí todo el tiempo que quieras.' },
-  { tool: 'rezo',       text: 'Rezar: las oraciones del Rosario. Puedes leerlas o escucharlas.' },
+  { tool: 'rezo',       text: 'Rezar: escucha el rezo del Misterio. Toca para reproducir o pausar, y acompáñalo en oración.' },
   { tool: 'canto',      text: 'Canto: reproduce el canto las veces que quieras.' },
   { tool: 'escribir',   text: 'Escribir: deja una reflexión personal. Queda guardada en tu diario.' }
 ];
@@ -1525,7 +1532,7 @@ function openToolPopup(t){
   if(btn)btn.classList.add('active');
   tool=t;
   $('popup-title').textContent=TN[t]||t;
-  $('popup-voice-btn').style.display=['contemplar','rezo','canto'].includes(t)?'':'none';
+  $('popup-voice-btn').style.display=['contemplar','canto'].includes(t)?'':'none';
   populatePopup(t);
   $('tool-popup').classList.add('open');
   var bd=$('tool-popup-body');
@@ -1557,59 +1564,6 @@ function populatePopup(t){
       bd.innerHTML=`<p class="popup-text">${formatContempl(md?.contemplacion||'Contemplación no disponible')}</p>`+
         _closeBtn();
       break;
-    case 'rezo':{
-      const done=!!(prog?.progress?.[blk]?.[bIdx]);
-      const ts=prog?.progress?.[blk]?.[bIdx];
-      const ORACIONES=`<b>Padre nuestro</b>
-
-Padre nuestro que estás en el cielo,
-santificado sea tu Nombre;
-venga a nosotros tu Reino;
-hágase tu voluntad
-en la tierra como en el cielo.
-Danos hoy
-nuestro pan de cada día;
-perdona nuestras ofensas,
-como también nosotros perdonamos
-a los que nos ofenden;
-no nos dejes caer en la tentación,
-y líbranos del mal. Amén.
-
-
-<b>Ave María</b>
-
-Dios te salve, María,
-llena eres de gracia;
-el Señor es contigo.
-Bendita Tú eres
-entre todas las mujeres,
-y bendito es el fruto de tu vientre, Jesús.
-Santa María, Madre de Dios,
-ruega por nosotros, pecadores,
-ahora y en la hora de nuestra muerte. Amén.
-
-
-<b>Gloria al Padre</b>
-
-Gloria al Padre
-y al Hijo
-y al Espíritu Santo.
-Como era en el principio,
-ahora y siempre,
-por los siglos de los siglos. Amén.
-
-
-<b>Oración de Fátima</b>
-
-¡Oh Jesús mío, perdona nuestros pecados, líbranos del fuego del infierno, lleva al cielo a todas las almas, especialmente a las más necesitadas de tu misericordia! Amén.`;
-      bd.innerHTML=`<p class="popup-lyrics">${ORACIONES}</p>`+
-        (done
-          ?`<div class="mystery-done-pill"><span class="done-check">✓</span><div><div class="done-txt">Misterio rezado</div><div class="done-date">${new Date(ts).toLocaleDateString('es-MX',{month:'short',day:'numeric'})}</div></div></div>`
-          :`<button class="amen-btn" id="amen-rezo">Amén — Misterio rezado</button>`)+
-        _closeBtn();
-      if(!done){$('amen-rezo').onclick=async()=>{await completeMystery();populatePopup('rezo');};}
-      break;
-    }
     case 'canto':{
       const canto=cantoJ?.cantos?.[blk]?.[bIdx];
       bd.innerHTML=(canto?.titulo?`<p class="popup-song-title">${esc(canto.titulo)}</p>`:'')+
@@ -1787,6 +1741,9 @@ function initVP(){
   if(!libro){
     libro=new Audio();
     libro.addEventListener('ended',onAudioEnd);
+    libro.addEventListener('play',  function(){ if(tool==='rezo') setRezoIcon(true);  });
+    libro.addEventListener('pause', function(){ if(tool==='rezo') setRezoIcon(false); });
+    libro.addEventListener('ended', function(){ setRezoIcon(false); });
     libro.addEventListener('timeupdate',function(){
       var fill=$('vp-progress-fill'),cur=$('vp-time-current'),dur=$('vp-time-duration');
       if(fill&&libro.duration)fill.style.width=(libro.currentTime/libro.duration*100)+'%';
@@ -1815,7 +1772,7 @@ function initVP(){
   $('popup-close').onclick=()=>closeToolPopup();
 }
 function openVP(t){
-  if(!['contemplar','rezo','canto'].includes(t))return;
+  if(!['contemplar','canto'].includes(t))return;
   const url=toolUrl(t);if(!url)return;
   $('vp-tool-name').textContent=TN[t]||t;
   if(libro.src!==url){libro.src=url;libro.load();}
@@ -1874,6 +1831,39 @@ function vpUpd(){
   if (pbtn) pbtn.classList.toggle('playing', !isPaused);
   libro.onpause = libro.onplay = vpUpd;
 }
+function setRezoIcon(playing){
+  var rb=document.querySelector('.tool-btn[data-tool="rezo"]');
+  if(!rb) return;
+  var p=rb.querySelector('.rezo-ic-play'), q=rb.querySelector('.rezo-ic-pause');
+  if(p) p.style.display = playing ? 'none' : '';
+  if(q) q.style.display = playing ? '' : 'none';
+}
+
+function toggleRezo(){
+  if(!libro) return;
+  var url=toolUrl('rezo'); if(!url) return;
+  if(tool==='rezo' && !libro.paused){
+    libro.pause();
+    if(bgmOn && bgmEl){ if(bgmEl.paused) bgmEl.play().catch(()=>{}); bgmUnduck(); }
+    return;
+  }
+  tool='rezo';
+  if(libro.src!==url){ libro.src=url; libro.load(); }
+  document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('active'));
+  var rb=document.querySelector('.tool-btn[data-tool="rezo"]'); if(rb) rb.classList.add('active');
+  $('tool-popup').classList.remove('open');
+  $('voice-player').style.display='none';
+  bgmDuck();
+  if(window.CZSound) CZSound('playStart');
+  // Onboarding: avanzar el paso de rezo si está activo (avance oficial del tooltip)
+  var _obTTel = $('ob-tool-tooltip');
+  if (_obTTel && _obTTel.style.display !== 'none') {
+    var _obStepTool = _OB_TOOLS_STEPS[_obToolStep] ? _OB_TOOLS_STEPS[_obToolStep].tool : null;
+    if (_obStepTool && _obStepTool==='rezo') _obToolTooltipNext();
+  }
+  libro.play().catch(()=>{});
+}
+
 function onAudioEnd(){
   vpUpd();
   if(bgmOn && bgmEl){
@@ -2018,7 +2008,16 @@ function initSwipe(){
   },{passive:true});
 }
 function initBtns(){
-  document.querySelectorAll('.tool-btn').forEach(b=>b.onclick=()=>openToolPopup(b.dataset.tool));
+  document.querySelectorAll('.tool-btn').forEach(function(b){
+    b.onclick=function(){
+      var t=b.dataset.tool;
+      if(t==='rezo'){ toggleRezo(); return; }
+      if(tool==='rezo' && libro && !libro.paused){ libro.pause(); }  // parar rezo al cambiar de tool
+      var abierto=$('tool-popup').classList.contains('open');
+      if(abierto && tool===t){ closeToolPopup(); }   // mismo botón activo → cerrar (toggle)
+      else { openToolPopup(t); }
+    };
+  });
   if($('btn-dark'))        $('btn-dark').onclick=toggleTheme;
   if($('btn-bgm'))         $('btn-bgm').onclick=toggleBgm;
   if($('btn-theme'))       $('btn-theme').onclick=toggleTheme;
