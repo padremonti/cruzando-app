@@ -1973,6 +1973,7 @@ let sectionRewards   = new Set(); // secciones que ya dieron metros esta sesión
 let microData        = null;  // {id}-micro.json del cuaderno actual
 let blockMicroDone   = false; // si el micro del bloque actual ya fue completado
 let sessionCompleted = false;
+let _freeNoGana      = false; // Política Free v2: true => suprime ganancia de metros (revisita en DEMO 0101)
 
 // Tema
 let isDark = true;
@@ -2501,6 +2502,18 @@ function showFreeVuelveManana() {
 }
 window.showFreeVuelveManana = showFreeVuelveManana;
 
+// Celebración "DEMO completado" (0101 m20). No es un candado: no lleva cuenta regresiva.
+function showDemoCompleto() {
+  const overlay = document.getElementById('demo-completo-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  if (audioEl) { audioEl.pause(); isPlaying = false; }
+  bgmStop();
+  if (typeof updatePlayUI === 'function') updatePlayUI();
+  if (window._obConfetti) window._obConfetti('demo-completo-confetti');
+}
+window.showDemoCompleto = showDemoCompleto;
+
 async function saveAudioProgress() {
   if (!currentUser) return;
   try {
@@ -2726,6 +2739,20 @@ async function buildSession() {
   sectionRewards = new Set();
   sessionCompleted = false;
 
+  // ── Política Free v2 (forward-only): free no re-gana metros en un Misterio ya
+  //    completado. Captura el estado AL EMPEZAR la sesión, antes de que
+  //    syncToOrarProgress escriba el timestamp al completar. Solo 'free' lo activa;
+  //    premium/beta/developer => siempre false. yaGanado tolera doc vacío => false.
+  _freeNoGana = false;
+  try {
+    const _plan = window.effectivePlan ? window.effectivePlan() : 'free';
+    if (_plan === 'free' && currentUser) {
+      const _psnap = await getDoc(doc(db, 'users', currentUser.uid, 'progress', nivelId));
+      const _pdoc  = _psnap.exists() ? _psnap.data() : {};
+      _freeNoGana  = !!(window.yaGanado && window.yaGanado(_pdoc, block, blockIdx));
+    }
+  } catch(e) { _freeNoGana = false; }
+
   // ── Micro-aprendizaje: solo en el primer misterio de cada bloque (1, 6, 11, 16)
   const isFirstOfBlock = (m === 1 || m === 6 || m === 11 || m === 16);
   if (isFirstOfBlock && getPrefs().microInAudio !== false) {
@@ -2861,9 +2888,11 @@ function renderMicroAudio(b, nivelId) {
       $('micro-btn-comenzar').onclick = async () => {
         blockMicroDone = true;
         await saveMicroDone(b, nivelId);
-        await addMetersToFirestore(METERS_MICRO);
-        showSlide(METERS_MICRO, '¡Micro completado!');
-        sessionMeters += METERS_MICRO;
+        if (!_freeNoGana) {
+          await addMetersToFirestore(METERS_MICRO);
+          showSlide(METERS_MICRO, '¡Micro completado!');
+          sessionMeters += METERS_MICRO;
+        }
         closeMicro();
         startPlayerSession(null);
       };
@@ -3158,10 +3187,12 @@ async function awardSectionMeters(track) {
   const def = METERS_SECTION[key];
   if (!def) return;
   sectionRewards.add(key);
-  sessionMeters += def.meters;
-  await addMetersToFirestore(def.meters);
-  $('session-meters-display').textContent = `${sessionMeters.toLocaleString('es-MX')}m esta sesión`;
-  showToast(`+${def.meters}m · ${def.label}`);
+  if (!_freeNoGana) {
+    sessionMeters += def.meters;
+    await addMetersToFirestore(def.meters);
+    $('session-meters-display').textContent = `${sessionMeters.toLocaleString('es-MX')}m esta sesión`;
+    showToast(`+${def.meters}m · ${def.label}`);
+  }
 }
 
 function isCanto(idx) {
@@ -3712,10 +3743,12 @@ function renderEpilogo(canto, audioUrl) {
     // Metros por escuchar el canto del epílogo completo
     if (!sectionRewards.has('epilogo')) {
       sectionRewards.add('epilogo');
-      sessionMeters += METERS_EPILOGO_CANTO;
-      addMetersToFirestore(METERS_EPILOGO_CANTO);
-      $('complete-meters').textContent = `+${sessionMeters.toLocaleString('es-MX')}m`;
-      showToast(`+${METERS_EPILOGO_CANTO}m · Canto escuchado`);
+      if (!_freeNoGana) {
+        sessionMeters += METERS_EPILOGO_CANTO;
+        addMetersToFirestore(METERS_EPILOGO_CANTO);
+        $('complete-meters').textContent = `+${sessionMeters.toLocaleString('es-MX')}m`;
+        showToast(`+${METERS_EPILOGO_CANTO}m · Canto escuchado`);
+      }
     }
   };
   epilogoAudioEl.onerror = () => {
@@ -3768,6 +3801,10 @@ async function completeSession() {
     const curNivelId  = String(audioProgress.nivel).padStart(2, '0') +
                         String(audioProgress.cuaderno).padStart(2, '0');
     const curMisterio = audioProgress.misterio;
+    // ── Ritmo libre en 0101: no consumir día hasta completar el m20 ──
+    const _esDemo      = (curNivelId === '0101');
+    const _demoCleared = _esDemo && curMisterio === 20;
+    const _lockHoy     = !_esDemo || curMisterio === 20;  // false solo en 0101 m1-19
     let nextMisterio  = curMisterio + 1;
     let nextNivelId   = curNivelId;
     if (nextMisterio > 20) {
@@ -3784,16 +3821,18 @@ async function completeSession() {
       await setDoc(doc(db, 'users', currentUser.uid, 'freeProgress', 'current'), {
         nivelId:        nextNivelId,
         misterio:       nextMisterio,
-        completedToday: true,
+        completedToday: _lockHoy,
         fechaHoy:       hoy,
         completedAt:    serverTimestamp()
       });
-      window._freeProg = { nivelId: nextNivelId, misterio: nextMisterio, completedToday: true, fechaHoy: hoy };
+      window._freeProg = { nivelId: nextNivelId, misterio: nextMisterio, completedToday: _lockHoy, fechaHoy: hoy };
       try { localStorage.setItem('cruzando_free_prog', JSON.stringify(window._freeProg)); } catch(_) {}
     } catch(e) { console.warn('[CruzAndo] Error guardando freeProgress:', e); }
 
     try { localStorage.setItem('cruzando_progress_cache_dirty', 'true'); } catch(_) {}
-    window._freeShowMananaAfterCelebration = true;
+    window._freeShowMananaAfterCelebration = _lockHoy && !_demoCleared;
+    window._freeDemoJustCleared = _demoCleared;
+    window._freeRitmoLibre = _esDemo && !_demoCleared;   // true solo en 0101 m1-19
     // Sin return: el flujo normal continúa para registrar metros y mostrar celebración
   }
 
@@ -3926,9 +3965,21 @@ async function completeSession() {
   const actions = $('complete-actions');
   const s = 'width:100%;padding:15px;border-radius:14px;font-family:Inter,sans-serif;font-size:1rem;font-weight:700;cursor:pointer;margin-bottom:10px;display:block;';
   if (userPlan === 'free') {
-    actions.innerHTML =
-      '<button onclick="window.showFreeVuelveManana()" style="' + s + 'background:var(--lvl-bold);color:#fff;border:none;">Volver mañana 🙏</button>' +
-      '<button onclick="window._repeatSession()" style="' + s + 'background:var(--card);color:var(--text-soft);border:1.5px solid var(--border);">🔄 Repetir sesión</button>';
+    if (window._freeRitmoLibre) {
+      // 0101 m1-19: continuar al siguiente Misterio hoy mismo
+      actions.innerHTML =
+        '<button onclick="window.advanceAndRestart()" style="' + s + 'background:var(--lvl-bold);color:#fff;border:none;">Siguiente misterio →</button>' +
+        '<button onclick="window._repeatSession()" style="' + s + 'background:var(--card);color:var(--text-soft);border:1.5px solid var(--border);">🔄 Repetir sesión</button>';
+    } else if (window._freeDemoJustCleared) {
+      // 0101 m20: la celebración DEMO toma el control
+      actions.innerHTML =
+        '<button onclick="window.showDemoCompleto()" style="' + s + 'background:var(--lvl-bold);color:#fff;border:none;">Continuar 🎉</button>';
+    } else {
+      // 0102+: candado diario (comportamiento actual)
+      actions.innerHTML =
+        '<button onclick="window.showFreeVuelveManana()" style="' + s + 'background:var(--lvl-bold);color:#fff;border:none;">Volver mañana 🙏</button>' +
+        '<button onclick="window._repeatSession()" style="' + s + 'background:var(--card);color:var(--text-soft);border:1.5px solid var(--border);">🔄 Repetir sesión</button>';
+    }
   } else {
     actions.innerHTML =
       '<button onclick="window.advanceAndRestart()" style="' + s + 'background:var(--lvl-bold);color:#fff;border:none;">Siguiente misterio →</button>' +
@@ -3938,8 +3989,12 @@ async function completeSession() {
   $('scr-complete').classList.add('open');
   $('fab-questions') && ($('fab-questions').style.display = 'none');
 
-  // Si era Free completando por primera vez hoy: mostrar overlay tras la celebración
-  if (window._freeShowMananaAfterCelebration) {
+  // Si era Free completando por primera vez hoy: mostrar overlay tras la celebración.
+  // Prioridad: celebración DEMO (m20) por encima del "vuelve mañana" diario.
+  if (window._freeDemoJustCleared) {
+    window._freeDemoJustCleared = false;
+    setTimeout(window.showDemoCompleto, 2000);
+  } else if (window._freeShowMananaAfterCelebration) {
     window._freeShowMananaAfterCelebration = false;
     setTimeout(showFreeVuelveManana, 2000);
   }
@@ -4050,23 +4105,28 @@ async function awardQuestionMeters(qi, value) {
     audioProgress.firstAnswered[qi] = true;
     await saveAudioProgress();
     const earned = METERS_Q_FIRST;
-    sessionMeters += earned;
-    await addMetersToFirestore(earned);
-    showSlide(earned);
-    $('session-meters-display').textContent = `${sessionMeters.toLocaleString('es-MX')}m esta sesión`;
     const el = $(`q-meters-${qi}`);
-    if (el) { el.textContent = `+${earned}m ganados`; el.classList.add('earned'); }
-    showToast(`+${earned}m · ${Q_LABELS[qi].replace(':','')}`);
+    if (el) el.classList.add('earned');
+    if (!_freeNoGana) {
+      sessionMeters += earned;
+      await addMetersToFirestore(earned);
+      showSlide(earned);
+      $('session-meters-display').textContent = `${sessionMeters.toLocaleString('es-MX')}m esta sesión`;
+      if (el) el.textContent = `+${earned}m ganados`;
+      showToast(`+${earned}m · ${Q_LABELS[qi].replace(':','')}`);
+    }
   } else {
     // Actualización posterior
     const el = $(`q-meters-${qi}`);
     if (el && !el.classList.contains('earned')) {
-      el.textContent = `+${METERS_Q_UPDATE}m`;
       el.classList.add('earned');
-      await addMetersToFirestore(METERS_Q_UPDATE);
-      showSlide(METERS_Q_UPDATE, '¡Primera respuesta!');
-      sessionMeters += METERS_Q_UPDATE;
-      $('session-meters-display').textContent = `${sessionMeters.toLocaleString('es-MX')}m esta sesión`;
+      if (!_freeNoGana) {
+        el.textContent = `+${METERS_Q_UPDATE}m`;
+        await addMetersToFirestore(METERS_Q_UPDATE);
+        showSlide(METERS_Q_UPDATE, '¡Primera respuesta!');
+        sessionMeters += METERS_Q_UPDATE;
+        $('session-meters-display').textContent = `${sessionMeters.toLocaleString('es-MX')}m esta sesión`;
+      }
     }
   }
 }
@@ -4328,6 +4388,48 @@ initAuth();
     -webkit-tap-highlight-color:transparent;">
     🔄 Repetir sesión
   </button>
+</div>
+
+<!-- ── Overlay Free: DEMO completado (0101 m20) ── -->
+<div id="demo-completo-overlay" style="display:none;position:fixed;inset:0;
+  background:var(--bg);z-index:9999;flex-direction:column;align-items:center;
+  justify-content:center;padding:32px;text-align:center;overflow:hidden;">
+  <div id="demo-completo-confetti" style="position:absolute;inset:0;
+    pointer-events:none;overflow:hidden;"></div>
+  <div style="position:relative;z-index:1;display:flex;flex-direction:column;
+    align-items:center;max-width:360px;">
+    <div style="font-size:3.5rem;margin-bottom:20px">🎉</div>
+    <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:2rem;
+      font-weight:600;color:var(--text);line-height:1.2;margin-bottom:14px">
+      ¡Completaste el DEMO!
+    </div>
+    <div style="font-family:'Crimson Pro',Georgia,serif;font-size:1.15rem;
+      color:var(--text-soft);line-height:1.7;margin-bottom:20px;max-width:330px">
+      Recorriste los 20 Misterios del primer Nivel. A partir de hoy puedes seguir
+      avanzando gratis en el modo audio: un Misterio nuevo cada día.
+    </div>
+    <div style="font-family:'Crimson Pro',Georgia,serif;font-size:1.02rem;
+      color:var(--text-dim);line-height:1.6;margin-bottom:34px;max-width:330px">
+      ¿Quieres los tres modos y todos los Niveles sin esperar?
+      Desbloquéalo con Premium.
+    </div>
+    <button onclick="window.location.href='index.html'"
+      style="padding:16px 40px;border-radius:28px;border:none;
+      background:var(--brand);color:#fff;
+      font-family:'Cormorant Garamond',Georgia,serif;
+      font-size:1.4rem;font-weight:600;cursor:pointer;
+      -webkit-tap-highlight-color:transparent;">
+      Ir al inicio
+    </button>
+    <button onclick="window.location.href='index.html?premium=1'"
+      style="margin-top:14px;padding:13px 40px;border-radius:28px;
+      background:none;border:1.5px solid var(--border);color:var(--text-soft);
+      font-family:'Cormorant Garamond',Georgia,serif;
+      font-size:1.2rem;font-weight:600;cursor:pointer;
+      -webkit-tap-highlight-color:transparent;">
+      Conocer Premium
+    </button>
+  </div>
 </div>
 
 <!-- Mariano slide-in -->

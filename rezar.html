@@ -1243,6 +1243,7 @@ Por Jesucristo, nuestro Señor. Amén.`;
 let usr=null, data=null, prog={};
 let nivelId='0101', nivel=1, cua=1;
 let blk='gozosos', bIdx=0;
+let _freeNoGana=false; // Política Free v2: true => suprime ganancia de metros (revisita en DEMO 0101)
 let totalM=0;
 let playlist=[], plIdx=0;
 let rezarAudio=null;
@@ -2034,8 +2035,7 @@ function countBead(){
     if(el){
       if(isOnTime){
         el.classList.add('lit-correct','gold-flash');
-        _showBeadBonus(el);
-        addMeters(25);
+        if(!_freeNoGana){ _showBeadBonus(el); addMeters(25); }
       } else {
         el.classList.add('lit-normal');
       }
@@ -2052,8 +2052,7 @@ function countBead(){
     if(lastBead){
       if(isOnTime){
         lastBead.classList.add('lit-correct','gold-flash');
-        _showBeadBonus(lastBead);
-        addMeters(25);
+        if(!_freeNoGana){ _showBeadBonus(lastBead); addMeters(25); }
       } else {
         lastBead.classList.add('lit-normal');
       }
@@ -2100,6 +2099,11 @@ function updateToggleHref(){
 }
 
 function updateMysteryContent(){
+  // Política Free v2 (forward-only): captura AL EMPEZAR si este Misterio ya estaba
+  // completado. Solo 'free' lo activa; premium/beta/developer siempre ganan.
+  // yaGanado tolera estados parciales (prog={}, blk null, bIdx undefined => false).
+  var _plan=window.effectivePlan?window.effectivePlan():'free';
+  _freeNoGana=(_plan==='free')&&!!(window.yaGanado&&window.yaGanado(prog,blk,bIdx));
   setupMediaSession();
   const md=mData(blk,bIdx),m=mNum(blk,bIdx);
   const hi=$('hero-img');
@@ -2276,8 +2280,8 @@ function initEscrH(md){
 async function onWrite(qi,text,force=false){
   if(!text.trim())return;
   await saveRef(qi,text);
-  if(!firstAns[qi]){firstAns[qi]=true;if(window.CZSound)CZSound('reflectionSaved');await addMeters(MR_QF);showSlide(MR_QF,'¡Primera respuesta!');}
-  else if(force){if(window.CZSound)CZSound('reflectionSaved');await addMeters(MR_QU);}
+  if(!firstAns[qi]){firstAns[qi]=true;if(window.CZSound)CZSound('reflectionSaved');if(!_freeNoGana){await addMeters(MR_QF);showSlide(MR_QF,'¡Primera respuesta!');}}
+  else if(force){if(window.CZSound)CZSound('reflectionSaved');if(!_freeNoGana){await addMeters(MR_QU);}}
   const sv=$('qsv'+qi);
   if(sv){sv.textContent='✓ Guardado';setTimeout(()=>{if(sv)sv.textContent='';},2500);}
 }
@@ -2463,8 +2467,7 @@ async function onTrackEnded(){
   if(!track)return;
   if(track.type==='misterio'){
     await completeMystery();
-    await addMeters(MR_REZO);
-    showSlide(MR_REZO);
+    if(!_freeNoGana){ await addMeters(MR_REZO); showSlide(MR_REZO); }
   }
   playNext();
 }
@@ -2645,7 +2648,7 @@ async function loadAndEnter(nId,block,idx){
     const snap=await FS.collection('users').doc(usr.uid).get();
     const ud=snap.exists?snap.data():{};
     const _plan=window.effectivePlan?window.effectivePlan():(window.resolvePlan?window.resolvePlan(ud):'free');
-    if(window.requirePremiumAccess&&!window.requirePremiumAccess('rezar',_plan))return;
+    if(window.requirePremiumAccess&&!window.requirePremiumAccess('rezar',_plan,nivelId))return;
     totalM=ud.totalMeters||0;
   }catch(e){}
 
@@ -2696,7 +2699,7 @@ async function loadAndStart(){
     const snap=await FS.collection('users').doc(usr.uid).get();
     const ud=snap.exists?snap.data():{};
     const _plan=window.effectivePlan?window.effectivePlan():(window.resolvePlan?window.resolvePlan(ud):'free');
-    if(window.requirePremiumAccess&&!window.requirePremiumAccess('rezar',_plan))return;
+    if(window.requirePremiumAccess&&!window.requirePremiumAccess('rezar',_plan,nivelId))return;
     totalM=ud.totalMeters||0;
   }catch(e){}
 

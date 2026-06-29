@@ -2127,6 +2127,16 @@ function renderHome(userData) {
   var plan   = effectivePlan ? effectivePlan() : currentPlan;
   var isPrem = isPremiumOrAbove ? isPremiumOrAbove(plan) : false;
 
+  // Upsell directo: ?premium=1 abre el modal de Premium (solo para no-premium).
+  if (_urlParams.get('premium') === '1') {
+    history.replaceState(null, '', location.pathname);   // limpiar para que un refresh no lo re-abra
+    if (!isPrem) {
+      setTimeout(function () {
+        if (window.openModal) window.openModal('modal-premium');
+      }, 600);
+    }
+  }
+
   _updateSuscripcionBtns(plan);
 
   // Banner premium — solo para free
