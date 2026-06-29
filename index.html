@@ -1121,6 +1121,16 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   margin:10px 14px 0; padding:12px 14px;
   background:var(--card2,var(--card)); border:1px solid var(--border);
   border-radius:16px; flex-shrink:0;
+  overflow:hidden;
+  max-height:140px;
+  transition:max-height .5s cubic-bezier(.16,1,.3,1), opacity .4s ease,
+             margin .5s ease, padding .5s ease, border-width .5s ease;
+}
+.odometro-wrap.collapsed {
+  max-height:0; opacity:0;
+  margin-top:0; margin-bottom:0;
+  padding-top:0; padding-bottom:0;
+  border-width:0; pointer-events:none;
 }
 .odometro-top { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:8px; }
 .odometro-label { font-size:0.58rem; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; color:var(--text-dim); }
@@ -1385,37 +1395,6 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   </div>
 
   <nav class="drawer-nav">
-    <button class="drawer-item active" onclick="closeDrawer()">
-      <div class="drawer-item-icon">🗺️</div>
-      <div><div class="drawer-item-label">El Camino</div><div class="drawer-item-sub">Mapa del nivel</div></div>
-    </button>
-    <button class="drawer-item" onclick="closeDrawer(); playTap(); navigateTo('audio.html?c='+(window.currentNivelId||'0101'))">
-      <div class="drawer-item-icon">🎧</div>
-      <div><div class="drawer-item-label">Orar en Audio</div><div class="drawer-item-sub">Sesión guiada</div></div>
-    </button>
-    <button class="drawer-item" onclick="closeDrawer(); playTap(); navigateTo('orar.html?c='+(window.currentNivelId||'0101'))">
-      <div class="drawer-item-icon">📖</div>
-      <div><div class="drawer-item-label">Orar en Libro</div><div class="drawer-item-sub">Textos interactivos</div></div>
-    </button>
-    <button class="drawer-item" onclick="closeDrawer(); playTap(); navigateTo('diario.html')">
-      <div class="drawer-item-icon">📓</div>
-      <div><div class="drawer-item-label">Diario</div><div class="drawer-item-sub">Mis reflexiones</div></div>
-    </button>
-    <button class="drawer-item" onclick="closeDrawer(); playTap(); navigateTo('cantos.html')">
-      <div class="drawer-item-icon">🎶</div>
-      <div><div class="drawer-item-label">Cantos</div><div class="drawer-item-sub">Melodías para orar</div></div>
-      <span class="drawer-item-badge" id="cantos-badge-drawer" style="display:none">¡Nuevos!</span>
-    </button>
-    <div class="drawer-divider"></div>
-    <button class="drawer-item" onclick="closeDrawer(); playTap(); navigateTo('sanar.html')">
-      <div class="drawer-item-icon">🌿</div>
-      <div><div class="drawer-item-label">Sanar</div><div class="drawer-item-sub">Talleres de acompañamiento</div></div>
-    </button>
-    <button class="drawer-item" id="drawer-extras-btn" onclick="closeDrawer(); playTap(); goToExtras()">
-      <div class="drawer-item-icon">⭐</div>
-      <div><div class="drawer-item-label">Extras</div><div class="drawer-item-sub">Canjea tus metros</div></div>
-    </button>
-    <div class="drawer-divider"></div>
     <button class="drawer-item" onclick="closeDrawer(); openPrefs()">
       <div class="drawer-item-icon">⚙️</div>
       <div><div class="drawer-item-label">Preferencias</div><div class="drawer-item-sub">Tema, audio, micro</div></div>
@@ -3195,6 +3174,18 @@ async function saveMetrosHoy(added) {
 }
 
 // ── Meta diaria: UI ───────────────────────────────────────────────
+let _odoHideTimer = null;
+function showOdometroTemporarily(ms) {
+  const w = document.getElementById('odometro-wrap');
+  if (!w) return;
+  w.classList.remove('collapsed');
+  clearTimeout(_odoHideTimer);
+  _odoHideTimer = setTimeout(function () {
+    const x = document.getElementById('odometro-wrap');
+    if (x) x.classList.add('collapsed');
+  }, ms || 5000);
+}
+
 function updateOdometro() {
   window.metaMetros = metaMetros;
   const pct      = Math.min((metrosHoy / metaMetros) * 100, 100);
@@ -3220,6 +3211,12 @@ function updateOdometro() {
     if (estadoTxt) estadoTxt.textContent = 'En camino';
     if (faltaEl)   faltaEl.textContent   = 'faltan ' + (metaMetros - metrosHoy).toLocaleString('es-MX') + 'm';
   }
+
+  // Auto-mostrar: al cargar (1ª vez) y cuando los metros del día aumentan.
+  if (window._odoPrevHoy === undefined || metrosHoy > window._odoPrevHoy) {
+    showOdometroTemporarily();
+  }
+  window._odoPrevHoy = metrosHoy;
 }
 
 function checkMetaStreak() {
