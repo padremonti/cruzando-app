@@ -324,6 +324,8 @@ body.light .misterio-subtitulo{color:#002931;text-shadow:0 0 8px rgba(255,255,25
 .hero-btn:active{background:rgba(0,0,0,0.55)}
 .hero-btn-left{left:14px}
 .hero-btn-right{right:14px}
+.hero-btn-left2{left:65px}   /* flecha Misterio anterior, a la derecha del BGM */
+.hero-btn-right2{right:65px} /* flecha Misterio siguiente, a la izquierda del Tema */
 .hero-btn.bgm-on{background:rgba(255,122,0,0.5);border-color:rgba(255,122,0,0.7)}
 /* ── Preparación en el hero (pill) ── */
 .prep-hero{position:absolute;top:14px;left:66px;right:66px;z-index:10}
@@ -358,11 +360,50 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
 .tools-bar::before{content:'';position:absolute;top:32px;left:0;right:0;height:1.5px;background:var(--tb-bead);z-index:0}
 
 /* ══════════════════════════════════════
+   Cuentas del Rosario — indicador pasivo del rezo (sync bead_sync.json)
+   ══════════════════════════════════════ */
+.beads-col{
+  position:absolute;right:6px;top:50%;transform:translateY(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:7px;z-index:5;
+  filter:drop-shadow(0 1px 3px rgba(0,0,0,0.6)) drop-shadow(0 0 1px rgba(0,0,0,0.6));
+}
+.bead{
+  width:16px;height:16px;border-radius:50%;
+  border:2px solid rgba(255,255,255,0.35);background:rgba(255,255,255,0.08);
+  transition:background .18s,border-color .18s,transform .12s;
+}
+.bead.lit-normal,.bead.lit-correct,.bead.lit-white,.bead.active{border-color:var(--lvl-bold);background:var(--lvl-bold)}
+body.audio-playing .bead.active{animation:beadPulseFilled .9s ease-in-out infinite}
+@keyframes beadPulseFilled{
+  0%,100%{box-shadow:0 0 0 3px rgba(var(--lvl-bold-rgb,2,187,224),.25);transform:scale(1)}
+  50%{box-shadow:0 0 0 8px rgba(var(--lvl-bold-rgb,2,187,224),.5);transform:scale(1.15)}
+}
+.bead-pater{
+  width:12px;height:12px;border-radius:50%;
+  border:2px solid rgba(255,255,255,0.55);background:rgba(255,255,255,0.15);
+  transition:background .18s,border-color .18s;margin-bottom:4px;
+}
+.bead-pater.lit-normal,.bead-pater.lit-white,.bead-pater.active{background:var(--lvl-bold);border-color:var(--lvl-bold)}
+body.audio-playing .bead-pater.active{animation:beadPulseFilled .9s ease-in-out infinite}
+.bead-sep{width:1px;height:8px;background:rgba(255,255,255,0.15);margin:0 auto}
+.bead-lux-cross{display:none;margin-top:6px;flex-direction:column;align-items:center}
+.bead-lux-cross.show{display:flex;animation:luxAppear .6s cubic-bezier(.34,1.56,.64,1) forwards}
+.bead-lux-cross.show .lux-glow svg{filter:drop-shadow(0 0 6px rgba(255,255,255,.9)) drop-shadow(0 0 14px rgba(255,255,255,.5));animation:luxGlowPulse 1.2s ease-in-out infinite}
+@keyframes luxGlowPulse{0%,100%{filter:drop-shadow(0 0 4px rgba(255,255,255,.7))}50%{filter:drop-shadow(0 0 14px rgba(255,255,255,1)) drop-shadow(0 0 28px rgba(67,221,248,.6))}}
+@keyframes luxAppear{0%{opacity:0;transform:scale(.4)}60%{opacity:1;transform:scale(1.15)}100%{opacity:1;transform:scale(1)}}
+.lux-glow{position:relative;width:28px;height:28px;display:flex;align-items:center;justify-content:center}
+.lux-glow::before{content:'';position:absolute;inset:-6px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.35) 0%,transparent 70%);animation:luxPulse 1.4s ease-in-out infinite}
+@keyframes luxPulse{0%,100%{opacity:.4;transform:scale(.9)}50%{opacity:1;transform:scale(1.15)}}
+
+/* ══════════════════════════════════════
    POPUP — Bottom sheet sobre zona A
    ══════════════════════════════════════ */
 .tool-popup{
-  position:absolute;bottom:0;left:0;right:0;top:0;
-  background:var(--bg);
+  --popup-font:20px;                 /* base de letra del popup (fine-tuning del mockup) */
+  position:absolute;bottom:0;left:0;right:56px;   /* deja libre el margen derecho para las beads */
+  height:89%;
+  background:rgba(var(--bg-rgb),0.82);            /* transparencia sutil */
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);  /* difumina la imagen detrás */
   border-radius:20px 20px 0 0;
   transform:translateY(100%);
   transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);
@@ -389,15 +430,15 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
 .tool-popup-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 20px 24px;color:var(--text)}
 
 /* Contenido del popup — modo libro */
-.popup-text{font-family:'Crimson Pro',Georgia,serif;font-size:36px;line-height:1.7;color:var(--text)}
-.contempl-title{display:block;font-weight:700;font-size:42px;color:var(--text);margin-bottom:18px;line-height:1.3;font-style:normal;}
-.popup-reference{font-family:'Crimson Pro',Georgia,serif;font-size:26px;color:var(--text-dim);font-style:italic;margin-bottom:12px}
-.popup-song-title{font-family:'Crimson Pro',Georgia,serif;font-size:36px;font-weight:600;color:var(--text);margin-bottom:14px}
-.popup-lyrics{white-space:pre-line;font-family:'Crimson Pro',Georgia,serif;font-size:36px;line-height:1.7;font-style:italic;color:var(--text)}
+.popup-text{font-family:'Crimson Pro',Georgia,serif;font-size:var(--popup-font);line-height:1.7;color:var(--text)}
+.contempl-title{display:block;font-weight:700;font-size:calc(var(--popup-font) * 1.2);color:var(--text);margin-bottom:18px;line-height:1.3;font-style:normal;}
+.popup-reference{font-family:'Crimson Pro',Georgia,serif;font-size:calc(var(--popup-font) * 0.75);color:var(--text-dim);font-style:italic;margin-bottom:12px}
+.popup-song-title{font-family:'Crimson Pro',Georgia,serif;font-size:var(--popup-font);font-weight:600;color:var(--text);margin-bottom:14px}
+.popup-lyrics{white-space:pre-line;font-family:'Crimson Pro',Georgia,serif;font-size:var(--popup-font);line-height:1.7;font-style:italic;color:var(--text)}
 .q-block{margin-bottom:28px}
 .q-label{font-size:0.66rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
-.q-question{font-family:'Crimson Pro',Georgia,serif;font-size:36px;font-weight:500;line-height:1.7;color:var(--text-soft);font-style:italic;margin-bottom:12px}
-.q-textarea{width:100%;min-height:110px;max-height:35vh;resize:vertical;overflow-y:auto;padding:14px;background:var(--sec-bg);border:1.5px solid var(--border);border-radius:12px;color:var(--text);font-family:'Crimson Pro',Georgia,serif;font-size:30px;line-height:1.7}
+.q-question{font-family:'Crimson Pro',Georgia,serif;font-size:var(--popup-font);font-weight:500;line-height:1.7;color:var(--text-soft);font-style:italic;margin-bottom:12px}
+.q-textarea{width:100%;min-height:110px;max-height:35vh;resize:vertical;overflow-y:auto;padding:14px;background:var(--sec-bg);border:1.5px solid var(--border);border-radius:12px;color:var(--text);font-family:'Crimson Pro',Georgia,serif;font-size:calc(var(--popup-font) * 0.9);line-height:1.7}
 .q-textarea:focus{border-color:var(--lvl-soft);outline:none}
 .q-saved{font-size:0.72rem;color:var(--green);margin-top:5px;min-height:26px}
 .amen-btn{display:block;width:100%;margin-top:24px;padding:18px;border-radius:16px;border:none;cursor:pointer;font-family:'Cormorant Garamond',Georgia,serif;font-size:1.6rem;font-weight:600;background:var(--lvl-bold);color:#fff;letter-spacing:1px;transition:all 0.2s;box-shadow:0 4px 16px rgba(0,0,0,0.12)}
@@ -728,14 +769,17 @@ body.light .popup-close-bottom{border-color:var(--border);color:var(--text-dim)}
         <svg id="theme-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
       </button>
 
-      <!-- Navegación ← → entre misterios -->
-      <div class="hero-mystery-nav">
-        <button class="hero-nav-btn" id="btn-prev-mystery">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
-        </button>
-        <button class="hero-nav-btn" id="btn-next-mystery">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
+      <!-- Navegación entre misterios (reubicada al tope: junto a BGM y Tema) -->
+      <button class="hero-btn hero-btn-left2" id="btn-prev-mystery" title="Misterio anterior">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="hero-btn hero-btn-right2" id="btn-next-mystery" title="Misterio siguiente">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+
+      <!-- Columna de cuentas del Rosario (indicador pasivo del rezo) -->
+      <div id="beads-col-wrap" style="display:none">
+        <div class="beads-col" id="beads-col"></div>
       </div>
 
       <!-- Popup bottom sheet -->
@@ -1456,6 +1500,8 @@ function renderSession(){
   if (walkImg) walkImg.src = MARIANO_WALK;
   $('main-header').style.display='none';
   awd=new Set();tool=null;
+  // Reset de beads al cambiar de Misterio (re-render aunque la track sea del mismo tipo)
+  _currentSyncKey=null; _beadsHide();
   ans={0:'',1:'',2:''};firstAns={0:false,1:false,2:false};
   currentGlobalMystery=mNum(blk,bIdx);
 
@@ -1741,14 +1787,15 @@ function initVP(){
   if(!libro){
     libro=new Audio();
     libro.addEventListener('ended',onAudioEnd);
-    libro.addEventListener('play',  function(){ if(tool==='rezo') setRezoIcon(true);  });
-    libro.addEventListener('pause', function(){ if(tool==='rezo') setRezoIcon(false); });
-    libro.addEventListener('ended', function(){ setRezoIcon(false); });
+    libro.addEventListener('play',  function(){ if(tool==='rezo') setRezoIcon(true);  _updateSyncKey(libro.src); document.body.classList.add('audio-playing'); });
+    libro.addEventListener('pause', function(){ if(tool==='rezo') setRezoIcon(false); document.body.classList.remove('audio-playing'); });
+    libro.addEventListener('ended', function(){ setRezoIcon(false); document.body.classList.remove('audio-playing'); });
     libro.addEventListener('timeupdate',function(){
       var fill=$('vp-progress-fill'),cur=$('vp-time-current'),dur=$('vp-time-duration');
       if(fill&&libro.duration)fill.style.width=(libro.currentTime/libro.duration*100)+'%';
       if(cur)cur.textContent=fmtTime(libro.currentTime);
       if(dur&&libro.duration)dur.textContent=fmtTime(libro.duration);
+      _tickBeads();
     });
   }
   $('vp-play-pause').onclick=()=>vpToggle();
@@ -1837,6 +1884,51 @@ function setRezoIcon(playing){
   var p=rb.querySelector('.rezo-ic-play'), q=rb.querySelector('.rezo-ic-pause');
   if(p) p.style.display = playing ? 'none' : '';
   if(q) q.style.display = playing ? '' : 'none';
+}
+
+/* ─── Cuentas del Rosario: indicador pasivo sincronizado a la track (bead_sync.json) ─── */
+let _beadSync=null, _currentSyncKey=null;
+async function loadBeadSync(){
+  if(_beadSync)return;
+  try{ const r=await fetch('./data/bead_sync.json'); _beadSync=r.ok?await r.json():{}; }
+  catch(e){ _beadSync={}; }
+}
+function renderBeadsCol(){
+  const col=$('beads-col'); if(!col)return;
+  col.innerHTML='';
+  const pater=document.createElement('div'); pater.className='bead-pater'; pater.id='bead-pater'; col.appendChild(pater);
+  const sep=document.createElement('div'); sep.className='bead-sep'; col.appendChild(sep);
+  for(let i=0;i<10;i++){ const d=document.createElement('div'); d.className='bead'; col.appendChild(d); }
+  const lux=document.createElement('div'); lux.className='bead-lux-cross'; lux.id='bead-lux-cross';
+  lux.innerHTML='<div class="lux-glow"><svg width="22" height="22" viewBox="0 0 100 100"><rect x="46.2" y="0" width="7.6" height="100" fill="white" opacity="0.95"/><rect x="0" y="36" width="100" height="7.6" fill="white" opacity="0.95"/></svg></div>';
+  col.appendChild(lux);
+}
+function _getBeadEl(idx){ if(idx===0)return $('bead-pater'); return document.querySelectorAll('#beads-col .bead')[idx-1]||null; }
+function _beadsShow(){ const w=$('beads-col-wrap'); if(w)w.style.display='flex'; }
+function _beadsHide(){ const w=$('beads-col-wrap'); if(w)w.style.display='none'; }
+function _updateSyncKey(trackUrl){
+  if(!_beadSync||!trackUrl){ _currentSyncKey=null; _beadsHide(); return; }
+  const name=trackUrl.split('/').pop().replace(/\?.*$/,'').replace(/\.mp3$/i,'').toUpperCase();
+  const found=Object.keys(_beadSync).find(k=>k.toUpperCase()===name)||null;
+  const changed=(found!==_currentSyncKey);
+  _currentSyncKey=found;
+  if(found){ if(changed)renderBeadsCol(); _beadsShow(); }
+  else _beadsHide();
+}
+function _tickBeads(){
+  if(!libro||!_currentSyncKey||!_beadSync)return;
+  const windows=_beadSync[_currentSyncKey]; if(!windows)return;
+  const t=libro.currentTime;
+  let active=-1;
+  for(let i=0;i<windows.length;i++){ if(t>=windows[i].start&&t<=windows[i].end){active=i;break;} }
+  for(let i=0;i<windows.length;i++){
+    const el=_getBeadEl(i); if(!el)continue;
+    el.classList.remove('active','lit-normal');
+    if(i===active)el.classList.add('active');
+    else if(t>windows[i].end)el.classList.add('lit-normal');
+  }
+  const lux=$('bead-lux-cross');
+  if(lux){ const last=windows[windows.length-1]; if(t>last.end)lux.classList.add('show'); else lux.classList.remove('show'); }
 }
 
 function toggleRezo(){
@@ -2026,6 +2118,7 @@ function initBtns(){
 }
 
 bgmOn=prefs().bgm!==false;
+loadBeadSync();
 initBtns();
 initSwipe();
 initAuth();

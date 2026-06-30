@@ -241,22 +241,6 @@ body {
   overflow: hidden;
 }
 
-/* ── Fondo difuminado full-screen ── */
-.session-bg {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-}
-.session-bg img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  filter: blur(18px) brightness(0.35);
-  transform: scale(1.1);
-  opacity: 0.9;
-}
 
 /* ── Hero — ocupa todo el espacio disponible sobre los controles ── */
 .hero {
@@ -357,6 +341,40 @@ body.light .audio-hero-subtitulo {
   text-shadow: 0 0 8px rgba(255,255,255,1), 0 0 16px rgba(255,255,255,0.95), 0 0 32px rgba(255,255,255,0.8);
 }
 .audio-hero-beads { display: flex; gap: 7px; margin-top: 8px; }
+
+/* ── Cuentas del Rosario — indicador pasivo del rezo (sync bead_sync.json) ── */
+.beads-col{
+  position:absolute;right:6px;top:50%;transform:translateY(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:7px;z-index:6;
+  filter:drop-shadow(0 1px 3px rgba(0,0,0,0.6)) drop-shadow(0 0 1px rgba(0,0,0,0.6));
+}
+.bead{
+  width:16px;height:16px;border-radius:50%;
+  border:2px solid rgba(255,255,255,0.35);background:rgba(255,255,255,0.08);
+  transition:background .18s,border-color .18s,transform .12s;
+}
+.bead.lit-normal,.bead.lit-correct,.bead.lit-white,.bead.active{border-color:var(--lvl-bold);background:var(--lvl-bold)}
+body.audio-playing .bead.active{animation:beadPulseFilled .9s ease-in-out infinite}
+@keyframes beadPulseFilled{
+  0%,100%{box-shadow:0 0 0 3px rgba(var(--lvl-bold-rgb,2,187,224),.25);transform:scale(1)}
+  50%{box-shadow:0 0 0 8px rgba(var(--lvl-bold-rgb,2,187,224),.5);transform:scale(1.15)}
+}
+.bead-pater{
+  width:12px;height:12px;border-radius:50%;
+  border:2px solid rgba(255,255,255,0.55);background:rgba(255,255,255,0.15);
+  transition:background .18s,border-color .18s;margin-bottom:4px;
+}
+.bead-pater.lit-normal,.bead-pater.lit-white,.bead-pater.active{background:var(--lvl-bold);border-color:var(--lvl-bold)}
+body.audio-playing .bead-pater.active{animation:beadPulseFilled .9s ease-in-out infinite}
+.bead-sep{width:1px;height:8px;background:rgba(255,255,255,0.15);margin:0 auto}
+.bead-lux-cross{display:none;margin-top:6px;flex-direction:column;align-items:center}
+.bead-lux-cross.show{display:flex;animation:luxAppear .6s cubic-bezier(.34,1.56,.64,1) forwards}
+.bead-lux-cross.show .lux-glow svg{filter:drop-shadow(0 0 6px rgba(255,255,255,.9)) drop-shadow(0 0 14px rgba(255,255,255,.5));animation:luxGlowPulse 1.2s ease-in-out infinite}
+@keyframes luxGlowPulse{0%,100%{filter:drop-shadow(0 0 4px rgba(255,255,255,.7))}50%{filter:drop-shadow(0 0 14px rgba(255,255,255,1)) drop-shadow(0 0 28px rgba(67,221,248,.6))}}
+@keyframes luxAppear{0%{opacity:0;transform:scale(.4)}60%{opacity:1;transform:scale(1.15)}100%{opacity:1;transform:scale(1)}}
+.lux-glow{position:relative;width:28px;height:28px;display:flex;align-items:center;justify-content:center}
+.lux-glow::before{content:'';position:absolute;inset:-6px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.35) 0%,transparent 70%);animation:luxPulse 1.4s ease-in-out infinite}
+@keyframes luxPulse{0%,100%{opacity:.4;transform:scale(.9)}50%{opacity:1;transform:scale(1.15)}}
 
 /* ── Controles — glass sobre fondo difuminado ── */
 .session-controls {
@@ -1163,7 +1181,8 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   position: absolute;
   top: 10px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
   gap: 8px;
   z-index: 10;
 }
@@ -1485,11 +1504,6 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   <!-- ═══ PANTALLA: SESIÓN DIARIA ═══ -->
   <div class="screen" id="scr-session">
 
-    <!-- Fondo difuminado full-screen -->
-    <div class="session-bg">
-      <img id="session-bg-img" alt="">
-    </div>
-
     <!-- Hero compacto -->
     <div class="hero">
       <div class="hero-img-wrap">
@@ -1499,15 +1513,27 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
         <div class="hero-grad-bottom"></div>
         <!-- Waveform animado -->
         <div class="waveform-overlay" id="waveform-overlay"></div>
+        <!-- Columna de cuentas del Rosario (indicador pasivo del rezo) -->
+        <div id="beads-col-wrap" style="display:none">
+          <div class="beads-col" id="beads-col"></div>
+        </div>
         <!-- Botón izquierdo: BGM -->
         <div class="hero-btn-col left">
           <button class="hero-circle-btn" id="btn-bgm" title="Música de fondo">
             <svg class="bgm-on" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
             <svg class="bgm-off" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
           </button>
+          <!-- Misterio anterior (reubicado: a la derecha del BGM) -->
+          <button class="hero-circle-btn" id="btn-prev-mystery" title="Misterio anterior">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
         </div>
-        <!-- Botón derecho: Tema -->
+        <!-- Botón derecho: Misterio siguiente + Tema -->
         <div class="hero-btn-col right">
+          <!-- Misterio siguiente (reubicado: a la izquierda del Tema) -->
+          <button class="hero-circle-btn" id="btn-next-mystery" title="Misterio siguiente">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
           <button class="hero-circle-btn" id="btn-theme" title="Cambiar tema">
             <svg id="ico-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
             <svg id="ico-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
@@ -1516,15 +1542,6 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
         <!-- Preparación pill (micro completado) -->
         <div class="prep-hero" id="prep-hero" style="display:none">
           <button class="prep-hero-btn" id="btn-prep-hero"></button>
-        </div>
-        <!-- Navegación ← → entre misterios -->
-        <div class="hero-mystery-nav">
-          <button class="hero-nav-btn" id="btn-prev-mystery">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
-          </button>
-          <button class="hero-nav-btn" id="btn-next-mystery">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
-          </button>
         </div>
         <!-- Texto inferior: bloque, título, subtítulo, beads (estilo orar.html) -->
         <div class="hero-bottom-text">
@@ -3052,8 +3069,6 @@ function renderSession() {
     $('hero-placeholder').textContent = BLOCK_COLORS[block]?.dot || '🕊️';
   };
   heroImg.src = imgUrl;
-  const bgImg = $('session-bg-img');
-  if (bgImg) bgImg.src = imgUrl;
 
   // Inicializar progress bars: 8 segmentos visuales (no uno por track)
   const container = $('playlist-progress');
@@ -3230,6 +3245,51 @@ function getSegProgress(trackIdx) {
   return { posInGroup, total };
 }
 
+/* ─── Cuentas del Rosario: indicador pasivo sincronizado a la track (bead_sync.json) ─── */
+let _beadSync = null, _currentSyncKey = null;
+async function loadBeadSync(){
+  if(_beadSync)return;
+  try{ const r=await fetch('./data/bead_sync.json'); _beadSync=r.ok?await r.json():{}; }
+  catch(e){ _beadSync={}; }
+}
+function renderBeadsCol(){
+  const col=$('beads-col'); if(!col)return;
+  col.innerHTML='';
+  const pater=document.createElement('div'); pater.className='bead-pater'; pater.id='bead-pater'; col.appendChild(pater);
+  const sep=document.createElement('div'); sep.className='bead-sep'; col.appendChild(sep);
+  for(let i=0;i<10;i++){ const d=document.createElement('div'); d.className='bead'; col.appendChild(d); }
+  const lux=document.createElement('div'); lux.className='bead-lux-cross'; lux.id='bead-lux-cross';
+  lux.innerHTML='<div class="lux-glow"><svg width="22" height="22" viewBox="0 0 100 100"><rect x="46.2" y="0" width="7.6" height="100" fill="white" opacity="0.95"/><rect x="0" y="36" width="100" height="7.6" fill="white" opacity="0.95"/></svg></div>';
+  col.appendChild(lux);
+}
+function _getBeadEl(idx){ if(idx===0)return $('bead-pater'); return document.querySelectorAll('#beads-col .bead')[idx-1]||null; }
+function _beadsShow(){ const w=$('beads-col-wrap'); if(w)w.style.display='flex'; }
+function _beadsHide(){ const w=$('beads-col-wrap'); if(w)w.style.display='none'; }
+function _updateSyncKey(trackUrl){
+  if(!_beadSync||!trackUrl){ _currentSyncKey=null; _beadsHide(); return; }
+  const name=trackUrl.split('/').pop().replace(/\?.*$/,'').replace(/\.mp3$/i,'').toUpperCase();
+  const found=Object.keys(_beadSync).find(k=>k.toUpperCase()===name)||null;
+  const changed=(found!==_currentSyncKey);
+  _currentSyncKey=found;
+  if(found){ if(changed)renderBeadsCol(); _beadsShow(); }
+  else _beadsHide();
+}
+function _tickBeads(){
+  if(!audioEl||!_currentSyncKey||!_beadSync)return;
+  const windows=_beadSync[_currentSyncKey]; if(!windows)return;
+  const t=audioEl.currentTime;
+  let active=-1;
+  for(let i=0;i<windows.length;i++){ if(t>=windows[i].start&&t<=windows[i].end){active=i;break;} }
+  for(let i=0;i<windows.length;i++){
+    const el=_getBeadEl(i); if(!el)continue;
+    el.classList.remove('active','lit-normal');
+    if(i===active)el.classList.add('active');
+    else if(t>windows[i].end)el.classList.add('lit-normal');
+  }
+  const lux=$('bead-lux-cross');
+  if(lux){ const last=windows[windows.length-1]; if(t>last.end)lux.classList.add('show'); else lux.classList.remove('show'); }
+}
+
 function goTrack(idx) {
   const { playlist } = currentSession;
   if (idx < 0 || idx >= playlist.length) return;
@@ -3255,6 +3315,9 @@ function goTrack(idx) {
   }
 
   audioEl = new Audio(track.url);
+
+  // Beads: mostrar/avanzar solo en la track de Rezo (MA/MB/L_MA/L_MB)
+  _updateSyncKey(track.url);
 
   audioEl.onerror = () => {
     console.warn('Audio no encontrado:', track.url);
@@ -3291,6 +3354,8 @@ function goTrack(idx) {
       const fill = $('pseg-fill-' + track.seg);
       if (fill) fill.style.width = pct + '%';
     }
+
+    _tickBeads();
   };
 
   audioEl.onended = () => {
@@ -3627,6 +3692,8 @@ function updatePlayPauseBtn() {
   $('ico-play').style.display  = isPlaying ? 'none' : 'block';
   $('ico-pause').style.display = isPlaying ? 'block' : 'none';
   setWaveformPlaying(isPlaying);
+  // El bead activo pulsa solo mientras el audio se reproduce
+  document.body.classList.toggle('audio-playing', isPlaying);
 }
 
 // Perspectivas por qIdx
@@ -4332,6 +4399,7 @@ document.addEventListener('visibilitychange', function() {
   }
 });
 
+loadBeadSync();
 initAuth();
 </script>
 <script src="sounds.js"></script>

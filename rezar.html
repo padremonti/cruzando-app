@@ -344,10 +344,11 @@ body.light .misterio-subtitulo{color:#002931;text-shadow:0 0 8px rgba(255,255,25
 /* ── Cuentas del Rosario ── */
 .beads-col{
   position:absolute;right:6px;top:50%;transform:translateY(-50%);
-  display:flex;flex-direction:column;align-items:center;gap:8px;z-index:5;
+  display:flex;flex-direction:column;align-items:center;gap:7px;z-index:5;
+  filter:drop-shadow(0 1px 3px rgba(0,0,0,0.6)) drop-shadow(0 0 1px rgba(0,0,0,0.6));
 }
 .bead{
-  width:28px;height:28px;border-radius:50%;
+  width:16px;height:16px;border-radius:50%;
   border:2px solid rgba(255,255,255,0.35);
   background:rgba(255,255,255,0.08);
   transition:background 0.18s,border-color 0.18s,transform 0.12s;
@@ -358,10 +359,14 @@ body.light .misterio-subtitulo{color:#002931;text-shadow:0 0 8px rgba(255,255,25
   animation:bead-pop 0.18s ease-out;
 }
 /* Bead ACTIVO vacío — pulso sin relleno */
-.bead.active,.bead-pater.active{border-color:var(--lvl-bold);background:transparent;animation:beadPulse 0.9s ease-in-out infinite}
-/* Bead ACTIVO tapeado — pulso CON relleno */
+.bead.active,.bead-pater.active{border-color:var(--lvl-bold);background:transparent}
+/* Bead ACTIVO tapeado — relleno */
 .bead.active.lit-correct,.bead-pater.active.lit-correct,
-.bead.active.lit-normal,.bead-pater.active.lit-normal{border-color:var(--lvl-bold);background:var(--lvl-bold);animation:beadPulseFilled 0.9s ease-in-out infinite}
+.bead.active.lit-normal,.bead-pater.active.lit-normal{border-color:var(--lvl-bold);background:var(--lvl-bold)}
+/* Pulso SOLO mientras el audio se reproduce */
+body.audio-playing .bead.active,body.audio-playing .bead-pater.active{animation:beadPulse 0.9s ease-in-out infinite}
+body.audio-playing .bead.active.lit-correct,body.audio-playing .bead-pater.active.lit-correct,
+body.audio-playing .bead.active.lit-normal,body.audio-playing .bead-pater.active.lit-normal{animation:beadPulseFilled 0.9s ease-in-out infinite}
 /* Bead tapeado sin .active (ya terminó su ventana) */
 .bead.lit-correct,.bead-pater.lit-correct,
 .bead.lit-normal,.bead-pater.lit-normal{border-color:var(--lvl-bold);background:var(--lvl-bold)}
@@ -377,7 +382,7 @@ body.light .misterio-subtitulo{color:#002931;text-shadow:0 0 8px rgba(255,255,25
 .bead-pater.lit-spam   {background:#888;border-color:#888;animation:none}
 .bead-pater.gold-flash {animation:bead-pop 0.18s ease-out,beadGold 0.7s ease-out}
 .bead-pater {
-  width: 20px; height: 20px; border-radius: 50%;
+  width: 12px; height: 12px; border-radius: 50%;
   border: 2px solid rgba(255,255,255,0.55);
   background: rgba(255,255,255,0.15);
   transition: background 0.18s, border-color 0.18s;
@@ -2122,6 +2127,8 @@ function updateMysteryContent(){
 
 /* ─── PLAY / PAUSE ─── */
 function updatePlayBtn(){
+  // El bead activo pulsa SOLO mientras el audio se reproduce (señal visual)
+  document.body.classList.toggle('audio-playing', !!rezarAudio && !rezarAudio.paused);
   ['btn-play-pause','btn-play-pause-final'].forEach(id=>{
     const btn=$(id);if(!btn||!rezarAudio)return;
     btn.innerHTML=rezarAudio.paused
@@ -2160,6 +2167,11 @@ window._openPrefs=openSettings;
 const TOOL_ORDER_REZAR=['biblia','contemplar','escribir'];
 
 function openTool(t){
+  // Toggle (igual que orar.html): mismo tool ya abierto → cerrar
+  if(currentTool===t && $('tool-popup').classList.contains('open')){
+    closeToolPopup();
+    return;
+  }
   currentTool=t;
   ['biblia','contemplar','escribir'].forEach(id=>{
     const btn=$('tbtn-'+id);
