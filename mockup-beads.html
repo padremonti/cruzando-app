@@ -20,13 +20,14 @@
   --lvl-bold-rgb:2,187,224;
 
   /* ── Variables del mockup (controladas por sliders) ── */
-  --mk-bead-size:28px;
-  --mk-bead-gap:8px;
+  --mk-bead-size:16px;
+  --mk-bead-gap:7px;
   --mk-popup-right:56px;   /* espacio libre a la derecha para las beads */
-  --mk-popup-height:92%;   /* alto máximo del popup (real hoy: 70vh) */
+  --mk-popup-height:89%;   /* alto máximo del popup (real hoy: 70vh) */
   --mk-font:20px;          /* font-size del texto del popup (real hoy: 36px) */
   --mk-popup-alpha:0.82;   /* opacidad del fondo del popup (1 = opaco) */
   --mk-popup-blur:14px;    /* desenfoque de la imagen detrás del popup */
+  --mk-bead-shadow:0.6;    /* opacidad de la sombra oscura de las beads */
 }
 /* ── Tema DÍA (copiado de la app) ── */
 body.light{
@@ -92,11 +93,30 @@ body{
 .misterio-bloque-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--lvl-bold);margin-bottom:4px}
 .misterio-titulo{font-family:'Cormorant Garamond',Georgia,serif;font-size:2rem;font-weight:600;color:#fff;line-height:1.15;text-shadow:0 1px 3px rgba(0,0,0,.9),0 4px 16px rgba(0,0,0,.85);margin-bottom:4px}
 .misterio-subtitulo{font-family:'Cormorant Garamond',Georgia,serif;font-size:30px;font-style:italic;color:rgba(255,255,255,.75);text-shadow:0 1px 3px rgba(0,0,0,.9)}
+/* Mystery Beads: 5 puntos = en cuál Misterio del bloque vamos (real: .audio-hero-beads) */
+.mystery-beads{display:flex;gap:7px;margin-top:10px}
+.mystery-beads .mb-dot{border-radius:50%;transition:all .2s;filter:drop-shadow(0 1px 2px rgba(0,0,0,.55))}
+
+/* ─────────── Barra superior del hero: BGM · ‹ Misterio › · Tema ─────────── */
+.hero-topbar{position:absolute;top:10px;left:12px;right:12px;z-index:10;display:flex;justify-content:space-between;align-items:center;pointer-events:none}
+.hero-topbar .grp{display:flex;gap:8px;align-items:center;pointer-events:auto}
+.hero-circle-btn{
+  width:34px;height:34px;border-radius:50%;
+  background:rgba(0,0,0,0.42);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,0.14);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:rgba(255,255,255,0.82);transition:background .2s,transform .15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.hero-circle-btn:active{transform:scale(.88);background:rgba(0,0,0,0.65)}
+.hero-circle-btn.bgm-on{background:rgba(255,122,0,0.5);border-color:rgba(255,122,0,0.7)}
 
 /* ─────────── Cuentas del Rosario (geometría real + var sliders) ─────────── */
 .beads-col{
   position:absolute;right:6px;top:50%;transform:translateY(-50%);
   display:flex;flex-direction:column;align-items:center;gap:var(--mk-bead-gap);z-index:5;
+  /* sombra oscura para destacar las beads sobre la imagen del hero */
+  filter:drop-shadow(0 1px 3px rgba(0,0,0,var(--mk-bead-shadow))) drop-shadow(0 0 1px rgba(0,0,0,var(--mk-bead-shadow)));
 }
 .bead{
   width:var(--mk-bead-size);height:var(--mk-bead-size);border-radius:50%;
@@ -105,7 +125,9 @@ body{
   transition:background .18s,border-color .18s,transform .12s;
 }
 .bead.lit-normal{border-color:var(--lvl-bold);background:var(--lvl-bold)}
-.bead.active{border-color:var(--lvl-bold);background:var(--lvl-bold);animation:beadPulseFilled .9s ease-in-out infinite}
+/* bead activa: rellena SIEMPRE; pulsa SOLO mientras se reproduce (body.playing) */
+.bead.active{border-color:var(--lvl-bold);background:var(--lvl-bold)}
+body.playing .bead.active{animation:beadPulseFilled .9s ease-in-out infinite}
 @keyframes beadPulseFilled{
   0%,100%{box-shadow:0 0 0 3px rgba(var(--lvl-bold-rgb),.25);transform:scale(1)}
   50%{box-shadow:0 0 0 8px rgba(var(--lvl-bold-rgb),.5);transform:scale(1.15)}
@@ -118,7 +140,8 @@ body{
   transition:background .18s,border-color .18s;margin-bottom:4px;
 }
 .bead-pater.lit-normal{background:var(--lvl-bold);border-color:var(--lvl-bold);box-shadow:0 0 10px rgba(var(--lvl-bold-rgb),.6)}
-.bead-pater.active{background:var(--lvl-bold);border-color:var(--lvl-bold);animation:beadPulseFilled .9s ease-in-out infinite}
+.bead-pater.active{background:var(--lvl-bold);border-color:var(--lvl-bold)}
+body.playing .bead-pater.active{animation:beadPulseFilled .9s ease-in-out infinite}
 .bead-sep{width:1px;height:8px;background:rgba(255,255,255,.15);margin:0 auto}
 .bead-lux-cross{display:none;margin-top:6px;flex-direction:column;align-items:center}
 .bead-lux-cross.show{display:flex;animation:luxAppear .6s cubic-bezier(.34,1.56,.64,1) forwards}
@@ -154,6 +177,16 @@ body{
 .contempl-title{display:block;font-weight:700;margin-bottom:10px;line-height:1.4}
 .popup-lyrics{white-space:pre-line;font-family:'Crimson Pro',Georgia,serif;font-size:var(--mk-font);line-height:1.7;font-style:italic;color:var(--text)}
 .popup-q{margin-top:14px;padding-top:12px;border-top:1px solid var(--border);font-family:'Crimson Pro',Georgia,serif;font-size:var(--mk-font);line-height:1.6;color:var(--lvl-soft)}
+/* ── "Escribir / Preguntas" (copiado de orar.html, tamaños atados a --mk-font) ── */
+.q-block{margin-bottom:24px}
+.q-label{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
+.q-question{font-family:'Crimson Pro',Georgia,serif;font-size:var(--mk-font);font-weight:500;line-height:1.7;color:var(--text-soft);font-style:italic;margin-bottom:12px}
+.q-textarea{width:100%;min-height:90px;max-height:35vh;resize:vertical;overflow-y:auto;padding:12px;background:var(--sec-bg);border:1.5px solid var(--border);border-radius:12px;color:var(--text);font-family:'Crimson Pro',Georgia,serif;font-size:calc(var(--mk-font) * 0.92);line-height:1.7}
+.q-textarea:focus{border-color:var(--lvl-soft);outline:none}
+.q-saved{font-size:.72rem;color:#27AE60;margin-top:5px;min-height:20px}
+.amen-btn{display:block;width:100%;margin-top:20px;padding:16px;border-radius:16px;border:none;cursor:pointer;font-family:'Cormorant Garamond',Georgia,serif;font-size:1.5rem;font-weight:600;background:var(--lvl-bold);color:#fff;letter-spacing:1px;transition:all .2s;box-shadow:0 4px 16px rgba(0,0,0,.12)}
+.amen-btn:active{transform:scale(.96)}
+.amen-btn.done{background:#34A853}
 
 /* ─────────── Toolbars REALES (copiadas de orar.html / audio.html) ─────────── */
 /* Variables de contraste (dark default) */
@@ -189,6 +222,20 @@ body.light .misterio-subtitulo{color:#002931;text-shadow:0 0 8px rgba(255,255,25
 .atb-circle.primary{background:var(--lvl-bold);border-color:var(--lvl-bold);color:#fff;box-shadow:0 4px 16px rgba(var(--lvl-bold-rgb),.45)}
 .atb-btn:active .atb-circle{transform:scale(.9)}
 
+/* ── rezar.html: barra de progreso + toolbar con play central ── */
+.progress-bar-wrap{flex:0 0 auto;height:3px;background:var(--border)}
+.progress-bar-fill{height:100%;background:var(--lvl-bold);width:0%;transition:width .2s linear}
+.rezar-tools-bar{flex:0 0 auto;position:relative;display:flex;justify-content:space-around;align-items:center;padding:8px 12px 14px;background:var(--card);border-top:1px solid var(--border)}
+.rezar-tools-bar::before{content:'';position:absolute;top:32px;left:0;right:0;height:1.5px;background:var(--tb-bead);z-index:0}
+.rezar-tools-bar .tool-btn{flex-direction:column;gap:4px}
+.tool-btn-label{font-size:.55rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text-dim)}
+.play-btn-wrap{flex:0 0 auto;padding:0 6px;position:relative;z-index:1}
+.rezar-play{width:58px;height:58px;border-radius:50%;background:var(--lvl-bold);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s}
+.rezar-play:active{transform:scale(.92)}
+.play-inner{width:0;height:0;border-style:solid;border-width:11px 0 11px 20px;border-color:transparent transparent transparent #fff;margin-left:4px}
+.pause-inner{display:flex;gap:5px;align-items:center}
+.pause-inner div{width:5px;height:18px;background:#fff;border-radius:2px}
+
 /* ─────────── Controles del mockup ─────────── */
 .panel{width:390px;max-width:100%;margin-top:14px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px}
 .transport{display:flex;align-items:center;gap:12px;margin-bottom:12px}
@@ -221,6 +268,7 @@ input[type=range]{accent-color:var(--lvl-bold)}
 <div class="tabs">
   <button class="tab active" id="tab-a" onclick="setView('a')">VISTA A · orar</button>
   <button class="tab" id="tab-b" onclick="setView('b')">VISTA B · audio</button>
+  <button class="tab" id="tab-c" onclick="setView('c')">VISTA C · rezar</button>
 </div>
 <div class="hint" id="hint">VISTA A — hero de orar con el popup de texto NUEVO (angosto, letra menor) coexistiendo con la columna de beads en el margen derecho. Pulsa ▶ para ver el avance pasivo.</div>
 
@@ -232,10 +280,31 @@ input[type=range]{accent-color:var(--lvl-bold)}
     <div class="misterio-hero-grad-top"></div>
     <div class="misterio-hero-grad"></div>
 
+    <!-- Barra superior (dummy): BGM · ‹ retroceder Misterio … avanzar Misterio › · Tema -->
+    <div class="hero-topbar">
+      <div class="grp">
+        <button class="hero-circle-btn bgm-on" title="Música de fondo (dummy)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        </button>
+        <button class="hero-circle-btn mys-arrow" title="Misterio anterior (dummy)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+      </div>
+      <div class="grp">
+        <button class="hero-circle-btn mys-arrow" title="Misterio siguiente (dummy)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <button class="hero-circle-btn" title="Cambiar tema (dummy)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </button>
+      </div>
+    </div>
+
     <div class="misterio-hero-text" id="hero-text">
       <div class="misterio-bloque-label" id="hero-label">Misterios Gozosos</div>
       <div class="misterio-titulo" id="hero-title">La Anunciación</div>
       <div class="misterio-subtitulo">El sí que abre la historia</div>
+      <div class="mystery-beads" id="mystery-beads"></div>
     </div>
 
     <!-- Columna de beads (pasiva) -->
@@ -324,8 +393,32 @@ input[type=range]{accent-color:var(--lvl-bold)}
       <button class="atb-btn" onclick="seek(DURATION)">
         <div class="atb-circle"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg></div>
       </button>
-      <button class="atb-btn">
+      <button class="atb-btn" onclick="openPopup('pregunta')">
         <div class="atb-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── VISTA C: barra inferior real de rezar.html (progreso + toolbar con play central) ── -->
+  <div id="rezar-bottom" style="display:none">
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="rz-fill"></div></div>
+    <div class="rezar-tools-bar">
+      <button class="tool-btn" onclick="toolTap(this,'evangelio')">
+        <div class="tool-btn-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></div>
+      </button>
+      <button class="tool-btn" onclick="toolTap(this,'contempl')">
+        <div class="tool-btn-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
+      </button>
+      <div class="play-btn-wrap">
+        <button class="rezar-play" onclick="togglePlay()">
+          <span id="rz-play-ico"><span class="play-inner"></span></span>
+        </button>
+      </div>
+      <button class="tool-btn" onclick="toolTap(this,'pregunta')">
+        <div class="tool-btn-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+      </button>
+      <button class="tool-btn">
+        <div class="tool-btn-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg></div>
       </button>
     </div>
   </div>
@@ -367,8 +460,8 @@ input[type=range]{accent-color:var(--lvl-bold)}
     </div>
     <div class="slider-row" id="row-pheight">
       <label>Alto del popup <small>% del hero (real hoy: 70vh)</small></label>
-      <span class="val" id="v-pheight">92%</span>
-      <input type="range" min="25" max="92" step="1" value="92" oninput="setVar('--mk-popup-height',this.value+'%','v-pheight',this.value+'%')">
+      <span class="val" id="v-pheight">89%</span>
+      <input type="range" min="25" max="92" step="1" value="89" oninput="setVar('--mk-popup-height',this.value+'%','v-pheight',this.value+'%')">
       <div class="ranges"><span>25% (bajo)</span><span>92% (alto)</span></div>
     </div>
     <div class="slider-row" id="row-alpha">
@@ -391,20 +484,26 @@ input[type=range]{accent-color:var(--lvl-bold)}
     </div>
     <div class="slider-row">
       <label>Tamaño de bead <small>Ave María (real: 28px)</small></label>
-      <span class="val" id="v-bead">28px</span>
-      <input type="range" min="16" max="42" step="1" value="28" oninput="setVar('--mk-bead-size',this.value+'px','v-bead',this.value+'px')">
+      <span class="val" id="v-bead">16px</span>
+      <input type="range" min="10" max="42" step="1" value="16" oninput="setVar('--mk-bead-size',this.value+'px','v-bead',this.value+'px')">
       <div class="ranges"><span>16</span><span>42</span></div>
     </div>
     <div class="slider-row">
       <label>Gap entre beads <small>real: 8px</small></label>
-      <span class="val" id="v-gap">8px</span>
-      <input type="range" min="2" max="20" step="1" value="8" oninput="setVar('--mk-bead-gap',this.value+'px','v-gap',this.value+'px')">
+      <span class="val" id="v-gap">7px</span>
+      <input type="range" min="2" max="20" step="1" value="7" oninput="setVar('--mk-bead-gap',this.value+'px','v-gap',this.value+'px')">
       <div class="ranges"><span>2</span><span>20</span></div>
+    </div>
+    <div class="slider-row">
+      <label>Sombra de las beads <small>oscurece el borde para destacarlas sobre la imagen</small></label>
+      <span class="val" id="v-shadow">0.60</span>
+      <input type="range" min="0" max="1" step="0.05" value="0.6" oninput="setVar('--mk-bead-shadow',this.value,'v-shadow',parseFloat(this.value).toFixed(2))">
+      <div class="ranges"><span>0 (sin sombra)</span><span>1 (máxima)</span></div>
     </div>
   </div>
 
   <div class="note" id="note">
-    Defaults: espacio derecho <b>56px</b> · alto <b>92%</b> · opacidad <b>0.82</b> · blur <b>14px</b> · font-size <b>20px</b> · bead <b>28px</b> · gap <b>8px</b>.
+    Defaults: espacio derecho <b>56px</b> · alto <b>89%</b> · opacidad <b>0.82</b> · blur <b>14px</b> · font-size <b>20px</b> · bead <b>16px</b> · gap <b>7px</b> · sombra <b>0.60</b>.
     Las beads son <b>pasivas</b>: no se tocan, avanzan solas con el tiempo de audio. La activa pulsa (beadPulseFilled); las pasadas quedan llenas; al terminar aparece la <b>cruz lux</b>.
   </div>
 </div>
@@ -465,6 +564,21 @@ function beadEl(idx){
   return document.querySelectorAll('#beads-col .bead')[idx-1] || null;
 }
 
+/* ───── Mystery Beads: 5 puntos del bloque (espejo de audio.html) ───── */
+var mysteryPos = 2;   // misterio actual del bloque (0-4): demo con 2 hechos
+function renderMysteryBeads(){
+  var el = document.getElementById('mystery-beads');
+  var html = '';
+  for(var i=0;i<5;i++){
+    var done = i < mysteryPos, cur = i === mysteryPos;
+    var bg  = done ? '#34A853' : cur ? '#fff' : 'rgba(255,255,255,0.35)';
+    var sz  = cur ? '12px' : '8px';
+    var sh  = cur ? 'box-shadow:0 0 6px rgba(255,255,255,0.6);border:2px solid #fff;' : '';
+    html += '<div class="mb-dot" style="width:'+sz+';height:'+sz+';background:'+bg+';'+sh+'"></div>';
+  }
+  el.innerHTML = html;
+}
+
 /* ───── Avance pasivo (espejo de _tickBeads) ───── */
 function applyTime(){
   // ¿qué ventana está activa?
@@ -495,6 +609,7 @@ function applyTime(){
   var pct = (t/DURATION*100);
   document.getElementById('ab-fill').style.width = pct+'%';
   document.getElementById('ab-cur').textContent = fmt(t);
+  document.getElementById('rz-fill').style.width = pct+'%';
 }
 function fmt(s){var m=Math.floor(s/60),ss=Math.floor(s%60);return m+':' + (ss<10?'0':'') + ss;}
 
@@ -510,6 +625,8 @@ function frame(ts){
 }
 function togglePlay(){ playing ? stop() : start(); }
 function syncPlayIcons(){
+  // pulso de la bead activa solo mientras reproduce
+  document.body.classList.toggle('playing', playing);
   // panel
   document.getElementById('play-btn').textContent = playing ? '❚❚' : '▶';
   // vista A: botón rezo
@@ -520,6 +637,10 @@ function syncPlayIcons(){
   // vista B: botón central
   document.getElementById('ab-ico-play').style.display  = playing ? 'none' : '';
   document.getElementById('ab-ico-pause').style.display = playing ? '' : 'none';
+  // vista C: botón play central (triángulo / dos barras)
+  document.getElementById('rz-play-ico').innerHTML = playing
+    ? '<span class="pause-inner"><div></div><div></div></span>'
+    : '<span class="play-inner"></span>';
 }
 function start(){
   if(t >= DURATION){ t = 0; }
@@ -606,8 +727,26 @@ var POPUP = {
     '<p class="popup-text"><span class="contempl-title">El sí que lo cambia todo.</span>'+
     'María no entiende del todo, pero confía. Su «hágase» no nace de la certeza sino de la fe. '+
     'Cada vez que decimos sí a Dios sin tenerlo todo claro, repetimos su gesto.</p>'},
-  pregunta: {title:'Pregunta', html:
-    '<p class="popup-q">¿En qué parte de tu vida te está pidiendo Dios un «sí» que todavía no te animas a dar?</p>'},
+  pregunta: {title:'Escribir', html:
+    '<div class="q-block">'+
+      '<div class="q-label" style="color:#FF7A00">Por María hacia Jesús:</div>'+
+      '<div class="q-question">¿Qué te dice el «sí» de María sobre tu propia manera de responder a Dios?</div>'+
+      '<textarea class="q-textarea" placeholder="Escribe tu respuesta…"></textarea>'+
+      '<div class="q-saved"></div>'+
+    '</div>'+
+    '<div class="q-block">'+
+      '<div class="q-label" style="color:#C0392B">Desde el Hijo hacia el Padre:</div>'+
+      '<div class="q-question">¿En qué área de tu vida necesitas confiar más en el plan del Padre?</div>'+
+      '<textarea class="q-textarea" placeholder="Escribe tu respuesta…"></textarea>'+
+      '<div class="q-saved"></div>'+
+    '</div>'+
+    '<div class="q-block">'+
+      '<div class="q-label" style="color:#27AE60">Hijos y hermanos en el Espíritu:</div>'+
+      '<div class="q-question">¿A quién podrías llevar hoy la alegría de esta Buena Noticia?</div>'+
+      '<textarea class="q-textarea" placeholder="Escribe tu respuesta…"></textarea>'+
+      '<div class="q-saved"></div>'+
+    '</div>'+
+    '<button class="amen-btn" onclick="this.textContent=\'✓ Guardado\';this.classList.add(\'done\')">Amén</button>'},
   canto: {title:'Canto', html:
     '<p class="popup-lyrics">Dios te salve, María,\nllena eres de gracia;\nel Señor es contigo,\nbendita tú eres\nentre todas las mujeres.</p>'},
   suplica: {title:'Súplica', html:
@@ -624,33 +763,31 @@ function closePopup(){ document.getElementById('tool-popup').classList.remove('o
 /* ───── Cambio de vista ───── */
 function setView(v){
   view = v;
-  document.getElementById('tab-a').classList.toggle('active', v==='a');
-  document.getElementById('tab-b').classList.toggle('active', v==='b');
-  var isA = (v==='a');
-  // barras reales: orar (A) vs audio (B)
-  document.getElementById('tools-bar').style.display    = isA ? 'flex' : 'none';
-  document.getElementById('audio-bottom').style.display = isA ? 'none' : 'block';
-  // sliders de popup solo en A
-  ['row-popup','row-pheight','row-alpha','row-blur','row-font'].forEach(function(id){
-    document.getElementById(id).style.display = isA ? 'grid' : 'none';
+  ['a','b','c'].forEach(function(k){
+    document.getElementById('tab-'+k).classList.toggle('active', v===k);
   });
-  if(!isA) closePopup();
-  // textos del hero
-  if(isA){
-    document.getElementById('hero-label').textContent = BFN[currentMystery];
-    document.getElementById('hero-title').textContent = 'La Anunciación';
-    document.getElementById('hint').textContent =
-      'VISTA A — hero de orar con el popup de texto NUEVO (angosto, letra menor) coexistiendo con la columna de beads en el margen derecho. Abre un texto y pulsa ▶: las beads siguen avanzando.';
-  } else {
-    document.getElementById('hero-label').textContent = 'Sesión de audio';
-    document.getElementById('hero-title').textContent = 'La Anunciación';
-    document.getElementById('hint').textContent =
-      'VISTA B — hero de audio. La columna vertical del Rosario en el margen derecho es el monitor de avance de la sesión (distinta de la fila horizontal .audio-hero-beads). Sin popup. Pulsa ▶.';
-  }
+  // barras inferiores: una por vista
+  document.getElementById('tools-bar').style.display    = (v==='a') ? 'flex'  : 'none';
+  document.getElementById('audio-bottom').style.display = (v==='b') ? 'block' : 'none';
+  document.getElementById('rezar-bottom').style.display = (v==='c') ? 'block' : 'none';
+  // rezar no tiene flechas de navegación de Misterio en el hero
+  document.querySelectorAll('.mys-arrow').forEach(function(b){ b.style.display = (v==='c') ? 'none' : 'flex'; });
+  // el popup (con sus settings) se usa en las 3 vistas → sliders siempre visibles
+  closePopup();
+  // textos / hint del hero
+  document.getElementById('hero-title').textContent = 'La Anunciación';
+  document.getElementById('hero-label').textContent = BFN[currentMystery];
+  var HINTS = {
+    a:'VISTA A — hero de orar con el popup angosto (letra menor) coexistiendo con la columna de beads en el margen derecho. Abre un texto y pulsa play: las beads avanzan.',
+    b:'VISTA B — hero de audio. La columna vertical del Rosario en el margen derecho es el monitor de avance de la sesión. El botón de notas (cuaderno) abre el popup de preguntas, igual que en orar.',
+    c:'VISTA C — hero de rezar con play central, barra de progreso y beads pasivas. Mismo popup y settings que orar para uniformidad visual entre los tres modos.'
+  };
+  document.getElementById('hint').textContent = HINTS[v];
 }
 
 /* ───── Init ───── */
 renderBeads();
+renderMysteryBeads();
 applyTime();
 setMystery('gozosos');
 setView('a');
