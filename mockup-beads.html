@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Mockup — Beads del Rosario (pasivas)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Crimson+Pro:ital@0;1&display=swap" rel="stylesheet">
+<style>
+/* ─────────── Tema (copiado de la app, dark default) ─────────── */
+:root{
+  /* ── Tema NOCHE (default) ── */
+  --bg-rgb:0,41,49;
+  --card:#004C5B;
+  --card-rgb:0,76,91;
+  --border:rgba(67,221,248,0.2);
+  --sec-bg:#003845;
+  --text:#F0EAE2;--text-soft:#C8BFB5;--text-dim:#9A9088;
+  --lvl-bold:#02BBE0;--lvl-base:#FF7F09;--lvl-soft:#43DDF8;
+  --lvl-bold-rgb:2,187,224;
+
+  /* ── Variables del mockup (controladas por sliders) ── */
+  --mk-bead-size:28px;
+  --mk-bead-gap:8px;
+  --mk-popup-right:56px;   /* espacio libre a la derecha para las beads */
+  --mk-popup-height:92%;   /* alto máximo del popup (real hoy: 70vh) */
+  --mk-font:20px;          /* font-size del texto del popup (real hoy: 36px) */
+  --mk-popup-alpha:0.82;   /* opacidad del fondo del popup (1 = opaco) */
+  --mk-popup-blur:14px;    /* desenfoque de la imagen detrás del popup */
+}
+/* ── Tema DÍA (copiado de la app) ── */
+body.light{
+  --bg-rgb:230,222,211;
+  --card:#FFFCF7;
+  --card-rgb:255,252,247;
+  --border:#D9D1C7;
+  --sec-bg:#EDE5D8;
+  --text:#2B2622;--text-soft:#6B6259;--text-dim:#9B9389;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  background:#001b21;color:var(--text);
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:14px 14px 60px;
+}
+
+/* ─────────── Tabs ─────────── */
+.tabs{display:flex;gap:8px;margin-bottom:14px}
+.tab{
+  padding:9px 20px;border-radius:22px;border:1px solid var(--border);
+  background:transparent;color:var(--text-soft);font-weight:700;font-size:13px;
+  cursor:pointer;letter-spacing:.5px;transition:all .15s;
+}
+.tab.active{background:var(--lvl-bold);border-color:var(--lvl-bold);color:#012}
+.hint{font-size:11px;color:var(--text-dim);margin-bottom:10px;text-align:center;max-width:380px;line-height:1.5}
+
+/* ─────────── Phone frame ─────────── */
+.phone{
+  width:390px;max-width:100%;height:640px;
+  background:rgb(var(--bg-rgb));border-radius:26px;overflow:hidden;
+  position:relative;display:flex;flex-direction:column;
+  box-shadow:0 20px 60px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.06);
+}
+
+/* ─────────── HERO (geometría real) ─────────── */
+.misterio-hero, .hero{
+  flex:1;min-height:0;position:relative;overflow:hidden;
+  background:rgb(var(--bg-rgb));
+  display:flex;align-items:center;justify-content:center;
+}
+.misterio-hero-img, .hero-img{
+  width:100%;height:auto;max-height:100%;
+  object-fit:contain;object-position:center;display:block;
+}
+.misterio-hero-grad,.hero-grad-bottom{
+  position:absolute;bottom:0;left:0;right:0;height:25%;
+  background:linear-gradient(to top,
+    rgba(var(--bg-rgb),1) 0%,rgba(var(--bg-rgb),1) 20%,
+    rgba(var(--bg-rgb),1) 45%,rgba(var(--bg-rgb),1) 70%,
+    rgba(var(--bg-rgb),.77) 90%,transparent 100%);
+  pointer-events:none;z-index:2;
+}
+.misterio-hero-grad-top,.hero-grad-top{
+  position:absolute;top:0;left:0;right:0;height:24%;
+  background:linear-gradient(to bottom,
+    rgba(var(--bg-rgb),1) 0%,rgba(var(--bg-rgb),1) 33%,
+    rgba(var(--bg-rgb),1) 66%,rgba(var(--bg-rgb),0) 100%);
+  pointer-events:none;z-index:2;
+}
+.misterio-hero-text,.hero-bottom-text{position:absolute;bottom:16px;left:18px;right:100px;z-index:3;pointer-events:none}
+.misterio-bloque-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--lvl-bold);margin-bottom:4px}
+.misterio-titulo{font-family:'Cormorant Garamond',Georgia,serif;font-size:2rem;font-weight:600;color:#fff;line-height:1.15;text-shadow:0 1px 3px rgba(0,0,0,.9),0 4px 16px rgba(0,0,0,.85);margin-bottom:4px}
+.misterio-subtitulo{font-family:'Cormorant Garamond',Georgia,serif;font-size:30px;font-style:italic;color:rgba(255,255,255,.75);text-shadow:0 1px 3px rgba(0,0,0,.9)}
+
+/* ─────────── Cuentas del Rosario (geometría real + var sliders) ─────────── */
+.beads-col{
+  position:absolute;right:6px;top:50%;transform:translateY(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:var(--mk-bead-gap);z-index:5;
+}
+.bead{
+  width:var(--mk-bead-size);height:var(--mk-bead-size);border-radius:50%;
+  border:2px solid rgba(255,255,255,.35);
+  background:rgba(255,255,255,.08);
+  transition:background .18s,border-color .18s,transform .12s;
+}
+.bead.lit-normal{border-color:var(--lvl-bold);background:var(--lvl-bold)}
+.bead.active{border-color:var(--lvl-bold);background:var(--lvl-bold);animation:beadPulseFilled .9s ease-in-out infinite}
+@keyframes beadPulseFilled{
+  0%,100%{box-shadow:0 0 0 3px rgba(var(--lvl-bold-rgb),.25);transform:scale(1)}
+  50%{box-shadow:0 0 0 8px rgba(var(--lvl-bold-rgb),.5);transform:scale(1.15)}
+}
+@keyframes bead-pop{0%{transform:scale(1)}40%{transform:scale(1.3)}100%{transform:scale(1)}}
+.bead-pater{
+  width:calc(var(--mk-bead-size) * 0.72);height:calc(var(--mk-bead-size) * 0.72);
+  border-radius:50%;border:2px solid rgba(255,255,255,.55);
+  background:rgba(255,255,255,.15);
+  transition:background .18s,border-color .18s;margin-bottom:4px;
+}
+.bead-pater.lit-normal{background:var(--lvl-bold);border-color:var(--lvl-bold);box-shadow:0 0 10px rgba(var(--lvl-bold-rgb),.6)}
+.bead-pater.active{background:var(--lvl-bold);border-color:var(--lvl-bold);animation:beadPulseFilled .9s ease-in-out infinite}
+.bead-sep{width:1px;height:8px;background:rgba(255,255,255,.15);margin:0 auto}
+.bead-lux-cross{display:none;margin-top:6px;flex-direction:column;align-items:center}
+.bead-lux-cross.show{display:flex;animation:luxAppear .6s cubic-bezier(.34,1.56,.64,1) forwards}
+.bead-lux-cross.show .lux-glow svg{
+  filter:drop-shadow(0 0 6px rgba(255,255,255,.9)) drop-shadow(0 0 14px rgba(255,255,255,.5));
+  animation:luxGlowPulse 1.2s ease-in-out infinite;
+}
+@keyframes luxGlowPulse{0%,100%{filter:drop-shadow(0 0 4px rgba(255,255,255,.7))}50%{filter:drop-shadow(0 0 14px rgba(255,255,255,1)) drop-shadow(0 0 28px rgba(67,221,248,.6))}}
+@keyframes luxAppear{0%{opacity:0;transform:scale(.4)}60%{opacity:1;transform:scale(1.15)}100%{opacity:1;transform:scale(1)}}
+.lux-glow{position:relative;width:36px;height:36px;display:flex;align-items:center;justify-content:center}
+.lux-glow::before{content:'';position:absolute;inset:-8px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.35) 0%,transparent 70%);animation:luxPulse 1.4s ease-in-out infinite}
+@keyframes luxPulse{0%,100%{opacity:.4;transform:scale(.9)}50%{opacity:1;transform:scale(1.15)}}
+.beads-col-label{font-size:9px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:.8px;margin-top:4px;text-transform:uppercase}
+
+/* ─────────── Tool-popup (NUEVA forma: angosto + letra menor) ─────────── */
+.tool-popup{
+  position:absolute;bottom:0;left:0;right:var(--mk-popup-right);  /* << deja libre el margen derecho */
+  background:rgba(var(--card-rgb),var(--mk-popup-alpha));         /* << transparencia sutil */
+  backdrop-filter:blur(var(--mk-popup-blur));                    /* << difumina la imagen detrás */
+  -webkit-backdrop-filter:blur(var(--mk-popup-blur));
+  border-radius:18px 18px 0 0;
+  border-top:1px solid var(--border);
+  transform:translateY(100%);transition:transform .3s ease,right .15s;
+  z-index:20;height:var(--mk-popup-height);max-height:92%;display:flex;flex-direction:column;
+}
+.tool-popup.open{transform:translateY(0)}
+.tool-popup-header{display:flex;align-items:center;padding:12px 14px 10px;gap:12px;border-bottom:1px solid var(--border);flex-shrink:0}
+.popup-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--lvl-bold);flex:1;text-align:center}
+.popup-close-btn{width:26px;height:26px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--text-dim);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tool-popup-body{flex:1;min-height:0;overflow-y:auto;padding:14px;color:var(--text)}
+.popup-reference{font-family:'Crimson Pro',Georgia,serif;font-size:calc(var(--mk-font) * 0.72);color:var(--text-dim);font-style:italic;margin-bottom:10px}
+.popup-text{font-family:'Crimson Pro',Georgia,serif;font-size:var(--mk-font);line-height:1.7;color:var(--text)}
+.contempl-title{display:block;font-weight:700;margin-bottom:10px;line-height:1.4}
+.popup-lyrics{white-space:pre-line;font-family:'Crimson Pro',Georgia,serif;font-size:var(--mk-font);line-height:1.7;font-style:italic;color:var(--text)}
+.popup-q{margin-top:14px;padding-top:12px;border-top:1px solid var(--border);font-family:'Crimson Pro',Georgia,serif;font-size:var(--mk-font);line-height:1.6;color:var(--lvl-soft)}
+
+/* ─────────── Toolbars REALES (copiadas de orar.html / audio.html) ─────────── */
+/* Variables de contraste (dark default) */
+:root{--tb-circle-border:rgba(255,255,255,0.45);--tb-icon:rgba(255,255,255,0.75);--tb-bead:rgba(255,255,255,0.22)}
+body.light{--tb-circle-border:var(--border);--tb-icon:var(--text-dim);--tb-bead:rgba(0,41,49,0.18)}
+body.light .misterio-titulo,body.light .hero-title{color:#002931;text-shadow:0 0 8px rgba(255,255,255,1),0 0 16px rgba(255,255,255,.95)}
+body.light .misterio-subtitulo{color:#002931;text-shadow:0 0 8px rgba(255,255,255,1),0 0 16px rgba(255,255,255,.9)}
+
+/* ── orar.html: .tools-bar (6 botones) ── */
+.tools-bar{
+  flex:0 0 auto;position:relative;z-index:5;
+  display:flex;justify-content:space-around;align-items:center;
+  padding:8px 12px 14px;
+  background:var(--card);border-top:1px solid var(--border);
+}
+.tools-bar::before{content:'';position:absolute;top:32px;left:0;right:0;height:1.5px;background:var(--tb-bead);z-index:0}
+.tool-btn{display:flex;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:0;touch-action:manipulation}
+.tool-btn-circle{width:48px;height:48px;border-radius:50%;border:3px solid var(--tb-circle-border);background:rgb(var(--bg-rgb));display:flex;align-items:center;justify-content:center;color:var(--tb-icon);transition:background .2s,border-color .2s,color .2s,transform .15s;position:relative;z-index:1}
+.tool-btn.active .tool-btn-circle{background:var(--lvl-bold);border-color:var(--lvl-bold);color:#fff}
+.tool-btn:active .tool-btn-circle{transform:scale(.92)}
+
+/* ── audio.html: .audio-bottom (progreso + 5 botones) ── */
+.audio-bottom{flex:0 0 auto;position:relative;z-index:2;background:var(--card);border-top:1px solid var(--border)}
+.audio-progress-wrap{display:flex;align-items:center;gap:12px;padding:8px 18px 0}
+.audio-time{font-size:11px;color:var(--text-dim);font-variant-numeric:tabular-nums;min-width:30px}
+.audio-progress-bar{flex:1;height:4px;background:var(--border);border-radius:3px;cursor:pointer;position:relative}
+.audio-progress-fill{height:100%;background:var(--lvl-bold);border-radius:3px;width:0%;position:relative}
+.audio-progress-fill::after{content:'';position:absolute;right:-5px;top:-4px;width:12px;height:12px;border-radius:50%;background:var(--lvl-bold);box-shadow:0 1px 4px rgba(0,0,0,.4)}
+.audio-tools-bar{display:flex;justify-content:space-around;align-items:center;padding:10px 12px 14px;position:relative}
+.audio-tools-bar::before{content:'';position:absolute;top:32px;left:0;right:0;height:1.5px;background:var(--tb-bead);z-index:0}
+.atb-btn{display:flex;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:0;touch-action:manipulation}
+.atb-circle{width:48px;height:48px;border-radius:50%;border:3px solid var(--tb-circle-border);background:rgb(var(--bg-rgb));display:flex;align-items:center;justify-content:center;color:var(--tb-icon);transition:all .2s;position:relative;z-index:1}
+.atb-circle.primary{background:var(--lvl-bold);border-color:var(--lvl-bold);color:#fff;box-shadow:0 4px 16px rgba(var(--lvl-bold-rgb),.45)}
+.atb-btn:active .atb-circle{transform:scale(.9)}
+
+/* ─────────── Controles del mockup ─────────── */
+.panel{width:390px;max-width:100%;margin-top:14px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px}
+.transport{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.play-btn{width:48px;height:48px;border-radius:50%;border:none;background:var(--lvl-bold);color:#012;font-size:20px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.scrub{flex:1;display:flex;flex-direction:column;gap:3px}
+.scrub input{width:100%}
+.scrub .tlabel{font-size:11px;color:var(--text-dim);display:flex;justify-content:space-between}
+.toolbar{display:flex;gap:8px;margin-bottom:12px}
+.toolbar button,.toolbar .img-btn{flex:1;padding:8px;border-radius:10px;border:1px solid var(--border);background:var(--sec-bg);color:var(--text-soft);font-size:12px;font-weight:600;cursor:pointer;text-align:center}
+.toolbar .img-btn{flex:2;background:var(--lvl-bold);color:#012;border-color:var(--lvl-bold)}
+.sliders{display:flex;flex-direction:column;gap:11px}
+.slider-row{display:grid;grid-template-columns:1fr 56px;gap:10px;align-items:center}
+.slider-row label{font-size:12px;color:var(--text-soft);font-weight:600}
+.slider-row label small{display:block;color:var(--text-dim);font-weight:400;font-size:10px}
+.slider-row .val{font-size:13px;font-weight:700;color:var(--lvl-soft);text-align:right;font-variant-numeric:tabular-nums}
+.slider-row input[type=range]{grid-column:1/3;width:100%;accent-color:var(--lvl-bold);margin-top:-4px}
+.slider-row .ranges{grid-column:1/3;display:flex;justify-content:space-between;font-size:9px;color:var(--text-dim)}
+input[type=range]{accent-color:var(--lvl-bold)}
+.note{font-size:10px;color:var(--text-dim);margin-top:10px;line-height:1.5}
+.settings-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.seg-label{font-size:11px;color:var(--text-dim);font-weight:700;width:100%;text-transform:uppercase;letter-spacing:.5px}
+.theme-toggle{padding:7px 14px;border-radius:18px;border:1px solid var(--border);background:var(--sec-bg);color:var(--text-soft);font-size:12px;font-weight:700;cursor:pointer}
+.mys-chip{padding:6px 12px;border-radius:16px;border:1.5px solid var(--border);background:transparent;color:var(--text-soft);font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px}
+.mys-chip .dot{width:11px;height:11px;border-radius:50%;display:inline-block}
+.mys-chip.active{border-color:currentColor}
+</style>
+</head>
+<body>
+
+<div class="tabs">
+  <button class="tab active" id="tab-a" onclick="setView('a')">VISTA A · orar</button>
+  <button class="tab" id="tab-b" onclick="setView('b')">VISTA B · audio</button>
+</div>
+<div class="hint" id="hint">VISTA A — hero de orar con el popup de texto NUEVO (angosto, letra menor) coexistiendo con la columna de beads en el margen derecho. Pulsa ▶ para ver el avance pasivo.</div>
+
+<!-- ═════════ PHONE ═════════ -->
+<div class="phone">
+  <div class="misterio-hero" id="hero">
+    <img class="misterio-hero-img" id="hero-img" src="assets/mariano/mariano-rosario.png" alt=""
+         onerror="this.style.display='none'">
+    <div class="misterio-hero-grad-top"></div>
+    <div class="misterio-hero-grad"></div>
+
+    <div class="misterio-hero-text" id="hero-text">
+      <div class="misterio-bloque-label" id="hero-label">Misterios Gozosos</div>
+      <div class="misterio-titulo" id="hero-title">La Anunciación</div>
+      <div class="misterio-subtitulo">El sí que abre la historia</div>
+    </div>
+
+    <!-- Columna de beads (pasiva) -->
+    <div class="beads-col" id="beads-col"></div>
+
+    <!-- Popup SOLO en vista A -->
+    <div class="tool-popup" id="tool-popup">
+      <div class="tool-popup-header">
+        <span style="width:26px"></span>
+        <span class="popup-title" id="popup-title">Evangelio</span>
+        <button class="popup-close-btn" onclick="closePopup()">✕</button>
+      </div>
+      <div class="tool-popup-body" id="popup-body"></div>
+    </div>
+  </div>
+
+  <!-- ── VISTA A: toolbar real de orar.html (6 botones) ── -->
+  <div class="tools-bar" id="tools-bar">
+    <button class="tool-btn" data-tool="palabra" onclick="toolTap(this,'evangelio')">
+      <div class="tool-btn-circle">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/>
+        </svg>
+      </div>
+    </button>
+    <button class="tool-btn" data-tool="contemplar" onclick="toolTap(this,'contempl')">
+      <div class="tool-btn-circle">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+        </svg>
+      </div>
+    </button>
+    <button class="tool-btn" data-tool="rezo" onclick="rezoTap(this)">
+      <div class="tool-btn-circle">
+        <span class="rezo-ic rezo-ic-play">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+        </span>
+        <span class="rezo-ic rezo-ic-pause" style="display:none">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="9" y1="4" x2="9" y2="20"/><line x1="15" y1="4" x2="15" y2="20"/></svg>
+        </span>
+      </div>
+    </button>
+    <button class="tool-btn" data-tool="canto" onclick="toolTap(this,'canto')">
+      <div class="tool-btn-circle">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      </div>
+    </button>
+    <button class="tool-btn" data-tool="escribir" onclick="toolTap(this,'pregunta')">
+      <div class="tool-btn-circle">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+        </svg>
+      </div>
+    </button>
+    <button class="tool-btn" data-tool="suplica" onclick="toolTap(this,'suplica')">
+      <div class="tool-btn-circle">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 6.5V3a1 1 0 012 0v5"/><path d="M11 3.5V2a1 1 0 012 0v4.5"/><path d="M13 4V2.5a1 1 0 012 0V7"/><path d="M7 7.5V5a1 1 0 012 0v5.5"/><path d="M7 10.5c0 0-1.5 1-1.5 4S7 19 9 21h6c2 0 3.5-2 3.5-5s-1-5-1-5l-2-3.5"/>
+        </svg>
+      </div>
+    </button>
+  </div>
+
+  <!-- ── VISTA B: barra inferior real de audio.html (progreso + 5 botones) ── -->
+  <div class="audio-bottom" id="audio-bottom" style="display:none">
+    <div class="audio-progress-wrap">
+      <span class="audio-time" id="ab-cur">0:00</span>
+      <div class="audio-progress-bar" id="ab-bar" onclick="abSeek(event)">
+        <div class="audio-progress-fill" id="ab-fill"></div>
+      </div>
+      <span class="audio-time" id="ab-dur">0:30</span>
+    </div>
+    <div class="audio-tools-bar">
+      <button class="atb-btn" id="atb-nivel">
+        <div class="atb-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg></div>
+      </button>
+      <button class="atb-btn" onclick="seek(0)">
+        <div class="atb-circle"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg></div>
+      </button>
+      <button class="atb-btn" onclick="togglePlay()">
+        <div class="atb-circle primary">
+          <svg id="ab-ico-play" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <svg id="ab-ico-pause" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+        </div>
+      </button>
+      <button class="atb-btn" onclick="seek(DURATION)">
+        <div class="atb-circle"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg></div>
+      </button>
+      <button class="atb-btn">
+        <div class="atb-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════ CONTROLES ═════════ -->
+<div class="panel">
+  <div class="settings-row">
+    <span class="seg-label">Tema</span>
+    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()">🌙 Noche</button>
+    <span class="seg-label" style="margin-top:4px">Color de beads · Misterio</span>
+    <button class="mys-chip active" data-mys="gozosos"   onclick="setMystery('gozosos')"><span class="dot" style="background:#E8A0A0"></span>Gozosos</button>
+    <button class="mys-chip" data-mys="luminosos" onclick="setMystery('luminosos')"><span class="dot" style="background:#01BBE1"></span>Luminosos</button>
+    <button class="mys-chip" data-mys="dolorosos" onclick="setMystery('dolorosos')"><span class="dot" style="background:#C0392B"></span>Dolorosos</button>
+    <button class="mys-chip" data-mys="gloriosos" onclick="setMystery('gloriosos')"><span class="dot" style="background:#D4A017"></span>Gloriosos</button>
+  </div>
+
+  <div class="transport">
+    <button class="play-btn" id="play-btn" onclick="togglePlay()">▶</button>
+    <div class="scrub">
+      <input type="range" id="scrub" min="0" max="30" step="0.05" value="0" oninput="seek(this.value)">
+      <div class="tlabel"><span id="t-cur">0.0s</span><span>pista simulada · 30s</span></div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <label class="img-btn">📷 Cargar imagen de hero
+      <input type="file" accept="image/*" onchange="loadHeroImg(this)" hidden>
+    </label>
+    <button onclick="resetHeroImg()">Restaurar</button>
+  </div>
+
+  <div class="sliders">
+    <div class="slider-row" id="row-popup">
+      <label>Espacio libre derecho <small>margen para las beads (popup right)</small></label>
+      <span class="val" id="v-popup">56px</span>
+      <input type="range" min="36" max="130" step="2" value="56" oninput="setVar('--mk-popup-right',this.value+'px','v-popup',this.value+'px')">
+      <div class="ranges"><span>36 (ancho)</span><span>130 (angosto)</span></div>
+    </div>
+    <div class="slider-row" id="row-pheight">
+      <label>Alto del popup <small>% del hero (real hoy: 70vh)</small></label>
+      <span class="val" id="v-pheight">92%</span>
+      <input type="range" min="25" max="92" step="1" value="92" oninput="setVar('--mk-popup-height',this.value+'%','v-pheight',this.value+'%')">
+      <div class="ranges"><span>25% (bajo)</span><span>92% (alto)</span></div>
+    </div>
+    <div class="slider-row" id="row-alpha">
+      <label>Opacidad del popup <small>1 = opaco · menos = más imagen</small></label>
+      <span class="val" id="v-alpha">0.82</span>
+      <input type="range" min="0.55" max="1" step="0.01" value="0.82" oninput="setVar('--mk-popup-alpha',this.value,'v-alpha',parseFloat(this.value).toFixed(2))">
+      <div class="ranges"><span>0.55 (transparente)</span><span>1 (opaco)</span></div>
+    </div>
+    <div class="slider-row" id="row-blur">
+      <label>Difuminado de la imagen <small>backdrop-filter blur</small></label>
+      <span class="val" id="v-blur">14px</span>
+      <input type="range" min="0" max="30" step="1" value="14" oninput="setVar('--mk-popup-blur',this.value+'px','v-blur',this.value+'px')">
+      <div class="ranges"><span>0 (nítida)</span><span>30 (muy difusa)</span></div>
+    </div>
+    <div class="slider-row" id="row-font">
+      <label>Font-size del texto <small>hoy en producción: 36px</small></label>
+      <span class="val" id="v-font">20px</span>
+      <input type="range" min="13" max="36" step="1" value="20" oninput="setVar('--mk-font',this.value+'px','v-font',this.value+'px')">
+      <div class="ranges"><span>13</span><span>36 (actual)</span></div>
+    </div>
+    <div class="slider-row">
+      <label>Tamaño de bead <small>Ave María (real: 28px)</small></label>
+      <span class="val" id="v-bead">28px</span>
+      <input type="range" min="16" max="42" step="1" value="28" oninput="setVar('--mk-bead-size',this.value+'px','v-bead',this.value+'px')">
+      <div class="ranges"><span>16</span><span>42</span></div>
+    </div>
+    <div class="slider-row">
+      <label>Gap entre beads <small>real: 8px</small></label>
+      <span class="val" id="v-gap">8px</span>
+      <input type="range" min="2" max="20" step="1" value="8" oninput="setVar('--mk-bead-gap',this.value+'px','v-gap',this.value+'px')">
+      <div class="ranges"><span>2</span><span>20</span></div>
+    </div>
+  </div>
+
+  <div class="note" id="note">
+    Defaults: espacio derecho <b>56px</b> · alto <b>92%</b> · opacidad <b>0.82</b> · blur <b>14px</b> · font-size <b>20px</b> · bead <b>28px</b> · gap <b>8px</b>.
+    Las beads son <b>pasivas</b>: no se tocan, avanzan solas con el tiempo de audio. La activa pulsa (beadPulseFilled); las pasadas quedan llenas; al terminar aparece la <b>cruz lux</b>.
+  </div>
+</div>
+
+<script>
+/* ───── Estado del mockup ───── */
+var DURATION = 30;            // pista simulada
+var t = 0;                    // tiempo actual
+var playing = false;
+var rafId = null;
+var lastTs = null;
+var view = 'a';
+var activeIdx = -1;
+var currentMystery = 'gozosos';
+
+/* ───── Construye las ventanas de tiempo (simula _beadSync) ─────
+   11 elementos: idx 0 = Padrenuestro, 1..10 = Ave Marías.
+   Pater al inicio, 10 aves repartidas, cruz lux al final. */
+var PATER_END = 2.4;
+var TAIL = 2.0;               // cola final → cruz lux
+var beadWindows = (function(){
+  var w = [{start:0, end:PATER_END}];
+  var span = DURATION - PATER_END - TAIL;
+  var step = span / 10;
+  for(var i=0;i<10;i++){
+    w.push({start: PATER_END + i*step, end: PATER_END + (i+1)*step});
+  }
+  return w;
+})();
+
+/* ───── Render de la columna (espejo de renderBeadsCol) ───── */
+function renderBeads(){
+  var col = document.getElementById('beads-col');
+  col.innerHTML = '';
+  var pater = document.createElement('div');
+  pater.className = 'bead-pater'; pater.id = 'bead-pater';
+  col.appendChild(pater);
+  var sep = document.createElement('div'); sep.className='bead-sep';
+  col.appendChild(sep);
+  for(var i=0;i<10;i++){
+    var d = document.createElement('div'); d.className='bead';
+    col.appendChild(d);
+  }
+  var lux = document.createElement('div');
+  lux.className='bead-lux-cross'; lux.id='bead-lux-cross';
+  lux.innerHTML =
+    '<div class="lux-glow"><svg width="28" height="28" viewBox="0 0 100 100">'+
+      '<rect x="46.2" y="0" width="7.6" height="100" fill="white" opacity="0.95"/>'+
+      '<rect x="0" y="36" width="100" height="7.6" fill="white" opacity="0.95"/>'+
+    '</svg></div>';
+  col.appendChild(lux);
+  var label = document.createElement('div');
+  label.className='beads-col-label'; label.textContent='CONTAR';
+  col.appendChild(label);
+}
+function beadEl(idx){
+  if(idx===0) return document.getElementById('bead-pater');
+  return document.querySelectorAll('#beads-col .bead')[idx-1] || null;
+}
+
+/* ───── Avance pasivo (espejo de _tickBeads) ───── */
+function applyTime(){
+  // ¿qué ventana está activa?
+  var active = -1;
+  for(var i=0;i<beadWindows.length;i++){
+    if(t >= beadWindows[i].start && t < beadWindows[i].end){ active = i; break; }
+  }
+  // pintar TODAS según el tiempo (idempotente, sirve también al hacer seek)
+  for(var i=0;i<beadWindows.length;i++){
+    var el = beadEl(i); if(!el) continue;
+    el.classList.remove('active','lit-normal');
+    if(i === active){
+      el.classList.add('active');                 // la que "suena" → pulsa llena
+    } else if(t >= beadWindows[i].end){
+      el.classList.add('lit-normal');             // pasada → llena fija
+    }                                             // futura → vacía
+  }
+  // cruz lux al terminar
+  var lux = document.getElementById('bead-lux-cross');
+  if(lux){
+    if(t >= DURATION - TAIL && active === -1) lux.classList.add('show');
+    else lux.classList.remove('show');
+  }
+  // UI transporte (panel)
+  document.getElementById('scrub').value = t;
+  document.getElementById('t-cur').textContent = t.toFixed(1)+'s';
+  // UI barra de audio (vista B)
+  var pct = (t/DURATION*100);
+  document.getElementById('ab-fill').style.width = pct+'%';
+  document.getElementById('ab-cur').textContent = fmt(t);
+}
+function fmt(s){var m=Math.floor(s/60),ss=Math.floor(s%60);return m+':' + (ss<10?'0':'') + ss;}
+
+/* ───── Loop ───── */
+function frame(ts){
+  if(!playing) return;
+  if(lastTs==null) lastTs = ts;
+  var dt = (ts - lastTs)/1000; lastTs = ts;
+  t += dt;
+  if(t >= DURATION){ t = DURATION; applyTime(); stop(); return; }
+  applyTime();
+  rafId = requestAnimationFrame(frame);
+}
+function togglePlay(){ playing ? stop() : start(); }
+function syncPlayIcons(){
+  // panel
+  document.getElementById('play-btn').textContent = playing ? '❚❚' : '▶';
+  // vista A: botón rezo
+  document.querySelector('.rezo-ic-play').style.display  = playing ? 'none' : '';
+  document.querySelector('.rezo-ic-pause').style.display = playing ? '' : 'none';
+  var rezo = document.querySelector('.tool-btn[data-tool="rezo"]');
+  if(rezo) rezo.classList.toggle('active', playing);
+  // vista B: botón central
+  document.getElementById('ab-ico-play').style.display  = playing ? 'none' : '';
+  document.getElementById('ab-ico-pause').style.display = playing ? '' : 'none';
+}
+function start(){
+  if(t >= DURATION){ t = 0; }
+  playing = true; lastTs = null;
+  syncPlayIcons();
+  rafId = requestAnimationFrame(frame);
+}
+function stop(){
+  playing = false;
+  syncPlayIcons();
+  if(rafId) cancelAnimationFrame(rafId);
+}
+function seek(v){ t = Math.max(0, Math.min(DURATION, parseFloat(v))); applyTime(); }
+function abSeek(e){
+  var bar = document.getElementById('ab-bar');
+  var r = bar.getBoundingClientRect();
+  seek((e.clientX - r.left) / r.width * DURATION);
+}
+
+/* ───── Botones de la toolbar de orar (vista A) ───── */
+function toolTap(btn, kind){
+  document.querySelectorAll('.tools-bar .tool-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  openPopup(kind);
+}
+function rezoTap(btn){
+  togglePlay();   // el botón "rezo" reproduce/pausa el rezo (icono play/pause real)
+}
+
+/* ───── Sliders ───── */
+function setVar(name, value, labelId, labelText){
+  document.documentElement.style.setProperty(name, value);
+  if(labelId) document.getElementById(labelId).textContent = labelText;
+}
+
+/* ───── Tema día/noche ───── */
+function toggleTheme(){
+  var light = document.body.classList.toggle('light');
+  document.getElementById('theme-toggle').textContent = light ? '☀️ Día' : '🌙 Noche';
+}
+
+/* ───── Color de beads por Misterio (espejo de applyBlockAccent) ───── */
+var BCL     = {gozosos:'#E8A0A0',luminosos:'#01BBE1',dolorosos:'#C0392B',gloriosos:'#D4A017'};
+var BCL_RGB = {gozosos:'232,160,160',luminosos:'1,187,225',dolorosos:'192,57,43',gloriosos:'212,160,23'};
+var BFN     = {gozosos:'Misterios Gozosos',luminosos:'Misterios Luminosos',dolorosos:'Misterios Dolorosos',gloriosos:'Misterios Gloriosos'};
+function setMystery(block){
+  currentMystery = block;
+  var c = BCL[block], r = BCL_RGB[block];
+  var root = document.documentElement;
+  root.style.setProperty('--lvl-bold', c);
+  root.style.setProperty('--lvl-soft', c);
+  root.style.setProperty('--lvl-bold-rgb', r);   // para que el glow/pulse también combine
+  document.querySelectorAll('.mys-chip').forEach(function(ch){
+    ch.classList.toggle('active', ch.getAttribute('data-mys')===block);
+    ch.style.color = ch.classList.contains('active') ? c : '';
+  });
+  // etiqueta del hero (solo en vista A para no pisar la de audio)
+  if(view==='a') document.getElementById('hero-label').textContent = BFN[block];
+}
+
+/* ───── Imagen de hero (carga local) ───── */
+var DEFAULT_HERO = 'assets/mariano/mariano-rosario.png';
+function loadHeroImg(input){
+  var f = input.files && input.files[0];
+  if(!f) return;
+  var url = URL.createObjectURL(f);
+  var img = document.getElementById('hero-img');
+  img.src = url;
+  img.style.display = 'block';
+}
+function resetHeroImg(){
+  var img = document.getElementById('hero-img');
+  img.src = DEFAULT_HERO;
+  img.style.display = 'block';
+}
+
+/* ───── Popup (vista A) ───── */
+var POPUP = {
+  evangelio: {title:'Evangelio', html:
+    '<div class="popup-reference">Lucas 1, 26-38</div>'+
+    '<p class="popup-text">El ángel Gabriel fue enviado por Dios a una ciudad de Galilea, llamada Nazaret, '+
+    'a una virgen desposada con un hombre llamado José. Y le dijo: «Alégrate, llena de gracia, el Señor está contigo».</p>'},
+  contempl: {title:'Contemplar', html:
+    '<p class="popup-text"><span class="contempl-title">El sí que lo cambia todo.</span>'+
+    'María no entiende del todo, pero confía. Su «hágase» no nace de la certeza sino de la fe. '+
+    'Cada vez que decimos sí a Dios sin tenerlo todo claro, repetimos su gesto.</p>'},
+  pregunta: {title:'Pregunta', html:
+    '<p class="popup-q">¿En qué parte de tu vida te está pidiendo Dios un «sí» que todavía no te animas a dar?</p>'},
+  canto: {title:'Canto', html:
+    '<p class="popup-lyrics">Dios te salve, María,\nllena eres de gracia;\nel Señor es contigo,\nbendita tú eres\nentre todas las mujeres.</p>'},
+  suplica: {title:'Súplica', html:
+    '<p class="popup-text">Madre, enséñame a decir que sí como tú lo dijiste: sin reservas, confiando más en quien me llama que en lo que entiendo.</p>'}
+};
+function openPopup(kind){
+  var p = POPUP[kind]; if(!p) return;
+  document.getElementById('popup-title').textContent = p.title;
+  document.getElementById('popup-body').innerHTML = p.html;
+  document.getElementById('tool-popup').classList.add('open');
+}
+function closePopup(){ document.getElementById('tool-popup').classList.remove('open'); }
+
+/* ───── Cambio de vista ───── */
+function setView(v){
+  view = v;
+  document.getElementById('tab-a').classList.toggle('active', v==='a');
+  document.getElementById('tab-b').classList.toggle('active', v==='b');
+  var isA = (v==='a');
+  // barras reales: orar (A) vs audio (B)
+  document.getElementById('tools-bar').style.display    = isA ? 'flex' : 'none';
+  document.getElementById('audio-bottom').style.display = isA ? 'none' : 'block';
+  // sliders de popup solo en A
+  ['row-popup','row-pheight','row-alpha','row-blur','row-font'].forEach(function(id){
+    document.getElementById(id).style.display = isA ? 'grid' : 'none';
+  });
+  if(!isA) closePopup();
+  // textos del hero
+  if(isA){
+    document.getElementById('hero-label').textContent = BFN[currentMystery];
+    document.getElementById('hero-title').textContent = 'La Anunciación';
+    document.getElementById('hint').textContent =
+      'VISTA A — hero de orar con el popup de texto NUEVO (angosto, letra menor) coexistiendo con la columna de beads en el margen derecho. Abre un texto y pulsa ▶: las beads siguen avanzando.';
+  } else {
+    document.getElementById('hero-label').textContent = 'Sesión de audio';
+    document.getElementById('hero-title').textContent = 'La Anunciación';
+    document.getElementById('hint').textContent =
+      'VISTA B — hero de audio. La columna vertical del Rosario en el margen derecho es el monitor de avance de la sesión (distinta de la fila horizontal .audio-hero-beads). Sin popup. Pulsa ▶.';
+  }
+}
+
+/* ───── Init ───── */
+renderBeads();
+applyTime();
+setMystery('gozosos');
+setView('a');
+</script>
+</body>
+</html>
