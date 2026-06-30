@@ -151,16 +151,29 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 /* ── Señal de taller en progreso (pulso del botón Sanar) ── */
 .app-nav-item.taller-activo,
 .app-nav-item.taller-activo .app-nav-label { color:var(--taller-pulse); }
-.app-nav-item.taller-activo .app-nav-icon::after {
-  content:''; position:absolute; inset:-4px; border-radius:50%;
-  background:radial-gradient(circle, var(--taller-pulse) 0%, transparent 70%);
+.app-nav-item.taller-activo .app-nav-icon::after,
+.app-nav-item.taller-activo .app-nav-icon::before {
+  content:''; position:absolute; inset:-14px; border-radius:50%;
+  background:radial-gradient(circle, var(--taller-pulse) 0%, transparent 68%);
   opacity:0; pointer-events:none;
-  animation:tallerPulse 2.6s ease-out infinite;
+  animation:tallerPulse 2s ease-out infinite;
 }
+/* segunda onda escalonada → resplandor continuo y más vivo */
+.app-nav-item.taller-activo .app-nav-icon::before { animation-delay:1s; }
 @keyframes tallerPulse {
-  0%   { transform:scale(0.55); opacity:0; }
-  30%  { opacity:0.4; }
-  100% { transform:scale(1.7); opacity:0; }
+  0%   { transform:scale(0.4);  opacity:0; }
+  25%  { opacity:0.7; }
+  100% { transform:scale(2.6);  opacity:0; }
+}
+/* latido + resplandor del propio ícono para que destaque */
+.app-nav-item.taller-activo .app-nav-icon svg {
+  animation:tallerLatido 2s ease-in-out infinite;
+  filter:drop-shadow(0 0 5px var(--taller-pulse));
+}
+@keyframes tallerLatido {
+  0%,100% { transform:scale(1); }
+  20%     { transform:scale(1.28); }
+  40%     { transform:scale(1.05); }
 }
 .app-nav-icon {
   width:24px; height:24px; position:relative;
