@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(node --check _chk_0.mjs)",
+      "Bash(node --check _chk_1.js)",
+      "Bash(rm -f _chk_0.mjs _chk_1.js)"
     ]
   }
 }

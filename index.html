@@ -148,6 +148,20 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 }
 .app-nav-item.tapped .app-nav-icon { animation:navSpring 0.38s cubic-bezier(0.34,1.72,0.64,1) both; }
 .app-nav-item.tapped { color:#43DDF8; }
+/* ── Señal de taller en progreso (pulso del botón Sanar) ── */
+.app-nav-item.taller-activo,
+.app-nav-item.taller-activo .app-nav-label { color:var(--taller-pulse); }
+.app-nav-item.taller-activo .app-nav-icon::after {
+  content:''; position:absolute; inset:-4px; border-radius:50%;
+  background:radial-gradient(circle, var(--taller-pulse) 0%, transparent 70%);
+  opacity:0; pointer-events:none;
+  animation:tallerPulse 2.6s ease-out infinite;
+}
+@keyframes tallerPulse {
+  0%   { transform:scale(0.55); opacity:0; }
+  30%  { opacity:0.4; }
+  100% { transform:scale(1.7); opacity:0; }
+}
 .app-nav-icon {
   width:24px; height:24px; position:relative;
   display:flex; align-items:center; justify-content:center;
@@ -1621,6 +1635,17 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     </div>
   </div>
 
+  <!-- ═══ MODAL TALLER EN PROGRESO ═══ -->
+  <div class="modal-overlay" id="modal-taller">
+    <div class="modal-sheet">
+      <div class="modal-title">El Santuario te espera</div>
+      <p id="modal-taller-nombre" style="text-align:center; color:var(--text-soft); font-family:'Crimson Pro',serif; font-size:1.05rem; margin:-8px 0 22px;"></p>
+      <button class="btn-primary" id="modal-taller-continuar">Continuar →</button>
+      <button class="btn-primary" style="margin-top:10px; background:var(--bg2); color:var(--text);" onclick="closeModal('modal-taller'); navigateTo('sanar.html')">Ir a todos los talleres</button>
+      <button class="btn-modal-close" onclick="closeModal('modal-taller')">Cerrar</button>
+    </div>
+  </div>
+
   <!-- ═══ HOME ═══ -->
   <div id="scr-home">
 
@@ -1730,7 +1755,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
       </div>
       <span class="app-nav-label">Cantos</span>
     </button>
-    <button class="app-nav-item" id="nav-sanar-btn" onclick="navTap(this); navigateTo('sanar.html')">
+    <button class="app-nav-item" id="nav-sanar-btn" onclick="abrirSanar(this)">
       <div class="app-nav-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 22s-8-5.5-8-11a8 8 0 0116 0c0 5.5-8 11-8 11z"/>
@@ -2819,9 +2844,12 @@ async function verificarRetiroEnProgreso(uid) {
       where('completed', '==', false)
     );
     const snap = await getDocs(q);
-    if (snap.empty) return;
+    if (snap.empty) { _limpiarSenalTaller(); return; }
 
     let masReciente = null;
+    // DEUDA: lastSeenAt se guarda como string ISO (rezar_taller.html), por lo que
+    // `.seconds` es undefined→0 y este desempate no ordena. Solo afecta el caso de
+    // 2+ talleres simultáneos; con uno solo, masReciente toma el primero sin comparar.
     snap.forEach(function(d) {
       const datos = d.data();
       if (!masReciente) { masReciente = datos; return; }
@@ -2829,8 +2857,10 @@ async function verificarRetiroEnProgreso(uid) {
       const ts2 = masReciente.lastSeenAt?.seconds || 0;
       if (ts1 > ts2) masReciente = datos;
     });
-    if (masReciente) mostrarBannerRetiro(masReciente);
+    if (masReciente) activarSenalTaller(masReciente);
+    else _limpiarSenalTaller();
   } catch(e) {
+    _limpiarSenalTaller();
     console.warn('[index] retiro en progreso:', e);
   }
 }
@@ -2862,6 +2892,56 @@ function mostrarBannerRetiro(retiro) {
 
 window.retomarRetiro = function(slug) {
   location.href = 'sanar.html?retiro=' + slug + '&resume=true';
+};
+
+// ── Señal de taller en progreso (pulso en botón Sanar + modal) ──────
+function _resolverColorTaller(slug, mundoFallback) {
+  var entry = (typeof RETIROS_MAP !== 'undefined')
+    ? RETIROS_MAP.find(function(t) { return t.slug === slug; }) : null;
+  if (entry && entry.color) return { color: entry.color, nombre: entry.nombre, mundo: entry.mundo };
+  var mundo = (entry && entry.mundo) || mundoFallback || 1;
+  var md = (typeof MUNDOS_DATA !== 'undefined') ? MUNDOS_DATA[mundo - 1] : null;
+  return {
+    color: (md && md.color) || '#FF7A00',
+    nombre: (entry && entry.nombre) || null,
+    mundo: mundo
+  };
+}
+
+window.activarSenalTaller = function(retiro) {
+  var slug = retiro.tallerSlug || '';
+  var res = _resolverColorTaller(slug);
+  var nombre = res.nombre || retiro.tallerNombre || 'tu taller';
+  window._tallerEnProgreso = { slug: slug, nombre: nombre, color: res.color };
+  var btn = document.getElementById('nav-sanar-btn');
+  if (btn) {
+    btn.style.setProperty('--taller-pulse', res.color);
+    btn.classList.add('taller-activo');
+  }
+};
+
+function _limpiarSenalTaller() {
+  window._tallerEnProgreso = null;
+  var btn = document.getElementById('nav-sanar-btn');
+  if (btn) {
+    btn.classList.remove('taller-activo');
+    btn.style.removeProperty('--taller-pulse');
+  }
+}
+
+window.abrirSanar = function(btn) {
+  navTap(btn);
+  if (window._tallerEnProgreso) abrirModalTaller();
+  else navigateTo('sanar.html');
+};
+
+window.abrirModalTaller = function() {
+  if (!window._tallerEnProgreso) return;
+  var nombreEl = document.getElementById('modal-taller-nombre');
+  if (nombreEl) nombreEl.textContent = window._tallerEnProgreso.nombre;
+  var cont = document.getElementById('modal-taller-continuar');
+  if (cont) cont.onclick = function() { window.retomarRetiro(window._tallerEnProgreso.slug); };
+  openModal('modal-taller');
 };
 
 // ── Esferas de recompensa pendiente ─────────────────────────────
