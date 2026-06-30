@@ -1587,7 +1587,7 @@ function openToolPopup(t){
 function closeToolPopup(){
   $('tool-popup').classList.remove('open');
   document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('active'));
-  if(libro)libro.pause();
+  if(libro && !_currentSyncKey)libro.pause();   // si suena el rezo (track con sync) no lo cortamos; sí la voz
   $('voice-player').style.display='none';
   $('popup-voice-btn').classList.remove('playing');
   tool=null;
@@ -1787,8 +1787,8 @@ function initVP(){
   if(!libro){
     libro=new Audio();
     libro.addEventListener('ended',onAudioEnd);
-    libro.addEventListener('play',  function(){ if(tool==='rezo') setRezoIcon(true);  _updateSyncKey(libro.src); document.body.classList.add('audio-playing'); });
-    libro.addEventListener('pause', function(){ if(tool==='rezo') setRezoIcon(false); document.body.classList.remove('audio-playing'); });
+    libro.addEventListener('play',  function(){ _updateSyncKey(libro.src); document.body.classList.add('audio-playing'); setRezoIcon(!!_currentSyncKey); });
+    libro.addEventListener('pause', function(){ document.body.classList.remove('audio-playing'); setRezoIcon(false); });
     libro.addEventListener('ended', function(){ setRezoIcon(false); document.body.classList.remove('audio-playing'); });
     libro.addEventListener('timeupdate',function(){
       var fill=$('vp-progress-fill'),cur=$('vp-time-current'),dur=$('vp-time-duration');
@@ -1934,7 +1934,7 @@ function _tickBeads(){
 function toggleRezo(){
   if(!libro) return;
   var url=toolUrl('rezo'); if(!url) return;
-  if(tool==='rezo' && !libro.paused){
+  if(_currentSyncKey && !libro.paused){   // rezo sonando (aunque el tool activo sea otro) → pausar
     libro.pause();
     if(bgmOn && bgmEl){ if(bgmEl.paused) bgmEl.play().catch(()=>{}); bgmUnduck(); }
     return;
@@ -2104,7 +2104,7 @@ function initBtns(){
     b.onclick=function(){
       var t=b.dataset.tool;
       if(t==='rezo'){ toggleRezo(); return; }
-      if(tool==='rezo' && libro && !libro.paused){ libro.pause(); }  // parar rezo al cambiar de tool
+      // El rezo sigue sonando al abrir popups de texto; solo lo detiene el botón de VOZ (openVP)
       var abierto=$('tool-popup').classList.contains('open');
       if(abierto && tool===t){ closeToolPopup(); }   // mismo botón activo → cerrar (toggle)
       else { openToolPopup(t); }

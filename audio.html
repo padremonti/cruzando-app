@@ -653,9 +653,11 @@ body.light { --tb-circle-bg:var(--card); --tb-circle-border:var(--border); --tb-
 .modal-overlay.open { display: flex; }
 
 .modal-sheet {
+  --popup-font: 20px;                                  /* misma base de letra que orar */
   width: 100%;
   max-width: 480px;
-  background: var(--card);
+  background: rgba(var(--bg-rgb),0.82);               /* transparencia sutil (igual que orar) */
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
   border-radius: 20px 20px 0 0;
   border-top: 1.5px solid var(--border);
   padding: 0 0 env(safe-area-inset-bottom, 0);
@@ -719,59 +721,16 @@ body.light { --tb-circle-bg:var(--card); --tb-circle-border:var(--border); --tb-
   -webkit-overflow-scrolling: touch;
 }
 
-.question-group {
-  margin-bottom: 22px;
-}
-.question-label-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-.question-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.question-label {
-  font-size: 0.95rem;
-  font-weight: 700;
-  text-transform: none;
-  letter-spacing: 0;
-  font-style: italic;
-}
-.question-text {
-  font-size: 1.05rem;
-  color: var(--text-soft);
-  line-height: 1.7;
-  margin-bottom: 12px;
-  font-style: italic;
-}
-.question-textarea {
-  width: 100%;
-  min-height: 80px;
-  padding: 12px 14px;
-  background: var(--sec-bg);
-  border: 1.5px solid var(--border);
-  border-radius: 12px;
-  color: var(--text);
-  font-family: 'Inter', sans-serif;
-  font-size: 1rem;
-  line-height: 1.7;
-  resize: vertical;
-  outline: none;
-  transition: border-color 0.2s;
-}
-.question-textarea:focus { border-color: var(--lvl-soft); }
-.question-meters {
-  font-size: 0.82rem;
-  color: var(--text-dim);
-  margin-top: 5px;
-  text-align: right;
-  min-height: 14px;
-  transition: color 0.3s;
-}
-.question-meters.earned { color: var(--lvl-soft); }
+/* Tarjetas de pregunta — idénticas a orar.html */
+.q-block{margin-bottom:28px}
+.q-label{font-size:0.66rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
+.q-question{font-family:'Crimson Pro',Georgia,serif;font-size:var(--popup-font);font-weight:500;line-height:1.7;color:var(--text-soft);font-style:italic;margin-bottom:12px}
+.q-textarea{width:100%;min-height:110px;max-height:35vh;resize:vertical;overflow-y:auto;padding:14px;background:var(--sec-bg);border:1.5px solid var(--border);border-radius:12px;color:var(--text);font-family:'Crimson Pro',Georgia,serif;font-size:calc(var(--popup-font) * 0.9);line-height:1.7}
+.q-textarea:focus{border-color:var(--lvl-soft);outline:none}
+.q-saved{font-size:0.72rem;color:var(--green);margin-top:5px;min-height:26px}
+.amen-btn{display:block;width:100%;margin-top:24px;padding:18px;border-radius:16px;border:none;cursor:pointer;font-family:'Cormorant Garamond',Georgia,serif;font-size:1.6rem;font-weight:600;background:var(--lvl-bold);color:#fff;letter-spacing:1px;transition:all 0.2s;box-shadow:0 4px 16px rgba(0,0,0,0.12)}
+.amen-btn:active{transform:scale(0.96)}
+.amen-btn.done{background:var(--green)}
 
 /* ══════════════════════════════════════════════
    PANTALLA: COMPLETADO
@@ -2001,6 +1960,7 @@ let audioEl        = null;
 let epilogoAudioEl = null;
 let currentTrack   = -1;  // índice en playlist
 let isPlaying      = false;
+let _prepHideTimer = null;
 let autosaveTimer  = null;
 
 // BGM — música de fondo
@@ -2816,6 +2776,11 @@ function closeMicro() { $('scr-micro').classList.remove('open'); }
 function startPlayerSession(prepBlock) {
   renderSession();
 
+  // Reset de las cuentas del Rosario al cambiar de Misterio (que no continúen donde quedaron)
+  _currentSyncKey = null;
+  renderBeadsCol();
+  _beadsHide();
+
   // Botón "Preparación" en el hero (solo si micro ya fue completado en este bloque)
   const prepHero   = $('prep-hero');
   const btnPrepHero = $('btn-prep-hero');
@@ -2828,8 +2793,14 @@ function startPlayerSession(prepBlock) {
         '<span class="prep-hero-name">' + (bloque.subtitulo || BLOCK_NAMES[prepBlock]) + '</span>';
       btnPrepHero.onclick = () => { stopAudio(); bgmStop(); renderMicroAudio(prepBlock, nivelId); };
     }
-    if (prepHero) prepHero.style.display = '';
+    if (prepHero) {
+      prepHero.style.display = '';
+      // Ocultar automáticamente el botón de Preparación tras 3.8s
+      clearTimeout(_prepHideTimer);
+      _prepHideTimer = setTimeout(() => { if (prepHero) prepHero.style.display = 'none'; }, 3800);
+    }
   } else {
+    clearTimeout(_prepHideTimer);
     if (prepHero) prepHero.style.display = 'none';
   }
 
@@ -4107,21 +4078,13 @@ async function openModal() {
 
   const body = $('modal-body');
   body.innerHTML = Q_LABELS.map((label, i) => `
-    <div class="question-group">
-      <div class="question-label-row">
-        <div class="question-dot" style="background:${Q_COLORS[i]}"></div>
-        <span class="question-label" style="color:${Q_COLORS[i]}">${label}</span>
-      </div>
-      <p class="question-text">${escHTML(questions[i] || '')}</p>
-      <textarea
-        class="question-textarea"
-        id="q-ta-${i}"
-        placeholder="Escribe tu reflexión…"
-        rows="3"
-      >${escHTML(localAnswers[i])}</textarea>
-      <div class="question-meters" id="q-meters-${i}"></div>
+    <div class="q-block">
+      <div class="q-label" style="color:${Q_COLORS[i]}">${label}</div>
+      <div class="q-question">${escHTML(questions[i] || '')}</div>
+      <textarea class="q-textarea" id="q-ta-${i}" placeholder="Escribe tu respuesta…">${escHTML(localAnswers[i])}</textarea>
+      <div class="q-saved" id="q-meters-${i}"></div>
     </div>
-  `).join('');
+  `).join('') + '<button class="amen-btn" id="modal-amen">Amén</button>';
 
   // Eventos con debounce
   [0,1,2].forEach(i => {
@@ -4129,6 +4092,8 @@ async function openModal() {
     if (!ta) return;
     ta.addEventListener('input', () => onAnswerInput(i, ta.value));
   });
+  const amen = $('modal-amen');
+  if (amen) amen.onclick = () => { amen.textContent = '✓ Guardado'; amen.classList.add('done'); closeModal(); };
 
   $('modal-overlay').classList.add('open');
   updateFabBadge();
