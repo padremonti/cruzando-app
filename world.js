@@ -629,7 +629,7 @@ const _db   = getFirestore(_app);
 
   // ── Tap en Santuario ─────────────────────────────────────────────
   window.tapSantuario = function(slug) {
-    location.href = 'sanar.html?retiro=' + slug;
+    location.href = 'retiros.html?retiro=' + slug;
   };
 
   // ── Arrancar ─────────────────────────────────────────────────────

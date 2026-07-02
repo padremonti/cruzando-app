@@ -475,7 +475,7 @@ document.addEventListener('DOMContentLoaded', async function () {
   _rtRetiroSlug  = params.get('retiro')   || '';
   _rtMisterioIdx = parseInt(params.get('misterio') || '0', 10);
 
-  if (!_rtRetiroSlug) { window.location.href = 'sanar.html'; return; }
+  if (!_rtRetiroSlug) { window.location.href = 'retiros.html'; return; }
 
   // Cargar JSON del taller
   var res  = await fetch('data/' + _rtRetiroSlug + '.json');
@@ -905,7 +905,7 @@ window.rtContinuar = function () {
   });
   if (siguiente >= TOTAL_MISTERIOS) {
     _rtGuardarProgreso({ completed: true, completedAt: new Date().toISOString() });
-    window.location.href = 'sanar.html?retiro=' + _rtRetiroSlug + '&completado=true';
+    window.location.href = 'retiros.html?retiro=' + _rtRetiroSlug + '&completado=true';
   } else {
     window.location.href = 'rezar_taller.html?retiro=' + _rtRetiroSlug + '&misterio=' + siguiente;
   }
@@ -913,7 +913,7 @@ window.rtContinuar = function () {
 
 window.rtGuardarYSalir = function () {
   _rtGuardarProgreso({ rezandoMisterio: _rtMisterioIdx });
-  window.location.href = 'sanar.html?retiro=' + _rtRetiroSlug + '&resume=true';
+  window.location.href = 'retiros.html?retiro=' + _rtRetiroSlug + '&resume=true';
 };
 
 function _rtGuardarProgreso(extra) {

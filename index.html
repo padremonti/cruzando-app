@@ -1654,7 +1654,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
       <div class="modal-title">El Santuario te espera</div>
       <p id="modal-taller-nombre" style="text-align:center; color:var(--text-soft); font-family:'Crimson Pro',serif; font-size:1.05rem; margin:-8px 0 22px;"></p>
       <button class="btn-primary" id="modal-taller-continuar">Continuar →</button>
-      <button class="btn-primary" style="margin-top:10px; background:var(--bg2); color:var(--text);" onclick="closeModal('modal-taller'); navigateTo('sanar.html')">Ir a todos los talleres</button>
+      <button class="btn-primary" style="margin-top:10px; background:var(--bg2); color:var(--text);" onclick="closeModal('modal-taller'); navigateTo('retiros.html')">Ir a todos los talleres</button>
       <button class="btn-modal-close" onclick="closeModal('modal-taller')">Cerrar</button>
     </div>
   </div>
@@ -2904,7 +2904,7 @@ function mostrarBannerRetiro(retiro) {
 }
 
 window.retomarRetiro = function(slug) {
-  location.href = 'sanar.html?retiro=' + slug + '&resume=true';
+  location.href = 'retiros.html?retiro=' + slug + '&resume=true';
 };
 
 // ── Señal de taller en progreso (pulso en botón Sanar + modal) ──────
@@ -2945,7 +2945,7 @@ function _limpiarSenalTaller() {
 window.abrirSanar = function(btn) {
   navTap(btn);
   if (window._tallerEnProgreso) abrirModalTaller();
-  else navigateTo('sanar.html');
+  else navigateTo('retiros.html');
 };
 
 window.abrirModalTaller = function() {
@@ -3660,7 +3660,7 @@ function buildMap() {
           if (!desbloq || planR === 'free') {
             _showRetiroFreePrompt();
           } else {
-            navigateTo('sanar.html?retiro=' + slug);
+            navigateTo('retiros.html?retiro=' + slug);
           }
         };
       })(retiro.slug, desbloqueado, _planRetiro);

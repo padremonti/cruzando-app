@@ -228,7 +228,7 @@
   };
 
   window.entrarRetiro = function (slug, resume) {
-    var url = 'sanar.html?retiro=' + slug;
+    var url = 'retiros.html?retiro=' + slug;
     if (resume) url += '&resume=true';
     window.goTo(url);
   };
