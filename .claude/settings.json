@@ -7,7 +7,8 @@
       "Bash(rm -f _chk_0.mjs _chk_1.js)",
       "PowerShell(python -m py_compile \"c:\\\\Users\\\\Usuario\\\\Desktop\\\\cruzando-app\\\\data\\\\lrc_sync_maker.py\")",
       "PowerShell(if \\($?\\) { \"OK: compila sin errores\" })",
-      "Bash(git mv *)"
+      "Bash(git mv *)",
+      "Bash(grep -n \"return { pts:pts, totalH:y + 300 };\" crecer.html)"
     ]
   }
 }
