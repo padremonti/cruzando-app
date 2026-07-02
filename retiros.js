@@ -1,4 +1,4 @@
-// sanar.js — El Santuario · CruzAndo
+// retiros.js — El Santuario · CruzAndo
 (function () {
   'use strict';
 
