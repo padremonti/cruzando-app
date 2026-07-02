@@ -1775,7 +1775,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
           <path d="M9 11h6M12 8v6"/>
         </svg>
       </div>
-      <span class="app-nav-label">Sanar</span>
+      <span class="app-nav-label">Retiros</span>
     </button>
     <button class="app-nav-item" id="nav-extras-btn" onclick="navTap(this); goToExtras()">
       <div class="app-nav-icon">
@@ -2161,7 +2161,7 @@ function renderHome(userData) {
   if (banner) banner.style.display = plan === 'free' ? '' : 'none';
   if (_blockedMode && banner && plan === 'free') {
     banner.style.display = '';
-    var _modoNombres = { libro:'Libro', rezar:'Orar', cantos:'Cantos', sanar:'Sanar', extras:'Extras' };
+    var _modoNombres = { libro:'Libro', rezar:'Orar', cantos:'Cantos', sanar:'Retiros', extras:'Extras' };
     var _bmsg = banner.querySelector('.blocked-redirect-msg');
     if (!_bmsg) {
       _bmsg = document.createElement('p');
@@ -2351,7 +2351,7 @@ function _showRetiroFreePrompt() {
   document.getElementById('popup-bg').style.background =
     'radial-gradient(ellipse at 30% 60%,' + c + '35 0%,transparent 60%)';
   var badge = document.getElementById('popup-badge');
-  if (badge) { badge.textContent = 'Sanar'; badge.style.cssText = 'background:' + c + '22;color:' + c + ';border:1px solid ' + c + '44;'; }
+  if (badge) { badge.textContent = 'Retiros'; badge.style.cssText = 'background:' + c + '22;color:' + c + ';border:1px solid ' + c + '44;'; }
   var nameEl = document.getElementById('popup-name');
   if (nameEl) nameEl.textContent = 'Retiros de Sanar';
   var subEl = document.getElementById('popup-sub');
