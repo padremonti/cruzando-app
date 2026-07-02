@@ -1,0 +1,225 @@
+{
+  "version": "acogida-v1",
+  "_contrato": "Toda interacción emite { tipo, valor, eco }. La mecánica define la FORMA de captura; la señal es uniforme y alimenta tanto el eco como la afinidad del usuario en Firestore.",
+  "_uso_sidecar": "El sidecar de cada Misterio nombra 2-3 tipos en su campo 'acogida'. Un string usa la mecánica por defecto: \"presencia\". Un objeto pide una alterna: { \"tipo\": \"intensidad\", \"mecanica\": \"sendero\" } o { \"tipo\": \"necesidad\", \"mecanica\": \"mosaico\", \"modo\": \"ambiente\" }.",
+  "_composicion": "Regla de arco: cada Misterio elige tipos en orden de familia, de 'recibir el estado' hacia 'orientar a la oración', prefiriendo al menos un tipo no-mosaico para que la acogida no se sienta repetitiva.",
+
+  "familias": {
+    "comoEstas": "Cómo estás",
+    "tuSituacion": "Tu situación",
+    "comoLoNombras": "Cómo lo nombras",
+    "dondeConDios": "Dónde estás con Dios",
+    "queBuscas": "Qué buscas"
+  },
+
+  "mecanicas": {
+    "termometro": { "emite": "tramo", "orientacion": "vertical", "_nota": "orientacion configurable: vertical u horizontal" },
+    "rodillo": { "emite": "clave", "_nota": "carrete de rostros/emojis; usa el mismo set de opciones que 'corazones'" },
+    "corazones": { "emite": "clave", "_nota": "elegir un corazón y colocarlo en el hueco; los rostros, si se usan, serenos y compuestos, nunca caricaturescos" },
+    "cuerpo": { "emite": "zona", "seleccionMultiple": true },
+    "mosaico": { "emite": "clave", "modos": ["ilustracion", "palabra", "ambiente"], "modoDefault": "ilustracion", "_nota": "mismas opciones, distinto render. 'ambiente' es generativo (paleta+movimiento+son+haptica), multisensorial y de cuatro canales. 'sonido' nunca es el único camino: el texto siempre visible." },
+    "cercania": { "emite": "clave", "_nota": "colocar 'yo' respecto a Lux. Lux no se acerca ni se aleja: ninguna posición es mejor. Permite la desolación sin corregirla." },
+    "sendero": { "emite": "paso" },
+    "brujula": { "emite": "clave", "estado": "v2", "_nota": "direccional, para 'mocion'; por ahora 'mocion' entra como mosaico" }
+  },
+
+  "haptica": {
+    "_nota": "Hook previsto para Capacitor (@capacitor/haptics, iOS+Android). Web: navigator.vibrate (solo Android; iOS web no soporta). Toggleable en ajustes.",
+    "suave": { "capacitor": "impactLight", "web": [15], "sentido": "un pulso largo y suave" },
+    "doble": { "capacitor": "impactMedium(x2)", "web": [12, 60, 12], "sentido": "dos toques" },
+    "hondo": { "capacitor": "impactHeavy", "web": [40], "sentido": "un pulso hondo" }
+  },
+
+  "assets": {
+    "ilustrado": "acogida/{mecanica}/{clave}.webp",
+    "ambiente": "generativo, sin asset (paleta + movimiento + son sintetizado + haptica)",
+    "son_generativo": "por código (WebAudio); presets: pad, campana, gota, respiracion"
+  },
+
+  "plantillas": {
+
+    "estado": {
+      "familia": "comoEstas",
+      "mecanica": "corazones",
+      "alternas": ["rodillo", { "mecanica": "mosaico", "modo": "ambiente" }],
+      "pregunta": "¿Con qué corazón llegas hoy?",
+      "opciones": [
+        { "clave": "sereno", "texto": "Sereno", "color": "#3FBFA0",
+          "amb": { "paleta": ["#3FBFA0", "#BFE6DB"], "movimiento": "respira", "son": "respiracion", "haptica": "suave" },
+          "eco": "Deja que esa serenidad te sostenga." },
+        { "clave": "esperanzado", "texto": "Esperanzado", "color": "#EFA02A",
+          "amb": { "paleta": ["#EFA02A", "#F7D79B"], "movimiento": "asciende", "son": "campana", "haptica": "suave" },
+          "eco": "Esa chispa ya mira hacia adelante." },
+        { "clave": "agradecido", "texto": "Agradecido", "color": "#7FB069",
+          "amb": { "paleta": ["#7FB069", "#CFE3BE"], "movimiento": "respira", "son": "pad", "haptica": "suave" },
+          "eco": "La gratitud abre el corazón." },
+        { "clave": "inquieto", "texto": "Inquieto", "color": "#E8845C",
+          "amb": { "paleta": ["#E8845C", "#F2C0AA"], "movimiento": "deriva-inquieta", "son": "pad", "haptica": "doble" },
+          "eco": "Tu inquietud también es oración." },
+        { "clave": "herido", "texto": "Herido", "color": "#D9534F",
+          "amb": { "paleta": ["#D9534F", "#E9A6A4"], "movimiento": "deriva-lenta", "son": "gota", "haptica": "hondo" },
+          "eco": "No estás solo en esa herida." },
+        { "clave": "vacio", "texto": "Vacío", "color": "#8FA9BF",
+          "amb": { "paleta": ["#7FA8C9", "#B8C9D6"], "movimiento": "deriva-lenta", "son": "gota", "haptica": "suave" },
+          "eco": "Ese hueco también puede ofrecerse." }
+      ]
+    },
+
+    "intensidad": {
+      "familia": "comoEstas",
+      "mecanica": "termometro",
+      "alternas": ["sendero"],
+      "pregunta": "¿Qué tanto pesa esto en ti, hoy?",
+      "orientacion": "vertical",
+      "extremos": { "min": "Apenas lo rozo", "max": "Me abruma" },
+      "tramos": [
+        { "hasta": 33, "clave": "leve", "eco": "Está bien mirarlo de lejos por ahora." },
+        { "hasta": 66, "clave": "medio", "eco": "Gracias por confiarlo; no lo cargas solo." },
+        { "hasta": 100, "clave": "alto", "eco": "Lo que te abruma también cabe en las manos de Dios." }
+      ],
+      "_alterna_sendero": {
+        "pasos": [
+          { "clave": "apenas", "etiqueta": "Apenas lo rozo", "eco": "Está bien mirarlo de lejos por ahora." },
+          { "clave": "aRatos", "etiqueta": "Va y viene", "eco": "Dejarlo aparecer y pasar también es orar." },
+          { "clave": "bastante", "etiqueta": "Me pesa bastante", "eco": "Gracias por confiarlo; no lo cargas solo." },
+          { "clave": "abruma", "etiqueta": "Me abruma", "eco": "Lo que te abruma también cabe en las manos de Dios." }
+        ]
+      }
+    },
+
+    "cuerpo": {
+      "familia": "comoEstas",
+      "mecanica": "cuerpo",
+      "alternas": [],
+      "pregunta": "¿Dónde lo sientes en el cuerpo?",
+      "seleccionMultiple": true,
+      "zonas": [
+        { "clave": "cabeza", "eco": "La cabeza también aprieta lo que el corazón no ha soltado." },
+        { "clave": "garganta", "eco": "A veces el nudo en la garganta solo pide respirar." },
+        { "clave": "hombros", "eco": "Puedes soltar aquí un poco de ese peso." },
+        { "clave": "pecho", "eco": "El pecho guarda lo que aún no tiene palabras." },
+        { "clave": "estomago", "eco": "El cuerpo sabe antes que la mente." },
+        { "clave": "manos", "eco": "Lo que sostienes, también puedes ofrecerlo." }
+      ]
+    },
+
+    "compania": {
+      "familia": "tuSituacion",
+      "mecanica": "mosaico",
+      "modo": "ilustracion",
+      "alternas": [],
+      "pregunta": "¿Con quién vives esto?",
+      "opciones": [
+        { "clave": "aSolas", "texto": "A solas", "arte": "acogida/mosaico/aSolas.webp", "eco": "Estar a solas no es estar abandonado." },
+        { "clave": "enFamilia", "texto": "En familia", "arte": "acogida/mosaico/enFamilia.webp", "eco": "Los tuyos también sostienen sin saberlo." },
+        { "clave": "alguienCercano", "texto": "Con alguien cercano", "arte": "acogida/mosaico/alguienCercano.webp", "eco": "Compartir el peso ya lo aligera." },
+        { "clave": "aSolasConDios", "texto": "A solas con Dios", "arte": "acogida/mosaico/aSolasConDios.webp", "eco": "Esa intimidad es un lugar seguro." }
+      ]
+    },
+
+    "tiempo": {
+      "familia": "tuSituacion",
+      "mecanica": "sendero",
+      "alternas": [],
+      "pregunta": "¿Desde cuándo cargas esto?",
+      "pasos": [
+        { "clave": "reciente", "etiqueta": "Reciente", "eco": "Aún estás conociendo esta herida." },
+        { "clave": "haceTiempo", "etiqueta": "Hace tiempo", "eco": "Llevas rato con esto; mereces descanso." },
+        { "clave": "siempre", "etiqueta": "Casi siempre", "eco": "Lo que es viejo también puede sanar." }
+      ]
+    },
+
+    "imagen": {
+      "familia": "comoLoNombras",
+      "mecanica": "mosaico",
+      "modo": "ilustracion",
+      "alternas": [{ "mecanica": "mosaico", "modo": "palabra" }],
+      "pregunta": "¿A qué se parece esto hoy?",
+      "opciones": [
+        { "clave": "tormenta", "texto": "Una tormenta", "arte": "acogida/mosaico/tormenta.webp", "eco": "Toda tormenta, tarde o temprano, amaina." },
+        { "clave": "nudo", "texto": "Un nudo", "arte": "acogida/mosaico/nudo.webp", "eco": "Los nudos se desatan despacio, hebra por hebra." },
+        { "clave": "niebla", "texto": "Una niebla", "arte": "acogida/mosaico/niebla.webp", "eco": "Aun sin ver lejos, puedes dar el siguiente paso." },
+        { "clave": "peso", "texto": "Un peso", "arte": "acogida/mosaico/peso.webp", "eco": "No tienes que cargarlo de pie ni solo." }
+      ]
+    },
+
+    "horizonte": {
+      "familia": "dondeConDios",
+      "mecanica": "mosaico",
+      "modo": "ilustracion",
+      "alternas": ["cercania"],
+      "pregunta": "¿Desde dónde llegas a orar esto?",
+      "opciones": [
+        { "clave": "desdeLaConfianza", "texto": "Desde la confianza", "arte": "acogida/mosaico/desdeLaConfianza.webp", "eco": "Esa confianza ya es oración." },
+        { "clave": "desdeLaDuda", "texto": "Desde la duda", "arte": "acogida/mosaico/desdeLaDuda.webp", "eco": "La duda también cabe ante Dios." },
+        { "clave": "desdeElCansancio", "texto": "Desde el cansancio", "arte": "acogida/mosaico/desdeElCansancio.webp", "eco": "Ven así, cansado; no necesitas fingir." },
+        { "clave": "desdeElDeseo", "texto": "Con ganas de encontrarlo", "arte": "acogida/mosaico/desdeElDeseo.webp", "eco": "Ese deseo ya te acerca." }
+      ]
+    },
+
+    "presencia": {
+      "familia": "dondeConDios",
+      "mecanica": "cercania",
+      "alternas": ["corazones"],
+      "pregunta": "¿Cómo sientes a Dios en esto, hoy?",
+      "_nota": "Lux no se acerca ni se aleja; ninguna posición es mejor. 'noSe' va aparte: la duda no es una distancia más.",
+      "opciones": [
+        { "clave": "cercano", "etiqueta": "Cercano", "sub": "Lo siento presente", "eco": "Deja que esa cercanía te sostenga." },
+        { "clave": "enSilencio", "etiqueta": "En silencio", "sub": "Está, pero callado", "eco": "También el silencio de Dios es una forma de estar." },
+        { "clave": "lejano", "etiqueta": "Lejano", "sub": "Apenas lo alcanzo", "eco": "Sentirlo lejos también es parte del camino." },
+        { "clave": "noSe", "etiqueta": "No sé si está", "sub": "Y así lo traigo", "aparte": true, "eco": "Puedes traer esa duda tal como es; cabe aquí." }
+      ]
+    },
+
+    "mocion": {
+      "familia": "dondeConDios",
+      "mecanica": "mosaico",
+      "modo": "ilustracion",
+      "alternas": [{ "mecanica": "brujula", "estado": "v2" }],
+      "pregunta": "¿Hacia dónde sientes que te mueve esto?",
+      "opciones": [
+        { "clave": "aEncerrarme", "texto": "A encerrarme", "arte": "acogida/mosaico/aEncerrarme.webp", "eco": "Reconocerlo ya es una rendija de luz." },
+        { "clave": "aBuscarAlguien", "texto": "A buscar a alguien", "arte": "acogida/mosaico/aBuscarAlguien.webp", "eco": "Buscar compañía es un buen impulso." },
+        { "clave": "aRezar", "texto": "A rezar", "arte": "acogida/mosaico/aRezar.webp", "eco": "Deja que ese impulso te lleve." },
+        { "clave": "aHuir", "texto": "A huir", "arte": "acogida/mosaico/aHuir.webp", "eco": "Nombrar las ganas de huir ya es quedarte un poco." }
+      ]
+    },
+
+    "disposicion": {
+      "familia": "queBuscas",
+      "mecanica": "mosaico",
+      "modo": "ilustracion",
+      "alternas": [{ "mecanica": "mosaico", "modo": "palabra" }],
+      "pregunta": "¿Qué quieres presentar hoy?",
+      "opciones": [
+        { "clave": "unLimite", "texto": "Un límite que me pesa", "arte": "acogida/mosaico/unLimite.webp", "eco": "Puedes traerlo sin maquillarlo." },
+        { "clave": "unaGratitud", "texto": "Un agradecimiento", "arte": "acogida/mosaico/unaGratitud.webp", "eco": "La gratitud ya es camino de verdad." },
+        { "clave": "unaPeticion", "texto": "Una petición", "arte": "acogida/mosaico/unaPeticion.webp", "eco": "Pide con confianza; eres escuchado." },
+        { "clave": "unSilencio", "texto": "Solo mi silencio", "arte": "acogida/mosaico/unSilencio.webp", "eco": "El silencio también dice mucho." }
+      ]
+    },
+
+    "necesidad": {
+      "familia": "queBuscas",
+      "mecanica": "mosaico",
+      "modo": "ilustracion",
+      "alternas": [{ "mecanica": "mosaico", "modo": "ambiente" }, { "mecanica": "mosaico", "modo": "palabra" }],
+      "pregunta": "¿Qué necesitas más ahora?",
+      "opciones": [
+        { "clave": "consuelo", "texto": "Consuelo", "arte": "acogida/mosaico/consuelo.webp",
+          "amb": { "paleta": ["#E8845C", "#EFA02A", "#3FBFA0"], "movimiento": "respira-deriva", "son": "pad", "haptica": "suave" },
+          "eco": "Ponle nombre y déjalo estar." },
+        { "clave": "claridad", "texto": "Claridad", "arte": "acogida/mosaico/claridad.webp",
+          "amb": { "paleta": ["#EFA02A", "#F7E3B0"], "movimiento": "asciende", "son": "campana", "haptica": "suave" },
+          "eco": "La luz llega de a poco; basta el siguiente paso." },
+        { "clave": "fuerza", "texto": "Fuerza", "arte": "acogida/mosaico/fuerza.webp",
+          "amb": { "paleta": ["#C0563A", "#E8845C"], "movimiento": "pulso-firme", "son": "pad", "haptica": "hondo" },
+          "eco": "No estás solo para esto." },
+        { "clave": "soltar", "texto": "Soltar", "arte": "acogida/mosaico/soltar.webp",
+          "amb": { "paleta": ["#7FA8C9", "#BFD3DF"], "movimiento": "deriva-lenta", "son": "respiracion", "haptica": "suave" },
+          "eco": "Abrir las manos también es un acto de fe." }
+      ]
+    }
+
+  }
+}

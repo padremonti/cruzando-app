@@ -1,0 +1,417 @@
+{
+  "version": "pains-index-v1",
+  "elemento": "0101",
+  "_uso": "Índice invertido generado desde 0101-pains.json. 'porTag' (slug -> [pain-ids]) da la búsqueda por dolor. 'porEje' (eje -> [pain-ids]) alimenta el elenco por eje. El Misterio-puerta se deriva: mid = pain_id[:6]. Regenerar cada vez que cambie 0101-pains.json.",
+  "_generado_de": "0101-pains.json",
+  "porTag": {
+    "abandono": [
+      "010116c"
+    ],
+    "abundancia": [
+      "010107c"
+    ],
+    "aceptacion": [
+      "010109a"
+    ],
+    "acompanar": [
+      "010102c"
+    ],
+    "angustia": [
+      "010104b",
+      "010109c",
+      "010111a",
+      "010111c",
+      "010119a"
+    ],
+    "ansiedadexistencial": [
+      "010115c"
+    ],
+    "aprobacion": [
+      "010113b"
+    ],
+    "autenticidad": [
+      "010118c"
+    ],
+    "autocuidado": [
+      "010106b"
+    ],
+    "belleza": [
+      "010119a",
+      "010119c"
+    ],
+    "burla": [
+      "010118a"
+    ],
+    "cansancio": [
+      "010106a",
+      "010106b",
+      "010114a",
+      "010114c"
+    ],
+    "compasion": [
+      "010102c"
+    ],
+    "comunidad": [
+      "010102a"
+    ],
+    "confianza": [
+      "010101c",
+      "010115b"
+    ],
+    "control": [
+      "010101c",
+      "010107b",
+      "010109a",
+      "010113b",
+      "010115b"
+    ],
+    "crecer": [
+      "010105b",
+      "010105c"
+    ],
+    "cuerpo": [
+      "010112a",
+      "010112b",
+      "010112c",
+      "010119b"
+    ],
+    "culpa": [
+      "010105c",
+      "010107b",
+      "010108a",
+      "010108c",
+      "010110c"
+    ],
+    "desarraigo": [
+      "010103b"
+    ],
+    "desconfianza": [
+      "010117a",
+      "010117b"
+    ],
+    "desesperanza": [
+      "010116a",
+      "010116c"
+    ],
+    "desgaste": [
+      "010106a"
+    ],
+    "despedidas": [
+      "010104b",
+      "010105b"
+    ],
+    "dignidad": [
+      "010102b",
+      "010103c"
+    ],
+    "distancia": [
+      "010110a"
+    ],
+    "dolorfisico": [
+      "010112a"
+    ],
+    "duda": [
+      "010108b",
+      "010117c"
+    ],
+    "duelo": [
+      "010116b"
+    ],
+    "dueloanticipado": [
+      "010104a",
+      "010104b"
+    ],
+    "emocionesdificiles": [
+      "010111a"
+    ],
+    "enfermedad": [
+      "010112a"
+    ],
+    "envejecer": [
+      "010119a",
+      "010119b"
+    ],
+    "escasez": [
+      "010103a",
+      "010103c",
+      "010107a",
+      "010107b"
+    ],
+    "esfuerzo": [
+      "010114a",
+      "010114c"
+    ],
+    "esperanza": [
+      "010107c"
+    ],
+    "estatus": [
+      "010120b"
+    ],
+    "estigma": [
+      "010102b"
+    ],
+    "fe": [
+      "010117c"
+    ],
+    "finitud": [
+      "010115a",
+      "010115c"
+    ],
+    "fragilidad": [
+      "010101a",
+      "010112c"
+    ],
+    "habitos": [
+      "010106c"
+    ],
+    "hogar": [
+      "010103b"
+    ],
+    "humildad": [
+      "010101b",
+      "010120c"
+    ],
+    "imagen": [
+      "010119c"
+    ],
+    "incertidumbre": [
+      "010101c",
+      "010109a",
+      "010109b",
+      "010109c",
+      "010111c"
+    ],
+    "independencia": [
+      "010105c"
+    ],
+    "injusticia": [
+      "010113c",
+      "010120c"
+    ],
+    "integridad": [
+      "010104c"
+    ],
+    "interioridad": [
+      "010101a",
+      "010111b"
+    ],
+    "juicioajeno": [
+      "010102b",
+      "010113a",
+      "010113b",
+      "010113c"
+    ],
+    "limites": [
+      "010110b",
+      "010110c"
+    ],
+    "malinterpretado": [
+      "010113a",
+      "010118b"
+    ],
+    "merito": [
+      "010120a",
+      "010120c"
+    ],
+    "miedo": [
+      "010109b",
+      "010111b",
+      "010111c"
+    ],
+    "miedoaamar": [
+      "010104a"
+    ],
+    "miedoalamuerte": [
+      "010115a",
+      "010119b"
+    ],
+    "miedoalridiculo": [
+      "010118a"
+    ],
+    "migracion": [
+      "010103b"
+    ],
+    "misterio": [
+      "010109b",
+      "010109c"
+    ],
+    "mortalidad": [
+      "010115a"
+    ],
+    "nidovacio": [
+      "010105a"
+    ],
+    "paternidad": [
+      "010105a"
+    ],
+    "pediayuda": [
+      "010101b",
+      "010114b"
+    ],
+    "perseverancia": [
+      "010114c"
+    ],
+    "plenitud": [
+      "010118b"
+    ],
+    "pobreza": [
+      "010103a",
+      "010103c",
+      "010107a",
+      "010107c"
+    ],
+    "presencia": [
+      "010110c"
+    ],
+    "rechazo": [
+      "010104c"
+    ],
+    "recibirlobueno": [
+      "010117a",
+      "010117b"
+    ],
+    "reconocimiento": [
+      "010120a"
+    ],
+    "reputacion": [
+      "010113c"
+    ],
+    "rutina": [
+      "010106a",
+      "010106c"
+    ],
+    "sensibilidad": [
+      "010112b"
+    ],
+    "sentidodeldolor": [
+      "010108a",
+      "010108b",
+      "010108c"
+    ],
+    "seresqueridos": [
+      "010110a"
+    ],
+    "servir": [
+      "010102c"
+    ],
+    "sobrecarga": [
+      "010110b",
+      "010114b"
+    ],
+    "soledad": [
+      "010102a"
+    ],
+    "soltar": [
+      "010105a",
+      "010105b",
+      "010115b"
+    ],
+    "sufrimiento": [
+      "010108a",
+      "010108b"
+    ],
+    "tiempo": [
+      "010106b",
+      "010110b",
+      "010115c"
+    ],
+    "tristeza": [
+      "010111a",
+      "010116b"
+    ],
+    "tristezaprofunda": [
+      "010116a"
+    ],
+    "vacio": [
+      "010120b"
+    ],
+    "valentia": [
+      "010118c"
+    ],
+    "vanidad": [
+      "010119c"
+    ],
+    "vulnerabilidad": [
+      "010101a",
+      "010101b",
+      "010111b",
+      "010112c"
+    ]
+  },
+  "porEje": {
+    "actitud": [
+      "010101a",
+      "010101b",
+      "010104c",
+      "010105c",
+      "010114c",
+      "010117a",
+      "010117b",
+      "010117c",
+      "010118b",
+      "010118c"
+    ],
+    "cuerpo": [
+      "010106a",
+      "010106b",
+      "010106c",
+      "010112a",
+      "010112b",
+      "010112c",
+      "010114a",
+      "010119a",
+      "010119b",
+      "010119c"
+    ],
+    "emociones": [
+      "010108c",
+      "010110c",
+      "010111a",
+      "010111b",
+      "010111c",
+      "010116a"
+    ],
+    "existencial": [
+      "010101c",
+      "010108a",
+      "010108b",
+      "010109a",
+      "010109b",
+      "010109c",
+      "010110b",
+      "010115a",
+      "010115b",
+      "010115c"
+    ],
+    "recursos": [
+      "010103a",
+      "010103b",
+      "010107a",
+      "010107b",
+      "010107c",
+      "010114b"
+    ],
+    "social": [
+      "010102b",
+      "010103c",
+      "010113a",
+      "010113b",
+      "010113c",
+      "010118a",
+      "010120a",
+      "010120b",
+      "010120c"
+    ],
+    "vinculos": [
+      "010102a",
+      "010102c",
+      "010104a",
+      "010104b",
+      "010105a",
+      "010105b",
+      "010110a",
+      "010116b",
+      "010116c"
+    ]
+  }
+}

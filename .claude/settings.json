@@ -4,7 +4,9 @@
       "Bash(node -e ' *)",
       "Bash(node --check _chk_0.mjs)",
       "Bash(node --check _chk_1.js)",
-      "Bash(rm -f _chk_0.mjs _chk_1.js)"
+      "Bash(rm -f _chk_0.mjs _chk_1.js)",
+      "PowerShell(python -m py_compile \"c:\\\\Users\\\\Usuario\\\\Desktop\\\\cruzando-app\\\\data\\\\lrc_sync_maker.py\")",
+      "PowerShell(if \\($?\\) { \"OK: compila sin errores\" })"
     ]
   }
 }
