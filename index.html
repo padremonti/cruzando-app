@@ -1249,23 +1249,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 .hub-door-titulo { font-family:'Crimson Pro',serif; font-size:1.45rem; font-weight:700; }
 .hub-door-sub { font-size:0.85rem; color:var(--text-dim); margin-top:2px; }
 .hub-door-arrow { font-size:1.3rem; color:var(--text-dim); flex-shrink:0; }
-.hub-santuario {
-  margin:20px 16px 0; padding:20px; border-radius:20px;
-  background:linear-gradient(145deg,#1E1206,#160D04);
-  border:1px solid rgba(255,122,0,0.18);
-}
-.light .hub-santuario { background:linear-gradient(145deg,#FFF4EA,#FAEADE); border-color:rgba(255,122,0,0.2); }
-.hub-santuario-head { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
-.hub-santuario-icono { font-size:1.6rem; color:var(--orange); flex-shrink:0; }
-.hub-santuario-titulo { font-family:'Crimson Pro',serif; font-size:1.35rem; font-weight:700; color:var(--text); }
-.hub-santuario-sub { font-size:0.82rem; color:var(--text-dim); margin-top:2px; }
-.hub-santuario .banner-retiro { margin:0 0 14px; }
-.hub-santuario-btn {
-  width:100%; padding:13px; border-radius:14px; border:none; cursor:pointer;
-  background:var(--orange); color:#fff; font-weight:700; font-size:0.9rem;
-  font-family:'Inter',sans-serif; -webkit-tap-highlight-color:transparent;
-}
-.hub-santuario-btn:active { opacity:0.9; }
+.hub-door-santuario .hub-door-icon { color:var(--orange); background:rgba(255,122,0,0.14); font-size:1.4rem; }
 
 /* ══ ESFERA NOTIFICACIÓN RECOMPENSA ══ */
 .esfera-notif {
@@ -1755,16 +1739,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
       </div>
     </div>
 
-    <!-- ═══ PUERTAS PRINCIPALES ═══ -->
-    <button class="hub-door hub-door-crecer" onclick="navTap(this); navigateTo('crecer.html')">
-      <div class="hub-door-icon">🗺</div>
-      <div class="hub-door-texto">
-        <div class="hub-door-titulo">Crecer</div>
-        <div class="hub-door-sub">El mapa de Misterios</div>
-      </div>
-      <div class="hub-door-arrow">→</div>
-    </button>
-
+    <!-- ═══ PUERTAS PRINCIPALES (mismo tamaño: Sanar · Crecer · Santuario) ═══ -->
     <button class="hub-door hub-door-sanar" onclick="navTap(this); navigateTo('sanar.html')">
       <div class="hub-door-icon">🕊</div>
       <div class="hub-door-texto">
@@ -1774,27 +1749,34 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
       <div class="hub-door-arrow">→</div>
     </button>
 
-    <!-- ═══ EL SANTUARIO (Retiros) ═══ -->
-    <div class="hub-santuario">
-      <div class="hub-santuario-head">
-        <span class="hub-santuario-icono">◆</span>
-        <div>
-          <div class="hub-santuario-titulo">El Santuario</div>
-          <div class="hub-santuario-sub">Talleres de oración para cada nivel</div>
-        </div>
+    <button class="hub-door hub-door-crecer" onclick="navTap(this); navigateTo('crecer.html')">
+      <div class="hub-door-icon">🗺</div>
+      <div class="hub-door-texto">
+        <div class="hub-door-titulo">Crecer</div>
+        <div class="hub-door-sub">El mapa de Misterios</div>
       </div>
-      <!-- Banner de retiro en curso — visible solo si hay uno activo -->
-      <div class="banner-retiro" id="santuario-banner" style="display:none">
-        <div class="banner-retiro-inner">
-          <span class="banner-retiro-icono">◆</span>
-          <div class="banner-retiro-texto">
-            <p class="banner-retiro-titulo">El Santuario te espera</p>
-            <p class="banner-retiro-sub" id="santuario-banner-sub">continúa donde te quedaste</p>
-          </div>
-          <button class="banner-retiro-btn" id="santuario-banner-btn">Continuar →</button>
-        </div>
+      <div class="hub-door-arrow">→</div>
+    </button>
+
+    <button class="hub-door hub-door-santuario" onclick="navTap(this); navigateTo('retiros.html')">
+      <div class="hub-door-icon">◆</div>
+      <div class="hub-door-texto">
+        <div class="hub-door-titulo">El Santuario</div>
+        <div class="hub-door-sub">Talleres de oración</div>
       </div>
-      <button class="hub-santuario-btn" onclick="navTap(this); navigateTo('retiros.html')">Entrar a los retiros →</button>
+      <div class="hub-door-arrow">→</div>
+    </button>
+
+    <!-- Banner de retiro en curso — visible solo si hay uno activo -->
+    <div class="banner-retiro" id="santuario-banner" style="display:none">
+      <div class="banner-retiro-inner">
+        <span class="banner-retiro-icono">◆</span>
+        <div class="banner-retiro-texto">
+          <p class="banner-retiro-titulo">El Santuario te espera</p>
+          <p class="banner-retiro-sub" id="santuario-banner-sub">continúa donde te quedaste</p>
+        </div>
+        <button class="banner-retiro-btn" id="santuario-banner-btn">Continuar →</button>
+      </div>
     </div>
 
     <!-- Banner Premium — visible para usuarios Free / redirección ?blocked= -->
