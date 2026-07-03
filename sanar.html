@@ -1,0 +1,53 @@
+<!-- sanar.html — Micro (pain → acogida → oración) · PLACEHOLDER
+     Stub temporal: la puerta "Sanar" del hub apunta aquí.
+     El módulo real (micro-oración) se construye en un bloque posterior. -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Sanar · CruzAndo</title>
+<link rel="manifest" href="manifest.json">
+<style>
+  :root {
+    --bg:#0E0602; --bg2:#1A0F06; --card:#1E1206; --border:rgba(255,122,0,0.14);
+    --text:#F5E9DC; --text-dim:rgba(245,233,220,0.55); --orange:#FF7A00; --brand:#01BBE1;
+  }
+  body.light {
+    --bg:#FBF5EE; --bg2:#F3E9DC; --card:#FFF7EF; --border:rgba(255,122,0,0.18);
+    --text:#2B1A0E; --text-dim:rgba(43,26,14,0.55);
+  }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body {
+    margin:0; min-height:100vh; background:var(--bg); color:var(--text);
+    font-family:'Inter',system-ui,sans-serif;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:32px 24px; text-align:center; transition:background .3s,color .3s;
+  }
+  .cruz { width:44px; height:44px; margin-bottom:22px; }
+  .titulo { font-family:'Crimson Pro',Georgia,serif; font-size:2rem; font-weight:700; margin:0 0 8px; }
+  .sub { font-size:1rem; color:var(--text-dim); max-width:340px; line-height:1.6; margin:0 0 6px; }
+  .chip {
+    margin:18px 0 30px; padding:6px 14px; border-radius:20px;
+    background:rgba(255,122,0,0.12); color:var(--orange);
+    font-size:0.78rem; font-weight:700; letter-spacing:0.4px;
+  }
+  .btn {
+    padding:14px 26px; border-radius:16px; border:none; cursor:pointer;
+    background:var(--orange); color:#fff; font-weight:700; font-size:0.92rem;
+    font-family:'Inter',sans-serif;
+  }
+  .btn:active { opacity:0.9; }
+</style>
+
+<svg class="cruz" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <rect x="46.2" y="0" width="7.6" height="100" fill="#02BBE0"/>
+  <rect x="0" y="46.2" width="100" height="7.6" fill="#02BBE0"/>
+</svg>
+
+<h1 class="titulo">Sanar</h1>
+<p class="sub">Un espacio breve de oración para acoger lo que duele: reconocerlo, presentarlo y dejar que el Señor lo toque.</p>
+<div class="chip">✦ Próximamente</div>
+<button class="btn" onclick="location.href='index.html'">← Volver al inicio</button>
+
+<script>
+  // Tema unificado (misma clave que el resto de la app)
+  if (localStorage.getItem('cruzando_theme') === 'light') document.body.classList.add('light');
+</script>
