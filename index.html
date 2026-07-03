@@ -1228,9 +1228,14 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 .banner-retiro-btn:active { opacity:0.85; }
 
 /* ══ HUB / LOBBY ══ */
-.hub-greeting { padding:18px 20px 4px; }
+.hub-greeting { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:18px 20px 4px; }
+.hub-greeting-text { min-width:0; }
 .hub-greeting-time { font-family:'Crimson Pro',serif; font-size:1rem; color:var(--text-dim); }
 .hub-greeting-name { font-family:'Crimson Pro',serif; font-size:1.9rem; font-weight:700; color:var(--text); line-height:1.15; }
+.hub-odo-line { margin-top:5px; font-size:0.8rem; color:var(--text-dim); font-weight:600; }
+.hub-odo-ring { flex-shrink:0; line-height:0; }
+.hub-odo-ring #odo-arc { transition:stroke-dashoffset .8s cubic-bezier(.16,1,.3,1); }
+.hub-odo-ring #odo-pct { fill:var(--text); font-size:15px; font-weight:600; font-family:'Inter',sans-serif; }
 .hub-door {
   display:flex; align-items:center; gap:16px; width:calc(100% - 32px);
   margin:12px 16px 0; padding:18px 20px; border-radius:20px; cursor:pointer;
@@ -1712,30 +1717,21 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
       </button>
     </div>
 
-    <!-- Saludo -->
+    <!-- Saludo + anillo de meta del día (lectura ligera: metrosHoy / metaMetros) -->
     <div class="hub-greeting">
-      <div class="hub-greeting-time"><span id="greeting-time">Hola</span></div>
-      <div class="hub-greeting-name" id="user-name">Peregrino</div>
-    </div>
-
-    <!-- ── ODÓMETRO META DEL DÍA ── -->
-    <div class="odometro-wrap" id="odometro-wrap">
-      <div class="odometro-top">
-        <div class="odometro-label">Meta del día</div>
-        <div class="odometro-fraction">
-          <span class="odometro-hoy" id="odo-hoy">0m</span>
-          <span class="odometro-meta-txt" id="odo-meta-txt"> / 1,850m</span>
-        </div>
+      <div class="hub-greeting-text">
+        <div class="hub-greeting-time"><span id="greeting-time">Hola</span></div>
+        <div class="hub-greeting-name" id="user-name">Peregrino</div>
+        <div class="hub-odo-line"><span id="odo-hoy">0</span> / <span id="odo-meta">1,850</span> m</div>
       </div>
-      <div class="odometro-track">
-        <div class="odometro-fill" id="odo-fill" style="width:0%"></div>
-      </div>
-      <div class="odometro-bottom">
-        <div class="odometro-estado" id="odo-estado">
-          <div class="odo-dot-live"></div>
-          <span id="odo-estado-txt">En camino</span>
-        </div>
-        <div class="odometro-falta" id="odo-falta">faltan 1,850m</div>
+      <div class="hub-odo-ring">
+        <svg width="66" height="66" viewBox="0 0 66 66" aria-label="Meta del día">
+          <circle cx="33" cy="33" r="27" fill="none" stroke="var(--border)" stroke-width="6"/>
+          <circle id="odo-arc" cx="33" cy="33" r="27" fill="none" stroke="var(--orange)" stroke-width="6"
+                  stroke-linecap="round" stroke-dasharray="169.6" stroke-dashoffset="169.6"
+                  transform="rotate(-90 33 33)"/>
+          <text id="odo-pct" x="33" y="37" text-anchor="middle">0%</text>
+        </svg>
       </div>
     </div>
 
@@ -3344,29 +3340,22 @@ function updateOdometro() {
   window.metaMetros = metaMetros;
   const pct      = Math.min((metrosHoy / metaMetros) * 100, 100);
   const cumplida = metrosHoy >= metaMetros;
-  const fill      = document.getElementById('odo-fill');
-  const hoyEl     = document.getElementById('odo-hoy');
-  const metaTxt   = document.getElementById('odo-meta-txt');
-  const estadoEl  = document.getElementById('odo-estado');
-  const estadoTxt = document.getElementById('odo-estado-txt');
-  const faltaEl   = document.getElementById('odo-falta');
-  if (!fill) return;
-  fill.style.width = pct + '%';
-  fill.classList.toggle('done', cumplida);
-  if (hoyEl)    hoyEl.textContent   = metrosHoy.toLocaleString('es-MX') + 'm';
-  if (metaTxt)  metaTxt.textContent = ' / ' + metaMetros.toLocaleString('es-MX') + 'm';
-  if (estadoEl) estadoEl.classList.toggle('cumplida', cumplida);
+  const arc   = document.getElementById('odo-arc');
+  const pctEl = document.getElementById('odo-pct');
+  const hoyEl = document.getElementById('odo-hoy');
+  const metaEl = document.getElementById('odo-meta');
+  if (!arc) return;
+  // Arco: C = 2·π·r (r=27); offset = C·(1 − pct/100)
+  const C = 2 * Math.PI * 27;
+  arc.style.strokeDashoffset = (C * (1 - pct / 100)).toFixed(1);
+  if (pctEl)  pctEl.textContent  = Math.round(pct) + '%';
+  if (hoyEl)  hoyEl.textContent  = Math.round(metrosHoy).toLocaleString('es-MX');
+  if (metaEl) metaEl.textContent = Math.round(metaMetros).toLocaleString('es-MX');
   if (cumplida) {
     if (!window._goalSoundPlayed) { window._goalSoundPlayed = true; if (window.CZSound) CZSound('goalReached'); }
-    if (estadoTxt) estadoTxt.textContent = '¡Meta del día cumplida!';
-    if (faltaEl)   faltaEl.textContent   = '+' + (metrosHoy - metaMetros).toLocaleString('es-MX') + 'm extra';
   } else {
     window._goalSoundPlayed = false;
-    if (estadoTxt) estadoTxt.textContent = 'En camino';
-    if (faltaEl)   faltaEl.textContent   = 'faltan ' + (metaMetros - metrosHoy).toLocaleString('es-MX') + 'm';
   }
-
-  // En el hub el odómetro es permanente: no se auto-colapsa.
 }
 
 function checkMetaStreak() {
@@ -4707,6 +4696,9 @@ function onMetaSliderChange(val) {
   var v = parseInt(val);
   var el = document.getElementById('prefs-meta-val');
   if (el) el.textContent = v.toLocaleString('es-MX');
+  // Preview en vivo del anillo (se persiste al pulsar "Guardar meta")
+  metaMetros = v;
+  updateOdometro();
 }
 
 async function guardarMeta() {
