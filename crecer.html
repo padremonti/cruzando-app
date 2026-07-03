@@ -1327,6 +1327,10 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   </div>
 
   <nav class="drawer-nav">
+    <button class="drawer-item" id="drawer-extras-btn" onclick="closeDrawer(); goToExtras()">
+      <div class="drawer-item-icon">✦</div>
+      <div><div class="drawer-item-label">Extras</div><div class="drawer-item-sub">Contenido adicional Premium</div></div>
+    </button>
     <button class="drawer-item" onclick="closeDrawer(); openPrefs()">
       <div class="drawer-item-icon">⚙️</div>
       <div><div class="drawer-item-label">Preferencias</div><div class="drawer-item-sub">Tema, audio, micro</div></div>
@@ -1644,6 +1648,32 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 
   <!-- ═══ BOTTOM NAV BAR ═══ -->
   <nav class="app-nav" id="app-nav" style="display:none">
+    <button class="app-nav-item active" disabled>
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="1 6 8 3 16 6 23 3 23 18 16 21 8 18 1 21 1 6"/>
+          <line x1="8" y1="3" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="21"/>
+        </svg>
+      </div>
+      <span class="app-nav-label">Crecer</span>
+    </button>
+    <button class="app-nav-item" onclick="navTap(this); navigateTo('sanar.html')">
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.8z"/>
+        </svg>
+      </div>
+      <span class="app-nav-label">Sanar</span>
+    </button>
+    <button class="app-nav-item" id="nav-sanar-btn" onclick="navTap(this); navigateTo('retiros.html')">
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s-8-5.5-8-11a8 8 0 0116 0c0 5.5-8 11-8 11z"/>
+          <path d="M9 11h6M12 8v6"/>
+        </svg>
+      </div>
+      <span class="app-nav-label">Retiros</span>
+    </button>
     <button class="app-nav-item" onclick="navTap(this); navigateTo('diario.html')">
       <div class="app-nav-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -1661,23 +1691,6 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
         <span id="cantos-nav-dot" style="display:none;position:absolute;top:-2px;right:-2px;width:7px;height:7px;background:#FF7A00;border-radius:50%;"></span>
       </div>
       <span class="app-nav-label">Cantos</span>
-    </button>
-    <button class="app-nav-item" id="nav-sanar-btn" onclick="navTap(this); navigateTo('retiros.html')">
-      <div class="app-nav-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 22s-8-5.5-8-11a8 8 0 0116 0c0 5.5-8 11-8 11z"/>
-          <path d="M9 11h6M12 8v6"/>
-        </svg>
-      </div>
-      <span class="app-nav-label">Retiros</span>
-    </button>
-    <button class="app-nav-item" id="nav-extras-btn" onclick="navTap(this); goToExtras()">
-      <div class="app-nav-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-        </svg>
-      </div>
-      <span class="app-nav-label">Extras</span>
     </button>
   </nav>
 
