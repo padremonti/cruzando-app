@@ -2729,6 +2729,19 @@ onAuthStateChanged(auth, async function(user) {
     var progreso = (audioSnap && audioSnap.exists()) ? audioSnap.data() : null;
     var bookmark = (bookSnap  && bookSnap.exists())  ? bookSnap.data()  : null;
     renderTuCamino(bookmark, progreso, user);
+
+    // ── Deep-link "Ir a mi avance" (desde el hub): abrir el selector de modo del Misterio frontier ──
+    if (progreso && new URLSearchParams(location.search).get('abrirFrente') === '1') {
+      var _fNid = String(progreso.nivel).padStart(2,'0') + String(progreso.cuaderno).padStart(2,'0');
+      var _fGi  = (progreso.misterio || 1) - 1;            // globalIdx 0-19
+      window.currentNivelId = _fNid; currentNivelId = _fNid; // fijar mapa/popup al cuaderno del frontier
+      if (window.buildMap) window.buildMap();               // re-render del mapa en el frontier
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+          if (window.openMapPopup) window.openMapPopup(_fGi, Math.floor(_fGi / 5), _fGi % 5);
+        });
+      });
+    }
   } catch(e) {}
 
   if (user && user.uid) {
@@ -3977,6 +3990,7 @@ function closeDrawer() {
 }
 
 window.buildMap      = buildMap;
+window.openMapPopup  = openMapPopup;
 window.openDrawer    = openDrawer;
 window.closeDrawer   = closeDrawer;
 

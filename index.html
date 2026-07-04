@@ -765,239 +765,6 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 }
 .light .theme-switch::after { transform:translateX(18px); background:var(--orange); }
 
-/* ══ UNIT BANNER ══ */
-.unit-banner {
-  margin:10px 14px 0; padding:14px 16px; border-radius:16px;
-  position:relative; overflow:hidden; flex-shrink:0;
-  display:flex; align-items:center; justify-content:space-between;
-  border:1.5px solid rgba(255,122,0,0.2); background:rgba(255,122,0,0.1);
-  cursor:pointer; user-select:none; -webkit-tap-highlight-color:transparent;
-}
-.unit-banner-content { position:relative; z-index:1; flex:1; }
-.unit-banner-label {
-  font-size:0.58rem; font-weight:800; letter-spacing:1px;
-  text-transform:uppercase; color:rgba(255,160,80,0.8); margin-bottom:2px;
-}
-.unit-banner-title {
-  font-family:'Crimson Pro',serif; font-size:1.7rem; font-weight:700;
-  color:var(--text); line-height:1.1;
-}
-.unit-banner-right { display:flex; align-items:center; gap:6px; position:relative; z-index:1; }
-.unit-progress-text { font-size:0.68rem; font-weight:700; color:var(--orange); }
-.unit-picker-chevron {
-  font-size:1.3rem; color:var(--orange); line-height:1;
-  transition:transform 0.3s cubic-bezier(0.4,0,0.2,1); display:block;
-}
-
-/* ══ LEVEL PICKER ══ */
-.level-picker {
-  overflow:hidden; max-height:0;
-  transition:max-height 0.38s cubic-bezier(0.4,0,0.2,1);
-  flex-shrink:0; margin:0 14px;
-}
-.level-picker.open { max-height:160px; }
-.level-picker-scroll {
-  overflow-x:auto; overflow-y:hidden;
-  display:flex; gap:0; align-items:flex-start;
-  padding:14px 4px 10px;
-  scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;
-  scrollbar-width:none;
-}
-.level-picker-scroll::-webkit-scrollbar { display:none; }
-.nivel-mundo-group {
-  display:flex; flex-direction:column; align-items:center;
-  flex-shrink:0; scroll-snap-align:start;
-  padding:0 10px; border-right:1px solid rgba(255,255,255,0.07);
-}
-.nivel-mundo-group:last-child { border-right:none; }
-.nivel-mundo-label {
-  font-size:0.52rem; font-weight:800; text-transform:uppercase;
-  letter-spacing:0.9px; margin-bottom:9px; opacity:0.85;
-}
-.nivel-orbs { display:flex; gap:14px; }
-.nivel-orb {
-  width:92px; height:92px; border-radius:50%;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  cursor:pointer; border:2px solid transparent;
-  transition:transform 0.15s, box-shadow 0.15s;
-  gap:4px; -webkit-tap-highlight-color:transparent;
-  touch-action:manipulation; user-select:none;
-}
-.nivel-orb.locked {
-  background:rgba(255,255,255,0.05) !important;
-  border-color:rgba(255,255,255,0.1) !important;
-  cursor:default;
-}
-.nivel-orb.active {
-  box-shadow:0 0 0 3px var(--mc,#FF7A00), 0 4px 14px rgba(0,0,0,0.4);
-}
-.nivel-orb:not(.locked):not(.active):active { transform:scale(0.91); }
-.nivel-orb-num {
-  font-size:1.45rem; font-weight:800; line-height:1;
-  color:#fff; pointer-events:none;
-}
-.nivel-orb.locked .nivel-orb-num { color:rgba(255,255,255,0.2); }
-.nivel-orb-sub {
-  font-size:0.62rem; letter-spacing:0.2px; color:rgba(255,255,255,0.75);
-  max-width:78px; text-align:center; overflow:hidden;
-  text-overflow:ellipsis; white-space:nowrap; pointer-events:none;
-}
-.nivel-orb.locked .nivel-orb-sub { color:rgba(255,255,255,0.15); }
-
-/* ══ MAP SCROLL ══ */
-.map-scroll {
-  flex:1; overflow-y:auto; overflow-x:hidden;
-  -webkit-overflow-scrolling:touch;
-  overscroll-behavior:contain; scrollbar-width:none;
-  contain:strict;
-}
-.map-scroll::-webkit-scrollbar { display:none; }
-.map-canvas {
-  position:relative; width:100%;
-  transform:translateZ(0);
-  will-change:transform;
-}
-
-/* ══ NODO ══ */
-.map-node {
-  position:absolute; transform:translate(-50%,-50%); z-index:5;
-  display:flex; flex-direction:column; align-items:center; gap:0;
-  cursor:pointer; -webkit-tap-highlight-color:transparent;
-}
-.map-node.locked { cursor:default; }
-.node-sphere {
-  width:104px; height:104px; border-radius:50%;
-  display:flex; align-items:center; justify-content:center;
-  position:relative; transition:transform 0.18s cubic-bezier(0.34,1.56,0.64,1);
-  border-bottom:6px solid rgba(0,0,0,0.3); border-top:3px solid rgba(255,255,255,0.2);
-}
-.map-node:not(.locked):active .node-sphere { transform:scale(0.91); }
-.node-sphere.xl { width:120px; height:120px; }
-.node-sphere.sm { width:104px; height:104px; }
-.node-sphere.active { animation:nodeGlow 2s ease-in-out infinite; }
-@keyframes nodeGlow {
-  0%,100% { box-shadow:0 0 0 0 var(--nc,rgba(255,122,0,0.4)),0 5px 18px rgba(0,0,0,0.4); }
-  50%      { box-shadow:0 0 0 18px color-mix(in srgb,var(--nc) 0%,transparent),0 10px 36px rgba(0,0,0,0.4); }
-}
-.node-sphere.done   { box-shadow:0 4px 14px var(--nc,rgba(255,122,0,0.35)),0 5px 18px rgba(0,0,0,0.35); }
-.node-sphere.locked {
-  background:var(--node-locked-bg) !important;
-  border-color:var(--node-locked-border) !important;
-  border-bottom-color:rgba(0,0,0,0.15) !important;
-  box-shadow:none; opacity:0.5; filter:grayscale(0.7);
-}
-.node-icon { font-size:2.4rem; line-height:1; position:relative; z-index:1; }
-.node-badge {
-  background:var(--orange); color:#fff;
-  font-size:0.58rem; font-weight:800; letter-spacing:0.8px; text-transform:uppercase;
-  padding:3px 10px; border-radius:8px; margin-bottom:4px;
-  box-shadow:0 3px 10px rgba(255,122,0,0.5); animation:badgePulse 2s ease-in-out infinite;
-}
-@keyframes badgePulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
-.node-label { margin-top:7px; text-align:center; }
-.node-label-name { font-size:0.68rem; font-weight:700; color:var(--text-soft); line-height:1.2; max-width:110px; }
-
-/* ══ TESORO ══ */
-.treasure-node {
-  position:absolute; transform:translate(-50%,-50%); z-index:5;
-  cursor:pointer; -webkit-tap-highlight-color:transparent;
-  display:flex; flex-direction:column; align-items:center; gap:4px;
-}
-.treasure-chest {
-  width:104px; height:104px; border-radius:50%;
-  display:flex; align-items:center; justify-content:center; font-size:2.6rem;
-  position:relative; border:2px solid transparent;
-  transition:transform 0.18s cubic-bezier(0.34,1.56,0.64,1);
-  box-shadow:0 4px 16px rgba(0,0,0,0.4);
-}
-.treasure-node:active .treasure-chest { transform:scale(0.9); }
-.treasure-chest.closed {
-  background:linear-gradient(135deg,rgba(212,160,23,0.25),rgba(212,160,23,0.1));
-  border-color:rgba(212,160,23,0.5); animation:treasurePulse 2.5s ease-in-out infinite;
-}
-@keyframes treasurePulse {
-  0%,100%{box-shadow:0 0 0 0 rgba(212,160,23,0.4),0 4px 16px rgba(0,0,0,0.4)}
-  50%    {box-shadow:0 0 0 8px rgba(212,160,23,0),0 4px 16px rgba(0,0,0,0.4)}
-}
-.treasure-chest.opened {
-  background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.1);
-  filter:grayscale(0.6); opacity:0.55; animation:none; box-shadow:none;
-}
-.treasure-chest.locked {
-  background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.08);
-  filter:grayscale(0.8); opacity:0.35; animation:none; cursor:default; box-shadow:none;
-}
-.treasure-label { font-size:0.58rem; font-weight:700; color:var(--gold); letter-spacing:0.3px; }
-.treasure-chest.opened + .treasure-label { color:var(--text-dim); }
-.treasure-chest.locked + .treasure-label { color:var(--text-dim); opacity:0.4; }
-
-/* ── Nodos de Retiro en el mapa ── */
-.retiro-node {
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  transition: transform 0.15s;
-  z-index: 5;
-}
-.retiro-node:active { transform: translate(-50%,-50%) scale(0.93) !important; }
-.retiro-node-svg {
-  width: 90px;
-  height: 90px;
-  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.45));
-}
-.retiro-node-label {
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: var(--text-soft);
-  text-align: center;
-  max-width: 96px;
-  line-height: 1.3;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-}
-.retiro-node.bloqueado {
-  opacity: 0.25;
-  cursor: default;
-  pointer-events: none;
-}
-
-/* ══ BLOQUE / PATER / LUX ══ */
-.bloque-section-label { position:absolute; z-index:4; pointer-events:none; }
-.bloque-pill {
-  padding:3px 9px; border-radius:20px; font-size:0.56rem; font-weight:700;
-  letter-spacing:0.4px; text-transform:uppercase; display:flex; align-items:center; gap:4px;
-}
-.pater-node {
-  position:absolute; transform:translate(-50%,-50%); z-index:4;
-  width:18px; height:18px; border-radius:50%;
-  background:var(--pater-bg); border:1.5px solid var(--pater-border);
-  display:flex; align-items:center; justify-content:center; pointer-events:none;
-}
-.pater-cross { width:7px; height:7px; position:relative; }
-.pater-cross::before, .pater-cross::after {
-  content:''; position:absolute; background:rgba(255,255,255,0.4); border-radius:1px;
-}
-.light .pater-cross::before, .light .pater-cross::after { background:rgba(0,0,0,0.3); }
-.pater-cross::before { width:2px; height:7px; left:50%; transform:translateX(-50%); }
-.pater-cross::after  { width:7px; height:2px; top:37%; left:0; }
-.lux-companion {
-  position:absolute; z-index:6; pointer-events:none;
-  animation:luxFloat 3s ease-in-out infinite;
-}
-@keyframes luxFloat {
-  0%,100%{transform:translateY(0px) rotate(-2deg)} 50%{transform:translateY(-7px) rotate(2deg)}
-}
-.lux-bubble {
-  background:var(--lux-bubble-bg); border:1px solid var(--lux-bubble-border);
-  border-radius:12px 12px 12px 4px; padding:6px 9px; font-size:0.6rem;
-  color:var(--text-soft); max-width:95px; line-height:1.4; font-style:italic;
-  box-shadow:0 4px 12px var(--shadow); margin-bottom:5px;
-}
-
 /* ══ POPUP MISTERIO ══ */
 .popup-overlay {
   position:fixed; inset:0; background:rgba(0,0,0,0.6);
@@ -1021,31 +788,6 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 .popup-hero { padding:14px 20px 16px; position:relative; overflow:hidden; flex:1; display:flex; flex-direction:column; }
 .popup-hero-bg { position:absolute; inset:0; z-index:0; pointer-events:none; }
 .popup-hero-content { position:relative; z-index:1; flex:1; display:flex; flex-direction:column; }
-
-/* ── Imagen del misterio (duotono) ── */
-.popup-mystery-frame {
-  width:75%; margin-left:auto; margin-right:auto;
-  flex:1; min-height:140px; position:relative; overflow:hidden;
-  border-radius:13px; margin-bottom:12px;
-  background:rgba(255,255,255,0.04);
-  opacity:0; transition:opacity 0.4s ease;
-}
-.popup-mystery-img {
-  width:100%; height:100%; object-fit:cover; object-position:center 20%;
-  display:block;
-  filter:grayscale(1) contrast(1.1) brightness(0.82);
-}
-.popup-mystery-tint {
-  position:absolute; inset:0;
-  mix-blend-mode:color;
-  opacity:0.55; pointer-events:none;
-}
-/* degradado inferior para suavizar la transición con el badge */
-.popup-mystery-frame::after {
-  content:''; position:absolute; inset:0;
-  background:linear-gradient(to bottom, transparent 40%, var(--popup-bg) 100%);
-  pointer-events:none;
-}
 
 .popup-badge {
   display:inline-flex; align-items:center; gap:5px;
@@ -1090,51 +832,6 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 }
 .light .modo-tag.soon { background:rgba(0,0,0,0.06); }
 
-/* ══ POPUP TESORO ══ */
-.treasure-popup-sheet {
-  width:100%; max-width:480px; background:var(--popup-bg);
-  border-radius:26px 26px 0 0; border-top:1px solid var(--border);
-  padding:0 0 env(safe-area-inset-bottom,28px);
-  animation:sheetUp 0.38s cubic-bezier(0.34,1.2,0.64,1);
-  overflow:hidden; transition:background 0.3s;
-}
-.treasure-popup-hero { padding:20px 20px 18px; text-align:center; position:relative; overflow:hidden; }
-.treasure-popup-bg { position:absolute; inset:0; z-index:0; pointer-events:none; }
-.treasure-popup-content { position:relative; z-index:1; }
-.treasure-chest-big {
-  font-size:3rem; margin-bottom:8px;
-  animation:chestBounce 0.6s cubic-bezier(0.34,1.56,0.64,1); display:block;
-}
-@keyframes chestBounce { from{transform:scale(0.5);opacity:0} to{transform:scale(1);opacity:1} }
-.treasure-popup-title { font-family:'Crimson Pro',serif; font-size:1.35rem; font-weight:700; color:var(--text); margin-bottom:4px; }
-.treasure-popup-sub { font-size:0.65rem; color:var(--text-dim); }
-.treasure-rewards { padding:4px 16px 4px; }
-.treasure-reward-title {
-  font-size:0.58rem; font-weight:700; letter-spacing:0.8px;
-  text-transform:uppercase; color:var(--text-dim); margin-bottom:10px; padding:0 4px;
-}
-.treasure-reward-item {
-  display:flex; align-items:center; gap:12px; padding:11px 12px; border-radius:14px;
-  background:rgba(255,255,255,0.04); margin-bottom:7px; border:1px solid var(--border);
-}
-.light .treasure-reward-item { background:rgba(0,0,0,0.04); }
-.reward-icon  { width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; }
-.reward-info  { flex:1; }
-.reward-name  { font-size:0.8rem; font-weight:700; color:var(--text); margin-bottom:2px; }
-.reward-desc  { font-size:0.6rem; color:var(--text-dim); }
-.reward-new   { font-size:0.55rem; font-weight:700; padding:2px 7px; border-radius:20px; background:rgba(76,175,125,0.18); color:var(--green); flex-shrink:0; border:1px solid rgba(76,175,125,0.25); }
-.reward-metros { font-size:0.55rem; font-weight:700; padding:2px 7px; border-radius:20px; background:rgba(255,122,0,0.15); color:var(--orange); flex-shrink:0; }
-.treasure-open-btn {
-  width:calc(100% - 32px); margin:4px 16px 0; padding:13px; border-radius:14px;
-  background:var(--gold); color:#fff; border:none;
-  font-family:'Inter',sans-serif; font-size:0.85rem; font-weight:700;
-  cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;
-  box-shadow:0 4px 16px rgba(212,160,23,0.4); transition:transform 0.15s;
-}
-.treasure-open-btn:active { transform:scale(0.97); }
-.treasure-open-btn.already-opened { background:rgba(255,255,255,0.08); color:var(--text-dim); box-shadow:none; }
-.light .treasure-open-btn.already-opened { background:rgba(0,0,0,0.07); }
-
 /* ══ #scr-home como columna flex ══ */
 #scr-home.active {
   display:flex !important;
@@ -1142,40 +839,6 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   height:calc(100dvh - 72px);
   overflow:hidden;
 }
-
-/* ══ ODÓMETRO ══ */
-.odometro-wrap {
-  margin:10px 14px 0; padding:12px 14px;
-  background:var(--card2,var(--card)); border:1px solid var(--border);
-  border-radius:16px; flex-shrink:0;
-  overflow:hidden;
-  max-height:140px;
-  transition:max-height .5s cubic-bezier(.16,1,.3,1), opacity .4s ease,
-             margin .5s ease, padding .5s ease, border-width .5s ease;
-}
-.odometro-wrap.collapsed {
-  max-height:0; opacity:0;
-  margin-top:0; margin-bottom:0;
-  padding-top:0; padding-bottom:0;
-  border-width:0; pointer-events:none;
-}
-.odometro-top { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:8px; }
-.odometro-label { font-size:0.58rem; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; color:var(--text-dim); }
-.odometro-fraction { font-size:0.68rem; font-weight:700; color:var(--text-soft); }
-.odometro-hoy { font-size:0.9rem; font-weight:800; color:#43DDF8; }
-.odometro-track { height:6px; background:rgba(255,255,255,0.08); border-radius:4px; overflow:visible; position:relative; margin-bottom:6px; }
-.light .odometro-track { background:rgba(0,0,0,0.08); }
-.odometro-fill { height:100%; background:linear-gradient(90deg,#02BBE0,#43DDF8); border-radius:4px; width:0%; transition:width 0.8s cubic-bezier(0.16,1,0.3,1); position:relative; }
-.odometro-fill::after { content:''; position:absolute; right:-4px; top:50%; transform:translateY(-50%); width:10px; height:10px; border-radius:50%; background:#fff; box-shadow:0 0 8px rgba(67,221,248,0.9); transition:box-shadow 0.3s; }
-.odometro-fill.done { background:linear-gradient(90deg,var(--green,#34A853),#6FCFA0); }
-.odometro-fill.done::after { box-shadow:0 0 8px rgba(76,175,125,0.9); }
-.odometro-bottom { display:flex; align-items:center; justify-content:space-between; }
-.odometro-estado { display:flex; align-items:center; gap:5px; font-size:0.62rem; font-weight:600; color:var(--text-dim); }
-.odometro-estado.cumplida { color:var(--green,#34A853); }
-.odo-dot-live { width:6px; height:6px; border-radius:50%; background:var(--orange); flex-shrink:0; animation:odoDotPulse 1.5s ease-in-out infinite; }
-.odometro-estado.cumplida .odo-dot-live { background:var(--green,#34A853); }
-@keyframes odoDotPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(1.5)} }
-.odometro-falta { font-size:0.6rem; color:var(--text-dim); }
 
 /* ══ PREFS META ══ */
 .prefs-section { margin-top:18px; padding-top:16px; border-top:1px solid var(--border); }
@@ -1257,21 +920,6 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 .hub-door-titulo { font-family:'Crimson Pro',serif; font-size:1.45rem; font-weight:700; }
 .hub-door-sub { font-size:0.85rem; color:var(--text-dim); margin-top:2px; }
 .hub-door-arrow { font-size:1.3rem; color:var(--text-dim); flex-shrink:0; }
-
-/* ══ ESFERA NOTIFICACIÓN RECOMPENSA ══ */
-.esfera-notif {
-  position:absolute; top:-8px; right:-8px;
-  width:24px; height:24px; border-radius:50%;
-  background:#C0392B;
-  display:flex; align-items:center; justify-content:center;
-  font-size:11px; cursor:pointer;
-  animation:esferaPulso 1.5s ease-in-out infinite;
-  z-index:10; border:2px solid var(--bg);
-}
-@keyframes esferaPulso {
-  0%,100% { transform:scale(1);   box-shadow:0 0 0 0 rgba(192,57,43,0.4); }
-  50%      { transform:scale(1.1); box-shadow:0 0 0 6px rgba(192,57,43,0); }
-}
 
 /* ── Onboarding Splash ── */
 #ob-splash {
@@ -1737,6 +1385,9 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
       </div>
     </div>
 
+    <!-- Tarjeta "continuar el Misterio en curso" — renderTuCamino la llena/oculta -->
+    <div id="tu-camino-wrap"></div>
+
     <!-- ═══ PUERTAS PRINCIPALES (Sanar · Crecer · El Santuario) ═══ -->
     <div class="hub-elige">Elige tu camino</div>
 
@@ -1870,10 +1521,6 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
       <div class="popup-hero">
         <div class="popup-hero-bg" id="popup-bg"></div>
         <div class="popup-hero-content">
-          <div class="popup-mystery-frame" id="popup-mystery-frame" style="display:none">
-            <img class="popup-mystery-img" id="popup-mystery-img" src="" alt="">
-            <div class="popup-mystery-tint" id="popup-mystery-tint"></div>
-          </div>
           <div class="popup-badge" id="popup-badge"></div>
           <div class="popup-name" id="popup-name"></div>
           <div class="popup-sub"  id="popup-sub"></div>
@@ -1896,27 +1543,6 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     </div>
   </div>
 
-  <!-- POPUP COFRE TESORO -->
-  <div class="popup-overlay" id="treasure-overlay" onclick="if(event.target===this)closeTreasure()">
-    <div class="treasure-popup-sheet">
-      <div class="popup-handle"></div>
-      <div class="treasure-popup-hero">
-        <div class="treasure-popup-bg" id="treasure-bg"></div>
-        <div class="treasure-popup-content">
-          <span class="treasure-chest-big" id="treasure-chest-emoji">🎁</span>
-          <div class="treasure-popup-title" id="treasure-title">¡Bloque completado!</div>
-          <div class="treasure-popup-sub"  id="treasure-sub">Has terminado los Misterios Gozosos</div>
-        </div>
-      </div>
-      <div class="treasure-rewards">
-        <div class="treasure-reward-title">Lo que has desbloqueado</div>
-        <div id="treasure-rewards-list"></div>
-      </div>
-      <button class="treasure-open-btn" id="treasure-btn" onclick="closeTreasure()">
-        ✨ ¡Recibir recompensas!
-      </button>
-    </div>
-  </div>
 
   <!-- ── POPUP META FALLIDA ── -->
   <div class="popup-overlay" id="meta-streak-overlay">
@@ -2422,25 +2048,6 @@ function _showUpgradePrompt(modo) {
 }
 window._showUpgradePrompt = _showUpgradePrompt;
 
-function _showRetiroFreePrompt() {
-  var b = BLOQUES_MAP[0]; var c = b ? b.color : '#FF7A00';
-  document.getElementById('popup-bg').style.background =
-    'radial-gradient(ellipse at 30% 60%,' + c + '35 0%,transparent 60%)';
-  var badge = document.getElementById('popup-badge');
-  if (badge) { badge.textContent = 'Retiros'; badge.style.cssText = 'background:' + c + '22;color:' + c + ';border:1px solid ' + c + '44;'; }
-  var nameEl = document.getElementById('popup-name');
-  if (nameEl) nameEl.textContent = 'Retiros de Sanar';
-  var subEl = document.getElementById('popup-sub');
-  if (subEl) subEl.textContent = 'Espacios de oración para cada nivel';
-  var frameEl = document.getElementById('popup-mystery-frame');
-  if (frameEl) frameEl.style.display = 'none';
-  _injectFreeMotiv(
-    'Este retiro está disponible para ti en modo Premium.',
-    'Espacios de oración para acompañar el duelo, la tristeza, el enojo, el perdón... Momentos para detenerse y dejar que el Rosario sane lo que duele.'
-  );
-  _openPopupSheet();
-}
-window._showRetiroFreePrompt = _showRetiroFreePrompt;
 
 function _injectFreeMotiv(msg, submsg) {
   var sheet = document.querySelector('.popup-sheet');
@@ -2527,53 +2134,6 @@ function _showExtrasComingSoon() {
 }
 window._showExtrasComingSoon = _showExtrasComingSoon;
 
-function _showNivelComingSoon(nivelId) {
-  closeLevelPicker();
-  var nombre = (window.NIVEL_NAMES || {})[nivelId] || ('Nivel ' + nivelId);
-  var mundo = parseInt((nivelId || '0101').slice(0,2), 10);
-  var mundoNombre = ['','Cruz','Emociones','Mente','Corazón','Relaciones','Amor','Tiempo'][mundo] || ('Mundo ' + mundo);
-
-  var badge = document.getElementById('popup-badge');
-  if (badge) { badge.textContent = mundoNombre; badge.style.cssText = 'background:rgba(255,122,0,0.1);color:#FF7A00;border:1px solid rgba(255,122,0,0.3);'; }
-  var nameEl = document.getElementById('popup-name');
-  if (nameEl) nameEl.textContent = nombre;
-  var subEl = document.getElementById('popup-sub');
-  if (subEl) subEl.textContent = 'En desarrollo · Próximamente';
-  var frameEl = document.getElementById('popup-mystery-frame');
-  if (frameEl) frameEl.style.display = 'none';
-  document.getElementById('popup-bg').style.background =
-    'radial-gradient(ellipse at 30% 60%,rgba(255,122,0,0.15) 0%,transparent 60%)';
-
-  ['popup-audio','popup-orar','popup-rezar'].forEach(function(id) {
-    var el = document.getElementById(id); if (el) el.style.display = 'none';
-  });
-  var mt = document.getElementById('popup-modos-title');
-  if (mt) mt.style.display = 'none';
-
-  var sheet = document.querySelector('.popup-sheet');
-  var existing = document.getElementById('popup-free-motiv');
-  if (existing) existing.remove();
-
-  var div = document.createElement('div');
-  div.id = 'popup-free-motiv';
-  div.style.cssText = 'padding:8px 20px 16px;text-align:center;';
-  div.innerHTML =
-    '<div style="font-size:2.5rem;margin-bottom:16px">🚧</div>' +
-    '<p style="font-family:\'Crimson Pro\',Georgia,serif;font-size:26px;' +
-    'line-height:1.65;color:var(--text-soft);font-style:italic;margin-bottom:20px">' +
-    'El nivel <strong style="font-style:normal;color:var(--text)">' + nombre + '</strong> ' +
-    'está en preparación. Pronto podrás continuar tu camino aquí.</p>' +
-    '<button onclick="closePopup();var ex=document.getElementById(\'popup-free-motiv\');' +
-    'if(ex)ex.remove();[\'popup-audio\',\'popup-orar\',\'popup-rezar\'].forEach(function(id)' +
-    '{var el=document.getElementById(id);if(el)el.style.display=\'\'});' +
-    'var mt=document.getElementById(\'popup-modos-title\');if(mt)mt.style.display=\'\';" ' +
-    'style="padding:14px 32px;border-radius:28px;border:1.5px solid var(--border);' +
-    'background:none;color:var(--text-dim);font-family:\'Inter\',sans-serif;' +
-    'font-size:0.9rem;cursor:pointer;">Cerrar</button>';
-  if (sheet) sheet.appendChild(div);
-  _openPopupSheet();
-}
-window._showNivelComingSoon = _showNivelComingSoon;
 
 function showFreeVuelveManana() {
   var el = document.createElement('div');
@@ -2910,11 +2470,11 @@ onAuthStateChanged(auth, async function(user) {
     ]);
     var progreso = (audioSnap && audioSnap.exists()) ? audioSnap.data() : null;
     var bookmark = (bookSnap  && bookSnap.exists())  ? bookSnap.data()  : null;
+    renderTuCamino(bookmark, progreso, user);
   } catch(e) {}
 
   if (user && user.uid) {
     verificarRetiroEnProgreso(user.uid);
-    verificarRecompensas(user.uid);
   }
 });
 
@@ -3036,49 +2596,6 @@ window.abrirModalTaller = function() {
   openModal('modal-taller');
 };
 
-// ── Esferas de recompensa pendiente ─────────────────────────────
-async function verificarRecompensas(uid) {
-  try {
-    const q = query(
-      collection(db, 'users', uid, 'recompensas'),
-      where('vista', '==', false)
-    );
-    const snap = await getDocs(q);
-    if (snap.empty) return;
-
-    var pendientes = [];
-    snap.forEach(function(d) { pendientes.push(d.data().nivelId); });
-    if (pendientes.length > 0) mostrarEsferas(pendientes);
-  } catch(e) {
-    console.warn('[index] recompensas:', e);
-  }
-}
-
-function mostrarEsferas(niveles) {
-  niveles.forEach(function(nivelId) {
-    var nodo = document.querySelector('[data-nivel="' + nivelId + '"]');
-    if (!nodo) return;
-    if (nodo.querySelector('.esfera-notif')) return;
-
-    nodo.style.position = 'relative';
-    var esfera = document.createElement('div');
-    esfera.className = 'esfera-notif';
-    esfera.textContent = '🎁';
-    esfera.title = 'Tienes una recompensa';
-    esfera.onclick = function() {
-      var self = this;
-      self.style.animation = 'none';
-      self.style.transition = 'opacity 0.3s';
-      self.style.opacity = '0';
-      setTimeout(function() {
-        self.remove();
-        location.href = 'world.html';
-      }, 300);
-    };
-    nodo.appendChild(esfera);
-  });
-}
-
 // ── Banner "Tu Camino" ───────────────────────────────────────────
 function renderTuCamino(bookmark, progreso, user) {
   var wrap = document.getElementById('tu-camino-wrap');
@@ -3163,7 +2680,8 @@ function renderTuCamino(bookmark, progreso, user) {
           { merge: true });
       } catch(e) { console.warn('[bookmark]', e); }
       wrap.innerHTML = '';
-      navigateTo('audio.html?nivel=' + progreso.nivel + '&cuaderno=' + progreso.cuaderno + '&misterio=' + progreso.misterio);
+      // Ir al frente: crecer.html resuelve su frontier y abre el popup de selección de modo (ver C2)
+      location.href = 'crecer.html?abrirFrente=1';
     };
   }
 }
@@ -3346,18 +2864,6 @@ async function saveMetrosHoy(added) {
 }
 
 // ── Meta diaria: UI ───────────────────────────────────────────────
-let _odoHideTimer = null;
-function showOdometroTemporarily(ms) {
-  const w = document.getElementById('odometro-wrap');
-  if (!w) return;
-  w.classList.remove('collapsed');
-  clearTimeout(_odoHideTimer);
-  _odoHideTimer = setTimeout(function () {
-    const x = document.getElementById('odometro-wrap');
-    if (x) x.classList.add('collapsed');
-  }, ms || 3700);
-}
-
 function updateOdometro() {
   window.metaMetros = metaMetros;
   const pct      = Math.min((metrosHoy / metaMetros) * 100, 100);
@@ -3541,695 +3047,11 @@ window.navTap = navTap;
 </script>
 
 <script>
-/* ══ DATOS DEL MAPA ══ */
-var BLOQUES_MAP = [
-  { key:'goz', color:'#E8A0A0', name:'Gozosos',  icon_active:'☀️', icon_locked:'⭐',
-    misterios:['Anunciación','Visitación','Natividad','Presentación','Hallazgo'],
-    treasure:{
-      title:'¡Misterios Gozosos!', sub:'Completaste los 5 Misterios Gozosos',
-      rewards:[
-        {icon:'🎵',iconBg:'rgba(212,160,23,0.15)',name:'Canto desbloqueado',desc:'"Ave María" · Misterios Gozosos',tag:'nuevo'},
-        {icon:'👣',iconBg:'rgba(255,122,0,0.15)', name:'+1,000 metros',      desc:'Bonus de bloque completado',  tag:'metros'},
-        {icon:'📜',iconBg:'rgba(76,175,125,0.15)',name:'Estampita Gozosos',  desc:'La Anunciación · Guarda en tu Diario',tag:'nuevo'},
-      ]}},
-  { key:'lum', color:'#01BBE1', name:'Luminosos', icon_active:'💧', icon_locked:'💎',
-    misterios:['Bautismo','Caná','Reino','Transfiguración','Eucaristía'],
-    treasure:{
-      title:'¡Misterios Luminosos!', sub:'Completaste los 5 Misterios Luminosos',
-      rewards:[
-        {icon:'🎵',iconBg:'rgba(1,187,225,0.15)', name:'Canto desbloqueado',desc:'"Salve Regina" · Misterios Luminosos',tag:'nuevo'},
-        {icon:'👣',iconBg:'rgba(255,122,0,0.15)', name:'+1,000 metros',     desc:'Bonus de bloque completado',tag:'metros'},
-        {icon:'🏅',iconBg:'rgba(212,160,23,0.15)',name:'Medalla Luminosos', desc:'Cruz del Bautismo · Para tu colección',tag:'nuevo'},
-      ]}},
-  { key:'dol', color:'#C0392B', name:'Dolorosos', icon_active:'🌹', icon_locked:'🌹',
-    misterios:['Agonía','Azotes','Corona de Espinas','Camino de la Cruz','Crucifixión'],
-    treasure:{
-      title:'¡Misterios Dolorosos!', sub:'Completaste los 5 Misterios Dolorosos',
-      rewards:[
-        {icon:'🎵',iconBg:'rgba(192,57,43,0.15)', name:'Canto desbloqueado',desc:'"Stabat Mater" · Misterios Dolorosos',tag:'nuevo'},
-        {icon:'👣',iconBg:'rgba(255,122,0,0.15)', name:'+1,000 metros',     desc:'Bonus de bloque completado',tag:'metros'},
-      ]}},
-  { key:'glo', color:'#D4A017', name:'Gloriosos', icon_active:'✨', icon_locked:'✨',
-    misterios:['Resurrección','Ascensión','Pentecostés','Asunción','Coronación'],
-    treasure:{
-      title:'¡Misterios Gloriosos!', sub:'Completaste los 5 Misterios Gloriosos',
-      rewards:[
-        {icon:'🎵',iconBg:'rgba(142,68,173,0.15)',name:'Canto desbloqueado',desc:'"Regina Caeli" · Misterios Gloriosos',tag:'nuevo'},
-        {icon:'👣',iconBg:'rgba(255,122,0,0.15)', name:'+1,000 metros',     desc:'Bonus de bloque completado',tag:'metros'},
-        {icon:'🏆',iconBg:'rgba(212,160,23,0.15)',name:'Nivel completado',  desc:'CruzAndo la Cruz · Pecado',tag:'nuevo'},
-      ]}},
-];
 
-window.DONE_COUNT  = 0;
-window.chestState  = ['locked','locked','locked','locked'];
-
-/* ══ LAYOUT ══ */
-var MAP_W      = 375;
-var MAP_CX     = MAP_W / 2;
-var MAP_AMP    = 50;
-var MAP_NODE_H    = 132;
-var MAP_BLOCK_GAP = 260; // espacio extra entre bloques: tesoro + pater sin encimarse con esferas
-var MAP_TOP       = 32;
-var MAP_STEP      = (2 * Math.PI) / 8;
-
-function computeAllPositions(cuaderno) {
-  // Cada cuaderno arranca en una fase distinta del seno para que el mapa se sienta diferente
-  var phaseOff = ((cuaderno || 1) - 1) * 2;
-  var pts = []; var y = MAP_TOP; var gi = 0;
-  BLOQUES_MAP.forEach(function(bloque, bi) {
-    bloque.misterios.forEach(function(_, mi) {
-      var x = MAP_CX + MAP_AMP * Math.sin((gi + phaseOff) * MAP_STEP);
-      pts.push({ type:'misterio', x:x, y:y, bi:bi, mi:mi, globalIdx:gi });
-      y += MAP_NODE_H; gi++;
-    });
-    if (bi < BLOQUES_MAP.length - 1) {
-      var xPrev  = pts[pts.length-1].x;
-      var xNext  = MAP_CX + MAP_AMP * Math.sin((gi + phaseOff) * MAP_STEP);
-      var xChest = (xPrev + xNext) / 2;
-      pts.push({ type:'treasure', x:xChest,            y:y + MAP_BLOCK_GAP * 0.35, bi:bi });
-      pts.push({ type:'pater',    x:(xChest+xNext)/2, y:y + MAP_BLOCK_GAP * 0.65, color:BLOQUES_MAP[bi+1].color });
-      y += MAP_BLOCK_GAP;
-    }
-  });
-  return { pts:pts, totalH:y + 300 };
-}
-
-function _retiroSvg(tipo, color) {
-  if (tipo === 'santuario') {
-    return '<svg class="retiro-node-svg" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-      '<polygon points="26,4 48,26 26,48 4,26" fill="' + color + '" opacity="0.18"/>' +
-      '<polygon points="26,4 48,26 26,48 4,26" fill="none" stroke="' + color + '" stroke-width="2"/>' +
-      '<text x="26" y="31" text-anchor="middle" font-size="16" fill="' + color + '">🕯</text>' +
-      '</svg>';
-  }
-  if (tipo === 'albergue') {
-    return '<svg class="retiro-node-svg" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-      '<polygon points="26,4 46,15 46,37 26,48 6,37 6,15" fill="' + color + '" opacity="0.18"/>' +
-      '<polygon points="26,4 46,15 46,37 26,48 6,37 6,15" fill="none" stroke="' + color + '" stroke-width="2"/>' +
-      '<text x="26" y="31" text-anchor="middle" font-size="16" fill="' + color + '">🚪</text>' +
-      '</svg>';
-  }
-  return '<svg class="retiro-node-svg" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-    '<polygon points="26,4 30,22 48,26 30,30 26,48 22,30 4,26 22,22" fill="' + color + '" opacity="0.18"/>' +
-    '<polygon points="26,4 30,22 48,26 30,30 26,48 22,30 4,26 22,22" fill="none" stroke="' + color + '" stroke-width="2"/>' +
-    '<line x1="26" y1="17" x2="26" y2="35" stroke="' + color + '" stroke-width="2.5" stroke-linecap="round"/>' +
-    '<line x1="17" y1="26" x2="35" y2="26" stroke="' + color + '" stroke-width="2.5" stroke-linecap="round"/>' +
-    '</svg>';
-}
-
-function buildMap() {
-  var canvas = document.getElementById('map-canvas');
-  if (!canvas) return;
-  canvas.innerHTML = '';
-
-  // Nivel anterior (para esfera "Anterior" y espacio extra en el tope)
-  var _bCId    = window.currentNivelId || '0101';
-  var _bOrder  = window.NIVELES_ORDER;
-  var _bIdx    = _bOrder ? _bOrder.indexOf(_bCId) : 0;
-  var _hasPrev = _bIdx > 0;
-  var _mundoColors = ['#FF7A00','#01BBE1','#8E44AD','#C0392B','#27AE60','#E91E8C','#D4A017'];
-
-  // Si hay "Anterior", dar espacio en el tope
-  var _cuad = parseInt(_bCId.substring(2,4), 10);
-  var _mnd  = parseInt(_bCId.substring(0,2), 10);
-
-  var origMapTop = MAP_TOP;
-  if (_hasPrev) MAP_TOP = 200;
-  var res = computeAllPositions(_cuad);
-  MAP_TOP = origMapTop;
-
-  var pts = res.pts; var totalH = res.totalH;
-  canvas.style.height = totalH + 'px';
-  buildBioma(canvas, totalH, _cuad, _mundoColors[_mnd - 1] || '#FF7A00');
-
-  var svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-  svg.setAttribute('viewBox','0 0 ' + MAP_W + ' ' + totalH);
-  svg.setAttribute('width', MAP_W); svg.setAttribute('height', totalH);
-  svg.style.cssText = 'position:absolute;top:0;left:0;z-index:2;pointer-events:none;';
-  canvas.appendChild(svg);
-
-  var mPts = pts.filter(function(p){ return p.type==='misterio'; });
-  drawMapPath(svg, mPts);
-
-  BLOQUES_MAP.forEach(function(bloque, bi) {
-    var fp = pts.find(function(p){ return p.type==='misterio' && p.bi===bi && p.mi===0; });
-    if (!fp) return;
-    var isRight = fp.x > MAP_CX;
-    var lbl = document.createElement('div');
-    lbl.className = 'bloque-section-label';
-    lbl.style.cssText = 'top:' + (fp.y-40) + 'px;' + (isRight ? 'left:12px' : 'right:12px');
-    lbl.innerHTML = '<div class="bloque-pill" style="background:color-mix(in srgb,' + bloque.color + ' 15%,transparent);color:' + bloque.color + ';border:1px solid color-mix(in srgb,' + bloque.color + ' 25%,transparent)"><span>●</span>' + bloque.name + '</div>';
-    canvas.appendChild(lbl);
-  });
-
-  pts.filter(function(p){ return p.type==='pater'; }).forEach(function(p) {
-    var el = document.createElement('div');
-    el.className = 'pater-node';
-    el.style.cssText = 'left:' + p.x + 'px;top:' + p.y + 'px;';
-    el.innerHTML = '<div class="pater-cross"></div>';
-    canvas.appendChild(el);
-  });
-
-  pts.filter(function(p){ return p.type==='treasure'; }).forEach(function(p) {
-    var bloque = BLOQUES_MAP[p.bi];
-    var state  = window.chestState[p.bi];
-    var node   = document.createElement('div');
-    node.className = 'treasure-node' + (state==='locked' ? ' locked' : '');
-    node.style.cssText = 'left:' + p.x + 'px;top:' + p.y + 'px;';
-    var emoji = state==='opened' ? '📦' : state==='locked' ? '🔒' : '🎁';
-    var label = state==='opened' ? 'Abierto' : state==='locked' ? 'Bloqueado' : '¡Abrir!';
-    node.innerHTML = '<div class="treasure-chest ' + state + '">' + emoji + '</div><div class="treasure-label">' + label + '</div>';
-    if (state !== 'locked') {
-      (function(bi, st){ node.onclick = function(){ openTreasure(bi, st); }; })(p.bi, state);
-    }
-    canvas.appendChild(node);
-
-    // — Nodo de retiro junto al cofre (cuaderno bi+2 del mundo actual) —
-    var _retiroNivelId = String(_mnd).padStart(2,'0') + String(p.bi + 2).padStart(2,'0');
-    var retiro = null;
-    for (var ri = 0; ri < RETIROS_MAP.length; ri++) {
-      if (RETIROS_MAP[ri].nivelDesbloqueo === _retiroNivelId) { retiro = RETIROS_MAP[ri]; break; }
-    }
-    if (retiro) {
-      var _frontierIdx  = NIVELES_ORDER.indexOf(window.frontierNivelId || '0101');
-      var _retiroIdx    = NIVELES_ORDER.indexOf(retiro.nivelDesbloqueo);
-      var desbloqueado  = _frontierIdx > _retiroIdx;
-      var offsetX       = (retiro.tipo === 'albergue') ? -80 : 80;
-      var rNode = document.createElement('div');
-      rNode.className = 'retiro-node' + (desbloqueado ? '' : ' bloqueado');
-      var retiroOffsetY = (retiro.tipo === 'albergue') ? -60 : 60;
-      rNode.style.cssText = 'top:' + (p.y + retiroOffsetY) + 'px;left:' + (p.x + offsetX) + 'px;transform:translate(-50%,-50%)';
-      rNode.innerHTML = _retiroSvg(retiro.tipo, retiro.color) +
-        '<span class="retiro-node-label">' + retiro.nombre.replace('Sanando ', '') + '</span>';
-      var _planRetiro = window.effectivePlan ? window.effectivePlan() : 'free';
-      rNode.onclick = (function(slug, desbloq, planR) {
-        return function() {
-          if (window.CZSound) CZSound('beadTap');
-          if (!desbloq || planR === 'free') {
-            _showRetiroFreePrompt();
-          } else {
-            navigateTo('retiros.html?retiro=' + slug);
-          }
-        };
-      })(retiro.slug, desbloqueado, _planRetiro);
-      canvas.appendChild(rNode);
-    }
-  });
-
-  var activeDrawn = false;
-  var _plan = window.effectivePlan ? window.effectivePlan() : 'free';
-  var _isFree = (_plan === 'free');
-
-  // Para Free: el único misterio activo es el que marca freeProgress
-  var _freeActiveGi = -1;
-  if (_isFree && window._freeProg) {
-    var _fp    = window._freeProg;
-    var _fpNId = _fp.nivelId || '0101';
-    var _cNId  = window.currentNivelId || '0101';
-    if (_fpNId === _cNId) {
-      _freeActiveGi = (_fp.misterio || 1) - 1; // globalIdx es 0-based
-    }
-  }
-
-  mPts.forEach(function(pt) {
-    var gi = pt.globalIdx; var bi = pt.bi; var mi = pt.mi;
-    var bloque = BLOQUES_MAP[bi]; var nombre = bloque.misterios[mi];
-
-    var isDone, isActive, isLocked;
-    if (_isFree) {
-      isDone   = (gi < _freeActiveGi);  // nodos pasados se ven como done
-      isActive = (gi === _freeActiveGi);
-      isLocked = false;                 // nunca ocultar — todos visibles
-    } else {
-      var doneCount = window.DONE_COUNT;
-      isDone   = gi < doneCount;
-      isActive = gi === doneCount;
-      isLocked = gi > doneCount;
-    }
-
-    var node = document.createElement('div');
-    node.className = 'map-node' + (isLocked ? ' locked' : '');
-    node.style.cssText = 'left:' + pt.x + 'px;top:' + pt.y + 'px;';
-
-    var badgeHtml='', sphereClass='node-sphere', sphereStyle='', iconHtml='';
-    var labelColor = isLocked ? 'var(--text-dim)' : 'var(--text-soft)';
-
-    if (isDone) {
-      sphereClass += ' done';
-      sphereStyle = 'background:radial-gradient(circle at 35% 30%,' + bloque.color + 'ff,' + bloque.color + '88);border-color:' + bloque.color + '88;--nc:' + bloque.color + '66;box-shadow:0 4px 14px ' + bloque.color + '55,inset 0 -3px 0 rgba(0,0,0,0.3);';
-      iconHtml = '<div class="node-icon"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>';
-      labelColor = 'var(--text-dim)';
-    } else if (isActive) {
-      sphereClass += ' active xl';
-      sphereStyle = 'background:radial-gradient(circle at 35% 30%,' + bloque.color + 'ff,' + bloque.color + '99);border-color:' + bloque.color + ';--nc:' + bloque.color + '88;box-shadow:0 6px 22px ' + bloque.color + '66,inset 0 -4px 0 rgba(0,0,0,0.35);';
-      iconHtml = '<div class="node-icon" style="font-size:2.8rem">' + bloque.icon_active + '</div>';
-      badgeHtml = '<div class="node-badge">CONTINUAR</div>';
-    } else {
-      sphereClass += ' locked';
-      iconHtml = '<div class="node-icon" style="font-size:2.6rem;opacity:0.3">' + bloque.icon_locked + '</div>';
-    }
-
-    node.innerHTML = badgeHtml +
-      '<div class="' + sphereClass + '" style="' + sphereStyle + '">' + iconHtml + '</div>' +
-      '<div class="node-label"><div class="node-label-name" style="color:' + labelColor + '">' + nombre + '</div></div>';
-
-    (function(gi,bi,mi){ node.onclick = function(){ if(window.CZSound) CZSound('beadTap'); openMapPopup(gi,bi,mi); }; })(gi,bi,mi);
-    canvas.appendChild(node);
-
-    if (isActive && !activeDrawn) {
-      activeDrawn = true;
-      var isRight = pt.x > MAP_CX;
-      var lux = document.createElement('div');
-      lux.className = 'lux-companion';
-      lux.style.cssText = (isRight ? 'right:16px' : 'left:16px') + ';top:' + (pt.y-78) + 'px;';
-      lux.innerHTML = '<div class="lux-bubble">¡Sigue, peregrino! ✝</div>' +
-        '<svg viewBox="0 0 100 100" width="36" height="36" xmlns="http://www.w3.org/2000/svg">' +
-        '<defs><filter id="lxf"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>' +
-        '<g filter="url(#lxf)"><rect x="46.2" y="0.3" width="7.6" height="99.4" fill="#FFFCF7"/><rect x="0" y="46.2" width="100" height="7.6" fill="#FFFCF7"/></g></svg>';
-      canvas.appendChild(lux);
-    }
-  });
-
-  // ── Esfera "Siguiente nivel" ──────────────────────────────────────
-  var _cId    = window.currentNivelId || '0101';
-  var _cOrder = window.NIVELES_ORDER;
-  var _cIdx2  = _cOrder ? _cOrder.indexOf(_cId) : -1;
-  var _nextId = (_cIdx2 >= 0 && _cIdx2 < _cOrder.length - 1) ? _cOrder[_cIdx2 + 1] : null;
-
-  if (_nextId && mPts.length > 0) {
-    var _lastPt  = mPts[mPts.length - 1];
-    var _nextY   = _lastPt.y + 200;
-    var _nextX   = MAP_CX;
-
-    // ¿Ya lo alcanzó el usuario? (frontera de progreso, no solo bookmark)
-    var _nextIdx2      = _cOrder.indexOf(_nextId);
-    var _frontierIdx   = _cOrder ? _cOrder.indexOf(window.frontierNivelId || _cId) : _cIdx2;
-    var _accessible    = _nextIdx2 <= _frontierIdx || window.DONE_COUNT >= 20;
-
-    var _nextName  = (window.NIVEL_NAMES && window.NIVEL_NAMES[_nextId]) || _nextId;
-    var _nMundo    = parseInt(_nextId.substring(0, 2), 10);
-    var _mundoColors = ['#FF7A00','#01BBE1','#8E44AD','#C0392B','#27AE60','#E91E8C','#D4A017'];
-    var _nc        = _mundoColors[_nMundo - 1] || '#FF7A00';
-
-    var _nextNode = document.createElement('div');
-    _nextNode.className = 'map-node' + (_accessible ? '' : ' locked');
-    _nextNode.style.cssText = 'left:' + _nextX + 'px;top:' + _nextY + 'px;';
-
-    var _sStyle = _accessible
-      ? 'background:radial-gradient(circle at 35% 30%,' + _nc + 'ee,' + _nc + '77);border-color:' + _nc + '55;--nc:' + _nc + '88;'
-      : 'background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.08);opacity:0.4;';
-
-    _nextNode.innerHTML =
-      '<div class="node-sphere xl" style="' + _sStyle + '">' +
-        '<div class="node-icon" style="font-size:2.4rem">' + (_accessible ? '→' : '🔒') + '</div>' +
-      '</div>' +
-      '<div class="node-label">' +
-        '<div class="node-label-name" style="color:' + (_accessible ? _nc : 'var(--text-dim)') + ';font-size:0.75rem;font-weight:800;letter-spacing:0.4px">Siguiente</div>' +
-        '<div style="font-size:0.58rem;color:var(--text-dim);text-align:center;max-width:120px;margin-top:3px;line-height:1.3">' + _nextName + '</div>' +
-      '</div>';
-
-    if (_accessible) {
-      _nextNode.onclick = (function(id) {
-        return function() { if (window.selectNivel) window.selectNivel(id); };
-      })(_nextId);
-    }
-    canvas.appendChild(_nextNode);
-  }
-
-  // ── Esfera "Anterior nivel" ───────────────────────────────────────
-  if (_hasPrev && mPts.length > 0) {
-    var _prevId   = _bOrder[_bIdx - 1];
-    var _prevName = (window.NIVEL_NAMES && window.NIVEL_NAMES[_prevId]) || _prevId;
-    var _pMundo   = parseInt(_prevId.substring(0,2), 10);
-    var _pc       = _mundoColors[_pMundo - 1] || '#FF7A00';
-    var _prevNode = document.createElement('div');
-    _prevNode.className = 'map-node';
-    _prevNode.style.cssText = 'left:' + MAP_CX + 'px;top:90px;';
-    _prevNode.innerHTML =
-      '<div class="node-sphere xl" style="background:radial-gradient(circle at 35% 30%,' + _pc + 'ee,' + _pc + '77);border-color:' + _pc + '55;--nc:' + _pc + '88;">' +
-        '<div class="node-icon" style="font-size:2.4rem">←</div>' +
-      '</div>' +
-      '<div class="node-label">' +
-        '<div class="node-label-name" style="color:' + _pc + ';font-size:0.75rem;font-weight:800;letter-spacing:0.4px">Anterior</div>' +
-        '<div style="font-size:0.58rem;color:var(--text-dim);text-align:center;max-width:120px;margin-top:3px;line-height:1.3">' + _prevName + '</div>' +
-      '</div>';
-    _prevNode.onclick = (function(id) {
-      return function() { if (window.selectNivel) window.selectNivel(id); };
-    })(_prevId);
-    canvas.appendChild(_prevNode);
-  }
-
-  setTimeout(function() {
-    var ap = mPts.find(function(p){ return p.globalIdx === window.DONE_COUNT; });
-    if (ap) {
-      var scroll = document.getElementById('map-scroll');
-      if (scroll) scroll.scrollTo({ top: Math.max(0, ap.y - 200), behavior:'smooth' });
-    }
-  }, 350);
-}
-
-function drawMapPath(svg, mPts) {
-  function buildD(points) {
-    var d = 'M ' + points[0].x + ' ' + points[0].y;
-    for (var i=1; i<points.length; i++) {
-      d += ' L ' + points[i].x + ' ' + points[i].y;
-    }
-    return d;
-  }
-
-  // Camino base completo (pendiente)
-  var base = document.createElementNS('http://www.w3.org/2000/svg','path');
-  base.setAttribute('d', buildD(mPts));
-  base.setAttribute('fill','none');
-  base.setAttribute('stroke','rgba(255,255,255,0.07)');
-  base.setAttribute('stroke-width','30');
-  base.setAttribute('stroke-linecap','round');
-  svg.appendChild(base);
-
-  // Segmentos completados por bloque (encima del camino base)
-  BLOQUES_MAP.forEach(function(bloque, bi) {
-    var start=bi*5, done=Math.max(0,Math.min(window.DONE_COUNT-start,5));
-    if (done<=0) return;
-    var pts=mPts.slice(start, start+done+1);
-    if (pts.length<2) return;
-    var line=document.createElementNS('http://www.w3.org/2000/svg','path');
-    line.setAttribute('d', buildD(pts));
-    line.setAttribute('fill','none');
-    line.setAttribute('stroke',bloque.color);
-    line.setAttribute('stroke-width','30');
-    line.setAttribute('stroke-linecap','round');
-    line.setAttribute('opacity','0.35');
-    svg.appendChild(line);
-  });
-}
-
-function buildBioma(canvas, totalH, cuaderno, color) {
-  var c = color || '#FF7A00';
-  var idx = Math.max(0, Math.min(3, (cuaderno || 1) - 1));
-  // 4 patrones de gradiente distintos según cuaderno
-  var GRAD = [
-    // X-1: esquinas diagonales
-    'radial-gradient(ellipse at 10% 8%,'  + c + '32 0%,transparent 40%),' +
-    'radial-gradient(ellipse at 88% 28%,' + c + '20 0%,transparent 35%),' +
-    'radial-gradient(ellipse at 18% 62%,' + c + '18 0%,transparent 38%),' +
-    'radial-gradient(ellipse at 78% 88%,' + c + '16 0%,transparent 35%)',
-    // X-2: flujo diagonal descendente
-    'radial-gradient(ellipse at 30% 5%,'  + c + '28 0%,transparent 38%),' +
-    'radial-gradient(ellipse at 65% 35%,' + c + '24 0%,transparent 40%),' +
-    'radial-gradient(ellipse at 35% 65%,' + c + '20 0%,transparent 36%),' +
-    'radial-gradient(ellipse at 72% 92%,' + c + '26 0%,transparent 42%)',
-    // X-3: centrado vertical
-    'radial-gradient(ellipse at 50% 10%,' + c + '30 0%,transparent 44%),' +
-    'radial-gradient(ellipse at 50% 48%,' + c + '16 0%,transparent 48%),' +
-    'radial-gradient(ellipse at 15% 78%,' + c + '18 0%,transparent 34%),' +
-    'radial-gradient(ellipse at 85% 78%,' + c + '18 0%,transparent 34%)',
-    // X-4: disperso asimétrico
-    'radial-gradient(ellipse at 72% 4%,'  + c + '28 0%,transparent 36%),' +
-    'radial-gradient(ellipse at 28% 33%,' + c + '22 0%,transparent 40%),' +
-    'radial-gradient(ellipse at 82% 62%,' + c + '20 0%,transparent 38%),' +
-    'radial-gradient(ellipse at 22% 90%,' + c + '26 0%,transparent 42%)',
-  ];
-  // Frecuencias de ruido distintas por cuaderno
-  var FREQ = ['0.65','0.38','0.20','0.82'];
-
-  var bg = document.createElement('div');
-  bg.id = 'bioma-bg';
-  bg.style.cssText = 'position:absolute;inset:0;z-index:0;transition:background 0.4s;background:' + GRAD[idx] + ',var(--map-bg,#0E0602);';
-  canvas.appendChild(bg);
-
-  // Textura CSS de puntos — costo de render cero vs. feTurbulence
-  var noise = document.createElement('div');
-  noise.style.cssText = 'position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0.06;' +
-    'background-image:radial-gradient(circle,rgba(255,255,255,0.8) 1px,transparent 1px);' +
-    'background-size:18px 18px;';
-  canvas.appendChild(noise);
-}
-
-/* ══ POPUP MISTERIO ══ */
-var IMG_BASE_IDX = 'https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev/';
-
-function openMapPopup(gi, bi, mi) {
-  var _plan = window.effectivePlan ? window.effectivePlan() : 'free';
-  var _isFree = (_plan === 'free');
-
-  // ── Calcular si este misterio es el actual del Free ──
-  var _isFreeActive = false;
-  if (_isFree && window._freeProg) {
-    var _fp    = window._freeProg;
-    var _fpNId = _fp.nivelId || '0101';
-    var _fpM   = _fp.misterio || 1;
-    var _nId2  = window.currentNivelId || '0101';
-    _isFreeActive = (_nId2 === _fpNId && (gi + 1) === _fpM);
-  }
-
-  if (_isFree && (window.currentNivelId || '0101') === '0102') _showFree0102Info();
-
-  var b=BLOQUES_MAP[bi], c=b.color;
-  document.getElementById('popup-bg').style.background='radial-gradient(ellipse at 30% 60%,' + c + '35 0%,transparent 60%)';
-  var badge=document.getElementById('popup-badge');
-  badge.textContent=b.name;
-  badge.style.cssText='background:' + c + '22;color:' + c + ';border:1px solid ' + c + '44;';
-  document.getElementById('popup-name').textContent=b.misterios[mi];
-  document.getElementById('popup-sub').textContent='Misterio ' + (gi+1) + ' de 20 · ' + (gi < window.DONE_COUNT ? 'Completado ✓' : 'Pendiente');
-
-  // Imagen del misterio con filtro duotono
-  var cId  = window.currentNivelId || '0101';
-  var niv  = parseInt(cId.substring(0,2), 10);
-  var cuad = parseInt(cId.substring(2,4), 10);
-  var imgUrl = IMG_BASE_IDX + 'P_' + niv + '_' + cuad + '_' + (gi+1) + '.webp';
-  var frameEl = document.getElementById('popup-mystery-frame');
-  var imgEl   = document.getElementById('popup-mystery-img');
-  var tintEl  = document.getElementById('popup-mystery-tint');
-  if (frameEl && imgEl) {
-    frameEl.style.display = 'none';
-    frameEl.style.opacity = '0';
-    imgEl.onload  = function() {
-      frameEl.style.display = '';
-      setTimeout(function() { frameEl.style.opacity = '1'; }, 260);
-    };
-    imgEl.onerror = function() { frameEl.style.display = 'none'; };
-    imgEl.src = imgUrl;
-  }
-  if (tintEl) tintEl.style.background = c;
-
-  var _nId = window.currentNivelId || '0101';
-  var _niv = parseInt(_nId.substring(0,2), 10);
-  var _cuad = parseInt(_nId.substring(2,4), 10);
-  var _mis = gi + 1; // misterio 1-20
-  var _plan = effectivePlan ? effectivePlan() : 'free';
-
-  document.getElementById('popup-audio').onclick = function() {
-    var plan = window.effectivePlan ? window.effectivePlan() : 'free';
-    if (plan === 'free') {
-      var fp    = window._freeProg || {};
-      var fpNId = fp.nivelId || '0101';
-      var fpM   = fp.misterio || 1;
-      if (_nId !== fpNId || _mis !== fpM) {
-        _showUpgradePrompt('Audio');
-        return;
-      }
-      if (fp.completedToday) {
-        window.showFreeVuelveManana && window.showFreeVuelveManana();
-        return;
-      }
-    }
-    closePopup();
-    if (window.navigateTo) window.navigateTo('audio.html?nivel=' + _niv + '&cuaderno=' + _cuad + '&misterio=' + _mis);
-  };
-
-  document.getElementById('popup-orar').onclick = function() {
-    if (!canAccessModo('libro', _plan, _nId)) { _showUpgradePrompt('Libro'); return; }
-    closePopup();
-    if (window.navigateTo) window.navigateTo('orar.html?c=' + _nId + '&misterio=' + _mis);
-  };
-
-  document.getElementById('popup-rezar').onclick = function() {
-    if (!canAccessModo('rezar', _plan, _nId)) { _showUpgradePrompt('Rezo'); return; }
-    closePopup();
-    irARezar(_nId, _mis);
-  };
-
-  // Indicador visual en botones bloqueados
-  var _libroAllowed = canAccessModo ? canAccessModo('libro', _plan, _nId) : true;
-  var _rezarAllowed = canAccessModo ? canAccessModo('rezar', _plan, _nId) : true;
-  var _popupOrar  = document.getElementById('popup-orar');
-  var _popupRezar = document.getElementById('popup-rezar');
-  if (_popupOrar) {
-    _popupOrar.style.opacity = _libroAllowed ? '' : '0.45';
-    var _lockOrar = _popupOrar.querySelector('.modo-lock') || document.createElement('span');
-    _lockOrar.className   = 'modo-lock';
-    _lockOrar.textContent = _libroAllowed ? '' : '🔒';
-    _lockOrar.style.cssText = 'font-size:0.75rem;margin-left:auto;';
-    if (!_libroAllowed && !_popupOrar.querySelector('.modo-lock')) _popupOrar.appendChild(_lockOrar);
-    if (_libroAllowed) { var _ex = _popupOrar.querySelector('.modo-lock'); if (_ex) _ex.remove(); }
-  }
-  if (_popupRezar) {
-    _popupRezar.style.opacity = _rezarAllowed ? '' : '0.45';
-    var _lockRezar = _popupRezar.querySelector('.modo-lock') || document.createElement('span');
-    _lockRezar.className   = 'modo-lock';
-    _lockRezar.textContent = _rezarAllowed ? '' : '🔒';
-    _lockRezar.style.cssText = 'font-size:0.75rem;margin-left:auto;';
-    if (!_rezarAllowed && !_popupRezar.querySelector('.modo-lock')) _popupRezar.appendChild(_lockRezar);
-    if (_rezarAllowed) { var _ex2 = _popupRezar.querySelector('.modo-lock'); if (_ex2) _ex2.remove(); }
-  }
-
-  // Indicador visual en botón Audio para Free
-  var _planAudio = window.effectivePlan ? window.effectivePlan() : 'free';
-  if (_planAudio === 'free') {
-    var _fpA    = window._freeProg || {};
-    var _isMio  = (_nId === (_fpA.nivelId || '0101') && _mis === (_fpA.misterio || 1));
-    var _audioBtn = document.getElementById('popup-audio');
-    if (_audioBtn) {
-      _audioBtn.style.opacity       = _isMio ? '' : '0.35';
-      _audioBtn.style.pointerEvents = _isMio ? '' : 'none';
-      var _lockAudio = _audioBtn.querySelector('.modo-lock') || document.createElement('span');
-      _lockAudio.className    = 'modo-lock';
-      _lockAudio.textContent  = _isMio ? '' : '🔒';
-      _lockAudio.style.cssText = 'font-size:0.75rem;margin-left:auto;';
-      if (!_isMio && !_audioBtn.querySelector('.modo-lock')) _audioBtn.appendChild(_lockAudio);
-      if (_isMio)  { var _exA = _audioBtn.querySelector('.modo-lock'); if (_exA) _exA.remove(); }
-    }
-  } else {
-    // Para planes superiores: restaurar apariencia por si se cambió el plan
-    var _audioBtnR = document.getElementById('popup-audio');
-    if (_audioBtnR) {
-      _audioBtnR.style.opacity = '';
-      _audioBtnR.style.pointerEvents = '';
-      var _exAR = _audioBtnR.querySelector('.modo-lock'); if (_exAR) _exAR.remove();
-    }
-  }
-
-  // Ocultar descripciones si el usuario ya pasó 1-1-5
-  var _showDesc = (_nId === '0101' && _mis <= 5);
-  document.querySelectorAll('.popup-modo .modo-desc').forEach(function(el) {
-    el.style.display = _showDesc ? '' : 'none';
-  });
-
-  // ── Para Free: controlar visibilidad de botones según nivel ──
-  var _existingMotiv = document.getElementById('popup-free-motiv');
-  if (_existingMotiv) _existingMotiv.remove();
-
-  var _audioBtn    = document.getElementById('popup-audio');
-  var _orarBtn     = document.getElementById('popup-orar');
-  var _rezarBtn    = document.getElementById('popup-rezar');
-  var _modasTitle  = document.getElementById('popup-modos-title');
-  var _nivelIdPopup = window.currentNivelId || '0101';
-
-  // Limpiar chips Premium previos
-  [_orarBtn, _rezarBtn].forEach(function(btn) {
-    if (!btn) return;
-    var ch = btn.querySelector('.premium-chip'); if (ch) ch.remove();
-    btn.style.opacity = ''; btn.style.pointerEvents = '';
-  });
-
-  if (_isFree && _nivelIdPopup === '0101') {
-    // Nivel 0101: Free tiene acceso completo
-    if (_audioBtn)   _audioBtn.style.display   = '';
-    if (_orarBtn)    _orarBtn.style.display     = '';
-    if (_rezarBtn)   _rezarBtn.style.display    = '';
-    if (_modasTitle) _modasTitle.style.display  = '';
-
-  } else if (_isFree && !_isFreeActive) {
-    // 0102+: no es su misterio del día — ocultar todo
-    if (_audioBtn)   _audioBtn.style.display   = 'none';
-    if (_orarBtn)    _orarBtn.style.display     = 'none';
-    if (_rezarBtn)   _rezarBtn.style.display    = 'none';
-    if (_modasTitle) _modasTitle.style.display  = 'none';
-    _injectFreeMotiv(
-      'Con Premium puedes orar todos los Misterios que desees cada día, en modo Audio, Libro o Rezo, sin límites.',
-      null
-    );
-
-  } else if (_isFree && _isFreeActive) {
-    // 0102+: es su misterio del día — audio libre, libro/rezar con chip Premium
-    if (_audioBtn)   _audioBtn.style.display   = '';
-    if (_modasTitle) _modasTitle.style.display  = '';
-    if (_orarBtn) {
-      _orarBtn.style.display = '';
-      _orarBtn.style.opacity = '0.45';
-      _orarBtn.style.pointerEvents = 'none';
-      var _chipO = document.createElement('span');
-      _chipO.className = 'premium-chip'; _chipO.textContent = 'Premium';
-      _orarBtn.appendChild(_chipO);
-    }
-    if (_rezarBtn) {
-      _rezarBtn.style.display = '';
-      _rezarBtn.style.opacity = '0.45';
-      _rezarBtn.style.pointerEvents = 'none';
-      var _chipR = document.createElement('span');
-      _chipR.className = 'premium-chip'; _chipR.textContent = 'Premium';
-      _rezarBtn.appendChild(_chipR);
-    }
-
-  } else {
-    // Premium / beta / developer: mostrar todo
-    if (_audioBtn)   _audioBtn.style.display   = '';
-    if (_orarBtn)    _orarBtn.style.display     = '';
-    if (_rezarBtn)   _rezarBtn.style.display    = '';
-    if (_modasTitle) _modasTitle.style.display  = '';
-  }
-
-  _openPopupSheet();
-}
 function closePopup() {
   var sheet = document.querySelector('.popup-sheet');
   if (sheet) sheet.style.transform = '';
   document.getElementById('popup-overlay').classList.remove('open');
-}
-
-function _openFreeMotivPopup(gi, bi, mi, freeActiveGi) {
-  var b      = BLOQUES_MAP[bi];
-  var c      = b.color;
-  var nombre = b.misterios[mi];
-  var isPast = (freeActiveGi >= 0 && gi < freeActiveGi);
-
-  document.getElementById('popup-bg').style.background =
-    'radial-gradient(ellipse at 30% 60%,' + c + '35 0%,transparent 60%)';
-  var badge = document.getElementById('popup-badge');
-  badge.textContent = b.name;
-  badge.style.cssText = 'background:' + c + '22;color:' + c + ';border:1px solid ' + c + '44;';
-  document.getElementById('popup-name').textContent = nombre;
-  document.getElementById('popup-sub').textContent  =
-    isPast ? 'Misterio completado ✓' : 'Misterio bloqueado';
-
-  document.getElementById('popup-audio').style.display = 'none';
-  document.getElementById('popup-orar').style.display  = 'none';
-  document.getElementById('popup-rezar').style.display = 'none';
-  var title = document.querySelector('.popup-modos-title');
-  if (title) title.style.display = 'none';
-
-  var sheet = document.querySelector('.popup-sheet');
-  var existing = document.getElementById('popup-free-motiv');
-  if (existing) existing.remove();
-
-  var msg = isPast
-    ? '¿Añoras volver a orar este Misterio con mayor profundidad? Con Premium puedes regresar a cualquier sesión pasada en modo Audio, Libro o Rezo.'
-    : 'Con Premium puedes orar todos los Misterios que desees cada día, en modo Audio, Libro o Rezo, sin límites.';
-
-  var motivDiv = document.createElement('div');
-  motivDiv.id  = 'popup-free-motiv';
-  motivDiv.style.cssText = 'padding:20px 20px 8px;';
-  motivDiv.innerHTML =
-    '<p style="font-family:\'Crimson Pro\',Georgia,serif;font-size:19px;' +
-    'line-height:1.7;color:var(--text-soft);margin-bottom:20px;font-style:italic;">' +
-    msg + '</p>' +
-    '<button onclick="window._goToFreeActiveMisterio()" ' +
-    'style="width:100%;padding:16px;border-radius:14px;border:none;' +
-    'background:var(--brand);color:#fff;font-family:\'Cormorant Garamond\',serif;' +
-    'font-size:1.3rem;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent;">' +
-    'Ir a mi Misterio actual →' +
-    '</button>';
-  if (sheet) sheet.appendChild(motivDiv);
-
-  var overlay = document.getElementById('popup-overlay');
-  var s = document.querySelector('.popup-sheet');
-  if (s) { s.style.transition = 'none'; s.style.transform = 'translateY(100%)'; }
-  if (overlay) overlay.classList.add('open');
-  requestAnimationFrame(function() {
-    requestAnimationFrame(function() {
-      if (s) { s.style.transition = ''; s.style.transform = ''; }
-    });
-  });
 }
 
 window._goToFreeActiveMisterio = function() {
@@ -4279,34 +3101,6 @@ window._goToFreeActiveMisterio = function() {
   }, { passive: true });
 })();
 
-/* ══ POPUP COFRE ══ */
-function openTreasure(bi, state) {
-  if (window.CZSound) CZSound('chestOpen');
-  var b=BLOQUES_MAP[bi], c=b.color, t=b.treasure;
-  document.getElementById('treasure-bg').style.background='radial-gradient(ellipse at 50% 60%,' + c + '30 0%,transparent 65%)';
-  document.getElementById('treasure-chest-emoji').textContent = state==='opened' ? '📦' : '🎁';
-  document.getElementById('treasure-title').textContent = state==='opened' ? 'Ya abriste este cofre' : t.title;
-  document.getElementById('treasure-sub').textContent = t.sub;
-  var list=document.getElementById('treasure-rewards-list');
-  list.innerHTML = t.rewards.map(function(r){
-    return '<div class="treasure-reward-item">' +
-      '<div class="reward-icon" style="background:' + r.iconBg + '">' + r.icon + '</div>' +
-      '<div class="reward-info"><div class="reward-name">' + r.name + '</div><div class="reward-desc">' + r.desc + '</div></div>' +
-      (r.tag==='nuevo' ? '<div class="reward-new">✦ Nuevo</div>' : '<div class="reward-metros">+1,000m</div>') +
-      '</div>';
-  }).join('');
-  var btn=document.getElementById('treasure-btn');
-  if (state==='opened') {
-    btn.textContent='Ya está abierto'; btn.classList.add('already-opened');
-  } else {
-    btn.textContent='✨ ¡Recibir recompensas!'; btn.classList.remove('already-opened');
-    btn.onclick=function(){
-      if (window.CZSound) CZSound('blockClear'); window.chestState[bi]='opened'; closeTreasure(); buildMap();
-    };
-  }
-  document.getElementById('treasure-overlay').classList.add('open');
-}
-function closeTreasure() { document.getElementById('treasure-overlay').classList.remove('open'); }
 
 /* ══ DRAWER ══ */
 function openDrawer() {
@@ -4319,7 +3113,6 @@ function closeDrawer() {
   document.getElementById('drawer-overlay').classList.remove('open');
 }
 
-window.buildMap      = buildMap;
 window.openDrawer    = openDrawer;
 window.closeDrawer   = closeDrawer;
 
@@ -4417,7 +3210,6 @@ function _obCerrarSplash() {
 }
 window._obCerrarSplash = _obCerrarSplash;
 window.closePopup    = closePopup;
-window.closeTreasure = closeTreasure;
 
 function _showFree0102Info() {
   var flag = 'cruzando_free_0102_shown';
@@ -4531,8 +3323,6 @@ window._setViewAs = function(simulatedPlan) {
 
   // Re-renderizar con plan simulado
   if (window._refreshHome) window._refreshHome();
-  if (window.buildLevelPicker) window.buildLevelPicker();
-  if (window.buildMap) window.buildMap();
 };
 
 /* ══ CATÁLOGO DE RETIROS ══ */
@@ -4574,144 +3364,6 @@ var MUNDOS_DATA = [
   { id:7, name:'Tiempo',     color:'#D4A017' },
 ];
 
-function buildLevelPicker() {
-  var scroll = document.getElementById('level-picker-scroll');
-  if (!scroll) return;
-  var cId   = window.currentNivelId || '0101';
-  var frontierIdForPicker = window.frontierNivelId || cId;
-  var cIdx  = NIVELES_ORDER.indexOf(frontierIdForPicker);
-  var names = window.NIVEL_NAMES || {};
-  scroll.innerHTML = '';
-
-  MUNDOS_DATA.forEach(function(m, mi) {
-    var group = document.createElement('div');
-    group.className = 'nivel-mundo-group';
-
-    var lbl = document.createElement('div');
-    lbl.className = 'nivel-mundo-label';
-    lbl.style.color = m.color;
-    lbl.textContent = m.name;
-    group.appendChild(lbl);
-
-    var orbsRow = document.createElement('div');
-    orbsRow.className = 'nivel-orbs';
-
-    for (var c = 1; c <= 4; c++) {
-      var nid    = String(m.id).padStart(2,'0') + String(c).padStart(2,'0');
-      var idx    = NIVELES_ORDER.indexOf(nid);
-      var isActive   = nid === cId;
-      var isUnlocked = idx <= cIdx;
-
-      var orb = document.createElement('div');
-      orb.className = 'nivel-orb' + (!isUnlocked ? ' locked' : '') + (isActive ? ' active' : '');
-      orb.setAttribute('data-nivel', nid);
-      if (isUnlocked) {
-        orb.style.cssText =
-          'background:radial-gradient(circle at 35% 30%,' + m.color + 'ee,' + m.color + '77);' +
-          'border-color:' + m.color + '55;' +
-          '--mc:' + m.color + ';';
-      }
-
-      var full = names[nid] || '';
-      var sub  = full.indexOf(': ') !== -1 ? full.split(': ')[1] : '';
-
-      var numEl = document.createElement('div');
-      numEl.className = 'nivel-orb-num';
-      numEl.textContent = m.id + '-' + c;
-      orb.appendChild(numEl);
-
-      if (sub) {
-        var subEl = document.createElement('div');
-        subEl.className = 'nivel-orb-sub';
-        subEl.textContent = sub;
-        orb.appendChild(subEl);
-      }
-
-      if (isUnlocked) {
-        orb.onclick = (function(id) { return function() { selectNivel(id); }; })(nid);
-      }
-      orbsRow.appendChild(orb);
-    }
-
-    group.appendChild(orbsRow);
-    scroll.appendChild(group);
-
-    // Scroll al mundo actual al abrir
-    if (mi === parseInt(cId.substring(0, 2), 10) - 1) {
-      setTimeout(function(el) { return function() {
-        el.scrollIntoView({ behavior:'instant', block:'nearest', inline:'start' });
-      }; }(group), 0);
-    }
-  });
-}
-
-function openLevelPicker() {
-  buildLevelPicker();
-  var p  = document.getElementById('level-picker');
-  var ch = document.getElementById('unit-picker-chevron');
-  if (p)  p.classList.add('open');
-  if (ch) ch.style.transform = 'rotate(180deg)';
-}
-
-function closeLevelPicker() {
-  var p  = document.getElementById('level-picker');
-  var ch = document.getElementById('unit-picker-chevron');
-  if (p)  p.classList.remove('open');
-  if (ch) ch.style.transform = '';
-}
-
-function toggleLevelPicker() {
-  var p = document.getElementById('level-picker');
-  if (!p) return;
-  if (p.classList.contains('open')) closeLevelPicker();
-  else openLevelPicker();
-}
-
-function playOrbSelect() {
-  try {
-    var ac = new (window.AudioContext || window.webkitAudioContext)();
-    var now = ac.currentTime;
-    var master = ac.createGain();
-    master.gain.setValueAtTime(0.09, now);
-    master.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
-    master.connect(ac.destination);
-    [[880, 0], [1108, 0.065]].forEach(function(pair) {
-      var o = ac.createOscillator(), g = ac.createGain();
-      o.type = 'sine'; o.frequency.value = pair[0];
-      g.gain.value = 1; o.connect(g); g.connect(master);
-      o.start(now + pair[1]); o.stop(now + 0.35);
-    });
-  } catch(e) {}
-}
-
-function selectNivel(id) {
-  playOrbSelect();
-
-  // ── Aviso si el nivel está en desarrollo ──────────────────
-  var st   = (window.NIVEL_STATUS || {})[id] || 'published';
-  var plan = window.effectivePlan ? window.effectivePlan() : 'free';
-  if (plan !== 'developer' && (st === 'dev' || st === 'empty')) {
-    _showNivelComingSoon(id);
-    return;
-  }
-
-  closeLevelPicker();
-  window.currentNivelId = id;
-  try { localStorage.setItem('cruzando_current_nivel', id); } catch(e) {}
-  window._firestoreProgress = null; // limpiar mientras carga
-  if (window._fetchProgressForNivel) {
-    window._fetchProgressForNivel(id).then(function() {
-      if (window._refreshHome) window._refreshHome();
-    });
-  } else if (window._refreshHome) {
-    window._refreshHome();
-  }
-}
-
-window.toggleLevelPicker = toggleLevelPicker;
-window.openLevelPicker   = openLevelPicker;
-window.closeLevelPicker  = closeLevelPicker;
-window.selectNivel       = selectNivel;
 
 /* ══ META DEL DÍA — funciones llamadas desde HTML ══ */
 function onMetaSliderChange(val) {

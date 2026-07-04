@@ -8,7 +8,15 @@
       "PowerShell(python -m py_compile \"c:\\\\Users\\\\Usuario\\\\Desktop\\\\cruzando-app\\\\data\\\\lrc_sync_maker.py\")",
       "PowerShell(if \\($?\\) { \"OK: compila sin errores\" })",
       "Bash(git mv *)",
-      "Bash(grep -n \"return { pts:pts, totalH:y + 300 };\" crecer.html)"
+      "Bash(grep -n \"return { pts:pts, totalH:y + 300 };\" crecer.html)",
+      "Bash(grep -c '^function buildMap\\(\\) {$' index.html)",
+      "Bash(grep -c '^function closePopup\\(\\) {$' index.html)",
+      "Bash(grep -c '^var BLOQUES_MAP = \\\\[$' index.html)",
+      "Bash(grep -c '^function _retiroSvg\\(tipo, color\\) {$' index.html)",
+      "Bash(awk '/^function buildMap\\\\\\(\\\\\\) \\\\{$/{f=1} f{c++} /^function closePopup\\\\\\(\\\\\\) \\\\{$/{print c-1; exit}' index.html)",
+      "Bash(awk -F: '$1>1429')",
+      "Bash(awk '/popup-mystery-frame\" id=/{f=1} f{c++; print NR\": \"$0} /^          <\\\\/div>$/ && f{exit}' index.html)",
+      "Bash(awk '/popup-overlay\" id=\"treasure-overlay\"/{f=1} f{c++} /^  <\\\\/div>$/ && f{print \"lineas:\"c; exit}' index.html)"
     ]
   }
 }
