@@ -121,6 +121,9 @@ h1{font-family:'Crimson Pro',serif;font-weight:600;font-size:19px;margin-top:6px
 .pdot{width:20px;height:3px;border-radius:2px;background:rgba(243,234,216,.25);transition:background .3s}
 .pdot.done{background:var(--soft)} .pdot.active{background:var(--gold)}
 
+.advance-chip{position:absolute;left:50%;bottom:106px;transform:translateX(-50%);z-index:18;display:none;align-items:center;gap:10px;padding:8px 10px 8px 14px;border-radius:22px;background:rgba(8,9,16,.62);backdrop-filter:blur(6px);border:1px solid rgba(231,119,119,.45);font-size:11.5px;color:var(--parch)}
+.advance-chip.show{display:flex}
+.advance-chip button{background:var(--gold-deep);color:#1a1305;border:none;border-radius:14px;padding:6px 12px;font-weight:600;cursor:pointer;font-size:12px;font-family:'Inter',sans-serif}
 .hidden{display:none!important}
 .note{font-size:11px;opacity:.55;max-width:372px;text-align:center;line-height:1.6}
 </style>
@@ -171,6 +174,7 @@ h1{font-family:'Crimson Pro',serif;font-weight:600;font-size:19px;margin-top:6px
         <div class="hero-sub" id="pSub">El cuerpo de Dios</div>
       </div>
       <div class="beads-col hidden" id="beadsCol"></div>
+      <div class="advance-chip" id="advanceChip"><span id="advanceMsg"></span><button id="advanceBtn">Avanzar →</button></div>
       <div class="toolbar" id="playerToolbar">
         <button class="tb-btn play-main" id="ppBtn"><div class="tb-circle"><svg id="ppIc" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div></button>
         <button class="tb-btn" id="secBtn"><div class="tb-circle"><svg id="secIc" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg></div><span id="secLbl">Texto</span></button>
@@ -221,7 +225,7 @@ const R2_AUD  = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev';
 const MID = '2_1_1';
 
 const URLS = {
-  hero:   `${R2_ILU}/${MID}.webp`,
+  hero:   `${R2_ILU}/P_${MID}.webp`,
   cantoImg: id => `${R2_ILU}/cantos/${MID}/P_${MID}${id}.webp`,   // P_2_1_1a.webp
   cantoAudio: `${R2_MUS}/m4a/M_${MID}.m4a`,
   cantoLrc:   `${R2_MUS}/lrc/M_${MID}.lrc`,
@@ -245,7 +249,7 @@ function renderDiag(){
     return `<div class="diag-row"><span>${d.label}</span><span class="${cls}">${mark} ${d.extra||''}</span></div>`;
   }).join('');
 }
-['0201.json','M_2_1_1.lrc','bead_sync.json','hero 2_1_1.webp','canto audio','ubible','cont','rezo MA','pray'].forEach((l,i)=>diag('k'+i,l));
+['0201.json','M_2_1_1.lrc','bead_sync.json','hero P_2_1_1.webp','canto audio','ubible','cont','rezo MA','pray'].forEach((l,i)=>diag('k'+i,l));
 function probeImg(url,key){const im=new Image();im.onload=()=>diagSet(key,true);im.onerror=()=>diagSet(key,false,'404');im.src=url;}
 function probeAudio(url,key){const a=new Audio();a.oncanplaythrough=()=>diagSet(key,true);a.onloadedmetadata=()=>diagSet(key,true);a.onerror=()=>diagSet(key,false,'404/CORS');a.src=url;}
 probeImg(URLS.hero,'k3');
@@ -388,6 +392,7 @@ function startCanto(fromEpilogue){
   $('skipBtn').classList.toggle('show', epilogueMode);   // epílogo: skip desde 0
   audio.src=URLS.cantoAudio; audio.load(); cur=0; curCut=-1;curLine=-1;
   audio.onended=()=>{ if(epilogueMode)backToEpilogue(); else advanceFromCanto(); };
+  audio.onerror=()=>{ $('skipBtn').classList.add('show'); };
   audio.currentTime=0; cantoPlay();
 }
 $('skipBtn').onclick=()=>{ cantoPause(); if(epilogueMode)backToEpilogue(); else advanceFromCanto(); };
@@ -402,7 +407,7 @@ const STEPS=[
 ];
 let stepIdx=-1, playing=false;
 
-function advanceFromCanto(){ stepIdx=-1; goStep(0); }
+function advanceFromCanto(){ cantoPause(); stepIdx=-1; goStep(0); }
 function goStep(i){
   if(i>=STEPS.length){ goEpilogue(); return; }
   stepIdx=i; const s=STEPS[i];
@@ -420,9 +425,9 @@ function goStep(i){
   $('beadsCol').classList.toggle('hidden', !s.beads);
   if(s.beads) renderBeadsCol();
   // audio
-  audio.src=s.url(); audio.load(); _updateSyncKey(s.url());
+  audio.src=s.url(); audio.load(); _updateSyncKey(s.url()); hideAdvance();
   audio.onended=()=>{ goStep(stepIdx+1); };
-  audio.onerror=()=>{ /* en mockup, si falta, avanza igual tras breve */ };
+  audio.onerror=()=>{ showAdvance('Audio aún no generado'); };
   playing=true; setPP(true); audio.currentTime=0; audio.play().catch(()=>{});
   audio.ontimeupdate=()=>{ if(s.beads)_tickBeads(); };
 }
@@ -431,8 +436,11 @@ $('ppBtn').onclick=()=>{ playing=!playing; if(playing){audio.play();}else{audio.
 $('secBtn').onclick=()=>{
   const s=STEPS[stepIdx];
   if(s.sec==='escribir'){ openDiary(); }
-  else { const t=s.txt(); openText(t.ref,t.body, s.sec==='amen'?'Amén':'Continuar', ()=>{ closeText(); }); }
+  else { const t=s.txt(); openText(t.ref,t.body, s.sec==='amen'?'Amén':'Continuar', ()=>{ goStep(stepIdx+1); }); }
 };
+function showAdvance(msg){ $('advanceMsg').textContent=msg||''; $('advanceChip').classList.add('show'); }
+function hideAdvance(){ $('advanceChip').classList.remove('show'); }
+$('advanceBtn').onclick=()=>{ hideAdvance(); goStep(stepIdx+1); };
 
 /* progreso */
 function updateProgress(){
@@ -484,8 +492,8 @@ $('diaryClose').onclick=()=>$('diaryPop').classList.remove('show');
 $('diarySave').onclick=()=>{ /* TODO: guardar en diario.html real */ $('diaryPop').classList.remove('show'); };
 
 /* ═══════════ EPÍLOGO ═══════════ */
-function goEpilogue(){ audio.pause(); playing=false; showMoment('epilogue'); $('stills').classList.add('hidden'); $('hero').classList.remove('hidden'); updateProgress(); }
-function backToEpilogue(){ epilogueMode=false; goEpilogue(); }
+function goEpilogue(){ audio.pause(); playing=false; hideAdvance(); showMoment('epilogue'); $('stills').classList.add('hidden'); $('hero').classList.remove('hidden'); updateProgress(); }
+function backToEpilogue(){ cantoPause(); epilogueMode=false; goEpilogue(); }
 $('epiCanto').onclick=()=>startCanto(true);
 $('epiDiario').onclick=openDiary;
 $('epiSalir').onclick=()=>{ /* TODO: marca 'completado' + consume crédito → volver a sanar.html */ alert('Sesión concluida → aquí se marca «completado» y se vuelve a sanar.html'); };
