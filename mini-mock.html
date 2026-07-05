@@ -226,7 +226,8 @@ h1{font-family:'Crimson Pro',serif;font-weight:600;font-size:19px;margin-top:6px
       <button class="sg-btn" id="startBtn" disabled>Preparando…</button>
     </div>
 
-    <audio id="audio" crossorigin="anonymous"></audio>
+    <!-- sin crossorigin: igual que audio.html (new Audio); R2 no envía cabeceras CORS y el atributo rompía la reproducción -->
+    <audio id="audio"></audio>
   </div>
 </div>
 
