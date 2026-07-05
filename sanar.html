@@ -533,7 +533,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   function renderElenco(){
     var v = $('view');
     v.innerHTML =
-      '<div class="s-hero"><h1>¿Qué estás cruzando?</h1></div>'+
+      '<div class="s-hero"><h1>¿Cómo estás hoy?</h1></div>'+
       '<div class="modes">'+
         modeBtn('navegar','Navegar','<path d="M4 6h16M4 12h16M4 18h10"/>')+
         modeBtn('buscar','Escríbelo','<circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/>')+
@@ -580,31 +580,39 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
         // match contra slugs de tags (nunca se muestran en la UI)
         return (p.tags||[]).some(function(t){ return norm(t).indexOf(q) !== -1; });
       });
-      box.innerHTML = hits.length ? hits.map(function(p){ return painCard(p,'flat'); }).join('') : '<div class="empty">Nada por aquí con esas palabras.<br>Prueba con otra forma de nombrarlo.</div>';
+      if (!hits.length) { box.innerHTML = '<div class="empty">Nada por aquí con esas palabras.<br>Prueba con otra forma de nombrarlo.</div>'; return; }
+      renderWheel(hits, '');
       return;
     }
 
     if (estado.modo === 'ejes') {
-      if (!estado.ejeActivo) { box.innerHTML = '<div class="empty">Elige un eje arriba para ver sus dolores.</div>'; return; }
+      if (!estado.ejeActivo) { box.innerHTML = '<div class="empty">Elige un tema</div>'; return; }
       var ids = (INDEX.porEje && INDEX.porEje[estado.ejeActivo]) || [];
-      box.innerHTML = ids.map(function(id){ return painById[id]; }).filter(Boolean).map(function(p){ return painCard(p,'flat'); }).join('') || '<div class="empty">Sin dolores en este eje.</div>';
+      var ps = ids.map(function(id){ return painById[id]; }).filter(Boolean);
+      if (!ps.length) { box.innerHTML = '<div class="empty">Sin dolores en este eje.</div>'; return; }
+      renderWheel(ps, '');
       return;
     }
 
-    // navegar: elenco inmersivo (wheel 3D) con la lista completa de pains
+    // navegar: elenco completo
+    renderWheel(pains, 'Desliza y elige');
+  }
+
+  // Todos los modos pintan sus resultados en el mismo wheel 3D
+  function renderWheel(list, hint){
+    var box = $('elenco-list'); if (!box) return;
     box.innerHTML =
-      '<div class="wheel-hint">Desliza y elige lo que hoy te cruza</div>'+
+      (hint ? '<div class="wheel-hint">'+esc(hint)+'</div>' : '')+
       '<div class="wheel" id="wheel"><div class="wheel-pad"></div>'+
-        pains.map(function(p){ return painCard(p,'wheel'); }).join('')+
+        list.map(function(p){ return painCard(p); }).join('')+
       '<div class="wheel-pad"></div></div>';
     setupWheel();
   }
 
-  function painCard(p, mode){
+  function painCard(p){
     var e = ejeData(p.ejePrincipal);
-    var oc = (mode === 'wheel') ? 'onWheelTap(this,\''+p.id+'\')' : 'pickPain(\''+p.id+'\')';
     // La tarjeta muestra SOLO la frase + color/label del eje. Nunca los tags.
-    return '<button class="pain-card" data-id="'+p.id+'" style="--_eje:'+e.color+'" onclick="'+oc+'">'+
+    return '<button class="pain-card" data-id="'+p.id+'" style="--_eje:'+e.color+'" onclick="onWheelTap(this,\''+p.id+'\')">'+
       esc(p.texto)+
       '<span class="pain-eje">'+ejeSVG(p.ejePrincipal)+esc(e.label)+'</span>'+
       '</button>';
