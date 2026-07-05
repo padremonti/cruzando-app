@@ -34,6 +34,7 @@ h1{font-family:'Crimson Pro',serif;font-weight:600;font-size:19px;margin-top:6px
 .kb{position:absolute;inset:-2%;background-size:cover;background-position:center;will-change:transform}
 .kb.run{animation:kenburns var(--kbdur,15s) ease-out forwards}
 @keyframes kenburns{from{transform:scale(1) translate(0,0)}to{transform:scale(var(--kbz,1.09)) translate(var(--kbx,0),var(--kby,0))}}
+@media (prefers-reduced-motion: reduce){ .kb.run{animation:none!important} .lay{transition-duration:.001ms!important} }
 .hero-bg{position:absolute;inset:0;background-size:cover;background-position:center}
 .scrim{position:absolute;inset:0;z-index:2;pointer-events:none;
   background:linear-gradient(180deg,rgba(6,7,14,.55) 0%,rgba(6,7,14,0) 24%,rgba(6,7,14,0) 40%,rgba(6,7,14,.7) 78%,rgba(6,7,14,.96) 100%)}
@@ -242,7 +243,7 @@ const MID = '2_1_1';
 
 const URLS = {
   hero:   `${R2_ILU}/P_${MID}.webp`,
-  cantoImg: id => `${R2_ILU}/cantos/${MID}/P_${MID}${String(id).replace(/^\d+/,'')}.webp`,   // still id '1a' → letra 'a' → P_2_1_1a.webp
+  cantoImg: letra => `${R2_ILU}/cantos/${MID}/P_${MID}${letra}.webp`,   // P_2_1_1a.webp — letra: a,b,c…
   cantoAudio: `${R2_MUS}/m4a/M_${MID}.m4a`,
   cantoLrc:   `${R2_MUS}/lrc/M_${MID}.lrc`,
   ubible: `${R2_AUD}/ubible/UBIBLE_${MID}.mp3`,
@@ -360,30 +361,45 @@ function parseLrc(text){
 const $=id=>document.getElementById(id);
 const screen=$('screen'),track=$('track'),audio=$('audio');
 const layA=$('layA'),layB=$('layB'),kbA=$('kbA'),kbB=$('kbB');
-let DATA=null,DURATION=0,lyricEvents=[],cutEvents=[];
-let cur=0,cantoPlaying=false,raf=0,frontA=true,curCut=-1,curLine=-1;
+const reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+const CANTO_LETTERS='abcdefghi'.split('');   // máx 9 imágenes por Misterio
+const FALLBACK_SEC=6;                         // sin duración de audio → avanza imagen cada X s
+let DATA=null,lyricEvents=[];
+let imgLetters=[], imgDurEach=15;             // letras detectadas (3-9) y duración por imagen
+let cur=0,cantoPlaying=false,raf=0,frontA=true,curImgIdx=-1,curLine=-1;
 let skipShownAt=20, epilogueMode=false;
 
-function cantoBg(id){ return `url('${URLS.cantoImg(id)}')`; }
+function cantoBg(letra){ return `url('${URLS.cantoImg(letra)}')`; }
 function initCanto(){
   DATA=parseLrc(LRC_TEXT);
-  lyricEvents=DATA.events.filter(e=>e.text);
-  cutEvents=DATA.events.filter(e=>e.cut!=null);
+  lyricEvents=DATA.events.filter(e=>e.text);   // el .lrc solo aporta letra/tiempos; stills/cut NO alimentan el fondo
   track.innerHTML='';
   lyricEvents.forEach(e=>{const d=document.createElement('div');d.className='ly';d.textContent=e.text;track.appendChild(d);});
-  curCut=-1;curLine=-1;
+  curImgIdx=-1;curLine=-1;
 }
-function showCut(N,fx){
-  const st=DATA.stills[N]; if(!st)return;
+/* Detección invisible del nº de imágenes: precarga a,b,c… hasta el primer 404 (máx 9), sin pintar nada roto */
+function detectCantoImages(){
+  imgLetters=[]; curImgIdx=-1;
+  let i=0;
+  (function probe(){
+    if(i>=CANTO_LETTERS.length) return;                 // tope de 9
+    const letra=CANTO_LETTERS[i];
+    const im=new Image();
+    im.onload=()=>{ imgLetters.push(letra); if(imgLetters.length===1 && curImgIdx<0){ curImgIdx=0; showImg(0); } i++; probe(); };
+    im.onerror=()=>{};                                   // primer 404 → fin del conjunto de este Misterio
+    im.src=URLS.cantoImg(letra);
+  })();
+}
+/* Muestra la imagen real del índice (a,b,c…) con Ken Burns variado por índice; cross-fade de dos capas */
+function showImg(idx){
+  const letra=imgLetters[idx]; if(!letra)return;
   const inLayer=frontA?layB:layA, inKb=frontA?kbB:kbA, outLayer=frontA?layA:layB;
-  fx=fx||{}; let zoom=1.09,durS=15,xfMs=1100;
-  const dirs=[['-3%','-2%'],['3%','-3%'],['-2%','3%'],['2%','2%']]; let pan=dirs[N%dirs.length];
-  if(fx.kb==='slow'){durS*=1.9;} else if(fx.kb==='hold'){zoom=1.025;pan=['0%','0%'];durS*=1.4;} else if(fx.kb==='in'){zoom+=0.05;pan=['0%','0%'];}
-  if(fx.fade==='long'){xfMs*=2.2;}
-  inKb.style.background=cantoBg(st.id);inKb.style.backgroundSize='cover';inKb.style.backgroundPosition='center';
+  const dirs=[['-3%','-2%'],['3%','-3%'],['-2%','3%'],['2%','2%']];
+  let pan=dirs[idx%dirs.length], zoom=(idx%2===0)?1.09:1.06, durS=Math.max(8,imgDurEach);
+  if(reduceMotion){ zoom=1; pan=['0%','0%']; }
+  inKb.style.background=cantoBg(letra);inKb.style.backgroundSize='cover';inKb.style.backgroundPosition='center';
   inKb.style.setProperty('--kbz',zoom);inKb.style.setProperty('--kbx',pan[0]);inKb.style.setProperty('--kby',pan[1]);
-  inKb.style.animationDuration=durS+'s'; inKb.classList.remove('run');void inKb.offsetWidth;inKb.classList.add('run');
-  inLayer.style.transitionDuration=xfMs+'ms';outLayer.style.transitionDuration=xfMs+'ms';
+  inKb.style.animationDuration=durS+'s'; inKb.classList.remove('run');void inKb.offsetWidth; if(!reduceMotion) inKb.classList.add('run');
   inLayer.classList.add('front');outLayer.classList.remove('front'); frontA=!frontA;
 }
 function setActiveLine(idx){
@@ -392,8 +408,16 @@ function setActiveLine(idx){
   if(idx>=0&&kids[idx]){const el=kids[idx];const anchor=$('lyrics').clientHeight*0.42;const y=el.offsetTop+el.offsetHeight/2;track.style.transform=`translateY(${anchor-y}px)`;}
 }
 function cantoRender(){
-  let cIdx=-1;for(let i=0;i<cutEvents.length;i++){if(cutEvents[i].t<=cur)cIdx=i;else break;}
-  if(cIdx>=0&&cutEvents[cIdx].cut!==curCut){curCut=cutEvents[cIdx].cut;showCut(curCut,cutEvents[cIdx].fx);}
+  // Fondo: reparto uniforme de imágenes por tiempo (procedimental, sin [stills]/[cut])
+  const N=imgLetters.length;
+  if(N>0){
+    const dur=audio.duration;
+    const seg=(dur>0&&isFinite(dur)) ? dur/N : FALLBACK_SEC;   // sin duración → fallback temporal
+    imgDurEach=seg;
+    const idx=Math.min(N-1, Math.max(0, Math.floor(cur/seg)));
+    if(idx!==curImgIdx){ curImgIdx=idx; showImg(idx); }
+  }
+  // Karaoke (letra) — sin cambios
   let lIdx=-1;for(let i=0;i<lyricEvents.length;i++){if(lyricEvents[i].t<=cur)lIdx=i;else break;}
   if(lIdx!==curLine){curLine=lIdx;setActiveLine(lIdx);}
   if(!epilogueMode && cur>=skipShownAt) $('skipBtn').classList.add('show');
@@ -411,7 +435,9 @@ function startCanto(fromEpilogue){
   showMoment('canto');
   $('stills').classList.remove('hidden'); $('hero').classList.add('hidden');
   $('skipBtn').classList.toggle('show', epilogueMode);   // epílogo: skip desde 0
-  audio.src=URLS.cantoAudio; audio.load(); cur=0; curCut=-1;curLine=-1;
+  cur=0; curImgIdx=-1; curLine=-1; frontA=true;
+  detectCantoImages();                                    // precarga a..i para el reparto uniforme por tiempo
+  audio.src=URLS.cantoAudio; audio.load();
   audio.onended=()=>{ if(epilogueMode)backToEpilogue(); else advanceFromCanto(); };
   audio.onerror=()=>{ const er=audio.error; console.warn('[canto] audio error → code', er&&er.code, '·', er&&er.message, '(code 4 suele ser CORS: probar quitar crossorigin del #audio)'); $('skipBtn').classList.add('show'); };
   audio.currentTime=0; cantoPlay();
