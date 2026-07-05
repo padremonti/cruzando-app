@@ -194,7 +194,8 @@ body {
 .ho-kicker { font-size:0.72rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--orange-soft); margin-bottom:10px; }
 .ho-title { font-family:'Crimson Pro',Georgia,serif; font-weight:700; font-size:1.7rem; margin-bottom:8px; }
 .ho-mal { color:var(--text-soft); font-size:0.95rem; font-style:italic; }
-.ho-ecos { list-style:none; margin:18px 0 4px; }
+.ho-ecos-intro { margin:18px 0 6px; font-size:0.72rem; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; color:var(--text-dim); }
+.ho-ecos { list-style:none; margin:0 0 4px; }
 .ho-ecos li { color:var(--text-soft); font-size:0.9rem; padding:6px 0; border-top:1px solid var(--border); }
 .ho-ecos li:first-child { border-top:none; }
 
@@ -912,12 +913,12 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 
     v.innerHTML =
       '<div class="ho-card">'+
-        '<div class="ho-kicker">Tu puerta de hoy</div>'+
+        '<div class="ho-kicker">El Misterio que estás cruzando</div>'+
         '<div class="ho-title">'+esc(m.titulo)+'</div>'+
         '<div class="ho-mal">'+esc(m.mal||'')+'</div>'+
-        (ecos.length ? '<ul class="ho-ecos">'+ecos.map(function(e){ return '<li>'+esc(e)+'</li>'; }).join('')+'</ul>' : '')+
+        (ecos.length ? '<div class="ho-ecos-intro">Lo que trajiste hoy</div><ul class="ho-ecos">'+ecos.map(function(e){ return '<li>'+esc(e)+'</li>'; }).join('')+'</ul>' : '')+
       '</div>'+
-      '<button class="btn-primary" onclick="irMini()">Entrar a la mini sesión</button>'+
+      '<button class="btn-primary" onclick="irMini()">Entrar al Misterio</button>'+
       '<button class="btn-ghost" onclick="volverElenco()">Elegir otro dolor</button>';
   }
 
