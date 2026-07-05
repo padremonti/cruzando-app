@@ -897,9 +897,6 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 .hub-door-arrow { font-size:1.3rem; color:var(--hub-cyan); flex-shrink:0; transition:transform .3s; }
 .hub-door.open .hub-door-arrow { transform:rotate(90deg); }
 .hub-reveal { max-height:0; overflow:hidden; transition:max-height .38s ease; margin:0 16px; }
-.hub-reveal.open { max-height:320px; }
-#rv-crecer.open { max-height:360px; }
-#rv-santuario.open { max-height:340px; }
 #rv-santuario .banner-retiro { margin:2px 0 10px; }
 #rv-santuario .banner-retiro-btn { background:var(--orange); }
 .hub-reveal-link {
@@ -2586,7 +2583,14 @@ window.activarSenalTaller = function(retiro) {
     if (sbBtn) sbBtn.onclick = function() { window.retomarRetiro(slug); };
     sb.style.display = '';
   }
+  _remedirSantuario();
 };
+
+// Si el panel de Santuario está abierto y su contenido cambió de alto, re-mide.
+function _remedirSantuario() {
+  var r = document.getElementById('rv-santuario');
+  if (r && r.classList.contains('open')) r.style.maxHeight = r.scrollHeight + 'px';
+}
 
 function _limpiarSenalTaller() {
   window._tallerEnProgreso = null;
@@ -2597,6 +2601,7 @@ function _limpiarSenalTaller() {
   }
   var sb = document.getElementById('santuario-banner');
   if (sb) sb.style.display = 'none';
+  _remedirSantuario();
 }
 
 window.abrirSanar = function(btn) {
@@ -3084,8 +3089,15 @@ function revHub(which){
   Object.keys(map).forEach(function(k){
     var d=document.getElementById(map[k][0]), r=document.getElementById(map[k][1]);
     if(!d||!r) return;
-    if(k===which){ d.classList.toggle('open'); r.classList.toggle('open'); }
-    else { d.classList.remove('open'); r.classList.remove('open'); }
+    if(k===which){
+      d.classList.toggle('open');
+      var abrir = r.classList.toggle('open');
+      r.style.maxHeight = abrir ? (r.scrollHeight + 'px') : '';
+    }
+    else {
+      d.classList.remove('open');
+      if(r.classList.contains('open')){ r.classList.remove('open'); r.style.maxHeight = ''; }
+    }
   });
 }
 window.revHub = revHub;
