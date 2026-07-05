@@ -1,53 +1,956 @@
-<!-- sanar.html — Micro (pain → acogida → oración) · PLACEHOLDER
-     Stub temporal: la puerta "Sanar" del hub/nav apunta aquí. -->
-<!-- TODO: sección micro (pain→acogida→oración); reemplazar placeholder -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- sanar.html — Micro (pain → acogida → mini sesión)
+     Bloque A: andamiaje. Máquina de 3 fases (elenco → acogida → handoff).
+     Piloto sobre ELEMENTO = '0101'. Acogida usa por ahora el fallback de
+     tiles de texto; los 6 renderers reales llegan en el Bloque B. -->
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Sanar · CruzAndo</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<link rel="icon" type="image/png" href="/icon-192.png">
+<link rel="shortcut icon" href="/icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1A0E04">
 <link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
+<meta name="apple-mobile-web-app-title" content="CruzAndo">
+<meta name="description" content="Sanar — entra por lo que estás cruzando. Un dolor te abre la puerta a un Misterio del Rosario.">
+<title>Sanar · CruzAndo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600;700&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg:#0E0602; --bg2:#1A0F06; --card:#1E1206; --border:rgba(255,122,0,0.14);
-    --text:#F5E9DC; --text-dim:rgba(245,233,220,0.55); --orange:#FF7A00; --brand:#01BBE1;
-  }
-  body.light {
-    --bg:#FBF5EE; --bg2:#F3E9DC; --card:#FFF7EF; --border:rgba(255,122,0,0.18);
-    --text:#2B1A0E; --text-dim:rgba(43,26,14,0.55);
-  }
-  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  body {
-    margin:0; min-height:100vh; background:var(--bg); color:var(--text);
-    font-family:'Inter',system-ui,sans-serif;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    padding:32px 24px; text-align:center; transition:background .3s,color .3s;
-  }
-  .cruz { width:44px; height:44px; margin-bottom:22px; }
-  .titulo { font-family:'Crimson Pro',Georgia,serif; font-size:2rem; font-weight:700; margin:0 0 8px; }
-  .sub { font-size:1rem; color:var(--text-dim); max-width:340px; line-height:1.6; margin:0 0 6px; }
-  .chip {
-    margin:18px 0 30px; padding:6px 14px; border-radius:20px;
-    background:rgba(255,122,0,0.12); color:var(--orange);
-    font-size:0.78rem; font-weight:700; letter-spacing:0.4px;
-  }
-  .btn {
-    padding:14px 26px; border-radius:16px; border:none; cursor:pointer;
-    background:var(--orange); color:#fff; font-weight:700; font-size:0.92rem;
-    font-family:'Inter',sans-serif;
-  }
-  .btn:active { opacity:0.9; }
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+
+/* ── Tokens reales del hub (teal/cian) — copiados de index.html ── */
+:root {
+  --bg:        #002931;
+  --bg-rgb:    0,41,49;
+  --bg2:       #001E25;
+  --card:      #004C5B;
+  --card2:     #003845;
+  --border:    rgba(67,221,248,0.15);
+  --text:      #F0E6DA;
+  --text-soft: #C4A882;
+  --text-dim:  #7A5C40;
+  --orange:    #FF7A00;
+  --orange-soft:#F69C49;
+  --orange-dim: rgba(255,122,0,0.12);
+  --brand:     #02BBE0;
+  --brand-soft:#43DDF8;
+  --brand-ultra:rgba(2,187,224,0.12);
+  --hub-cyan:  #02BBE0;
+  --nav-bg:    rgba(0,41,49,0.97);
+  --popup-bg:  #003845;
+  --shadow:    rgba(0,0,0,0.5);
+}
+.light {
+  --bg:        #E6DED3;
+  --bg-rgb:    230,222,211;
+  --bg2:       #D9CFC4;
+  --card:      #FFFCF7;
+  --card2:     #F5EDE4;
+  --border:    #D0C4B8;
+  --text:      #2B1A0E;
+  --text-soft: #6B5040;
+  --text-dim:  #9B8878;
+  --orange-dim: rgba(255,122,0,0.08);
+  --brand:     #02BBE0;
+  --brand-soft:#43DDF8;
+  --brand-ultra:rgba(2,187,224,0.10);
+  --hub-cyan:  #0389A6;
+  --nav-bg:    rgba(237,228,216,0.97);
+  --popup-bg:  #F5EDE4;
+  --shadow:    rgba(0,0,0,0.15);
+}
+
+html { font-size:18px; }
+body {
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--bg); color:var(--text);
+  line-height:1.6; min-height:100dvh;
+  -webkit-font-smoothing:antialiased;
+  transition:background 0.35s, color 0.35s;
+}
+.shell {
+  max-width:480px; margin:0 auto; min-height:100dvh;
+  position:relative; padding:0 20px 96px;
+}
+
+/* ── Cabecera ── */
+.s-top {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:18px 0 10px; position:sticky; top:0; z-index:20;
+  background:linear-gradient(180deg, var(--bg) 78%, transparent);
+}
+.s-back, .s-theme {
+  width:40px; height:40px; border-radius:12px; border:1px solid var(--border);
+  background:var(--card); color:var(--text);
+  display:flex; align-items:center; justify-content:center; cursor:pointer;
+}
+.s-back svg, .s-theme svg { width:20px; height:20px; }
+.s-title { font-family:'Crimson Pro',Georgia,serif; font-weight:700; font-size:1.15rem; letter-spacing:0.2px; }
+
+.s-hero { margin:6px 0 18px; }
+.s-hero h1 { font-family:'Crimson Pro',Georgia,serif; font-weight:700; font-size:1.7rem; margin-bottom:4px; }
+.s-hero p { color:var(--text-soft); font-size:0.92rem; max-width:340px; }
+
+/* ── Selector de modo ── */
+.modes { display:flex; gap:8px; margin-bottom:14px; }
+.mode-btn {
+  flex:1; display:flex; align-items:center; justify-content:center; gap:6px;
+  padding:10px 6px; min-height:44px; border-radius:13px; cursor:pointer;
+  background:var(--card2); border:1px solid var(--border); color:var(--text-soft);
+  font-family:inherit; font-size:0.8rem; font-weight:600;
+  transition:background .2s, color .2s, border-color .2s;
+}
+.mode-btn svg { width:16px; height:16px; }
+.mode-btn.active { background:var(--brand-ultra); border-color:var(--brand); color:var(--brand-soft); }
+
+/* ── Buscador ── */
+.search-wrap { position:relative; margin-bottom:16px; }
+.search-wrap svg { position:absolute; left:14px; top:50%; transform:translateY(-50%); width:18px; height:18px; color:var(--text-dim); }
+.search-input {
+  width:100%; padding:13px 14px 13px 42px; border-radius:14px;
+  background:var(--bg2); border:1px solid var(--border); color:var(--text);
+  font-family:inherit; font-size:0.95rem;
+}
+.search-input::placeholder { color:var(--text-dim); }
+.search-input:focus { outline:none; border-color:var(--brand); }
+
+/* ── Chips de eje ── */
+.ejes-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+.eje-chip {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:7px 13px; border-radius:20px; cursor:pointer;
+  background:var(--card2); border:1px solid var(--border); color:var(--text-soft);
+  font-family:inherit; font-size:0.82rem; font-weight:600;
+  transition:background .2s, color .2s;
+}
+.eje-chip svg { width:15px; height:15px; }
+.eje-chip.active { color:#fff; }
+
+/* ── Tarjetas de pain ── */
+.pain-card {
+  position:relative; display:block; width:100%; text-align:left;
+  padding:15px 16px 15px 20px; margin-bottom:10px; border-radius:16px;
+  background:var(--card); border:1px solid var(--border); color:var(--text);
+  font-family:inherit; font-size:0.95rem; line-height:1.5; cursor:pointer;
+  transition:transform .12s, border-color .2s;
+}
+.pain-card:active { transform:scale(0.985); }
+.pain-card::before {
+  content:''; position:absolute; left:0; top:12px; bottom:12px; width:4px;
+  border-radius:0 4px 4px 0; background:var(--_eje,#888);
+}
+.pain-eje {
+  display:inline-flex; align-items:center; gap:5px; margin-top:9px;
+  font-size:0.7rem; font-weight:700; letter-spacing:0.3px; color:var(--_eje,#888);
+}
+.pain-eje svg { width:13px; height:13px; }
+
+.empty { color:var(--text-dim); text-align:center; padding:34px 10px; font-size:0.9rem; }
+
+/* ── Fase acogida ── */
+.acg-recepcion {
+  background:var(--brand-ultra); border:1px solid var(--border);
+  border-radius:16px; padding:16px 18px; margin-bottom:18px;
+}
+.acg-recepcion .dolor { font-size:0.86rem; color:var(--text-soft); font-style:italic; margin-bottom:8px; }
+.acg-recepcion .apertura { font-family:'Crimson Pro',Georgia,serif; font-size:1.12rem; font-weight:600; color:var(--brand-soft); }
+
+.acg-progress { display:flex; gap:6px; justify-content:center; margin-bottom:18px; }
+.acg-progress .p { width:8px; height:8px; border-radius:50%; background:var(--border); }
+.acg-progress .p.on { background:var(--brand); }
+
+.acg-pregunta { font-family:'Crimson Pro',Georgia,serif; font-size:1.3rem; font-weight:600; text-align:center; margin-bottom:18px; }
+
+.acg-eco {
+  text-align:center; color:var(--text-soft); font-style:italic;
+  font-family:'Crimson Pro',Georgia,serif; font-size:1.05rem;
+  min-height:1.6em; margin-bottom:18px; transition:opacity .3s;
+}
+
+.btn-primary {
+  width:100%; padding:15px; border-radius:15px; border:none; cursor:pointer;
+  background:var(--orange); color:#fff; font-family:inherit; font-weight:700; font-size:0.98rem;
+  transition:opacity .2s;
+}
+.btn-primary:disabled { opacity:0.4; cursor:default; }
+.btn-primary:active:not(:disabled) { opacity:0.9; }
+.btn-ghost {
+  width:100%; padding:13px; border-radius:15px; margin-top:10px; cursor:pointer;
+  background:none; border:1px solid var(--border); color:var(--text-soft);
+  font-family:inherit; font-weight:600; font-size:0.9rem;
+}
+
+/* ── Fase handoff ── */
+.ho-card {
+  text-align:center; padding:30px 22px; border-radius:22px; margin:8px 0 20px;
+  background:linear-gradient(150deg, var(--card), var(--card2));
+  border:1px solid var(--border);
+}
+.ho-kicker { font-size:0.72rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--orange-soft); margin-bottom:10px; }
+.ho-title { font-family:'Crimson Pro',Georgia,serif; font-weight:700; font-size:1.7rem; margin-bottom:8px; }
+.ho-mal { color:var(--text-soft); font-size:0.95rem; font-style:italic; }
+.ho-ecos { list-style:none; margin:18px 0 4px; }
+.ho-ecos li { color:var(--text-soft); font-size:0.9rem; padding:6px 0; border-top:1px solid var(--border); }
+.ho-ecos li:first-child { border-top:none; }
+
+/* ── Elenco inmersivo · scroll 3D (modo Navegar) ── */
+.wheel-hint { text-align:center; color:var(--text-dim); font-size:0.78rem; letter-spacing:0.2px; margin:2px 0 8px; }
+.wheel {
+  height:60vh; min-height:340px; overflow-y:auto; overflow-x:hidden;
+  perspective:900px; scroll-snap-type:y proximity;
+  -webkit-overflow-scrolling:touch; margin:0 -2px;
+  -ms-overflow-style:none; scrollbar-width:none;
+}
+.wheel::-webkit-scrollbar { display:none; }
+.wheel-pad { height:calc(30vh - 46px); }
+.wheel .pain-card {
+  scroll-snap-align:center; margin:9px 2px; transform-origin:center center;
+  will-change:transform, opacity; backface-visibility:hidden;
+  transition:box-shadow .25s, border-color .25s;
+}
+.wheel .pain-card.centered { border-color:var(--_eje,var(--brand)); box-shadow:0 12px 32px -14px var(--shadow); }
+
+/* ── Coach-marks (onboarding de primer uso) ── */
+.coach {
+  position:fixed; left:50%; bottom:86px; transform:translateX(-50%);
+  width:calc(100% - 32px); max-width:440px; z-index:200;
+  background:var(--popup-bg); border:1px solid var(--border); border-radius:16px;
+  padding:14px 14px 14px 16px; box-shadow:0 14px 44px -12px var(--shadow);
+  display:flex; align-items:center; gap:12px;
+}
+.coach p { font-size:0.83rem; color:var(--text); line-height:1.5; }
+.coach b { color:var(--brand-soft); font-weight:700; }
+.coach .x {
+  flex:none; width:30px; height:30px; border-radius:9px; cursor:pointer;
+  background:var(--card2); border:1px solid var(--border); color:var(--text-soft);
+  display:flex; align-items:center; justify-content:center;
+}
+.coach .x svg { width:15px; height:15px; }
+
+/* ── Acogida · corazones (estado) ── */
+.cz-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px 10px; margin-bottom:8px; }
+.cz-opt {
+  display:flex; flex-direction:column; align-items:center; gap:7px;
+  background:none; border:none; cursor:pointer; font-family:inherit; padding:6px 2px; min-height:44px;
+}
+.cz-svg { width:54px; height:54px; }
+.cz-svg path { fill:var(--cz,#888); fill-opacity:0.20; stroke:var(--cz,#888); stroke-width:1.3; transition:fill-opacity .25s; }
+.cz-opt.sel .cz-svg path { fill-opacity:1; }
+.cz-opt.sel .cz-svg { animation:czSettle .42s ease; }
+@keyframes czSettle { 0%{transform:scale(.86)} 55%{transform:scale(1.1)} 100%{transform:scale(1)} }
+.cz-label { font-size:0.8rem; font-weight:600; color:var(--text-soft); }
+.cz-opt.sel .cz-label { color:var(--text); }
+
+/* ── Acogida · termómetro (intensidad) ── */
+.tm-wrap { display:flex; gap:16px; justify-content:center; align-items:stretch; margin:4px 0 10px; }
+.tm-track {
+  position:relative; width:58px; height:224px; border-radius:29px; cursor:pointer;
+  background:linear-gradient(to top,#3FBFA0 0%,#EFA02A 55%,#D9534F 100%);
+  border:1px solid var(--border); touch-action:none; overflow:hidden;
+}
+.tm-thumb {
+  position:absolute; left:50%; bottom:50%; transform:translate(-50%,50%);
+  width:44px; height:44px; border-radius:50%; background:var(--card);
+  border:3px solid #fff; box-shadow:0 3px 10px rgba(0,0,0,.35);
+}
+.tm-labels { display:flex; flex-direction:column; justify-content:space-between; padding:4px 0; max-width:130px; }
+.tm-labels span { font-size:0.82rem; color:var(--text-soft); line-height:1.3; }
+.tm-labels .max { color:var(--text); font-weight:600; }
+
+/* ── Acogida · cuerpo (zonas) ── */
+.cu-wrap { display:flex; justify-content:center; margin:2px 0 10px; }
+.cu-svg { width:148px; height:auto; }
+.cu-base > * { fill:var(--card2); stroke:var(--border); stroke-width:1.3; }
+.cu-zone { cursor:pointer; }
+.cu-zone > * { fill:var(--card); stroke:var(--border); stroke-width:1.4; transition:fill .2s; }
+.cu-zone.on > * { fill:var(--_eje,var(--brand)); stroke:var(--_eje,var(--brand)); }
+.cu-zone:focus { outline:none; }
+.cu-zone:focus-visible > * { stroke:var(--brand-soft); stroke-width:2.4; }
+
+/* ── Acogida · sendero (tiempo) ── */
+.sd-wrap { position:relative; margin:10px 2px 12px; }
+.sd-line { position:absolute; left:10%; right:10%; top:24px; height:3px; background:var(--border); border-radius:2px; }
+.sd-stops { position:relative; display:flex; }
+.sd-stop { flex:1; display:flex; flex-direction:column; align-items:center; gap:9px; background:none; border:none; cursor:pointer; font-family:inherit; min-height:44px; padding:14px 2px 0; }
+.sd-dot { width:24px; height:24px; border-radius:50%; background:var(--card); border:2px solid var(--border); transition:.2s; }
+.sd-stop.sel .sd-dot { background:var(--_eje,var(--brand)); border-color:var(--_eje,var(--brand)); transform:scale(1.14); }
+.sd-lbl { font-size:0.78rem; color:var(--text-soft); text-align:center; line-height:1.3; }
+.sd-stop.sel .sd-lbl { color:var(--text); font-weight:600; }
+
+/* ── Acogida · cercanía (presencia) ── */
+.cc-field {
+  position:relative; height:158px; border-radius:18px; margin-bottom:14px;
+  background:radial-gradient(circle at 17% 50%, var(--orange-dim), transparent 62%);
+  border:1px solid var(--border);
+}
+.cc-lux { position:absolute; left:17%; top:50%; transform:translate(-50%,-50%); }
+.cc-lux svg { width:58px; height:58px; }
+.cc-pos {
+  position:absolute; top:50%; transform:translate(-50%,-50%);
+  display:flex; flex-direction:column; align-items:center; gap:7px;
+  background:none; border:none; cursor:pointer; font-family:inherit; min-width:56px; min-height:56px; padding:0;
+}
+.cc-pos .yo { width:20px; height:20px; border-radius:50%; border:2px solid var(--text-soft); background:transparent; transition:.2s; }
+.cc-pos.sel .yo { background:var(--brand-soft); border-color:var(--brand-soft); box-shadow:0 0 0 5px var(--brand-ultra); }
+.cc-cap { font-size:0.72rem; color:var(--text-soft); white-space:nowrap; }
+.cc-pos.sel .cc-cap { color:var(--text); font-weight:600; }
+.cc-apart {
+  width:100%; padding:14px; border-radius:15px; margin-bottom:14px; cursor:pointer; min-height:44px;
+  background:var(--card); border:1.5px dashed var(--border); color:var(--text); font-family:inherit; text-align:center;
+}
+.cc-apart.sel { border-style:solid; border-color:var(--brand); background:var(--brand-ultra); }
+.cc-apart b { display:block; font-weight:700; margin-bottom:2px; }
+.cc-apart span { font-size:0.82rem; color:var(--text-soft); }
+
+/* ── Acogida · mosaico (texto tintado) ── */
+.mo-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:8px; }
+.mo-tile {
+  position:relative; min-height:92px; padding:16px 14px; border-radius:16px; cursor:pointer;
+  display:flex; align-items:flex-end; text-align:left; font-family:inherit; font-weight:600; font-size:0.94rem;
+  color:#fff; border:2px solid transparent; text-shadow:0 1px 6px rgba(0,0,0,.4);
+  background:linear-gradient(150deg, var(--_eje,#555) 0%, rgba(0,0,0,0.42) 145%);
+  transition:transform .12s, box-shadow .2s, border-color .2s;
+}
+.mo-tile:active { transform:scale(.98); }
+.mo-tile.sel { border-color:#fff; box-shadow:0 0 0 3px var(--brand-ultra); }
+
+/* ── prefers-reduced-motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important; }
+}
+
+/* ── Bottom nav (copiada del hub) ── */
+.app-nav {
+  position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+  width:100%; max-width:480px; z-index:100;
+  background:var(--nav-bg); border-top:1px solid var(--border);
+  display:flex; align-items:stretch;
+  padding-bottom:env(safe-area-inset-bottom, 0px);
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+}
+.app-nav-item {
+  flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:4px; padding:10px 4px 12px; background:none; border:none; cursor:pointer;
+  font-family:inherit; text-decoration:none; color:rgba(67,221,248,0.45);
+  transition:color 0.2s; -webkit-tap-highlight-color:transparent;
+}
+body.light .app-nav-item { color:rgba(0,41,49,0.45); }
+.app-nav-item.active { color:#43DDF8; }
+@keyframes navSpring {
+  0%{transform:scale(1)} 35%{transform:scale(0.78)} 65%{transform:scale(1.18)} 82%{transform:scale(0.95)} 100%{transform:scale(1)}
+}
+.app-nav-item.tapped .app-nav-icon { animation:navSpring 0.38s cubic-bezier(0.34,1.72,0.64,1) both; }
+.app-nav-item.tapped { color:#43DDF8; }
+.app-nav-icon { width:24px; height:24px; position:relative; display:flex; align-items:center; justify-content:center; }
+.app-nav-item.active .app-nav-icon::before { content:''; position:absolute; inset:-5px; background:rgba(2,187,224,0.12); border-radius:10px; }
+.app-nav-label { font-size:0.6rem; font-weight:600; letter-spacing:0.4px; text-transform:uppercase; }
 </style>
+</head>
+<body>
+<div class="shell">
+  <div class="s-top">
+    <button class="s-back" id="s-back" onclick="onBack()" aria-label="Volver">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="s-title">Sanar</div>
+    <button class="s-theme" onclick="toggleDark()" aria-label="Tema">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
+    </button>
+  </div>
 
-<svg class="cruz" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-  <rect x="46.2" y="0" width="7.6" height="100" fill="#02BBE0"/>
-  <rect x="0" y="46.2" width="100" height="7.6" fill="#02BBE0"/>
-</svg>
+  <div id="view"><div class="empty">Cargando…</div></div>
+</div>
 
-<h1 class="titulo">Sanar</h1>
-<div class="chip">✦ Próximamente</div>
-<p class="sub">Aquí entrarás por lo que estás cruzando.</p>
-<button class="btn" onclick="location.href='index.html'">← Volver al inicio</button>
+<!-- App-nav del hub — "Sanar" activo -->
+<nav class="app-nav" id="app-nav">
+  <button class="app-nav-item" onclick="navTap(this); navTo('crecer.html')">
+    <div class="app-nav-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="2.2"/><circle cx="18" cy="5" r="2.2"/><path d="M8 19h6a3.5 3.5 0 0 0 0-7H10a3.5 3.5 0 0 1 0-7h6"/></svg>
+    </div>
+    <span class="app-nav-label">Crecer</span>
+  </button>
+  <button class="app-nav-item active">
+    <div class="app-nav-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.8z"/></svg>
+    </div>
+    <span class="app-nav-label">Sanar</span>
+  </button>
+  <button class="app-nav-item" onclick="navTap(this); navTo('retiros.html')">
+    <div class="app-nav-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s-8-5.5-8-11a8 8 0 0116 0c0 5.5-8 11-8 11z"/><path d="M9 11h6M12 8v6"/></svg>
+    </div>
+    <span class="app-nav-label">Retiros</span>
+  </button>
+  <button class="app-nav-item" onclick="navTap(this); navTo('diario.html')">
+    <div class="app-nav-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+    </div>
+    <span class="app-nav-label">Diario</span>
+  </button>
+  <button class="app-nav-item" onclick="navTap(this); navTo('cantos.html')">
+    <div class="app-nav-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+    </div>
+    <span class="app-nav-label">Cantos</span>
+  </button>
+</nav>
 
 <script>
-  // Tema unificado (misma clave que el resto de la app)
-  if (localStorage.getItem('cruzando_theme') === 'light') document.body.classList.add('light');
+(function(){
+  'use strict';
+
+  // ── Constantes ──────────────────────────────────────────────────
+  var ELEMENTO = '0101';   // piloto: único elenco con datos. Parametrizable.
+  var base = location.origin + location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1);
+
+  // ── Datos cargados ──────────────────────────────────────────────
+  var TAGS = null;      // tags.json
+  var PLANT = null;     // acogida-plantillas-v1.json .plantillas
+  var SIDE = null;      // {ELEMENTO}-pains.json
+  var INDEX = null;     // pains-index.json
+  var pains = [];       // lista aplanada de pains {..., mid, misterio}
+  var painById = {};
+  var misterioByMid = {};
+
+  // ── Estado / máquina de 3 fases ─────────────────────────────────
+  var estado = {
+    fase: 'elenco',            // 'elenco' | 'acogida' | 'handoff'
+    modo: 'navegar',           // 'navegar' | 'buscar' | 'ejes'
+    ejeActivo: null,
+    query: '',
+    painSel: null,
+    misterioSel: null,
+    pasoAcogida: 0,
+    senales: []                // [{tipo, valor, eco}]
+  };
+
+  // ── Helpers ─────────────────────────────────────────────────────
+  function $(id){ return document.getElementById(id); }
+  function el(html){ var d=document.createElement('div'); d.innerHTML=html.trim(); return d.firstChild; }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  function norm(s){ return String(s==null?'':s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,''); }
+  function cap(s){ s=String(s||''); return s.charAt(0).toUpperCase()+s.slice(1); }
+  function ejeData(k){ return (TAGS && TAGS.ejes && TAGS.ejes[k]) || { label:cap(k), color:'#888' }; }
+
+  // Íconos SVG inline por eje (glifos sobrios; sustituibles por iconos/ejes/*.svg luego)
+  var EJE_GLIFO = {
+    emociones:   '<path d="M12 3s6 6.5 6 10a6 6 0 01-12 0c0-3.5 6-10 6-10z"/>',
+    vinculos:    '<circle cx="9" cy="12" r="4.2"/><circle cx="15" cy="12" r="4.2"/>',
+    cuerpo:      '<circle cx="12" cy="6" r="3"/><path d="M6 21v-1.5a6 6 0 0112 0V21"/>',
+    existencial: '<circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v3M12 17.5v3M3.5 12h3M17.5 12h3"/>',
+    recursos:    '<path d="M4 11l8-6 8 6"/><path d="M6 10v9h12v-9"/>',
+    social:      '<path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="2.4"/>',
+    actitud:     '<path d="M12 21v-8"/><path d="M12 13c0-3 2.6-5.2 6-5 .2 3.2-2.6 5.4-6 5z"/><path d="M12 14c0-2.6-2.2-4.6-5.2-4.4-.2 2.8 2.2 4.6 5.2 4.4z"/>'
+  };
+  function ejeSVG(k, cls){
+    var inner = EJE_GLIFO[k] || '<circle cx="12" cy="12" r="8"/>';
+    return '<svg class="'+(cls||'')+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+inner+'</svg>';
+  }
+
+  // Resuelve el tipo de acogida (string = default; objeto = alterna → usamos su .tipo)
+  function tipoDe(entry){ return (typeof entry === 'string') ? entry : (entry && entry.tipo); }
+
+  // Normaliza las opciones de cualquier mecánica a {clave, texto, eco}
+  // (fallback universal de Bloque A; el Bloque B rendereará cada mecánica a su forma)
+  function opcionesDe(pl){
+    if (!pl) return [];
+    var src = pl.opciones || pl.tramos || pl.zonas || pl.pasos || [];
+    return src.map(function(o){
+      return { clave:o.clave, texto:o.texto || o.etiqueta || cap(o.clave), eco:o.eco || '' };
+    });
+  }
+
+  // ── Hook de afinidad (TODO) ─────────────────────────────────────
+  // Bloque futuro: escribir a users/{uid}/... cuando la mini sesión sea real.
+  function guardarAfinidad(pain, senales){
+    // TODO: persistir afinidad por eje/tag en Firestore.
+    try { console.log('[guardarAfinidad]', pain && pain.id, senales); } catch(e){}
+  }
+
+  // ── Carga de los 4 JSON ─────────────────────────────────────────
+  async function cargar(){
+    async function j(archivo){
+      try { var r = await fetch(base + 'data/' + archivo); if (r.ok) return await r.json(); } catch(e){}
+      return null;
+    }
+    var res = await Promise.all([
+      j('tags.json'),
+      j('acogida-plantillas-v1.json'),
+      j(ELEMENTO + '-pains.json'),
+      j('pains-index.json')
+    ]);
+    TAGS = res[0];
+    PLANT = res[1] && res[1].plantillas;
+    SIDE = res[2];
+    INDEX = res[3];
+
+    if (!TAGS || !SIDE || !INDEX) {
+      $('view').innerHTML = '<div class="empty">No se pudo cargar el contenido de Sanar.<br>Intenta de nuevo más tarde.</div>';
+      return;
+    }
+
+    (SIDE.misterios || []).forEach(function(m){
+      misterioByMid[m.mid] = m;
+      (m.pains || []).forEach(function(p){
+        var pn = { id:p.id, texto:p.texto, ejePrincipal:p.ejePrincipal, tags:p.tags||[], apertura:p.apertura, mid:m.mid, misterio:m };
+        pains.push(pn);
+        painById[pn.id] = pn;
+      });
+    });
+
+    render();
+  }
+
+  // ── Router ──────────────────────────────────────────────────────
+  function render(){
+    // El botón "volver" solo aparece dentro de acogida/handoff
+    $('s-back').style.visibility = (estado.fase === 'elenco') ? 'hidden' : 'visible';
+    if (estado.fase === 'elenco')  return renderElenco();
+    if (estado.fase === 'acogida') return renderAcogida();
+    if (estado.fase === 'handoff') return renderHandoff();
+  }
+
+  function onBack(){
+    if (estado.fase === 'handoff') { estado.fase = 'acogida'; estado.pasoAcogida = Math.max(0,(estado.misterioSel.acogida||[]).length-1); return render(); }
+    if (estado.fase === 'acogida') {
+      if (estado.pasoAcogida > 0) { estado.pasoAcogida--; estado.senales.pop(); return render(); }
+      estado.fase = 'elenco'; estado.painSel = null; estado.misterioSel = null; estado.senales = [];
+      return render();
+    }
+  }
+  window.onBack = onBack;
+
+  // Respeta prefers-reduced-motion en toda micro-animación
+  var reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+  // ── FASE 1 · Elenco ─────────────────────────────────────────────
+  function renderElenco(){
+    var v = $('view');
+    v.innerHTML =
+      '<div class="s-hero"><h1>¿Qué estás cruzando?</h1></div>'+
+      '<div class="modes">'+
+        modeBtn('navegar','Navegar','<path d="M4 6h16M4 12h16M4 18h10"/>')+
+        modeBtn('buscar','Escríbelo','<circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/>')+
+        modeBtn('ejes','Ejes','<circle cx="7" cy="7" r="3"/><circle cx="17" cy="7" r="3"/><circle cx="7" cy="17" r="3"/><circle cx="17" cy="17" r="3"/>')+
+      '</div>'+
+      '<div id="elenco-controls"></div>'+
+      '<div id="elenco-list"></div>';
+
+    var c = $('elenco-controls');
+    if (estado.modo === 'buscar') {
+      c.innerHTML =
+        '<label for="s-input" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Escribe lo que sientes</label>'+
+        '<div class="search-wrap">'+
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>'+
+        '<input class="search-input" id="s-input" type="text" inputmode="search" aria-label="Escribe lo que sientes" placeholder="Escribe lo que sientes…" value="'+esc(estado.query)+'">'+
+        '</div>';
+      var inp = $('s-input');
+      inp.addEventListener('input', function(){ estado.query = inp.value; renderList(); });
+      setTimeout(function(){ inp.focus(); }, 40);
+    } else if (estado.modo === 'ejes') {
+      c.innerHTML = '<div class="ejes-row" role="group" aria-label="Filtrar por eje">' + Object.keys(TAGS.ejes).map(function(k){
+        var e = TAGS.ejes[k], on = estado.ejeActivo === k;
+        return '<button class="eje-chip'+(on?' active':'')+'" aria-pressed="'+(on?'true':'false')+'" style="'+(on?'background:'+e.color+';border-color:'+e.color:'')+'" onclick="pickEje(\''+k+'\')">'+ejeSVG(k)+esc(e.label)+'</button>';
+      }).join('') + '</div>';
+    }
+    renderList();
+    if (estado.modo === 'navegar') maybeCoach();
+  }
+
+  function modeBtn(id, label, glifo){
+    var on = estado.modo === id;
+    return '<button class="mode-btn'+(on?' active':'')+'" aria-pressed="'+(on?'true':'false')+'" onclick="setModo(\''+id+'\')">'+
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+glifo+'</svg>'+label+'</button>';
+  }
+
+  function renderList(){
+    var box = $('elenco-list'); if (!box) return;
+
+    if (estado.modo === 'buscar') {
+      var q = norm(estado.query).trim();
+      if (!q) { box.innerHTML = '<div class="empty">Escribe una palabra o una frase…<br>Ej. «me siento solo», «miedo», «cansancio».</div>'; return; }
+      var hits = pains.filter(function(p){
+        if (norm(p.texto).indexOf(q) !== -1) return true;
+        // match contra slugs de tags (nunca se muestran en la UI)
+        return (p.tags||[]).some(function(t){ return norm(t).indexOf(q) !== -1; });
+      });
+      box.innerHTML = hits.length ? hits.map(function(p){ return painCard(p,'flat'); }).join('') : '<div class="empty">Nada por aquí con esas palabras.<br>Prueba con otra forma de nombrarlo.</div>';
+      return;
+    }
+
+    if (estado.modo === 'ejes') {
+      if (!estado.ejeActivo) { box.innerHTML = '<div class="empty">Elige un eje arriba para ver sus dolores.</div>'; return; }
+      var ids = (INDEX.porEje && INDEX.porEje[estado.ejeActivo]) || [];
+      box.innerHTML = ids.map(function(id){ return painById[id]; }).filter(Boolean).map(function(p){ return painCard(p,'flat'); }).join('') || '<div class="empty">Sin dolores en este eje.</div>';
+      return;
+    }
+
+    // navegar: elenco inmersivo (wheel 3D) con la lista completa de pains
+    box.innerHTML =
+      '<div class="wheel-hint">Desliza y elige lo que hoy te cruza</div>'+
+      '<div class="wheel" id="wheel"><div class="wheel-pad"></div>'+
+        pains.map(function(p){ return painCard(p,'wheel'); }).join('')+
+      '<div class="wheel-pad"></div></div>';
+    setupWheel();
+  }
+
+  function painCard(p, mode){
+    var e = ejeData(p.ejePrincipal);
+    var oc = (mode === 'wheel') ? 'onWheelTap(this,\''+p.id+'\')' : 'pickPain(\''+p.id+'\')';
+    // La tarjeta muestra SOLO la frase + color/label del eje. Nunca los tags.
+    return '<button class="pain-card" data-id="'+p.id+'" style="--_eje:'+e.color+'" onclick="'+oc+'">'+
+      esc(p.texto)+
+      '<span class="pain-eje">'+ejeSVG(p.ejePrincipal)+esc(e.label)+'</span>'+
+      '</button>';
+  }
+
+  // ── Scroll 3D del elenco (modo Navegar) ─────────────────────────
+  var wheelRAF = null;
+  function setupWheel(){
+    var w = $('wheel'); if (!w) return;
+    var cards = Array.prototype.slice.call(w.querySelectorAll('.pain-card'));
+    if (!cards.length) return;
+
+    function update(){
+      wheelRAF = null;
+      var vc = w.scrollTop + w.clientHeight / 2;
+      var half = w.clientHeight / 2;
+      var best = null, bestD = Infinity;
+      cards.forEach(function(c){
+        var cc = c.offsetTop + c.offsetHeight / 2;
+        var d = (cc - vc) / half;                 // ~-1 (arriba) .. 1 (abajo)
+        var ad = Math.min(Math.abs(d), 1);
+        var scale = 1 - ad * 0.16;
+        var op = 1 - ad * 0.55;
+        var rot = reduceMotion ? 0 : Math.max(-1, Math.min(1, d)) * -15;  // rotateX ∝ distancia al centro
+        c.style.opacity = op.toFixed(3);
+        c.style.transform = 'scale(' + scale.toFixed(3) + ')' + (rot ? ' rotateX(' + rot.toFixed(1) + 'deg)' : '');
+        if (ad < bestD) { bestD = ad; best = c; }
+      });
+      cards.forEach(function(c){ c.classList.toggle('centered', c === best); });
+      w._centered = best;
+    }
+    w.addEventListener('scroll', function(){ if (!wheelRAF) wheelRAF = requestAnimationFrame(update); }, { passive:true });
+    update();
+  }
+
+  window.onWheelTap = function(elm, id){
+    var w = $('wheel');
+    if (w && w._centered === elm) { pickPain(id); }        // tarjeta centrada → entra
+    else { elm.scrollIntoView({ block:'center', behavior: reduceMotion ? 'auto' : 'smooth' }); }  // si no, la centra
+  };
+
+  // ── Onboarding de primer uso (coach-marks) ──────────────────────
+  // Persiste un contador; tras ~3-4 veces no reaparece.
+  // TODO: si hay sesión, migrar el contador a Firestore (users/{uid}).
+  function coachCount(){ try { return parseInt(localStorage.getItem('microOnboardingVisto') || '0', 10) || 0; } catch(e){ return 4; } }
+  function setCoachCount(v){ try { localStorage.setItem('microOnboardingVisto', String(v)); } catch(e){} }
+  function maybeCoach(){
+    if (coachCount() >= 4) return;
+    if ($('coach')) return;
+    var c = el('<div class="coach" id="coach" role="note" aria-live="polite">'+
+      '<p>Desliza para recorrer · <b>toca</b> la tarjeta central para entrar · o <b>escríbelo</b> / filtra por <b>eje</b>.</p>'+
+      '<button class="x" aria-label="Entendido" onclick="cerrarCoach()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>'+
+    '</div>');
+    document.body.appendChild(c);
+    setCoachCount(coachCount() + 1);
+  }
+  window.cerrarCoach = function(){ var c = $('coach'); if (c) c.remove(); };
+
+  window.setModo = function(m){ cerrarCoach(); estado.modo = m; render(); };
+  window.pickEje = function(k){ estado.ejeActivo = (estado.ejeActivo === k) ? null : k; render(); };
+  window.pickPain = function(id){
+    var p = painById[id]; if (!p) return;
+    cerrarCoach();
+    estado.painSel = p;
+    estado.misterioSel = misterioByMid[p.mid] || null;
+    estado.pasoAcogida = 0;
+    estado.senales = [];
+    estado.fase = 'acogida';
+    render();
+    window.scrollTo(0,0);
+  };
+
+  // ── FASE 2 · Acogida ────────────────────────────────────────────
+  // Emisión uniforme de la señal del paso actual: { tipo, valor, eco }.
+  function setEco(eco){
+    var e = $('acg-eco'); if (!e) return;
+    if (Array.isArray(eco)) e.innerHTML = eco.map(function(x){ return esc(x); }).join('<br>');
+    else e.textContent = eco || '';
+  }
+  function commit(tipo, valor, eco){
+    estado.senales[estado.pasoAcogida] = { tipo:tipo, valor:valor, eco:eco };
+    setEco(eco);
+    var c = $('acg-cont'); if (c) c.disabled = false;
+  }
+
+  function renderAcogida(){
+    var v = $('view');
+    var m = estado.misterioSel, p = estado.painSel;
+    var pasos = (m && m.acogida) || [];
+    var entry = pasos[estado.pasoAcogida];
+    var tipo = tipoDe(entry);
+    var pl = PLANT && PLANT[tipo];
+
+    // Salvaguarda: tipo sin plantilla → saltar el paso
+    if (!pl) { avanzarAcogida(); return; }
+
+    // string = mecánica por defecto de la plantilla; objeto = alterna (honra su .mecanica)
+    var mec = (entry && typeof entry === 'object' && entry.mecanica) || pl.mecanica || 'mosaico';
+    var ejeColor = ejeData(p.ejePrincipal).color;
+    var dots = pasos.map(function(_,i){ return '<span class="p'+(i<=estado.pasoAcogida?' on':'')+'"></span>'; }).join('');
+
+    v.innerHTML =
+      '<div class="acg-recepcion">'+
+        '<div class="dolor">«'+esc(p.texto)+'»</div>'+
+        '<div class="apertura">'+esc(p.apertura)+'</div>'+
+      '</div>'+
+      '<div class="acg-progress" aria-hidden="true">'+dots+'</div>'+
+      '<div class="acg-pregunta">'+esc(pl.pregunta||'')+'</div>'+
+      '<div id="acg-body" style="--_eje:'+ejeColor+'"></div>'+
+      '<div class="acg-eco" id="acg-eco" aria-live="polite"></div>'+
+      '<button class="btn-primary" id="acg-cont" disabled onclick="avanzarAcogida()">Continuar</button>';
+
+    var body = $('acg-body');
+    switch (mec) {
+      case 'corazones': rndCorazones(body, pl, tipo); break;
+      case 'termometro': rndTermometro(body, pl, tipo); break;
+      case 'cuerpo':     rndCuerpo(body, pl, tipo); break;
+      case 'sendero':    rndSendero(body, pl, tipo); break;
+      case 'cercania':   rndCercania(body, pl, tipo); break;
+      case 'mosaico':
+      default:           rndMosaico(body, pl, tipo); break;   // fallback universal
+    }
+
+    // Continuidad si el usuario retrocede: reactiva Continuar y muestra su eco
+    var prev = estado.senales[estado.pasoAcogida];
+    if (prev) { setEco(prev.eco); var cb = $('acg-cont'); if (cb) cb.disabled = false; }
+  }
+
+  // Selección única genérica: cada opción debe traer .clave y .eco
+  function wireSingle(box, sel, opts, tipo){
+    var nodes = box.querySelectorAll(sel);
+    Array.prototype.forEach.call(nodes, function(n){
+      n.addEventListener('click', function(){
+        Array.prototype.forEach.call(nodes, function(x){ x.classList.remove('sel'); });
+        n.classList.add('sel');
+        var o = opts[+n.getAttribute('data-i')];
+        commit(tipo, o.clave, o.eco || '');
+      });
+    });
+  }
+
+  // 1 · corazones (estado) — corazones SVG teñidos con opcion.color, selección única
+  function rndCorazones(box, pl, tipo){
+    var opts = pl.opciones || [];
+    box.innerHTML = '<div class="cz-grid">' + opts.map(function(o,i){
+      return '<button class="cz-opt" data-i="'+i+'">'+
+        '<span class="cz-svg" style="--cz:'+(o.color||'#888')+'">'+heartSVG()+'</span>'+
+        '<span class="cz-label">'+esc(o.texto)+'</span></button>';
+    }).join('') + '</div>';
+    wireSingle(box, '.cz-opt', opts, tipo);
+  }
+  function heartSVG(){
+    return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.6S3.6 15 3.6 9.3C3.6 6.5 5.7 4.7 8 4.7c1.7 0 3.1 1 4 2.4 0.9-1.4 2.3-2.4 4-2.4 2.3 0 4.4 1.8 4.4 4.6C20.4 15 12 20.6 12 20.6z"/></svg>';
+  }
+
+  // 2 · termometro (intensidad) — slider vertical suave→intenso; el valor cae en un tramo por umbral
+  function rndTermometro(box, pl, tipo){
+    var tramos = pl.tramos || [];
+    var ex = pl.extremos || { min:'', max:'' };
+    box.innerHTML =
+      '<div class="tm-wrap">'+
+        '<div class="tm-track" id="tm-track" role="slider" aria-label="'+esc(pl.pregunta||'Intensidad')+'" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" tabindex="0">'+
+          '<div class="tm-thumb" id="tm-thumb"></div>'+
+        '</div>'+
+        '<div class="tm-labels"><span class="max">'+esc(ex.max||'')+'</span><span>'+esc(ex.min||'')+'</span></div>'+
+      '</div>';
+    var track = $('tm-track'), thumb = $('tm-thumb');
+    var frac = 0.5, dragging = false;
+    function place(){ thumb.style.bottom = (frac*100) + '%'; track.setAttribute('aria-valuenow', Math.round(frac*100)); }
+    function fromY(clientY){
+      var r = track.getBoundingClientRect();
+      frac = Math.max(0, Math.min(1, 1 - (clientY - r.top) / r.height));
+      place();
+    }
+    function tramoDe(v){ for (var i=0;i<tramos.length;i++){ if (v <= tramos[i].hasta) return tramos[i]; } return tramos[tramos.length-1]; }
+    function commitFrac(){ var t = tramoDe(Math.round(frac*100)); if (t) commit(tipo, t.clave, t.eco); }
+    place();
+    track.addEventListener('pointerdown', function(e){ dragging = true; try { track.setPointerCapture(e.pointerId); } catch(_){} fromY(e.clientY); });
+    track.addEventListener('pointermove', function(e){ if (dragging) fromY(e.clientY); });
+    track.addEventListener('pointerup', function(){ if (!dragging) return; dragging = false; commitFrac(); });
+    track.addEventListener('keydown', function(e){
+      if (e.key === 'ArrowUp' || e.key === 'ArrowRight') { frac = Math.min(1, frac + 0.1); place(); commitFrac(); e.preventDefault(); }
+      else if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') { frac = Math.max(0, frac - 0.1); place(); commitFrac(); e.preventDefault(); }
+    });
+  }
+
+  // 3 · cuerpo (cuerpo) — silueta neutra; zonas de la plantilla (incluida la cabeza); selección múltiple
+  function rndCuerpo(box, pl, tipo){
+    var zonas = pl.zonas || [];
+    var byC = {}; zonas.forEach(function(z){ byC[z.clave] = z; });
+    box.innerHTML = '<div class="cu-wrap">' + cuerpoSVG(zonas) + '</div>';
+    var sel = {};
+    var nodes = box.querySelectorAll('.cu-zone');
+    function toggle(n){
+      var k = n.getAttribute('data-clave');
+      if (sel[k]) { delete sel[k]; n.classList.remove('on'); n.setAttribute('aria-pressed','false'); }
+      else { sel[k] = true; n.classList.add('on'); n.setAttribute('aria-pressed','true'); }
+      var claves = Object.keys(sel);
+      if (claves.length) {
+        var ecos = claves.map(function(c){ return byC[c] && byC[c].eco; }).filter(Boolean);
+        commit(tipo, claves, ecos);
+      } else {
+        estado.senales[estado.pasoAcogida] = undefined; setEco(''); var c = $('acg-cont'); if (c) c.disabled = true;
+      }
+    }
+    Array.prototype.forEach.call(nodes, function(n){
+      n.addEventListener('click', function(){ toggle(n); });
+      n.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(n); } });
+    });
+  }
+  function cuerpoSVG(zonas){
+    // Formas por zona (viewBox 0 0 120 250). Sólo se dibujan las de la plantilla.
+    var Z = {
+      cabeza:   '<circle cx="60" cy="30" r="18"/>',
+      garganta: '<rect x="51" y="49" width="18" height="13" rx="6"/>',
+      hombros:  '<rect x="24" y="63" width="72" height="18" rx="9"/>',
+      pecho:    '<rect x="36" y="85" width="48" height="34" rx="12"/>',
+      estomago: '<rect x="40" y="123" width="40" height="34" rx="12"/>',
+      manos:    '<circle cx="16" cy="150" r="12"/><circle cx="104" cy="150" r="12"/>'
+    };
+    var LBL = { cabeza:'Cabeza (mente)', garganta:'Garganta', hombros:'Hombros', pecho:'Pecho', estomago:'Estómago', manos:'Manos' };
+    var base =
+      '<g class="cu-base" aria-hidden="true">'+
+        '<rect x="18" y="80" width="12" height="66" rx="6"/>'+   // brazo izq
+        '<rect x="90" y="80" width="12" height="66" rx="6"/>'+   // brazo der
+        '<rect x="44" y="156" width="14" height="76" rx="7"/>'+  // pierna izq
+        '<rect x="62" y="156" width="14" height="76" rx="7"/>'+  // pierna der
+      '</g>';
+    var hot = zonas.map(function(z){
+      if (!Z[z.clave]) return '';
+      return '<g class="cu-zone" data-clave="'+esc(z.clave)+'" role="button" tabindex="0" aria-pressed="false" aria-label="'+esc(LBL[z.clave]||z.clave)+'">'+Z[z.clave]+'</g>';
+    }).join('');
+    return '<svg class="cu-svg" viewBox="0 0 120 250" fill="none">'+base+hot+'</svg>';
+  }
+
+  // 4 · sendero (tiempo) — camino horizontal con paradas ordinales; selección única
+  function rndSendero(box, pl, tipo){
+    var ps = pl.pasos || [];
+    box.innerHTML =
+      '<div class="sd-wrap"><div class="sd-line" aria-hidden="true"></div><div class="sd-stops">'+
+        ps.map(function(o,i){ return '<button class="sd-stop" data-i="'+i+'"><span class="sd-dot" aria-hidden="true"></span><span class="sd-lbl">'+esc(o.etiqueta||o.texto||o.clave)+'</span></button>'; }).join('')+
+      '</div></div>';
+    wireSingle(box, '.sd-stop', ps, tipo);
+  }
+
+  // 5 · cercania (presencia) — Lux fijo; se coloca el "yo"; "no sé si está" va aparte, con igual dignidad
+  function rndCercania(box, pl, tipo){
+    var opts = pl.opciones || [];
+    var eje = opts.filter(function(o){ return !o.aparte; });
+    var aparte = opts.filter(function(o){ return o.aparte; });
+    var lefts = ['42%','63%','84%'];
+    var field = '<div class="cc-field"><div class="cc-lux" aria-label="Lux">'+luxSVG()+'</div>'+
+      eje.map(function(o,i){
+        return '<button class="cc-pos" data-clave="'+esc(o.clave)+'" style="left:'+(lefts[i] || (42 + i*22) + '%')+'" title="'+esc(o.sub||'')+'">'+
+          '<span class="yo" aria-hidden="true"></span><span class="cc-cap">'+esc(o.etiqueta||o.texto)+'</span></button>';
+      }).join('') + '</div>';
+    var apts = aparte.map(function(o){
+      return '<button class="cc-apart" data-clave="'+esc(o.clave)+'"><b>'+esc(o.etiqueta||o.texto)+'</b>'+(o.sub?'<span>'+esc(o.sub)+'</span>':'')+'</button>';
+    }).join('');
+    box.innerHTML = field + apts;
+    var all = box.querySelectorAll('[data-clave]');
+    Array.prototype.forEach.call(all, function(n){
+      n.addEventListener('click', function(){
+        Array.prototype.forEach.call(all, function(x){ x.classList.remove('sel'); });
+        n.classList.add('sel');
+        var k = n.getAttribute('data-clave');
+        var o = opts.filter(function(z){ return z.clave === k; })[0];
+        if (o) commit(tipo, o.clave, o.eco);
+      });
+    });
+  }
+  function luxSVG(){
+    // Orbe neutro y cálido — no figurativo. Lux no se mueve.
+    return '<svg viewBox="0 0 60 60" aria-hidden="true">'+
+      '<circle cx="30" cy="30" r="26" fill="var(--orange)" opacity="0.10"/>'+
+      '<circle cx="30" cy="30" r="17" fill="var(--orange)" opacity="0.20"/>'+
+      '<circle cx="30" cy="30" r="9" fill="var(--orange-soft)"/></svg>';
+  }
+
+  // 6 · mosaico (compania, disposicion, necesidad, imagen, horizonte) — texto tintado; también fallback universal
+  function rndMosaico(box, pl, tipo){
+    var opts = opcionesDe(pl);   // normaliza opciones/tramos/zonas/pasos si llega una mecánica sin renderer
+    box.innerHTML = '<div class="mo-grid">' + opts.map(function(o,i){
+      return '<button class="mo-tile" data-i="'+i+'">'+esc(o.texto)+'</button>';
+    }).join('') + '</div>';
+    wireSingle(box, '.mo-tile', opts, tipo);
+  }
+
+  window.avanzarAcogida = function(){
+    var pasos = (estado.misterioSel && estado.misterioSel.acogida) || [];
+    estado.pasoAcogida++;
+    if (estado.pasoAcogida >= pasos.length) {
+      estado.senales = estado.senales.filter(Boolean);
+      estado.fase = 'handoff';
+      guardarAfinidad(estado.painSel, estado.senales);
+    }
+    render();
+    window.scrollTo(0,0);
+  };
+
+  // ── FASE 3 · Handoff ────────────────────────────────────────────
+  function renderHandoff(){
+    var v = $('view');
+    var m = estado.misterioSel, p = estado.painSel;
+    var ecos = estado.senales.map(function(s){ return s && s.eco; }).filter(Boolean);
+
+    v.innerHTML =
+      '<div class="ho-card">'+
+        '<div class="ho-kicker">Tu puerta de hoy</div>'+
+        '<div class="ho-title">'+esc(m.titulo)+'</div>'+
+        '<div class="ho-mal">'+esc(m.mal||'')+'</div>'+
+        (ecos.length ? '<ul class="ho-ecos">'+ecos.map(function(e){ return '<li>'+esc(e)+'</li>'; }).join('')+'</ul>' : '')+
+      '</div>'+
+      '<button class="btn-primary" onclick="irMini()">Entrar a la mini sesión</button>'+
+      '<button class="btn-ghost" onclick="volverElenco()">Elegir otro dolor</button>';
+  }
+
+  window.irMini = function(){
+    var mid = estado.misterioSel.mid;
+    navTo('mini.html?mid=' + encodeURIComponent(mid) + '&pain=' + encodeURIComponent(estado.painSel.id));
+  };
+  window.volverElenco = function(){
+    estado.fase = 'elenco'; estado.painSel = null; estado.misterioSel = null;
+    estado.pasoAcogida = 0; estado.senales = [];
+    render(); window.scrollTo(0,0);
+  };
+
+  // ── Tema (misma clave que el resto de la app) ───────────────────
+  var isLight = localStorage.getItem('cruzando_theme') === 'light';
+  function applyTheme(light){
+    document.body.classList.toggle('light', light);
+    document.querySelector('meta[name="theme-color"]').content = light ? '#E6DED3' : '#1A0E04';
+    localStorage.setItem('cruzando_theme', light ? 'light' : 'dark');
+  }
+  window.toggleDark = function(){ isLight = !isLight; applyTheme(isLight); };
+  if (isLight) applyTheme(true);
+
+  // ── Navegación (patrón del repo) ────────────────────────────────
+  window.navTo = function(pg){ location.href = base + pg; };
+  window.navTap = function(elm){
+    elm.classList.remove('tapped'); void elm.offsetWidth; elm.classList.add('tapped');
+    setTimeout(function(){ elm.classList.remove('tapped'); }, 400);
+  };
+
+  // ── Arranque ────────────────────────────────────────────────────
+  cargar();
+})();
 </script>
+</body>
+</html>
