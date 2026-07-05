@@ -124,6 +124,14 @@ h1{font-family:'Crimson Pro',serif;font-weight:600;font-size:19px;margin-top:6px
 .advance-chip{position:absolute;left:50%;bottom:106px;transform:translateX(-50%);z-index:18;display:none;align-items:center;gap:10px;padding:8px 10px 8px 14px;border-radius:22px;background:rgba(8,9,16,.62);backdrop-filter:blur(6px);border:1px solid rgba(231,119,119,.45);font-size:11.5px;color:var(--parch)}
 .advance-chip.show{display:flex}
 .advance-chip button{background:var(--gold-deep);color:#1a1305;border:none;border-radius:14px;padding:6px 12px;font-weight:600;cursor:pointer;font-size:12px;font-family:'Inter',sans-serif}
+/* pantalla-gesto de inicio (requerido para desbloquear el audio) */
+.start-gate{position:absolute;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:40px;text-align:center;background:radial-gradient(120% 80% at 50% 20%,rgba(10,20,32,.72),rgba(5,6,12,.96));backdrop-filter:blur(4px)}
+.sg-title{font-family:'Crimson Pro',serif;font-size:28px;font-weight:600}
+.sg-sub{font-size:14px;opacity:.7;font-style:italic;margin-bottom:24px}
+.sg-btn{padding:15px 30px;border-radius:26px;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:15px;font-weight:600;background:linear-gradient(160deg,var(--gold),var(--gold-deep));color:#1a1305}
+.sg-btn:disabled{opacity:.5;cursor:default;background:rgba(243,234,216,.2);color:var(--parch)}
+.sg-btn:active:not(:disabled){transform:scale(.96)}
+
 .hidden{display:none!important}
 .note{font-size:11px;opacity:.55;max-width:372px;text-align:center;line-height:1.6}
 </style>
@@ -211,6 +219,13 @@ h1{font-family:'Crimson Pro',serif;font-weight:600;font-size:19px;margin-top:6px
       <button class="txt-next" id="diarySave">Guardar en el diario</button>
     </div>
 
+    <!-- Pantalla-gesto: el primer play() debe salir de un clic del usuario -->
+    <div class="start-gate" id="startGate">
+      <div class="sg-title">La Anunciación</div>
+      <div class="sg-sub">El cuerpo de Dios</div>
+      <button class="sg-btn" id="startBtn" disabled>Preparando…</button>
+    </div>
+
     <audio id="audio" crossorigin="anonymous"></audio>
   </div>
 </div>
@@ -226,7 +241,7 @@ const MID = '2_1_1';
 
 const URLS = {
   hero:   `${R2_ILU}/P_${MID}.webp`,
-  cantoImg: id => `${R2_ILU}/cantos/${MID}/P_${MID}${id}.webp`,   // P_2_1_1a.webp
+  cantoImg: id => `${R2_ILU}/cantos/${MID}/P_${MID}${String(id).replace(/^\d+/,'')}.webp`,   // still id '1a' → letra 'a' → P_2_1_1a.webp
   cantoAudio: `${R2_MUS}/m4a/M_${MID}.m4a`,
   cantoLrc:   `${R2_MUS}/lrc/M_${MID}.lrc`,
   ubible: `${R2_AUD}/ubible/UBIBLE_${MID}.mp3`,
@@ -383,7 +398,11 @@ function cantoRender(){
   if(!epilogueMode && cur>=skipShownAt) $('skipBtn').classList.add('show');
 }
 function cantoTick(){ if(!cantoPlaying)return; cur=audio.currentTime; cantoRender(); raf=requestAnimationFrame(cantoTick); }
-function cantoPlay(){ cantoPlaying=true; audio.play().catch(()=>{}); raf=requestAnimationFrame(cantoTick); }
+function cantoPlay(){
+  cantoPlaying=true;
+  audio.play().catch(err=>{ console.warn('[canto] audio.play() rechazado →', err && err.name, '·', err && err.message); });
+  raf=requestAnimationFrame(cantoTick);
+}
 function cantoPause(){ cantoPlaying=false; cancelAnimationFrame(raf); audio.pause(); }
 
 function startCanto(fromEpilogue){
@@ -393,7 +412,7 @@ function startCanto(fromEpilogue){
   $('skipBtn').classList.toggle('show', epilogueMode);   // epílogo: skip desde 0
   audio.src=URLS.cantoAudio; audio.load(); cur=0; curCut=-1;curLine=-1;
   audio.onended=()=>{ if(epilogueMode)backToEpilogue(); else advanceFromCanto(); };
-  audio.onerror=()=>{ $('skipBtn').classList.add('show'); };
+  audio.onerror=()=>{ const er=audio.error; console.warn('[canto] audio error → code', er&&er.code, '·', er&&er.message, '(code 4 suele ser CORS: probar quitar crossorigin del #audio)'); $('skipBtn').classList.add('show'); };
   audio.currentTime=0; cantoPlay();
 }
 $('skipBtn').onclick=()=>{ cantoPause(); if(epilogueMode)backToEpilogue(); else advanceFromCanto(); };
@@ -428,8 +447,8 @@ function goStep(i){
   // audio
   audio.src=s.url(); audio.load(); _updateSyncKey(s.url()); hideAdvance();
   audio.onended=()=>{ goStep(stepIdx+1); };
-  audio.onerror=()=>{ showAdvance('Audio aún no generado'); };
-  playing=true; setPP(true); audio.currentTime=0; audio.play().catch(()=>{});
+  audio.onerror=()=>{ const er=audio.error; console.warn('[player] audio error →', s.key, '· code', er&&er.code, '·', er&&er.message); showAdvance('Audio aún no generado'); };
+  playing=true; setPP(true); audio.currentTime=0; audio.play().catch(err=>{ console.warn('[player] audio.play() rechazado →', s.key, err && err.name); });
   audio.ontimeupdate=()=>{ if(s.beads)_tickBeads(); };
 }
 function setPP(on){ $('ppIc').innerHTML = on?'<path d="M8 5v14M16 5v14"/>':'<path d="M8 5v14l11-7z"/>'; $('ppIc').style.fill=on?'none':'#1a1305'; $('ppIc').style.stroke=on?'#1a1305':'none'; }
@@ -512,7 +531,12 @@ $('volSlider').oninput=e=>{ audio.volume=e.target.value/100; };
 audio.volume=0.8;
 
 /* ═══════════ Arranque ═══════════ */
-loadData().then(()=>{ startCanto(false); });
+/* El audio necesita un gesto: preparamos datos y esperamos el clic de "Tocar para orar". */
+const startGate=$('startGate'), startBtn=$('startBtn');
+startBtn.onclick=()=>{ startGate.classList.add('hidden'); startCanto(false); };
+loadData()
+  .then(()=>{ startBtn.disabled=false; startBtn.textContent='Tocar para orar'; })
+  .catch(err=>{ console.error('[mini-mock] loadData falló →', err); startBtn.disabled=false; startBtn.textContent='Tocar para orar'; });
 </script>
 </body>
 </html>
