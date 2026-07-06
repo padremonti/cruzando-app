@@ -375,13 +375,23 @@ function detectCantoImages(){
   imgLetters=[]; curImgIdx=-1;
   let i=0;
   (function probe(){
-    if(i>=CANTO_LETTERS.length) return;                 // tope de 9
+    if(i>=CANTO_LETTERS.length){ finishDetect(); return; }   // tope de 9
     const letra=CANTO_LETTERS[i];
     const im=new Image();
     im.onload=()=>{ imgLetters.push(letra); if(imgLetters.length===1 && curImgIdx<0){ curImgIdx=0; showImg(0); } i++; probe(); };
-    im.onerror=()=>{};                                   // primer 404 → fin del conjunto de este Misterio
+    im.onerror=()=>{ finishDetect(); };                      // primer 404 → fin del conjunto de este Misterio
     im.src=URLS.cantoImg(letra);
   })();
+}
+/* Sin imágenes de carrusel (a,b,c…) → usar la still única P_{assetMID}.webp (la de la oración) */
+function finishDetect(){
+  if(imgLetters.length===0) showStill(URLS.hero);
+}
+function showStill(url){
+  const inLayer=frontA?layB:layA, inKb=frontA?kbB:kbA, outLayer=frontA?layA:layB;
+  inKb.style.background=`url('${url}')`; inKb.style.backgroundSize='cover'; inKb.style.backgroundPosition='center';
+  if(!reduceMotion){ inKb.style.setProperty('--kbz',1.06); inKb.style.setProperty('--kbx','0%'); inKb.style.setProperty('--kby','0%'); inKb.style.animationDuration='30s'; inKb.classList.remove('run'); void inKb.offsetWidth; inKb.classList.add('run'); }
+  inLayer.classList.add('front'); outLayer.classList.remove('front'); frontA=!frontA;
 }
 /* Muestra la imagen real del índice (a,b,c…) con Ken Burns variado por índice; cross-fade de dos capas */
 function showImg(idx){
