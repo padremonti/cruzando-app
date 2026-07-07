@@ -908,6 +908,26 @@ body.hub-clean .stats-bar,        /* drawer + racha + metros de un golpe */
 body.hub-clean .hub-odo-ring,     /* anillo del odómetro */
 body.hub-clean .hub-odo-line,     /* texto del odómetro */
 body.hub-clean #app-nav { display:none !important; }
+
+/* ── Animación de entrada escalonada del hub ── */
+/* Los elementos arrancan invisibles/desplazados; solo animan cuando el
+   contenedor (body) recibe .hub-go, aplicado al revelarse el home. */
+.hub-an{opacity:0;transform:translateY(20px)}
+.hub-an-nav{opacity:0;transform:translateY(70px)}
+.hub-go .hub-an{animation:hubRise .6s cubic-bezier(.2,.7,.3,1) forwards}
+.hub-go .hub-an-nav{animation:hubNavUp .55s cubic-bezier(.2,.7,.3,1) forwards}
+@keyframes hubRise{to{opacity:1;transform:translateY(0)}}
+@keyframes hubNavUp{to{opacity:1;transform:translateY(0)}}
+@media (prefers-reduced-motion:reduce){
+  .hub-an,.hub-an-nav{opacity:1!important;transform:none!important;animation:none!important}
+}
+/* Los delays inline marcan el modo completo; el modo limpio los reescribe. */
+body.hub-clean .hub-greeting-time  { animation-delay:.1s  !important; }
+body.hub-clean .hub-greeting-name  { animation-delay:.2s  !important; }
+body.hub-clean .hub-elige          { animation-delay:.7s  !important; }
+body.hub-clean .hub-door-sanar     { animation-delay:.9s  !important; }
+body.hub-clean .hub-door-crecer    { animation-delay:1.05s!important; }
+body.hub-clean .hub-door-santuario { animation-delay:1.2s !important; }
 .hub-reveal { max-height:0; overflow:hidden; transition:max-height .38s ease; margin:0 16px; }
 #rv-santuario .banner-retiro { margin:2px 0 10px; }
 #rv-santuario .banner-retiro-btn { background:var(--orange); }
@@ -1353,7 +1373,7 @@ body.hub-clean #app-nav { display:none !important; }
   <div id="scr-home">
 
     <!-- Stats bar -->
-    <div class="stats-bar">
+    <div class="stats-bar hub-an" style="animation-delay:0s">
       <div class="stat-item">
         <div class="brand-cross-sm"></div>
       </div>
@@ -1377,11 +1397,11 @@ body.hub-clean #app-nav { display:none !important; }
     <!-- Saludo + anillo de meta del día (lectura ligera: metrosHoy / metaMetros) -->
     <div class="hub-greeting">
       <div class="hub-greeting-text">
-        <div class="hub-greeting-time"><span id="greeting-time">Hola</span></div>
-        <div class="hub-greeting-name" id="user-name">Peregrino</div>
-        <div class="hub-odo-line"><span id="odo-hoy">0</span> / <span id="odo-meta">1,850</span> m</div>
+        <div class="hub-greeting-time hub-an" style="animation-delay:.12s"><span id="greeting-time">Hola</span></div>
+        <div class="hub-greeting-name hub-an" id="user-name" style="animation-delay:.12s">Peregrino</div>
+        <div class="hub-odo-line hub-an" style="animation-delay:.12s"><span id="odo-hoy">0</span> / <span id="odo-meta">1,850</span> m</div>
       </div>
-      <div class="hub-odo-ring">
+      <div class="hub-odo-ring hub-an" style="animation-delay:.12s">
         <svg width="66" height="66" viewBox="0 0 66 66" aria-label="Meta del día">
           <circle cx="33" cy="33" r="27" fill="none" stroke="var(--border)" stroke-width="6"/>
           <circle id="odo-arc" cx="33" cy="33" r="27" fill="none" stroke="var(--orange)" stroke-width="6"
@@ -1393,9 +1413,9 @@ body.hub-clean #app-nav { display:none !important; }
     </div>
 
     <!-- ═══ PUERTAS PRINCIPALES (Sanar · Crecer · El Santuario) ═══ -->
-    <div class="hub-elige">Elige tu camino</div>
+    <div class="hub-elige hub-an" style="animation-delay:.36s">Elige tu camino</div>
 
-    <button class="hub-door hub-door-sanar" onclick="navTap(this); navigateTo('sanar.html')">
+    <button class="hub-door hub-door-sanar hub-an" style="animation-delay:.48s" onclick="navTap(this); navigateTo('sanar.html')">
       <div class="hub-door-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="#2FA98A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 20.5C12 20.5 3.5 15 3.5 8.7C3.5 6 5.6 4 8.2 4C10 4 11.4 5 12 6.4C12.6 5 14 4 15.8 4C18.4 4 20.5 6 20.5 8.7C20.5 12 18 15 12 20.5Z"/>
@@ -1408,7 +1428,7 @@ body.hub-clean #app-nav { display:none !important; }
       </div>
     </button>
 
-    <button class="hub-door hub-door-crecer" id="door-crecer" onclick="navTap(this); revHub('crecer')">
+    <button class="hub-door hub-door-crecer hub-an" style="animation-delay:.6s" id="door-crecer" onclick="navTap(this); revHub('crecer')">
       <div class="hub-door-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="#C99A2E" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="6" cy="19" r="2.2"/>
@@ -1429,7 +1449,7 @@ body.hub-clean #app-nav { display:none !important; }
       </div>
     </div>
 
-    <button class="hub-door hub-door-santuario" id="door-santuario" onclick="navTap(this); revHub('santuario')">
+    <button class="hub-door hub-door-santuario hub-an" style="animation-delay:.72s" id="door-santuario" onclick="navTap(this); revHub('santuario')">
       <div class="hub-door-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 2.5V6M10 4.2H14"/>
@@ -1492,7 +1512,7 @@ body.hub-clean #app-nav { display:none !important; }
   </div>
 
   <!-- ═══ BOTTOM NAV BAR ═══ -->
-  <nav class="app-nav" id="app-nav" style="display:none">
+  <nav class="app-nav hub-an-nav" id="app-nav" style="display:none;animation-delay:.95s">
     <button class="app-nav-item" onclick="navTap(this); navigateTo('crecer.html')">
       <div class="app-nav-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -2317,7 +2337,62 @@ function showScreen(name) {
   document.getElementById('scr-login').classList.remove('active');
   document.getElementById('scr-home').classList.remove('active');
   if (name === 'login') document.getElementById('scr-login').classList.add('active');
-  if (name === 'home')  document.getElementById('scr-home').classList.add('active');
+  if (name === 'home') {
+    document.getElementById('scr-home').classList.add('active');
+    startHubEntrance();
+  }
+}
+
+// ── Entrada escalonada del hub ────────────────────────────────────
+// La animación debe correr sobre el hub YA visible, no oculto (si no, corre
+// tapada y termina antes de verse). El home puede estar bajo el splash de
+// onboarding (#ob-splash): en ese caso esperamos a que el splash se oculte.
+function startHubEntrance() {
+  if (window._hubEntranceArmed) return;
+  window._hubEntranceArmed = true;
+  var sp = document.getElementById('ob-splash');
+  var splashVisible = sp && getComputedStyle(sp).display !== 'none';
+  if (splashVisible) {
+    var obs = new MutationObserver(function() {
+      if (getComputedStyle(sp).display === 'none') { obs.disconnect(); _runHubEntrance(); }
+    });
+    obs.observe(sp, { attributes:true, attributeFilter:['style'] });
+  } else {
+    _runHubEntrance();
+  }
+}
+function _runHubEntrance() {
+  // Doble rAF: garantiza que el navegador pintó el estado inicial (opacity:0)
+  // antes de añadir .hub-go, de modo que la animación arranque visible.
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() {
+      document.body.classList.add('hub-go');
+      if (!document.body.classList.contains('hub-clean')) _hubFirstPaintOdometro();
+      // Al terminar la entrada, quitar clases para devolver los estados
+      // naturales (p.ej. que el :active de las puertas vuelva a responder).
+      setTimeout(function() {
+        document.body.classList.remove('hub-go');
+        var els = document.querySelectorAll('.hub-an, .hub-an-nav');
+        for (var i = 0; i < els.length; i++) {
+          els[i].classList.remove('hub-an', 'hub-an-nav');
+          els[i].style.animationDelay = '';
+        }
+      }, 2200);
+    });
+  });
+}
+// Llenado inicial del anillo: arranca vacío y transiciona al valor real que
+// ya calculó updateOdometro (no toca el cálculo). Solo la primera pintura.
+function _hubFirstPaintOdometro() {
+  var arc = document.getElementById('odo-arc');
+  if (!arc) return;
+  var C = 2 * Math.PI * 27; // circunferencia (r=27) ≈ 169.6
+  arc.style.transition = 'none';
+  arc.style.strokeDashoffset = C.toFixed(1);   // vacío
+  void arc.getBoundingClientRect();            // reflow → fija el estado vacío
+  arc.style.transition = 'stroke-dashoffset 1.1s cubic-bezier(.16,1,.3,1) .55s';
+  updateOdometro();                            // fija el offset real → transiciona
+  setTimeout(function() { arc.style.transition = ''; }, 1800); // devuelve la base CSS
 }
 
 // ── Auth state ────────────────────────────────────────────────────
