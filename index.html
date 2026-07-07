@@ -813,6 +813,10 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   overscroll-behavior:contain;
   padding-bottom:16px;
 }
+/* Los hijos del lobby NO deben encogerse para caber: deben conservar su alto
+   natural y desbordar el contenedor, de modo que overflow-y:auto haga scroll.
+   (Sin esto, flex-shrink:1 comprime el acordeón abierto y su overflow:hidden lo recorta.) */
+#scr-home.active > * { flex-shrink:0; }
 
 /* ══ PREFS META ══ */
 .prefs-section { margin-top:18px; padding-top:16px; border-top:1px solid var(--border); }
