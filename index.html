@@ -2587,9 +2587,13 @@ window.activarSenalTaller = function(retiro) {
 };
 
 // Si el panel de Santuario está abierto y su contenido cambió de alto, re-mide.
+// (Tras abrirse el tope queda en 'none' y el contenido ya fluye solo; sólo hace
+// falta re-medir si aún tiene un tope en px por estar a mitad de la animación.)
 function _remedirSantuario() {
   var r = document.getElementById('rv-santuario');
-  if (r && r.classList.contains('open')) r.style.maxHeight = r.scrollHeight + 'px';
+  if (r && r.classList.contains('open') && r.style.maxHeight !== 'none') {
+    r.style.maxHeight = r.scrollHeight + 'px';
+  }
 }
 
 function _limpiarSenalTaller() {
@@ -3090,17 +3094,38 @@ function revHub(which){
     var d=document.getElementById(map[k][0]), r=document.getElementById(map[k][1]);
     if(!d||!r) return;
     if(k===which){
-      d.classList.toggle('open');
-      var abrir = r.classList.toggle('open');
-      r.style.maxHeight = abrir ? (r.scrollHeight + 'px') : '';
+      if(r.classList.contains('open')){ d.classList.remove('open'); _cerrarReveal(r); }
+      else { d.classList.add('open'); _abrirReveal(r); }
     }
     else {
       d.classList.remove('open');
-      if(r.classList.contains('open')){ r.classList.remove('open'); r.style.maxHeight = ''; }
+      if(r.classList.contains('open')) _cerrarReveal(r);
     }
   });
 }
 window.revHub = revHub;
+
+// Abre midiendo la altura real; al terminar la animación libera el tope (max-height:none)
+// para que el panel siga el alto de su contenido aunque éste crezca después
+// (fuentes web que cargan, renderTuCamino asíncrono, banner del Santuario…).
+function _abrirReveal(r){
+  r.classList.add('open');
+  r.style.maxHeight = r.scrollHeight + 'px';
+  var done = function(e){
+    if(e.target !== r || e.propertyName !== 'max-height') return;
+    r.removeEventListener('transitionend', done);
+    if(r.classList.contains('open')) r.style.maxHeight = 'none';
+  };
+  r.addEventListener('transitionend', done);
+}
+
+// Cierra: fija el alto actual en px (por si estaba en 'none'), fuerza reflow y colapsa a 0.
+function _cerrarReveal(r){
+  r.style.maxHeight = r.scrollHeight + 'px';
+  void r.offsetHeight;
+  r.classList.remove('open');
+  r.style.maxHeight = '';
+}
 
 </script>
 
