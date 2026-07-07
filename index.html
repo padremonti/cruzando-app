@@ -808,7 +808,10 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   display:flex !important;
   flex-direction:column;
   height:calc(100dvh - 72px);
-  overflow:hidden;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  padding-bottom:16px;
 }
 
 /* ══ PREFS META ══ */
@@ -3114,7 +3117,11 @@ function _abrirReveal(r){
   var done = function(e){
     if(e.target !== r || e.propertyName !== 'max-height') return;
     r.removeEventListener('transitionend', done);
-    if(r.classList.contains('open')) r.style.maxHeight = 'none';
+    if(r.classList.contains('open')){
+      r.style.maxHeight = 'none';
+      // Asegura que el panel recién abierto quede visible dentro del scroll del lobby.
+      try { r.scrollIntoView({ block:'nearest', behavior:'smooth' }); } catch(_) {}
+    }
   };
   r.addEventListener('transitionend', done);
 }
