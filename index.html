@@ -902,7 +902,12 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 .hub-door-titulo { font-family:'Crimson Pro',serif; font-size:21px; font-weight:700; }
 .hub-door-sub { font-size:0.85rem; color:var(--hub-cyan); margin-top:2px; }
 .hub-door-arrow { font-size:1.3rem; color:var(--hub-cyan); flex-shrink:0; transition:transform .3s; }
-.hub-door.open .hub-door-arrow { transform:rotate(90deg); }
+.hub-door.open .hub-door-arrow { transform:rotate(180deg); }
+/* ── Modo limpio (1ª visita de sesión): oculta chrome, deja saludo + puertas ── */
+body.hub-clean .stats-bar,        /* drawer + racha + metros de un golpe */
+body.hub-clean .hub-odo-ring,     /* anillo del odómetro */
+body.hub-clean .hub-odo-line,     /* texto del odómetro */
+body.hub-clean #app-nav { display:none !important; }
 .hub-reveal { max-height:0; overflow:hidden; transition:max-height .38s ease; margin:0 16px; }
 #rv-santuario .banner-retiro { margin:2px 0 10px; }
 #rv-santuario .banner-retiro-btn { background:var(--orange); }
@@ -1401,7 +1406,6 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
         <div class="hub-door-titulo">Sanar</div>
         <div class="hub-door-sub">¿Cómo estás hoy?</div>
       </div>
-      <div class="hub-door-arrow">→</div>
     </button>
 
     <button class="hub-door hub-door-crecer" id="door-crecer" onclick="navTap(this); revHub('crecer')">
@@ -1416,7 +1420,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
         <div class="hub-door-titulo">Crecer</div>
         <div class="hub-door-sub">Avanza, misterio a misterio.</div>
       </div>
-      <div class="hub-door-arrow">→</div>
+      <span class="hub-door-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px"><path d="M6 9l6 6 6-6"/></svg></span>
     </button>
     <div class="hub-reveal" id="rv-crecer">
       <div class="hub-reveal-inner">
@@ -1437,7 +1441,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
         <div class="hub-door-titulo">El Santuario</div>
         <div class="hub-door-sub">Retiros para detenerte y respirar.</div>
       </div>
-      <div class="hub-door-arrow">→</div>
+      <span class="hub-door-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px"><path d="M6 9l6 6 6-6"/></svg></span>
     </button>
     <div class="hub-reveal" id="rv-santuario">
       <div class="hub-reveal-inner">
@@ -1706,6 +1710,16 @@ window.toggleDark = function() {
   if (tl) tl.textContent = isLight ? 'Tema claro' : 'Tema oscuro';
 };
 if (isLight) applyTheme(true);
+
+// ── Estado del hub: limpio (1ª visita de sesión) vs completo (re-visita) ──
+// Va aquí (no en <head>) para aprovechar el spinner (#scr-home aún oculto) y
+// evitar el flash del estado equivocado, igual que el tema.
+var hubVisto = sessionStorage.getItem('cruzando_hub_visto');
+if (!hubVisto) {
+  document.body.classList.add('hub-clean');
+  sessionStorage.setItem('cruzando_hub_visto', '1');
+}
+// si ya existe la clave → no se añade la clase → hub completo
 
 // ── Preferencias ──────────────────────────────────────────────────
 function getPrefs() {
