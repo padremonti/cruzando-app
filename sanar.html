@@ -214,7 +214,13 @@ body {
   will-change:transform, opacity; backface-visibility:hidden;
   transition:box-shadow .25s, border-color .25s;
 }
-.wheel .pain-card.centered { border-color:var(--_eje,var(--brand)); box-shadow:0 12px 32px -14px var(--shadow); }
+.wheel .pain-card.centered {
+  border-color:var(--_eje,var(--brand));
+  /* Halo cian difuso (rgba precomputado de #02BBE0) — señala "activa/accionable"
+     sin texto. Filo tenue (0 0 0 1px) + resplandor suave (0 8px 40px -6px). */
+  box-shadow: 0 0 0 1px rgba(2,187,224,.40),
+              0 8px 40px -6px rgba(2,187,224,.50);
+}
 
 /* ── Entrada escalonada del elenco (familia de movimiento del hub) ── */
 /* Sin reglas reduce-motion propias: el @media global (arriba) ya las cubre.
@@ -223,6 +229,23 @@ body {
 .san-an{opacity:0;transform:translateY(18px)}
 .san-go .san-an{animation:sanRise .6s cubic-bezier(.2,.7,.3,1) forwards}
 @keyframes sanRise{to{opacity:1;transform:translateY(0)}}
+
+/* ── Velo de foco (confirmación al tocar la tarjeta central) ── */
+.foco-overlay{
+  position:fixed; inset:0; z-index:300;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:20px; padding:28px 22px;
+  background:rgba(0,10,14,.72);
+  -webkit-backdrop-filter:blur(7px); backdrop-filter:blur(7px);
+}
+.foco-card-wrap{ width:100%; max-width:440px; }
+.foco-overlay .pain-card{ box-shadow:0 18px 50px -12px rgba(0,0,0,.6); cursor:default; }
+.foco-anim .pain-card{ animation:focoIn .32s cubic-bezier(.2,.7,.3,1) both; }
+@keyframes focoIn{ from{opacity:0;transform:scale(.92)} to{opacity:1;transform:scale(1)} }
+.foco-actions{ width:100%; max-width:440px; display:flex; flex-direction:column; gap:10px; }
+.foco-btn{ width:100%; padding:14px; border-radius:14px; border:none; font-family:inherit; font-size:1rem; font-weight:700; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.foco-btn-go{ background:var(--orange); color:#fff; }
+.foco-btn-cancel{ background:transparent; color:var(--text-soft); font-weight:600; }
 
 /* ── Coach-marks (onboarding de primer uso) ── */
 .coach {
@@ -671,9 +694,39 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 
   window.onWheelTap = function(elm, id){
     var w = $('wheel');
-    if (w && w._centered === elm) { pickPain(id); }        // tarjeta centrada → entra
+    if (w && w._centered === elm) { abrirFoco(id); }       // tarjeta centrada → velo de confirmación
     else { elm.scrollIntoView({ block:'center', behavior: reduceMotion ? 'auto' : 'smooth' }); }  // si no, la centra
   };
+
+  // ── Velo de foco: paso de confirmación antes de entrar a la acogida ──────
+  var _focoEsc = null;
+  function abrirFoco(painId){
+    var p = painById[painId]; if (!p) return;
+    if ($('foco')) return;
+    cerrarCoach();
+    var ov = el(
+      '<div class="foco-overlay'+(reduceMotion?'':' foco-anim')+'" id="foco" role="dialog" aria-modal="true" aria-label="Confirmar elección">'+
+        '<div class="foco-card-wrap">'+painCard(p)+'</div>'+
+        '<div class="foco-actions">'+
+          '<button class="foco-btn foco-btn-go" id="foco-go">Continuar</button>'+
+          '<button class="foco-btn foco-btn-cancel" id="foco-cancel">Cancelar</button>'+
+        '</div>'+
+      '</div>');
+    // La tarjeta del velo es solo visual: anula su onclick (onWheelTap) para que
+    // tocarla no dispare nada; y solo el fondo (no la tarjeta) cierra el velo.
+    var card = ov.querySelector('.pain-card'); if (card) card.onclick = null;
+    ov.addEventListener('click', function(e){ if (e.target === ov) cerrarFoco(); });
+    document.body.appendChild(ov);
+    $('foco-go').addEventListener('click', function(){ cerrarFoco(); pickPain(painId); });
+    $('foco-cancel').addEventListener('click', function(){ cerrarFoco(); });
+    _focoEsc = function(e){ if (e.key === 'Escape') cerrarFoco(); };
+    document.addEventListener('keydown', _focoEsc);
+    $('foco-go').focus();
+  }
+  function cerrarFoco(){
+    var ov = $('foco'); if (ov) ov.remove();
+    if (_focoEsc) { document.removeEventListener('keydown', _focoEsc); _focoEsc = null; }
+  }
 
   // ── Onboarding de primer uso (coach-marks) ──────────────────────
   // Persiste un contador; tras ~3-4 veces no reaparece.
