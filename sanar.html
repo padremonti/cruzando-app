@@ -231,18 +231,43 @@ body {
 @keyframes sanRise{to{opacity:1;transform:translateY(0)}}
 
 /* ── Velo de foco (confirmación al tocar la tarjeta central) ── */
+/* Tarjeta + botones entran como un solo gesto: la tarjeta se asienta arriba y
+   los botones emergen debajo (desfase mínimo). Misma curva de la app; el
+   cierre acompaña (revierte al quitar .on). Sin reglas reduce-motion propias:
+   el @media global reduce las transiciones a instantáneas → aparecen directo. */
 .foco-overlay{
   position:fixed; inset:0; z-index:300;
   display:flex; flex-direction:column; align-items:center; justify-content:center;
   gap:20px; padding:28px 22px;
   background:rgba(0,10,14,.72);
   -webkit-backdrop-filter:blur(7px); backdrop-filter:blur(7px);
+  opacity:0; transition:opacity .3s ease;
 }
-.foco-card-wrap{ width:100%; max-width:440px; }
+.foco-overlay.on{ opacity:1; }
+.foco-card-wrap{
+  width:100%; max-width:440px;
+  opacity:0; transform:translateY(18px) scale(.96);
+  transition:opacity .45s cubic-bezier(.2,.7,.3,1), transform .45s cubic-bezier(.2,.7,.3,1);
+}
+.foco-actions{
+  width:100%; max-width:440px; display:flex; flex-direction:column; gap:10px;
+  opacity:0; transform:translateY(24px);
+  transition:opacity .45s cubic-bezier(.2,.7,.3,1) .07s, transform .45s cubic-bezier(.2,.7,.3,1) .07s;
+}
+.foco-overlay.on .foco-card-wrap{ opacity:1; transform:translateY(0) scale(1); }
+.foco-overlay.on .foco-actions{ opacity:1; transform:translateY(0); }
+/* Salida (reverso de la entrada): los botones bajan/ocultan primero, la tarjeta
+   baja después (desfase espejo), y el velo se levanta. */
+.foco-overlay.leaving{ opacity:0; }
+.foco-overlay.leaving .foco-actions{
+  opacity:0; transform:translateY(24px);
+  transition:opacity .4s cubic-bezier(.2,.7,.3,1), transform .4s cubic-bezier(.2,.7,.3,1);
+}
+.foco-overlay.leaving .foco-card-wrap{
+  opacity:0; transform:translateY(18px) scale(.96);
+  transition:opacity .4s cubic-bezier(.2,.7,.3,1) .06s, transform .4s cubic-bezier(.2,.7,.3,1) .06s;
+}
 .foco-overlay .pain-card{ box-shadow:0 18px 50px -12px rgba(0,0,0,.6); cursor:default; }
-.foco-anim .pain-card{ animation:focoIn .32s cubic-bezier(.2,.7,.3,1) both; }
-@keyframes focoIn{ from{opacity:0;transform:scale(.92)} to{opacity:1;transform:scale(1)} }
-.foco-actions{ width:100%; max-width:440px; display:flex; flex-direction:column; gap:10px; }
 .foco-btn{ width:100%; padding:14px; border-radius:14px; border:none; font-family:inherit; font-size:1rem; font-weight:700; cursor:pointer; -webkit-tap-highlight-color:transparent; }
 .foco-btn-go{ background:var(--orange); color:#fff; }
 .foco-btn-cancel{ background:transparent; color:var(--text-soft); font-weight:600; }
@@ -705,7 +730,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     if ($('foco')) return;
     cerrarCoach();
     var ov = el(
-      '<div class="foco-overlay'+(reduceMotion?'':' foco-anim')+'" id="foco" role="dialog" aria-modal="true" aria-label="Confirmar elección">'+
+      '<div class="foco-overlay" id="foco" role="dialog" aria-modal="true" aria-label="Confirmar elección">'+
         '<div class="foco-card-wrap">'+painCard(p)+'</div>'+
         '<div class="foco-actions">'+
           '<button class="foco-btn foco-btn-go" id="foco-go">Continuar</button>'+
@@ -717,15 +742,32 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     var card = ov.querySelector('.pain-card'); if (card) card.onclick = null;
     ov.addEventListener('click', function(e){ if (e.target === ov) cerrarFoco(); });
     document.body.appendChild(ov);
-    $('foco-go').addEventListener('click', function(){ cerrarFoco(); pickPain(painId); });
+    // Continuar → cierre directo (la transición es hacia la acogida, no en reversa).
+    $('foco-go').addEventListener('click', function(){ cerrarFoco(true); pickPain(painId); });
+    // Cancelar / tap-fuera / Esc → salida coreografiada (reverso de la entrada).
     $('foco-cancel').addEventListener('click', function(){ cerrarFoco(); });
     _focoEsc = function(e){ if (e.key === 'Escape') cerrarFoco(); };
     document.addEventListener('keydown', _focoEsc);
+    // Un frame después → .on dispara la entrada coordinada (tarjeta + botones).
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ ov.classList.add('on'); }); });
     $('foco-go').focus();
   }
-  function cerrarFoco(){
-    var ov = $('foco'); if (ov) ov.remove();
+  // immediate=true → quita el velo al instante (Continuar/reduce-motion).
+  // Si no, corre la salida en reversa y remueve tras terminar (transitionend + respaldo).
+  function cerrarFoco(immediate){
+    var ov = $('foco');
     if (_focoEsc) { document.removeEventListener('keydown', _focoEsc); _focoEsc = null; }
+    if (!ov) return;
+    if (immediate || reduceMotion) { ov.remove(); return; }
+    if (ov._closing) return;
+    ov._closing = true;
+    ov.classList.remove('on');
+    ov.classList.add('leaving');                     // dispara las transiciones de salida
+    var done = false;
+    var fin = function(){ if (done) return; done = true; if (ov.parentNode) ov.remove(); };
+    var wrap = ov.querySelector('.foco-card-wrap');  // el último en asentarse (lleva el desfase)
+    if (wrap) wrap.addEventListener('transitionend', fin);
+    setTimeout(fin, 480);                            // respaldo si transitionend no dispara
   }
 
   // ── Onboarding de primer uso (coach-marks) ──────────────────────
