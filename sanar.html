@@ -217,12 +217,12 @@ body {
 .wheel .pain-card.centered { border-color:var(--_eje,var(--brand)); box-shadow:0 12px 32px -14px var(--shadow); }
 
 /* ── Entrada escalonada del elenco (familia de movimiento del hub) ── */
-/* Sin reglas reduce-motion propias: el @media global (arriba) ya las cubre. */
+/* Sin reglas reduce-motion propias: el @media global (arriba) ya las cubre.
+   El wheel entra como bloque (su contenedor lleva .san-an); las tarjetas NO
+   tienen entrada propia — conservan el transform 3D inline de update(). */
 .san-an{opacity:0;transform:translateY(18px)}
 .san-go .san-an{animation:sanRise .6s cubic-bezier(.2,.7,.3,1) forwards}
 @keyframes sanRise{to{opacity:1;transform:translateY(0)}}
-.san-go .san-cen{animation:sanFocus .6s cubic-bezier(.2,.7,.3,1) forwards}
-@keyframes sanFocus{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
 
 /* ── Coach-marks (onboarding de primer uso) ── */
 .coach {
@@ -548,7 +548,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
         modeBtn('ejes','Ejes','<circle cx="7" cy="7" r="3"/><circle cx="17" cy="7" r="3"/><circle cx="7" cy="17" r="3"/><circle cx="17" cy="17" r="3"/>')+
       '</div>'+
       '<div id="elenco-controls" class="san-an" style="animation-delay:.28s"></div>'+
-      '<div id="elenco-list"></div>';
+      '<div id="elenco-list" class="san-an" style="animation-delay:.4s"></div>';
 
     var c = $('elenco-controls');
     if (estado.modo === 'buscar') {
@@ -572,34 +572,15 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     _sanEntrada();
   }
 
-  // Dispara la animación de entrada del elenco. Re-anima en cada entrada a la
-  // fase (incluido volver del handoff, porque renderElenco re-renderiza).
-  // Enfoca por escala (.san-cen) la tarjeta que ya quedó centrada.
-  var _sanGen = 0;
+  // Re-dispara la cascada de entrada del elenco en cada entrada a la fase
+  // (incluido volver del handoff, porque renderElenco re-renderiza). El wheel
+  // entra como bloque vía el .san-an de su contenedor (#elenco-list); las
+  // tarjetas conservan intacto su transform 3D inline de update().
   function _sanEntrada(){
     var view = $('view'); if (!view) return;
-    var w = $('wheel');
-    if (w && w._centered && w._centered.classList.contains('san-an')) {
-      w._centered.classList.remove('san-an');
-      w._centered.classList.add('san-cen');
-    }
-    var gen = ++_sanGen;
     view.classList.remove('san-go');
     requestAnimationFrame(function(){
-      requestAnimationFrame(function(){
-        view.classList.add('san-go');
-        // Al terminar la entrada, quitar las clases para que el wheel 3D
-        // recupere el control de transform/opacity (forwards los bloquea).
-        setTimeout(function(){
-          if (gen !== _sanGen) return;   // hubo otra entrada; que la suya limpie
-          var els = view.querySelectorAll('.san-an, .san-cen');
-          for (var i = 0; i < els.length; i++){
-            els[i].classList.remove('san-an', 'san-cen');
-            els[i].style.animationDelay = '';
-          }
-          if (w && w._update) w._update();  // repinta el estado 3D correcto
-        }, 1500);
-      });
+      requestAnimationFrame(function(){ view.classList.add('san-go'); });
     });
   }
 
@@ -642,21 +623,17 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   function renderWheel(list, hint){
     var box = $('elenco-list'); if (!box) return;
     box.innerHTML =
-      (hint ? '<div class="wheel-hint san-an" style="animation-delay:.4s">'+esc(hint)+'</div>' : '')+
+      (hint ? '<div class="wheel-hint">'+esc(hint)+'</div>' : '')+
       '<div class="wheel" id="wheel"><div class="wheel-pad"></div>'+
-        list.map(function(p, i){ return painCard(p, i); }).join('')+
+        list.map(function(p){ return painCard(p); }).join('')+
       '<div class="wheel-pad"></div></div>';
     setupWheel();
   }
 
-  function painCard(p, i){
+  function painCard(p){
     var e = ejeData(p.ejePrincipal);
-    // Solo las primeras 4 tarjetas entran escalonadas (.san-an, delays desde
-    // .4s +.12s); de la 5ª en adelante ya presentes (las pinta el wheel 3D).
-    var anim = (i < 4) ? ' san-an' : '';
-    var delay = (i < 4) ? (';animation-delay:' + (0.4 + i * 0.12).toFixed(2) + 's') : '';
     // La tarjeta muestra SOLO la frase + color/label del eje. Nunca los tags.
-    return '<button class="pain-card'+anim+'" data-id="'+p.id+'" style="--_eje:'+e.color+delay+'" onclick="onWheelTap(this,\''+p.id+'\')">'+
+    return '<button class="pain-card" data-id="'+p.id+'" style="--_eje:'+e.color+'" onclick="onWheelTap(this,\''+p.id+'\')">'+
       esc(p.texto)+
       '<span class="pain-eje">'+ejeSVG(p.ejePrincipal)+esc(e.label)+'</span>'+
       '</button>';
@@ -678,21 +655,16 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
         var cc = c.offsetTop + c.offsetHeight / 2;
         var d = (cc - vc) / half;                 // ~-1 (arriba) .. 1 (abajo)
         var ad = Math.min(Math.abs(d), 1);
-        // Durante la entrada NO pisar el transform/opacity de la animación
-        // (.san-an/.san-cen); solo se detecta el centro. Al limpiar, w._update repinta.
-        if (!c.classList.contains('san-an') && !c.classList.contains('san-cen')) {
-          var scale = 1 - ad * 0.16;
-          var op = 1 - ad * 0.55;
-          var rot = reduceMotion ? 0 : Math.max(-1, Math.min(1, d)) * -15;  // rotateX ∝ distancia al centro
-          c.style.opacity = op.toFixed(3);
-          c.style.transform = 'scale(' + scale.toFixed(3) + ')' + (rot ? ' rotateX(' + rot.toFixed(1) + 'deg)' : '');
-        }
+        var scale = 1 - ad * 0.16;
+        var op = 1 - ad * 0.55;
+        var rot = reduceMotion ? 0 : Math.max(-1, Math.min(1, d)) * -15;  // rotateX ∝ distancia al centro
+        c.style.opacity = op.toFixed(3);
+        c.style.transform = 'scale(' + scale.toFixed(3) + ')' + (rot ? ' rotateX(' + rot.toFixed(1) + 'deg)' : '');
         if (ad < bestD) { bestD = ad; best = c; }
       });
       cards.forEach(function(c){ c.classList.toggle('centered', c === best); });
       w._centered = best;
     }
-    w._update = update;   // expuesto para repintar tras la entrada
     w.addEventListener('scroll', function(){ if (!wheelRAF) wheelRAF = requestAnimationFrame(update); }, { passive:true });
     update();
   }
