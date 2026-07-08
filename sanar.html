@@ -573,6 +573,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   }
 
   function onBack(){
+    estado._acgEntrada = false;   // retroceso → recepción/progreso fijos, sin re-animar
     if (estado.fase === 'handoff') { estado.fase = 'acogida'; estado.pasoAcogida = Math.max(0,(estado.misterioSel.acogida||[]).length-1); return render(); }
     if (estado.fase === 'acogida') {
       if (estado.pasoAcogida > 0) { estado.pasoAcogida--; estado.senales.pop(); return render(); }
@@ -797,6 +798,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     estado.pasoAcogida = 0;
     estado.senales = [];
     estado.fase = 'acogida';
+    estado._acgEntrada = true;   // primera entrada → cascada completa
     render();
     window.scrollTo(0,0);
   };
@@ -830,14 +832,18 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     var ejeColor = ejeData(p.ejePrincipal).color;
     var dots = pasos.map(function(_,i){ return '<span class="p'+(i<=estado.pasoAcogida?' on':'')+'"></span>'; }).join('');
 
+    // Primera entrada (desde pickPain) → cascada completa. Avance/retroceso →
+    // recepción y progreso fijos (sin .san-an); solo animan pregunta + body.
+    var first = !!estado._acgEntrada;
+
     v.innerHTML =
-      '<div class="acg-recepcion">'+
+      '<div class="acg-recepcion'+(first?' san-an':'')+'"'+(first?' style="animation-delay:0s"':'')+'>'+
         '<div class="dolor">«'+esc(p.texto)+'»</div>'+
         '<div class="apertura">'+esc(p.apertura)+'</div>'+
       '</div>'+
-      '<div class="acg-progress" aria-hidden="true">'+dots+'</div>'+
-      '<div class="acg-pregunta">'+esc(pl.pregunta||'')+'</div>'+
-      '<div id="acg-body" style="--_eje:'+ejeColor+'"></div>'+
+      '<div class="acg-progress'+(first?' san-an':'')+'" aria-hidden="true"'+(first?' style="animation-delay:.12s"':'')+'>'+dots+'</div>'+
+      '<div class="acg-pregunta san-an" style="animation-delay:'+(first?'.24s':'0s')+'">'+esc(pl.pregunta||'')+'</div>'+
+      '<div id="acg-body" class="san-an" style="--_eje:'+ejeColor+';animation-delay:'+(first?'.36s':'.12s')+'"></div>'+
       '<div class="acg-eco" id="acg-eco" aria-live="polite"></div>'+
       '<button class="btn-primary" id="acg-cont" disabled onclick="avanzarAcogida()">Continuar</button>';
 
@@ -855,6 +861,8 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     // Continuidad si el usuario retrocede: reactiva Continuar y muestra su eco
     var prev = estado.senales[estado.pasoAcogida];
     if (prev) { setEco(prev.eco); var cb = $('acg-cont'); if (cb) cb.disabled = false; }
+
+    _sanEntrada();   // dispara la cascada (.san-go sobre #view), como en el elenco
   }
 
   // Selección única genérica: cada opción debe traer .clave y .eco
@@ -1019,6 +1027,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 
   window.avanzarAcogida = function(){
     var pasos = (estado.misterioSel && estado.misterioSel.acogida) || [];
+    estado._acgEntrada = false;   // avance de paso → no re-animar recepción/progreso
     estado.pasoAcogida++;
     if (estado.pasoAcogida >= pasos.length) {
       estado.senales = estado.senales.filter(Boolean);
