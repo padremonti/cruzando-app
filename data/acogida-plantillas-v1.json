@@ -91,15 +91,16 @@
       "familia": "comoEstas",
       "mecanica": "cuerpo",
       "alternas": [],
-      "pregunta": "¿Dónde lo sientes en el cuerpo?",
-      "seleccionMultiple": true,
+      "pregunta": "¿En qué parte del cuerpo lo notas más?",
+      "seleccionMultiple": false,
       "zonas": [
         { "clave": "cabeza", "eco": "La cabeza también aprieta lo que el corazón no ha soltado." },
         { "clave": "garganta", "eco": "A veces el nudo en la garganta solo pide respirar." },
         { "clave": "hombros", "eco": "Puedes soltar aquí un poco de ese peso." },
         { "clave": "pecho", "eco": "El pecho guarda lo que aún no tiene palabras." },
         { "clave": "estomago", "eco": "El cuerpo sabe antes que la mente." },
-        { "clave": "manos", "eco": "Lo que sostienes, también puedes ofrecerlo." }
+        { "clave": "manos", "eco": "Lo que sostienes, también puedes ofrecerlo." },
+        { "clave": "noUbico", "texto": "No sabría decir", "aparte": true, "eco": "No saber dónde te habita también es honesto." }
       ]
     },
 

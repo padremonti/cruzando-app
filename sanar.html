@@ -333,15 +333,28 @@ body {
 .tm-labels span { font-size:0.82rem; color:var(--text-soft); line-height:1.3; }
 .tm-labels .max { color:var(--text); font-weight:600; }
 
-/* ── Acogida · cuerpo (zonas) ── */
-.cu-wrap { display:flex; justify-content:center; margin:2px 0 10px; }
-.cu-svg { width:148px; height:auto; }
+/* ── Acogida · cuerpo (zonas) — dos columnas: muñeco + lista, selección única ── */
+.cu-wrap { display:flex; align-items:center; justify-content:center; gap:16px; margin:2px 0 10px; }
+.cu-svg { width:132px; height:auto; flex-shrink:0; }
 .cu-base > * { fill:var(--card2); stroke:var(--border); stroke-width:1.3; }
 .cu-zone { cursor:pointer; }
-.cu-zone > * { fill:var(--card); stroke:var(--border); stroke-width:1.4; transition:fill .2s; }
-.cu-zone.on > * { fill:var(--_eje,var(--brand)); stroke:var(--_eje,var(--brand)); }
-.cu-zone:focus { outline:none; }
-.cu-zone:focus-visible > * { stroke:var(--brand-soft); stroke-width:2.4; }
+.cu-zone > * { fill:var(--card); stroke:var(--border); stroke-width:1.4; transition:fill .2s, stroke .2s; }
+.cu-zone.on > * { fill:var(--brand); stroke:var(--brand); }          /* iluminación cian */
+.cu-zone.on { filter:drop-shadow(0 0 5px var(--brand)); }
+/* lista de zonas — camino accesible (botones nativos con texto) */
+.cu-list { display:flex; flex-direction:column; gap:8px; flex:1; min-width:0; max-width:196px; }
+.cu-zbtn {
+  display:block; width:100%; text-align:left; cursor:pointer;
+  padding:11px 14px; border-radius:12px; min-height:44px;
+  background:var(--card); border:1.5px solid var(--border); color:var(--text);
+  font-family:inherit; font-size:0.9rem; font-weight:600;
+  transition:border-color .2s, background .2s;
+}
+.cu-zbtn.on { border-color:var(--brand); background:var(--brand-ultra); }
+.cu-zbtn:focus-visible { outline:2px solid var(--brand-soft); outline-offset:2px; }
+/* "No sabría decir" — salida aparte: no es una parte del cuerpo más */
+.cu-aparte { margin-top:8px; border-style:dashed; font-style:italic; color:var(--text-soft); }
+.cu-aparte.on { border-style:solid; }
 
 /* ── Acogida · sendero (tiempo) ── */
 .sd-wrap { position:relative; margin:10px 2px 12px; }
@@ -997,35 +1010,56 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   }
 
   // 3 · cuerpo (cuerpo) — silueta neutra; zonas de la plantilla (incluida la cabeza); selección múltiple
+  // Texto visible de la lista (limpio: "Cabeza", no "Cabeza (mente)").
+  var CU_LBL = { cabeza:'Cabeza', garganta:'Garganta', hombros:'Hombros', pecho:'Pecho', estomago:'Estómago', manos:'Manos' };
   function rndCuerpo(box, pl, tipo, pre){
     var zonas = pl.zonas || [];
     var byC = {}; zonas.forEach(function(z){ byC[z.clave] = z; });
-    box.innerHTML = '<div class="cu-wrap san-an" style="animation-delay:'+_acgD(0)+'">' + cuerpoSVG(zonas) + '</div>';
-    var sel = {};
-    var nodes = box.querySelectorAll('.cu-zone');
-    function toggle(n){
-      var k = n.getAttribute('data-clave');
-      if (sel[k]) { delete sel[k]; n.classList.remove('on'); n.setAttribute('aria-pressed','false'); }
-      else { sel[k] = true; n.classList.add('on'); n.setAttribute('aria-pressed','true'); }
-      var claves = Object.keys(sel);
-      if (claves.length) {
-        var ecos = claves.map(function(c){ return byC[c] && byC[c].eco; }).filter(Boolean);
-        commit(tipo, claves, ecos);
-      } else {
-        estado.senales[estado.pasoAcogida] = undefined; setEco(''); var c = $('acg-cont'); if (c) c.disabled = true;
-      }
-    }
-    Array.prototype.forEach.call(nodes, function(n){
-      n.addEventListener('click', function(){ toggle(n); });
-      n.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(n); } });
-    });
-    // Retroceso: restaura estado interno (sel) + visual coherentes, sin re-commit.
-    if (pre) {
-      (Array.isArray(pre) ? pre : [pre]).forEach(function(k){
-        var n = box.querySelector('.cu-zone[data-clave="'+k+'"]');
-        if (n) { sel[k] = true; n.classList.add('on'); n.setAttribute('aria-pressed','true'); }
+    // Camino accesible: una lista de <button> con texto visible (molde de las
+    // otras mecánicas). El muñeco solo refleja/permite el tap (no accesible).
+    var lista = zonas.map(function(z){
+      var txt = z.texto || CU_LBL[z.clave] || cap(z.clave);
+      var extra = z.aparte ? ' cu-aparte' : '';   // "No sabría decir" → visualmente aparte
+      return '<button class="cu-zbtn'+extra+'" type="button" data-clave="'+esc(z.clave)+'" aria-pressed="false">'+esc(txt)+'</button>';
+    }).join('');
+    box.innerHTML =
+      '<div class="cu-wrap san-an" style="animation-delay:'+_acgD(0)+'">'+
+        cuerpoSVG(zonas)+
+        '<div class="cu-list" role="group" aria-label="Zonas del cuerpo">'+lista+'</div>'+
+      '</div>';
+
+    var zButtons = box.querySelectorAll('.cu-zbtn');
+    var zGs = box.querySelectorAll('.cu-zone');   // muñeco: sincronía visual, no accesible
+    var selZona = null;
+
+    // Selección ÚNICA con reemplazo: marca una zona, de-marca la anterior,
+    // sincroniza lista (.on + aria-pressed) y muñeco (.on + glow cian), y emite
+    // commit como STRING/STRING (igual que las otras 5 mecánicas).
+    function marca(clave){
+      if (!byC[clave]) return;
+      selZona = clave;
+      Array.prototype.forEach.call(zButtons, function(b){
+        var on = b.getAttribute('data-clave') === clave;
+        b.classList.toggle('on', on);
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
       });
+      Array.prototype.forEach.call(zGs, function(g){
+        g.classList.toggle('on', g.getAttribute('data-clave') === clave);
+      });
+      commit(tipo, clave, byC[clave].eco || '');
     }
+
+    Array.prototype.forEach.call(zButtons, function(b){
+      b.addEventListener('click', function(){ marca(b.getAttribute('data-clave')); });
+    });
+    Array.prototype.forEach.call(zGs, function(g){
+      g.addEventListener('click', function(){ marca(g.getAttribute('data-clave')); });
+    });
+
+    // Retroceso: re-selecciona la única elección previa (string) — repone lista
+    // (.on+aria-pressed) y muñeco (cian si es zona con forma; noUbico no ilumina),
+    // y habilita Continuar (commit). El eco NO se re-muestra (reserva del handoff).
+    if (pre) marca(pre);
   }
   function cuerpoSVG(zonas){
     // Formas por zona (viewBox 0 0 120 250). Sólo se dibujan las de la plantilla.
@@ -1037,7 +1071,6 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
       estomago: '<rect x="40" y="123" width="40" height="34" rx="12"/>',
       manos:    '<circle cx="16" cy="150" r="12"/><circle cx="104" cy="150" r="12"/>'
     };
-    var LBL = { cabeza:'Cabeza (mente)', garganta:'Garganta', hombros:'Hombros', pecho:'Pecho', estomago:'Estómago', manos:'Manos' };
     var base =
       '<g class="cu-base" aria-hidden="true">'+
         '<rect x="18" y="80" width="12" height="66" rx="6"/>'+   // brazo izq
@@ -1045,11 +1078,13 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
         '<rect x="44" y="156" width="14" height="76" rx="7"/>'+  // pierna izq
         '<rect x="62" y="156" width="14" height="76" rx="7"/>'+  // pierna der
       '</g>';
+    // El muñeco es solo sincronía visual/tap: sin semántica (el camino accesible
+    // es la lista de <button>). SVG raíz aria-hidden para no duplicar anuncios.
     var hot = zonas.map(function(z){
       if (!Z[z.clave]) return '';
-      return '<g class="cu-zone" data-clave="'+esc(z.clave)+'" role="button" tabindex="0" aria-pressed="false" aria-label="'+esc(LBL[z.clave]||z.clave)+'">'+Z[z.clave]+'</g>';
+      return '<g class="cu-zone" data-clave="'+esc(z.clave)+'">'+Z[z.clave]+'</g>';
     }).join('');
-    return '<svg class="cu-svg" viewBox="0 0 120 250" fill="none">'+base+hot+'</svg>';
+    return '<svg class="cu-svg" viewBox="0 0 120 250" fill="none" aria-hidden="true">'+base+hot+'</svg>';
   }
 
   // 4 · sendero (tiempo) — camino horizontal con paradas ordinales; selección única
