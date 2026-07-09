@@ -199,6 +199,15 @@ body {
 .ho-ecos li { color:var(--text-soft); font-size:0.9rem; padding:6px 0; border-top:1px solid var(--border); }
 .ho-ecos li:first-child { border-top:none; }
 
+/* ── Handoff · acogida reposada (fade lento propio) ── */
+.ho-flow { text-align:center; padding:10px 4px 6px; }
+.ho-kick { font-size:0.72rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--orange); margin-bottom:14px; }
+.ho-eco-line { font-family:'Crimson Pro',Georgia,serif; font-size:1.12rem; color:var(--text); line-height:1.5; margin:12px 0; }
+.ho-oracion { margin-top:30px; }
+.ho-an { opacity:0; transform:translateY(16px); }
+.san-go .ho-an { animation:hoRise .9s cubic-bezier(.2,.7,.3,1) forwards; }
+@keyframes hoRise { to { opacity:1; transform:translateY(0); } }
+
 /* ── Elenco inmersivo · scroll 3D (modo Navegar) ── */
 .wheel-hint { text-align:center; color:var(--text-soft); font-size:1.02rem; letter-spacing:0.2px; margin:4px 0 12px; }
 .wheel {
@@ -1115,15 +1124,37 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     var m = estado.misterioSel, p = estado.painSel;
     var ecos = estado.senales.map(function(s){ return s && s.eco; }).filter(Boolean);
 
+    // Coreografía reposada con delays largos. Los ecos van uno a uno (0.7 + i*1.5),
+    // y la oración tras un respiro — recalculado por índice para no dejar huecos si
+    // hay menos de 3 ecos. CRÍTICO A11Y: con reduceMotion NO se aplican clases ni
+    // delays → todo se muestra de inmediato (nadie espera ~7s con pantalla vacía).
+    var hasEcos = ecos.length > 0;
+    var lastEco = hasEcos ? (0.7 + (ecos.length - 1) * 1.5) : 0;
+    var oBase   = hasEcos ? (lastEco + 2.0) : 0.2;   // respiro tras el último eco
+
+    function hoEl(cls, delay, html){
+      if (reduceMotion) return '<div class="'+cls+'">'+html+'</div>';
+      return '<div class="'+cls+' ho-an" style="animation-delay:'+(+delay).toFixed(2)+'s">'+html+'</div>';
+    }
+    function hoBtn(cls, delay, onclick, label){
+      if (reduceMotion) return '<button class="'+cls+'" onclick="'+onclick+'">'+label+'</button>';
+      return '<button class="'+cls+' ho-an" style="animation-delay:'+(+delay).toFixed(2)+'s" onclick="'+onclick+'">'+label+'</button>';
+    }
+
     v.innerHTML =
-      '<div class="ho-card">'+
-        '<div class="ho-kicker">El Misterio que estás cruzando</div>'+
-        '<div class="ho-title">'+esc(m.titulo)+'</div>'+
-        '<div class="ho-mal">'+esc(m.mal||'')+'</div>'+
-        (ecos.length ? '<div class="ho-ecos-intro">Lo que trajiste hoy</div><ul class="ho-ecos">'+ecos.map(function(e){ return '<li>'+esc(e)+'</li>'; }).join('')+'</ul>' : '')+
+      '<div class="ho-flow">'+
+        (hasEcos ? hoEl('ho-kick', 0.2, 'Buena noticia:') : '')+
+        ecos.map(function(e, i){ return hoEl('ho-eco-line', 0.7 + i * 1.5, esc(e)); }).join('')+
+        '<div class="ho-oracion">'+
+          hoEl('ho-kick',  oBase,       'Puedes orar con')+
+          hoEl('ho-title', oBase + 0.6, esc(m.titulo))+
+          hoEl('ho-mal',   oBase + 1.2, esc(m.mal || ''))+
+        '</div>'+
       '</div>'+
-      '<button class="btn-primary" onclick="irMini()">Entrar al Misterio</button>'+
-      '<button class="btn-ghost" onclick="volverElenco()">Elegir otro dolor</button>';
+      hoBtn('btn-primary', oBase + 1.8, 'irMini()',      'Entrar al Misterio')+
+      hoBtn('btn-ghost',   oBase + 2.0, 'volverElenco()', 'Elegir otro dolor');
+
+    _sanEntrada();   // toggle .san-go → dispara las animaciones (no-op bajo reduceMotion)
   }
 
   window.irMini = function(){
