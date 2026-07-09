@@ -16,7 +16,8 @@
       "Bash(awk '/^function buildMap\\\\\\(\\\\\\) \\\\{$/{f=1} f{c++} /^function closePopup\\\\\\(\\\\\\) \\\\{$/{print c-1; exit}' index.html)",
       "Bash(awk -F: '$1>1429')",
       "Bash(awk '/popup-mystery-frame\" id=/{f=1} f{c++; print NR\": \"$0} /^          <\\\\/div>$/ && f{exit}' index.html)",
-      "Bash(awk '/popup-overlay\" id=\"treasure-overlay\"/{f=1} f{c++} /^  <\\\\/div>$/ && f{print \"lineas:\"c; exit}' index.html)"
+      "Bash(awk '/popup-overlay\" id=\"treasure-overlay\"/{f=1} f{c++} /^  <\\\\/div>$/ && f{print \"lineas:\"c; exit}' index.html)",
+      "Bash(node -e \"const d=require\\('./data/0101-pains.json'\\);const m=d.misterios[0];console.log\\('ref:',JSON.stringify\\(m.ref\\)\\);console.log\\('mal:',JSON.stringify\\(m.mal\\)\\);console.log\\('n misterios:',d.misterios.length\\);console.log\\('un pain apertura:',JSON.stringify\\(\\(m.pains[0]||{}\\).apertura\\)\\);\")"
     ]
   }
 }

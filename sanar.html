@@ -817,7 +817,8 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   }
   function commit(tipo, valor, eco){
     estado.senales[estado.pasoAcogida] = { tipo:tipo, valor:valor, eco:eco };
-    setEco(eco);
+    // El eco ya NO se muestra durante la acogida: se reserva para el handoff.
+    // La señal (con su eco) se sigue acumulando en estado.senales, intacta.
     var c = $('acg-cont'); if (c) c.disabled = false;
   }
 
@@ -853,19 +854,25 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
       '<button class="btn-primary" id="acg-cont" disabled onclick="avanzarAcogida()">Continuar</button>';
 
     var body = $('acg-body');
+    var prev = estado.senales[estado.pasoAcogida];   // señal previa (si se retrocede)
     switch (mec) {
       case 'corazones': rndCorazones(body, pl, tipo); break;
       case 'termometro': rndTermometro(body, pl, tipo); break;
-      case 'cuerpo':     rndCuerpo(body, pl, tipo); break;
+      case 'cuerpo':     rndCuerpo(body, pl, tipo, prev && prev.valor); break;   // restaura su estado interno
       case 'sendero':    rndSendero(body, pl, tipo); break;
       case 'cercania':   rndCercania(body, pl, tipo); break;
       case 'mosaico':
       default:           rndMosaico(body, pl, tipo); break;   // fallback universal
     }
 
-    // Continuidad si el usuario retrocede: reactiva Continuar y muestra su eco
-    var prev = estado.senales[estado.pasoAcogida];
-    if (prev) { setEco(prev.eco); var cb = $('acg-cont'); if (cb) cb.disabled = false; }
+    // Continuidad si el usuario retrocede: reactiva Continuar y re-marca la
+    // opción elegida (el eco ya no se pinta aquí; se reserva para el handoff).
+    // cuerpo (multi-selección) se restaura dentro de su renderer para no
+    // desincronizar su estado interno; el resto, re-marcado sobre el DOM.
+    if (prev) {
+      var cb = $('acg-cont'); if (cb) cb.disabled = false;
+      if (mec !== 'cuerpo') _acgRestaura(body, mec, prev.valor, pl);
+    }
 
     _acgDispara();   // dispara la cascada (.san-go sobre #view) y limpia tras la entrada
   }
@@ -898,6 +905,30 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     });
   }
 
+  // Restaura el estado visual "seleccionado" al retroceder a un paso ya respondido
+  // (antes lo indicaba el eco; ahora el eco se reserva al handoff). Solo re-marca
+  // el DOM ya pintado según la mecánica; no toca la lógica de los renderers.
+  function _acgRestaura(box, mec, valor, pl){
+    if (!box) return;
+    if (mec === 'termometro') {
+      // No hay nodo "seleccionado": el thumb es la señal. Se reposiciona al
+      // punto medio del tramo elegido (aprox., no guardamos el frac exacto).
+      var thumb = $('tm-thumb'), track = $('tm-track'), tramos = (pl && pl.tramos) || [];
+      var idx = -1; for (var i = 0; i < tramos.length; i++){ if (tramos[i].clave === valor){ idx = i; break; } }
+      if (thumb && idx >= 0) {
+        var lo = idx > 0 ? tramos[idx-1].hasta : 0;
+        var hi = (tramos[idx].hasta != null) ? tramos[idx].hasta : 100;
+        var mid = (lo + hi) / 2;
+        thumb.style.bottom = mid + '%';
+        if (track) track.setAttribute('aria-valuenow', Math.round(mid));
+      }
+    } else {
+      // Selección única con .sel: corazones / sendero / mosaico / cercanía.
+      var n = box.querySelector('[data-clave="'+valor+'"]');
+      if (n) n.classList.add('sel');
+    }
+  }
+
   // Selección única genérica: cada opción debe traer .clave y .eco
   function wireSingle(box, sel, opts, tipo){
     var nodes = box.querySelectorAll(sel);
@@ -915,7 +946,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   function rndCorazones(box, pl, tipo){
     var opts = pl.opciones || [];
     box.innerHTML = '<div class="cz-grid">' + opts.map(function(o,i){
-      return '<button class="cz-opt san-an" data-i="'+i+'" style="animation-delay:'+_acgD(i)+'">'+
+      return '<button class="cz-opt san-an" data-i="'+i+'" data-clave="'+esc(o.clave)+'" style="animation-delay:'+_acgD(i)+'">'+
         '<span class="cz-svg" style="--cz:'+(o.color||'#888')+'">'+heartSVG()+'</span>'+
         '<span class="cz-label">'+esc(o.texto)+'</span></button>';
     }).join('') + '</div>';
@@ -957,7 +988,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   }
 
   // 3 · cuerpo (cuerpo) — silueta neutra; zonas de la plantilla (incluida la cabeza); selección múltiple
-  function rndCuerpo(box, pl, tipo){
+  function rndCuerpo(box, pl, tipo, pre){
     var zonas = pl.zonas || [];
     var byC = {}; zonas.forEach(function(z){ byC[z.clave] = z; });
     box.innerHTML = '<div class="cu-wrap san-an" style="animation-delay:'+_acgD(0)+'">' + cuerpoSVG(zonas) + '</div>';
@@ -979,6 +1010,13 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
       n.addEventListener('click', function(){ toggle(n); });
       n.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(n); } });
     });
+    // Retroceso: restaura estado interno (sel) + visual coherentes, sin re-commit.
+    if (pre) {
+      (Array.isArray(pre) ? pre : [pre]).forEach(function(k){
+        var n = box.querySelector('.cu-zone[data-clave="'+k+'"]');
+        if (n) { sel[k] = true; n.classList.add('on'); n.setAttribute('aria-pressed','true'); }
+      });
+    }
   }
   function cuerpoSVG(zonas){
     // Formas por zona (viewBox 0 0 120 250). Sólo se dibujan las de la plantilla.
@@ -1010,7 +1048,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     var ps = pl.pasos || [];
     box.innerHTML =
       '<div class="sd-wrap"><div class="sd-line" aria-hidden="true"></div><div class="sd-stops">'+
-        ps.map(function(o,i){ return '<button class="sd-stop san-an" data-i="'+i+'" style="animation-delay:'+_acgD(i)+'"><span class="sd-dot" aria-hidden="true"></span><span class="sd-lbl">'+esc(o.etiqueta||o.texto||o.clave)+'</span></button>'; }).join('')+
+        ps.map(function(o,i){ return '<button class="sd-stop san-an" data-i="'+i+'" data-clave="'+esc(o.clave)+'" style="animation-delay:'+_acgD(i)+'"><span class="sd-dot" aria-hidden="true"></span><span class="sd-lbl">'+esc(o.etiqueta||o.texto||o.clave)+'</span></button>'; }).join('')+
       '</div></div>';
     wireSingle(box, '.sd-stop', ps, tipo);
   }
@@ -1053,7 +1091,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   function rndMosaico(box, pl, tipo){
     var opts = opcionesDe(pl);   // normaliza opciones/tramos/zonas/pasos si llega una mecánica sin renderer
     box.innerHTML = '<div class="mo-grid">' + opts.map(function(o,i){
-      return '<button class="mo-tile san-an" data-i="'+i+'" style="animation-delay:'+_acgD(i)+'">'+esc(o.texto)+'</button>';
+      return '<button class="mo-tile san-an" data-i="'+i+'" data-clave="'+esc(o.clave)+'" style="animation-delay:'+_acgD(i)+'">'+esc(o.texto)+'</button>';
     }).join('') + '</div>';
     wireSingle(box, '.mo-tile', opts, tipo);
   }
