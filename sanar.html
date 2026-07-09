@@ -229,6 +229,11 @@ body {
 .san-an{opacity:0;transform:translateY(18px)}
 .san-go .san-an{animation:sanRise .6s cubic-bezier(.2,.7,.3,1) forwards}
 @keyframes sanRise{to{opacity:1;transform:translateY(0)}}
+/* Variante solo-opacidad para elementos ya posicionados con transform (cercanía:
+   .cc-pos/.cc-lux usan translate para centrar) — no debe tocarse su transform. */
+.san-fade{opacity:0}
+.san-go .san-fade{animation:sanFade .6s cubic-bezier(.2,.7,.3,1) forwards}
+@keyframes sanFade{to{opacity:1}}
 
 /* ── Velo de foco (confirmación al tocar la tarjeta central) ── */
 /* Tarjeta + botones entran como un solo gesto: la tarjeta se asienta arriba y
@@ -843,7 +848,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
       '</div>'+
       '<div class="acg-progress'+(first?' san-an':'')+'" aria-hidden="true"'+(first?' style="animation-delay:.12s"':'')+'>'+dots+'</div>'+
       '<div class="acg-pregunta san-an" style="animation-delay:'+(first?'.24s':'0s')+'">'+esc(pl.pregunta||'')+'</div>'+
-      '<div id="acg-body" class="san-an" style="--_eje:'+ejeColor+';animation-delay:'+(first?'.36s':'.12s')+'"></div>'+
+      '<div id="acg-body" style="--_eje:'+ejeColor+'"></div>'+   // sus elementos escalonan (Bloque B); base .36s/.12s
       '<div class="acg-eco" id="acg-eco" aria-live="polite"></div>'+
       '<button class="btn-primary" id="acg-cont" disabled onclick="avanzarAcogida()">Continuar</button>';
 
@@ -862,7 +867,35 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     var prev = estado.senales[estado.pasoAcogida];
     if (prev) { setEco(prev.eco); var cb = $('acg-cont'); if (cb) cb.disabled = false; }
 
-    _sanEntrada();   // dispara la cascada (.san-go sobre #view), como en el elenco
+    _acgDispara();   // dispara la cascada (.san-go sobre #view) y limpia tras la entrada
+  }
+
+  // Delay de un elemento del body, relativo al disparo: base tras la pregunta
+  // (.36s primera entrada / .12s avance) + índice × paso (.13s; .18s en cercanía).
+  function _acgD(i, step){
+    var base = estado._acgEntrada ? 0.36 : 0.12;
+    return (base + i * (step || 0.13)).toFixed(2) + 's';
+  }
+  // Dispara la cascada del body en cada renderAcogida y, al terminar, quita las
+  // clases para no dejar el transform bloqueado por forwards (p.ej. .mo-tile:active).
+  var _acgGen = 0;
+  function _acgDispara(){
+    var view = $('view'); if (!view) return;
+    view.classList.remove('san-go');
+    var gen = ++_acgGen;
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        view.classList.add('san-go');
+        setTimeout(function(){
+          if (gen !== _acgGen) return;   // hubo otro paso; que el suyo limpie
+          var els = view.querySelectorAll('.san-an, .san-fade');
+          for (var i = 0; i < els.length; i++){
+            els[i].classList.remove('san-an', 'san-fade');
+            els[i].style.animationDelay = '';
+          }
+        }, 2200);
+      });
+    });
   }
 
   // Selección única genérica: cada opción debe traer .clave y .eco
@@ -882,7 +915,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   function rndCorazones(box, pl, tipo){
     var opts = pl.opciones || [];
     box.innerHTML = '<div class="cz-grid">' + opts.map(function(o,i){
-      return '<button class="cz-opt" data-i="'+i+'">'+
+      return '<button class="cz-opt san-an" data-i="'+i+'" style="animation-delay:'+_acgD(i)+'">'+
         '<span class="cz-svg" style="--cz:'+(o.color||'#888')+'">'+heartSVG()+'</span>'+
         '<span class="cz-label">'+esc(o.texto)+'</span></button>';
     }).join('') + '</div>';
@@ -897,7 +930,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     var tramos = pl.tramos || [];
     var ex = pl.extremos || { min:'', max:'' };
     box.innerHTML =
-      '<div class="tm-wrap">'+
+      '<div class="tm-wrap san-an" style="animation-delay:'+_acgD(0)+'">'+
         '<div class="tm-track" id="tm-track" role="slider" aria-label="'+esc(pl.pregunta||'Intensidad')+'" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" tabindex="0">'+
           '<div class="tm-thumb" id="tm-thumb"></div>'+
         '</div>'+
@@ -927,7 +960,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   function rndCuerpo(box, pl, tipo){
     var zonas = pl.zonas || [];
     var byC = {}; zonas.forEach(function(z){ byC[z.clave] = z; });
-    box.innerHTML = '<div class="cu-wrap">' + cuerpoSVG(zonas) + '</div>';
+    box.innerHTML = '<div class="cu-wrap san-an" style="animation-delay:'+_acgD(0)+'">' + cuerpoSVG(zonas) + '</div>';
     var sel = {};
     var nodes = box.querySelectorAll('.cu-zone');
     function toggle(n){
@@ -977,7 +1010,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     var ps = pl.pasos || [];
     box.innerHTML =
       '<div class="sd-wrap"><div class="sd-line" aria-hidden="true"></div><div class="sd-stops">'+
-        ps.map(function(o,i){ return '<button class="sd-stop" data-i="'+i+'"><span class="sd-dot" aria-hidden="true"></span><span class="sd-lbl">'+esc(o.etiqueta||o.texto||o.clave)+'</span></button>'; }).join('')+
+        ps.map(function(o,i){ return '<button class="sd-stop san-an" data-i="'+i+'" style="animation-delay:'+_acgD(i)+'"><span class="sd-dot" aria-hidden="true"></span><span class="sd-lbl">'+esc(o.etiqueta||o.texto||o.clave)+'</span></button>'; }).join('')+
       '</div></div>';
     wireSingle(box, '.sd-stop', ps, tipo);
   }
@@ -988,13 +1021,13 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     var eje = opts.filter(function(o){ return !o.aparte; });
     var aparte = opts.filter(function(o){ return o.aparte; });
     var lefts = ['42%','63%','84%'];
-    var field = '<div class="cc-field"><div class="cc-lux" aria-label="Lux">'+luxSVG()+'</div>'+
+    var field = '<div class="cc-field"><div class="cc-lux san-fade" style="animation-delay:'+_acgD(0,0.18)+'" aria-label="Lux">'+luxSVG()+'</div>'+
       eje.map(function(o,i){
-        return '<button class="cc-pos" data-clave="'+esc(o.clave)+'" style="left:'+(lefts[i] || (42 + i*22) + '%')+'" title="'+esc(o.sub||'')+'">'+
+        return '<button class="cc-pos san-fade" data-clave="'+esc(o.clave)+'" style="left:'+(lefts[i] || (42 + i*22) + '%')+';animation-delay:'+_acgD(i+1,0.18)+'" title="'+esc(o.sub||'')+'">'+
           '<span class="yo" aria-hidden="true"></span><span class="cc-cap">'+esc(o.etiqueta||o.texto)+'</span></button>';
       }).join('') + '</div>';
-    var apts = aparte.map(function(o){
-      return '<button class="cc-apart" data-clave="'+esc(o.clave)+'"><b>'+esc(o.etiqueta||o.texto)+'</b>'+(o.sub?'<span>'+esc(o.sub)+'</span>':'')+'</button>';
+    var apts = aparte.map(function(o,k){
+      return '<button class="cc-apart san-fade" data-clave="'+esc(o.clave)+'" style="animation-delay:'+_acgD(eje.length+1+k,0.18)+'"><b>'+esc(o.etiqueta||o.texto)+'</b>'+(o.sub?'<span>'+esc(o.sub)+'</span>':'')+'</button>';
     }).join('');
     box.innerHTML = field + apts;
     var all = box.querySelectorAll('[data-clave]');
@@ -1020,7 +1053,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   function rndMosaico(box, pl, tipo){
     var opts = opcionesDe(pl);   // normaliza opciones/tramos/zonas/pasos si llega una mecánica sin renderer
     box.innerHTML = '<div class="mo-grid">' + opts.map(function(o,i){
-      return '<button class="mo-tile" data-i="'+i+'">'+esc(o.texto)+'</button>';
+      return '<button class="mo-tile san-an" data-i="'+i+'" style="animation-delay:'+_acgD(i)+'">'+esc(o.texto)+'</button>';
     }).join('') + '</div>';
     wireSingle(box, '.mo-tile', opts, tipo);
   }
