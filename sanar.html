@@ -1088,6 +1088,15 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
         if (n.hasAttribute('aria-pressed')) n.setAttribute('aria-pressed', 'true');   // toggle-btn (peso); resto no lo declara → no-op
         var o = opts[+n.getAttribute('data-i')];
         commit(tipo, o.clave, o.eco || '');
+        // UX: con tiles altos (mosaico/peso) el botón cae bajo el pliegue. Tras
+        // seleccionar, revelar "Continuar" solo si no está visible, y lo mínimo
+        // (block:'nearest' → el mosaico sigue a la vista). No auto-avanza.
+        var cont = $('acg-cont');
+        if (cont) {
+          var r = cont.getBoundingClientRect();
+          if (!(r.top >= 0 && r.bottom <= window.innerHeight))
+            cont.scrollIntoView({ block:'nearest', behavior: reduceMotion ? 'auto' : 'smooth' });
+        }
       });
     });
   }
