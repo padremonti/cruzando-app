@@ -534,7 +534,8 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     painSel: null,
     misterioSel: null,
     pasoAcogida: 0,
-    senales: []                // [{tipo, valor, eco}]
+    senales: [],               // [{tipo, valor, eco}]
+    elencoRecentrar: null      // id del pain a re-centrar al volver de la acogida (se consume una vez)
   };
 
   // ── Helpers ─────────────────────────────────────────────────────
@@ -628,6 +629,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     if (estado.fase === 'handoff') { estado.fase = 'acogida'; estado.pasoAcogida = Math.max(0,(estado.misterioSel.acogida||[]).length-1); return render(); }
     if (estado.fase === 'acogida') {
       if (estado.pasoAcogida > 0) { estado.pasoAcogida--; estado.senales.pop(); return render(); }
+      estado.elencoRecentrar = estado.painSel && estado.painSel.id;   // recordar el pain para re-centrarlo en el wheel al volver
       estado.fase = 'elenco'; estado.painSel = null; estado.misterioSel = null; estado.senales = [];
       return render();
     }
@@ -669,7 +671,23 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     }
     renderList();
     if (estado.modo === 'navegar') maybeCoach();
+    _recentrarElenco();
     _sanEntrada();
+  }
+
+  // Al volver de la acogida (atrás desde el primer paso), re-centra el pain de
+  // origen en el wheel ya montado (renderList→setupWheel ya corrió update()): el
+  // scrollIntoView instantáneo manda sobre el centrado inicial. Se consume una
+  // sola vez → no afecta a entradas normales al elenco. Modo/filtro no se tocan
+  // (se conservan solos): la lista ya se re-montó con el mismo modo y filtro.
+  function _recentrarElenco(){
+    var id = estado.elencoRecentrar;
+    estado.elencoRecentrar = null;
+    if (!id) return;
+    var box = $('elenco-list'); if (!box) return;
+    var card = box.querySelector('.pain-card[data-id="'+id+'"]');
+    // rAF: asegura layout listo antes de reposicionar el scroll del wheel.
+    if (card) requestAnimationFrame(function(){ card.scrollIntoView({ block:'center', behavior:'auto' }); });
   }
 
   // Re-dispara la cascada de entrada del elenco en cada entrada a la fase
