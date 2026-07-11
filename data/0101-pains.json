@@ -4,246 +4,902 @@
   "version": 1,
   "_uso": "Se une al maestro 0101.json por 'ref.numero' (sin reescribir el maestro). 'mid' es el Misterio-puerta: en MICRO la acogida desemboca en ESE solo Misterio, no en el bloque. 'tags' referencian slugs de tags.json; 'ejePrincipal' apunta a una clave de tags.ejes (da color e ícono a la tarjeta). 'acogida' nombra plantillas de acogida-plantillas-v1.json (string = mecánica por defecto; objeto = alterna). 'apertura' es la línea de recepción propia de cada pain.",
   "_tags_nuevos": "Requiere añadir a tags.json 3 slugs usados aquí: independencia (eje actitud, #independencia), habitos (eje cuerpo, #hábitos), presencia (eje vinculos, #presencia).",
-
   "misterios": [
     {
-      "ref": { "bloque": "gozosos", "numero": 1 },
+      "ref": {
+        "bloque": "gozosos",
+        "numero": 1
+      },
       "mid": "010101",
       "titulo": "La Anunciación",
       "mal": "La fragilidad es el punto de partida, no un fracaso.",
-      "acogida": ["peso", "compania", "disposicion"],
+      "acogida": [
+        "estado",
+        "compania",
+        "disposicion"
+      ],
       "pains": [
-        { "id": "010101a", "texto": "Con frecuencia me escondo cuando necesito llorar, o desahogarme.", "ejePrincipal": "actitud", "tags": ["vulnerabilidad", "interioridad", "fragilidad"], "apertura": "Aquí no tienes que esconderte para llorar." },
-        { "id": "010101b", "texto": "Me cuesta pedir ayuda; depender de otros me hace sentir menos.", "ejePrincipal": "actitud", "tags": ["pediayuda", "humildad", "vulnerabilidad"], "apertura": "Pedir ayuda es de valientes, no de débiles." },
-        { "id": "010101c", "texto": "Me llegó una noticia o un cambio sin garantías, y la incertidumbre me paraliza.", "ejePrincipal": "existencial", "tags": ["incertidumbre", "control", "confianza"], "apertura": "No necesitas todas las garantías para dar el siguiente paso." }
+        {
+          "id": "010101a",
+          "texto": "Con frecuencia me escondo cuando necesito llorar, o desahogarme.",
+          "ejePrincipal": "actitud",
+          "tags": [
+            "vulnerabilidad",
+            "interioridad",
+            "fragilidad"
+          ]
+        },
+        {
+          "id": "010101b",
+          "texto": "Me cuesta pedir ayuda; depender de otros me hace sentir menos.",
+          "ejePrincipal": "actitud",
+          "tags": [
+            "pediayuda",
+            "humildad",
+            "vulnerabilidad"
+          ]
+        },
+        {
+          "id": "010101c",
+          "texto": "Me llegó una noticia o un cambio sin garantías, y la incertidumbre me paraliza.",
+          "ejePrincipal": "existencial",
+          "tags": [
+            "incertidumbre",
+            "control",
+            "confianza"
+          ]
+        }
       ]
     },
     {
-      "ref": { "bloque": "gozosos", "numero": 2 },
+      "ref": {
+        "bloque": "gozosos",
+        "numero": 2
+      },
       "mid": "010102",
       "titulo": "La Visitación",
       "mal": "La vulnerabilidad puede aislar… o unir.",
-      "acogida": ["estado", "compania", "necesidad"],
+      "acogida": [
+        "estado",
+        "compania",
+        "necesidad"
+      ],
       "pains": [
-        { "id": "010102a", "texto": "Me siento solo en mi situación, como si nadie entendiera.", "ejePrincipal": "vinculos", "tags": ["soledad", "comunidad"], "apertura": "No estás tan solo como se siente ahora mismo." },
-        { "id": "010102b", "texto": "Me juzgan (o yo me juzgo) por mi condición: edad, embarazo, situación social.", "ejePrincipal": "social", "tags": ["estigma", "juicioajeno", "dignidad"], "apertura": "Lo que te define no es la mirada ajena." },
-        { "id": "010102c", "texto": "Quiero acompañar a alguien frágil pero no sé cómo; quiero hacerlo sin lástima ni sentirme superior.", "ejePrincipal": "vinculos", "tags": ["acompanar", "servir", "compasion"], "apertura": "Acompañar no pide tener respuestas, solo presencia." }
+        {
+          "id": "010102a",
+          "texto": "Me siento solo en mi situación, como si nadie entendiera.",
+          "ejePrincipal": "vinculos",
+          "tags": [
+            "soledad",
+            "comunidad"
+          ]
+        },
+        {
+          "id": "010102b",
+          "texto": "Me juzgan (o yo me juzgo) por mi condición: edad, embarazo, situación social.",
+          "ejePrincipal": "social",
+          "tags": [
+            "estigma",
+            "juicioajeno",
+            "dignidad"
+          ]
+        },
+        {
+          "id": "010102c",
+          "texto": "Quiero acompañar a alguien frágil pero no sé cómo; quiero hacerlo sin lástima ni sentirme superior.",
+          "ejePrincipal": "vinculos",
+          "tags": [
+            "acompanar",
+            "servir",
+            "compasion"
+          ]
+        }
       ]
     },
     {
-      "ref": { "bloque": "gozosos", "numero": 3 },
+      "ref": {
+        "bloque": "gozosos",
+        "numero": 3
+      },
       "mid": "010103",
       "titulo": "El Nacimiento",
       "mal": "Pobreza, desarraigo, puertas que se cierran.",
-      "acogida": ["estado", "tiempo", "necesidad"],
+      "acogida": [
+        "estado",
+        "tiempo",
+        "necesidad"
+      ],
       "pains": [
-        { "id": "010103a", "texto": "No me alcanza: falta dinero, luz, agua, salud.", "ejePrincipal": "recursos", "tags": ["escasez", "pobreza"], "apertura": "Traer aquí lo que falta ya es un acto de confianza." },
-        { "id": "010103b", "texto": "Estoy lejos de casa, desplazado, sin un lugar donde me reciban.", "ejePrincipal": "recursos", "tags": ["desarraigo", "hogar", "migracion"], "apertura": "Aunque estés lejos de casa, aquí hay lugar para ti." },
-        { "id": "010103c", "texto": "La falta de recursos me hace sentir indigno o fracasado.", "ejePrincipal": "social", "tags": ["dignidad", "pobreza", "escasez"], "apertura": "Tu valor no se mide por lo que tienes." }
+        {
+          "id": "010103a",
+          "texto": "No me alcanza: falta dinero, luz, agua, salud.",
+          "ejePrincipal": "recursos",
+          "tags": [
+            "escasez",
+            "pobreza"
+          ]
+        },
+        {
+          "id": "010103b",
+          "texto": "Estoy lejos de casa, desplazado, sin un lugar donde me reciban.",
+          "ejePrincipal": "recursos",
+          "tags": [
+            "desarraigo",
+            "hogar",
+            "migracion"
+          ]
+        },
+        {
+          "id": "010103c",
+          "texto": "La falta de recursos me hace sentir indigno o fracasado.",
+          "ejePrincipal": "social",
+          "tags": [
+            "dignidad",
+            "pobreza",
+            "escasez"
+          ]
+        }
       ]
     },
     {
-      "ref": { "bloque": "gozosos", "numero": 4 },
+      "ref": {
+        "bloque": "gozosos",
+        "numero": 4
+      },
       "mid": "010104",
       "titulo": "La Presentación",
       "mal": "Amar duele, y ser bueno incomoda.",
-      "acogida": ["estado", "presencia", "disposicion"],
+      "acogida": [
+        "estado",
+        "presencia",
+        "disposicion"
+      ],
       "pains": [
-        { "id": "010104a", "texto": "Tengo miedo de amar porque sé que un día voy a sufrir la pérdida.", "ejePrincipal": "vinculos", "tags": ["miedoaamar", "dueloanticipado"], "apertura": "Amar de verdad siempre corre ese riesgo, y vale la pena." },
-        { "id": "010104b", "texto": "Presiento una despedida que aún no llega y me angustia por adelantado.", "ejePrincipal": "vinculos", "tags": ["dueloanticipado", "despedidas", "angustia"], "apertura": "Puedes traer ese presentimiento sin adelantarte al dolor." },
-        { "id": "010104c", "texto": "Por ser honesto o recto, incomodo a la gente y me rechazan.", "ejePrincipal": "actitud", "tags": ["integridad", "rechazo"], "apertura": "Ser fiel a lo bueno a veces cuesta; no estás equivocado por serlo." }
+        {
+          "id": "010104a",
+          "texto": "Tengo miedo de amar porque sé que un día voy a sufrir la pérdida.",
+          "ejePrincipal": "vinculos",
+          "tags": [
+            "miedoaamar",
+            "dueloanticipado"
+          ]
+        },
+        {
+          "id": "010104b",
+          "texto": "Presiento una despedida que aún no llega y me angustia por adelantado.",
+          "ejePrincipal": "vinculos",
+          "tags": [
+            "dueloanticipado",
+            "despedidas",
+            "angustia"
+          ]
+        },
+        {
+          "id": "010104c",
+          "texto": "Por ser honesto o recto, incomodo a la gente y me rechazan.",
+          "ejePrincipal": "actitud",
+          "tags": [
+            "integridad",
+            "rechazo"
+          ]
+        }
       ]
     },
     {
-      "ref": { "bloque": "gozosos", "numero": 5 },
+      "ref": {
+        "bloque": "gozosos",
+        "numero": 5
+      },
       "mid": "010105",
       "titulo": "Jesús perdido y hallado",
       "mal": "Crecer y soltar duele a los dos lados.",
-      "acogida": ["estado", "tiempo", "necesidad"],
+      "acogida": [
+        "estado",
+        "tiempo",
+        "necesidad"
+      ],
       "pains": [
-        { "id": "010105a", "texto": "Mis hijos crecen y se alejan; ya no soy su prioridad.", "ejePrincipal": "vinculos", "tags": ["nidovacio", "soltar", "paternidad"], "apertura": "Soltar a un hijo que crece es la forma más difícil de amar." },
-        { "id": "010105b", "texto": "Me pesa dejar atrás mi infancia, mi casa, mis costumbres...", "ejePrincipal": "vinculos", "tags": ["soltar", "crecer", "despedidas"], "apertura": "Lo que dejas atrás también fue amado; puedes agradecerlo al soltarlo." },
-        { "id": "010105c", "texto": "Tomar mis propias decisiones me genera culpa frente a mi familia.", "ejePrincipal": "actitud", "tags": ["independencia", "culpa", "crecer"], "apertura": "Crecer y decidir por ti no te hace desleal." }
+        {
+          "id": "010105a",
+          "texto": "Mis hijos crecen y se alejan; ya no soy su prioridad.",
+          "ejePrincipal": "vinculos",
+          "tags": [
+            "nidovacio",
+            "soltar",
+            "paternidad"
+          ]
+        },
+        {
+          "id": "010105b",
+          "texto": "Me pesa dejar atrás mi infancia, mi casa, mis costumbres...",
+          "ejePrincipal": "vinculos",
+          "tags": [
+            "soltar",
+            "crecer",
+            "despedidas"
+          ]
+        },
+        {
+          "id": "010105c",
+          "texto": "Tomar mis propias decisiones me genera culpa frente a mi familia.",
+          "ejePrincipal": "actitud",
+          "tags": [
+            "independencia",
+            "culpa",
+            "crecer"
+          ]
+        }
       ]
     },
     {
-      "ref": { "bloque": "luminosos", "numero": 6 },
+      "ref": {
+        "bloque": "luminosos",
+        "numero": 6
+      },
       "mid": "010106",
       "titulo": "Bautismo en el Jordán",
       "mal": "El desgaste que exige renovación constante.",
-      "acogida": ["peso", "cuerpo", "necesidad"],
+      "acogida": [
+        "peso",
+        "cuerpo",
+        "necesidad"
+      ],
       "pains": [
-        { "id": "010106a", "texto": "El trabajo de la casa nunca termina y me agota.", "ejePrincipal": "cuerpo", "tags": ["desgaste", "cansancio", "rutina"], "apertura": "Ese cansancio que nadie ve, aquí sí cuenta." },
-        { "id": "010106b", "texto": "No tengo tiempo para descansar, comer, o cuidarme.", "ejePrincipal": "cuerpo", "tags": ["autocuidado", "cansancio", "tiempo"], "apertura": "Cuidarte no es un lujo; es parte de una vida cuidada." },
-        { "id": "010106c", "texto": "La rutina diaria se siente sin sentido, pura repetición.", "ejePrincipal": "cuerpo", "tags": ["rutina", "habitos"], "apertura": "Aun lo repetido puede volverse oración." }
+        {
+          "id": "010106a",
+          "texto": "El trabajo de la casa nunca termina y me agota.",
+          "ejePrincipal": "cuerpo",
+          "tags": [
+            "desgaste",
+            "cansancio",
+            "rutina"
+          ]
+        },
+        {
+          "id": "010106b",
+          "texto": "No tengo tiempo para descansar, comer, o cuidarme.",
+          "ejePrincipal": "cuerpo",
+          "tags": [
+            "autocuidado",
+            "cansancio",
+            "tiempo"
+          ]
+        },
+        {
+          "id": "010106c",
+          "texto": "La rutina diaria se siente sin sentido, pura repetición.",
+          "ejePrincipal": "cuerpo",
+          "tags": [
+            "rutina",
+            "habitos"
+          ]
+        }
       ]
     },
     {
-      "ref": { "bloque": "luminosos", "numero": 7 },
+      "ref": {
+        "bloque": "luminosos",
+        "numero": 7
+      },
       "mid": "010107",
       "titulo": "Bodas de Caná",
       "mal": "Todo lo material se gasta y se acaba.",
-      "acogida": ["estado", "tiempo", "necesidad"],
+      "acogida": [
+        "estado",
+        "tiempo",
+        "necesidad"
+      ],
       "pains": [
-        { "id": "010107a", "texto": "Tengo problemas económicos, y no sé qué hacer.", "ejePrincipal": "recursos", "tags": ["escasez", "pobreza"], "apertura": "No tienes que resolverlo todo hoy." },
-        { "id": "010107b", "texto": "Cuando falta algo, me paralizo o culpo a otros.", "ejePrincipal": "recursos", "tags": ["escasez", "culpa", "control"], "apertura": "Cuando algo falta, el primer paso es respirar." },
-        { "id": "010107c", "texto": "En mi situación de pobreza, no encuentro una salida, ni un camino de abundancia.", "ejePrincipal": "recursos", "tags": ["pobreza", "abundancia", "esperanza"], "apertura": "Aun sin ver la salida, puede haber un camino." }
+        {
+          "id": "010107a",
+          "texto": "Tengo problemas económicos, y no sé qué hacer.",
+          "ejePrincipal": "recursos",
+          "tags": [
+            "escasez",
+            "pobreza"
+          ]
+        },
+        {
+          "id": "010107b",
+          "texto": "Cuando falta algo, me paralizo o culpo a otros.",
+          "ejePrincipal": "recursos",
+          "tags": [
+            "escasez",
+            "culpa",
+            "control"
+          ]
+        },
+        {
+          "id": "010107c",
+          "texto": "En mi situación de pobreza, no encuentro una salida, ni un camino de abundancia.",
+          "ejePrincipal": "recursos",
+          "tags": [
+            "pobreza",
+            "abundancia",
+            "esperanza"
+          ]
+        }
       ]
     },
     {
-      "ref": { "bloque": "luminosos", "numero": 8 },
+      "ref": {
+        "bloque": "luminosos",
+        "numero": 8
+      },
       "mid": "010108",
       "titulo": "Anuncio del Reino",
       "mal": "Buscar culpables en vez de aliviar.",
-      "acogida": ["estado", "presencia", "horizonte"],
+      "acogida": [
+        "estado",
+        "presencia",
+        "horizonte"
+      ],
       "pains": [
-        { "id": "010108a", "texto": "¿Por qué me pasó esto, si me he portado bien?", "ejePrincipal": "existencial", "tags": ["sentidodeldolor", "culpa", "sufrimiento"], "apertura": "No siempre hay un porqué; y puedes preguntarlo sin miedo." },
-        { "id": "010108b", "texto": "Cuando sufren los inocentes, ¿dónde está Dios?", "ejePrincipal": "existencial", "tags": ["sufrimiento", "sentidodeldolor", "duda"], "apertura": "Esa pregunta también cabe en la oración." },
-        { "id": "010108c", "texto": "He pensado que mi sufrimiento es un castigo por algo que hice.", "ejePrincipal": "emociones", "tags": ["culpa", "sentidodeldolor"], "apertura": "Tu dolor no es un castigo de Dios." }
+        {
+          "id": "010108a",
+          "texto": "¿Por qué me pasó esto, si me he portado bien?",
+          "ejePrincipal": "existencial",
+          "tags": [
+            "sentidodeldolor",
+            "culpa",
+            "sufrimiento"
+          ]
+        },
+        {
+          "id": "010108b",
+          "texto": "Cuando sufren los inocentes, ¿dónde está Dios?",
+          "ejePrincipal": "existencial",
+          "tags": [
+            "sufrimiento",
+            "sentidodeldolor",
+            "duda"
+          ]
+        },
+        {
+          "id": "010108c",
+          "texto": "He pensado que mi sufrimiento es un castigo por algo que hice.",
+          "ejePrincipal": "emociones",
+          "tags": [
+            "culpa",
+            "sentidodeldolor"
+          ]
+        }
       ]
     },
     {
-      "ref": { "bloque": "luminosos", "numero": 9 },
+      "ref": {
+        "bloque": "luminosos",
+        "numero": 9
+      },
       "mid": "010109",
       "titulo": "La Transfiguración",
       "mal": "Lo que no entendemos nos desconcierta.",
-      "acogida": ["intensidad", "presencia", "disposicion"],
+      "acogida": [
+        "intensidad",
+        "presencia",
+        "disposicion"
+      ],
       "pains": [
-        { "id": "010109a", "texto": "Necesito entenderlo todo, antes de poder aceptarlo o avanzar.", "ejePrincipal": "existencial", "tags": ["control", "incertidumbre", "aceptacion"], "apertura": "No hace falta entenderlo todo para dar un paso." },
-        { "id": "010109b", "texto": "Estoy viviendo algo que no puedo explicar, y eso me asusta.", "ejePrincipal": "existencial", "tags": ["misterio", "incertidumbre", "miedo"], "apertura": "Puedes traer lo que no entiendes, tal como es." },
-        { "id": "010109c", "texto": "La incertidumbre y el misterio me generan angustia.", "ejePrincipal": "existencial", "tags": ["incertidumbre", "misterio", "angustia"], "apertura": "El misterio no siempre se resuelve; a veces se habita." }
+        {
+          "id": "010109a",
+          "texto": "Necesito entenderlo todo, antes de poder aceptarlo o avanzar.",
+          "ejePrincipal": "existencial",
+          "tags": [
+            "control",
+            "incertidumbre",
+            "aceptacion"
+          ]
+        },
+        {
+          "id": "010109b",
+          "texto": "Estoy viviendo algo que no puedo explicar, y eso me asusta.",
+          "ejePrincipal": "existencial",
+          "tags": [
+            "misterio",
+            "incertidumbre",
+            "miedo"
+          ]
+        },
+        {
+          "id": "010109c",
+          "texto": "La incertidumbre y el misterio me generan angustia.",
+          "ejePrincipal": "existencial",
+          "tags": [
+            "incertidumbre",
+            "misterio",
+            "angustia"
+          ]
+        }
       ]
     },
     {
-      "ref": { "bloque": "luminosos", "numero": 10 },
+      "ref": {
+        "bloque": "luminosos",
+        "numero": 10
+      },
       "mid": "010110",
       "titulo": "Institución de la Eucaristía",
       "mal": "Solo puedo estar en un lugar a la vez.",
-      "acogida": ["estado", "compania", "disposicion"],
+      "acogida": [
+        "estado",
+        "compania",
+        "disposicion"
+      ],
       "pains": [
-        { "id": "010110a", "texto": "Estoy lejos de los que amo, y la distancia me duele.", "ejePrincipal": "vinculos", "tags": ["distancia", "seresqueridos"], "apertura": "La distancia duele porque hay amor de por medio." },
-        { "id": "010110b", "texto": "No me alcanza el tiempo, ni la energía, para estar con todos y atender todo.", "ejePrincipal": "existencial", "tags": ["limites", "tiempo", "sobrecarga"], "apertura": "No puedes con todo, y está bien." },
-        { "id": "010110c", "texto": "Me siento culpable por no poder acompañar a todos los que me necesitan.", "ejePrincipal": "emociones", "tags": ["culpa", "limites", "presencia"], "apertura": "Hacer lo que puedes ya es suficiente." }
+        {
+          "id": "010110a",
+          "texto": "Estoy lejos de los que amo, y la distancia me duele.",
+          "ejePrincipal": "vinculos",
+          "tags": [
+            "distancia",
+            "seresqueridos"
+          ]
+        },
+        {
+          "id": "010110b",
+          "texto": "No me alcanza el tiempo, ni la energía, para estar con todos y atender todo.",
+          "ejePrincipal": "existencial",
+          "tags": [
+            "limites",
+            "tiempo",
+            "sobrecarga"
+          ]
+        },
+        {
+          "id": "010110c",
+          "texto": "Me siento culpable por no poder acompañar a todos los que me necesitan.",
+          "ejePrincipal": "emociones",
+          "tags": [
+            "culpa",
+            "limites",
+            "presencia"
+          ]
+        }
       ]
     },
     {
-      "ref": { "bloque": "dolorosos", "numero": 11 },
+      "ref": {
+        "bloque": "dolorosos",
+        "numero": 11
+      },
       "mid": "010111",
       "titulo": "Agonía en Getsemaní",
       "mal": "Rechazar las emociones difíciles.",
-      "acogida": ["estado", "cuerpo", "presencia"],
+      "acogida": [
+        "estado",
+        "cuerpo",
+        "presencia"
+      ],
       "pains": [
-        { "id": "010111a", "texto": "Siento angustia o tristeza, y creo que está mal sentirla.", "ejePrincipal": "emociones", "tags": ["angustia", "tristeza", "emocionesdificiles"], "apertura": "Sentir angustia no es fallar; es ser humano." },
-        { "id": "010111b", "texto": "Pienso que ser fuerte o espiritual es no tener miedo.", "ejePrincipal": "emociones", "tags": ["miedo", "interioridad", "vulnerabilidad"], "apertura": "Hasta Jesús tuvo miedo; sentirlo no te hace menos." },
-        { "id": "010111c", "texto": "Tengo miedo de algo que se acerca, y no sé qué hacer.", "ejePrincipal": "emociones", "tags": ["miedo", "angustia", "incertidumbre"], "apertura": "Puedes nombrar ese miedo aquí, sin resolverlo aún." }
+        {
+          "id": "010111a",
+          "texto": "Siento angustia o tristeza, y creo que está mal sentirla.",
+          "ejePrincipal": "emociones",
+          "tags": [
+            "angustia",
+            "tristeza",
+            "emocionesdificiles"
+          ]
+        },
+        {
+          "id": "010111b",
+          "texto": "Pienso que ser fuerte o espiritual es no tener miedo.",
+          "ejePrincipal": "emociones",
+          "tags": [
+            "miedo",
+            "interioridad",
+            "vulnerabilidad"
+          ]
+        },
+        {
+          "id": "010111c",
+          "texto": "Tengo miedo de algo que se acerca, y no sé qué hacer.",
+          "ejePrincipal": "emociones",
+          "tags": [
+            "miedo",
+            "angustia",
+            "incertidumbre"
+          ]
+        }
       ]
     },
     {
-      "ref": { "bloque": "dolorosos", "numero": 12 },
+      "ref": {
+        "bloque": "dolorosos",
+        "numero": 12
+      },
       "mid": "010112",
       "titulo": "Flagelación",
       "mal": "Un cuerpo que siente es un cuerpo que puede doler.",
-      "acogida": ["cuerpo", "peso", "necesidad"],
+      "acogida": [
+        "cuerpo",
+        "peso",
+        "necesidad"
+      ],
       "pains": [
-        { "id": "010112a", "texto": "Vivo con dolor físico y me cuesta aceptarlo.", "ejePrincipal": "cuerpo", "tags": ["dolorfisico", "cuerpo", "enfermedad"], "apertura": "Tu dolor es real, y aquí se le hace lugar." },
-        { "id": "010112b", "texto": "Hay sensaciones (ruido, olor, temperatura, dolor) que me resultan insoportables.", "ejePrincipal": "cuerpo", "tags": ["sensibilidad", "cuerpo"], "apertura": "Sentir intensamente también es una forma de estar vivo." },
-        { "id": "010112c", "texto": "Rechazo mi cuerpo, o me avergüenza su fragilidad.", "ejePrincipal": "cuerpo", "tags": ["cuerpo", "vulnerabilidad", "fragilidad"], "apertura": "Tu cuerpo, frágil y todo, es digno de ternura." }
+        {
+          "id": "010112a",
+          "texto": "Vivo con dolor físico y me cuesta aceptarlo.",
+          "ejePrincipal": "cuerpo",
+          "tags": [
+            "dolorfisico",
+            "cuerpo",
+            "enfermedad"
+          ]
+        },
+        {
+          "id": "010112b",
+          "texto": "Hay sensaciones (ruido, olor, temperatura, dolor) que me resultan insoportables.",
+          "ejePrincipal": "cuerpo",
+          "tags": [
+            "sensibilidad",
+            "cuerpo"
+          ]
+        },
+        {
+          "id": "010112c",
+          "texto": "Rechazo mi cuerpo, o me avergüenza su fragilidad.",
+          "ejePrincipal": "cuerpo",
+          "tags": [
+            "cuerpo",
+            "vulnerabilidad",
+            "fragilidad"
+          ]
+        }
       ]
     },
     {
-      "ref": { "bloque": "dolorosos", "numero": 13 },
+      "ref": {
+        "bloque": "dolorosos",
+        "numero": 13
+      },
       "mid": "010113",
       "titulo": "Coronación de espinas",
       "mal": "Como te ven, te tratan.",
-      "acogida": ["estado", "compania", "disposicion"],
+      "acogida": [
+        "estado",
+        "compania",
+        "disposicion"
+      ],
       "pains": [
-        { "id": "010113a", "texto": "La gente tiene una idea equivocada de mí, y me trata según eso.", "ejePrincipal": "social", "tags": ["malinterpretado", "juicioajeno"], "apertura": "Lo que otros creen de ti no es lo que eres." },
-        { "id": "010113b", "texto": "Me desgasto intentando controlar lo que otros piensan de mí.", "ejePrincipal": "social", "tags": ["aprobacion", "control", "juicioajeno"], "apertura": "No puedes controlar cada mirada, y no tienes que hacerlo." },
-        { "id": "010113c", "texto": "Me hiere que me juzguen injustamente, sin conocerme.", "ejePrincipal": "social", "tags": ["injusticia", "juicioajeno", "reputacion"], "apertura": "Esa herida del juicio injusto es válida." }
+        {
+          "id": "010113a",
+          "texto": "La gente tiene una idea equivocada de mí, y me trata según eso.",
+          "ejePrincipal": "social",
+          "tags": [
+            "malinterpretado",
+            "juicioajeno"
+          ]
+        },
+        {
+          "id": "010113b",
+          "texto": "Me desgasto intentando controlar lo que otros piensan de mí.",
+          "ejePrincipal": "social",
+          "tags": [
+            "aprobacion",
+            "control",
+            "juicioajeno"
+          ]
+        },
+        {
+          "id": "010113c",
+          "texto": "Me hiere que me juzguen injustamente, sin conocerme.",
+          "ejePrincipal": "social",
+          "tags": [
+            "injusticia",
+            "juicioajeno",
+            "reputacion"
+          ]
+        }
       ]
     },
     {
-      "ref": { "bloque": "dolorosos", "numero": 14 },
+      "ref": {
+        "bloque": "dolorosos",
+        "numero": 14
+      },
       "mid": "010114",
       "titulo": "Camino al Calvario",
       "mal": "Todo requiere esfuerzo, y a veces cargamos solos.",
-      "acogida": ["peso", "cuerpo", "necesidad"],
+      "acogida": [
+        "peso",
+        "cuerpo",
+        "necesidad"
+      ],
       "pains": [
-        { "id": "010114a", "texto": "Todo me cuesta; estoy agotado por el esfuerzo de cada día.", "ejePrincipal": "cuerpo", "tags": ["cansancio", "esfuerzo"], "apertura": "Estás cansado, y mereces descanso, no reproche." },
-        { "id": "010114b", "texto": "Cargar con todo yo sola/o me está aplastando.", "ejePrincipal": "recursos", "tags": ["sobrecarga", "pediayuda"], "apertura": "No tienes que cargarlo todo tú solo." },
-        { "id": "010114c", "texto": "Interpreto mi cansancio como fracaso o falta de capacidad.", "ejePrincipal": "actitud", "tags": ["cansancio", "perseverancia", "esfuerzo"], "apertura": "Cansarte no es fracasar; es haber dado mucho." }
+        {
+          "id": "010114a",
+          "texto": "Todo me cuesta; estoy agotado por el esfuerzo de cada día.",
+          "ejePrincipal": "cuerpo",
+          "tags": [
+            "cansancio",
+            "esfuerzo"
+          ]
+        },
+        {
+          "id": "010114b",
+          "texto": "Cargar con todo yo sola/o me está aplastando.",
+          "ejePrincipal": "recursos",
+          "tags": [
+            "sobrecarga",
+            "pediayuda"
+          ]
+        },
+        {
+          "id": "010114c",
+          "texto": "Interpreto mi cansancio como fracaso o falta de capacidad.",
+          "ejePrincipal": "actitud",
+          "tags": [
+            "cansancio",
+            "perseverancia",
+            "esfuerzo"
+          ]
+        }
       ]
     },
     {
-      "ref": { "bloque": "dolorosos", "numero": 15 },
+      "ref": {
+        "bloque": "dolorosos",
+        "numero": 15
+      },
       "mid": "010115",
       "titulo": "Crucifixión",
       "mal": "Somos mortales.",
-      "acogida": ["estado", "presencia", "necesidad"],
+      "acogida": [
+        "estado",
+        "presencia",
+        "necesidad"
+      ],
       "pains": [
-        { "id": "010115a", "texto": "Me da miedo morir, o pensar en mi propia muerte.", "ejePrincipal": "existencial", "tags": ["miedoalamuerte", "mortalidad", "finitud"], "apertura": "Nombrar este miedo ya es un acto de valentía." },
-        { "id": "010115b", "texto": "Me cuesta soltar el control ante lo que no puedo cambiar.", "ejePrincipal": "existencial", "tags": ["soltar", "control", "confianza"], "apertura": "Reconocer lo que no controlas también es sabiduría." },
-        { "id": "010115c", "texto": "Me angustia saber que el tiempo se acaba.", "ejePrincipal": "existencial", "tags": ["finitud", "tiempo", "ansiedadexistencial"], "apertura": "El tiempo que aún se te da es tuyo para habitarlo." }
+        {
+          "id": "010115a",
+          "texto": "Me da miedo morir, o pensar en mi propia muerte.",
+          "ejePrincipal": "existencial",
+          "tags": [
+            "miedoalamuerte",
+            "mortalidad",
+            "finitud"
+          ]
+        },
+        {
+          "id": "010115b",
+          "texto": "Me cuesta soltar el control ante lo que no puedo cambiar.",
+          "ejePrincipal": "existencial",
+          "tags": [
+            "soltar",
+            "control",
+            "confianza"
+          ]
+        },
+        {
+          "id": "010115c",
+          "texto": "Me angustia saber que el tiempo se acaba.",
+          "ejePrincipal": "existencial",
+          "tags": [
+            "finitud",
+            "tiempo",
+            "ansiedadexistencial"
+          ]
+        }
       ]
     },
     {
-      "ref": { "bloque": "gloriosos", "numero": 16 },
+      "ref": {
+        "bloque": "gloriosos",
+        "numero": 16
+      },
       "mid": "010116",
       "titulo": "Resurrección",
       "mal": "El dolor que ciega y no deja ver la esperanza.",
-      "acogida": ["estado", "presencia", "necesidad"],
+      "acogida": [
+        "estado",
+        "presencia",
+        "necesidad"
+      ],
       "pains": [
-        { "id": "010116a", "texto": "Mi tristeza es tan grande, que no veo salida.", "ejePrincipal": "emociones", "tags": ["tristezaprofunda", "desesperanza"], "apertura": "Aunque no veas salida, no tienes que verla hoy para seguir." },
-        { "id": "010116b", "texto": "El duelo me impide reconocer que lo bueno todavía sigue aquí.", "ejePrincipal": "vinculos", "tags": ["duelo", "tristeza"], "apertura": "El duelo nubla, pero lo bueno sigue estando." },
-        { "id": "010116c", "texto": "Siento que Dios, o la vida, me abandonó.", "ejePrincipal": "vinculos", "tags": ["abandono", "desesperanza"], "apertura": "Puedes traer esa sensación de abandono tal como es." }
+        {
+          "id": "010116a",
+          "texto": "Mi tristeza es tan grande, que no veo salida.",
+          "ejePrincipal": "emociones",
+          "tags": [
+            "tristezaprofunda",
+            "desesperanza"
+          ]
+        },
+        {
+          "id": "010116b",
+          "texto": "El duelo me impide reconocer que lo bueno todavía sigue aquí.",
+          "ejePrincipal": "vinculos",
+          "tags": [
+            "duelo",
+            "tristeza"
+          ]
+        },
+        {
+          "id": "010116c",
+          "texto": "Siento que Dios, o la vida, me abandonó.",
+          "ejePrincipal": "vinculos",
+          "tags": [
+            "abandono",
+            "desesperanza"
+          ]
+        }
       ]
     },
     {
-      "ref": { "bloque": "gloriosos", "numero": 17 },
+      "ref": {
+        "bloque": "gloriosos",
+        "numero": 17
+      },
       "mid": "010117",
       "titulo": "Ascensión",
       "mal": "Desconfiar de lo bueno.",
-      "acogida": ["estado", "horizonte", "disposicion"],
+      "acogida": [
+        "estado",
+        "horizonte",
+        "disposicion"
+      ],
       "pains": [
-        { "id": "010117a", "texto": "Cuando algo bueno me pasa, desconfío o espero que se arruine.", "ejePrincipal": "actitud", "tags": ["desconfianza", "recibirlobueno"], "apertura": "Puedes dejar que lo bueno simplemente sea bueno." },
-        { "id": "010117b", "texto": "Estoy tan acostumbrado al dolor que la alegría me desconcierta.", "ejePrincipal": "actitud", "tags": ["recibirlobueno", "desconfianza"], "apertura": "La alegría también se aprende a recibir." },
-        { "id": "010117c", "texto": "Dudo, y siento que mi duda me descalifica.", "ejePrincipal": "actitud", "tags": ["duda", "fe"], "apertura": "Dudar no te descalifica; puede ser parte de creer." }
+        {
+          "id": "010117a",
+          "texto": "Cuando algo bueno me pasa, desconfío o espero que se arruine.",
+          "ejePrincipal": "actitud",
+          "tags": [
+            "desconfianza",
+            "recibirlobueno"
+          ]
+        },
+        {
+          "id": "010117b",
+          "texto": "Estoy tan acostumbrado al dolor que la alegría me desconcierta.",
+          "ejePrincipal": "actitud",
+          "tags": [
+            "recibirlobueno",
+            "desconfianza"
+          ]
+        },
+        {
+          "id": "010117c",
+          "texto": "Dudo, y siento que mi duda me descalifica.",
+          "ejePrincipal": "actitud",
+          "tags": [
+            "duda",
+            "fe"
+          ]
+        }
       ]
     },
     {
-      "ref": { "bloque": "gloriosos", "numero": 18 },
+      "ref": {
+        "bloque": "gloriosos",
+        "numero": 18
+      },
       "mid": "010118",
       "titulo": "Pentecostés",
       "mal": "La plenitud que otros ridiculizan.",
-      "acogida": ["estado", "compania", "disposicion"],
+      "acogida": [
+        "estado",
+        "compania",
+        "disposicion"
+      ],
       "pains": [
-        { "id": "010118a", "texto": "Me da miedo que se burlen de mí por lo que vivo o creo.", "ejePrincipal": "social", "tags": ["miedoalridiculo", "burla"], "apertura": "Vivir lo que crees no es motivo de vergüenza." },
-        { "id": "010118b", "texto": "Cuando estoy pleno o feliz, otros me malinterpretan o me minimizan.", "ejePrincipal": "actitud", "tags": ["plenitud", "malinterpretado"], "apertura": "Tu plenitud es real, aunque otros no la entiendan." },
-        { "id": "010118c", "texto": "No defiendo a las buenas personas cuando las ridiculizan.", "ejePrincipal": "actitud", "tags": ["valentia", "autenticidad"], "apertura": "Reconocer ese silencio ya es el primer paso de la valentía." }
+        {
+          "id": "010118a",
+          "texto": "Me da miedo que se burlen de mí por lo que vivo o creo.",
+          "ejePrincipal": "social",
+          "tags": [
+            "miedoalridiculo",
+            "burla"
+          ]
+        },
+        {
+          "id": "010118b",
+          "texto": "Cuando estoy pleno o feliz, otros me malinterpretan o me minimizan.",
+          "ejePrincipal": "actitud",
+          "tags": [
+            "plenitud",
+            "malinterpretado"
+          ]
+        },
+        {
+          "id": "010118c",
+          "texto": "No defiendo a las buenas personas cuando las ridiculizan.",
+          "ejePrincipal": "actitud",
+          "tags": [
+            "valentia",
+            "autenticidad"
+          ]
+        }
       ]
     },
     {
-      "ref": { "bloque": "gloriosos", "numero": 19 },
+      "ref": {
+        "bloque": "gloriosos",
+        "numero": 19
+      },
       "mid": "010119",
       "titulo": "Asunción de María",
       "mal": "Todo cuerpo se deteriora.",
-      "acogida": ["cuerpo", "peso", "necesidad"],
+      "acogida": [
+        "cuerpo",
+        "peso",
+        "necesidad"
+      ],
       "pains": [
-        { "id": "010119a", "texto": "Me angustia envejecer; vivo pendiente de la juventud y la belleza.", "ejePrincipal": "cuerpo", "tags": ["envejecer", "belleza", "angustia"], "apertura": "Envejecer también es una forma de florecer." },
-        { "id": "010119b", "texto": "Me aterra el deterioro del cuerpo.", "ejePrincipal": "cuerpo", "tags": ["cuerpo", "envejecer", "miedoalamuerte"], "apertura": "Tu dignidad no se deteriora con el cuerpo." },
-        { "id": "010119c", "texto": "Cuido mi imagen y mi salud como si eso fuera lo que me da valor.", "ejePrincipal": "cuerpo", "tags": ["imagen", "belleza", "vanidad"], "apertura": "Tu valor no está en la imagen que muestras." }
+        {
+          "id": "010119a",
+          "texto": "Me angustia envejecer; vivo pendiente de la juventud y la belleza.",
+          "ejePrincipal": "cuerpo",
+          "tags": [
+            "envejecer",
+            "belleza",
+            "angustia"
+          ]
+        },
+        {
+          "id": "010119b",
+          "texto": "Me aterra el deterioro del cuerpo.",
+          "ejePrincipal": "cuerpo",
+          "tags": [
+            "cuerpo",
+            "envejecer",
+            "miedoalamuerte"
+          ]
+        },
+        {
+          "id": "010119c",
+          "texto": "Cuido mi imagen y mi salud como si eso fuera lo que me da valor.",
+          "ejePrincipal": "cuerpo",
+          "tags": [
+            "imagen",
+            "belleza",
+            "vanidad"
+          ]
+        }
       ]
     },
     {
-      "ref": { "bloque": "gloriosos", "numero": 20 },
+      "ref": {
+        "bloque": "gloriosos",
+        "numero": 20
+      },
       "mid": "010120",
       "titulo": "Coronación de María",
       "mal": "Buscar gloria donde no está.",
-      "acogida": ["estado", "imagen", "disposicion"],
+      "acogida": [
+        "estado",
+        "imagen",
+        "disposicion"
+      ],
       "pains": [
-        { "id": "010120a", "texto": "Me esfuerzo y me sacrifico, y nadie reconoce lo que hago.", "ejePrincipal": "social", "tags": ["reconocimiento", "merito"], "apertura": "Lo que haces en silencio no pasa inadvertido para Dios." },
-        { "id": "010120b", "texto": "Busco estatus, poder o aplauso, y aun así me siento vacío.", "ejePrincipal": "social", "tags": ["estatus", "vacio"], "apertura": "El aplauso no llena; puedes buscar algo más hondo." },
-        { "id": "010120c", "texto": "Veo a personas buenas y humildes ignoradas o despreciadas.", "ejePrincipal": "social", "tags": ["injusticia", "humildad", "merito"], "apertura": "Los humildes tienen un lugar que el mundo no ve." }
+        {
+          "id": "010120a",
+          "texto": "Me esfuerzo y me sacrifico, y nadie reconoce lo que hago.",
+          "ejePrincipal": "social",
+          "tags": [
+            "reconocimiento",
+            "merito"
+          ]
+        },
+        {
+          "id": "010120b",
+          "texto": "Busco estatus, poder o aplauso, y aun así me siento vacío.",
+          "ejePrincipal": "social",
+          "tags": [
+            "estatus",
+            "vacio"
+          ]
+        },
+        {
+          "id": "010120c",
+          "texto": "Veo a personas buenas y humildes ignoradas o despreciadas.",
+          "ejePrincipal": "social",
+          "tags": [
+            "injusticia",
+            "humildad",
+            "merito"
+          ]
+        }
       ]
     }
   ]

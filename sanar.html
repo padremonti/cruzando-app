@@ -179,8 +179,7 @@ body {
   background:var(--brand-ultra); border:1px solid var(--border);
   border-radius:16px; padding:16px 18px; margin-bottom:18px;
 }
-.acg-recepcion .dolor { font-size:0.86rem; color:var(--text-soft); font-style:italic; margin-bottom:8px; }
-.acg-recepcion .apertura { font-family:'Crimson Pro',Georgia,serif; font-size:1.12rem; font-weight:600; color:var(--brand-soft); }
+.acg-recepcion .dolor { font-size:0.86rem; color:var(--text-soft); font-style:italic; }
 
 .acg-progress { display:flex; gap:6px; justify-content:center; margin-bottom:18px; }
 .acg-progress .p { width:8px; height:8px; border-radius:50%; background:var(--border); }
@@ -638,7 +637,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     (SIDE.misterios || []).forEach(function(m){
       misterioByMid[m.mid] = m;
       (m.pains || []).forEach(function(p){
-        var pn = { id:p.id, texto:p.texto, ejePrincipal:p.ejePrincipal, tags:p.tags||[], apertura:p.apertura, mid:m.mid, misterio:m };
+        var pn = { id:p.id, texto:p.texto, ejePrincipal:p.ejePrincipal, tags:p.tags||[], mid:m.mid, misterio:m };
         pains.push(pn);
         painById[pn.id] = pn;
       });
@@ -989,7 +988,6 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     v.innerHTML =
       '<div class="acg-recepcion'+(first?' san-an':'')+'"'+(first?' style="animation-delay:0s"':'')+'>'+
         '<div class="dolor">«'+esc(p.texto)+'»</div>'+
-        '<div class="apertura">'+esc(p.apertura)+'</div>'+
       '</div>'+
       '<div class="acg-progress'+(first?' san-an':'')+'" aria-hidden="true"'+(first?' style="animation-delay:.12s"':'')+'>'+dots+'</div>'+
       '<div class="acg-pregunta san-an" style="animation-delay:'+(first?'.24s':'0s')+'">'+esc(pl.pregunta||'')+'</div>'+
