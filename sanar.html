@@ -131,6 +131,28 @@ body {
 .eje-chip svg { width:15px; height:15px; }
 .eje-chip.active { color:#fff; }
 
+/* ── Modo Misterio (developer) · numberpad tipo PIN ── */
+.mist-pad { display:flex; flex-direction:column; align-items:center; gap:16px; margin-bottom:16px; }
+.pad-display { display:flex; align-items:center; gap:8px; font-variant-numeric:tabular-nums; }
+.pad-grp { display:flex; gap:6px; }
+.pad-sep { color:var(--text-dim); font-weight:700; }
+.pad-cell {
+  width:34px; height:46px; border-radius:9px; display:flex; align-items:center; justify-content:center;
+  font-size:1.4rem; font-weight:700; color:var(--text);
+  background:var(--card); border:2px solid var(--border);
+}
+.pad-cell.active { border-color:var(--brand); box-shadow:0 0 0 3px var(--brand-ultra); }
+.pad-grid { display:grid; grid-template-columns:repeat(3,64px); gap:10px; }
+.pad-key {
+  min-height:56px; border-radius:14px; cursor:pointer; font-family:inherit;
+  font-size:1.3rem; font-weight:600; color:var(--text);
+  background:var(--card2); border:1px solid var(--border);
+  transition:transform .1s, background .2s, border-color .2s;
+}
+.pad-key:active { transform:scale(.96); background:var(--brand-ultra); border-color:var(--brand); }
+.pad-key:focus-visible { outline:2px solid var(--brand-soft); outline-offset:2px; }
+.pad-alt { color:var(--text-soft); font-size:1.15rem; }
+
 /* ── Tarjetas de pain ── */
 .pain-card {
   position:relative; display:block; width:100%; text-align:left;
@@ -516,6 +538,15 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   var base = location.origin + location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1);
   var IMGB = 'https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev/';   // bucket de ilustraciones (mismo que orar/mini). arte relativo → IMGB + o.arte
 
+  // Gate developer — espejo mínimo de plan-utils.js:effectivePlan() (mantener en
+  // sync si cambia el canónico). sanar.html es autocontenido: solo lee storage.
+  // Fail-safe: sin cache → 'free' → DEV=false → el modo Misterio queda oculto.
+  function _effectivePlan(){
+    return sessionStorage.getItem('cruzando_view_as') ||
+           localStorage.getItem('cruzando_plan_cache') || 'free';
+  }
+  var DEV = _effectivePlan() === 'developer';
+
   // ── Datos cargados ──────────────────────────────────────────────
   var TAGS = null;      // tags.json
   var PLANT = null;     // acogida-plantillas-v1.json .plantillas
@@ -535,7 +566,8 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     misterioSel: null,
     pasoAcogida: 0,
     senales: [],               // [{tipo, valor, eco}]
-    elencoRecentrar: null      // id del pain a re-centrar al volver de la acogida (se consume una vez)
+    elencoRecentrar: null,     // id del pain a re-centrar al volver de la acogida (se consume una vez)
+    misterioPin: ''            // dev: dígitos del mid tecleados en el numberpad del modo Misterio
   };
 
   // ── Helpers ─────────────────────────────────────────────────────
@@ -648,6 +680,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
         modeBtn('navegar','Navegar','<path d="M4 6h16M4 12h16M4 18h10"/>')+
         modeBtn('buscar','Escríbelo','<circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/>')+
         modeBtn('ejes','Ejes','<circle cx="7" cy="7" r="3"/><circle cx="17" cy="7" r="3"/><circle cx="7" cy="17" r="3"/><circle cx="17" cy="17" r="3"/>')+
+        (DEV ? modeBtn('misterio','Misterio','<path d="M12 4v16M7 9h10"/>') : '')+   // solo developer
       '</div>'+
       '<div id="elenco-controls" class="san-an" style="animation-delay:.28s"></div>'+
       '<div id="elenco-list" class="san-an" style="animation-delay:.4s"></div>';
@@ -668,6 +701,8 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
         var e = TAGS.ejes[k], on = estado.ejeActivo === k;
         return '<button class="eje-chip'+(on?' active':'')+'" aria-pressed="'+(on?'true':'false')+'" style="'+(on?'background:'+e.color+';border-color:'+e.color:'')+'" onclick="pickEje(\''+k+'\')">'+ejeSVG(k)+esc(e.label)+'</button>';
       }).join('') + '</div>';
+    } else if (estado.modo === 'misterio') {
+      _renderMisterioControls(c);   // dev: numberpad tipo PIN
     }
     renderList();
     if (estado.modo === 'navegar') maybeCoach();
@@ -708,6 +743,40 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+glifo+'</svg>'+label+'</button>';
   }
 
+  // ── Modo Misterio (developer) — numberpad tipo PIN para cargar un mid ────────
+  // Display de 6 casillas 2·2·2 (mundo·nivel·número) + pad 3×4 que rellena
+  // estado.misterioPin. renderList (rama 'misterio') pinta el resultado en el wheel.
+  function _misterioPadHTML(){
+    var pin = estado.misterioPin || '';
+    function cell(i){ return '<span class="pad-cell'+(pin.length===i?' active':'')+'">'+esc(pin[i]||'')+'</span>'; }
+    var display =
+      '<div class="pad-display" role="status" aria-live="polite" aria-label="mid '+(pin?esc(pin):'vacío')+'">'+
+        '<span class="pad-grp">'+cell(0)+cell(1)+'</span><span class="pad-sep">·</span>'+
+        '<span class="pad-grp">'+cell(2)+cell(3)+'</span><span class="pad-sep">·</span>'+
+        '<span class="pad-grp">'+cell(4)+cell(5)+'</span>'+
+      '</div>';
+    var keys = '';
+    for (var d = 1; d <= 9; d++) keys += '<button class="pad-key" type="button" data-d="'+d+'" aria-label="Dígito '+d+'">'+d+'</button>';
+    keys += '<button class="pad-key pad-alt" type="button" data-act="clear" aria-label="Limpiar">C</button>';
+    keys += '<button class="pad-key" type="button" data-d="0" aria-label="Dígito 0">0</button>';
+    keys += '<button class="pad-key pad-alt" type="button" data-act="del" aria-label="Borrar último dígito">⌫</button>';
+    return '<div class="mist-pad">'+display+'<div class="pad-grid">'+keys+'</div></div>';
+  }
+  function _renderMisterioControls(c){
+    c.innerHTML = _misterioPadHTML();
+    Array.prototype.forEach.call(c.querySelectorAll('.pad-key'), function(b){
+      b.addEventListener('click', function(){
+        var act = b.getAttribute('data-act'), pin = estado.misterioPin || '';
+        if (act === 'del') pin = pin.slice(0, -1);
+        else if (act === 'clear') pin = '';
+        else if (pin.length < 6) pin += b.getAttribute('data-d');
+        estado.misterioPin = pin;
+        _renderMisterioControls(c);   // repinta casillas + pad (sin re-render completo)
+        renderList();                 // refresca el resultado (wheel/aviso) según el pin
+      });
+    });
+  }
+
   function renderList(){
     var box = $('elenco-list'); if (!box) return;
 
@@ -730,6 +799,17 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
       var ps = ids.map(function(id){ return painById[id]; }).filter(Boolean);
       if (!ps.length) { box.innerHTML = '<div class="empty">Sin dolores en este eje.</div>'; return; }
       renderWheel(ps, '');
+      return;
+    }
+
+    if (estado.modo === 'misterio') {   // dev: cargar un Misterio por mid
+      var pin = estado.misterioPin || '';
+      if (pin.length < 6) { box.innerHTML = '<div class="empty">Teclea el mid del Misterio (6 dígitos).<br>mundo·nivel·número — ej. «010120».</div>'; return; }
+      var m = misterioByMid[pin];
+      if (!m) { box.innerHTML = '<div class="empty">Ese Misterio no está cargado.<br><small>mid '+esc(pin)+' — hoy solo '+esc(ELEMENTO)+' (010101–010120).</small></div>'; return; }
+      var mps = pains.filter(function(p){ return p.mid === pin; });
+      if (!mps.length) { box.innerHTML = '<div class="empty">Sin pains en este Misterio.</div>'; return; }
+      renderWheel(mps, m.titulo);   // título del Misterio como encabezado (confirma cuál cargó)
       return;
     }
 
@@ -857,7 +937,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   }
   window.cerrarCoach = function(){ var c = $('coach'); if (c) c.remove(); };
 
-  window.setModo = function(m){ cerrarCoach(); estado.modo = m; render(); };
+  window.setModo = function(m){ cerrarCoach(); estado.misterioPin = ''; estado.modo = m; render(); };   // cambiar de modo limpia el PIN (dev)
   window.pickEje = function(k){ estado.ejeActivo = (estado.ejeActivo === k) ? null : k; render(); };
   window.pickPain = function(id){
     var p = painById[id]; if (!p) return;
