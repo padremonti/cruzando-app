@@ -11,7 +11,7 @@
       "mid": "010101",
       "titulo": "La Anunciación",
       "mal": "La fragilidad es el punto de partida, no un fracaso.",
-      "acogida": ["estado", "compania", "disposicion"],
+      "acogida": ["peso", "compania", "disposicion"],
       "pains": [
         { "id": "010101a", "texto": "Con frecuencia me escondo cuando necesito llorar, o desahogarme.", "ejePrincipal": "actitud", "tags": ["vulnerabilidad", "interioridad", "fragilidad"], "apertura": "Aquí no tienes que esconderte para llorar." },
         { "id": "010101b", "texto": "Me cuesta pedir ayuda; depender de otros me hace sentir menos.", "ejePrincipal": "actitud", "tags": ["pediayuda", "humildad", "vulnerabilidad"], "apertura": "Pedir ayuda es de valientes, no de débiles." },
@@ -71,7 +71,7 @@
       "mid": "010106",
       "titulo": "Bautismo en el Jordán",
       "mal": "El desgaste que exige renovación constante.",
-      "acogida": ["intensidad", "cuerpo", "necesidad"],
+      "acogida": ["peso", "cuerpo", "necesidad"],
       "pains": [
         { "id": "010106a", "texto": "El trabajo de la casa nunca termina y me agota.", "ejePrincipal": "cuerpo", "tags": ["desgaste", "cansancio", "rutina"], "apertura": "Ese cansancio que nadie ve, aquí sí cuenta." },
         { "id": "010106b", "texto": "No tengo tiempo para descansar, comer, o cuidarme.", "ejePrincipal": "cuerpo", "tags": ["autocuidado", "cansancio", "tiempo"], "apertura": "Cuidarte no es un lujo; es parte de una vida cuidada." },
@@ -143,7 +143,7 @@
       "mid": "010112",
       "titulo": "Flagelación",
       "mal": "Un cuerpo que siente es un cuerpo que puede doler.",
-      "acogida": ["cuerpo", "intensidad", "necesidad"],
+      "acogida": ["cuerpo", "peso", "necesidad"],
       "pains": [
         { "id": "010112a", "texto": "Vivo con dolor físico y me cuesta aceptarlo.", "ejePrincipal": "cuerpo", "tags": ["dolorfisico", "cuerpo", "enfermedad"], "apertura": "Tu dolor es real, y aquí se le hace lugar." },
         { "id": "010112b", "texto": "Hay sensaciones (ruido, olor, temperatura, dolor) que me resultan insoportables.", "ejePrincipal": "cuerpo", "tags": ["sensibilidad", "cuerpo"], "apertura": "Sentir intensamente también es una forma de estar vivo." },
@@ -167,7 +167,7 @@
       "mid": "010114",
       "titulo": "Camino al Calvario",
       "mal": "Todo requiere esfuerzo, y a veces cargamos solos.",
-      "acogida": ["intensidad", "cuerpo", "necesidad"],
+      "acogida": ["peso", "cuerpo", "necesidad"],
       "pains": [
         { "id": "010114a", "texto": "Todo me cuesta; estoy agotado por el esfuerzo de cada día.", "ejePrincipal": "cuerpo", "tags": ["cansancio", "esfuerzo"], "apertura": "Estás cansado, y mereces descanso, no reproche." },
         { "id": "010114b", "texto": "Cargar con todo yo sola/o me está aplastando.", "ejePrincipal": "recursos", "tags": ["sobrecarga", "pediayuda"], "apertura": "No tienes que cargarlo todo tú solo." },
@@ -227,7 +227,7 @@
       "mid": "010119",
       "titulo": "Asunción de María",
       "mal": "Todo cuerpo se deteriora.",
-      "acogida": ["cuerpo", "intensidad", "necesidad"],
+      "acogida": ["cuerpo", "peso", "necesidad"],
       "pains": [
         { "id": "010119a", "texto": "Me angustia envejecer; vivo pendiente de la juventud y la belleza.", "ejePrincipal": "cuerpo", "tags": ["envejecer", "belleza", "angustia"], "apertura": "Envejecer también es una forma de florecer." },
         { "id": "010119b", "texto": "Me aterra el deterioro del cuerpo.", "ejePrincipal": "cuerpo", "tags": ["cuerpo", "envejecer", "miedoalamuerte"], "apertura": "Tu dignidad no se deteriora con el cuerpo." },
