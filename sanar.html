@@ -403,6 +403,29 @@ body {
 .mo-tile:active { transform:scale(.98); }
 .mo-tile.sel { border-color:#fff; box-shadow:0 0 0 3px var(--brand-ultra); }
 
+/* ── Acogida · peso (carga) — figura con bulto creciente; texto = dato y camino
+   accesible, imagen = refuerzo visual. Selección única, realce cian. ── */
+.peso-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:8px; }
+@media (max-width:430px){ .peso-grid { grid-template-columns:1fr 1fr; gap:12px; } }
+.peso-tile {
+  display:flex; flex-direction:column; align-items:center; gap:9px; cursor:pointer;
+  padding:12px 8px 11px; border-radius:16px; min-height:44px;
+  background:var(--card); border:2px solid var(--border); font-family:inherit;
+  transition:transform .12s, box-shadow .2s, border-color .2s, background .2s;
+}
+.peso-tile:active { transform:scale(.98); }
+.peso-tile.sel { border-color:var(--brand); background:var(--brand-ultra); box-shadow:0 0 0 3px var(--brand-ultra); }
+.peso-tile:focus-visible { outline:2px solid var(--brand-soft); outline-offset:2px; }
+/* marco de la figura: fondo neutro tenue siempre presente → sirve de placeholder
+   antes de cargar y si la webp falta (404), sin icono de imagen rota. */
+.peso-img {
+  display:block; width:100%; aspect-ratio:1/1; object-fit:contain;
+  border-radius:12px; background:var(--card2);
+}
+.peso-img.peso-noart { opacity:.55; }   /* webp ausente: marco neutro, sigue usable */
+.peso-lbl { font-size:0.9rem; font-weight:600; color:var(--text-soft); text-align:center; line-height:1.2; }
+.peso-tile.sel .peso-lbl { color:var(--text); }
+
 /* ── prefers-reduced-motion ── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important; }
@@ -491,6 +514,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   // ── Constantes ──────────────────────────────────────────────────
   var ELEMENTO = '0101';   // piloto: único elenco con datos. Parametrizable.
   var base = location.origin + location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1);
+  var IMGB = 'https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev/';   // bucket de ilustraciones (mismo que orar/mini). arte relativo → IMGB + o.arte
 
   // ── Datos cargados ──────────────────────────────────────────────
   var TAGS = null;      // tags.json
@@ -883,6 +907,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
       case 'cuerpo':     rndCuerpo(body, pl, tipo, prev && prev.valor); break;   // restaura su estado interno
       case 'sendero':    rndSendero(body, pl, tipo); break;
       case 'cercania':   rndCercania(body, pl, tipo); break;
+      case 'peso':       rndPeso(body, pl, tipo); break;   // carga; restaura vía _acgRestaura genérico (.sel + aria-pressed)
       case 'mosaico':
       default:           rndMosaico(body, pl, tipo); break;   // fallback universal
     }
@@ -945,9 +970,12 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
         if (track) track.setAttribute('aria-valuenow', Math.round(mid));
       }
     } else {
-      // Selección única con .sel: corazones / sendero / mosaico / cercanía.
+      // Selección única con .sel: corazones / sendero / mosaico / cercanía / peso.
       var n = box.querySelector('[data-clave="'+valor+'"]');
-      if (n) n.classList.add('sel');
+      if (n) {
+        n.classList.add('sel');
+        if (n.hasAttribute('aria-pressed')) n.setAttribute('aria-pressed', 'true');   // peso: repone estado a11y (resto no lo declara → no-op)
+      }
     }
   }
 
@@ -956,8 +984,12 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     var nodes = box.querySelectorAll(sel);
     Array.prototype.forEach.call(nodes, function(n){
       n.addEventListener('click', function(){
-        Array.prototype.forEach.call(nodes, function(x){ x.classList.remove('sel'); });
+        Array.prototype.forEach.call(nodes, function(x){
+          x.classList.remove('sel');
+          if (x.hasAttribute('aria-pressed')) x.setAttribute('aria-pressed', 'false');
+        });
         n.classList.add('sel');
+        if (n.hasAttribute('aria-pressed')) n.setAttribute('aria-pressed', 'true');   // toggle-btn (peso); resto no lo declara → no-op
         var o = opts[+n.getAttribute('data-i')];
         commit(tipo, o.clave, o.eco || '');
       });
@@ -1139,6 +1171,33 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     }).join('') + '</div>';
     wireSingle(box, '.mo-tile', opts, tipo);
   }
+
+  // 7 · peso (peso) — figura que carga un bulto de tamaño creciente (nada→mucho).
+  // El texto (Nada/Poco/Bastante/Mucho) es el DATO y el camino accesible: siempre
+  // visible y lo único que lee el lector de pantalla. La <img> es refuerzo visual
+  // (alt="" + aria-hidden). El <button> entero es tappable (imagen o texto valen
+  // igual). Selección única con reemplazo, realce cian; commit string/string.
+  function rndPeso(box, pl, tipo){
+    var opts = pl.opciones || [];
+    box.innerHTML = '<div class="peso-grid">' + opts.map(function(o,i){
+      var img = o.arte
+        ? '<img class="peso-img" src="'+esc(IMGB + o.arte)+'" alt="" aria-hidden="true" onerror="pesoSinArte(this)">'
+        : '<span class="peso-img peso-noart" aria-hidden="true"></span>';
+      return '<button class="peso-tile san-an" type="button" data-i="'+i+'" data-clave="'+esc(o.clave)+'" aria-pressed="false" style="animation-delay:'+_acgD(i)+'">'+
+        img +
+        '<span class="peso-lbl">'+esc(o.texto || cap(o.clave))+'</span>'+
+      '</button>';
+    }).join('') + '</div>';
+    wireSingle(box, '.peso-tile', opts, tipo);
+  }
+  // webp ausente (404): deja un marco neutro (peso-noart) y evita el icono de
+  // imagen rota (svg vacío transparente). La etiqueta y el botón siguen intactos
+  // → la mecánica funciona y es testeable por teclado solo con texto.
+  window.pesoSinArte = function(img){
+    img.onerror = null;
+    img.classList.add('peso-noart');
+    img.src = 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%2F%3E';
+  };
 
   window.avanzarAcogida = function(){
     var pasos = (estado.misterioSel && estado.misterioSel.acogida) || [];
