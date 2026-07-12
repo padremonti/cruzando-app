@@ -57,10 +57,6 @@ body.light{--parch:#0a2530;--bg:#EAF4F6}
 .icon-btn{width:38px;height:38px;flex-shrink:0;border-radius:50%;border:1px solid rgba(243,234,216,.18);background:rgba(8,9,16,.4);backdrop-filter:blur(6px);color:var(--parch);display:flex;align-items:center;justify-content:center;cursor:pointer}
 .icon-btn:active{transform:scale(.94)}
 .icon-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-.vol-wrap{position:relative}
-.vol-pop{position:absolute;top:44px;right:0;background:rgba(8,9,16,.8);backdrop-filter:blur(8px);border:1px solid rgba(243,234,216,.16);border-radius:12px;padding:12px 10px;display:none}
-.vol-pop.show{display:block}
-.vol-pop input{writing-mode:vertical-lr;direction:rtl;width:8px;height:90px;accent-color:var(--gold)}
 
 /* karaoke */
 .lyrics{position:absolute;left:0;right:0;top:52%;bottom:118px;z-index:6;overflow:hidden;mask-image:linear-gradient(180deg,transparent,#000 18%,#000 82%,transparent)}
@@ -75,6 +71,13 @@ body.light{--parch:#0a2530;--bg:#EAF4F6}
   border:1px solid rgba(243,234,216,.2);color:var(--parch);font-size:12.5px;font-weight:500;cursor:pointer;opacity:0;transition:opacity .5s}
 .skip.show{display:flex;opacity:1}
 .skip svg{width:15px;height:15px;fill:currentColor}
+/* Controles del canto — táctiles ≥44px; play/pause central algo mayor */
+.canto-ctrls{position:absolute;left:50%;bottom:40px;transform:translateX(-50%);z-index:20;display:flex;align-items:center;gap:22px}
+.cc-btn{width:52px;height:52px;flex-shrink:0;border-radius:50%;border:1px solid rgba(243,234,216,.18);background:rgba(8,9,16,.4);backdrop-filter:blur(6px);color:var(--parch);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.cc-btn:active{transform:scale(.94)}
+.cc-btn svg{width:26px;height:26px}
+.cc-play{width:60px;height:60px;background:rgba(243,234,216,.14)}
+.cc-play svg{width:30px;height:30px}
 
 /* texto inferior (hero) */
 .hero-caption{position:absolute;left:0;right:0;bottom:120px;z-index:6;text-align:center;padding:0 26px}
@@ -166,10 +169,7 @@ body.light{--parch:#0a2530;--bg:#EAF4F6}
     </div>
     <div class="topbar-r">
       <button class="icon-btn" id="themeBtn" title="Tema" aria-label="Tema"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg></button>
-      <div class="vol-wrap">
-        <button class="icon-btn" id="volBtn" title="Volumen" aria-label="Volumen"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8.5a4 4 0 0 1 0 7"/></svg></button>
-        <div class="vol-pop" id="volPop"><input type="range" min="0" max="100" value="80" id="volSlider" aria-label="Volumen"></div>
-      </div>
+      <button class="icon-btn" id="muteBtn" title="Silenciar" aria-label="Silenciar canto"><svg id="muteIc" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8.5a4 4 0 0 1 0 7"/></svg></button>
     </div>
   </div>
 
@@ -177,6 +177,11 @@ body.light{--parch:#0a2530;--bg:#EAF4F6}
   <div class="moment show" id="m-canto">
     <div class="lyrics" id="lyrics"><div class="lyric-track" id="track"></div></div>
     <button class="skip" id="skipBtn"><span>Saltar</span><svg viewBox="0 0 24 24"><path d="M5 4l10 8-10 8zM17 4h2v16h-2z"/></svg></button>
+    <!-- Controles del canto: retroceder 10s (izq) · play/pause (centro) -->
+    <div class="canto-ctrls" id="cantoCtrls">
+      <button class="cc-btn" id="cantoBack10" aria-label="Retroceder 10 segundos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><path d="M3 4v4.5h4.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><text x="12.5" y="15.5" font-size="8" font-weight="700" fill="currentColor" text-anchor="middle">10</text></svg></button>
+      <button class="cc-btn cc-play" id="cantoPP" aria-label="Pausar canto"><svg id="cantoPPIc" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.2v14H7zM13.8 5H17v14h-3.2z" fill="currentColor"/></svg></button>
+    </div>
   </div>
 
   <!-- ══ M2/M3/M4 · REPRODUCTOR (hero) ══ -->
@@ -430,8 +435,9 @@ function cantoPlay(){
   cantoPlaying=true;
   audio.play().catch(err=>{ console.warn('[canto] audio.play() rechazado →', err && err.name, '·', err && err.message); });
   raf=requestAnimationFrame(cantoTick);
+  setCantoPP();
 }
-function cantoPause(){ cantoPlaying=false; cancelAnimationFrame(raf); audio.pause(); }
+function cantoPause(){ cantoPlaying=false; cancelAnimationFrame(raf); audio.pause(); setCantoPP(); }
 
 function startCanto(fromEpilogue){
   epilogueMode=!!fromEpilogue;
@@ -561,9 +567,36 @@ function applyTheme(light){
 if(isLight) applyTheme(true);
 $('themeBtn').onclick=()=>{ isLight=!isLight; applyTheme(isLight); };
 
-$('volBtn').onclick=()=>$('volPop').classList.toggle('show');
-$('volSlider').oninput=e=>{ audio.volume=e.target.value/100; };
-audio.volume=0.8;
+// Mute — iOS-safe: .muted sí es tratable en iOS; .volume es de solo-lectura ahí
+// (volumen físico por botones del dispositivo). Toggle síncrono dentro del tap.
+function setMuteIcon(){
+  var m=audio.muted;
+  $('muteIc').innerHTML = m
+    ? '<path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M23 9l-6 6M17 9l6 6"/>'   // altavoz tachado
+    : '<path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8.5a4 4 0 0 1 0 7"/>'; // altavoz con onda
+  $('muteBtn').setAttribute('aria-label', m?'Activar sonido':'Silenciar canto');
+  $('muteBtn').setAttribute('title', m?'Activar sonido':'Silenciar');
+}
+$('muteBtn').onclick=()=>{ audio.muted=!audio.muted; setMuteIcon(); };
+setMuteIcon();
+
+// Canto · play/pause — reutiliza cantoPlay/cantoPause (detienen audio + rAF de
+// letra). Toggle síncrono en el gesto (iOS). El ícono se sincroniza dentro de
+// cantoPlay/cantoPause, así que refleja el estado venga de donde venga.
+$('cantoPP').onclick=()=>{ if(cantoPlaying)cantoPause(); else cantoPlay(); };
+// Canto · retroceder 10s — reposiciona y re-sincroniza letra/imagen de inmediato
+// (imprescindible si está pausado; inofensivo si suena: el siguiente tick coincide).
+$('cantoBack10').onclick=()=>{
+  audio.currentTime=Math.max(0, audio.currentTime-10);
+  cur=audio.currentTime; cantoRender();
+};
+function setCantoPP(){
+  var p=cantoPlaying;
+  $('cantoPPIc').innerHTML = p
+    ? '<path d="M7 5h3.2v14H7zM13.8 5H17v14h-3.2z" fill="currentColor"/>'   // ⏸ sonando
+    : '<path d="M8 5v14l11-7z" fill="currentColor"/>';                       // ▶ pausado
+  $('cantoPP').setAttribute('aria-label', p?'Pausar canto':'Reanudar canto');
+}
 
 /* ═══════════ Arranque — datos listos, gesto de inicio ═══════════ */
 function paintTexts(){
