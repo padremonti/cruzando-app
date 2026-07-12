@@ -406,10 +406,13 @@ body {
 .cc-pos.sel .cc-cap { color:var(--text); font-weight:600; }
 .cc-apart {
   width:100%; padding:14px; border-radius:15px; margin-bottom:14px; cursor:pointer; min-height:44px;
-  background:var(--card); border:1.5px dashed var(--border); color:var(--text); font-family:inherit; text-align:center;
+  background:var(--card); border:1.5px solid var(--border); color:var(--text); font-family:inherit; text-align:center;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;   /* etiqueta sola: centrada, sin hueco del sub ausente */
+  transition:border-color .2s, background .2s;
 }
-.cc-apart.sel { border-style:solid; border-color:var(--brand); background:var(--brand-ultra); }
-.cc-apart b { display:block; font-weight:700; margin-bottom:2px; }
+.cc-apart.sel { border-color:var(--brand); background:var(--brand-ultra); }
+.cc-apart b { display:block; font-weight:600; }
+.cc-apart b:not(:last-child) { margin-bottom:2px; }   /* separa del sub solo cuando existe */
 .cc-apart span { font-size:0.82rem; color:var(--text-soft); }
 
 /* ── Acogida · mosaico (texto tintado) ── */
