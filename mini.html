@@ -120,6 +120,15 @@ body.light{--parch:#0a2530;--bg:#EAF4F6}
 .diary textarea{width:100%;height:200px;resize:none;background:rgba(7,8,16,.6);border:1px solid rgba(243,234,216,.16);border-radius:12px;color:var(--parch);padding:14px;font-family:'Crimson Pro',serif;font-size:15px;line-height:1.6}
 .diary .txt-body{font-size:15px;margin-bottom:14px}
 
+/* diálogo de salida — velo tenue + tarjeta centrada (sobre topbar y pops) */
+.exit-pop{position:absolute;inset:0;z-index:40;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(5,7,14,.72);backdrop-filter:blur(6px)}
+.exit-pop.show{display:flex}
+.exit-card{width:100%;max-width:340px;background:rgba(12,14,22,.96);border:1px solid rgba(243,234,216,.16);border-radius:20px;padding:26px 22px}
+.exit-title{font-family:'Crimson Pro',serif;font-size:20px;font-weight:600;line-height:1.4;text-align:center;color:var(--parch);margin-bottom:22px}
+.exit-actions{display:flex;flex-direction:column;align-items:center;gap:10px}
+.exit-pop:not(.no-anim) .exit-card{animation:exitIn .22s cubic-bezier(.2,.7,.3,1)}
+@keyframes exitIn{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
+
 /* epílogo */
 .epilogue{z-index:8;justify-content:center;align-items:center;gap:16px;padding:40px}
 .epi-title{font-family:'Crimson Pro',serif;font-size:24px;font-weight:600;text-align:center}
@@ -227,6 +236,17 @@ body.light{--parch:#0a2530;--bg:#EAF4F6}
       <textarea id="diaryText" placeholder="Escribe lo que surja…"></textarea>
     </div>
     <button class="txt-next" id="diarySave">Guardar en el diario</button>
+  </div>
+
+  <!-- Diálogo de confirmación al salir (velo + tarjeta centrada) -->
+  <div class="exit-pop" id="exitPop" role="dialog" aria-modal="true" aria-labelledby="exitTitle" aria-hidden="true">
+    <div class="exit-card">
+      <div class="exit-title" id="exitTitle">¿Deseas salir de esta oración?</div>
+      <div class="exit-actions">
+        <button class="epi-btn primary" id="exitStay" aria-label="Seguir orando">Seguir orando</button>
+        <button class="epi-btn" id="exitLeave" aria-label="Salir de la oración">Salir</button>
+      </div>
+    </div>
   </div>
 
   <!-- Pantalla-gesto: el primer play() debe salir de un clic del usuario -->
@@ -556,7 +576,48 @@ function showMoment(name){
 
 /* ═══════════ Navegación / tema (patrón del repo) ═══════════ */
 function volver(){ location.href = base + 'sanar.html'; }
-$('backBtn').onclick=volver;
+
+/* ── Diálogo de confirmación al salir ────────────────────────────────
+   Atrás pausa cualquier audio en curso (canto o rezo), recuerda qué reanudar,
+   y abre #exitPop. Cancelar/Esc/tap-fuera reanuda SOLO lo que sonaba y se queda
+   en mini.html. Salir difiere a volver(). No inventa pausas: usa cantoPause()/
+   cantoPlay() (canto) y los primitivos del rezo (playing/audio/setPP). */
+var _reanudarCanto=false, _reanudarRezo=false, _exitPrevFocus=null, _exitKeydown=null;
+function _trapFocus(box, e){
+  var f=box.querySelectorAll('button:not([disabled])'); if(!f.length) return;
+  var first=f[0], last=f[f.length-1];
+  if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
+  else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
+}
+function abrirSalida(){
+  _reanudarCanto = cantoPlaying;                 // recuerda antes de pausar
+  _reanudarRezo  = playing;
+  if(cantoPlaying) cantoPause();                 // pausa canto (audio + rAF de letra)
+  if(playing){ playing=false; audio.pause(); setPP(false); }   // pausa rezo (mismos primitivos que #ppBtn)
+  var pop=$('exitPop');
+  pop.classList.toggle('no-anim', reduceMotion); // reduce-motion: sin animación de entrada
+  _exitPrevFocus=document.activeElement;
+  pop.classList.add('show'); pop.setAttribute('aria-hidden','false');
+  _exitKeydown=function(e){
+    if(e.key==='Escape'){ e.preventDefault(); cerrarSalida(); }
+    else if(e.key==='Tab'){ _trapFocus(pop, e); }
+  };
+  document.addEventListener('keydown', _exitKeydown);
+  $('exitStay').focus();                         // foco inicial en "Seguir orando"
+}
+function cerrarSalida(){                          // Cancelar / Seguir orando / Esc / tap-fuera
+  var pop=$('exitPop');
+  pop.classList.remove('show'); pop.setAttribute('aria-hidden','true');
+  if(_exitKeydown){ document.removeEventListener('keydown', _exitKeydown); _exitKeydown=null; }
+  if(_reanudarCanto) cantoPlay();                                    // reanuda SOLO lo que sonaba
+  if(_reanudarRezo){ playing=true; audio.play().catch(()=>{}); setPP(true); }
+  _reanudarCanto=_reanudarRezo=false;
+  if(_exitPrevFocus && _exitPrevFocus.focus) _exitPrevFocus.focus();
+}
+$('exitStay').onclick=cerrarSalida;
+$('exitLeave').onclick=volver;                    // navegación original, diferida tras confirmar
+$('exitPop').onclick=function(e){ if(e.target===$('exitPop')) cerrarSalida(); };   // tap-fuera = Cancelar
+$('backBtn').onclick=abrirSalida;                 // intercepta el atrás (antes: =volver)
 
 let isLight = localStorage.getItem('cruzando_theme')==='light';
 function applyTheme(light){
