@@ -1255,7 +1255,7 @@ let rezarAudio=null;
 let bgmEl=null;
 let bgmAudioCtx=null;
 let bgmGainNode=null;
-const BGM_VOL=0.12;
+const BGM_VOL=1.0;   // nivel horneado en los .m4a (-20 dB en R2): reproducir sin atenuar
 const _prefs=()=>{try{return JSON.parse(localStorage.getItem('cruzando_prefs')||'{}');}catch(e){return{};}};
 let bgmOn=_prefs().bgm!==false;
 let beadCount=0;
@@ -1351,7 +1351,7 @@ function bgmFadeTo(value, ms) {
 }
 function startBgm(){
   if(!bgmOn) return;
-  var url = R2 + '/BGM/BGM_' + nivel + '_' + cua + '.mp3';
+  var url = R2 + '/BGM/BGM_' + nivel + '_' + cua + '.m4a';
   if(!bgmEl){
     bgmEl = new Audio(url);
     bgmEl.loop = true;
@@ -1371,7 +1371,7 @@ function startBgm(){
       bgmFadeTo(BGM_VOL, 800);
     }, { once: true });
     bgmEl.play().catch(function(){});
-  } else if (!bgmEl.src.endsWith('BGM_' + nivel + '_' + cua + '.mp3')) {
+  } else if (!bgmEl.src.endsWith('BGM_' + nivel + '_' + cua + '.m4a')) {
     bgmEl.pause();
     bgmGainNode = null;
     bgmAudioCtx = null;

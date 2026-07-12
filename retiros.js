@@ -155,7 +155,7 @@
   /* ── BGM ── */
 
   var _BGM_BASE = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/BGM/';
-  var _BGM_VOL  = 0.07;
+  var _BGM_VOL  = 1.0;   // nivel horneado en los .m4a (-20 dB en R2): reproducir sin atenuar
   var _bgmEl    = null;
   var _bgmOn    = (function() {
     try { return JSON.parse(localStorage.getItem('cruzando_prefs') || '{}').bgm !== false; }
@@ -164,9 +164,9 @@
 
   function _bgmSlugToUrl(slug) {
     var m1 = slug.match(/^sanar_(\d+)_(\d+)$/);
-    if (m1) return _BGM_BASE + 'BGM_' + m1[1] + '_' + m1[2] + '.mp3';
+    if (m1) return _BGM_BASE + 'BGM_' + m1[1] + '_' + m1[2] + '.m4a';
     var m2 = slug.match(/^s(\d+)_(\d+)$/);
-    if (m2) return _BGM_BASE + 'BGM_' + m2[1] + '_' + m2[2] + '.mp3';
+    if (m2) return _BGM_BASE + 'BGM_' + m2[1] + '_' + m2[2] + '.m4a';
     return null;
   }
 

@@ -1969,8 +1969,10 @@ function onAudioEnd(){
 }
 
 /* ─── BGM con Web Audio API (funciona en iOS standalone) ─── */
-var BGM_NORMAL  = 0.12;
-var BGM_DUCK    = 0.03;
+// El nivel del BGM va horneado en los MP4/M4A (atenuados -20 dB en R2), así que aquí
+// se reproduce sin atenuar. El duck conserva la proporción original (1:4).
+var BGM_NORMAL  = 1.0;
+var BGM_DUCK    = 0.25;
 var _bgmCtx     = null;
 var _bgmGain    = null;
 var _bgmSource  = null;
@@ -2043,8 +2045,8 @@ document.addEventListener('visibilitychange', function() {
 
 function startBgm(){
   if(!bgmOn) return;
-  const url     = `${R2}/BGM/BGM_${nivel}_${cua}.mp3`;
-  const trackId = `BGM_${nivel}_${cua}.mp3`;
+  const url     = `${R2}/BGM/BGM_${nivel}_${cua}.m4a`;
+  const trackId = `BGM_${nivel}_${cua}.m4a`;
   if(!bgmEl){
     bgmEl = new Audio(url);
     bgmEl.loop = true;

@@ -1833,8 +1833,12 @@ const AUDIO_FOLDERS = {
 };
 const BGM_BASE = R2_BASE + '/BGM/';
 const NUM_SEGS  = 10;  // segmentos visuales en la barra de progreso
-const BGM_VOL   = 0.03; // volumen de la música de fondo (0.0 – 1.0). Suena BAJO la narración
-                        // casi todo el tiempo (solo se pausa en el canto): mantener discreto.
+// El NIVEL del BGM está horneado en los propios MP3 (atenuados ~-30 dB en R2).
+// Motivo: en iOS, HTMLMediaElement.volume es de SOLO-LECTURA — asignarlo no hace
+// nada y el BGM sonaría a tope. Bajando el archivo, el nivel se respeta en todas
+// las plataformas. Aquí se reproduce sin atenuar (1.0); NO subir el nivel por
+// código: no tendría efecto en iPhone. Para ajustar el volumen, re-exportar los MP3.
+const BGM_VOL   = 1.0;
 
 const BLOCKS     = ['gozosos','luminosos','dolorosos','gloriosos'];
 const BLOCK_NAMES = { gozosos:'Gozoso', luminosos:'Luminoso', dolorosos:'Doloroso', gloriosos:'Glorioso' };
@@ -3433,15 +3437,9 @@ function toggleTheme() {
 // BGM — Música de fondo
 // ════════════════════════════════════════════
 
-// ── Web Audio API para control preciso de ganancia del BGM ──
-let bgmAudioCtx  = null;
-let bgmSource    = null;
-let bgmGainNode  = null;
+// El nivel del BGM se controla con bgmEl.volume (BGM_VOL) + fades por timer.
 let bgmFadeTimer = null;
 let _bgmUnlockAttached = false;
-let _bgmDuckCtx  = null;
-let _bgmDuckGain = null;
-const BGM_DUCK_RATIO = 0.08;
 
 function bgmClearFade() {
   if (bgmFadeTimer) { clearTimeout(bgmFadeTimer); bgmFadeTimer = null; }
@@ -3451,7 +3449,7 @@ function bgmInit() {
   bgmStop(); // limpiar cualquier instancia previa antes de crear una nueva
   if (!currentSession) return;
   const { nivel, cuaderno } = currentSession;
-  const url = `${BGM_BASE}BGM_${nivel}_${cuaderno}.mp3`;
+  const url = `${BGM_BASE}BGM_${nivel}_${cuaderno}.m4a`;
 
   bgmEl = new Audio(url);
   bgmEl.loop = true;
@@ -3492,39 +3490,6 @@ function bgmSetGain(value) {
 function bgmGetGain() {
   if (bgmEl) return bgmEl.volume;
   return 0;
-}
-
-function _bgmEnsureDuckCtx() {
-  if (_bgmDuckCtx) return;
-  try {
-    _bgmDuckCtx  = new (window.AudioContext || window.webkitAudioContext)();
-    var src      = _bgmDuckCtx.createMediaElementSource(bgmEl);
-    _bgmDuckGain = _bgmDuckCtx.createGain();
-    _bgmDuckGain.gain.value = 1.0;
-    src.connect(_bgmDuckGain);
-    _bgmDuckGain.connect(_bgmDuckCtx.destination);
-  } catch(e) {
-    _bgmDuckCtx = null; _bgmDuckGain = null;
-  }
-}
-
-function bgmDuck() {
-  _bgmEnsureDuckCtx();
-  if (_bgmDuckGain && _bgmDuckCtx) {
-    _bgmDuckGain.gain.cancelScheduledValues(_bgmDuckCtx.currentTime);
-    _bgmDuckGain.gain.linearRampToValueAtTime(BGM_DUCK_RATIO, _bgmDuckCtx.currentTime + 0.3);
-  } else if (bgmEl) {
-    bgmEl.volume = BGM_VOL * BGM_DUCK_RATIO;
-  }
-}
-
-function bgmUnduck() {
-  if (_bgmDuckGain && _bgmDuckCtx) {
-    _bgmDuckGain.gain.cancelScheduledValues(_bgmDuckCtx.currentTime);
-    _bgmDuckGain.gain.linearRampToValueAtTime(1.0, _bgmDuckCtx.currentTime + 0.8);
-  } else if (bgmEl) {
-    bgmEl.volume = BGM_VOL;
-  }
 }
 
 function bgmFadeTo(target, durationMs, onDone) {
@@ -3576,18 +3541,7 @@ function bgmStop() {
     bgmEl.onerror = null;
     bgmEl = null;
   }
-  if (bgmAudioCtx) {
-    bgmAudioCtx.close().catch(() => {});
-    bgmAudioCtx = null;
-  }
-  if (_bgmDuckCtx) {
-    _bgmDuckCtx.close().catch(() => {});
-    _bgmDuckCtx  = null;
-    _bgmDuckGain = null;
-  }
-  bgmSource   = null;
-  bgmGainNode = null;
-  bgmLoaded   = false;
+  bgmLoaded = false;
 }
 
 function setupAudioMediaSession(mysteryData) {
@@ -4354,12 +4308,9 @@ window.navGuardSeamless  = navGuardSeamless;
   }
 })();
 
-// iOS: reanudar AudioContext del BGM cuando la pantalla se desbloquea
+// iOS: reanudar el BGM cuando la pantalla se desbloquea
 document.addEventListener('visibilitychange', function() {
   if (document.visibilityState !== 'visible') return;
-  if (_bgmDuckCtx && _bgmDuckCtx.state === 'suspended') {
-    _bgmDuckCtx.resume().catch(function(){});
-  }
   if (bgmEl && bgmEl.paused && isPlaying && bgmEnabled) {
     bgmEl.play().catch(function(){});
   }
