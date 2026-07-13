@@ -312,11 +312,20 @@ body.light .app-nav-item{color:rgba(0,41,49,0.45)}
 }
 .misterio-hero-text{position:absolute;bottom:16px;left:18px;right:18px;z-index:3;pointer-events:none}
 .misterio-bloque-label{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--lvl-bold);margin-bottom:4px}
-.misterio-titulo{font-family:'Cormorant Garamond',Georgia,serif;font-size:2rem;font-weight:600;color:#fff;line-height:1.15;text-shadow:0 1px 3px rgba(0,0,0,0.9),0 4px 16px rgba(0,0,0,0.85),0 8px 32px rgba(0,0,0,0.7);margin-bottom:4px}
-.misterio-subtitulo{font-family:'Cormorant Garamond',Georgia,serif;font-size:30px;font-style:italic;color:rgba(255,255,255,0.75);text-shadow:0 1px 3px rgba(0,0,0,0.9),0 3px 12px rgba(0,0,0,0.8)}
+.misterio-titulo{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.65rem;font-weight:600;color:#fff;line-height:1.15;text-shadow:0 1px 3px rgba(0,0,0,0.9),0 4px 16px rgba(0,0,0,0.85),0 8px 32px rgba(0,0,0,0.7);margin-bottom:4px}
+.misterio-subtitulo{font-family:'Cormorant Garamond',Georgia,serif;font-size:23px;font-style:italic;color:rgba(255,255,255,0.75);text-shadow:0 1px 3px rgba(0,0,0,0.9),0 3px 12px rgba(0,0,0,0.8)}
 body.light .misterio-titulo{color:#002931;text-shadow:0 0 8px rgba(255,255,255,1),0 0 16px rgba(255,255,255,0.95),0 0 32px rgba(255,255,255,0.8)}
 body.light .misterio-subtitulo{color:#002931;text-shadow:0 0 8px rgba(255,255,255,1),0 0 16px rgba(255,255,255,0.95),0 0 32px rgba(255,255,255,0.8)}
-.hero-beads{margin-top:8px;pointer-events:auto}
+/* Indicador de los 5 Misterios del set: 5 barritas mudas, flotando en el centro
+   de la topbar entre los grupos de botones. Solo indicador — no son tocables. */
+.hero-beads{
+  position:absolute;top:14px;left:50%;transform:translateX(-50%);
+  width:140px;height:43px; /* misma altura que los .hero-btn → quedan alineadas */
+  display:flex;align-items:center;gap:4px;
+  z-index:5; /* bajo el banner de Preparación (z-index:10) */
+}
+.hb-seg{flex:1;height:3px;border-radius:2px;background:var(--seg-idle);transition:background 0.3s}
+.hb-seg.done,.hb-seg.active{background:var(--lvl-bold)}
 
 /* Botones circulares sobre la imagen */
 .hero-btn{position:absolute;top:14px;width:43px;height:43px;border-radius:50%;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;color:rgba(230,222,211,0.85);cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);-webkit-tap-highlight-color:transparent;transition:background 0.2s;z-index:4;touch-action:manipulation}
@@ -333,9 +342,6 @@ body.light .misterio-subtitulo{color:#002931;text-shadow:0 0 8px rgba(255,255,25
 .prep-hero-btn:active{opacity:0.7}
 .prep-hero-kicker{font-size:0.85rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--lvl-bold);flex-shrink:0}
 .prep-hero-name{font-size:1.15rem;font-weight:600;color:rgba(255,255,255,0.92);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hero-mystery-nav{position:absolute;top:50%;transform:translateY(-50%);left:0;right:0;display:flex;justify-content:space-between;padding:0 8px;pointer-events:none;z-index:10}
-.hero-nav-btn{width:52px;height:52px;border-radius:50%;background:rgba(0,0,0,0.35);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);border:1.5px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.85);cursor:pointer;pointer-events:auto;-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:background 0.15s,transform 0.15s}
-.hero-nav-btn:active{background:rgba(0,0,0,0.55);transform:scale(0.92)}
 
 /* ══════════════════════════════════════
    ZONA B — Barra de herramientas
@@ -350,14 +356,12 @@ body.light .misterio-subtitulo{color:#002931;text-shadow:0 0 8px rgba(255,255,25
   border-top:1px solid var(--border);
 }
 /* ── Variables de contraste para toolbar (dark default → light override) ── */
-:root{--tb-circle-bg:rgb(var(--bg-rgb));--tb-circle-border:rgba(255,255,255,0.45);--tb-icon:rgba(255,255,255,0.75);--tb-bead:rgba(255,255,255,0.22)}
-body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon:var(--text-dim);--tb-bead:rgba(0,41,49,0.18)}
+:root{--tb-circle-bg:rgb(var(--bg-rgb));--tb-circle-border:rgba(255,255,255,0.45);--tb-icon:rgba(255,255,255,0.75);--tb-bead:rgba(255,255,255,0.22);--seg-idle:rgba(255,255,255,0.28)}
+body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon:var(--text-dim);--tb-bead:rgba(0,41,49,0.18);--seg-idle:rgba(0,41,49,0.22)}
 .tool-btn{display:flex;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:0;touch-action:manipulation}
 .tool-btn-circle{width:48px;height:48px;border-radius:50%;border:3px solid var(--tb-circle-border);background:rgb(var(--bg-rgb));display:flex;align-items:center;justify-content:center;color:var(--tb-icon);transition:background 0.2s,border-color 0.2s,color 0.2s,transform 0.15s;position:relative;z-index:1}
 .tool-btn.active .tool-btn-circle{background:var(--lvl-bold);border-color:var(--lvl-bold);color:#fff}
 .tool-btn:active .tool-btn-circle{transform:scale(0.92)}
-/* Línea de rosario que atraviesa los círculos */
-.tools-bar::before{content:'';position:absolute;top:32px;left:0;right:0;height:1.5px;background:var(--tb-bead);z-index:0}
 
 /* ══════════════════════════════════════
    Cuentas del Rosario — indicador pasivo del rezo (sync bead_sync.json)
@@ -751,8 +755,9 @@ body.light .popup-close-bottom{border-color:var(--border);color:var(--text-dim)}
         <div class="misterio-bloque-label" id="hero-bloque-label"></div>
         <div class="misterio-titulo" id="hero-titulo"></div>
         <div class="misterio-subtitulo" id="hero-subtitulo"></div>
-        <div class="hero-beads" id="hero-beads"></div>
       </div>
+      <!-- Indicador de los 5 Misterios: barritas mudas, flotando entre los botones -->
+      <div class="hero-beads" id="hero-beads"></div>
       <!-- Preparación pill (micro completado) -->
       <div class="prep-hero" id="prep-hero" style="display:none">
         <button class="prep-hero-btn" id="btn-prep-hero"></button>
@@ -1514,13 +1519,6 @@ function renderSession(){
   $('hero-titulo').textContent=md?.titulo||'Misterio '+(bIdx+1);
   $('hero-subtitulo').textContent=md?.subtitulo||'';
 
-  const bdots=prog?.progress?.[blk]||[null,null,null,null,null];
-  $('hero-beads').innerHTML='<div style="display:flex;gap:8px;margin-top:6px">'+
-    Array.from({length:5},(_,i)=>{
-      const d=bdots[i],cur=i===bIdx;
-      return `<div onclick="window._gm(${i})" style="width:${cur?'12px':'8px'};height:${cur?'12px':'8px'};border-radius:50%;cursor:pointer;transition:all 0.2s;background:${d?'#34A853':cur?'#fff':'rgba(255,255,255,0.4)'};${cur?'border:2px solid #fff;box-shadow:0 0 6px rgba(255,255,255,0.6)':''}"></div>`;
-    }).join('')+'</div>';
-
   applyBlockAccent(blk);
   $('tools-bar').style.setProperty('--tools-bar-bg',TBG[blk]||'var(--card)');
   $('btn-bgm').classList.toggle('bgm-on',bgmOn);
@@ -1539,6 +1537,9 @@ function renderSession(){
       prepHero.style.display='none';
     }
   }
+
+  // Después del banner: las barritas se ocultan si la Preparación está visible
+  renderHeroBeads(prog?.progress?.[blk]);
 
   closeToolPopup();
   initVP();
@@ -1560,6 +1561,21 @@ function renderSession(){
   updateNavBtns();
   updateToggleHref();
   if(bgmOn)startBgm();
+}
+
+/* 5 barritas mudas = los 5 Misterios del set. Anteriores/hechas y actual en cian;
+   pendientes en --seg-idle (por tema). Solo indicador: la navegación entre
+   Misterios va por las flechas ‹ › del hero (window._gm).
+   No se ven mientras el banner de Preparación ocupa la franja central. */
+function renderHeroBeads(dots){
+  const el=$('hero-beads');if(!el)return;
+  const prep=$('prep-hero');
+  el.style.display=(prep&&prep.style.display!=='none')?'none':'';
+  const d=dots||[null,null,null,null,null];
+  el.innerHTML=Array.from({length:5},(_,i)=>{
+    const state=i===bIdx?'active':d[i]?'done':'';
+    return '<div class="hb-seg '+state+'"></div>';
+  }).join('');
 }
 
 window._gm=i=>{if(i!==bIdx){bIdx=i;if(libro)libro.pause();renderSession();}};
@@ -1719,12 +1735,7 @@ async function completeMystery(){
       .set({nivel,cuaderno:cua,misterio:mNum(blk,bIdx)},{merge:true});
   }catch(e){}
   // Refresh beads
-  const cur=bIdx;
-  $('hero-beads').innerHTML='<div style="display:flex;gap:8px;margin-top:6px">'+
-    Array.from({length:5},(_,i)=>{
-      const d=dots[i],c=i===cur;
-      return `<div onclick="window._gm(${i})" style="width:${c?'12px':'8px'};height:${c?'12px':'8px'};border-radius:50%;cursor:pointer;transition:all 0.2s;background:${d?'#34A853':c?'#fff':'rgba(255,255,255,0.4)'};${c?'border:2px solid #fff;box-shadow:0 0 6px rgba(255,255,255,0.6)':''}"></div>`;
-    }).join('')+'</div>';
+  renderHeroBeads(dots);
   if(dots.every(Boolean)){
     setTimeout(async()=>{if(window.CZSound)CZSound('blockClear');await addMeters(MR_BNS);showSlide(MR_BNS,'¡Bloque completo!');showCelebration();},600);
     if(blk==='gloriosos'&&cua===4){
