@@ -317,8 +317,8 @@ body.light .app-nav-item{color:rgba(0,41,49,0.45)}
 }
 .misterio-hero-text{position:absolute;bottom:16px;left:18px;right:100px;z-index:3;pointer-events:none}
 .misterio-bloque-label{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--lvl-bold);margin-bottom:4px}
-.misterio-titulo{font-family:'Cormorant Garamond',Georgia,serif;font-size:2rem;font-weight:600;color:#fff;line-height:1.15;text-shadow:0 1px 3px rgba(0,0,0,0.9),0 4px 16px rgba(0,0,0,0.85),0 8px 32px rgba(0,0,0,0.7);margin-bottom:4px}
-.misterio-subtitulo{font-family:'Cormorant Garamond',Georgia,serif;font-size:30px;font-style:italic;color:rgba(255,255,255,0.75);text-shadow:0 1px 3px rgba(0,0,0,0.9),0 3px 12px rgba(0,0,0,0.8)}
+.misterio-titulo{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.65rem;font-weight:600;color:#fff;line-height:1.15;text-shadow:0 1px 3px rgba(0,0,0,0.9),0 4px 16px rgba(0,0,0,0.85),0 8px 32px rgba(0,0,0,0.7);margin-bottom:4px}
+.misterio-subtitulo{font-family:'Cormorant Garamond',Georgia,serif;font-size:23px;font-style:italic;color:rgba(255,255,255,0.75);text-shadow:0 1px 3px rgba(0,0,0,0.9),0 3px 12px rgba(0,0,0,0.8)}
 body.light .misterio-titulo{color:#002931;text-shadow:0 0 8px rgba(255,255,255,1),0 0 16px rgba(255,255,255,0.95),0 0 32px rgba(255,255,255,0.8)}
 body.light .misterio-subtitulo{color:#002931;text-shadow:0 0 8px rgba(255,255,255,1),0 0 16px rgba(255,255,255,0.95),0 0 32px rgba(255,255,255,0.8)}
 .hero-btn{
@@ -444,27 +444,19 @@ body.audio-playing .bead.active.lit-normal,body.audio-playing .bead-pater.active
 .progress-bar-wrap{height:3px;background:var(--border)}
 .progress-bar-fill{height:100%;background:var(--lvl-bold);width:0%;transition:width 0.2s linear}
 
-/* ── Tira de playlist ── */
+/* ── Tira de playlist — 7 barritas flotando en el centro de la topbar del hero ── */
 .playlist-strip{
-  display:flex;gap:0;overflow-x:auto;
-  padding:6px 14px;background:var(--sec-bg);
-  border-bottom:1px solid var(--border);
-  scrollbar-width:none;
+  position:absolute;top:14px;left:50%;transform:translateX(-50%);
+  width:140px;height:43px; /* misma altura que los .hero-btn → quedan alineadas */
+  display:flex;align-items:center;gap:4px;
+  z-index:5; /* bajo el banner de Preparación (z-index:10) */
 }
-.playlist-strip::-webkit-scrollbar{display:none}
-.pl-item{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;opacity:0.4;min-width:38px}
-.pl-item.active{opacity:1}
-.pl-item.done{opacity:0.65}
-.pl-dot{width:8px;height:8px;border-radius:50%;background:var(--border)}
-.pl-dot.rhombus{border-radius:0;transform:rotate(45deg);width:8px;height:8px;}
-.pl-item.active .pl-dot{background:var(--lvl-bold)}
-.pl-item.done .pl-dot{background:#34A853}
-.pl-lbl{font-size:11px;color:var(--text-dim);text-align:center;white-space:nowrap}
-.pl-item.active .pl-lbl{color:var(--lvl-bold);font-weight:700}
+.pl-seg{flex:1;height:3px;border-radius:2px;background:var(--seg-idle);transition:background 0.3s}
+.pl-seg.done,.pl-seg.active{background:var(--lvl-bold)}
 
 /* ── Toolbar inferior ── */
-:root{--tb-circle-bg:rgb(var(--bg-rgb));--tb-circle-border:rgba(255,255,255,0.45);--tb-icon:rgba(255,255,255,0.75);--tb-bead:rgba(255,255,255,0.22)}
-body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon:var(--text-dim);--tb-bead:rgba(0,41,49,0.15)}
+:root{--tb-circle-bg:rgb(var(--bg-rgb));--tb-circle-border:rgba(255,255,255,0.45);--tb-icon:rgba(255,255,255,0.75);--seg-idle:rgba(255,255,255,0.28)}
+body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon:var(--text-dim);--seg-idle:rgba(0,41,49,0.22)}
 .tools-bar{
   position:relative;
   display:flex;justify-content:space-around;align-items:center;
@@ -472,7 +464,6 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
   background:var(--card);border-top:1px solid var(--border);
   flex-shrink:0;
 }
-.tools-bar::before{content:'';position:absolute;top:32px;left:0;right:0;height:1.5px;background:var(--tb-bead);z-index:0}
 .tool-btn{display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:0;touch-action:manipulation}
 .tool-btn-circle{width:48px;height:48px;border-radius:50%;border:3px solid var(--tb-circle-border);background:rgb(var(--bg-rgb));display:flex;align-items:center;justify-content:center;color:var(--tb-icon);transition:background 0.2s,border-color 0.2s,color 0.2s,transform 0.15s;position:relative;z-index:1}
 .tool-btn.active .tool-btn-circle{background:var(--lvl-bold);border-color:var(--lvl-bold);color:#fff}
@@ -949,6 +940,9 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
         </svg>
       </button>
 
+      <!-- Tira de secciones: 7 barritas mudas, flotando entre los botones -->
+      <div class="playlist-strip" id="playlist-strip"></div>
+
       <!-- Columna de 10 cuentas -->
       <div id="beads-col-wrap" style="display:none">
         <div class="beads-col" id="beads-col">
@@ -979,10 +973,6 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
       <div class="progress-bar-fill" id="progress-fill"></div>
     </div>
 
-
-
-    <!-- ── Tira de playlist ── -->
-    <div class="playlist-strip" id="playlist-strip"></div>
 
 
     <!-- ── Toolbar inferior ── -->
@@ -1251,6 +1241,9 @@ let blk='gozosos', bIdx=0;
 let _freeNoGana=false; // Política Free v2: true => suprime ganancia de metros (revisita en DEMO 0101)
 let totalM=0;
 let playlist=[], plIdx=0;
+// El rezo ya concluyó (5º Misterio completado): enciende la barrita de Conclusión
+// aunque las Letanías estén desactivadas y no haya tracks finales que reproducir.
+let rezoConcluido=false;
 let rezarAudio=null;
 let bgmEl=null;
 let bgmAudioCtx=null;
@@ -1676,16 +1669,17 @@ function checkMicroRezar() {
   var prepDiv  = $('prep-hero-rezar');
   var prepName = $('prep-hero-rezar-name');
   var prepBtn  = $('btn-prep-hero-rezar');
-  if (!prepDiv || !_microDataRezar) { if(prepDiv) prepDiv.style.display='none'; return; }
+  if (!prepDiv || !_microDataRezar) { if(prepDiv) prepDiv.style.display='none'; syncStripVisibility(); return; }
 
   var blkData = (_microDataRezar.bloques || [])[BLOCKS.indexOf(blk)];
-  if (!blkData) { prepDiv.style.display='none'; return; }
+  if (!blkData) { prepDiv.style.display='none'; syncStripVisibility(); return; }
 
   var microKey = 'cruzando_micro_rezar_' + nivelId + '_' + blk;
-  if (localStorage.getItem(microKey) === 'done') { prepDiv.style.display='none'; return; }
+  if (localStorage.getItem(microKey) === 'done') { prepDiv.style.display='none'; syncStripVisibility(); return; }
 
   if (prepName) prepName.textContent = blkData.subtitulo || blkData.titulo || blk;
   prepDiv.style.display = '';
+  syncStripVisibility();
 
   if (prepBtn) {
     prepBtn.onclick = function() {
@@ -2073,28 +2067,37 @@ window.countBead=countBead;
 
 
 /* ─── RENDER — PLAYLIST STRIP ─── */
+/* 7 barritas: Inicio · M1–M5 · Conclusión. Las 11+ secciones internas se agrupan
+   por TIPO de track (el canto y el anuncio se absorben en su Misterio), de modo
+   que el mapeo aguanta cualquier combinación de prefs y cualquier punto de arranque. */
+const PL_BARS=7;
+function plBarOf(t){
+  if(!t)return 0;
+  if(t.type==='inicio')return 0;
+  if(t.mIdx!==null&&t.mIdx!==undefined)return 1+t.mIdx;  // anuncio | misterio | canto
+  return 6;                                              // letanias | salve | final
+}
+/* Las barritas no se ven mientras el banner de Preparación ocupa la franja
+   central: en preparación aún no ha empezado el rezo, no hay progreso que mostrar. */
+function syncStripVisibility(){
+  const strip=$('playlist-strip');if(!strip)return;
+  const prep=$('prep-hero-rezar');
+  const prepVisible=prep&&prep.style.display!=='none';
+  strip.style.display=prepVisible?'none':'';
+}
 function updatePlaylistStrip(){
   const strip=$('playlist-strip');if(!strip)return;
-  const visible=playlist
-    .map((t,i)=>({...t,oi:i}))
-    .filter(t=>!t.hidden);
-  strip.innerHTML=visible.map((t,vi)=>{
-    const nextOi=visible[vi+1]?.oi??Infinity;
-    const isActive=plIdx>=t.oi&&plIdx<nextOi;
-    const isDone=t.oi<plIdx&&!isActive;
-    const state=isActive?'active':isDone?'done':'';
-    const lbl=
-      t.type==='inicio'   ?'Inicio':
-      t.type==='misterio' ?'M'+(t.mIdx+1):
-      t.type==='canto'    ?'♪'+(t.mIdx+1):
-      t.type==='letanias' ?'Let.':
-      t.type==='salve'    ?'Salve':'Final';
-    var isRhombus=(t.type==='inicio'||t.type==='letanias'||t.type==='salve');
-    var dotClass='pl-dot'+(isRhombus?' rhombus':'');
-    return '<div class="pl-item '+state+'"><div class="'+dotClass+'"></div><div class="pl-lbl">'+lbl+'</div></div>';
-  }).join('');
-  const sf=$('playlist-strip-final');
-  if(sf)sf.innerHTML=strip.innerHTML;
+  syncStripVisibility();
+  const active=plBarOf(playlist[plIdx]);
+  let html='';
+  for(let i=0;i<PL_BARS;i++){
+    const state=
+      i===active                       ?'active':
+      i<active                         ?'done':
+      (i===6&&rezoConcluido)           ?'done':'';
+    html+='<div class="pl-seg '+state+'"></div>';
+  }
+  strip.innerHTML=html;
 }
 
 /* ─── RENDER — CONTENIDO DEL MISTERIO ─── */
@@ -2479,6 +2482,7 @@ async function onTrackEnded(){
   if(!track)return;
   if(track.type==='misterio'){
     await completeMystery();
+    if(track.mIdx===4) rezoConcluido=true;
     if(!_freeNoGana){ await addMeters(MR_REZO); showSlide(MR_REZO); }
   }
   playNext();
