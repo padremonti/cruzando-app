@@ -460,16 +460,21 @@ body.audio-playing .bead-pater.active{animation:beadPulseFilled .9s ease-in-out 
   gap: 3px;
   z-index: 10;
 }
+/* Barrita apagada: el gradiente superior del hero es opaco, así que estas viven
+   sobre el color de fondo del tema (teal oscuro / crema claro), no sobre la foto.
+   Por eso el tono va por tema — blanco al 28% desaparecería en tema claro. */
+:root      { --seg-idle: rgba(255,255,255,0.28); }
+body.light { --seg-idle: rgba(0,41,49,0.22); }
 .playlist-seg {
   flex: 1;
   height: 3px;
   border-radius: 2px;
-  background: var(--border);
+  background: var(--seg-idle);
   overflow: hidden;
   transition: background 0.3s;
 }
 .playlist-seg.done { background: var(--lvl-bold); }
-.playlist-seg.active { background: var(--border); }
+.playlist-seg.active { background: var(--seg-idle); }
 .playlist-seg.active .playlist-seg-fill {
   height: 100%;
   background: var(--lvl-bold);
@@ -488,25 +493,17 @@ body.audio-playing .bead-pater.active{animation:beadPulseFilled .9s ease-in-out 
 }
 
 /* ── Variables de contraste para toolbar (dark default → light override) ── */
-:root { --tb-circle-bg:rgb(var(--bg-rgb)); --tb-circle-border:rgba(255,255,255,0.45); --tb-icon:rgba(255,255,255,0.75); --tb-bead:rgba(255,255,255,0.22); }
-body.light { --tb-circle-bg:var(--card); --tb-circle-border:var(--border); --tb-icon:var(--text-dim); --tb-bead:rgba(0,41,49,0.18); }
+:root { --tb-circle-bg:rgb(var(--bg-rgb)); --tb-circle-border:rgba(255,255,255,0.45); --tb-icon:rgba(255,255,255,0.75); }
+body.light { --tb-circle-bg:var(--card); --tb-circle-border:var(--border); --tb-icon:var(--text-dim); }
 
-/* ── Audio Toolbar (5 botones estilo rosario) ── */
+/* ── Audio Toolbar: trío compacto centrado (−10s · play · preguntas) ── */
 .audio-tools-bar {
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
   align-items: center;
+  gap: 16px;
   padding: 8px 12px calc(env(safe-area-inset-bottom, 8px) + 10px);
   position: relative;
-}
-.audio-tools-bar::before {
-  content: '';
-  position: absolute;
-  top: 32px;
-  left: 0; right: 0;
-  height: 1.5px;
-  background: var(--tb-bead);
-  z-index: 0;
 }
 .atb-btn {
   display: flex;
