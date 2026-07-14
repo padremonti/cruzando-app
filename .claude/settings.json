@@ -19,7 +19,8 @@
       "Bash(awk '/popup-overlay\" id=\"treasure-overlay\"/{f=1} f{c++} /^  <\\\\/div>$/ && f{print \"lineas:\"c; exit}' index.html)",
       "Bash(node -e \"const d=require\\('./data/0101-pains.json'\\);const m=d.misterios[0];console.log\\('ref:',JSON.stringify\\(m.ref\\)\\);console.log\\('mal:',JSON.stringify\\(m.mal\\)\\);console.log\\('n misterios:',d.misterios.length\\);console.log\\('un pain apertura:',JSON.stringify\\(\\(m.pains[0]||{}\\).apertura\\)\\);\")",
       "Bash(node \"C:/Users/Usuario/AppData/Local/Temp/claude/c--Users-Usuario-Desktop-cruzando-app/e9dd230f-1d8f-435f-b559-9b4d9c453e7c/scratchpad/drive-canto.mjs\")",
-      "Bash(node --check \"C:/Users/Usuario/AppData/Local/Temp/claude/c--Users-Usuario-Desktop-cruzando-app/e9dd230f-1d8f-435f-b559-9b4d9c453e7c/scratchpad/mod1.mjs\")"
+      "Bash(node --check \"C:/Users/Usuario/AppData/Local/Temp/claude/c--Users-Usuario-Desktop-cruzando-app/e9dd230f-1d8f-435f-b559-9b4d9c453e7c/scratchpad/mod1.mjs\")",
+      "Bash(node \"C:/Users/Usuario/AppData/Local/Temp/claude/c--Users-Usuario-Desktop-cruzando-app/e9dd230f-1d8f-435f-b559-9b4d9c453e7c/scratchpad/drive-epilogo.mjs\")"
     ]
   }
 }

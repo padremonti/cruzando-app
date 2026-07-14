@@ -824,114 +824,63 @@ body.light { --tb-circle-bg:var(--card); --tb-circle-border:var(--border); --tb-
   flex-shrink: 0;
 }
 
-/* ── Epílogo del canto ── */
-.epilogo-canto {
-  width: 100%;
+/* ── Epílogo: cierre de la sesión + helper de botones ──
+   El canto ya no se escucha aquí con un mini-player: "Escuchar el canto"
+   abre la pantalla de canto (#scr-canto) en modo epílogo. ── */
+.epi-top {
   flex: 1;
   min-height: 0;
-  background: var(--card);
-  border-bottom: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  text-align: left;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 26px;
+  text-align: center;
 }
-.epilogo-canto-header {
-  flex-shrink: 0;
-  padding: 16px 20px 12px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-.epilogo-canto-titulo {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--text);
-  flex: 1;
-}
-.epilogo-canto-badge {
+.epi-kicker {
   font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
   color: var(--lvl-soft);
-  background: var(--lvl-ultra);
-  padding: 3px 10px;
-  border-radius: 20px;
-  white-space: nowrap;
 }
-/* Player del canto en epílogo */
-.epilogo-player {
-  flex-shrink: 0;
-  padding: 14px 20px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.epi-titulo {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.9rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--text);
 }
-.epilogo-play-btn {
-  width: 42px; height: 42px;
-  border-radius: 50%;
-  background: var(--lvl-bold);
-  border: none;
+.epi-sub {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+.epi-btn {
+  width: 100%;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 14px;
+  border: 1.5px solid var(--border);
+  background: var(--card);
+  color: var(--text-soft);
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  flex-shrink: 0;
+  gap: 9px;
   transition: transform 0.15s;
 }
-.epilogo-play-btn:active { transform: scale(0.92); }
-.epilogo-player-bar {
-  flex: 1;
-}
-.epilogo-bar-track {
-  width: 100%;
-  height: 4px;
-  background: var(--border);
-  border-radius: 3px;
-  cursor: pointer;
-  margin-bottom: 4px;
-}
-.epilogo-bar-fill {
-  height: 100%;
+.epi-btn:active { transform: scale(0.97); }
+.epi-btn.primary {
   background: var(--lvl-bold);
-  border-radius: 3px;
-  width: 0%;
-  transition: width 0.1s linear;
+  color: #fff;
+  border: none;
 }
-.epilogo-bar-time {
-  font-size: 0.7rem;
-  color: var(--text-dim);
-  font-variant-numeric: tabular-nums;
-}
-/* Letra del canto */
-.epilogo-letra {
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-  padding: 16px 20px 20px;
-  font-family: 'Crimson Pro', Georgia, serif;
-  font-size: 36px;
-  line-height: 1.85;
-  color: var(--text-soft);
-  white-space: pre-line;
-  font-style: italic;
-}
-.epilogo-canto-titulo-wrap {
-  flex: 1;
-}
-.epilogo-canto-subtitulo {
-  display: block;
-  font-size: 0.75rem;
-  color: var(--text-dim);
-  margin-top: 3px;
-}
+.epi-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
 /* Zona inferior: metros + botones */
 #complete-controls {
   flex-shrink: 0;
@@ -1676,30 +1625,13 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   <!-- ═══ OVERLAY: EPÍLOGO / COMPLETADO ═══ -->
   <div id="scr-complete">
     <div class="epilogo-handle"></div>
-    <!-- Zona superior: canto del epílogo -->
-    <div class="epilogo-canto" id="epilogo-canto" style="display:none">
-      <div class="epilogo-canto-header">
-        <div class="epilogo-canto-titulo-wrap">
-          <span class="epilogo-canto-titulo" id="epilogo-titulo">—</span>
-          <span class="epilogo-canto-subtitulo" id="epilogo-subtitulo"></span>
-        </div>
-        <span class="epilogo-canto-badge">Canto</span>
-      </div>
-      <div class="epilogo-player">
-        <button class="epilogo-play-btn" id="epilogo-play-btn">
-          <svg id="epilogo-ico-play" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          <svg id="epilogo-ico-pause" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-        </button>
-        <div class="epilogo-player-bar">
-          <div class="epilogo-bar-track" id="epilogo-bar-track">
-            <div class="epilogo-bar-fill" id="epilogo-bar-fill"></div>
-          </div>
-          <div class="epilogo-bar-time" id="epilogo-bar-time">0:00 / 0:00</div>
-        </div>
-      </div>
-      <div class="epilogo-letra" id="epilogo-letra"></div>
+    <!-- Zona superior: cierre de la sesión -->
+    <div class="epi-top">
+      <div class="epi-kicker">Sesión completada</div>
+      <div class="epi-titulo" id="epilogo-titulo">—</div>
+      <div class="epi-sub"    id="epilogo-subtitulo"></div>
     </div>
-    <!-- Zona inferior: metros + botones de acción -->
+    <!-- Zona inferior: metros + helper de botones -->
     <div id="complete-controls">
       <div class="complete-meters" id="complete-meters">+0m</div>
       <div id="complete-actions" style="width:100%;max-width:320px;"></div>
@@ -2062,8 +1994,6 @@ let isDark = true;
 
 // Audio principal
 let audioEl        = null;
-// Audio del epílogo (canto al final de sesión)
-let epilogoAudioEl = null;
 let currentTrack   = -1;  // índice en playlist
 let isPlaying      = false;
 let _prepHideTimer = null;
@@ -2168,7 +2098,7 @@ window._goToPrevMystery = async () => {
     console.log('Retrocediendo a:', nivel, cuaderno, misterio);
     await saveAudioProgress();
 
-    if (epilogoAudioEl) { epilogoAudioEl.pause(); epilogoAudioEl = null; }
+    closeCanto(); cantoEpilogo = false;
     sessionMeters = 0; sectionRewards = new Set(); sessionCompleted = false; currentTrack = -1;
     stopAudio(); bgmStop();
 
@@ -2192,7 +2122,7 @@ window._goToPrevMystery = async () => {
 
 window._repeatSession = async () => {
   closeEpilogo();
-  if (epilogoAudioEl) { epilogoAudioEl.pause(); epilogoAudioEl = null; }
+  closeCanto(); cantoEpilogo = false;
   audioProgress.firstAnswered = [false, false, false];
   await saveAudioProgress();
   sessionMeters = 0; sessionCompleted = false; currentTrack = -1;
@@ -2203,7 +2133,7 @@ window._repeatSession = async () => {
 
 window.advanceAndRestart = async () => {
   closeEpilogo();
-  if (epilogoAudioEl) { epilogoAudioEl.pause(); epilogoAudioEl = null; }
+  closeCanto(); cantoEpilogo = false;
   let { nivel, cuaderno, misterio } = audioProgress;
   misterio++;
   if (misterio > 20) { misterio = 1; cuaderno++; if (cuaderno > 4) { cuaderno = 1; nivel++; } }
@@ -3170,8 +3100,6 @@ function renderSession() {
   // Limpiar pantalla de completado para evitar acumulación de botones
   const actionsDiv = $('complete-actions');
   if (actionsDiv) actionsDiv.innerHTML = '';
-  const epilogoDiv = $('epilogo-canto');
-  if (epilogoDiv) epilogoDiv.style.display = 'none';
 
   const nivelId = String(nivel).padStart(2,'0') + String(cuaderno).padStart(2,'0');
 
@@ -3329,6 +3257,9 @@ let cantoImgLetters = [];
 let cantoImgIdx     = -1;
 let cantoFrontA     = true;
 let _cantoNivelId   = null;   // nivelId de CANTOS_DATA en memoria (evita letra de otro cuaderno)
+// Modo epílogo: el canto es opcional y ya se rezó todo. Cambia SOLO tres cosas:
+// quién crea el audio, "Saltar" desde el segundo 0, y adónde se vuelve al terminar.
+let cantoEpilogo    = false;
 
 // Parser .lrc — portado de mini.html. Convierte [mm:ss.xx] a segundos, ignora
 // metadatos ([ti:], [ar:]…) y directivas ([cut:], [fx:]) que aquí no se usan.
@@ -3381,8 +3312,9 @@ function openCanto() {
   const s = currentSession;
   if (!s || cantoOpen) return;
   const hasStatic = !!(cantoLetraTxt && cantoLetraTxt.trim());
-  // Sin .lrc y sin letra: no abrimos nada. El canto suena con el hero, como siempre.
-  if (!cantoLrcText && !hasStatic) return;
+  // Sin .lrc y sin letra: en la sesión no abrimos nada (el canto suena con el hero,
+  // como siempre). En el epílogo sí abrimos: el usuario lo ha pedido a propósito.
+  if (!cantoLrcText && !hasStatic && !cantoEpilogo) return;
 
   cantoStatic  = !cantoLrcText;
   cantoOpen    = true;
@@ -3397,7 +3329,7 @@ function openCanto() {
   track.innerHTML = '';
 
   const lines = cantoStatic
-    ? cantoLetraTxt.split(/\r?\n/)
+    ? (cantoLetraTxt ? cantoLetraTxt.split(/\r?\n/) : [])   // en epílogo puede no haber letra
     : (cantoEvents = parseLrc(cantoLrcText)).map(e => e.text);
   if (cantoStatic) cantoEvents = [];
   lines.forEach(txt => {
@@ -3407,9 +3339,9 @@ function openCanto() {
     track.appendChild(d);
   });
 
-  // Con karaoke, "Saltar" aparece tras CANTO_SKIP_AT escuchados.
-  // Con letra estática no hay nada que sincronizar: disponible desde el inicio.
-  $('canto-skip').classList.toggle('show', cantoStatic);
+  // Con karaoke, "Saltar" aparece tras CANTO_SKIP_AT escuchados. Con letra estática
+  // no hay nada que sincronizar, y en el epílogo el canto es opcional: desde el inicio.
+  $('canto-skip').classList.toggle('show', cantoStatic || cantoEpilogo);
 
   cantoDetectImages();
   $('scr-canto').classList.add('open');
@@ -3542,12 +3474,58 @@ function cantoShowStill(url) {
        (awardSectionMeters no mapea folder 'music'), así que no hay nada que compensar;
        solo se cierra el segmento para que la barrita no quede a medias. ─── */
 function cantoSkip() {
+  // En el epílogo no hay nada por delante: se vuelve, no se avanza.
+  if (cantoEpilogo) { volverAlEpilogo(); return; }
+
   const idx   = currentTrack;
   const track = currentSession && currentSession.playlist[idx];
   closeCanto();
   if (track) markSegDone(track.seg);
   const next = nextRealTrack(idx);
   if (next >= 0) goTrack(next); else onPlaylistEnded();
+}
+
+/* ─── Canto en modo epílogo: el epílogo (z-500) taparía la pantalla de canto,
+       así que se cierra al ir y se reabre al volver — como mini. Cuantas veces quiera. ─── */
+function abrirCantoEpilogo() {
+  const s = currentSession;
+  if (!s) return;
+  cantoEpilogo = true;
+  closeEpilogo();
+  stopAudio();
+
+  // El motor lee la global audioEl en cada frame: basta con ponerle el canto aquí.
+  // Así los controles del overlay (togglePlayPause, back10) siguen valiendo sin tocar nada.
+  const url = AUDIO_FOLDERS['music'] + `M_${s.nivel}_${s.cuaderno}_${s.misterio}.m4a`;
+  audioEl = new Audio(url);
+  audioEl.onended = () => { premiarCantoEpilogo(); volverAlEpilogo(); };
+  audioEl.onerror = () => { showToast('El canto aún no está disponible'); volverAlEpilogo(); };
+
+  openCanto();
+  audioEl.play()
+    .then(()  => { isPlaying = true;  updatePlayPauseBtn(); })
+    .catch(() => { isPlaying = false; updatePlayPauseBtn(); });
+  isPlaying = true;
+  updatePlayPauseBtn();
+}
+
+function volverAlEpilogo() {
+  closeCanto();
+  cantoEpilogo = false;
+  stopAudio();
+  $('scr-complete').classList.add('open');
+}
+
+// Los mismos 200m de siempre, con la misma guardia: solo al escuchar el canto entero,
+// una vez por sesión. Saltarlo no otorga metros (ni antes ni ahora).
+function premiarCantoEpilogo() {
+  if (sectionRewards.has('epilogo')) return;
+  sectionRewards.add('epilogo');
+  if (_freeNoGana) return;
+  sessionMeters += METERS_EPILOGO_CANTO;
+  addMetersToFirestore(METERS_EPILOGO_CANTO);
+  $('complete-meters').textContent = `+${sessionMeters.toLocaleString('es-MX')}m`;
+  showToast(`+${METERS_EPILOGO_CANTO}m · Canto escuchado`);
 }
 
 // Saltar tracks de pausa/silencio — para controles ⏮⏭
@@ -4094,64 +4072,65 @@ function getCanto(cantosData, block, blockIdx) {
   return cantosData.cantos[block][blockIdx] || null;
 }
 
-function renderEpilogo(canto, audioUrl) {
-  const wrap = $('epilogo-canto');
-  if (!canto) { wrap.style.display = 'none'; return; }
+/* ═══ EPÍLOGO — helper de botones ═══
+   Presentación pura: la lógica (metros, medallas, desbloqueos, candado free)
+   vive en completeSession() y no se toca aquí.
 
-  $('epilogo-titulo').textContent = canto.titulo;
-  $('epilogo-letra').textContent  = canto.letra;
-  wrap.style.display = '';
+   Todos:                      Escuchar el canto · Repetir sesión · Salir
+   premium / beta / developer: + Siguiente misterio
+   DEMO 0101 m1-19:            + Siguiente misterio (también para free)
+   free en 0101 m20:           solo "Continuar 🎉" (la celebración toma el control) */
 
-  // Player del epílogo
-  if (epilogoAudioEl) { epilogoAudioEl.pause(); epilogoAudioEl = null; }
-  epilogoAudioEl = new Audio(audioUrl);
+const ICO_CANTO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
+const ICO_SALIR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>';
 
-  epilogoAudioEl.ontimeupdate = () => {
-    if (!epilogoAudioEl.duration) return;
-    const pct = (epilogoAudioEl.currentTime / epilogoAudioEl.duration) * 100;
-    $('epilogo-bar-fill').style.width = pct + '%';
-    $('epilogo-bar-time').textContent =
-      fmtTime(epilogoAudioEl.currentTime) + ' / ' + fmtTime(epilogoAudioEl.duration);
-  };
-  epilogoAudioEl.onended = () => {
-    $('epilogo-ico-play').style.display  = 'block';
-    $('epilogo-ico-pause').style.display = 'none';
-    $('epilogo-bar-fill').style.width = '0%';
-    epilogoAudioEl.currentTime = 0;
-    // Metros por escuchar el canto del epílogo completo
-    if (!sectionRewards.has('epilogo')) {
-      sectionRewards.add('epilogo');
-      if (!_freeNoGana) {
-        sessionMeters += METERS_EPILOGO_CANTO;
-        addMetersToFirestore(METERS_EPILOGO_CANTO);
-        $('complete-meters').textContent = `+${sessionMeters.toLocaleString('es-MX')}m`;
-        showToast(`+${METERS_EPILOGO_CANTO}m · Canto escuchado`);
-      }
-    }
-  };
-  epilogoAudioEl.onerror = () => {
-    $('epilogo-play-btn').style.opacity = '0.4';
-    $('epilogo-play-btn').disabled = true;
-  };
+function epiBtn(label, primary, onClick, icon) {
+  const b = document.createElement('button');
+  b.className = 'epi-btn' + (primary ? ' primary' : '');
+  b.innerHTML = (icon || '') + '<span>' + label + '</span>';
+  b.onclick = onClick;
+  return b;
+}
 
-  $('epilogo-play-btn').onclick = () => {
-    if (!epilogoAudioEl) return;
-    if (epilogoAudioEl.paused) {
-      epilogoAudioEl.play().catch(() => {});
-      $('epilogo-ico-play').style.display  = 'none';
-      $('epilogo-ico-pause').style.display = 'block';
-    } else {
-      epilogoAudioEl.pause();
-      $('epilogo-ico-play').style.display  = 'block';
-      $('epilogo-ico-pause').style.display = 'none';
-    }
-  };
+function renderEpilogoActions() {
+  const { nivel, cuaderno, misterio } = currentSession;
+  const nivelId = String(nivel).padStart(2,'0') + String(cuaderno).padStart(2,'0');
+  const plan    = window.effectivePlan ? window.effectivePlan() : 'free';
+  const actions = $('complete-actions');
+  actions.innerHTML = '';
 
-  $('epilogo-bar-track').onclick = e => {
-    if (!epilogoAudioEl || !epilogoAudioEl.duration) return;
-    const rect = $('epilogo-bar-track').getBoundingClientRect();
-    epilogoAudioEl.currentTime = ((e.clientX - rect.left) / rect.width) * epilogoAudioEl.duration;
-  };
+  // 0101 m20 con free: el DEMO se ha cerrado, la celebración manda (como hasta ahora)
+  if (window._freeDemoJustCleared) {
+    actions.appendChild(epiBtn('Continuar 🎉', true, () => window.showDemoCompleto()));
+    return;
+  }
+
+  // El demo (0101 m1-19) deja avanzar a cualquiera; fuera de él, solo premium y superiores.
+  // effectivePlan() (no userPlan) para que el developer "viendo como free" vea lo que vería un free.
+  const esPremium  = window.isPremiumOrAbove ? window.isPremiumOrAbove(plan) : false;
+  const enDemo     = (nivelId === '0101' && misterio < 20);
+  const puedeAvanzar = esPremium || enDemo;
+
+  if (puedeAvanzar) {
+    actions.appendChild(epiBtn('Siguiente misterio →', true, () => window.advanceAndRestart()));
+  }
+  // Para quien no avanza hoy, re-vivir el canto que ya ganó es la invitación principal
+  actions.appendChild(epiBtn('Escuchar el canto', !puedeAvanzar, abrirCantoEpilogo, ICO_CANTO));
+  actions.appendChild(epiBtn('🔄 Repetir sesión', false, () => window._repeatSession()));
+  actions.appendChild(epiBtn('Salir', false, salirDelEpilogo, ICO_SALIR));
+}
+
+/* Salir: el progreso ya se guardó al abrir el epílogo y los metros del canto se
+   escriben al ganarlos. Solo queda callar el audio y, si el free ya consumió su
+   Misterio del día, mostrarle el candado AQUÍ — al irse, no interrumpiendo el epílogo. */
+function salirDelEpilogo() {
+  stopAudio();
+  if (window._freeShowMananaAfterCelebration) {
+    window._freeShowMananaAfterCelebration = false;
+    showFreeVuelveManana();
+    return;
+  }
+  window._goHome();
 }
 
 async function completeSession() {
@@ -4303,15 +4282,14 @@ async function completeSession() {
 
   // Pantalla completado — datos básicos
   $('complete-meters').textContent  = `+${sessionMeters.toLocaleString('es-MX')}m`;
+  $('epilogo-titulo').textContent    = (currentSession.mysteryData && currentSession.mysteryData.titulo) || 'Misterio completado';
   $('epilogo-subtitulo').textContent = `${ORDS[misterio-1]} Misterio ${BLOCK_NAMES[block]} · Nivel ${nivel}-${cuaderno}`;
 
-  // Cargar canto del epílogo
+  // Canto del bloque (para el desbloqueo). La letra del canto del epílogo ya está
+  // en memoria desde preloadCanto(): "Escuchar el canto" abre la pantalla de canto.
   const nivelId   = String(nivel).padStart(2,'0') + String(cuaderno).padStart(2,'0');
   CANTOS_DATA     = null; // forzar recarga si cambió de nivel
   const cantosData = await loadCantos(nivelId);
-  const canto      = getCanto(cantosData, block, blockIdx);
-  const cantoUrl   = AUDIO_FOLDERS['music'] + `M_${nivel}_${cuaderno}_${misterio}.m4a`;
-  renderEpilogo(canto, cantoUrl);
 
   // Desbloqueo de canto de bloque al completar los 5 misterios
   const BLOCK_IDX_MAP = { gozosos:1, luminosos:2, dolorosos:3, gloriosos:4 };
@@ -4339,42 +4317,18 @@ async function completeSession() {
     } catch(e) { console.warn('[cantos unlock]', e); }
   }
 
-  // Botones de acción
-  const actions = $('complete-actions');
-  const s = 'width:100%;padding:15px;border-radius:14px;font-family:Inter,sans-serif;font-size:1rem;font-weight:700;cursor:pointer;margin-bottom:10px;display:block;';
-  if (userPlan === 'free') {
-    if (window._freeRitmoLibre) {
-      // 0101 m1-19: continuar al siguiente Misterio hoy mismo
-      actions.innerHTML =
-        '<button onclick="window.advanceAndRestart()" style="' + s + 'background:var(--lvl-bold);color:#fff;border:none;">Siguiente misterio →</button>' +
-        '<button onclick="window._repeatSession()" style="' + s + 'background:var(--card);color:var(--text-soft);border:1.5px solid var(--border);">🔄 Repetir sesión</button>';
-    } else if (window._freeDemoJustCleared) {
-      // 0101 m20: la celebración DEMO toma el control
-      actions.innerHTML =
-        '<button onclick="window.showDemoCompleto()" style="' + s + 'background:var(--lvl-bold);color:#fff;border:none;">Continuar 🎉</button>';
-    } else {
-      // 0102+: candado diario (comportamiento actual)
-      actions.innerHTML =
-        '<button onclick="window.showFreeVuelveManana()" style="' + s + 'background:var(--lvl-bold);color:#fff;border:none;">Volver mañana 🙏</button>' +
-        '<button onclick="window._repeatSession()" style="' + s + 'background:var(--card);color:var(--text-soft);border:1.5px solid var(--border);">🔄 Repetir sesión</button>';
-    }
-  } else {
-    actions.innerHTML =
-      '<button onclick="window.advanceAndRestart()" style="' + s + 'background:var(--lvl-bold);color:#fff;border:none;">Siguiente misterio →</button>' +
-      '<button onclick="window._repeatSession()" style="' + s + 'background:var(--card);color:var(--text-soft);border:1.5px solid var(--border);">🔄 Repetir sesión</button>';
-  }
+  // Helper de botones (presentación)
+  renderEpilogoActions();
 
   $('scr-complete').classList.add('open');
   $('fab-questions') && ($('fab-questions').style.display = 'none');
 
-  // Si era Free completando por primera vez hoy: mostrar overlay tras la celebración.
-  // Prioridad: celebración DEMO (m20) por encima del "vuelve mañana" diario.
+  // La celebración del DEMO (0101 m20) sigue tomando el control sola.
+  // El candado diario del free, en cambio, ya NO interrumpe el epílogo:
+  // aparece al pulsar "Salir" (ver salirDelEpilogo), para que pueda re-vivir su canto.
   if (window._freeDemoJustCleared) {
     window._freeDemoJustCleared = false;
     setTimeout(window.showDemoCompleto, 2000);
-  } else if (window._freeShowMananaAfterCelebration) {
-    window._freeShowMananaAfterCelebration = false;
-    setTimeout(showFreeVuelveManana, 2000);
   }
 }
 
