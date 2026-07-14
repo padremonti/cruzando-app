@@ -464,6 +464,13 @@ body.light .popup-close-bottom{border-color:var(--border);color:var(--text-dim)}
 /* El botón de avance: mismo bloque relleno, con tipografía algo menor porque su
    etiqueta es larga y a 1.6rem se desborda en pantallas estrechas. */
 .amen-btn.next{margin-top:18px;font-size:1.25rem;letter-spacing:0.5px}
+/* Letanías — se ofrece al cerrar un set de 5 Misterios, encima de "Siguiente Misterio".
+   Secundario: es una invitación, no el camino por defecto. */
+.amen-btn.letanias{
+  margin-top:18px;font-size:1.15rem;letter-spacing:0.5px;
+  background:transparent;color:var(--lvl-bold);
+  border:1.5px solid var(--lvl-bold);box-shadow:none;
+}
 /* ── Modal de salida (mismo lenguaje que rezar.html) ── */
 .exit-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);display:none;align-items:center;justify-content:center;z-index:300;padding:24px}
 .exit-modal-overlay.open{display:flex}
@@ -1029,6 +1036,12 @@ body.light .popup-close-bottom{border-color:var(--border);color:var(--text-dim)}
 </div><!-- /shell -->
 
 <script src="utils.js"></script>
+<!-- Bloque final del Rosario (Letanías → Salve → conclusiva), módulos compartidos -->
+<link rel="stylesheet" href="canto.css">
+<link rel="stylesheet" href="rosario-final.css">
+<script src="canto.js"></script>
+<script src="letanias.js"></script>
+<script src="rosario-final.js"></script>
 <script src="gestures.js"></script>
 <script>
 (function(){
@@ -1673,9 +1686,14 @@ function populatePopup(t){
       break;
     case 'suplica':{
       const ultimo=currentGlobalMystery>=20;   // en el 20 no hay siguiente: se cierra el nivel
+      // Al cerrar un set de 5 Misterios, la tradición reza las Letanías. Se ofrecen
+      // (nunca se imponen) y llevan a la Salve y a la oración conclusiva. Sin metros.
+      const cierraSet=[5,10,15,20].includes(currentGlobalMystery);
       bd.innerHTML=`<p class="popup-text">${esc(md?.intercesion||'Súplica no disponible')}</p>`+
         `<div class="amen-word">Amén</div>`+
+        (cierraSet?`<button class="amen-btn letanias" id="btn-letanias">Letanías</button>`:'')+
         `<button class="amen-btn next" id="btn-amen">${ultimo?'Terminar el nivel':'Siguiente Misterio →'}</button>`;
+      if(cierraSet) $('btn-letanias').onclick=()=>{ RosarioFinal.abrir({}); };
       $('btn-amen').onclick=async()=>{
         const b=$('btn-amen');
         if(b.disabled)return;   // el avance se dispara una sola vez

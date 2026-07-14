@@ -17,8 +17,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
 
-<!-- Pantalla de canto karaoke (motor compartido) -->
+<!-- Pantalla de canto karaoke + bloque final del Rosario (módulos compartidos) -->
 <link rel="stylesheet" href="canto.css">
+<link rel="stylesheet" href="rosario-final.css">
 
 <style>
 /* ══════════════════════════════════════════════
@@ -1636,6 +1637,8 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 <script src="utils.js"></script>
 <script src="gestures.js"></script>
 <script src="canto.js"></script>
+<script src="letanias.js"></script>
+<script src="rosario-final.js"></script>
 <script type="module">
 /* ══════════════════════════════════════════════
    CruzAndo · Sesión Diaria · audio.html
@@ -2625,7 +2628,7 @@ async function buildSession() {
   const silencioUrl = AUDIO_FOLDERS['rezo'] + 'silencio.m4a'; // /audio/global/silencio.m4a
   const pausaUrl   = AUDIO_FOLDERS['rezo'] + 'pausa.m4a';
   // Alternar MA/MB según posición dentro del bloque (1,3,5 → MA; 2,4 → MB)
-  const _latinPref = getPrefs().latinPrayer === true;
+  const _latinPref = !!(window.esLatin && esLatin());   // una sola preferencia para toda la app
   const _rezaFile  = blockIdx % 2 === 0
     ? (_latinPref ? 'L_MA.m4a' : 'MA.m4a')
     : (_latinPref ? 'L_MB.m4a' : 'MB.m4a');
@@ -2730,13 +2733,9 @@ function closeMicro() { $('scr-micro').classList.remove('open'); }
 function startPlayerSession(prepBlock) {
   renderSession();
 
-  // Precarga de la letra del canto (.lrc y respaldo estático) — no bloquea el arranque:
+  // Precarga de la letra del canto (.lrc y respaldo) — no bloquea el arranque:
   // cuando la playlist llegue al canto, abrir la pantalla ya es síncrono.
-  {
-    const s = currentSession;
-    const nId = String(s.nivel).padStart(2,'0') + String(s.cuaderno).padStart(2,'0');
-    Canto.preload({ nivelId: nId, block: s.block, blockIdx: s.blockIdx });
-  }
+  Canto.preload();
 
   // Reset de las cuentas del Rosario al cambiar de Misterio (que no continúen donde quedaron)
   _currentSyncKey = null;
@@ -3161,20 +3160,37 @@ function isCanto(idx) {
 // solo recibe instantSkip + allowNoLyrics, y nos devuelve el control en onSkip.
 let cantoEpilogo = false;
 
-Canto.init({
-  getAudio:    () => audioEl,              // GETTER: goTrack crea un new Audio() por track
-  isPlaying:   () => isPlaying,
-  getMid:      () => {
-    const s = currentSession;
-    return s ? `${s.nivel}_${s.cuaderno}_${s.misterio}` : '';
+const CANTO_LETTERS = 'abcdefghi'.split('');   // máx. 9 imágenes de carrusel por Misterio
+const cantoMid = () => {
+  const s = currentSession;
+  return s ? (s.nivel + '_' + s.cuaderno + '_' + s.misterio) : '';
+};
+
+const Canto = Karaoke.create({
+  id: 'canto', kicker: 'Canto',
+  getAudio:  () => audioEl,              // GETTER: goTrack crea un new Audio() por track
+  isPlaying: () => isPlaying,
+  getTitulo: () => (currentSession && currentSession.mysteryData && currentSession.mysteryData.titulo) || '',
+
+  getLrcUrl:        () => LRC_BASE + 'M_' + cantoMid() + '.lrc',
+  getImgCandidates: () => {
+    const mid = cantoMid();
+    return CANTO_LETTERS.map(l => IMG_BASE + 'cantos/' + mid + '/P_' + mid + l + '.webp');
   },
-  getTitulo:   () => (currentSession && currentSession.mysteryData && currentSession.mysteryData.titulo) || '',
-  isCantoNow:  () => !!currentSession && isCanto(currentTrack),
+  getStillUrl:      () => IMG_BASE + 'P_' + cantoMid() + '.webp',
+  // Letra de respaldo: la del cuaderno ({nivelId}-cantos.json), sin marcas de tiempo
+  loadFallbackLetra: async () => {
+    const s = currentSession;
+    if (!s) return null;
+    const nivelId = String(s.nivel).padStart(2,'0') + String(s.cuaderno).padStart(2,'0');
+    const c = Karaoke.getCanto(await Karaoke.loadCantos(nivelId), s.block, s.blockIdx);
+    return c ? { letra: c.letra, titulo: c.titulo } : null;
+  },
+
+  isOpenNow:   () => !!currentSession && isCanto(currentTrack),
   onSkip:      () => cantoSkip(),
   onPlayPause: () => togglePlayPause(),
-  onBack10:    () => back10(),             // el de la toolbar: además refresca la barra de tiempo
-  imgBase:     IMG_BASE,
-  lrcBase:     LRC_BASE
+  onBack10:    () => back10()            // el de la toolbar: además refresca la barra de tiempo
 });
 
 /* ─── Saltar: cierra la pantalla y avanza a la siguiente sección (Meditación).
@@ -3685,7 +3701,7 @@ function updatePlayPauseBtn() {
   $('ico-play').style.display  = isPlaying ? 'none' : 'block';
   $('ico-pause').style.display = isPlaying ? 'block' : 'none';
   // Espejo en la pantalla de canto: mismo estado, mismos handlers
-  if (window.Canto) Canto.syncIcon();
+  Canto.syncIcon();
   setWaveformPlaying(isPlaying);
   // El bead activo pulsa solo mientras el audio se reproduce
   document.body.classList.toggle('audio-playing', isPlaying);
@@ -3771,6 +3787,18 @@ function onPlaylistEnded() {
 
 const ICO_CANTO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
 const ICO_SALIR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>';
+const ICO_LETANIAS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M8 7h8M6 21h12"/><circle cx="12" cy="3" r="1.4"/></svg>';
+
+/* Las Letanías, la Salve y la oración conclusiva las sirve rosario-final.js (el mismo
+   bloque que reza rezar.html). El epílogo (z-500) taparía sus pantallas, así que se
+   cierra al ir y se reabre al volver — igual que con el canto. */
+function abrirLetaniasEpilogo() {
+  closeEpilogo();
+  stopAudio();
+  RosarioFinal.abrir({
+    onCerrar: () => { $('scr-complete').classList.add('open'); }
+  });
+}
 
 function epiBtn(label, primary, onClick, icon) {
   const b = document.createElement('button');
@@ -3799,6 +3827,11 @@ function renderEpilogoActions() {
   const enDemo     = (nivelId === '0101' && misterio < 20);
   const puedeAvanzar = esPremium || enDemo;
 
+  // Al cerrar un set de 5 Misterios, la tradición reza las Letanías. Se ofrecen (nunca
+  // se imponen) y llevan a la Salve y a la oración conclusiva. No otorgan metros.
+  if ([5, 10, 15, 20].includes(misterio)) {
+    actions.appendChild(epiBtn('Letanías', false, abrirLetaniasEpilogo, ICO_LETANIAS));
+  }
   if (puedeAvanzar) {
     actions.appendChild(epiBtn('Siguiente misterio →', true, () => window.advanceAndRestart()));
   }
@@ -3976,7 +4009,7 @@ async function completeSession() {
   // Canto del bloque (para el desbloqueo). La letra del canto del epílogo ya está
   // en memoria desde preloadCanto(): "Escuchar el canto" abre la pantalla de canto.
   const nivelId   = String(nivel).padStart(2,'0') + String(cuaderno).padStart(2,'0');
-  const cantosData = await Canto.loadCantos(nivelId);   // caché única del módulo (guarda por nivelId)
+  const cantosData = await Karaoke.loadCantos(nivelId);   // caché única del módulo (guarda por nivelId)
 
   // Desbloqueo de canto de bloque al completar los 5 misterios
   const BLOCK_IDX_MAP = { gozosos:1, luminosos:2, dolorosos:3, gloriosos:4 };

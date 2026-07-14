@@ -11,8 +11,9 @@
 <title>CruzAndo · Rezar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
-<!-- Pantalla de canto karaoke (motor compartido) -->
+<!-- Pantalla de canto karaoke + bloque final del Rosario (módulos compartidos) -->
 <link rel="stylesheet" href="canto.css">
+<link rel="stylesheet" href="rosario-final.css">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -48,6 +49,8 @@ window._fbFirestore = {
 <script src="utils.js"></script>
 <script src="gestures.js"></script>
 <script src="canto.js"></script>
+<script src="letanias.js"></script>
+<script src="rosario-final.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
@@ -623,23 +626,6 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
 .popup-close-bottom svg{stroke:var(--lvl-bold);width:24px;height:24px}
 .popup-close-bottom:active{background:var(--sec-bg)}
 
-/* ── scr-letanias / layout final ── */
-#scr-letanias.active{display:flex;flex-direction:column;height:100dvh;overflow:hidden}
-.final-layout-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
-.final-layout-header{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:16px 20px 12px;border-bottom:1px solid var(--border);
-  background:var(--card);flex-shrink:0;
-}
-.final-layout-title{font-size:16px;font-weight:800;color:var(--lvl-bold)}
-.play-btn-sm{width:42px;height:42px;border-radius:50%}
-.final-layout-text{
-  flex:1;overflow-y:auto;padding:20px;
-  font-size:16px;line-height:2;color:var(--text-soft);
-  -webkit-overflow-scrolling:touch;
-}
-
-
 @media(max-width:380px){html{font-size:16px}}
 
 /* ── Onboarding Rezar ── */
@@ -1036,19 +1022,6 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
 
   </div><!-- /scr-rezar -->
 
-  <!-- ═══ PANTALLA: LETANÍAS / FINAL ═══ -->
-  <div class="screen" id="scr-letanias">
-    <div class="final-layout-wrap">
-      <div class="final-layout-header">
-        <div class="final-layout-title" id="final-layout-title"></div>
-        <button class="play-btn play-btn-sm" id="btn-play-pause-final" onclick="window.togglePlay()">
-          <div class="play-inner" id="play-icon-final"></div>
-        </button>
-      </div>
-      <div class="final-layout-text popup-lyrics" id="final-layout-text"></div>
-    </div>
-  </div>
-
   <!-- ═══ PANTALLA: CELEBRACIÓN ═══ -->
   <div class="screen" id="scr-celebration">
     <div class="celebration-screen fade-in">
@@ -1122,8 +1095,6 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
  *       L_INICIO.m4a, L_MA.m4a, L_MB.m4a
  *       L_LETANIAS.m4a, L_SALVE.m4a, L_ORACION_FINAL.m4a
  * [ ] Subir sfx/bead_click.mp3 al bucket R2
- * [ ] Completar TXT_LETANIAS con el texto completo de las Letanías
- * [ ] Verificar que TXT_SALVE y TXT_ORACION_FINAL están completos
  * [ ] Probar en iOS Safari (autoplay policy)
  * [ ] Probar en Android Chrome
  * [ ] Verificar que el toggle 📖 Libro apunta correctamente
@@ -1161,97 +1132,6 @@ const MR_REZO = 400;
 const MR_QF   = 650;
 const MR_QU   = 325;
 const MR_BNS  = 1000;
-
-const TXT_LETANIAS =
-`<b>Señor, ten piedad.</b> Señor, ten piedad.<br>
-<b>Cristo, ten piedad.</b> Cristo, ten piedad.<br>
-<b>Señor, ten piedad.</b> Señor, ten piedad.<br>
-<b>Cristo, óyenos.</b> Cristo, óyenos.<br>
-<b>Cristo, escúchanos.</b> Cristo, escúchanos.<br><br>
-<b>Dios, Padre celestial,</b> ten misericordia de nosotros.<br>
-<b>Dios, Hijo Redentor del mundo,</b> ten misericordia de nosotros.<br>
-<b>Dios, Espíritu Santo,</b> ten misericordia de nosotros.<br>
-<b>Santísima Trinidad, un solo Dios,</b> ten misericordia de nosotros.<br><br>
-<b>Santa María,</b> ruega por nosotros.<br>
-<b>Santa Madre de Dios,</b> ruega por nosotros.<br>
-<b>Santa Virgen de las vírgenes,</b> ruega por nosotros.<br>
-<b>Madre de Cristo,</b> ruega por nosotros.<br>
-<b>Madre de la Iglesia,</b> ruega por nosotros.<br>
-<b>Madre de la misericordia,</b> ruega por nosotros.<br>
-<b>Madre de la divina gracia,</b> ruega por nosotros.<br>
-<b>Madre de la esperanza,</b> ruega por nosotros.<br>
-<b>Madre purísima,</b> ruega por nosotros.<br>
-<b>Madre castísima,</b> ruega por nosotros.<br>
-<b>Madre inviolada,</b> ruega por nosotros.<br>
-<b>Madre inmaculada,</b> ruega por nosotros.<br>
-<b>Madre amable,</b> ruega por nosotros.<br>
-<b>Madre admirable,</b> ruega por nosotros.<br>
-<b>Madre del buen consejo,</b> ruega por nosotros.<br>
-<b>Madre del Creador,</b> ruega por nosotros.<br>
-<b>Madre del Salvador,</b> ruega por nosotros.<br>
-<b>Virgen prudentísima,</b> ruega por nosotros.<br>
-<b>Virgen digna de veneración,</b> ruega por nosotros.<br>
-<b>Virgen digna de alabanza,</b> ruega por nosotros.<br>
-<b>Virgen poderosa,</b> ruega por nosotros.<br>
-<b>Virgen clemente,</b> ruega por nosotros.<br>
-<b>Virgen fiel,</b> ruega por nosotros.<br>
-<b>Espejo de justicia,</b> ruega por nosotros.<br>
-<b>Trono de la Sabiduría,</b> ruega por nosotros.<br>
-<b>Causa de nuestra alegría,</b> ruega por nosotros.<br>
-<b>Vas espiritual,</b> ruega por nosotros.<br>
-<b>Vas honorable,</b> ruega por nosotros.<br>
-<b>Vas insigne de devoción,</b> ruega por nosotros.<br>
-<b>Rosa mística,</b> ruega por nosotros.<br>
-<b>Torre de David,</b> ruega por nosotros.<br>
-<b>Torre de marfil,</b> ruega por nosotros.<br>
-<b>Casa de oro,</b> ruega por nosotros.<br>
-<b>Arca de la Alianza,</b> ruega por nosotros.<br>
-<b>Puerta del cielo,</b> ruega por nosotros.<br>
-<b>Estrella de la mañana,</b> ruega por nosotros.<br>
-<b>Salud de los enfermos,</b> ruega por nosotros.<br>
-<b>Refugio de los pecadores,</b> ruega por nosotros.<br>
-<b>Consoladora de los afligidos,</b> ruega por nosotros.<br>
-<b>Auxilio de los cristianos,</b> ruega por nosotros.<br>
-<b>Reina de los Ángeles,</b> ruega por nosotros.<br>
-<b>Reina de los Patriarcas,</b> ruega por nosotros.<br>
-<b>Reina de los Profetas,</b> ruega por nosotros.<br>
-<b>Reina de los Apóstoles,</b> ruega por nosotros.<br>
-<b>Reina de los Mártires,</b> ruega por nosotros.<br>
-<b>Reina de los Confesores,</b> ruega por nosotros.<br>
-<b>Reina de las Vírgenes,</b> ruega por nosotros.<br>
-<b>Reina de todos los Santos,</b> ruega por nosotros.<br>
-<b>Reina concebida sin pecado original,</b> ruega por nosotros.<br>
-<b>Reina asunta al cielo,</b> ruega por nosotros.<br>
-<b>Reina del Santísimo Rosario,</b> ruega por nosotros.<br>
-<b>Reina de la familia,</b> ruega por nosotros.<br>
-<b>Reina de la paz,</b> ruega por nosotros.<br><br>
-<b>Cordero de Dios, que quitas el pecado del mundo,</b> perdónanos, Señor.<br>
-<b>Cordero de Dios, que quitas el pecado del mundo,</b> escúchanos, Señor.<br>
-<b>Cordero de Dios, que quitas el pecado del mundo,</b> ten misericordia de nosotros.<br><br>
-<i>Ruega por nosotros, Santa Madre de Dios,</i><br>
-<i>para que seamos dignos de alcanzar las promesas de Jesucristo. Amén.</i>`;
-
-const TXT_SALVE =
-`Dios te salve, Reina y Madre de misericordia,
-vida, dulzura y esperanza nuestra; Dios te salve.
-A ti llamamos los desterrados hijos de Eva;
-a ti suspiramos, gimiendo y llorando
-en este valle de lágrimas.
-Ea, pues, Señora, abogada nuestra,
-vuelve a nosotros esos tus ojos misericordiosos;
-y después de este destierro muéstranos a Jesús,
-fruto bendito de tu vientre.
-¡Oh clementísima, oh piadosa,
-oh dulce siempre Virgen María! Amén.`;
-
-const TXT_ORACION_FINAL =
-`Oh Dios, cuyo Hijo unigénito, con su vida,
-muerte y resurrección, nos obtuvo el premio
-de la salvación eterna, te rogamos que,
-meditando estos misterios del Santísimo Rosario
-de la Virgen María, imitemos lo que contienen
-y obtengamos lo que prometen.
-Por Jesucristo, nuestro Señor. Amén.`;
 
 /* ─── ESTADO ─── */
 let usr=null, data=null, prog={};
@@ -1543,7 +1423,9 @@ function saveRezarPrefs(p){
 }
 function renderPrefs(){
   const p=rezarPrefs();
-  const lang=p.idioma||'espanol';
+  // El idioma es una sola preferencia para toda la app (setLatin la mantiene en las
+  // dos claves): así el latín elegido aquí también suena en audio, orar y el bloque final.
+  const lang=(window.esLatin&&window.esLatin())?'latin':'espanol';
   const es=$('btn-lang-es'),la=$('btn-lang-la');
   if(es)es.classList.toggle('active',lang==='espanol');
   if(la)la.classList.toggle('active',lang==='latin');
@@ -1552,7 +1434,9 @@ function renderPrefs(){
   if(tl)tl.classList.toggle('on',p.letanias===true);
 }
 window.setLang=function(lang){
-  const p=rezarPrefs();p.idioma=lang;saveRezarPrefs(p);renderPrefs();
+  if(window.setLatin) setLatin(lang==='latin');   // escribe las dos claves, ya sincronizadas
+  else { const p=rezarPrefs(); p.idioma=lang; saveRezarPrefs(p); }
+  renderPrefs();
 };
 window.togglePref=function(key){
   const p=rezarPrefs();
@@ -2158,14 +2042,14 @@ function updateMysteryContent(){
 function updatePlayBtn(){
   // El bead activo pulsa SOLO mientras el audio se reproduce (señal visual)
   document.body.classList.toggle('audio-playing', !!rezarAudio && !rezarAudio.paused);
-  ['btn-play-pause','btn-play-pause-final'].forEach(id=>{
+  ['btn-play-pause'].forEach(id=>{
     const btn=$(id);if(!btn||!rezarAudio)return;
     btn.innerHTML=rezarAudio.paused
       ?'<div class="play-inner"></div>'
       :'<div class="pause-inner"><div></div><div></div></div>';
   });
-  // Espejo en la pantalla de canto: mismo estado, mismo handler (togglePlay)
-  if(window.Canto) Canto.syncIcon();
+  // Espejo en las pantallas de karaoke: mismo estado, mismo handler (togglePlay)
+  Canto.syncIcon();
 }
 function togglePlay(){
   // ── Onboarding: quitar resaltado del play al tocarlo ─────────
@@ -2399,17 +2283,20 @@ function initPopupSwipe(){
 }
 
 /* ═══════════════════════════════════════════════
-   CANTO KARAOKE — el motor vive en canto.js (compartido con audio.html).
-   Aquí solo la configuración: el audio de rezar, la identidad del Misterio,
-   qué hacer al saltar, y el BGM (que el módulo no conoce).
+   KARAOKE — el motor vive en canto.js (compartido con audio.html).
+   Dos instancias: el canto de cada Misterio y las Letanías.
+   Aquí solo la configuración: el audio de rezar, qué hacer al saltar,
+   y el BGM (que el módulo no conoce).
    ═══════════════════════════════════════════════ */
 
+const CANTO_LETTERS = 'abcdefghi'.split('');   // máx. 9 imágenes de carrusel por Misterio
+
 // El Misterio en curso: bIdx ya apunta al correcto cuando suena su canto.
-const cantoMid     = () => nivel + '_' + cua + '_' + mNum(blk, bIdx);
-const isCantoTrack = t => !!t && t.type === 'canto';
+const cantoMid        = () => nivel + '_' + cua + '_' + mNum(blk, bIdx);
+const isCantoTrack    = t => !!t && t.type === 'canto';
 
 /* BGM: el canto se escucha limpio. Solo se reanuda lo que de verdad estaba sonando:
-   si el usuario lo tenía silenciado, sigue silenciado al salir del canto. */
+   si el usuario lo tenía silenciado, sigue silenciado al salir. */
 let _cantoBgmEraOn = false;
 function cantoBgmPause(){
   _cantoBgmEraOn = !!(bgmOn && bgmEl && !bgmEl.paused);
@@ -2420,31 +2307,40 @@ function cantoBgmResume(){
   _cantoBgmEraOn = false;
 }
 
-Canto.init({
-  getAudio:    () => rezarAudio,
-  isPlaying:   () => !!rezarAudio && !rezarAudio.paused,
-  getMid:      cantoMid,
-  getTitulo:   () => { const md = mData(blk, bIdx); return (md && md.titulo) || ''; },
-  isCantoNow:  () => isCantoTrack(playlist[plIdx]),
+/* ── El canto de cada Misterio ── */
+const Canto = Karaoke.create({
+  id: 'canto', kicker: 'Canto',
+  getAudio:  () => rezarAudio,
+  isPlaying: () => !!rezarAudio && !rezarAudio.paused,
+  getTitulo: () => { const md = mData(blk, bIdx); return (md && md.titulo) || ''; },
+
+  getLrcUrl:        () => MUSB + 'lrc/M_' + cantoMid() + '.lrc',
+  getImgCandidates: () => { const mid = cantoMid(); return CANTO_LETTERS.map(l => IMGB + 'cantos/' + mid + '/P_' + mid + l + '.webp'); },
+  getStillUrl:      () => IMGB + 'P_' + cantoMid() + '.webp',
+  loadFallbackLetra: async () => {
+    const c = Karaoke.getCanto(await Karaoke.loadCantos(nivelId), blk, bIdx);
+    return c ? { letra: c.letra, titulo: c.titulo } : null;
+  },
+
+  isOpenNow: () => isCantoTrack(playlist[plIdx]),
   // Saltar: el Misterio ya se rezó, se contó y se guardó ANTES de su canto, y el canto
   // no otorga metros. Así que saltar no cuesta nada: basta con avanzar.
-  onSkip:      () => { Canto.close(); playNext(); },
+  onSkip:      () => playNext(),
   onPlayPause: () => togglePlay(),
   onOpen:      cantoBgmPause,
-  onClose:     cantoBgmResume,
-  imgBase:     IMGB,
-  lrcBase:     MUSB + 'lrc/'
+  onClose:     cantoBgmResume
 });
 
 // Cada Misterio del set trae su propio canto: se precarga al cambiar de Misterio.
-function preloadCanto(){
-  return Canto.preload({ nivelId: nivelId, block: blk, blockIdx: bIdx });
-}
+function preloadCanto(){ return Canto.preload(); }
+
+/* Las Letanías ya no viven aquí: son parte del bloque final (rosario-final.js),
+   que se abre al terminar los 5 Misterios y que orar y audio también pueden abrir. */
 
 /* ─── PLAYLIST ─── */
 // nombre sin extensión: todo R2/global/ es .m4a
 function globalTrack(nombre){
-  const pfx=rezarPrefs().idioma==='latin'?'L_':'';
+  const pfx=(window.esLatin&&window.esLatin())?'L_':'';
   return R2+'/global/'+pfx+nombre+'.m4a';
 }
 
@@ -2464,11 +2360,9 @@ function buildPlaylist(startIdx){
                src:MUSB+'m4a/M_'+nivel+'_'+cua+'_'+m+'.m4a'});
     }
   }
-  if(p.letanias){
-    pl.push({id:'letanias',type:'letanias',mIdx:null,src:globalTrack('LETANIAS')});
-    pl.push({id:'salve',   type:'salve',   mIdx:null,src:globalTrack('SALVE')});
-    pl.push({id:'final',   type:'final',   mIdx:null,src:globalTrack('ORACION_FINAL')});
-  }
+  // Las oraciones finales (Letanías → Salve → conclusiva) ya no son pistas de esta
+  // playlist: las sirve rosario-final.js al terminar el 5º Misterio, para que orar
+  // y audio puedan abrir exactamente el mismo bloque.
   return pl;
 }
 
@@ -2567,45 +2461,32 @@ function playNext(){
     bIdx=track.mIdx;
     updateMysteryContent();
   }
-  if(['letanias','salve','final'].includes(track.type)){
-    showFinalLayout(track.type);
-  }
   rezarAudio.src=track.src;
   _updateSyncKey(track.src);
   rezarAudio.load();
   rezarAudio.play().catch(()=>{updatePlayBtn();});
   updatePlaylistStrip();
 
-  // Pantalla de canto: se abre al entrar al canto y se cierra en cualquier otra salida.
+  // Pantalla de canto: se abre al entrar a su pista y se cierra en cualquier otra salida.
   // El else es incondicional a propósito: todos los caminos (fin de track, error de
   // audio, saltar) pasan por aquí, así que ninguno puede dejarla colgada.
   if(isCantoTrack(track)) Canto.open(); else Canto.close();
 }
 
-function showFinalLayout(type){
-  const hero=$('misterio-hero');
-  if(hero)hero.style.display='none';
-  const txt=
-    type==='letanias'?TXT_LETANIAS:
-    type==='salve'   ?TXT_SALVE:TXT_ORACION_FINAL;
-  const titles={letanias:'Letanías Lauretanas',salve:'Salve Regina',final:'Oración conclusiva'};
-  $('final-layout-title').textContent=titles[type]||'';
-  $('final-layout-text').innerHTML=txt;
-  show('scr-letanias');
-  updatePlayBtn();
-  // Los misterios ya están guardados — actualizar texto del modal de salida
-  var exitTitle   = document.getElementById('exit-modal-title');
-  var exitSub     = document.getElementById('exit-modal-sub');
-  var exitConfirm = document.getElementById('exit-btn-confirm');
-  var exitCancel  = document.getElementById('exit-btn-cancel');
-  if(exitTitle)   exitTitle.textContent  = 'Oraciones finales';
-  if(exitSub)     exitSub.innerHTML      = 'Tus 5 Misterios ya están guardados.<br>¿Deseas salir ahora?';
-  if(exitConfirm) exitConfirm.textContent = 'Sí, salir';
-  if(exitCancel)  exitCancel.textContent  = 'Continuar';
-}
-
+/* Terminados los 5 Misterios: si el usuario reza las oraciones finales, las sirve
+   rosario-final.js (Letanías con karaoke → Salve → conclusiva) y la celebración
+   espera a que cierre. Si no, se celebra directamente. */
 function onSessionComplete(){
   _stopBeadTimer();
+  if(rezarAudio) rezarAudio.pause();
+  if(rezarPrefs().letanias && window.RosarioFinal){
+    RosarioFinal.abrir({ onCerrar: celebrar });
+    return;
+  }
+  celebrar();
+}
+
+function celebrar(){
   if(window.CZSound)CZSound('blockClear');
 
   var blkIdx   = BLOCKS.indexOf(blk);

@@ -1,0 +1,80 @@
+/* CruzAndo — rosario-final.css
+ * Bloque final del Rosario (Letanías → Salve → Oración conclusiva).
+ * La pantalla de texto y el diálogo de confirmación los inyecta rosario-final.js.
+ * Las Letanías usan la pantalla de karaoke (canto.css); estos estilos son para
+ * los dos pasos rezados, que no llevan letra sincronizada.
+ */
+
+.rf-screen{
+  position:fixed; inset:0; z-index:430;
+  display:none; flex-direction:column;
+  background:var(--bg, #002931);
+}
+.rf-screen.open{display:flex}
+
+.rf-header{
+  flex-shrink:0; display:flex; align-items:center; gap:12px;
+  padding:calc(14px + env(safe-area-inset-top,0px)) 16px 12px;
+  border-bottom:1px solid var(--border, rgba(255,255,255,.12));
+  background:var(--card, rgba(255,255,255,.04));
+}
+.rf-title{
+  flex:1; text-align:center;
+  font-family:'Cormorant Garamond',Georgia,serif;
+  font-size:1.2rem; font-weight:600; color:var(--lvl-bold, #01BBE1);
+}
+.rf-icon-btn{
+  width:42px; height:42px; flex-shrink:0; border-radius:50%;
+  border:1px solid var(--border, rgba(255,255,255,.16));
+  background:transparent; color:var(--text, #E6DED3);
+  display:flex; align-items:center; justify-content:center; cursor:pointer;
+}
+.rf-icon-btn:active{transform:scale(.94)}
+.rf-icon-btn.primary{
+  background:var(--lvl-bold, #01BBE1); color:#fff; border:none;
+}
+
+.rf-text{
+  flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch;
+  padding:22px 20px 12px;
+  font-family:'Crimson Pro',Georgia,serif;
+  font-size:1.05rem; line-height:2; color:var(--text-soft, #C7D6DA);
+  white-space:pre-line;
+}
+.rf-text b{color:var(--text, #E6DED3); font-weight:700}
+.rf-text i{font-style:italic}
+
+.rf-next{
+  flex-shrink:0; margin:0 20px calc(20px + env(safe-area-inset-bottom,0px));
+  padding:15px; border-radius:14px; border:none; cursor:pointer;
+  background:var(--lvl-bold, #01BBE1); color:#fff;
+  font-family:'Inter',sans-serif; font-size:1rem; font-weight:700;
+}
+.rf-next:active{transform:scale(.97)}
+
+/* ── Confirmar el salto de las Letanías ──
+   Va SOBRE el karaoke: mientras el usuario decide, las Letanías siguen sonando
+   detrás. Si cancela, no ha pasado nada. */
+#rf-confirm{
+  position:fixed; inset:0; z-index:520;
+  display:none; align-items:center; justify-content:center; padding:24px;
+  background:rgba(5,7,14,.72); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+}
+#rf-confirm.open{display:flex}
+.rf-confirm-box{
+  width:100%; max-width:330px; padding:26px 22px; text-align:center;
+  background:rgba(12,14,22,.97); border:1px solid rgba(243,234,216,.16); border-radius:20px;
+}
+.rf-confirm-title{
+  font-family:'Cormorant Garamond',Georgia,serif; font-size:1.35rem; font-weight:600;
+  line-height:1.35; color:#F3EAD8; margin-bottom:8px;
+}
+.rf-confirm-sub{font-size:.85rem; line-height:1.5; color:rgba(243,234,216,.6); margin-bottom:22px}
+.rf-confirm-btns{display:flex; flex-direction:column; gap:10px}
+.rf-confirm-btns button{
+  width:100%; padding:14px; border-radius:14px; cursor:pointer;
+  font-family:'Inter',sans-serif; font-size:.95rem; font-weight:700;
+}
+.rf-confirm-btns button:active{transform:scale(.97)}
+.rf-btn-stay{background:var(--lvl-bold, #01BBE1); color:#fff; border:none}
+.rf-btn-go{background:transparent; color:rgba(243,234,216,.75); border:1.5px solid rgba(243,234,216,.22)}

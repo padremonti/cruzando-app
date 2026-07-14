@@ -1,13 +1,13 @@
 /* CruzAndo — canto.css
- * Estilos de la pantalla de canto karaoke (#scr-canto), inyectada por canto.js.
- * Compartido por todas las pantallas que usen el módulo.
+ * Estilos de la pantalla de karaoke, inyectada por canto.js (Karaoke.create).
+ * Sirve a todas las instancias: el canto de cada Misterio, las Letanías, y lo que venga.
  *
  * La letra va SIEMPRE sobre fondo oscuro, en tema claro y en oscuro: por eso los
  * colores son fijos y no variables de tema. Es deliberado, no un descuido.
  */
 
-#scr-canto{position:fixed;inset:0;z-index:400;display:none;overflow:hidden;background:#05060c}
-#scr-canto.open{display:block}
+.karaoke{position:fixed;inset:0;z-index:400;display:none;overflow:hidden;background:#05060c}
+.karaoke.open{display:block}
 
 /* Fondo: dos capas con cross-fade + Ken Burns */
 .canto-stills{position:absolute;inset:0;overflow:hidden;background:#05060c}

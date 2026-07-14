@@ -1755,7 +1755,7 @@ window.openPrefs = function() {
   document.getElementById('pref-toggle-theme').classList.toggle('on', !isLight);
   document.getElementById('pref-toggle-bgm').classList.toggle('on', p.bgm !== false);
   document.getElementById('pref-toggle-micro').classList.toggle('on', p.microInAudio !== false);
-  document.getElementById('pref-toggle-latin').classList.toggle('on', p.latinPrayer === true);
+  document.getElementById('pref-toggle-latin').classList.toggle('on', !!(window.esLatin && esLatin()));
   var soundsToggle = document.getElementById('pref-toggle-sounds');
   if (soundsToggle) soundsToggle.classList.toggle('on', localStorage.getItem('cruzando_sounds') !== 'off');
   var slider = document.getElementById('prefs-meta-slider');
@@ -1806,8 +1806,11 @@ window.prefToggleMicro = function() {
   document.getElementById('pref-toggle-micro').classList.toggle('on', p.microInAudio !== false);
 };
 window.prefToggleLatin = function() {
-  var p = getPrefs(); p.latinPrayer = !p.latinPrayer; setPrefs(p);
-  document.getElementById('pref-toggle-latin').classList.toggle('on', p.latinPrayer === true);
+  // setLatin escribe las DOS claves (cruzando_prefs y cruzando_rezar_prefs): antes
+  // este ajuste solo llegaba a audio, y rezar seguía en español.
+  var enLatin = window.setLatin ? setLatin(!getPrefs().latinPrayer)
+                                : (function(){ var p=getPrefs(); p.latinPrayer=!p.latinPrayer; setPrefs(p); return p.latinPrayer; })();
+  document.getElementById('pref-toggle-latin').classList.toggle('on', enLatin === true);
 };
 function toggleSounds() {
   const off = localStorage.getItem('cruzando_sounds') === 'off';

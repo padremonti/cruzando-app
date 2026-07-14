@@ -98,6 +98,38 @@
       String(d.getDate()).padStart(2, '0');
   }
 
+  // ── Idioma de las oraciones ──────────────────────────────────────────────────
+  // Había DOS claves para lo mismo, y no se hablaban: index/audio usaban
+  // cruzando_prefs.latinPrayer y rezar usaba cruzando_rezar_prefs.idioma. Quien
+  // activaba el latín en Preferencias lo oía en audio pero no en rezar.
+  // Canónica: cruzando_prefs.latinPrayer (el ajuste del drawer de index).
+  // La otra se sigue leyendo (usuarios que ya la tenían puesta) y se mantiene
+  // sincronizada al escribir, para que la pantalla de rezar no se contradiga.
+  function esLatin() {
+    try {
+      var p = JSON.parse(localStorage.getItem('cruzando_prefs') || '{}');
+      if (p.latinPrayer === true)  return true;
+      if (p.latinPrayer === false) return false;
+      var r = JSON.parse(localStorage.getItem('cruzando_rezar_prefs') || '{}');
+      return r.idioma === 'latin';
+    } catch (e) { return false; }
+  }
+  window.esLatin = esLatin;
+
+  function setLatin(on) {
+    on = !!on;
+    try {
+      var p = JSON.parse(localStorage.getItem('cruzando_prefs') || '{}');
+      p.latinPrayer = on;
+      localStorage.setItem('cruzando_prefs', JSON.stringify(p));
+      var r = JSON.parse(localStorage.getItem('cruzando_rezar_prefs') || '{}');
+      r.idioma = on ? 'latin' : 'espanol';
+      localStorage.setItem('cruzando_rezar_prefs', JSON.stringify(r));
+    } catch (e) {}
+    return on;
+  }
+  window.setLatin = setLatin;
+
   // ── getFreeProgress ──────────────────────────────────────────────────────────
   // db, getDoc, doc: instancias de Firebase del archivo que llama.
   async function getFreeProgress(uid, db, getDoc, doc) {
