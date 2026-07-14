@@ -11,6 +11,8 @@
 <title>CruzAndo · Rezar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<!-- Pantalla de canto karaoke (motor compartido) -->
+<link rel="stylesheet" href="canto.css">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -44,6 +46,7 @@ window._fbFirestore = {
 </script>
 <script src="plan-utils.js"></script>
 <script src="utils.js"></script>
+<script src="canto.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
@@ -793,62 +796,6 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
   border-radius: 12px; max-width: 280px;
 }
 
-/* ══════════════════════════════════════════════
-   OVERLAY: CANTO KARAOKE (.lrc sincronizado)
-   Mismo motor y mismo aspecto que audio.html. Tapa hero, barritas,
-   cuentas y toolbar — que durante el canto no están haciendo nada.
-   La letra va SIEMPRE sobre fondo oscuro: colores fijos, no vars de tema.
-   ══════════════════════════════════════════════ */
-#scr-canto{position:fixed;inset:0;z-index:400;display:none;overflow:hidden;background:#05060c}
-#scr-canto.open{display:block}
-
-/* Fondo: dos capas con cross-fade + Ken Burns */
-.canto-stills{position:absolute;inset:0;overflow:hidden;background:#05060c}
-.canto-lay{position:absolute;inset:0;opacity:0;transition:opacity 1.1s ease}
-.canto-lay.front{opacity:1}
-.canto-kb{position:absolute;inset:-2%;background-size:cover;background-position:center;will-change:transform}
-.canto-kb.run{animation:cantoKenburns var(--ckbdur,15s) ease-out forwards}
-@keyframes cantoKenburns{from{transform:scale(1) translate(0,0)}to{transform:scale(var(--ckbz,1.09)) translate(var(--ckbx,0),var(--ckby,0))}}
-@media (prefers-reduced-motion: reduce){.canto-kb.run{animation:none!important}.canto-lay{transition-duration:.001ms!important}}
-.canto-scrim{position:absolute;inset:0;z-index:2;pointer-events:none;
-  background:linear-gradient(180deg,rgba(6,7,14,.60) 0%,rgba(6,7,14,.20) 22%,rgba(6,7,14,.42) 55%,rgba(6,7,14,.86) 82%,rgba(6,7,14,.96) 100%)}
-
-/* Cabecera */
-.canto-head{position:absolute;top:calc(20px + env(safe-area-inset-top,0px));left:0;right:0;z-index:6;text-align:center;padding:0 24px;color:#F3EAD8}
-.canto-kicker{font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;opacity:.8}
-.canto-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.5rem;font-weight:600;margin-top:3px}
-
-/* Letra */
-.canto-lyrics{position:absolute;left:0;right:0;top:32%;bottom:142px;z-index:5;overflow:hidden;
-  -webkit-mask-image:linear-gradient(180deg,transparent,#000 18%,#000 82%,transparent);
-          mask-image:linear-gradient(180deg,transparent,#000 18%,#000 82%,transparent)}
-.canto-track{position:absolute;top:0;left:0;right:0;padding:0 30px;text-align:center;
-  transition:transform .55s cubic-bezier(.33,.85,.3,1);will-change:transform}
-.canto-ly{font-family:'Crimson Pro',Georgia,serif;font-size:1.2rem;line-height:1.5;
-  color:rgba(243,234,216,.34);padding:7px 0;transition:color .4s,font-size .4s}
-.canto-ly.active{color:#F5ECDA;font-size:1.38rem}
-.canto-ly.near{color:rgba(243,234,216,.5)}
-/* Degradado: letra sin tiempos => scroll manual, sin línea activa */
-.canto-lyrics.static{overflow-y:auto;-webkit-overflow-scrolling:touch}
-.canto-lyrics.static .canto-track{position:relative;transform:none!important;transition:none;padding-bottom:24px}
-.canto-lyrics.static .canto-ly{color:rgba(243,234,216,.78);font-size:1.16rem}
-
-/* Saltar */
-.canto-skip{position:absolute;right:16px;bottom:136px;z-index:8;display:none;align-items:center;gap:6px;
-  padding:9px 15px;border-radius:22px;background:rgba(8,9,16,.5);backdrop-filter:blur(6px);
-  border:1px solid rgba(243,234,216,.22);color:#F3EAD8;font-family:'Inter',sans-serif;
-  font-size:0.78rem;font-weight:500;cursor:pointer}
-.canto-skip.show{display:flex}
-.canto-skip:active{transform:scale(.95)}
-
-/* Controles propios (delegan en togglePlay / updatePlayBtn de rezar) */
-.canto-ctrls{position:absolute;left:50%;bottom:calc(42px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
-  z-index:8;display:flex;align-items:center;gap:24px}
-.canto-cbtn{width:52px;height:52px;flex-shrink:0;border-radius:50%;border:1px solid rgba(243,234,216,.18);
-  background:rgba(8,9,16,.42);backdrop-filter:blur(6px);color:#F3EAD8;
-  display:flex;align-items:center;justify-content:center;cursor:pointer}
-.canto-cbtn:active{transform:scale(.94)}
-.canto-cbtn.primary{width:62px;height:62px;background:rgba(243,234,216,.16)}
 </style>
 </head>
 <body class="dark">
@@ -872,40 +819,6 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
         <button class="exit-btn-cancel"  id="exit-btn-cancel"  onclick="window._exitCancel()">Seguir rezando</button>
         <button class="exit-btn-confirm" id="exit-btn-confirm" onclick="window._exitConfirm()">Salir</button>
       </div>
-    </div>
-  </div>
-
-  <!-- ═══ OVERLAY: CANTO KARAOKE ═══
-       Fuera de .screen a propósito: show() no debe poder pisarlo. -->
-  <div id="scr-canto">
-    <div class="canto-stills">
-      <div class="canto-lay front" id="canto-layA"><div class="canto-kb" id="canto-kbA"></div></div>
-      <div class="canto-lay"       id="canto-layB"><div class="canto-kb" id="canto-kbB"></div></div>
-    </div>
-    <div class="canto-scrim"></div>
-
-    <div class="canto-head">
-      <div class="canto-kicker">Canto</div>
-      <div class="canto-title" id="canto-title"></div>
-    </div>
-
-    <div class="canto-lyrics" id="canto-lyrics">
-      <div class="canto-track" id="canto-lyric-track"></div>
-    </div>
-
-    <button class="canto-skip" id="canto-skip" onclick="window.cantoSkip()">
-      <span>Saltar</span>
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M5 4l10 8-10 8zM17 4h2v16h-2z"/></svg>
-    </button>
-
-    <div class="canto-ctrls">
-      <button class="canto-cbtn" id="canto-back10" title="Retroceder 10 segundos" aria-label="Retroceder 10 segundos" onclick="window.cantoBack10()">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M3 4v4.5h4.5"/><text x="12.5" y="16" font-size="8" font-weight="700" fill="currentColor" stroke="none" text-anchor="middle">10</text></svg>
-      </button>
-      <button class="canto-cbtn primary" id="canto-play-pause" aria-label="Pausar canto" onclick="window.togglePlay()">
-        <svg id="canto-ico-play"  width="26" height="26" viewBox="0 0 24 24" fill="currentColor" style="display:none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        <svg id="canto-ico-pause" width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-      </button>
     </div>
   </div>
 
@@ -2251,12 +2164,7 @@ function updatePlayBtn(){
       :'<div class="pause-inner"><div></div><div></div></div>';
   });
   // Espejo en la pantalla de canto: mismo estado, mismo handler (togglePlay)
-  const cPlay=$('canto-ico-play'), cPause=$('canto-ico-pause');
-  if(cPlay&&cPause){
-    const paused=!rezarAudio||rezarAudio.paused;
-    cPlay.style.display  = paused?'block':'none';
-    cPause.style.display = paused?'none':'block';
-  }
+  if(window.Canto) Canto.syncIcon();
 }
 function togglePlay(){
   // ── Onboarding: quitar resaltado del play al tocarlo ─────────
@@ -2490,262 +2398,19 @@ function initPopupSwipe(){
   },{passive:true});
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   CANTO KARAOKE — pantalla de canto con letra sincronizada (.lrc)
-   Mismo motor que audio.html (y que mini). Aquí el enganche es más
-   simple: rezarAudio es persistente, así que el bucle lee esa global
-   en cada frame y nunca se queda con una referencia muerta.
-   ═══════════════════════════════════════════════════════════════ */
-const CANTO_SKIP_AT      = 20;   // segundos de currentTime (no de reloj) antes de ofrecer "Saltar"
-const CANTO_LETTERS      = 'abcdefghi'.split('');  // máx. 9 imágenes de carrusel por Misterio
-const CANTO_FALLBACK_SEC = 6;    // sin duración de audio: cambia de imagen cada X s
-const cantoReduceMotion  = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-
-let cantoLrcText    = null;   // .lrc del canto del Misterio en curso (null si no hay o no trae tiempos)
-let cantoLetraTxt   = null;   // letra estática de {nivelId}-cantos.json (degradación)
-let cantoTitulo     = '';
-let cantoEvents     = [];     // [{ t, text }]
-let cantoOpen       = false;
-let cantoStatic     = false;  // letra sin tiempos: se muestra, no se sincroniza
-let cantoRaf        = 0;
-let cantoCurLine    = -1;
-let cantoImgLetters = [];
-let cantoImgIdx     = -1;
-let cantoFrontA     = true;
-let _cantoBgmEraOn  = false;  // ¿el BGM sonaba de verdad antes de entrar al canto?
-
-/* ─── Datos del canto ─── */
-let CANTOS_DATA = null;
-
-async function loadCantos(nId){
-  if(CANTOS_DATA) return CANTOS_DATA;
-  try{
-    const base = location.origin + location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1);
-    const resp = await fetch(base + 'data/' + nId + '-cantos.json');
-    if(!resp.ok) return null;
-    CANTOS_DATA = await resp.json();
-    return CANTOS_DATA;
-  }catch(e){ return null; }
-}
-function getCanto(cantosData, block, blockIdx){
-  if(!cantosData || !cantosData.cantos || !cantosData.cantos[block]) return null;
-  return cantosData.cantos[block][blockIdx] || null;
-}
+/* ═══════════════════════════════════════════════
+   CANTO KARAOKE — el motor vive en canto.js (compartido con audio.html).
+   Aquí solo la configuración: el audio de rezar, la identidad del Misterio,
+   qué hacer al saltar, y el BGM (que el módulo no conoce).
+   ═══════════════════════════════════════════════ */
 
 // El Misterio en curso: bIdx ya apunta al correcto cuando suena su canto.
-const cantoMid = () => nivel + '_' + cua + '_' + mNum(blk, bIdx);
-
-// Parser .lrc — convierte [mm:ss.xx] a segundos, ignora metadatos y directivas.
-function parseLrc(text){
-  const lines = text.split(/\r?\n/), events = [];
-  let mode = null;
-  const reTime = /^\s*\[(\d+):(\d+(?:\.\d+)?)\]/;
-  for(const raw of lines){
-    const line = raw.replace(/\s+$/, '');
-    if(!line.trim()) continue;
-    const low = line.trim().toLowerCase();
-    if(low === '[stills]'){ mode = 'stills'; continue; }
-    if(low === '[lyrics]'){ mode = 'lyrics'; continue; }
-    if(/^\[(ti|ar|al|by|offset):/i.test(line.trim())) continue;
-    if(mode === 'stills' && !reTime.test(line)) continue;
-    const tm = line.match(reTime);
-    if(!tm) continue;
-    const t = parseInt(tm[1], 10) * 60 + parseFloat(tm[2]);
-    const rest = line.slice(tm[0].length).replace(/\[[a-z]+:[^\]]*\]/ig, '').trim();
-    if(rest) events.push({ t, text: rest });
-  }
-  events.sort((a, b) => a.t - b.t);
-  return events;
-}
-
-// Precarga del canto del Misterio en curso. Se llama desde updateMysteryContent(),
-// que es justo donde bIdx cambia: cada Misterio del set trae su propia letra.
-// Hay minutos de rezo por delante antes de que suene el canto, así que al llegar
-// a él la pantalla se abre sin esperar a la red.
-async function preloadCanto(){
-  cantoLrcText = null; cantoLetraTxt = null; cantoTitulo = '';
-  const mid = cantoMid();
-  try{
-    const r = await fetch(MUSB + 'lrc/M_' + mid + '.lrc');
-    if(r.ok){
-      const t = await r.text();
-      if(/\[\d+:\d/.test(t)) cantoLrcText = t;   // sin marcas de tiempo no sirve para karaoke
-    }
-  }catch(e){ /* sin .lrc: degrada a la letra de -cantos.json */ }
-  try{
-    const canto = getCanto(await loadCantos(nivelId), blk, bIdx);
-    if(canto){ cantoLetraTxt = canto.letra || null; cantoTitulo = canto.titulo || ''; }
-  }catch(e){ /* sin letra: si tampoco hay .lrc, no se abre la pantalla */ }
-
-  // Si la precarga llegó tarde (red lenta) y el canto ya está sonando, abre ahora
-  if(!cantoOpen && isCantoTrack(playlist[plIdx])) openCanto();
-}
-
+const cantoMid     = () => nivel + '_' + cua + '_' + mNum(blk, bIdx);
 const isCantoTrack = t => !!t && t.type === 'canto';
 
-function openCanto(){
-  if(cantoOpen) return;
-  const hasStatic = !!(cantoLetraTxt && cantoLetraTxt.trim());
-  // Sin .lrc y sin letra no abrimos nada: el canto suena con el hero, como hasta ahora.
-  if(!cantoLrcText && !hasStatic) return;
-
-  cantoStatic  = !cantoLrcText;
-  cantoOpen    = true;
-  cantoCurLine = -1; cantoImgIdx = -1; cantoImgLetters = []; cantoFrontA = true;
-
-  const md = mData(blk, bIdx);
-  $('canto-title').textContent = cantoTitulo || (md && md.titulo) || '';
-
-  const lyrics = $('canto-lyrics'), track = $('canto-lyric-track');
-  lyrics.classList.toggle('static', cantoStatic);
-  lyrics.scrollTop = 0;
-  track.style.transform = 'translateY(0)';
-  track.innerHTML = '';
-
-  const lines = cantoStatic
-    ? cantoLetraTxt.split(/\r?\n/)
-    : (cantoEvents = parseLrc(cantoLrcText)).map(e => e.text);
-  if(cantoStatic) cantoEvents = [];
-  lines.forEach(txt => {
-    const d = document.createElement('div');
-    d.className = 'canto-ly';
-    if(txt.trim()) d.textContent = txt; else d.innerHTML = '&nbsp;';
-    track.appendChild(d);
-  });
-
-  // Con karaoke, "Saltar" aparece tras CANTO_SKIP_AT escuchados.
-  // Con letra estática no hay nada que sincronizar: disponible desde el inicio.
-  $('canto-skip').classList.toggle('show', cantoStatic);
-
-  cantoBgmPause();          // el canto se escucha limpio, sin música de fondo debajo
-  cantoDetectImages();
-  $('scr-canto').classList.add('open');
-  updatePlayBtn();          // el icono del overlay refleja el estado real
-  cantoRaf = requestAnimationFrame(cantoTick);
-}
-
-function closeCanto(){
-  if(!cantoOpen) return;
-  cantoOpen = false;
-  cancelAnimationFrame(cantoRaf); cantoRaf = 0;
-  $('scr-canto').classList.remove('open');
-  $('canto-skip').classList.remove('show');
-  cantoBgmResume();
-}
-
-// El bucle muere solo en cuanto la pantalla se cierra.
-function cantoTick(){
-  if(!cantoOpen || !rezarAudio){ closeCanto(); return; }
-  cantoRender(rezarAudio.currentTime);
-  cantoRaf = requestAnimationFrame(cantoTick);
-}
-
-function cantoRender(cur){
-  // Fondo: las imágenes del carrusel se reparten uniformemente por la duración
-  const n = cantoImgLetters.length;
-  if(n > 0){
-    const dur = rezarAudio && rezarAudio.duration;
-    const seg = (dur > 0 && isFinite(dur)) ? dur / n : CANTO_FALLBACK_SEC;
-    const idx = Math.min(n - 1, Math.max(0, Math.floor(cur / seg)));
-    if(idx !== cantoImgIdx){ cantoImgIdx = idx; cantoShowImg(idx, seg); }
-  }
-  if(cantoStatic) return;
-
-  let line = -1;
-  for(let i = 0; i < cantoEvents.length; i++){
-    if(cantoEvents[i].t <= cur) line = i; else break;
-  }
-  if(line !== cantoCurLine){ cantoCurLine = line; cantoSetActiveLine(line); }
-
-  if(cur >= CANTO_SKIP_AT) $('canto-skip').classList.add('show');
-}
-
-function cantoSetActiveLine(idx){
-  const track = $('canto-lyric-track'), kids = track.children;
-  for(let i = 0; i < kids.length; i++){
-    kids[i].classList.toggle('active', i === idx);
-    kids[i].classList.toggle('near', Math.abs(i - idx) === 1);
-  }
-  if(idx >= 0 && kids[idx]){
-    const el = kids[idx];
-    const anchor = $('canto-lyrics').clientHeight * 0.42;
-    const y = el.offsetTop + el.offsetHeight / 2;
-    track.style.transform = 'translateY(' + (anchor - y) + 'px)';
-  }
-}
-
-/* ─── Fondo: carrusel del canto, con degradación a la still del Misterio ─── */
-function cantoImgUrl(letra){
-  const mid = cantoMid();
-  return IMGB + 'cantos/' + mid + '/P_' + mid + letra + '.webp';
-}
-
-// Detección invisible: precarga a, b, c… hasta el primer 404 (máx. 9). Nada roto se pinta.
-function cantoDetectImages(){
-  cantoImgLetters = []; cantoImgIdx = -1;
-  let i = 0;
-  (function probe(){
-    if(!cantoOpen) return;
-    if(i >= CANTO_LETTERS.length){ cantoFinishDetect(); return; }
-    const letra = CANTO_LETTERS[i];
-    const im = new Image();
-    im.onload = () => {
-      cantoImgLetters.push(letra);
-      if(cantoImgLetters.length === 1 && cantoImgIdx < 0){ cantoImgIdx = 0; cantoShowImg(0, CANTO_FALLBACK_SEC); }
-      i++; probe();
-    };
-    im.onerror = () => { cantoFinishDetect(); };   // primer 404 => fin del carrusel de este Misterio
-    im.src = cantoImgUrl(letra);
-  })();
-}
-
-// Sin carrusel: la still del Misterio (la misma del hero, ya cacheada)
-function cantoFinishDetect(){
-  if(cantoImgLetters.length > 0) return;
-  cantoShowStill(IMGB + 'P_' + cantoMid() + '.webp');
-}
-
-function cantoLayers(){
-  return cantoFrontA
-    ? { inLay: $('canto-layB'), inKb: $('canto-kbB'), outLay: $('canto-layA') }
-    : { inLay: $('canto-layA'), inKb: $('canto-kbA'), outLay: $('canto-layB') };
-}
-
-function cantoPaint(inKb, url, zoom, panX, panY, durS){
-  inKb.style.background         = "url('" + url + "')";
-  inKb.style.backgroundSize     = 'cover';
-  inKb.style.backgroundPosition = 'center';
-  inKb.style.setProperty('--ckbz', zoom);
-  inKb.style.setProperty('--ckbx', panX);
-  inKb.style.setProperty('--ckby', panY);
-  inKb.style.animationDuration  = durS + 's';
-  inKb.classList.remove('run');
-  void inKb.offsetWidth;                          // reinicia la animación
-  if(!cantoReduceMotion) inKb.classList.add('run');
-}
-
-function cantoShowImg(idx, segDur){
-  const letra = cantoImgLetters[idx];
-  if(!letra) return;
-  const { inLay, inKb, outLay } = cantoLayers();
-  const dirs = [['-3%','-2%'], ['3%','-3%'], ['-2%','3%'], ['2%','2%']];
-  let pan = dirs[idx % dirs.length], zoom = (idx % 2 === 0) ? 1.09 : 1.06;
-  if(cantoReduceMotion){ zoom = 1; pan = ['0%','0%']; }
-  cantoPaint(inKb, cantoImgUrl(letra), zoom, pan[0], pan[1], Math.max(8, segDur || CANTO_FALLBACK_SEC));
-  inLay.classList.add('front'); outLay.classList.remove('front');
-  cantoFrontA = !cantoFrontA;
-}
-
-function cantoShowStill(url){
-  const { inLay, inKb, outLay } = cantoLayers();
-  cantoPaint(inKb, url, cantoReduceMotion ? 1 : 1.06, '0%', '0%', 30);
-  inLay.classList.add('front'); outLay.classList.remove('front');
-  cantoFrontA = !cantoFrontA;
-}
-
-/* ─── BGM: el canto se escucha limpio ───
-   Solo se reanuda lo que de verdad estaba sonando: si el usuario tenía el BGM
-   silenciado, sigue silenciado al salir del canto. */
+/* BGM: el canto se escucha limpio. Solo se reanuda lo que de verdad estaba sonando:
+   si el usuario lo tenía silenciado, sigue silenciado al salir del canto. */
+let _cantoBgmEraOn = false;
 function cantoBgmPause(){
   _cantoBgmEraOn = !!(bgmOn && bgmEl && !bgmEl.paused);
   if(_cantoBgmEraOn) stopBgm();
@@ -2755,22 +2420,26 @@ function cantoBgmResume(){
   _cantoBgmEraOn = false;
 }
 
-/* ─── Controles del overlay ───
-   Play/pause delega en togglePlay() (el icono lo sincroniza updatePlayBtn).
-   El −10s no existía en rezar: reposiciona y re-sincroniza la letra al instante
-   (imprescindible si está en pausa; inofensivo si suena). */
-window.cantoBack10 = function(){
-  if(!rezarAudio) return;
-  rezarAudio.currentTime = Math.max(0, rezarAudio.currentTime - 10);
-  cantoRender(rezarAudio.currentTime);
-};
+Canto.init({
+  getAudio:    () => rezarAudio,
+  isPlaying:   () => !!rezarAudio && !rezarAudio.paused,
+  getMid:      cantoMid,
+  getTitulo:   () => { const md = mData(blk, bIdx); return (md && md.titulo) || ''; },
+  isCantoNow:  () => isCantoTrack(playlist[plIdx]),
+  // Saltar: el Misterio ya se rezó, se contó y se guardó ANTES de su canto, y el canto
+  // no otorga metros. Así que saltar no cuesta nada: basta con avanzar.
+  onSkip:      () => { Canto.close(); playNext(); },
+  onPlayPause: () => togglePlay(),
+  onOpen:      cantoBgmPause,
+  onClose:     cantoBgmResume,
+  imgBase:     IMGB,
+  lrcBase:     MUSB + 'lrc/'
+});
 
-// Saltar: el Misterio ya se rezó, se contó y se guardó ANTES de su canto, y el canto
-// no otorga metros. Así que saltar no cuesta nada: basta con avanzar.
-window.cantoSkip = function(){
-  closeCanto();
-  playNext();
-};
+// Cada Misterio del set trae su propio canto: se precarga al cambiar de Misterio.
+function preloadCanto(){
+  return Canto.preload({ nivelId: nivelId, block: blk, blockIdx: bIdx });
+}
 
 /* ─── PLAYLIST ─── */
 function globalTrack(nombre){
@@ -2909,7 +2578,7 @@ function playNext(){
   // Pantalla de canto: se abre al entrar al canto y se cierra en cualquier otra salida.
   // El else es incondicional a propósito: todos los caminos (fin de track, error de
   // audio, saltar) pasan por aquí, así que ninguno puede dejarla colgada.
-  if(isCantoTrack(track)) openCanto(); else closeCanto();
+  if(isCantoTrack(track)) Canto.open(); else Canto.close();
 }
 
 function showFinalLayout(type){
