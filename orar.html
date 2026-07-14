@@ -448,9 +448,12 @@ body.audio-playing .bead-pater.active{animation:beadPulseFilled .9s ease-in-out 
 .amen-btn{display:block;width:100%;margin-top:24px;padding:18px;border-radius:16px;border:none;cursor:pointer;font-family:'Cormorant Garamond',Georgia,serif;font-size:1.6rem;font-weight:600;background:var(--lvl-bold);color:#fff;letter-spacing:1px;transition:all 0.2s;box-shadow:0 4px 16px rgba(0,0,0,0.12)}
 .popup-close-bottom{display:block;width:100%;margin-top:20px;padding:14px;border-radius:16px;border:2px solid var(--lvl-bold);background:rgba(var(--bg-rgb),0.5);color:var(--text);font-family:'Inter',sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;text-align:center;transition:background 0.15s;-webkit-tap-highlight-color:transparent}
 .popup-close-bottom:active{background:var(--border)}
+.popup-close-bottom:disabled{opacity:0.55;cursor:default}
 body.light .popup-close-bottom{border-color:var(--border);color:var(--text-dim)}
 .amen-btn:active{transform:scale(0.96)}
 .amen-btn.done{background:var(--green)}
+/* Cierre de la oración: mismo formato que .amen-btn, pero es palabra, no botón */
+.amen-word{display:block;width:100%;margin-top:24px;padding:18px;border-radius:16px;font-family:'Cormorant Garamond',Georgia,serif;font-size:1.6rem;font-weight:600;background:var(--lvl-bold);color:#fff;letter-spacing:1px;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,0.12)}
 .mystery-done-pill{display:flex;align-items:center;gap:10px;padding:14px 16px;background:var(--green-soft);border-radius:14px;border:1.5px solid rgba(52,168,83,0.2);margin-top:20px}
 .mystery-done-pill .done-check{color:var(--green);font-size:1.2rem}
 .mystery-done-pill .done-txt{font-size:0.82rem;font-weight:600;color:var(--green)}
@@ -1635,10 +1638,15 @@ function populatePopup(t){
       initEscrH(md);
       loadRefs().then(r=>{[0,1,2].forEach(qi=>{const ta=$('qta'+qi);if(ta){ta.value=r[qi]||'';ans[qi]=ta.value;firstAns[qi]=!!ta.value;}});});
       break;
-    case 'suplica':
+    case 'suplica':{
+      const ultimo=currentGlobalMystery>=20;   // en el 20 no hay siguiente: se cierra el nivel
       bd.innerHTML=`<p class="popup-text">${esc(md?.intercesion||'Súplica no disponible')}</p>`+
-        `<button class="amen-btn" id="btn-amen">Amén</button>`;
+        `<div class="amen-word">Amén</div>`+
+        `<button class="popup-close-bottom" id="btn-amen">${ultimo?'Terminar el nivel':'Siguiente Misterio'}</button>`;
       $('btn-amen').onclick=async()=>{
+        const b=$('btn-amen');
+        if(b.disabled)return;   // el avance se dispara una sola vez
+        b.disabled=true;
         await markMysteryComplete(blk,bIdx);
         if(currentGlobalMystery<20){
           currentGlobalMystery++;
@@ -1650,6 +1658,7 @@ function populatePopup(t){
         }
       };
       break;
+    }
   }
 }
 
