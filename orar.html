@@ -421,16 +421,16 @@ body.audio-playing .bead-pater.active{animation:beadPulseFilled .9s ease-in-out 
   border-bottom:1px solid var(--border);
   flex-shrink:0;
 }
-.popup-title{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-dim)}
-.popup-close-btn,.popup-voice-btn{
+/* padding-right = ancho del botón de cerrar: mantiene el título centrado en la franja */
+.popup-title{flex:1;text-align:center;padding-right:68px;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-dim)}
+.popup-close-btn{
   width:68px;height:68px;border-radius:50%;background:var(--sec-bg);
   border:1.5px solid var(--border);display:flex;align-items:center;
   justify-content:center;cursor:pointer;color:var(--text-soft);
   -webkit-tap-highlight-color:transparent;transition:background 0.15s;
   flex-shrink:0;
 }
-.popup-close-btn:active,.popup-voice-btn:active{background:var(--border)}
-.popup-voice-btn.playing{background:var(--lvl-ultra);border-color:var(--lvl-bold);color:var(--lvl-bold)}
+.popup-close-btn:active{background:var(--border)}
 .tool-popup-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 20px 24px;color:var(--text)}
 
 /* Contenido del popup — modo libro */
@@ -796,13 +796,6 @@ body.light .popup-close-bottom{border-color:var(--border);color:var(--text-dim)}
             </svg>
           </button>
           <span class="popup-title" id="popup-title"></span>
-          <button class="popup-voice-btn" id="popup-voice-btn">
-            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-              <path d="M19.07 4.93a10 10 0 010 14.14"/>
-              <path d="M15.54 8.46a5 5 0 010 7.07"/>
-            </svg>
-          </button>
         </div>
         <div class="tool-popup-body" id="tool-popup-body"></div>
       </div>
@@ -1050,7 +1043,8 @@ let usr=null, data=null, cantoJ=null, microJ=null;
 let microDone=false, prog=null;
 let nivelId='0101', nivel=1, cua=1;
 let blk=null, bIdx=0;
-let tool=null;
+let tool=null;        // herramienta cuyo TEXTO está abierto en el popup
+let audioTool=null;   // herramienta cuya PISTA está cargada en libro (puede diferir de tool)
 let libro=null, bgmEl=null, bgmOn=true;
 let totalM=0;
 let ans={0:'',1:'',2:''}, ansT={}, firstAns={0:false,1:false,2:false};
@@ -1504,7 +1498,8 @@ function renderSession(){
   var walkImg = $('mariano-slide-img');
   if (walkImg) walkImg.src = MARIANO_WALK;
   $('main-header').style.display='none';
-  awd=new Set();tool=null;
+  awd=new Set();tool=null;audioTool=null;
+  $('voice-player').style.display='none';
   // Reset de beads al cambiar de Misterio (re-render aunque la track sea del mismo tipo)
   _currentSyncKey=null; _beadsHide();
   ans={0:'',1:'',2:''};firstAns={0:false,1:false,2:false};
@@ -1594,18 +1589,20 @@ function openToolPopup(t){
   if(btn)btn.classList.add('active');
   tool=t;
   $('popup-title').textContent=TN[t]||t;
-  $('popup-voice-btn').style.display=['contemplar','canto'].includes(t)?'':'none';
   populatePopup(t);
   $('tool-popup').classList.add('open');
   var bd=$('tool-popup-body');
   if(bd) bd.scrollTop=0;
+  // El mini-reproductor es siempre el del texto que se está leyendo: se prepara en pausa
+  // para las herramientas con audio, y la voz anterior se corta en las de solo texto.
+  if(['contemplar','canto'].includes(t)) stageVP(t);
+  else { stopVoice(); $('voice-player').style.display='none'; }
 }
 function closeToolPopup(){
   $('tool-popup').classList.remove('open');
   document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('active'));
-  if(libro && !_currentSyncKey)libro.pause();   // si suena el rezo (track con sync) no lo cortamos; sí la voz
+  stopVoice();   // pausa la voz y restaura la BGM; el rezo sigue sonando
   $('voice-player').style.display='none';
-  $('popup-voice-btn').classList.remove('playing');
   tool=null;
 }
 window.closeToolPopup = closeToolPopup;
@@ -1802,10 +1799,14 @@ function initVP(){
     libro.addEventListener('pause', function(){ document.body.classList.remove('audio-playing'); setRezoIcon(false); });
     libro.addEventListener('ended', function(){ setRezoIcon(false); document.body.classList.remove('audio-playing'); });
     libro.addEventListener('timeupdate',function(){
-      var fill=$('vp-progress-fill'),cur=$('vp-time-current'),dur=$('vp-time-duration');
-      if(fill&&libro.duration)fill.style.width=(libro.currentTime/libro.duration*100)+'%';
-      if(cur)cur.textContent=fmtTime(libro.currentTime);
-      if(dur&&libro.duration)dur.textContent=fmtTime(libro.duration);
+      // Solo pintamos la barra si lo que suena es la pista del texto abierto: si suena el
+      // rezo con otro popup delante, su avance no debe aparecer en el mini-reproductor.
+      if(audioTool===tool){
+        var fill=$('vp-progress-fill'),cur=$('vp-time-current'),dur=$('vp-time-duration');
+        if(fill&&libro.duration)fill.style.width=(libro.currentTime/libro.duration*100)+'%';
+        if(cur)cur.textContent=fmtTime(libro.currentTime);
+        if(dur&&libro.duration)dur.textContent=fmtTime(libro.duration);
+      }
       _tickBeads();
     });
   }
@@ -1818,25 +1819,52 @@ function initVP(){
     var rect=$('vp-progress-bar').getBoundingClientRect();
     libro.currentTime=((e.clientX-rect.left)/rect.width)*libro.duration;
   };
-  $('popup-voice-btn').onclick = function() {
-    var vp = $('voice-player');
-    var isOpen = vp && vp.style.display !== 'none';
-    if (isOpen) {
-      closeVP();
-    } else {
-      openVP(tool);
-    }
-  };
   $('popup-close').onclick=()=>closeToolPopup();
 }
-function openVP(t){
-  if(!['contemplar','canto'].includes(t))return;
+function bgmBack(){
+  if(bgmOn && bgmEl){
+    if(bgmEl.paused) bgmEl.play().catch(()=>{});
+    bgmUnduck();
+  }
+}
+/* Pausa la VOZ (contemplación o canto) y devuelve la BGM a su nivel.
+   El rezo no se interrumpe aquí: sigue sonando bajo los textos. */
+function stopVoice(){
+  if(!libro || audioTool==='rezo')return;
+  if(!libro.paused)libro.pause();
+  bgmBack();
+}
+/* Deja el mini-reproductor listo para la herramienta abierta, SIN reproducir:
+   el texto manda y el audio arranca solo con el play. Si el rezo está sonando no
+   tocamos la pista cargada — solo el play cambiará el src y lo relevará. */
+function stageVP(t){
+  if(!libro || !['contemplar','canto'].includes(t))return;
   const url=toolUrl(t);if(!url)return;
+  stopVoice();
+  const rezoSonando = audioTool==='rezo' && !libro.paused;
+  if(!rezoSonando && libro.src!==url){ libro.src=url; libro.load(); audioTool=t; }
   $('vp-tool-name').textContent=TN[t]||t;
-  if(libro.src!==url){libro.src=url;libro.load();}
+  if(audioTool!==t){   // la pista abierta no es la cargada → barra en cero, a la espera del play
+    if($('vp-progress-fill'))$('vp-progress-fill').style.width='0%';
+    if($('vp-time-current'))$('vp-time-current').textContent='0:00';
+    if($('vp-time-duration'))$('vp-time-duration').textContent='0:00';
+  }
   $('voice-player').style.display='';
+  vpUpd();
+}
+function vpToggle(){
+  if(!libro || !tool)return;
+  const url=toolUrl(tool);if(!url)return;
+  if(audioTool===tool && !libro.paused){   // suena lo que estoy leyendo → pausar
+    libro.pause();
+    bgmBack();
+    vpUpd();
+    return;
+  }
+  if(libro.src!==url){ libro.src=url; libro.load(); }   // releva al rezo si estaba sonando
+  audioTool=tool;
   if(window.CZSound)CZSound('playStart');
-  if(t==='canto'){
+  if(tool==='canto'){
     if(bgmEl){ bgmFadeTo(0, 400); setTimeout(function(){ if(bgmEl) bgmEl.pause(); }, 420); }
   } else {
     bgmDuck();
@@ -1844,49 +1872,14 @@ function openVP(t){
   libro.play().catch(()=>{});
   vpUpd();
 }
-function closeVP(){
-  if(libro) libro.pause();
-  $('voice-player').style.display='none';
-  $('popup-voice-btn').classList.remove('playing');
-  var pvbN = document.getElementById('pvb-normal');
-  var pvbP = document.getElementById('pvb-playing');
-  if(pvbN) pvbN.style.display = '';
-  if(pvbP) pvbP.style.display = 'none';
-  if(bgmOn && bgmEl){
-    if(bgmEl.paused) bgmEl.play().catch(()=>{});
-    bgmUnduck();
-  }
-}
-function vpToggle(){
-  if(!libro) return;
-  if(libro.paused){
-    if(!libro.src||libro.src===location.href) openVP(tool);
-    else {
-      libro.play().catch(()=>{});
-      if(tool==='canto'){
-        if(bgmEl){ bgmFadeTo(0, 400); setTimeout(function(){ if(bgmEl) bgmEl.pause(); }, 420); }
-      } else {
-        bgmDuck();
-      }
-    }
-  } else {
-    libro.pause();
-    if(bgmOn && bgmEl){
-      if(bgmEl.paused) bgmEl.play().catch(()=>{});
-      bgmUnduck();
-    }
-  }
-  vpUpd();
-}
 function vpUpd(){
   if(!libro) return;
-  var isPaused = libro.paused;
+  // Si lo cargado no es la pista del texto abierto, el mini-reproductor está en espera → play.
+  var isPaused = libro.paused || audioTool!==tool;
   var svgPlay  = document.getElementById('vp-svg-play');
   var svgPause = document.getElementById('vp-svg-pause');
   if (svgPlay)  svgPlay.style.display  = isPaused  ? '' : 'none';
   if (svgPause) svgPause.style.display = !isPaused ? '' : 'none';
-  var pbtn = $('popup-voice-btn');
-  if (pbtn) pbtn.classList.toggle('playing', !isPaused);
   libro.onpause = libro.onplay = vpUpd;
 }
 function setRezoIcon(playing){
@@ -1951,6 +1944,7 @@ function toggleRezo(){
     return;
   }
   tool='rezo';
+  audioTool='rezo';
   if(libro.src!==url){ libro.src=url; libro.load(); }
   document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('active'));
   var rb=document.querySelector('.tool-btn[data-tool="rezo"]'); if(rb) rb.classList.add('active');
@@ -1969,14 +1963,13 @@ function toggleRezo(){
 
 function onAudioEnd(){
   vpUpd();
-  if(bgmOn && bgmEl){
-    if(bgmEl.paused) bgmEl.play().catch(()=>{});
-    bgmUnduck();
-  }
-  if(!tool||awd.has(tool))return;
-  awd.add(tool);
-  const tm={contemplar:MR_CONT,rezo:MR_REZO,canto:MR_CANTO}[tool];
-  if(tm){if(!_freeNoGana){addMeters(tm);showSlide(tm,TN[tool]);}}
+  bgmBack();
+  // Los metros se acreditan por la pista que terminó (audioTool), nunca por el texto
+  // que el usuario tenga abierto en ese momento (tool), que puede ser otro.
+  if(!audioTool||awd.has(audioTool))return;
+  awd.add(audioTool);
+  const tm={contemplar:MR_CONT,rezo:MR_REZO,canto:MR_CANTO}[audioTool];
+  if(tm){if(!_freeNoGana){addMeters(tm);showSlide(tm,TN[audioTool]);}}
 }
 
 /* ─── BGM con Web Audio API (funciona en iOS standalone) ─── */
@@ -2117,7 +2110,7 @@ function initBtns(){
     b.onclick=function(){
       var t=b.dataset.tool;
       if(t==='rezo'){ toggleRezo(); return; }
-      // El rezo sigue sonando al abrir popups de texto; solo lo detiene el botón de VOZ (openVP)
+      // El rezo sigue sonando al abrir popups de texto; solo lo releva el play del mini-reproductor
       var abierto=$('tool-popup').classList.contains('open');
       if(abierto && tool===t){ closeToolPopup(); }   // mismo botón activo → cerrar (toggle)
       else { openToolPopup(t); }
