@@ -643,30 +643,34 @@ body.light { --tb-circle-bg:var(--card); --tb-circle-border:var(--border); --tb-
 /* ══════════════════════════════════════════════
    MODAL: PREGUNTAS DE MEDITACIÓN
    ══════════════════════════════════════════════ */
+/* Bottom sheet al estilo del .tool-popup de orar: sin velo oscuro, sin bloquear
+   la pantalla. Queda POR DEBAJO de la barra de herramientas (z-index 6), así que
+   el lápiz sigue visible y pulsable para volver a cerrarla. */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(10,8,6,0.75);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  z-index: 300;
+  background: transparent;
+  z-index: 5;
   display: none;
   align-items: flex-end;
   justify-content: center;
-  padding-bottom: 0;
+  pointer-events: none;   /* los toques atraviesan el velo; solo la hoja los recibe */
 }
 .modal-overlay.open { display: flex; }
 
 .modal-sheet {
   --popup-font: 20px;                                  /* misma base de letra que orar */
-  width: 100%;
+  pointer-events: auto;
+  width: calc(100% - 56px);                            /* deja libre el margen derecho para las beads */
+  margin-right: 56px;
   max-width: 480px;
   background: rgba(var(--bg-rgb),0.82);               /* transparencia sutil (igual que orar) */
   backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
   border-radius: 20px 20px 0 0;
   border-top: 1.5px solid var(--border);
-  padding: 0 0 env(safe-area-inset-bottom, 0);
-  max-height: 85dvh;
+  /* el fondo llega hasta abajo, pero el contenido termina sobre el toolbar flotante */
+  padding: 0 0 calc(126px + env(safe-area-inset-bottom, 0px));
+  max-height: 89dvh;
   display: flex;
   flex-direction: column;
   animation: slideUp 0.32s cubic-bezier(0.34, 1.4, 0.64, 1);
@@ -3094,7 +3098,7 @@ function renderSession() {
 
   // Audio toolbar
   const btnEscribir = $('btn-escribir');
-  if (btnEscribir) btnEscribir.onclick = openModal;
+  if (btnEscribir) btnEscribir.onclick = toggleModal;
 
   // Navegación de misterios (hero arrows) — con confirmación si hay audio activo
   const btnPrevMys = $('btn-prev-mystery');
@@ -3113,7 +3117,6 @@ function renderSession() {
 
   // Modal
   $('modal-close').onclick   = closeModal;
-  $('modal-overlay').onclick = e => { if (e.target === $('modal-overlay')) closeModal(); };
 
   // Iniciar BGM de fondo
   bgmInit();
@@ -4082,6 +4085,13 @@ function closeModal() {
   // Guardado final forzado
   forceSaveAll();
   $('modal-overlay').classList.remove('open');
+}
+
+// El lápiz abre y cierra (como el botón de herramienta en orar.html)
+function toggleModal() {
+  const ov = $('modal-overlay');
+  if (ov && ov.classList.contains('open')) closeModal();
+  else openModal();
 }
 
 function onAnswerInput(qi, value) {
