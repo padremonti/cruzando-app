@@ -291,7 +291,7 @@ const URLS = {
   cantoLrc:   `${R2_MUS}/lrc/M_${assetMID}.lrc`,
   ubible:     `${R2_AUD}/ubible/UBIBLE_${assetMID}.mp3`,
   cont:       `${R2_AUD}/cont/CONT_${assetMID}.mp3`,
-  rezo:       `${R2_AUD}/global/MA.mp3`,   // TODO: alternar MA/MB/L_MA según posición en el bloque e idioma, como audio.html
+  rezo:       `${R2_AUD}/global/MA.m4a`,   // TODO: alternar MA/MB/L_MA según posición en el bloque e idioma, como audio.html
   pray:       `${R2_AUD}/pray/PRAY_${assetMID}.mp3`,
   data:       `${base}data/${elemento}.json`,
   beadSync:   `${base}data/bead_sync.json`
@@ -544,7 +544,7 @@ function renderBeadsCol(){
 function _getBeadEl(idx){ if(idx===0)return $('bead-pater'); return document.querySelectorAll('#beadsCol .bead')[idx-1]||null; }
 function _updateSyncKey(trackUrl){
   if(!BEADSYNC||!trackUrl){_currentSyncKey=null;return;}
-  const name=trackUrl.split('/').pop().replace(/\?.*$/,'').replace(/\.mp3$/i,'').toUpperCase();
+  const name=trackUrl.split('/').pop().replace(/\?.*$/,'').replace(/\.(m4a|mp3)$/i,'').toUpperCase();
   _currentSyncKey=Object.keys(BEADSYNC).find(k=>k.toUpperCase()===name)||null;
 }
 function _tickBeads(){

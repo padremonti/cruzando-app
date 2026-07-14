@@ -556,7 +556,7 @@ function _rtSetupRezo() {
   var ab  = (_rtMisterioIdx % 2 === 0) ? 'MA' : 'MB';
   _rtCurrentSyncKey = pfx + ab;
 
-  var audioUrl = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/global/' + _rtCurrentSyncKey + '.mp3';
+  var audioUrl = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/global/' + _rtCurrentSyncKey + '.m4a';
   document.getElementById('rt-rezo-audio').src = audioUrl;
 
   document.getElementById('rt-rezo-audio').addEventListener('ended', function () {

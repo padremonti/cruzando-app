@@ -1117,10 +1117,10 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
  * ANTES DE PRODUCCIÓN:
  * [ ] Eliminar #dev-nav y sus funciones _devPrev / _devNext
  * [ ] Subir audios globales al bucket R2/global/:
- *       INICIO.mp3, MA.mp3, MB.mp3
- *       LETANIAS.mp3, SALVE.mp3, ORACION_FINAL.mp3
- *       L_INICIO.mp3, L_MA.mp3, L_MB.mp3
- *       L_LETANIAS.mp3, L_SALVE.mp3, L_ORACION_FINAL.mp3
+ *       INICIO.m4a, MA.m4a, MB.m4a
+ *       LETANIAS.m4a, SALVE.m4a, ORACION_FINAL.m4a
+ *       L_INICIO.m4a, L_MA.m4a, L_MB.m4a
+ *       L_LETANIAS.m4a, L_SALVE.m4a, L_ORACION_FINAL.m4a
  * [ ] Subir sfx/bead_click.mp3 al bucket R2
  * [ ] Completar TXT_LETANIAS con el texto completo de las Letanías
  * [ ] Verificar que TXT_SALVE y TXT_ORACION_FINAL están completos
@@ -1784,7 +1784,7 @@ function _updateSyncKey(trackUrl){
     _hideBeadsCol();
     return;
   }
-  var name=trackUrl.split('/').pop().replace(/\?.*$/,'').replace(/\.mp3$/i,'').toUpperCase();
+  var name=trackUrl.split('/').pop().replace(/\?.*$/,'').replace(/\.(m4a|mp3)$/i,'').toUpperCase();
   var found=Object.keys(_beadSync).find(function(k){return k.toUpperCase()===name;})||null;
   var changed=(found!==_currentSyncKey);
   _currentSyncKey=found;
@@ -2442,31 +2442,32 @@ function preloadCanto(){
 }
 
 /* ─── PLAYLIST ─── */
+// nombre sin extensión: todo R2/global/ es .m4a
 function globalTrack(nombre){
   const pfx=rezarPrefs().idioma==='latin'?'L_':'';
-  return R2+'/global/'+pfx+nombre;
+  return R2+'/global/'+pfx+nombre+'.m4a';
 }
 
 function buildPlaylist(startIdx){
   const p=rezarPrefs(),pl=[];
   if(startIdx===0){
-    pl.push({id:'inicio',type:'inicio',mIdx:null,src:globalTrack('INICIO.mp3')});
+    pl.push({id:'inicio',type:'inicio',mIdx:null,src:globalTrack('INICIO')});
   }
   for(let i=startIdx;i<5;i++){
     const m=mNum(blk,i),ab=(i%2===0)?'MA':'MB';
     pl.push({id:'anuncio_'+i,  type:'anuncio', mIdx:i,hidden:true,
-             src:globalTrack('MISTERIO_'+m+'.mp3')});
+             src:globalTrack('MISTERIO_'+m)});
     pl.push({id:'misterio_'+i, type:'misterio',mIdx:i,
-             src:globalTrack(ab+'.mp3')});
+             src:globalTrack(ab)});
     if(p.cantos!==false){
       pl.push({id:'canto_'+i,  type:'canto',   mIdx:i,
                src:MUSB+'m4a/M_'+nivel+'_'+cua+'_'+m+'.m4a'});
     }
   }
   if(p.letanias){
-    pl.push({id:'letanias',type:'letanias',mIdx:null,src:globalTrack('LETANIAS.mp3')});
-    pl.push({id:'salve',   type:'salve',   mIdx:null,src:globalTrack('SALVE.mp3')});
-    pl.push({id:'final',   type:'final',   mIdx:null,src:globalTrack('ORACION_FINAL.mp3')});
+    pl.push({id:'letanias',type:'letanias',mIdx:null,src:globalTrack('LETANIAS')});
+    pl.push({id:'salve',   type:'salve',   mIdx:null,src:globalTrack('SALVE')});
+    pl.push({id:'final',   type:'final',   mIdx:null,src:globalTrack('ORACION_FINAL')});
   }
   return pl;
 }

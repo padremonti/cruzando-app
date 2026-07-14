@@ -1826,7 +1826,7 @@ function toolUrl(t){
   if(t==='contemplar')return`${R2}/cont/CONT_${nivel}_${cua}_${m}.mp3`;
   if(t==='rezo'){
     const _latin=prefs().latinPrayer===true;
-    const _file=bIdx%2===0?(_latin?'L_MA.mp3':'MA.mp3'):(_latin?'L_MB.mp3':'MB.mp3');
+    const _file=bIdx%2===0?(_latin?'L_MA.m4a':'MA.m4a'):(_latin?'L_MB.m4a':'MB.m4a');
     return`${R2}/global/${_file}`;
   }
   if(t==='canto')return`${MUSB}m4a/M_${nivel}_${cua}_${m}.m4a`;
@@ -1971,7 +1971,7 @@ function _beadsShow(){ const w=$('beads-col-wrap'); if(w)w.style.display='flex';
 function _beadsHide(){ const w=$('beads-col-wrap'); if(w)w.style.display='none'; }
 function _updateSyncKey(trackUrl){
   if(!_beadSync||!trackUrl){ _currentSyncKey=null; _beadsHide(); return; }
-  const name=trackUrl.split('/').pop().replace(/\?.*$/,'').replace(/\.mp3$/i,'').toUpperCase();
+  const name=trackUrl.split('/').pop().replace(/\?.*$/,'').replace(/\.(m4a|mp3)$/i,'').toUpperCase();
   const found=Object.keys(_beadSync).find(k=>k.toUpperCase()===name)||null;
   const changed=(found!==_currentSyncKey);
   _currentSyncKey=found;

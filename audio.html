@@ -2622,45 +2622,45 @@ async function buildSession() {
   // Las Preguntas se expanden en 6 tracks (QA·silencio·QB·silencio·QC·silencio)
   // agrupados visualmente como un solo segmento en la barra.
   const n = nivel, c = cuaderno;
-  const silencioUrl = AUDIO_FOLDERS['rezo'] + 'silencio.mp3'; // /audio/global/silencio.mp3
-  const pausaUrl   = AUDIO_FOLDERS['rezo'] + 'pausa.mp3';
+  const silencioUrl = AUDIO_FOLDERS['rezo'] + 'silencio.m4a'; // /audio/global/silencio.m4a
+  const pausaUrl   = AUDIO_FOLDERS['rezo'] + 'pausa.m4a';
   // Alternar MA/MB según posición dentro del bloque (1,3,5 → MA; 2,4 → MB)
   const _latinPref = getPrefs().latinPrayer === true;
   const _rezaFile  = blockIdx % 2 === 0
-    ? (_latinPref ? 'L_MA.mp3' : 'MA.mp3')
-    : (_latinPref ? 'L_MB.mp3' : 'MB.mp3');
+    ? (_latinPref ? 'L_MA.m4a' : 'MA.m4a')
+    : (_latinPref ? 'L_MB.m4a' : 'MB.m4a');
   const playlist = [
     // ── Introducción: En el nombre del Padre... ──
-    { label:'Introducción',    file:'ennombre.mp3',               folder:'rezo',   seg:0 },
-    { label:'Introducción',    file:'pausa.mp3',                  folder:'rezo',   seg:0, silence:true },
+    { label:'Introducción',    file:'ennombre.m4a',               folder:'rezo',   seg:0 },
+    { label:'Introducción',    file:'pausa.m4a',                  folder:'rezo',   seg:0, silence:true },
     { label:'Bienvenida',      file:`START_${n}_${c}_${m}.mp3`,  folder:'start',  seg:1 },
-    { label:'Bienvenida',      file:'pausa.mp3',                  folder:'rezo',   seg:1, silence:true },
+    { label:'Bienvenida',      file:'pausa.m4a',                  folder:'rezo',   seg:1, silence:true },
     { label:'Camino y Palabra',file:`UBIBLE_${n}_${c}_${m}.mp3`, folder:'ubible', seg:2 },
-    { label:'Camino y Palabra',file:'pausa.mp3',                  folder:'rezo',   seg:2, silence:true },
+    { label:'Camino y Palabra',file:'pausa.m4a',                  folder:'rezo',   seg:2, silence:true },
     { label:'Contemplación',   file:`CONT_${n}_${c}_${m}.mp3`,   folder:'cont',   seg:3 },
-    { label:'Contemplación',   file:'pausa.mp3',                  folder:'rezo',   seg:3, silence:true },
+    { label:'Contemplación',   file:'pausa.m4a',                  folder:'rezo',   seg:3, silence:true },
     { label:'Rezo',            file:_rezaFile,                    folder:'rezo',   seg:4 },
-    { label:'Rezo',            file:'pausa.mp3',                  folder:'rezo',   seg:4, silence:true },
+    { label:'Rezo',            file:'pausa.m4a',                  folder:'rezo',   seg:4, silence:true },
     { label:'Canto',           file:`M_${n}_${c}_${m}.m4a`,      folder:'music',  seg:5 },
-    { label:'Canto',           file:'pausa.mp3',                  folder:'rezo',   seg:5, silence:true },
+    { label:'Canto',           file:'pausa.m4a',                  folder:'rezo',   seg:5, silence:true },
     // ── Separador de Meditación ──
-    { label:'Meditación',      file:'meditacion.mp3',             folder:'rezo',   seg:6 },
-    { label:'Meditación',      file:'pausa.mp3',                  folder:'rezo',   seg:6, silence:true },
+    { label:'Meditación',      file:'meditacion.m4a',             folder:'rezo',   seg:6 },
+    { label:'Meditación',      file:'pausa.m4a',                  folder:'rezo',   seg:6, silence:true },
     // ── Bloque de Preguntas ──
     { label:'Preguntas',       file:`QA_${n}_${c}_${m}.mp3`,     folder:'q',      seg:7, qIdx:0 },
-    { label:'Preguntas',       file:'silencio.mp3',               folder:'rezo',   seg:7, silence:true },
+    { label:'Preguntas',       file:'silencio.m4a',               folder:'rezo',   seg:7, silence:true },
     { label:'Preguntas',       file:`QB_${n}_${c}_${m}.mp3`,     folder:'q',      seg:7, qIdx:1 },
-    { label:'Preguntas',       file:'silencio.mp3',               folder:'rezo',   seg:7, silence:true },
+    { label:'Preguntas',       file:'silencio.m4a',               folder:'rezo',   seg:7, silence:true },
     { label:'Preguntas',       file:`QC_${n}_${c}_${m}.mp3`,     folder:'q',      seg:7, qIdx:2 },
-    { label:'Preguntas',       file:'silencio.mp3',               folder:'rezo',   seg:7, silence:true },
+    { label:'Preguntas',       file:'silencio.m4a',               folder:'rezo',   seg:7, silence:true },
     // ── Oración final + pausa + Despedida ──
     { label:'Oración final',   file:`PRAY_${n}_${c}_${m}.mp3`,   folder:'pray',   seg:8 },
-    { label:'Oración final',   file:'pausa.mp3',                  folder:'rezo',   seg:8, silence:true },
+    { label:'Oración final',   file:'pausa.m4a',                  folder:'rezo',   seg:8, silence:true },
     { label:'Despedida',       file:`BYE_${n}_${c}_${m}.mp3`,    folder:'bye',    seg:9 }
   ].map(t => ({
     ...t,
-    url: (t.folder === 'rezo' && t.file === 'silencio.mp3') ? silencioUrl
-       : (t.folder === 'rezo' && t.file === 'pausa.mp3')    ? pausaUrl
+    url: (t.folder === 'rezo' && t.file === 'silencio.m4a') ? silencioUrl
+       : (t.folder === 'rezo' && t.file === 'pausa.m4a')    ? pausaUrl
        : AUDIO_FOLDERS[t.folder] + t.file
   }));
 
@@ -2924,7 +2924,7 @@ function playMicroIntroThenMicro(block, nivelId) {
   _stopLoadingRotation();
   show('scr-session');
 
-  const url = AUDIO_FOLDERS['rezo'] + 'micro_' + block + '.mp3';
+  const url = AUDIO_FOLDERS['rezo'] + 'micro_' + block + '.m4a';
   const introAudio = new Audio(url);
 
   const goToMicro = () => {
@@ -3288,7 +3288,7 @@ function _beadsShow(){ const w=$('beads-col-wrap'); if(w)w.style.display='flex';
 function _beadsHide(){ const w=$('beads-col-wrap'); if(w)w.style.display='none'; }
 function _updateSyncKey(trackUrl){
   if(!_beadSync||!trackUrl){ _currentSyncKey=null; _beadsHide(); return; }
-  const name=trackUrl.split('/').pop().replace(/\?.*$/,'').replace(/\.mp3$/i,'').toUpperCase();
+  const name=trackUrl.split('/').pop().replace(/\?.*$/,'').replace(/\.(m4a|mp3)$/i,'').toUpperCase();
   const found=Object.keys(_beadSync).find(k=>k.toUpperCase()===name)||null;
   const changed=(found!==_currentSyncKey);
   _currentSyncKey=found;
