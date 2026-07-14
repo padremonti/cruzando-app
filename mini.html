@@ -112,13 +112,22 @@ body.light{--parch:#0a2530;--bg:#EAF4F6}
 .txt-pop.show{display:flex}
 .txt-scroll{flex:1;overflow-y:auto;padding:0 22px 10px}
 .txt-ref{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
-.txt-body{font-family:'Crimson Pro',serif;font-size:17px;line-height:1.72;white-space:pre-wrap}
+/* El cuerpo ya llega como HTML (esc() convierte los saltos en <br>), así que no
+   se usa pre-wrap: duplicaría los saltos. Mismo criterio que .popup-text de orar. */
+.txt-body{font-family:'Crimson Pro',serif;font-size:17px;line-height:1.72}
+/* Título de la contemplación — primer párrafo aislado por línea en blanco */
+.contempl-title{display:block;font-weight:700;font-size:20px;color:var(--parch);margin-bottom:18px;line-height:1.3;font-style:normal}
 .txt-next{margin:14px 22px 0;padding:13px;border-radius:12px;border:none;background:var(--gold-deep);color:#1a1305;font-weight:600;font-size:14px;cursor:pointer;font-family:'Inter',sans-serif}
 .txt-close{position:absolute;top:18px;right:18px;z-index:2}
 
-/* diario / meditación */
-.diary textarea{width:100%;height:200px;resize:none;background:rgba(7,8,16,.6);border:1px solid rgba(243,234,216,.16);border-radius:12px;color:var(--parch);padding:14px;font-family:'Crimson Pro',serif;font-size:15px;line-height:1.6}
-.diary .txt-body{font-size:15px;margin-bottom:14px}
+/* diario / meditación — tres preguntas con su título y su caja (como orar.html) */
+.q-block{margin-bottom:26px}
+.q-label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px}
+.q-question{font-family:'Crimson Pro',serif;font-size:17px;font-weight:500;line-height:1.7;color:rgba(243,234,216,.72);font-style:italic;margin-bottom:12px}
+.q-textarea{width:100%;min-height:110px;max-height:35vh;resize:vertical;overflow-y:auto;padding:14px;background:rgba(7,8,16,.6);border:1px solid rgba(243,234,216,.16);border-radius:12px;color:var(--parch);font-family:'Crimson Pro',serif;font-size:15px;line-height:1.6}
+.q-textarea:focus{border-color:var(--gold);outline:none}
+body.light .q-question{color:rgba(10,37,48,.72)}
+body.light .q-textarea{background:rgba(255,255,255,.6);border-color:rgba(10,37,48,.18)}
 
 /* diálogo de salida — velo tenue + tarjeta centrada (sobre topbar y pops) */
 .exit-pop{position:absolute;inset:0;z-index:40;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(5,7,14,.72);backdrop-filter:blur(6px)}
@@ -227,13 +236,12 @@ body.light{--parch:#0a2530;--bg:#EAF4F6}
     <button class="txt-next" id="txtNext">Continuar</button>
   </div>
 
-  <!-- Popup diario / meditación -->
+  <!-- Popup diario / meditación — tres preguntas, cada una con su título y su caja -->
   <div class="txt-pop diary" id="diaryPop">
     <button class="icon-btn txt-close" id="diaryClose"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <div class="txt-scroll">
       <div class="txt-ref">Para escribir</div>
-      <div class="txt-body" id="diaryPrompt"></div>
-      <textarea id="diaryText" placeholder="Escribe lo que surja…"></textarea>
+      <div id="diaryQs"></div>
     </div>
     <button class="txt-next" id="diarySave">Guardar en el diario</button>
   </div>
@@ -475,10 +483,11 @@ $('skipBtn').onclick=()=>{ cantoPause(); if(epilogueMode)backToEpilogue(); else 
 
 /* ═══════════ REPRODUCTOR (M2/M3/M4) ═══════════ */
 const STEPS=[
-  {key:'ubible', kicker:'Palabra',        url:()=>URLS.ubible, sec:'texto', txt:()=>({ref:MISTERIO.referencia, body:MISTERIO.evangelio})},
-  {key:'cont',   kicker:'Contemplación',  url:()=>URLS.cont,   sec:'texto', txt:()=>({ref:'Contemplación', body:MISTERIO.contemplacion})},
+  // La referencia bíblica va de kicker; la contemplación estrena su título en negrita.
+  {key:'ubible', kicker:'Palabra',        url:()=>URLS.ubible, sec:'texto', txt:()=>({ref:MISTERIO.referencia, html:esc(MISTERIO.evangelio||'Texto no disponible')})},
+  {key:'cont',   kicker:'Contemplación',  url:()=>URLS.cont,   sec:'texto', txt:()=>({ref:'Contemplación', html:formatContempl(MISTERIO.contemplacion||'Contemplación no disponible')})},
   {key:'rezo',   kicker:'El rezo',        url:()=>URLS.rezo,   sec:'escribir', beads:true},
-  {key:'pray',   kicker:'Oración final',  url:()=>URLS.pray,   sec:'amen', txt:()=>({ref:'Oración final', body:MISTERIO.intercesion})}
+  {key:'pray',   kicker:'Oración final',  url:()=>URLS.pray,   sec:'amen', txt:()=>({ref:'Oración final', html:esc(MISTERIO.intercesion||'Oración final no disponible')})}
 ];
 let stepIdx=-1, playing=false;
 
@@ -507,7 +516,7 @@ $('ppBtn').onclick=()=>{ playing=!playing; if(playing){audio.play();}else{audio.
 $('secBtn').onclick=()=>{
   const s=STEPS[stepIdx];
   if(s.sec==='escribir'){ openDiary(); }
-  else { const t=s.txt(); openText(t.ref,t.body, s.sec==='amen'?'Amén':'Continuar', ()=>{ goStep(stepIdx+1); }); }
+  else { const t=s.txt(); openText(t.ref,t.html, s.sec==='amen'?'Amén':'Continuar', ()=>{ goStep(stepIdx+1); }); }
 };
 function showAdvance(msg){ $('advanceMsg').textContent=msg||''; $('advanceChip').classList.add('show'); }
 function hideAdvance(){ $('advanceChip').classList.remove('show'); }
@@ -548,18 +557,69 @@ function _tickBeads(){
   const lux=$('bead-lux'); if(lux){const last=windows[windows.length-1]; if(t>last.end)lux.classList.add('show');else lux.classList.remove('show');}
 }
 
+/* ═══════════ TEXTOS — mismo parseo que orar.html ═══════════ */
+const QL=['Por María hacia Jesús:','Desde el Hijo hacia el Padre:','Hijos y hermanos en el Espíritu:'];
+const QC=['#FF7A00','#C0392B','#27AE60'];
+const esc=s=>s?s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'):'';
+
+// El título solo existe cuando el primer párrafo está aislado por una línea en
+// blanco (\n\n). Sin esa separación, la primera línea es cuerpo, no título.
+function formatContempl(text){
+  if(!text) return '';
+  var dbl=text.indexOf('\n\n');
+  if(dbl===-1) return esc(text);
+  var title=text.slice(0,dbl).replace(/\.\s*$/,'');
+  var body =text.slice(dbl+2).replace(/^\n+/,'');
+  return '<strong class="contempl-title">'+esc(title)+'</strong><br>'+esc(body);
+}
+
+// Parte el bloque de meditación en las 3 preguntas usando las etiquetas QL
+function parseQ(text){
+  if(!text) return ['','',''];
+  const out=[]; let rem=text;
+  QL.forEach((lbl,i)=>{
+    const idx=rem.indexOf(lbl);
+    if(idx>=0){ if(i>0)out.push(rem.substring(0,idx).trim()); rem=rem.substring(idx+lbl.length).trim(); }
+  });
+  out.push(rem.trim());
+  while(out.length<3)out.push('');
+  return out.slice(0,3);
+}
+
 /* ═══════════ POPUPS de texto ═══════════ */
-function openText(ref,body,nextLbl,onNext){
-  $('txtRef').textContent=ref||''; $('txtBody').textContent=body||''; $('txtNext').textContent=nextLbl||'Continuar';
+function openText(ref,html,nextLbl,onNext){
+  $('txtRef').textContent=ref||''; $('txtBody').innerHTML=html||''; $('txtNext').textContent=nextLbl||'Continuar';
   $('txtNext').onclick=()=>{ closeText(); if(onNext)onNext(); };
   $('txtPop').classList.add('show');
 }
 function closeText(){ $('txtPop').classList.remove('show'); }
 $('txtClose').onclick=closeText;
 
-function openDiary(){ $('diaryPrompt').textContent=MISTERIO.meditacion||''; $('diaryPop').classList.add('show'); }
+/* ═══════════ DIARIO — 3 preguntas, 3 cajas ═══════════ */
+let ans={0:'',1:'',2:''};
+
+function openDiary(){
+  const qs=parseQ(MISTERIO.meditacion||'');
+  $('diaryQs').innerHTML=qs.map((q,qi)=>
+    `<div class="q-block">
+       <div class="q-label" style="color:${QC[qi]}">${QL[qi]}</div>
+       <div class="q-question">${esc(q)}</div>
+       <textarea class="q-textarea" id="qta${qi}" placeholder="Escribe tu respuesta…"></textarea>
+     </div>`).join('');
+  [0,1,2].forEach(qi=>{
+    const ta=$('qta'+qi); if(!ta) return;
+    ta.value=ans[qi]||'';                                  // conserva lo escrito al reabrir
+    ta.addEventListener('input',()=>{ ans[qi]=ta.value; });
+  });
+  $('diaryPop').classList.add('show');
+}
 $('diaryClose').onclick=()=>$('diaryPop').classList.remove('show');
-$('diarySave').onclick=()=>{ /* TODO: guardar en el diario real (users/{uid}/reflections o diario.html) */ $('diaryPop').classList.remove('show'); };
+$('diarySave').onclick=()=>{
+  [0,1,2].forEach(qi=>{ const ta=$('qta'+qi); if(ta)ans[qi]=ta.value; });
+  /* TODO: guardar en el diario real — una reflexión por pregunta, como orar.html:
+     users/{uid}/reflections/{nivelId}_{bloque}_{misterioIdx}_q{qi} */
+  $('diaryPop').classList.remove('show');
+};
 
 /* ═══════════ EPÍLOGO ═══════════ */
 function goEpilogue(){ audio.pause(); playing=false; hideAdvance(); showMoment('epilogue'); $('stills').classList.add('hidden'); $('hero').classList.remove('hidden'); updateProgress(); }
