@@ -1070,8 +1070,9 @@ let microDone=false, prog=null;
 let nivelId='0101', nivel=1, cua=1;
 let blk=null, bIdx=0;
 let tool=null;        // herramienta cuyo TEXTO está abierto en el popup
-let audioTool=null;   // herramienta cuya PISTA está cargada en libro (puede diferir de tool)
-let libro=null, bgmEl=null, bgmOn=true;
+// Un elemento por pista: pausar conserva el segundo exacto de cada una (ver initVP)
+let rezoEl=null, contemplaEl=null, cantoEl=null;
+let bgmEl=null, bgmOn=true;
 let totalM=0;
 let ans={0:'',1:'',2:''}, ansT={}, firstAns={0:false,1:false,2:false};
 let awd=new Set();
@@ -1187,7 +1188,7 @@ function toggleTheme(){applyTheme(localStorage.getItem('cruzando_theme')==='dark
 
 /* ─── NAV ─── */
 function goTo(pg){
-  if(libro){libro.pause();libro.src='';}
+  pausarTodo();
   if(bgmEl) bgmEl.pause();
   location.href=location.origin+location.pathname.substring(0,location.pathname.lastIndexOf('/')+1)+pg;
 }
@@ -1524,7 +1525,8 @@ function renderSession(){
   var walkImg = $('mariano-slide-img');
   if (walkImg) walkImg.src = MARIANO_WALK;
   $('main-header').style.display='none';
-  awd=new Set();tool=null;audioTool=null;
+  awd=new Set();tool=null;
+  resetAudios();   // Misterio nuevo = pistas nuevas: ninguna posición se arrastra
   $('voice-player').style.display='none';
   // Reset de beads al cambiar de Misterio (re-render aunque la track sea del mismo tipo)
   _currentSyncKey=null; _beadsHide();
@@ -1599,7 +1601,7 @@ function renderHeroBeads(dots){
   }).join('');
 }
 
-window._gm=i=>{if(i!==bIdx){bIdx=i;if(libro)libro.pause();renderSession();}};
+window._gm=i=>{if(i!==bIdx){bIdx=i;pausarTodo();renderSession();}};
 
 /* ─── POPUP ─── */
 function openToolPopup(t){
@@ -1823,33 +1825,53 @@ function toolUrl(t){
   return'';
 }
 function fmtTime(s){var m=Math.floor(s/60),sec=Math.floor(s%60);return m+':'+(sec<10?'0':'')+sec;}
+
+/* ── Un elemento <audio> por pista ──────────────────────────────────────────────
+   Compartir un solo elemento obligaba a reasignar .src para cambiar de pista, y eso
+   destruye la posición: el rezo volvía al Padre Nuestro y las cuentas se reiniciaban.
+   Con un elemento por pista, pausar conserva el segundo exacto de forma nativa.
+   Regla: nunca suenan dos a la vez, y ninguna se reanuda sola — el ritmo lo pone el usuario. */
+function vozEl(t){ return t==='canto'?cantoEl:(t==='contemplar'?contemplaEl:null); }
+function audios(){ return [rezoEl,contemplaEl,cantoEl].filter(Boolean); }
+function algoSonando(){ return audios().some(a=>!a.paused); }
+function pausarTodo(){ audios().forEach(a=>a.pause()); }
+/* Cambiar de Misterio = pistas nuevas. El rezo alterna MA/MB por paridad, así que los
+   Misterios 1 y 3 comparten archivo: sin este reset, el 3 arrancaría donde quedó el 1. */
+function resetAudios(){
+  audios().forEach(a=>{ a.pause(); try{ a.currentTime=0; }catch(e){} });
+}
+function marcarSonando(){ document.body.classList.toggle('audio-playing', algoSonando()); }
+
+function nuevaVoz(t){
+  const a=new Audio();
+  a.addEventListener('play',  ()=>{ marcarSonando(); vpUpd(); });
+  a.addEventListener('pause', ()=>{ marcarSonando(); vpUpd(); });
+  a.addEventListener('ended', ()=>{ marcarSonando(); bgmBack(); premiar(t); vpUpd(); });
+  a.addEventListener('loadedmetadata', ()=>{ if(tool===t) vpBarra(a); });
+  a.addEventListener('timeupdate', ()=>{ if(tool===t) vpBarra(a); });
+  return a;
+}
+
 function initVP(){
-  if(!libro){
-    libro=new Audio();
-    libro.addEventListener('ended',onAudioEnd);
-    libro.addEventListener('play',  function(){ _updateSyncKey(libro.src); document.body.classList.add('audio-playing'); setRezoIcon(!!_currentSyncKey); });
-    libro.addEventListener('pause', function(){ document.body.classList.remove('audio-playing'); setRezoIcon(false); });
-    libro.addEventListener('ended', function(){ setRezoIcon(false); document.body.classList.remove('audio-playing'); });
-    libro.addEventListener('timeupdate',function(){
-      // Solo pintamos la barra si lo que suena es la pista del texto abierto: si suena el
-      // rezo con otro popup delante, su avance no debe aparecer en el mini-reproductor.
-      if(audioTool===tool){
-        var fill=$('vp-progress-fill'),cur=$('vp-time-current'),dur=$('vp-time-duration');
-        if(fill&&libro.duration)fill.style.width=(libro.currentTime/libro.duration*100)+'%';
-        if(cur)cur.textContent=fmtTime(libro.currentTime);
-        if(dur&&libro.duration)dur.textContent=fmtTime(libro.duration);
-      }
-      _tickBeads();
-    });
+  if(!rezoEl){
+    rezoEl=new Audio();
+    rezoEl.addEventListener('play',  ()=>{ _updateSyncKey(rezoEl.src); marcarSonando(); setRezoIcon(true); });
+    rezoEl.addEventListener('pause', ()=>{ marcarSonando(); setRezoIcon(false); });   // las cuentas se quedan donde están
+    rezoEl.addEventListener('ended', ()=>{ marcarSonando(); setRezoIcon(false); bgmBack(); premiar('rezo'); });
+    rezoEl.addEventListener('timeupdate', _tickBeads);
   }
+  if(!contemplaEl) contemplaEl=nuevaVoz('contemplar');
+  if(!cantoEl)     cantoEl=nuevaVoz('canto');
+
+  const v=()=>vozEl(tool);
   $('vp-play-pause').onclick=()=>vpToggle();
-  $('vp-rewind').onclick=()=>{if(libro)libro.currentTime=Math.max(0,libro.currentTime-15);};
-  $('vp-forward').onclick=()=>{if(libro)libro.currentTime+=15;};
-  $('vp-speed').onchange=()=>{if(libro)libro.playbackRate=parseFloat($('vp-speed').value);};
+  $('vp-rewind').onclick=()=>{const a=v();if(a)a.currentTime=Math.max(0,a.currentTime-15);};
+  $('vp-forward').onclick=()=>{const a=v();if(a)a.currentTime+=15;};
+  $('vp-speed').onchange=()=>{const a=v();if(a)a.playbackRate=parseFloat($('vp-speed').value);};
   $('vp-progress-bar').onclick=function(e){
-    if(!libro||!libro.duration)return;
+    const a=v(); if(!a||!a.duration)return;
     var rect=$('vp-progress-bar').getBoundingClientRect();
-    libro.currentTime=((e.clientX-rect.left)/rect.width)*libro.duration;
+    a.currentTime=((e.clientX-rect.left)/rect.width)*a.duration;
   };
   $('popup-close').onclick=()=>closeToolPopup();
 }
@@ -1859,60 +1881,57 @@ function bgmBack(){
     bgmUnduck();
   }
 }
-/* Pausa la VOZ (contemplación o canto) y devuelve la BGM a su nivel.
+function vpBarra(a){
+  var fill=$('vp-progress-fill'),cur=$('vp-time-current'),dur=$('vp-time-duration');
+  if(fill)fill.style.width=(a.duration?(a.currentTime/a.duration*100):0)+'%';
+  if(cur)cur.textContent=fmtTime(a.currentTime||0);
+  if(dur)dur.textContent=a.duration?fmtTime(a.duration):'0:00';
+}
+/* Pausa la VOZ (contemplación o canto), que conserva su segundo exacto.
    El rezo no se interrumpe aquí: sigue sonando bajo los textos. */
 function stopVoice(){
-  if(!libro || audioTool==='rezo')return;
-  if(!libro.paused)libro.pause();
-  bgmBack();
+  [contemplaEl,cantoEl].forEach(a=>{ if(a) a.pause(); });
+  if(!algoSonando()) bgmBack();
 }
-/* Deja el mini-reproductor listo para la herramienta abierta, SIN reproducir:
-   el texto manda y el audio arranca solo con el play. Si el rezo está sonando no
-   tocamos la pista cargada — solo el play cambiará el src y lo relevará. */
+/* Deja el mini-reproductor listo para la herramienta abierta, SIN reproducir: el texto
+   manda y el audio arranca solo con el play. Nunca toca el rezo — leer no interrumpe. */
 function stageVP(t){
-  if(!libro || !['contemplar','canto'].includes(t))return;
-  const url=toolUrl(t);if(!url)return;
+  const a=vozEl(t); if(!a)return;
+  const url=toolUrl(t); if(!url)return;
   stopVoice();
-  const rezoSonando = audioTool==='rezo' && !libro.paused;
-  if(!rezoSonando && libro.src!==url){ libro.src=url; libro.load(); audioTool=t; }
+  if(a.src!==url){ a.src=url; a.load(); }   // pista de otro Misterio → desde cero
   $('vp-tool-name').textContent=TN[t]||t;
-  if(audioTool!==t){   // la pista abierta no es la cargada → barra en cero, a la espera del play
-    if($('vp-progress-fill'))$('vp-progress-fill').style.width='0%';
-    if($('vp-time-current'))$('vp-time-current').textContent='0:00';
-    if($('vp-time-duration'))$('vp-time-duration').textContent='0:00';
-  }
+  vpBarra(a);                                // refleja el punto donde quedó esta voz
   $('voice-player').style.display='';
   vpUpd();
 }
 function vpToggle(){
-  if(!libro || !tool)return;
-  const url=toolUrl(tool);if(!url)return;
-  if(audioTool===tool && !libro.paused){   // suena lo que estoy leyendo → pausar
-    libro.pause();
-    bgmBack();
-    vpUpd();
+  const a=vozEl(tool); if(!a)return;
+  if(!a.paused){                       // suena lo que estoy leyendo → pausar (conserva su segundo)
+    a.pause();
+    if(!algoSonando()) bgmBack();
     return;
   }
-  if(libro.src!==url){ libro.src=url; libro.load(); }   // releva al rezo si estaba sonando
-  audioTool=tool;
+  const url=toolUrl(tool); if(!url)return;
+  if(a.src!==url){ a.src=url; a.load(); }
+  // El rezo cede el paso, pero NO se pierde: queda pausado en su segundo, con sus cuentas.
+  if(rezoEl) rezoEl.pause();
+  [contemplaEl,cantoEl].forEach(x=>{ if(x&&x!==a) x.pause(); });
   if(window.CZSound)CZSound('playStart');
   if(tool==='canto'){
     if(bgmEl){ bgmFadeTo(0, 400); setTimeout(function(){ if(bgmEl) bgmEl.pause(); }, 420); }
   } else {
     bgmDuck();
   }
-  libro.play().catch(()=>{});
-  vpUpd();
+  a.play().catch(()=>{});
 }
 function vpUpd(){
-  if(!libro) return;
-  // Si lo cargado no es la pista del texto abierto, el mini-reproductor está en espera → play.
-  var isPaused = libro.paused || audioTool!==tool;
+  const a=vozEl(tool);
+  var isPaused = !a || a.paused;
   var svgPlay  = document.getElementById('vp-svg-play');
   var svgPause = document.getElementById('vp-svg-pause');
   if (svgPlay)  svgPlay.style.display  = isPaused  ? '' : 'none';
   if (svgPause) svgPause.style.display = !isPaused ? '' : 'none';
-  libro.onpause = libro.onplay = vpUpd;
 }
 function setRezoIcon(playing){
   var rb=document.querySelector('.tool-btn[data-tool="rezo"]');
@@ -1952,9 +1971,9 @@ function _updateSyncKey(trackUrl){
   else _beadsHide();
 }
 function _tickBeads(){
-  if(!libro||!_currentSyncKey||!_beadSync)return;
+  if(!rezoEl||!_currentSyncKey||!_beadSync)return;
   const windows=_beadSync[_currentSyncKey]; if(!windows)return;
-  const t=libro.currentTime;
+  const t=rezoEl.currentTime;
   let active=-1;
   for(let i=0;i<windows.length;i++){ if(t>=windows[i].start&&t<=windows[i].end){active=i;break;} }
   for(let i=0;i<windows.length;i++){
@@ -1968,16 +1987,17 @@ function _tickBeads(){
 }
 
 function toggleRezo(){
-  if(!libro) return;
+  if(!rezoEl) return;
   var url=toolUrl('rezo'); if(!url) return;
-  if(_currentSyncKey && !libro.paused){   // rezo sonando (aunque el tool activo sea otro) → pausar
-    libro.pause();
-    if(bgmOn && bgmEl){ if(bgmEl.paused) bgmEl.play().catch(()=>{}); bgmUnduck(); }
+  if(!rezoEl.paused){                 // rezo sonando → pausar; las cuentas se quedan donde están
+    rezoEl.pause();
+    if(!algoSonando()) bgmBack();
     return;
   }
   tool='rezo';
-  audioTool='rezo';
-  if(libro.src!==url){ libro.src=url; libro.load(); }
+  stopVoice();                        // la voz cede el paso, conservando su segundo
+  // Si la pista ya es la de este Misterio, NO se recarga: el rezo reanuda donde quedó.
+  if(rezoEl.src!==url){ rezoEl.src=url; rezoEl.load(); }
   document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('active'));
   var rb=document.querySelector('.tool-btn[data-tool="rezo"]'); if(rb) rb.classList.add('active');
   $('tool-popup').classList.remove('open');
@@ -1990,18 +2010,16 @@ function toggleRezo(){
     var _obStepTool = _OB_TOOLS_STEPS[_obToolStep] ? _OB_TOOLS_STEPS[_obToolStep].tool : null;
     if (_obStepTool && _obStepTool==='rezo') _obToolTooltipNext();
   }
-  libro.play().catch(()=>{});
+  rezoEl.play().catch(()=>{});
 }
 
-function onAudioEnd(){
-  vpUpd();
-  bgmBack();
-  // Los metros se acreditan por la pista que terminó (audioTool), nunca por el texto
-  // que el usuario tenga abierto en ese momento (tool), que puede ser otro.
-  if(!audioTool||awd.has(audioTool))return;
-  awd.add(audioTool);
-  const tm={contemplar:MR_CONT,rezo:MR_REZO,canto:MR_CANTO}[audioTool];
-  if(tm){if(!_freeNoGana){addMeters(tm);showSlide(tm,TN[audioTool]);}}
+/* Los metros se acreditan por la pista que terminó, nunca por el texto que el usuario
+   tenga abierto en ese momento, que puede ser otro. */
+function premiar(t){
+  if(!t||awd.has(t))return;
+  awd.add(t);
+  const tm={contemplar:MR_CONT,rezo:MR_REZO,canto:MR_CANTO}[t];
+  if(tm){if(!_freeNoGana){addMeters(tm);showSlide(tm,TN[t]);}}
 }
 
 /* ─── BGM con Web Audio API (funciona en iOS standalone) ─── */
@@ -2129,7 +2147,7 @@ function initSwipe(){
 let _exitPend=null;
 
 function salirDeOrar(){
-  if(libro){libro.pause();libro.src='';}
+  pausarTodo();
   if(bgmEl)bgmEl.pause();
   const dest=_exitPend||'index.html';
   _exitPend=null;
@@ -2140,7 +2158,7 @@ function salirDeOrar(){
 }
 function salirConAviso(pg){
   _exitPend=pg||'index.html';
-  if(libro && !libro.paused){ $('exit-modal').classList.add('open'); return true; }
+  if(algoSonando()){ $('exit-modal').classList.add('open'); return true; }
   salirDeOrar();
   return false;
 }
