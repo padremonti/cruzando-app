@@ -109,13 +109,15 @@
 .light .premium-card.selected { border-color:var(--orange); }
 .light .code-input { background:var(--bg2); }
 
-html { font-size:18px; }
+/* overscroll-behavior mata el swipe-atrás de Chrome/Android; en iOS lo bloquea el guard de bordes */
+html { font-size:18px; overscroll-behavior:none; }
 body {
   font-family:'Inter',system-ui,sans-serif;
   background:var(--bg); color:var(--text);
   line-height:1.6; min-height:100dvh;
   -webkit-font-smoothing:antialiased;
   transition:background 0.35s, color 0.35s;
+  overscroll-behavior:none; touch-action:pan-y;
 }
 .shell { max-width:480px; margin:0 auto; min-height:100dvh; position:relative; overflow:hidden; padding-bottom:72px; }
 
@@ -2720,9 +2722,22 @@ window.abrirModalTaller = function() {
 };
 
 // ── Banner "Tu Camino" ───────────────────────────────────────────
+// orar.html lee ?misterio= directamente; audio.html necesita ?nivel=&cuaderno=&misterio= juntos
+function bookmarkUrl(bookmark) {
+  if (!bookmark) return null;
+  var nivelId = String(bookmark.nivel).padStart(2,'0') + String(bookmark.cuaderno).padStart(2,'0');
+  return bookmark.modo === 'libro'
+    ? 'orar.html?c=' + nivelId + '&misterio=' + bookmark.misterio
+    : 'audio.html?nivel=' + bookmark.nivel + '&cuaderno=' + bookmark.cuaderno + '&misterio=' + bookmark.misterio;
+}
+
 function renderTuCamino(bookmark, progreso, user) {
   var wrap = document.getElementById('tu-camino-wrap');
   if (!wrap) return;
+
+  // Destino del swipe a la izquierda (ver el bloque de gestos): el mismo que "Continuar
+  // donde lo dejé". Sin bookmark queda en null y el gesto no hace nada.
+  window._sessionUrl = bookmarkUrl(bookmark);
 
   var SVG_LIBRO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10.5 5.2 8.5 4.5 6 4.5C4.5 4.5 3.5 4.7 3 4.9V18.4C3.5 18.2 4.5 18 6 18C8.5 18 10.5 18.7 12 20"/><path d="M12 6.5C13.5 5.2 15.5 4.5 18 4.5C19.5 4.5 20.5 4.7 21 4.9V18.4C20.5 18.2 19.5 18 18 18C15.5 18 13.5 18.7 12 20"/><path d="M12 6.5V20"/></svg>';
   var SVG_AUDIO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13V12C4 7.6 7.6 4 12 4C16.4 4 20 7.6 20 12V13"/><rect x="3" y="13" width="4" height="6" rx="1.5"/><rect x="17" y="13" width="4" height="6" rx="1.5"/></svg>';
@@ -2792,13 +2807,8 @@ function renderTuCamino(bookmark, progreso, user) {
   if (bc && bookmark) {
     bc.onclick = function() {
       playTap();
-      var nivelId = String(bookmark.nivel).padStart(2,'0') + String(bookmark.cuaderno).padStart(2,'0');
-      // orar.html lee ?misterio= directamente; audio.html necesita ?nivel=&cuaderno=&misterio= juntos
-      var url = bookmark.modo === 'libro'
-        ? 'orar.html?c=' + nivelId + '&misterio=' + bookmark.misterio
-        : 'audio.html?nivel=' + bookmark.nivel + '&cuaderno=' + bookmark.cuaderno + '&misterio=' + bookmark.misterio;
       wrap.innerHTML = '';
-      navigateTo(url);
+      navigateTo(bookmarkUrl(bookmark));
     };
   }
 
@@ -3281,6 +3291,49 @@ window._goToFreeActiveMisterio = function() {
       sheet.style.transform = '';
     }
     dragging = false;
+  }, { passive: true });
+})();
+
+/* ══ GESTOS ══
+   iOS navega atrás/adelante con el swipe desde los bordes. Ese gesto se llevaba al usuario
+   fuera de la app (o a una entrada muerta del historial), así que lo cancelamos y ponemos
+   en su lugar un gesto propio y fiable: swipe a la izquierda = volver a la sesión, al
+   mismo destino que el botón "Continuar donde lo dejé". */
+(function() {
+  var EDGE = 28, MAXMS = 500, MINDX = 70;
+
+  document.addEventListener('touchstart', function(e) {
+    if (e.touches.length !== 1) return;
+    var x = e.touches[0].clientX;
+    if (x > EDGE && x < window.innerWidth - EDGE) return;
+    // Los controles que viven pegados al borde deben seguir respondiendo
+    if (e.target.closest && e.target.closest('button,a,input,textarea,select,label')) return;
+    e.preventDefault();
+  }, { passive: false });
+
+  function overlayAbierto() {
+    var pop = document.getElementById('popup-overlay');
+    var dr  = document.getElementById('drawer');
+    var rz  = document.getElementById('rezar-modal');
+    if (pop && pop.classList.contains('open')) return true;
+    if (dr  && dr.classList.contains('open'))  return true;
+    if (rz  && rz.style.display === 'flex')    return true;
+    return !!document.querySelector('.modal-overlay.open');
+  }
+
+  var sx = 0, sy = 0, st = 0, ok = false;
+  document.addEventListener('touchstart', function(e) {
+    ok = e.touches.length === 1 && !overlayAbierto();
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY; st = e.timeStamp;
+  }, { passive: true });
+  document.addEventListener('touchend', function(e) {
+    if (!ok) return;
+    ok = false;
+    if (!window._sessionUrl) return;   // sin bookmark no hay sesión a la que volver
+    if (e.timeStamp - st > MAXMS) return;
+    var dx = e.changedTouches[0].clientX - sx;
+    var dy = e.changedTouches[0].clientY - sy;
+    if (dx < -MINDX && Math.abs(dx) > Math.abs(dy) * 1.5) navigateTo(window._sessionUrl);
   }, { passive: true });
 })();
 
