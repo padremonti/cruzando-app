@@ -69,10 +69,11 @@ window._fbFirestore = {
   --brand:#02BBE0;--brand-soft:#43DDF8;
   --brand-ultra:rgba(2,187,224,0.12);--brand-glow:rgba(2,187,224,0.25);
 }
-html{font-size:18px}
+/* overscroll-behavior mata el swipe-atrás de Chrome/Android; en iOS lo bloquea initEdgeGuard() */
+html{font-size:18px;overscroll-behavior:none}
 body{
   font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);
-  line-height:1.7;min-height:100dvh;-webkit-font-smoothing:antialiased;
+  line-height:1.7;min-height:100dvh;-webkit-font-smoothing:antialiased;overscroll-behavior:none;
   transition:background 0.4s,color 0.4s;
   background-image:
     url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/></filter><rect width='200' height='200' filter='url(%23n)' opacity='0.08'/></svg>"),
@@ -88,7 +89,9 @@ body{
 .shell{max-width:480px;margin:0 auto;min-height:100dvh;position:relative;padding-bottom:72px}
 .screen{display:none}
 .screen.active{display:block}
-#scr-orar.active{display:flex;flex-direction:column;height:100dvh;overflow:hidden;padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))}
+/* pan-y: el arrastre horizontal no es una panorámica del navegador (que dispararía su
+   navegación); los swipes de la sesión los interpretamos nosotros en initSwipe(). */
+#scr-orar.active{display:flex;flex-direction:column;height:100dvh;overflow:hidden;touch-action:pan-y;padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))}
 
 /* ── Header (home + micro) ── */
 .header{
@@ -2083,32 +2086,80 @@ function goToolAdj(dir){
 }
 
 /* ─── SWIPE + INIT ─── */
+const SWIPE_EDGE=28;    // franja de borde que WebKit reserva para su gesto de atrás/adelante
+const SWIPE_MAXMS=500;  // más lento que esto no es un swipe, es un arrastre
+
+/* iOS dispara "atrás" con el swipe desde el borde: nos saca de la sesión, corta el audio
+   y recarga Firebase. Se cancela con preventDefault en un touchstart NO pasivo. Los toques
+   sobre controles se dejan pasar: la flecha de Misterio anterior vive dentro de la franja. */
+function initEdgeGuard(){
+  document.addEventListener('touchstart',function(e){
+    if(e.touches.length!==1)return;
+    const x=e.touches[0].clientX;
+    if(x>SWIPE_EDGE && x<window.innerWidth-SWIPE_EDGE)return;
+    if(e.target.closest && e.target.closest('button,a,input,textarea,select,label'))return;
+    e.preventDefault();
+  },{passive:false});
+}
+
+/* Red de seguridad: si el gesto del sistema (o el botón atrás de Android) se cuela igual,
+   no dejamos que la página se abandone a ciegas. Con el popup abierto lo cerramos y nos
+   quedamos; si no, salimos a index.html por la ruta propia de la app. */
+function initHistoryTrap(){
+  const guard=()=>history.pushState({cz:1},'',location.href);
+  guard();
+  window.addEventListener('popstate',function(){
+    if($('tool-popup').classList.contains('open')){
+      closeToolPopup();
+      guard();
+      return;
+    }
+    if(history.length>2){
+      // Volvemos a la entrada de index que ya existe: así el swipe hacia adelante
+      // devuelve al usuario a la sesión en vez de dejarlo en un callejón.
+      if(libro){libro.pause();libro.src='';}
+      if(bgmEl)bgmEl.pause();
+      history.back();
+    }else{
+      goTo('index.html');   // orar.html se abrió directo: no hay adónde retroceder
+    }
+  });
+}
+
 function initSwipe(){
-  let sx=0,sy=0;const pp=$('tool-popup');
-  pp.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;e.stopPropagation();},{passive:true});
+  // Popup: swipe horizontal = herramienta anterior / siguiente
+  let sx=0,sy=0,st=0,sOk=false;const pp=$('tool-popup');
+  pp.addEventListener('touchstart',e=>{
+    const t=e.touches[0];
+    sx=t.clientX;sy=t.clientY;st=e.timeStamp;
+    sOk=e.touches.length===1 && sx>SWIPE_EDGE && sx<window.innerWidth-SWIPE_EDGE;
+    e.stopPropagation();
+  },{passive:true});
   pp.addEventListener('touchend',e=>{
+    e.stopPropagation();
+    if(!sOk)return;
     const dx=e.changedTouches[0].clientX-sx;
     const dy=e.changedTouches[0].clientY-sy;
-    e.stopPropagation();
+    if(e.timeStamp-st>SWIPE_MAXMS)return;
     if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)*1.5){goToolAdj(dx<0?1:-1);}
   },{passive:true});
 
-  // scr-home ya no existe; el swipe horizontal desde scr-orar lleva a index.html
-  let hsx=0;const orarScr=$('scr-orar');
-  orarScr.addEventListener('touchstart',e=>{hsx=e.touches[0].clientX;},{passive:true});
-  orarScr.addEventListener('touchend',e=>{
-    if(e.changedTouches[0].clientX-hsx>80)goTo('index.html');
-  },{passive:true});
-
-  // Swipe vertical en la sesión: arriba → muestra nav, abajo → oculta
-  let nvY=0,nvX=0,navT=null;
+  // Sesión: swipe vertical = mostrar / ocultar la nav bar. El horizontal ya no navega:
+  // duplicaba el gesto de "atrás" del sistema y ambos se disparaban a la vez.
+  let nvX=0,nvY=0,nvT=0,nvOk=false,navT=null;
   function showAppNav(){$('app-nav').classList.add('visible');clearTimeout(navT);navT=setTimeout(()=>$('app-nav').classList.remove('visible'),3500);}
   function hideAppNav(){$('app-nav').classList.remove('visible');clearTimeout(navT);}
   const scr=$('scr-orar');
-  scr.addEventListener('touchstart',e=>{nvY=e.touches[0].clientY;nvX=e.touches[0].clientX;},{passive:true});
+  scr.addEventListener('touchstart',e=>{
+    const t=e.touches[0];
+    nvX=t.clientX;nvY=t.clientY;nvT=e.timeStamp;
+    nvOk=e.touches.length===1 && nvX>SWIPE_EDGE && nvX<window.innerWidth-SWIPE_EDGE;
+  },{passive:true});
   scr.addEventListener('touchend',e=>{
-    const dy=e.changedTouches[0].clientY-nvY;
+    if(!nvOk)return;
     const dx=e.changedTouches[0].clientX-nvX;
+    const dy=e.changedTouches[0].clientY-nvY;
+    if(e.timeStamp-nvT>SWIPE_MAXMS)return;
     if(Math.abs(dy)>50&&Math.abs(dy)>Math.abs(dx)*1.5){
       if(dy<0)showAppNav();else hideAppNav();
     }
@@ -2136,6 +2187,8 @@ bgmOn=prefs().bgm!==false;
 loadBeadSync();
 initBtns();
 initSwipe();
+initEdgeGuard();
+initHistoryTrap();
 initAuth();
 }());
 </script>
