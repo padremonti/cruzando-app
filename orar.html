@@ -69,11 +69,10 @@ window._fbFirestore = {
   --brand:#02BBE0;--brand-soft:#43DDF8;
   --brand-ultra:rgba(2,187,224,0.12);--brand-glow:rgba(2,187,224,0.25);
 }
-/* overscroll-behavior mata el swipe-atrás de Chrome/Android; en iOS lo bloquea initEdgeGuard() */
-html{font-size:18px;overscroll-behavior:none}
+html{font-size:18px}
 body{
   font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);
-  line-height:1.7;min-height:100dvh;-webkit-font-smoothing:antialiased;overscroll-behavior:none;
+  line-height:1.7;min-height:100dvh;-webkit-font-smoothing:antialiased;
   transition:background 0.4s,color 0.4s;
   background-image:
     url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/></filter><rect width='200' height='200' filter='url(%23n)' opacity='0.08'/></svg>"),
@@ -457,6 +456,17 @@ body.light .popup-close-bottom{border-color:var(--border);color:var(--text-dim)}
 .amen-btn.done{background:var(--green)}
 /* Cierre de la oración: mismo formato que .amen-btn, pero es palabra, no botón */
 .amen-word{display:block;width:100%;margin-top:24px;padding:18px;border-radius:16px;font-family:'Cormorant Garamond',Georgia,serif;font-size:1.6rem;font-weight:600;background:var(--lvl-bold);color:#fff;letter-spacing:1px;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,0.12)}
+/* ── Modal de salida (mismo lenguaje que rezar.html) ── */
+.exit-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);display:none;align-items:center;justify-content:center;z-index:300;padding:24px}
+.exit-modal-overlay.open{display:flex}
+.exit-modal-box{background:var(--card);border-radius:20px;border:1px solid var(--border);padding:28px 24px;width:100%;max-width:320px;text-align:center}
+.exit-modal-title{font-size:18px;font-weight:800;color:var(--text);margin-bottom:8px}
+.exit-modal-sub{font-size:14px;color:var(--text-soft);line-height:1.6;margin-bottom:22px}
+.exit-modal-btns{display:flex;gap:10px}
+.exit-btn-cancel{flex:1;padding:12px;border-radius:12px;border:1.5px solid var(--border);background:transparent;font-family:inherit;font-size:0.85rem;font-weight:600;color:var(--text-soft);cursor:pointer;transition:all 0.2s}
+.exit-btn-confirm{flex:1;padding:12px;border-radius:12px;border:none;background:#C0392B;font-family:inherit;font-size:0.85rem;font-weight:600;color:#fff;cursor:pointer;transition:all 0.2s}
+.exit-btn-confirm:active,.exit-btn-cancel:active{transform:scale(0.96)}
+
 .mystery-done-pill{display:flex;align-items:center;gap:10px;padding:14px 16px;background:var(--green-soft);border-radius:14px;border:1.5px solid rgba(52,168,83,0.2);margin-top:20px}
 .mystery-done-pill .done-check{color:var(--green);font-size:1.2rem}
 .mystery-done-pill .done-txt{font-size:0.82rem;font-weight:600;color:var(--green)}
@@ -932,6 +942,19 @@ body.light .popup-close-bottom{border-color:var(--border);color:var(--text-dim)}
     <div class="meters-float" id="meters-float-text"></div>
   </div>
 
+  <!-- Salir con la sesión en curso (mismo diálogo que rezar.html) -->
+  <div id="exit-modal" class="exit-modal-overlay">
+    <div class="exit-modal-box">
+      <div style="font-size:32px;margin-bottom:12px">⏸</div>
+      <div class="exit-modal-title">Sesión en curso</div>
+      <div class="exit-modal-sub">¿Deseas salir? Se detendrá el audio<br>de esta sesión.</div>
+      <div class="exit-modal-btns">
+        <button class="exit-btn-cancel"  onclick="window._exitCancel()">Seguir orando</button>
+        <button class="exit-btn-confirm" onclick="window._exitConfirm()">Salir</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Bottom nav -->
   <nav class="app-nav" id="app-nav">
 
@@ -966,7 +989,7 @@ body.light .popup-close-bottom{border-color:var(--border);color:var(--text-dim)}
       <span class="app-nav-label">Audio</span>
     </button>
 
-    <button class="app-nav-item" onclick="navTap(this);goTo('index.html')">
+    <button class="app-nav-item" onclick="navTap(this);salirConAviso('index.html')">
       <div class="app-nav-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
@@ -998,6 +1021,7 @@ body.light .popup-close-bottom{border-color:var(--border);color:var(--text-dim)}
 </div><!-- /shell -->
 
 <script src="utils.js"></script>
+<script src="gestures.js"></script>
 <script>
 (function(){
 'use strict';
@@ -1073,7 +1097,7 @@ function updateToggleHref(){
   if(tab) tab.href=`audio.html?nivel=${nivel}&cuaderno=${cua}&misterio=${currentGlobalMystery}`;
 }
 function goPrevMystery(){
-  if(currentGlobalMystery<=1){goTo('index.html');return;}
+  if(currentGlobalMystery<=1){salirConAviso('index.html');return;}   // salir del primero = salir de la sesión
   const{block,idx}=getMysteryBlock(--currentGlobalMystery);
   loadMystery(block,idx);
 }
@@ -2081,85 +2105,54 @@ function goToolAdj(dir){
   else openToolPopup(TOOL_ORDER[n]);
 }
 
-/* ─── SWIPE + INIT ─── */
-const SWIPE_EDGE=28;    // franja de borde que WebKit reserva para su gesto de atrás/adelante
-const SWIPE_MAXMS=500;  // más lento que esto no es un swipe, es un arrastre
-
-/* iOS dispara "atrás" con el swipe desde el borde: nos saca de la sesión, corta el audio
-   y recarga Firebase. Se cancela con preventDefault en un touchstart NO pasivo. Los toques
-   sobre controles se dejan pasar: la flecha de Misterio anterior vive dentro de la franja. */
-function initEdgeGuard(){
-  document.addEventListener('touchstart',function(e){
-    if(e.touches.length!==1)return;
-    const x=e.touches[0].clientX;
-    if(x>SWIPE_EDGE && x<window.innerWidth-SWIPE_EDGE)return;
-    if(e.target.closest && e.target.closest('button,a,input,textarea,select,label'))return;
-    e.preventDefault();
-  },{passive:false});
-}
-
-/* Red de seguridad: si el gesto del sistema (o el botón atrás de Android) se cuela igual,
-   no dejamos que la página se abandone a ciegas. Con el popup abierto lo cerramos y nos
-   quedamos; si no, salimos a index.html por la ruta propia de la app. */
-function initHistoryTrap(){
-  const guard=()=>history.pushState({cz:1},'',location.href);
-  guard();
-  window.addEventListener('popstate',function(){
-    if($('tool-popup').classList.contains('open')){
-      closeToolPopup();
-      guard();
-      return;
-    }
-    if(history.length>2){
-      // Volvemos a la entrada de index que ya existe: así el swipe hacia adelante
-      // devuelve al usuario a la sesión en vez de dejarlo en un callejón.
-      if(libro){libro.pause();libro.src='';}
-      if(bgmEl)bgmEl.pause();
-      history.back();
-    }else{
-      goTo('index.html');   // orar.html se abrió directo: no hay adónde retroceder
-    }
-  });
-}
-
+/* ─── SWIPE + INIT ─── (gestos comunes en gestures.js) */
 function initSwipe(){
-  // Popup: swipe horizontal = herramienta anterior / siguiente
-  let sx=0,sy=0,st=0,sOk=false;const pp=$('tool-popup');
-  pp.addEventListener('touchstart',e=>{
-    const t=e.touches[0];
-    sx=t.clientX;sy=t.clientY;st=e.timeStamp;
-    sOk=e.touches.length===1 && sx>SWIPE_EDGE && sx<window.innerWidth-SWIPE_EDGE;
-    e.stopPropagation();
-  },{passive:true});
-  pp.addEventListener('touchend',e=>{
-    e.stopPropagation();
-    if(!sOk)return;
-    const dx=e.changedTouches[0].clientX-sx;
-    const dy=e.changedTouches[0].clientY-sy;
-    if(e.timeStamp-st>SWIPE_MAXMS)return;
-    if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)*1.5){goToolAdj(dx<0?1:-1);}
-  },{passive:true});
-
-  // Sesión: swipe vertical = mostrar / ocultar la nav bar. El horizontal ya no navega:
-  // duplicaba el gesto de "atrás" del sistema y ambos se disparaban a la vez.
-  let nvX=0,nvY=0,nvT=0,nvOk=false,navT=null;
+  let navT=null;
   function showAppNav(){$('app-nav').classList.add('visible');clearTimeout(navT);navT=setTimeout(()=>$('app-nav').classList.remove('visible'),3500);}
   function hideAppNav(){$('app-nav').classList.remove('visible');clearTimeout(navT);}
-  const scr=$('scr-orar');
-  scr.addEventListener('touchstart',e=>{
-    const t=e.touches[0];
-    nvX=t.clientX;nvY=t.clientY;nvT=e.timeStamp;
-    nvOk=e.touches.length===1 && nvX>SWIPE_EDGE && nvX<window.innerWidth-SWIPE_EDGE;
-  },{passive:true});
-  scr.addEventListener('touchend',e=>{
-    if(!nvOk)return;
-    const dx=e.changedTouches[0].clientX-nvX;
-    const dy=e.changedTouches[0].clientY-nvY;
-    if(e.timeStamp-nvT>SWIPE_MAXMS)return;
-    if(Math.abs(dy)>50&&Math.abs(dy)>Math.abs(dx)*1.5){
-      if(dy<0)showAppNav();else hideAppNav();
-    }
-  },{passive:true});
+
+  // Popup: swipe horizontal = herramienta anterior / siguiente. stop: el gesto no debe
+  // llegar además a scr-orar y mover la nav bar ni disparar el atrás.
+  CZGestures.swipe($('tool-popup'),{
+    stop:true, minDx:40,
+    onLeft: ()=>goToolAdj(1),
+    onRight:()=>goToolAdj(-1)
+  });
+
+  // Sesión: vertical = nav bar; derecha = atrás de la app (con aviso si hay audio sonando).
+  CZGestures.swipe($('scr-orar'),{ onUp:showAppNav, onDown:hideAppNav, onRight:backDeOrar });
+}
+
+/* ─── SALIDA ───
+   Nunca se abandona una sesión con audio sonando sin preguntar: el swipe a la derecha, el
+   atrás del sistema y el botón Inicio pasan todos por aquí. Sin audio, la salida es directa. */
+let _exitPend=null;
+
+function salirDeOrar(){
+  if(libro){libro.pause();libro.src='';}
+  if(bgmEl)bgmEl.pause();
+  const dest=_exitPend||'index.html';
+  _exitPend=null;
+  // Volvemos por la entrada de index que ya existe en el historial, así el gesto hacia
+  // adelante devuelve al usuario a la sesión en vez de dejarlo en un callejón.
+  if(dest==='index.html' && history.length>2) history.back();
+  else goTo(dest);
+}
+function salirConAviso(pg){
+  _exitPend=pg||'index.html';
+  if(libro && !libro.paused){ $('exit-modal').classList.add('open'); return true; }
+  salirDeOrar();
+  return false;
+}
+window.salirConAviso=salirConAviso;
+window._exitCancel=function(){ $('exit-modal').classList.remove('open'); _exitPend=null; };
+window._exitConfirm=function(){ $('exit-modal').classList.remove('open'); salirDeOrar(); };
+
+/* Atrás propio: cierra primero lo que esté abierto; si no hay nada, sale (con aviso). */
+function backDeOrar(){
+  if($('exit-modal').classList.contains('open')){ window._exitCancel(); return true; }
+  if($('tool-popup').classList.contains('open')){ closeToolPopup(); return true; }
+  return salirConAviso('index.html');
 }
 function initBtns(){
   document.querySelectorAll('.tool-btn').forEach(function(b){
@@ -2183,8 +2176,7 @@ bgmOn=prefs().bgm!==false;
 loadBeadSync();
 initBtns();
 initSwipe();
-initEdgeGuard();
-initHistoryTrap();
+CZGestures.init({ onBack: backDeOrar });
 initAuth();
 }());
 </script>

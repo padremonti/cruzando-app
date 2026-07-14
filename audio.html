@@ -1634,6 +1634,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 
 <!-- ── Firebase SDK ── -->
 <script src="utils.js"></script>
+<script src="gestures.js"></script>
 <script src="canto.js"></script>
 <script type="module">
 /* ══════════════════════════════════════════════
@@ -4305,39 +4306,34 @@ window.navGuardSeamless  = navGuardSeamless;
 // ════════════════════════════════════════════
 
 
-// Swipe horizontal sobre el hero: izquierda → siguiente, derecha → anterior
-// Swipe vertical en cualquier parte de la sesión: arriba → muestra nav, abajo → oculta
+// Gestos de la sesión (los comunes viven en gestures.js). El swipe vertical muestra/oculta
+// la nav bar; el horizontal no navega: es del gesto del sistema, y ese lo cancelamos.
 (function(){
   let navT = null;
   function showAppNav(){ const n=$('app-nav'); if(!n)return; n.classList.add('visible'); clearTimeout(navT); navT=setTimeout(()=>n.classList.remove('visible'),3500); }
   function hideAppNav(){ const n=$('app-nav'); if(!n)return; n.classList.remove('visible'); clearTimeout(navT); }
+  const epilogoAbierto = () => !!($('scr-complete') && $('scr-complete').classList.contains('open'));
 
-  // Horizontal swipe (y navegación vertical) solo en el hero
+  /* Atrás propio: cierra lo que esté abierto y, si no hay nada, pasa por navGuard — el mismo
+     guardián del botón Inicio, que confirma antes de abandonar una sesión en curso. */
+  function backDeAudio(){
+    const nc = document.getElementById('nav-confirm-overlay');
+    if (nc && nc.classList.contains('open')) { closeNavConfirm(); return true; }
+    const mnc = document.getElementById('mystery-nav-confirm');
+    if (mnc && mnc.style.pointerEvents === 'auto') { hideNavConfirm(); return true; }
+    const mo = $('modal-overlay');
+    if (mo && mo.classList.contains('open')) { closeModal(); return true; }
+    navGuard('index.html');
+    return !!(nc && nc.classList.contains('open'));   // true si navGuard pidió confirmación (nos quedamos)
+  }
+
+  const gestos = { ignore: epilogoAbierto, onUp: showAppNav, onDown: hideAppNav, onRight: backDeAudio };
   const hero = document.querySelector('.hero-img-wrap');
-  if (hero) {
-    let sy = 0;
-    hero.addEventListener('touchstart', e => { sy=e.touches[0].clientY; }, { passive: true });
-    hero.addEventListener('touchend', e => {
-      if ($('scr-complete') && $('scr-complete').classList.contains('open')) return;
-      const dy = e.changedTouches[0].clientY - sy;
-      if (Math.abs(dy) > 50) { if (dy < 0) showAppNav(); else hideAppNav(); }
-    }, { passive: true });
-  }
-
-  // Swipe vertical en los controles (zona inferior) para mostrar nav
+  if (hero) CZGestures.swipe(hero, gestos);
   const scr = document.getElementById('scr-session');
-  if (scr) {
-    let cy = 0, cx = 0;
-    scr.addEventListener('touchstart', e => { cy=e.touches[0].clientY; cx=e.touches[0].clientX; }, { passive: true });
-    scr.addEventListener('touchend', e => {
-      if ($('scr-complete') && $('scr-complete').classList.contains('open')) return;
-      const dy = e.changedTouches[0].clientY - cy;
-      const dx = e.changedTouches[0].clientX - cx;
-      if (Math.abs(dy) > 50 && Math.abs(dy) > Math.abs(dx) * 1.5) {
-        if (dy < 0) showAppNav(); else hideAppNav();
-      }
-    }, { passive: true });
-  }
+  if (scr)  CZGestures.swipe(scr,  gestos);
+
+  CZGestures.init({ onBack: backDeAudio });
 })();
 
 // iOS: reanudar el BGM cuando la pantalla se desbloquea

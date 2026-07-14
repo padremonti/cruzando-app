@@ -531,6 +531,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   </button>
 </nav>
 
+<script src="gestures.js"></script>
 <script>
 (function(){
   'use strict';
@@ -1385,6 +1386,14 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     elm.classList.remove('tapped'); void elm.offsetWidth; elm.classList.add('tapped');
     setTimeout(function(){ elm.classList.remove('tapped'); }, 400);
   };
+
+  // ── Gestos (comunes en gestures.js) ─────────────────────────────
+  // El swipe horizontal no navega aquí: los bordes quedan bloqueados y el atrás propio
+  // cierra el velo de foco si está abierto; si no, vuelve al inicio.
+  CZGestures.init({ onBack: function(){
+    if ($('foco')) { cerrarFoco(); return true; }
+    window.navTo('index.html');
+  }});
 
   // ── Arranque ────────────────────────────────────────────────────
   cargar();

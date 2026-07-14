@@ -268,6 +268,7 @@ body.light .q-textarea{background:rgba(255,255,255,.6);border-color:rgba(10,37,4
   <audio id="audio"></audio>
 </div>
 
+<script src="gestures.js"></script>
 <script>
 /* ═══════════ CONFIG · todo se deriva del mid (cero hardcode) ═══════════ */
 const R2_ILU = 'https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev';
@@ -678,6 +679,15 @@ $('exitStay').onclick=cerrarSalida;
 $('exitLeave').onclick=volver;                    // navegación original, diferida tras confirmar
 $('exitPop').onclick=function(e){ if(e.target===$('exitPop')) cerrarSalida(); };   // tap-fuera = Cancelar
 $('backBtn').onclick=abrirSalida;                 // intercepta el atrás (antes: =volver)
+
+/* El gesto de atrás de iOS se saltaba este diálogo y abandonaba la oración con el audio a
+   medias. Con gestures.js el gesto queda bloqueado y el atrás del sistema hace lo mismo
+   que el botón atrás de la app: pausar y preguntar. Aquí nunca se sale sin confirmar. */
+CZGestures.init({ onBack: function(){
+  if ($('exitPop').classList.contains('show')) cerrarSalida();
+  else abrirSalida();
+  return true;
+}});
 
 let isLight = localStorage.getItem('cruzando_theme')==='light';
 function applyTheme(light){

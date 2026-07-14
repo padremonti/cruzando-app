@@ -735,6 +735,7 @@ body.light .tool-btn svg { background: rgba(0,0,0,0.04); }
 </style>
 <script src="plan-utils.js"></script>
 <script src="utils.js"></script>
+<script src="gestures.js"></script>
 </head>
 <body>
 
@@ -1351,16 +1352,15 @@ function setupCantoMediaSession(canto) {
   });
 })();
 
-// Swipe en el hero
+// Swipe en el hero: canto anterior / siguiente (dominancia y tiempo los pone CZGestures,
+// para que un scroll con deriva lateral no cambie de canto)
 (function() {
-  const hero = document.getElementById('cantos-hero');
-  let tx0 = 0;
-  hero.addEventListener('touchstart', e => { tx0 = e.touches[0].clientX; }, { passive: true });
-  hero.addEventListener('touchend',   e => {
-    const dx = e.changedTouches[0].clientX - tx0;
-    if (Math.abs(dx) < 40 || letraOpen) return;
-    heroNav(dx < 0 ? 1 : -1);
-  }, { passive: true });
+  CZGestures.swipe(document.getElementById('cantos-hero'), {
+    minDx: 40,
+    ignore: () => letraOpen,
+    onLeft:  () => heroNav(1),
+    onRight: () => heroNav(-1)
+  });
 })();
 
 // Estado de ordenación y navegación
@@ -1910,20 +1910,16 @@ async function backfillCantos(uid) {
     n.classList.remove('visible');
     clearTimeout(navTimer);
   }
-  let startY = 0, startX = 0;
-  document.addEventListener('touchstart', e => {
-    startY = e.touches[0].clientY;
-    startX = e.touches[0].clientX;
-  }, { passive: true });
-  document.addEventListener('touchend', e => {
-    if (letraOpen) return;
-    const dy = e.changedTouches[0].clientY - startY;
-    const dx = e.changedTouches[0].clientX - startX;
-    if (Math.abs(dy) > 50 && Math.abs(dy) > Math.abs(dx) * 1.5) {
-      if (dy < 0) showAppNav();
-      else hideAppNav();
-    }
-  }, { passive: true });
+  CZGestures.swipe(document, { ignore: () => letraOpen, onUp: showAppNav, onDown: hideAppNav });
+
+  /* Atrás propio: cierra la hoja de letra o la playlist si están abiertas; si no,
+     sale a index.html. El horizontal es de los cantos, no del historial. */
+  CZGestures.init({ onBack: () => {
+    if (letraOpen) { closeLetraSheet(); return true; }
+    const pl = document.getElementById('playlist-sheet');
+    if (pl && pl.classList.contains('open')) { closePlaylistPopup(); return true; }
+    goTo('index.html');
+  }});
 })();
 
 // ── Textos de los interstitials (coinciden con los mp3) ──────

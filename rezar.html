@@ -46,6 +46,7 @@ window._fbFirestore = {
 </script>
 <script src="plan-utils.js"></script>
 <script src="utils.js"></script>
+<script src="gestures.js"></script>
 <script src="canto.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -2364,38 +2365,37 @@ function hideAppNav(){
   const nav=$('app-nav');if(nav)nav.classList.remove('visible');
   clearTimeout(navHideTimer);
 }
+/* Gestos de la sesión (los comunes viven en gestures.js) */
 function initNavSwipe(){
-  let sy=0,sx=0;
-  document.addEventListener('touchstart',e=>{sy=e.touches[0].clientY;sx=e.touches[0].clientX;},{passive:true});
-  document.addEventListener('touchend',e=>{
-    const dy=e.changedTouches[0].clientY-sy;
-    const dx=e.changedTouches[0].clientX-sx;
-    if(Math.abs(dy)>50&&Math.abs(dy)>Math.abs(dx)*1.5){
-      if(dy<0){
-        if($('tool-popup')?.classList.contains('open')){closeToolPopup();return;}
-        showAppNav();
-      }else{
-        hideAppNav();
-      }
-    }
-  },{passive:true});
+  CZGestures.swipe(document,{
+    onUp:()=>{
+      if($('tool-popup')?.classList.contains('open')){closeToolPopup();return;}
+      showAppNav();
+    },
+    onDown:hideAppNav,
+    onRight:backDeRezar        // swipe a la derecha = atrás de la app
+  });
+  CZGestures.init({ onBack:backDeRezar });
+}
+
+/* Atrás propio: cierra primero lo que esté abierto; si no, sale por safeGoTo, que con el
+   rezo sonando abre el diálogo "¿Deseas salir?" en vez de abandonar la sesión en silencio. */
+function backDeRezar(){
+  if($('exit-modal').classList.contains('open')){ window._exitCancel(); return true; }
+  if($('tool-popup')?.classList.contains('open')){ closeToolPopup(); return true; }
+  safeGoTo('index.html');
+  return $('exit-modal').classList.contains('open');
 }
 
 /* ─── SWIPE — popup (horizontal entre herramientas) ─── */
 function initPopupSwipe(){
-  let sx=0,sy=0;
-  const pp=$('tool-popup');
-  pp.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;e.stopPropagation();},{passive:true});
-  pp.addEventListener('touchend',e=>{
-    const dx=e.changedTouches[0].clientX-sx;
-    const dy=e.changedTouches[0].clientY-sy;
-    e.stopPropagation();
-    if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)*1.5){
-      const i=TOOL_ORDER_REZAR.indexOf(currentTool),n=i+(dx<0?1:-1);
-      if(n<0||n>=TOOL_ORDER_REZAR.length)closeToolPopup();
-      else openTool(TOOL_ORDER_REZAR[n]);
-    }
-  },{passive:true});
+  const adj=dir=>{
+    const i=TOOL_ORDER_REZAR.indexOf(currentTool),n=i+dir;
+    if(n<0||n>=TOOL_ORDER_REZAR.length)closeToolPopup();
+    else openTool(TOOL_ORDER_REZAR[n]);
+  };
+  // stop: el gesto no debe llegar además al swipe de la nav bar
+  CZGestures.swipe($('tool-popup'),{ stop:true, minDx:40, onLeft:()=>adj(1), onRight:()=>adj(-1) });
 }
 
 /* ═══════════════════════════════════════════════

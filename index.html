@@ -109,15 +109,14 @@
 .light .premium-card.selected { border-color:var(--orange); }
 .light .code-input { background:var(--bg2); }
 
-/* overscroll-behavior mata el swipe-atrás de Chrome/Android; en iOS lo bloquea el guard de bordes */
-html { font-size:18px; overscroll-behavior:none; }
+html { font-size:18px; }
 body {
   font-family:'Inter',system-ui,sans-serif;
   background:var(--bg); color:var(--text);
   line-height:1.6; min-height:100dvh;
   -webkit-font-smoothing:antialiased;
   transition:background 0.35s, color 0.35s;
-  overscroll-behavior:none; touch-action:pan-y;
+  touch-action:pan-y;   /* el arrastre horizontal lo interpreta CZGestures, no el navegador */
 }
 .shell { max-width:480px; margin:0 auto; min-height:100dvh; position:relative; overflow:hidden; padding-bottom:72px; }
 
@@ -1616,6 +1615,7 @@ body.hub-clean .hub-door-santuario { animation-delay:1.2s !important; }
 </div>
 
 <script src="utils.js"></script>
+<script src="gestures.js"></script>
 
 <script type="module">
 // ── Firebase SDK ──────────────────────────────────────────────────
@@ -3294,23 +3294,11 @@ window._goToFreeActiveMisterio = function() {
   }, { passive: true });
 })();
 
-/* ══ GESTOS ══
-   iOS navega atrás/adelante con el swipe desde los bordes. Ese gesto se llevaba al usuario
-   fuera de la app (o a una entrada muerta del historial), así que lo cancelamos y ponemos
-   en su lugar un gesto propio y fiable: swipe a la izquierda = volver a la sesión, al
-   mismo destino que el botón "Continuar donde lo dejé". */
+/* ══ GESTOS ══ (comunes en gestures.js)
+   El home es la salida de la app: el atrás solo cierra lo que esté abierto; si no hay nada,
+   se deja marchar. El swipe a la izquierda vuelve a la sesión, al mismo destino que el botón
+   "Continuar donde lo dejé" (window._sessionUrl, que publica renderTuCamino). */
 (function() {
-  var EDGE = 28, MAXMS = 500, MINDX = 70;
-
-  document.addEventListener('touchstart', function(e) {
-    if (e.touches.length !== 1) return;
-    var x = e.touches[0].clientX;
-    if (x > EDGE && x < window.innerWidth - EDGE) return;
-    // Los controles que viven pegados al borde deben seguir respondiendo
-    if (e.target.closest && e.target.closest('button,a,input,textarea,select,label')) return;
-    e.preventDefault();
-  }, { passive: false });
-
   function overlayAbierto() {
     var pop = document.getElementById('popup-overlay');
     var dr  = document.getElementById('drawer');
@@ -3321,20 +3309,26 @@ window._goToFreeActiveMisterio = function() {
     return !!document.querySelector('.modal-overlay.open');
   }
 
-  var sx = 0, sy = 0, st = 0, ok = false;
-  document.addEventListener('touchstart', function(e) {
-    ok = e.touches.length === 1 && !overlayAbierto();
-    sx = e.touches[0].clientX; sy = e.touches[0].clientY; st = e.timeStamp;
-  }, { passive: true });
-  document.addEventListener('touchend', function(e) {
-    if (!ok) return;
-    ok = false;
-    if (!window._sessionUrl) return;   // sin bookmark no hay sesión a la que volver
-    if (e.timeStamp - st > MAXMS) return;
-    var dx = e.changedTouches[0].clientX - sx;
-    var dy = e.changedTouches[0].clientY - sy;
-    if (dx < -MINDX && Math.abs(dx) > Math.abs(dy) * 1.5) navigateTo(window._sessionUrl);
-  }, { passive: true });
+  CZGestures.init({
+    onBack: function() {
+      var pop = document.getElementById('popup-overlay');
+      var dr  = document.getElementById('drawer');
+      var rz  = document.getElementById('rezar-modal');
+      var mod = document.querySelector('.modal-overlay.open');
+      if (pop && pop.classList.contains('open')) { closePopup(); return true; }
+      if (dr  && dr.classList.contains('open'))  { closeDrawer(); return true; }
+      if (rz  && rz.style.display === 'flex')    { window._cerrarRezarModal(); return true; }
+      if (mod) { mod.classList.remove('open'); return true; }
+      // Nada abierto: el home es la salida de la app, se deja marchar
+    }
+  });
+
+  CZGestures.swipe(document, {
+    ignore: overlayAbierto,
+    onLeft: function() {
+      if (window._sessionUrl) navigateTo(window._sessionUrl);   // sin bookmark no hay sesión
+    }
+  });
 })();
 
 
