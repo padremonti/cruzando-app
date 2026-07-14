@@ -338,24 +338,27 @@ body.light .misterio-subtitulo{color:#002931;text-shadow:0 0 8px rgba(255,255,25
 .hero-btn-left2{left:65px}   /* flecha Misterio anterior, a la derecha del BGM */
 .hero-btn-right2{right:65px} /* flecha Misterio siguiente, a la izquierda del Tema */
 .hero-btn.bgm-on{background:rgba(255,122,0,0.5);border-color:rgba(255,122,0,0.7)}
-/* ── Preparación en el hero (pill) ── */
-.prep-hero{position:absolute;top:14px;left:66px;right:66px;z-index:10}
-.prep-hero-btn{width:100%;height:54px;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 14px;background:rgba(var(--bg-rgb),0.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:2px solid var(--lvl-bold);border-radius:27px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.35)}
+/* ── Preparación en el hero (pill) — mismas medidas que audio.html: bajo la fila de
+   botones (top 14px + 43px de alto → arranca 7px por debajo), no sobre ella. ── */
+.prep-hero{position:absolute;top:calc(64px + env(safe-area-inset-top, 0px));left:40px;right:40px;z-index:10}
+.prep-hero-btn{width:100%;height:42px;display:flex;align-items:center;justify-content:center;gap:7px;padding:0 12px;background:rgba(var(--bg-rgb),0.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:2px solid var(--lvl-bold);border-radius:21px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.35)}
 .prep-hero-btn:active{opacity:0.7}
-.prep-hero-kicker{font-size:0.85rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--lvl-bold);flex-shrink:0}
-.prep-hero-name{font-size:1.15rem;font-weight:600;color:rgba(255,255,255,0.92);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prep-hero-kicker{font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--lvl-bold);flex-shrink:0}
+.prep-hero-name{font-size:0.82rem;font-weight:600;color:rgba(255,255,255,0.92);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* ══════════════════════════════════════
    ZONA B — Barra de herramientas
    ══════════════════════════════════════ */
+/* Flota sobre la imagen (como rezar.html y audio.html): sin tarjeta ni borde.
+   space-around en vez de gap fijo: con seis herramientas, un gap de 26px se desborda
+   en pantallas estrechas. */
 .tools-bar{
   position:fixed;bottom:0;left:50%;transform:translateX(-50%);
   width:100%;max-width:480px;
   z-index:5;
   display:flex;justify-content:space-around;align-items:center;
-  padding:8px 12px calc(env(safe-area-inset-bottom,8px) + 10px);
-  background:var(--tools-bar-bg,var(--card));
-  border-top:1px solid var(--border);
+  padding:14px 12px calc(env(safe-area-inset-bottom,8px) + 16px);
+  background:transparent;
 }
 /* ── Variables de contraste para toolbar (dark default → light override) ── */
 :root{--tb-circle-bg:rgb(var(--bg-rgb));--tb-circle-border:rgba(255,255,255,0.45);--tb-icon:rgba(255,255,255,0.75);--tb-bead:rgba(255,255,255,0.22);--seg-idle:rgba(255,255,255,0.28)}
@@ -454,8 +457,13 @@ body.audio-playing .bead-pater.active{animation:beadPulseFilled .9s ease-in-out 
 body.light .popup-close-bottom{border-color:var(--border);color:var(--text-dim)}
 .amen-btn:active{transform:scale(0.96)}
 .amen-btn.done{background:var(--green)}
-/* Cierre de la oración: mismo formato que .amen-btn, pero es palabra, no botón */
-.amen-word{display:block;width:100%;margin-top:24px;padding:18px;border-radius:16px;font-family:'Cormorant Garamond',Georgia,serif;font-size:1.6rem;font-weight:600;background:var(--lvl-bold);color:#fff;letter-spacing:1px;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,0.12)}
+.amen-btn:disabled{opacity:0.55;cursor:default}
+/* Cierre de la oración: palabra, no botón. Sin recuadro ni fondo, para que nadie
+   la confunga con un control pulsable — el único botón es "Siguiente Misterio". */
+.amen-word{display:block;width:100%;margin-top:28px;font-family:'Cormorant Garamond',Georgia,serif;font-size:2rem;font-weight:600;color:var(--lvl-bold);letter-spacing:2px;text-align:center}
+/* El botón de avance: mismo bloque relleno, con tipografía algo menor porque su
+   etiqueta es larga y a 1.6rem se desborda en pantallas estrechas. */
+.amen-btn.next{margin-top:18px;font-size:1.25rem;letter-spacing:0.5px}
 /* ── Modal de salida (mismo lenguaje que rezar.html) ── */
 .exit-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);display:none;align-items:center;justify-content:center;z-index:300;padding:24px}
 .exit-modal-overlay.open{display:flex}
@@ -1057,7 +1065,6 @@ function applyBlockAccent(block){
   root.style.setProperty('--lvl-ultra',`rgba(${r},0.10)`);
 }
 const BFM = {gozosos:1,luminosos:6,dolorosos:11,gloriosos:16};
-const TBG = {gozosos:'var(--card)',luminosos:'var(--card)',dolorosos:'var(--card)',gloriosos:'var(--card)'};
 const TN  = {palabra:'La Palabra',contemplar:'Contemplar',rezo:'Rezo',canto:'Canto',escribir:'Escribir',suplica:'Súplica'};
 const TOOL_ORDER = ['palabra','contemplar','canto','escribir','suplica'];
 const QL  = ['Por María hacia Jesús:','Desde el Hijo hacia el Padre:','Hijos y hermanos en el Espíritu:'];
@@ -1077,6 +1084,7 @@ let totalM=0;
 let ans={0:'',1:'',2:''}, ansT={}, firstAns={0:false,1:false,2:false};
 let awd=new Set();
 let currentGlobalMystery=1;
+let _prepHideTimer=null;
 let _freeNoGana=false; // Política Free v2: true => suprime ganancia de metros (revisita en DEMO 0101)
 
 /* ─── MYSTERY NAV HELPERS ─── */
@@ -1543,7 +1551,6 @@ function renderSession(){
   $('hero-subtitulo').textContent=md?.subtitulo||'';
 
   applyBlockAccent(blk);
-  $('tools-bar').style.setProperty('--tools-bar-bg',TBG[blk]||'var(--card)');
   $('btn-bgm').classList.toggle('bgm-on',bgmOn);
   $('btn-bgm').onclick=toggleBgm;
   $('btn-theme').onclick=toggleTheme;
@@ -1551,17 +1558,19 @@ function renderSession(){
   // Botón Preparación en el hero
   const prepHero=$('prep-hero'),btnPrep=$('btn-prep-hero');
   if(prepHero&&btnPrep){
+    clearTimeout(_prepHideTimer);
     if(microDone&&microJ?.bloques?.[blk]){
       const sub=microJ.bloques[blk].subtitulo||BFN[blk]||blk;
       btnPrep.innerHTML='<span class="prep-hero-kicker">✦ Preparación</span><span class="prep-hero-name">'+sub+'</span>';
       btnPrep.onclick=renderMicro;
       prepHero.style.display='';
+      // Se retira solo tras 3.8s (igual que audio.html): recuerda que existe, no estorba
+      _prepHideTimer=setTimeout(()=>{ prepHero.style.display='none'; },3800);
     }else{
       prepHero.style.display='none';
     }
   }
 
-  // Después del banner: las barritas se ocultan si la Preparación está visible
   renderHeroBeads(prog?.progress?.[blk]);
 
   closeToolPopup();
@@ -1589,11 +1598,10 @@ function renderSession(){
 /* 5 barritas mudas = los 5 Misterios del set. Anteriores/hechas y actual en cian;
    pendientes en --seg-idle (por tema). Solo indicador: la navegación entre
    Misterios va por las flechas ‹ › del hero (window._gm).
-   No se ven mientras el banner de Preparación ocupa la franja central. */
+   Ya no se ocultan por la Preparación: el pill bajó y dejó libre la franja central. */
 function renderHeroBeads(dots){
   const el=$('hero-beads');if(!el)return;
-  const prep=$('prep-hero');
-  el.style.display=(prep&&prep.style.display!=='none')?'none':'';
+  el.style.display='';
   const d=dots||[null,null,null,null,null];
   el.innerHTML=Array.from({length:5},(_,i)=>{
     const state=i===bIdx?'active':d[i]?'done':'';
@@ -1667,7 +1675,7 @@ function populatePopup(t){
       const ultimo=currentGlobalMystery>=20;   // en el 20 no hay siguiente: se cierra el nivel
       bd.innerHTML=`<p class="popup-text">${esc(md?.intercesion||'Súplica no disponible')}</p>`+
         `<div class="amen-word">Amén</div>`+
-        `<button class="popup-close-bottom" id="btn-amen">${ultimo?'Terminar el nivel':'Siguiente Misterio'}</button>`;
+        `<button class="amen-btn next" id="btn-amen">${ultimo?'Terminar el nivel':'Siguiente Misterio →'}</button>`;
       $('btn-amen').onclick=async()=>{
         const b=$('btn-amen');
         if(b.disabled)return;   // el avance se dispara una sola vez
