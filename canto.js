@@ -1,8 +1,8 @@
 /* CruzAndo — canto.js
- * Motor de karaoke: letra .lrc sincronizada, fondo Ken Burns y botón "Saltar".
- * Único y compartido. Hoy lo usan el canto de cada Misterio (audio.html, rezar.html)
- * y las Letanías (letanias.js). Cualquier pantalla futura solo necesita cargarlo
- * y crear su instancia.
+ * Motor de karaoke: letra .lrc sincronizada, fondo Ken Burns y controles.
+ * Único y compartido. Lo usan el canto de cada Misterio (audio.html, rezar.html),
+ * las Letanías (letanias.js) y la galería de cantos (cantos.html). Cualquier pantalla
+ * futura solo necesita cargarlo y crear su instancia.
  *
  * El motor NO sabe qué es una sesión, un Misterio, un epílogo ni un metro: recibe
  * getters y callbacks, y devuelve el control a la página en los puntos de decisión.
@@ -20,16 +20,21 @@
  *     getTitulo: () => 'La Anunciación',
  *
  *     getLrcUrl:        () => 'https://…/M_1_1_1.lrc',
- *     getImgCandidates: () => ['https://…/a.webp', …],   // el carrusel a probar
+ *     getImgCandidates: () => ['https://…/a.webp', …],   // el carrusel
  *     getStillUrl:      () => 'https://…/P_1_1_1.webp',  // fondo si no hay carrusel
  *     imgTolerateGaps:  false,       // true: prueba todas y se queda con las que existan
+ *     imgTrust:         false,       // true: confía en la lista (manifiesto) y no la prueba
  *     loadFallbackLetra: async () => ({ letra, titulo }),  // opcional (degradación)
  *
  *     isOpenNow:   () => true,       // ¿debería estar abierta AHORA? (precarga tardía)
- *     onSkip:      () => {},         // qué hacer al saltar
+ *     onSkip:      () => {},         // opcional: si falta, no hay botón "Saltar"
  *     confirmSkip: () => true,       // opcional: pide confirmación antes de saltar
  *     onPlayPause: () => {},
- *     onBack10:    () => {},         // opcional; si falta, el motor hace el seek
+ *     onBack10:    () => {},         // opcional; si falta, el motor hace el seek −10s
+ *     onFwd10:     () => {},         // opcional; si falta, el motor hace el seek +10s
+ *     onPrev:      () => {},         // galería: pista anterior (habilita swipe →)
+ *     onNext:      () => {},         // galería: pista siguiente (habilita swipe ←)
+ *     controls:    ['back10','playpause'],   // orden de la barra; galería: prev/-10/play/+10/next
  *     onOpen:      () => {},         // opcional (p. ej. pausar la música de fondo)
  *     onClose:     () => {},         // opcional (p. ej. restaurarla)
  *   });
@@ -37,6 +42,7 @@
  *   await K.preload();
  *   K.open();                                          // en la sesión
  *   K.open({ instantSkip: true, allowNoLyrics: true }); // contenido opcional (epílogo)
+ *   K.reload({ dir: 'next' });                          // galería: cambia de canto sin cerrar
  *   K.close();
  */
 (function () {
@@ -47,6 +53,15 @@
   var reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
   var $ = function (id) { return document.getElementById(id); };
+
+  // Iconos de los controles opcionales (el −10s y el play/pausa se arman aparte,
+  // idénticos a como estaban, para no cambiar nada en las pantallas existentes).
+  var SVG = {
+    prev:  '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="18 20 8 12 18 4"/><rect x="5" y="4" width="2.4" height="16" rx="1"/></svg>',
+    next:  '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="6 4 16 12 6 20"/><rect x="16.6" y="4" width="2.4" height="16" rx="1"/></svg>',
+    back10:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M3 4v4.5h4.5"/><text x="12.5" y="16" font-size="8" font-weight="700" fill="currentColor" stroke="none" text-anchor="middle">10</text></svg>',
+    fwd10: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M21 4v4.5h-4.5"/><text x="11.5" y="16" font-size="8" font-weight="700" fill="currentColor" stroke="none" text-anchor="middle">10</text></svg>'
+  };
 
   /* ═══════════ Parser .lrc ═══════════
      Convierte [mm:ss.xx] a segundos; ignora metadatos ([ti:], [ar:]…) y directivas
@@ -98,6 +113,8 @@
   function create(cfg) {
     cfg = cfg || {};
     var P = cfg.id || 'canto';                 // prefijo de ids: cada instancia, el suyo
+    var hasSkip  = !!cfg.onSkip;               // sin onSkip no hay botón "Saltar" (galería)
+    var controls = cfg.controls || ['back10', 'playpause'];
 
     // Letra en memoria
     var lrcText = null, letraTxt = null, titulo = '', events = [];
@@ -108,10 +125,25 @@
 
     var id = {
       root:  'scr-' + P,             title: P + '-title',      lyrics: P + '-lyrics',
-      track: P + '-lyric-track',     skip:  P + '-skip',       back10: P + '-back10',
+      track: P + '-lyric-track',     skip:  P + '-skip',       stills: P + '-stills',
       pp:    P + '-play-pause',      ipl:   P + '-ico-play',   ips:    P + '-ico-pause',
-      layA:  P + '-layA',            layB:  P + '-layB',       kbA:    P + '-kbA',  kbB: P + '-kbB'
+      back10: P + '-back10',         fwd10: P + '-fwd10',      prev:   P + '-prev',  next: P + '-next',
+      layA:  P + '-layA',            layB:  P + '-layB',       kbA:    P + '-kbA',   kbB:  P + '-kbB'
     };
+
+    // Un botón de la barra por token. play/pausa lleva sus dos iconos (estado real).
+    function ctrlButton(tok) {
+      if (tok === 'playpause') {
+        return '<button class="canto-cbtn primary" id="' + id.pp + '" aria-label="Pausar">' +
+          '<svg id="' + id.ipl + '" width="26" height="26" viewBox="0 0 24 24" fill="currentColor" style="display:none"><polygon points="5 3 19 12 5 21 5 3"/></svg>' +
+          '<svg id="' + id.ips + '" width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>' +
+          '</button>';
+      }
+      var bid = { prev: id.prev, back10: id.back10, fwd10: id.fwd10, next: id.next }[tok];
+      var lbl = { prev: 'Pista anterior', back10: 'Retroceder 10 segundos', fwd10: 'Adelantar 10 segundos', next: 'Pista siguiente' }[tok];
+      if (!bid) return '';
+      return '<button class="canto-cbtn" id="' + bid + '" aria-label="' + lbl + '">' + SVG[tok] + '</button>';
+    }
 
     /* ─── Marcado (inyectado una vez) ─── */
     function mount() {
@@ -120,7 +152,7 @@
       el.id = id.root;
       el.className = 'karaoke';
       el.innerHTML =
-        '<div class="canto-stills">' +
+        '<div class="canto-stills" id="' + id.stills + '">' +
           '<div class="canto-lay front" id="' + id.layA + '"><div class="canto-kb" id="' + id.kbA + '"></div></div>' +
           '<div class="canto-lay"       id="' + id.layB + '"><div class="canto-kb" id="' + id.kbB + '"></div></div>' +
         '</div>' +
@@ -130,24 +162,30 @@
           '<div class="canto-title" id="' + id.title + '"></div>' +
         '</div>' +
         '<div class="canto-lyrics" id="' + id.lyrics + '"><div class="canto-track" id="' + id.track + '"></div></div>' +
-        '<button class="canto-skip" id="' + id.skip + '">' +
-          '<span>Saltar</span>' +
-          '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M5 4l10 8-10 8zM17 4h2v16h-2z"/></svg>' +
-        '</button>' +
-        '<div class="canto-ctrls">' +
-          '<button class="canto-cbtn" id="' + id.back10 + '" title="Retroceder 10 segundos" aria-label="Retroceder 10 segundos">' +
-            '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M3 4v4.5h4.5"/><text x="12.5" y="16" font-size="8" font-weight="700" fill="currentColor" stroke="none" text-anchor="middle">10</text></svg>' +
-          '</button>' +
-          '<button class="canto-cbtn primary" id="' + id.pp + '" aria-label="Pausar">' +
-            '<svg id="' + id.ipl + '" width="26" height="26" viewBox="0 0 24 24" fill="currentColor" style="display:none"><polygon points="5 3 19 12 5 21 5 3"/></svg>' +
-            '<svg id="' + id.ips + '" width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>' +
-          '</button>' +
-        '</div>';
+        (hasSkip
+          ? '<button class="canto-skip" id="' + id.skip + '"><span>Saltar</span>' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M5 4l10 8-10 8zM17 4h2v16h-2z"/></svg></button>'
+          : '') +
+        '<div class="canto-ctrls">' + controls.map(ctrlButton).join('') + '</div>';
       document.body.appendChild(el);
 
-      $(id.skip).onclick   = skipPressed;
-      $(id.pp).onclick     = function () { if (cfg.onPlayPause) cfg.onPlayPause(); };
-      $(id.back10).onclick = back10;
+      if (hasSkip && $(id.skip)) $(id.skip).onclick = skipPressed;
+      if ($(id.pp))     $(id.pp).onclick     = function () { if (cfg.onPlayPause) cfg.onPlayPause(); };
+      if ($(id.back10)) $(id.back10).onclick = back10;
+      if ($(id.fwd10))  $(id.fwd10).onclick  = fwd10;
+      if ($(id.prev))   $(id.prev).onclick   = function () { if (cfg.onPrev) cfg.onPrev(); };
+      if ($(id.next))   $(id.next).onclick   = function () { if (cfg.onNext) cfg.onNext(); };
+
+      // Swipe horizontal — solo en la galería (prev/next). SIN stop: el evento sigue
+      // burbujeando, así el edgeGuard de gestures.js conserva el swipe-atrás nativo y
+      // el swipe vertical llega al handler de la página (que lo ignora con el karaoke abierto).
+      // Convención igual que el hero de cantos.html: izquierda = siguiente, derecha = anterior.
+      if ((cfg.onPrev || cfg.onNext) && window.CZGestures) {
+        window.CZGestures.swipe(el, {
+          onLeft:  function () { if (cfg.onNext) cfg.onNext(); },
+          onRight: function () { if (cfg.onPrev) cfg.onPrev(); }
+        });
+      }
     }
 
     /* ─── Precarga: la letra del contenido en curso ─── */
@@ -171,18 +209,9 @@
         });
     }
 
-    /* ─── Abrir / cerrar ─── */
-    function openK(opts) {
-      opts = opts || {};
-      if (open) return;
-      var hasStatic = !!(letraTxt && letraTxt.trim());
-      // Sin .lrc y sin letra no abrimos nada: suena el audio y se ve lo que hubiera
-      // debajo. allowNoLyrics lo fuerza (el usuario ha pedido esta pantalla a propósito).
-      if (!lrcText && !hasStatic && !opts.allowNoLyrics) return;
-
-      isStatic    = !lrcText;
-      instantSkip = !!opts.instantSkip;
-      open        = true;
+    /* ─── Construir el contenido (título, letra, fondo) — reutilizado por open y reload ─── */
+    function buildContent() {
+      isStatic = !lrcText;
       curLine = -1; imgIdx = -1; imgUrls = []; frontA = true;
 
       $(id.title).textContent = titulo || (cfg.getTitulo ? cfg.getTitulo() : '') || '';
@@ -210,7 +239,21 @@
 
       // "Saltar" aparece tras SKIP_AT segundos escuchados. Con letra estática no hay nada
       // que sincronizar, y con instantSkip el contenido es opcional: desde el inicio.
-      $(id.skip).classList.toggle('show', isStatic || instantSkip);
+      if (hasSkip) $(id.skip).classList.toggle('show', isStatic || instantSkip);
+    }
+
+    /* ─── Abrir / cerrar ─── */
+    function openK(opts) {
+      opts = opts || {};
+      if (open) return;
+      var hasStatic = !!(letraTxt && letraTxt.trim());
+      // Sin .lrc y sin letra no abrimos nada: suena el audio y se ve lo que hubiera
+      // debajo. allowNoLyrics lo fuerza (el usuario ha pedido esta pantalla a propósito).
+      if (!lrcText && !hasStatic && !opts.allowNoLyrics) return;
+
+      instantSkip = !!opts.instantSkip;
+      open        = true;
+      buildContent();
 
       if (cfg.onOpen) cfg.onOpen();
       detectImages();
@@ -224,8 +267,46 @@
       open = false;
       cancelAnimationFrame(raf); raf = 0;
       $(id.root).classList.remove('open');
-      $(id.skip).classList.remove('show');
+      if (hasSkip) $(id.skip).classList.remove('show');
       if (cfg.onClose) cfg.onClose();
+    }
+
+    /* ─── Cambiar de contenido SIN cerrar (galería: prev/next) ───
+       La página ya cambió su audio antes de llamar; aquí se recarga la letra/fondo del
+       nuevo canto y se anima. dir 'next' desliza el fondo hacia la izquierda (avanza);
+       'prev' hacia la derecha. La letra hace cross-fade (deslizarla se lee mal). */
+    function reload(opts) {
+      opts = opts || {};
+      var dir = opts.dir === 'prev' ? 'prev' : 'next';
+      if (!open) return preload().then(function () { openK(opts); });
+      return preload().then(function () {
+        if (reduceMotion) { buildContent(); detectImages(); syncIcon(); return; }
+        slideSwap(dir);
+      });
+    }
+
+    function slideSwap(dir) {
+      var stills = $(id.stills), lyrics = $(id.lyrics);
+      var exitTo    = dir === 'prev' ? '100%'  : '-100%';
+      var enterFrom = dir === 'prev' ? '-100%' : '100%';
+
+      stills.style.transition = 'transform .22s ease';
+      stills.style.transform  = 'translateX(' + exitTo + ')';
+      lyrics.style.transition = 'opacity .16s ease';
+      lyrics.style.opacity    = '0';
+
+      setTimeout(function () {
+        buildContent();
+        detectImages();
+        // Entra desde el lado opuesto y se desliza a su sitio
+        stills.style.transition = 'none';
+        stills.style.transform  = 'translateX(' + enterFrom + ')';
+        void stills.offsetWidth;
+        stills.style.transition = 'transform .26s ease';
+        stills.style.transform  = 'translateX(0)';
+        lyrics.style.opacity    = '1';
+        syncIcon();   // el nuevo canto ya suena: refleja play/pausa real
+      }, 230);
     }
 
     /* ─── Bucle ───
@@ -257,7 +338,7 @@
       }
       if (line !== curLine) { curLine = line; setActiveLine(line); }
 
-      if (cur >= SKIP_AT) $(id.skip).classList.add('show');
+      if (hasSkip && cur >= SKIP_AT) $(id.skip).classList.add('show');
     }
 
     function setActiveLine(idx) {
@@ -275,13 +356,20 @@
     }
 
     /* ─── Fondo: carrusel, con degradación a la imagen única ─── */
-    // Prueba los candidatos que da la configuración. Por defecto para en el primer
-    // hueco (los cantos numeran a,b,c… sin saltos). Con imgTolerateGaps las prueba
-    // todas y se queda con las que existan: así una ilustración que falte no trunca
-    // el carrusel (letanías, donde el conjunto crece y cambia).
+    // Por defecto prueba los candidatos y para en el primer hueco (los cantos numeran
+    // a,b,c… sin saltos). imgTolerateGaps: prueba todas y se queda con las que existan
+    // (letanías). imgTrust: confía en la lista (manifiesto ya resuelto) y no prueba nada.
     function detectImages() {
       imgUrls = []; imgIdx = -1;
       var cands = (cfg.getImgCandidates ? cfg.getImgCandidates() : []) || [];
+
+      if (cfg.imgTrust) {
+        imgUrls = cands.slice();
+        if (imgUrls.length) { imgIdx = 0; showImg(0, FALLBACK_SEC); }
+        else finishDetect();
+        return;
+      }
+
       var i = 0;
       (function probe() {
         if (!open) return;
@@ -365,16 +453,26 @@
       render(a.currentTime);
     }
 
+    function fwd10() {
+      if (cfg.onFwd10) { cfg.onFwd10(); return; }
+      var a = cfg.getAudio();
+      if (!a) return;
+      var top = (a.duration && isFinite(a.duration)) ? a.duration : Infinity;
+      a.currentTime = Math.min(top, a.currentTime + 10);
+      render(a.currentTime);
+    }
+
     /* Saltar. El motor cierra la pantalla ANTES de delegar, así ningún consumidor
        puede olvidarse y dejar el karaoke colgado sobre la pantalla siguiente.
        Si la configuración pide confirmación, la pantalla sigue en pie mientras el
        usuario decide: si dice que no, no ha pasado nada. */
     function skipPressed() {
-      if (!cfg.confirmSkip) { closeK(); if (cfg.onSkip) cfg.onSkip(); return; }
+      if (!cfg.onSkip) return;
+      if (!cfg.confirmSkip) { closeK(); cfg.onSkip(); return; }
       Promise.resolve(cfg.confirmSkip()).then(function (si) {
         if (!si) return;
         closeK();
-        if (cfg.onSkip) cfg.onSkip();
+        cfg.onSkip();
       });
     }
 
@@ -383,6 +481,7 @@
     return {
       preload:  preload,
       open:     openK,
+      reload:   reload,
       close:    closeK,
       isOpen:   function () { return open; },
       syncIcon: syncIcon

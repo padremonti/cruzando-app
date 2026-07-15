@@ -15,6 +15,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<!-- Pantalla de karaoke (motor compartido) -->
+<link rel="stylesheet" href="canto.css"/>
 <style>
 /* ── Reset & vars ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -736,6 +738,7 @@ body.light .tool-btn svg { background: rgba(0,0,0,0.04); }
 <script src="plan-utils.js"></script>
 <script src="utils.js"></script>
 <script src="gestures.js"></script>
+<script src="canto.js"></script>
 </head>
 <body>
 
@@ -967,8 +970,19 @@ const app  = initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 
-const CANTOS_BASE       = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/cantos/';
+// Los cantos de bloque viven en el bucket de música (m4a), junto a su .lrc.
+const MUSIC_BASE        = 'https://pub-faed94e375aa443e846e07f81ef93274.r2.dev/';   // cruzando-music
+const IMG_BASE          = 'https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev/';   // cruzando-ilustraciones
+const CANTOS_BASE       = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/cantos/';   // (heredado; ya no se usa para audio)
 const EXTRAS_CANTOS_BASE = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/extras/';
+
+// Manifiesto del carrusel de cada bloque (una lista de imágenes por canto), cargado
+// una vez: la galería navega sin sondear imagen por imagen. Lo genera el sync.
+let cantosImgManifest = {};
+fetch(IMG_BASE + 'cantos/manifest.json')
+  .then(r => r.ok ? r.json() : {})
+  .then(j => { cantosImgManifest = j || {}; })
+  .catch(() => {});
 const INTERSTITIAL_BASE  = 'https://pub-cd28789360f74fc0a623bb76605f42c3.r2.dev/interstitials/';
 const INTERSTITIAL_TOTAL = 10;
 const INTERSTITIAL_KEY   = 'cruzando_interstitial_fecha';
@@ -997,7 +1011,20 @@ function cantoAudioUrl(canto) {
   if (canto.source === 'extras' && canto.audio_filename) {
     return EXTRAS_CANTOS_BASE + canto.audio_filename;
   }
-  return CANTOS_BASE + 'CANTO_' + canto.nivel + '_' + canto.cuaderno + '_' + canto.bloqueIdx + '.mp3';
+  return MUSIC_BASE + 'cantos/CANTO_' + canto.nivel + '_' + canto.cuaderno + '_' + canto.bloqueIdx + '.m4a';
+}
+
+// La letra sincronizada va junto al audio, con la misma convención de nombre.
+function cantoLrcUrl(canto) {
+  if (canto.source === 'extras' && canto.audio_filename) {
+    return EXTRAS_CANTOS_BASE + canto.audio_filename.replace(/\.[^.]+$/, '.lrc');
+  }
+  return MUSIC_BASE + 'cantos/CANTO_' + canto.nivel + '_' + canto.cuaderno + '_' + canto.bloqueIdx + '.lrc';
+}
+
+// Clave del canto en el manifiesto de imágenes: {nivel}_{cuaderno}_{bloqueIdx}.
+function cantoImgKey(canto) {
+  return canto.nivel + '_' + canto.cuaderno + '_' + canto.bloqueIdx;
 }
 
 function updateBlockColor(bloque) {
@@ -1101,14 +1128,22 @@ window.togglePlay = function() {
 window.prevCanto = function() { heroNav(-1); };
 window.nextCanto = function() { heroNav(1); };
 window.toggleLetra = function() {
-  const sheet = document.getElementById('letra-sheet');
-  if (sheet.classList.contains('open')) {
-    closeLetraSheet();
-  } else {
-    const canto = navCantos[currentIdx];
-    if (canto) openLetraSheet(canto.letra || '', canto.titulo);
-  }
-  document.getElementById('tool-letra').classList.toggle('active', letraOpen);
+  // "Letra" abre el karaoke (letra sincronizada). El sheet estático queda solo como
+  // último recurso: un canto sin .lrc y sin letra en Firestore (raro; el DEMO vacío).
+  if (galKaraoke.isOpen()) { galKaraoke.close(); return; }
+  const canto = navCantos[currentIdx];
+  if (!canto) return;
+  // El karaoke sigue al audio del hero: asegurar que suena antes de abrir.
+  const heroPlayBtn = document.getElementById('hero-play-btn');
+  if (!activeAudio || activePlayBtn !== heroPlayBtn) playHeroCanto(canto);
+  document.getElementById('tool-letra').classList.add('active');
+  galKaraoke.preload().then(() => {
+    galKaraoke.open();
+    if (!galKaraoke.isOpen()) {                        // ni .lrc ni letra → sheet de siempre
+      document.getElementById('tool-letra').classList.remove('active');
+      openLetraSheet(canto.letra || '', canto.titulo);
+    }
+  });
 };
 window.toggleFavorita = function() {
   if (window.CZSound) CZSound('heartTap');
@@ -1156,9 +1191,12 @@ function goToCanto(index) {
     heroBounce(index < 0 ? 'right' : 'left');
     return;
   }
-  // Capturar si el hero estaba sonando antes de cambiar
+  const karaokeOpen = galKaraoke.isOpen();
+  const dir = index > currentIdx ? 'next' : 'prev';   // capturar antes de mover currentIdx
+  // Capturar si el hero estaba sonando antes de cambiar. Con el karaoke abierto el audio
+  // debe seguir sonando: así activeAudio no queda en null y el bucle no cierra la pantalla.
   const heroPlayBtn   = document.getElementById('hero-play-btn');
-  const wasHeroPlaying = activeAudio && !activeAudio.paused && activePlayBtn === heroPlayBtn;
+  const wasHeroPlaying = (activeAudio && !activeAudio.paused && activePlayBtn === heroPlayBtn) || karaokeOpen;
 
   // Detener audio completamente
   if (activeAudio) {
@@ -1186,6 +1224,9 @@ function goToCanto(index) {
 
   // Si estaba sonando en el hero, arrancar el nuevo automáticamente
   if (wasHeroPlaying) playHeroCanto(navCantos[currentIdx]);
+
+  // Con el karaoke abierto, seguir al nuevo canto (letra/fondo) con el slide direccional
+  if (karaokeOpen) galKaraoke.reload({ dir });
 }
 
 function heroNav(delta) {
@@ -1571,6 +1612,34 @@ let activeBarFill = null;
 let activeCurEl = null;
 let activeDurEl = null;
 
+/* ─── Karaoke de la galería (motor compartido) ───
+   Sigue al audio del hero (activeAudio). Los prev/next y el swipe delegan en heroNav,
+   que ya cambia de canto; goToCanto/_doAutoplay recargan el karaoke si está abierto.
+   La letra sale del .lrc del canto; si no hay, cae a la letra de Firestore (canto.letra). */
+const galKaraoke = window.Karaoke.create({
+  id: 'gal', kicker: 'Canto',
+  getAudio:  () => activeAudio,
+  isPlaying: () => !!activeAudio && !activeAudio.paused,
+  getTitulo: () => (navCantos[currentIdx] || {}).titulo || '',
+  getLrcUrl: () => cantoLrcUrl(navCantos[currentIdx] || {}),
+  getImgCandidates: () => {
+    const c = navCantos[currentIdx];
+    const list = (c && cantosImgManifest[cantoImgKey(c)]) || [];
+    return list.map(p => IMG_BASE + p);
+  },
+  imgTrust: true,                          // el manifiesto ya viene resuelto: no probar
+  getStillUrl: () => '',                   // sin carrusel → fondo oscuro (raro: bloque sin imágenes)
+  loadFallbackLetra: async () => {
+    const c = navCantos[currentIdx];
+    return c ? { letra: c.letra || '', titulo: c.titulo || '' } : null;
+  },
+  controls: ['prev', 'back10', 'playpause', 'fwd10', 'next'],
+  onPrev:      () => heroNav(-1),
+  onNext:      () => heroNav(1),
+  onPlayPause: () => { window.togglePlay(); galKaraoke.syncIcon(); },
+  onClose:     () => { document.getElementById('tool-letra')?.classList.remove('active'); }
+});
+
 function fmt(s) {
   if (!isFinite(s)) return '0:00';
   const m = Math.floor(s / 60), sec = Math.floor(s % 60);
@@ -1586,6 +1655,7 @@ function _doAutoplay() {
     updateNavBtns();
     saveBookmark(navCantos[currentIdx]);
     playHeroCanto(navCantos[currentIdx]);
+    if (galKaraoke.isOpen()) galKaraoke.reload({ dir: 'next' });
   } else {
     heroBounce('right');
   }
@@ -1910,11 +1980,15 @@ async function backfillCantos(uid) {
     n.classList.remove('visible');
     clearTimeout(navTimer);
   }
-  CZGestures.swipe(document, { ignore: () => letraOpen, onUp: showAppNav, onDown: hideAppNav });
+  // Vertical (mostrar/ocultar app-nav): se inhibe con el karaoke abierto, igual que con
+  // el sheet de letra. El swipe del overlay (horizontal) lo pone el motor sin `stop`, así
+  // que este handler sigue recibiendo el evento y por eso debe ignorarlo aquí.
+  CZGestures.swipe(document, { ignore: () => letraOpen || galKaraoke.isOpen(), onUp: showAppNav, onDown: hideAppNav });
 
-  /* Atrás propio: cierra la hoja de letra o la playlist si están abiertas; si no,
-     sale a index.html. El horizontal es de los cantos, no del historial. */
+  /* Atrás propio: cierra el karaoke, la hoja de letra o la playlist si están abiertos;
+     si no, sale a index.html. El horizontal es de los cantos, no del historial. */
   CZGestures.init({ onBack: () => {
+    if (galKaraoke.isOpen()) { galKaraoke.close(); return true; }
     if (letraOpen) { closeLetraSheet(); return true; }
     const pl = document.getElementById('playlist-sheet');
     if (pl && pl.classList.contains('open')) { closePlaylistPopup(); return true; }
