@@ -126,6 +126,7 @@
     var id = {
       root:  'scr-' + P,             title: P + '-title',      lyrics: P + '-lyrics',
       track: P + '-lyric-track',     skip:  P + '-skip',       stills: P + '-stills',
+      close: P + '-close',
       pp:    P + '-play-pause',      ipl:   P + '-ico-play',   ips:    P + '-ico-pause',
       back10: P + '-back10',         fwd10: P + '-fwd10',      prev:   P + '-prev',  next: P + '-next',
       layA:  P + '-layA',            layB:  P + '-layB',       kbA:    P + '-kbA',   kbB:  P + '-kbB'
@@ -157,6 +158,10 @@
           '<div class="canto-lay"       id="' + id.layB + '"><div class="canto-kb" id="' + id.kbB + '"></div></div>' +
         '</div>' +
         '<div class="canto-scrim"></div>' +
+        (cfg.closeBtn
+          ? '<button class="canto-close" id="' + id.close + '" aria-label="Cerrar">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>'
+          : '') +
         '<div class="canto-head">' +
           '<div class="canto-kicker">' + (cfg.kicker || 'Canto') + '</div>' +
           '<div class="canto-title" id="' + id.title + '"></div>' +
@@ -170,6 +175,7 @@
       document.body.appendChild(el);
 
       if (hasSkip && $(id.skip)) $(id.skip).onclick = skipPressed;
+      if (cfg.closeBtn && $(id.close)) $(id.close).onclick = closeK;
       if ($(id.pp))     $(id.pp).onclick     = function () { if (cfg.onPlayPause) cfg.onPlayPause(); };
       if ($(id.back10)) $(id.back10).onclick = back10;
       if ($(id.fwd10))  $(id.fwd10).onclick  = fwd10;

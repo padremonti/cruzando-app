@@ -304,7 +304,8 @@ class App(tk.Tk):
     def open_audio(self):
         path = filedialog.askopenfilename(
             title="Abrir audio",
-            filetypes=[("Audio", "*.mp3 *.wav"), ("MP3", "*.mp3"), ("WAV", "*.wav"),
+            filetypes=[("Audio", "*.mp3 *.m4a *.wav"), ("MP3", "*.mp3"),
+                       ("M4A / AAC", "*.m4a"), ("WAV", "*.wav"),
                        ("Todos", "*.*")])
         if not path:
             return
