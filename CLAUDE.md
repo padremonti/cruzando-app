@@ -20,7 +20,8 @@ PWA de formación espiritual católica. El usuario reza los 20 Misterios del Ros
 | `audio.html` | Player de sesión diaria. Módulo principal. |
 | `orar.html` | Rezo por bloques (gozosos/luminosos/dolorosos/gloriosos). |
 | `diario.html` | Diario de reflexiones. Lee `users/{uid}/reflections/*`. |
-| `sanar.html` | Módulo de sanación (integración básica). |
+| `sanar.html` | Entrada emocional al Rosario (pestaña "Sanar" del hub). Máquina de 3 fases: elenco de dolores → acogida interactiva → handoff al Misterio. Navega a `mini.html?mid=…&pain=…`. |
+| `mini.html` | Mini sesión de UN Misterio (el "Misterio-puerta" que señaló Sanar). Reproductor cinematográfico a pantalla completa. Todo derivado del `mid` de la URL. |
 | `utils.js` | `window.isPremium(userData)` y `window.resolvePlan(userData)`. Cargado en todas las páginas. |
 
 ## Modelo de datos Firestore
@@ -99,6 +100,28 @@ Aparece solo en misterios 1, 6, 11, 16 (primero de cada bloque).
 - **diario.html** lee: toda la subcolección `reflections` del usuario.
 - Hay un fallback en `loadReflections()` de audio.html para el formato antiguo (`{nivel}_{cuaderno}_{misterio}`).
 
+## Sanar (sanar.html) — entrada emocional
+
+Módulo maduro (~1400 líneas, autocontenido en una IIFE). Máquina de 3 fases (`estado.fase`):
+
+1. **Elenco** — catálogo de *pains* (dolores) en un **wheel 3D con scroll-snap**. Cuatro modos:
+   - `navegar` (recorrer todo), `buscar` (texto libre: frase + tags ocultos), `ejes` (chips por eje), `misterio` (numberpad tipo PIN para cargar un `mid` — **solo plan `developer`**, vía `_effectivePlan()` sobre storage).
+   - Tocar la tarjeta central abre un **velo de foco** de confirmación antes de entrar.
+2. **Acogida** — 1-N pasos definidos por Misterio en `m.acogida`. **7 mecánicas interactivas** ya implementadas: `corazones`, `termometro` (slider vertical), `cuerpo` (silueta + lista accesible), `sendero` (tiempo), `cercania` (colocar el "yo" ante Lux), `peso` (bulto creciente con arte R2), `mosaico` (fallback universal). Cada paso hace `commit(tipo, valor, eco)`; los ecos se reservan para el handoff. Soporta retroceso restaurando estado.
+3. **Handoff** — muestra los ecos acumulados uno a uno y presenta el Misterio-puerta. Botón "Entrar al Misterio" → `mini.html?mid=…&pain=…`.
+
+**Datos** (`data/`): `tags.json`, `acogida-plantillas-v1.json`, `{elemento}-pains.json`, `pains-index.json`. Piloto sobre `ELEMENTO = '0101'` (único elenco con datos hoy).
+**Pendiente:** `guardarAfinidad()` es un `TODO` — aún no persiste afinidad por eje/tag en Firestore.
+
+## Mini sesión (mini.html) — Misterio-puerta
+
+Reproductor cinematográfico a pantalla completa (~750 líneas). Destino de Sanar. **Todo se deriva del `mid`** de la URL (`?mid=010101&pain=…`), sin hardcode: elemento, número global (1-20), assets R2 y `data/{elemento}.json`.
+
+Flujo de "momentos" (`STEPS`): **Canto** (karaoke `.lrc` sobre carrusel Ken Burns procedimental) → **Palabra** (UBIBLE) → **Contemplación** (CONT) → **Rezo** (con beads/rosario sincronizados vía `data/bead_sync.json`) → **Oración final** (PRAY) → **Epílogo** (canto / diario / concluir).
+
+Buckets R2: `R2_ILU` (ilustraciones), `R2_MUS` (música/lrc), `R2_AUD` (audios). Paleta por Mundo desde `tema.paleta` del JSON. Diálogo de confirmación al salir integrado con `gestures.js` (intercepta el atrás de iOS).
+**Pendientes (`TODO`):** guardar el diario en `reflections/…` (mismo formato que orar/audio), alternar pistas de rezo MA/MB/L_MA, y marcar "completado" + consumir crédito al salir.
+
 ## Estado de integración por archivo
 
 | Archivo | Nav bar | Tema unificado | Plan/beta | Micro | Metros |
@@ -108,11 +131,13 @@ Aparece solo en misterios 1, 6, 11, 16 (primero de cada bloque).
 | audio.html | ✅ | ✅ | ✅ | ✅ | ✅ progresivos |
 | orar.html | ✅ | ✅ (parcial) | ✅ | ✅ | ✅ |
 | diario.html | ⚠️ no revisado | ⚠️ | ⚠️ | — | — |
-| sanar.html | ⚠️ parcial | ✅ clave | ⚠️ | — | — |
+| sanar.html | ✅ | ✅ `cruzando_theme` | ✅ gate `developer` | — | ❌ `guardarAfinidad` TODO |
+| mini.html | — (pantalla completa) | ✅ `cruzando_theme` | — | — | ❌ diario/crédito TODO |
 
 ## Pendientes conocidos
 
 1. `diario.html` — revisar nav bar, tema y plan (nunca auditado en este ciclo).
-2. `sanar.html` — solo se unificó la clave de tema; no se auditó el resto.
-3. Contenido Mundo 2 — faltan `0201.json`, `0202.json`, etc. (audio, preguntas, cantos).
-4. Verificación en producción: que las respuestas del modal de audio.html aparezcan en diario.html.
+2. `sanar.html` — `guardarAfinidad()` no persiste nada en Firestore (solo `console.log`). Datos solo para `ELEMENTO = '0101'`.
+3. `mini.html` — guardar el diario en `reflections/…`, alternar pistas de rezo MA/MB/L_MA por posición/idioma, y marcar "completado" + consumir crédito al salir (todos `TODO`).
+4. Contenido Mundo 2 — faltan `0201.json`, `0202.json`, etc. (audio, preguntas, cantos).
+5. Verificación en producción: que las respuestas del modal de audio.html aparezcan en diario.html.
