@@ -20,6 +20,36 @@
 <title>Sanar · CruzAndo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600;700&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+
+<!-- ── Cimientos: Firebase (compat) + plan-utils — mismo patrón que orar/audio ── -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
+  authDomain: "cruzando-app.firebaseapp.com",
+  projectId: "cruzando-app",
+  storageBucket: "cruzando-app.firebasestorage.app",
+  messagingSenderId: "408196948528",
+  appId: "1:408196948528:web:de291e8afc969252e943f5"
+};
+firebase.initializeApp(firebaseConfig);
+const _db   = firebase.firestore();
+const _auth = firebase.auth();
+// Shim compat → API modular que plan-utils.js espera (_obSet/_obSync; y afinidad en Fase B).
+window._fbFirestore = {
+  doc: function(db){
+    var segs = Array.prototype.slice.call(arguments, 1), ref = db;
+    for (var i = 0; i < segs.length; i++) ref = (i % 2 === 0) ? ref.collection(segs[i]) : ref.doc(segs[i]);
+    return ref;
+  },
+  getDoc: function(ref){ return ref.get(); },
+  setDoc: function(ref, data, opts){ return opts && opts.merge ? ref.set(data, { merge:true }) : ref.set(data); },
+  serverTimestamp: function(){ return firebase.firestore.FieldValue.serverTimestamp(); }
+};
+</script>
+<script src="plan-utils.js"></script>
 <style>
 *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
 
@@ -541,14 +571,12 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   var base = location.origin + location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1);
   var IMGB = 'https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev/';   // bucket de ilustraciones (mismo que orar/mini). arte relativo → IMGB + o.arte
 
-  // Gate developer — espejo mínimo de plan-utils.js:effectivePlan() (mantener en
-  // sync si cambia el canónico). sanar.html es autocontenido: solo lee storage.
-  // Fail-safe: sin cache → 'free' → DEV=false → el modo Misterio queda oculto.
-  function _effectivePlan(){
-    return sessionStorage.getItem('cruzando_view_as') ||
-           localStorage.getItem('cruzando_plan_cache') || 'free';
-  }
-  var DEV = _effectivePlan() === 'developer';
+  // Gate developer — ahora sobre el effectivePlan() canónico de plan-utils.js
+  // (honra "ver como" en sessionStorage → window.currentPlan → caché). DEV se
+  // resuelve en el arranque diferido (Bloque B), cuando el plan real del doc ya
+  // está en window.currentPlan: un developer por deep link no cae en falso 'free'.
+  function _plan(){ return (window.effectivePlan ? window.effectivePlan() : 'free'); }
+  var DEV = false;   // resuelto tras onAuthStateChanged, antes del primer render
 
   // ── Datos cargados ──────────────────────────────────────────────
   var TAGS = null;      // tags.json
@@ -780,6 +808,29 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     });
   }
 
+  // ── Orden del elenco · PUNTO ÚNICO ──────────────────────────────
+  // Toda decisión de orden del wheel pasa por aquí. Hoy:
+  //   • user + 'navegar'      → orden actual (tal como llega del JSON).
+  //   • developer + 'navegar' → orden de itinerario (mid canónico ascendente).
+  //   • 'buscar' / 'ejes'     → no se reordenan (búsqueda movida por el usuario).
+  // Fase C: en la rama user de 'navegar', sustituir el return por
+  //   ordenarPorAfinidad(list, perfil). No hay que reestructurar nada más.
+  var _perfil = null;   // Fase B/C: perfil de afinidad del usuario (aún sin poblar)
+  function ordenElenco(list, modo, perfil){
+    if (modo === 'navegar' && DEV) return _ordenItinerario(list);
+    // user + 'navegar' → orden actual. Fase C: return ordenarPorAfinidad(list, perfil);
+    return list;
+  }
+  // Itinerario (developer): por mid canónico ascendente. El mid es zero-padded
+  // (mundo·nivel·número, 2+2+2), así que el orden lexicográfico del string ya
+  // equivale a 1_1_1→1_1_20→1_2_1→… No muta la lista original (slice antes de sort).
+  function _ordenItinerario(list){
+    return list.slice().sort(function(a,b){
+      var A = String(a.mid || ''), B = String(b.mid || '');
+      return A < B ? -1 : A > B ? 1 : 0;
+    });
+  }
+
   function renderList(){
     var box = $('elenco-list'); if (!box) return;
 
@@ -816,8 +867,8 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
       return;
     }
 
-    // navegar: elenco completo
-    renderWheel(pains, 'Desliza y elige');
+    // navegar: elenco completo — orden centralizado (Fase C insertará afinidad aquí)
+    renderWheel(ordenElenco(pains, 'navegar', _perfil), DEV ? 'Orden de itinerario' : 'Desliza y elige');
   }
 
   // Todos los modos pintan sus resultados en el mismo wheel 3D
@@ -1395,8 +1446,30 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     window.navTo('index.html');
   }});
 
-  // ── Arranque ────────────────────────────────────────────────────
-  cargar();
+  // ── Arranque (diferido tras Auth) ───────────────────────────────
+  // No hay usuarios anónimos: el sign-in es obligatorio. Esperamos a que Auth
+  // resuelva; con sesión → capturamos uid, resolvemos el plan REAL del doc y
+  // arrancamos; sin sesión → al sign-in. Patrón de orar/audio.
+  function _arranque(user){
+    window._obDB  = _db;
+    window._obUID = user.uid;   // uid para Fase B (persistir el perfil de afinidad)
+    // Plan real desde el doc → window.currentPlan; así effectivePlan() no depende
+    // del caché frío (developer por deep link no cae en falso 'free').
+    _db.collection('users').doc(user.uid).get()
+      .then(function(snap){
+        var userData = (snap && snap.exists) ? snap.data() : {};
+        window.currentPlan = window.resolvePlan ? window.resolvePlan(userData) : 'free';
+      })
+      .catch(function(){ /* sin doc/red → effectivePlan cae a "ver como"/caché/'free' */ })
+      .then(function(){
+        DEV = _plan() === 'developer';   // gate resuelto de verdad, antes del primer render
+        cargar();
+      });
+  }
+  _auth.onAuthStateChanged(function(u){
+    if (u) _arranque(u);
+    else window.navTo('index.html');   // sin sesión → sign-in
+  });
 })();
 </script>
 </body>
