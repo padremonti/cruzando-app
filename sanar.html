@@ -510,6 +510,58 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 .app-nav-icon { width:24px; height:24px; position:relative; display:flex; align-items:center; justify-content:center; }
 .app-nav-item.active .app-nav-icon::before { content:''; position:absolute; inset:-5px; background:rgba(2,187,224,0.12); border-radius:10px; }
 .app-nav-label { font-size:0.6rem; font-weight:600; letter-spacing:0.4px; text-transform:uppercase; }
+
+/* ── Fase 0 · Onboarding de afinidad ── */
+.ob-screen { display:flex; flex-direction:column; min-height:calc(100dvh - 150px); padding:6px 0 16px; }
+.ob-progress { display:flex; gap:6px; justify-content:center; margin:2px 0 22px; }
+.ob-progress .p { width:8px; height:8px; border-radius:50%; background:var(--border); }
+.ob-progress .p.on { background:var(--brand); }
+.ob-lead { color:var(--text-soft); font-size:1rem; line-height:1.6; margin-bottom:18px; }
+.ob-title { font-family:'Crimson Pro',Georgia,serif; font-weight:700; font-size:1.7rem; line-height:1.25; margin-bottom:6px; }
+.ob-sub { color:var(--text-soft); font-size:0.9rem; margin-bottom:16px; }
+.ob-grid { display:grid; gap:10px; margin:14px 0 8px; }
+.ob-grid-2 { grid-template-columns:1fr 1fr; }
+.ob-opt {
+  min-height:64px; padding:14px 12px; border-radius:16px; cursor:pointer;
+  background:var(--card); border:1px solid var(--border); color:var(--text);
+  font-family:'Crimson Pro',Georgia,serif; font-size:1.05rem; font-weight:600;
+  display:flex; align-items:center; justify-content:center; text-align:center;
+  transition:transform .12s, border-color .2s, background .2s;
+}
+.ob-opt:active { transform:scale(.97); }
+.ob-opt.sel { border-color:var(--brand); background:var(--brand-ultra); }
+/* P2 · áreas (chips, multi máx-4) */
+.ob-areas { display:flex; flex-wrap:wrap; gap:9px; margin:12px 0 6px; }
+.ob-area {
+  padding:11px 14px; border-radius:20px; cursor:pointer; min-height:44px;
+  background:var(--card2); border:1.5px solid var(--border); color:var(--text-soft);
+  font-family:inherit; font-size:0.9rem; font-weight:600;
+  transition:opacity .2s, border-color .2s, background .2s, color .2s;
+}
+.ob-area.sel { border-color:var(--brand); background:var(--brand-ultra); color:var(--brand-soft); }
+.ob-areas.maxed .ob-area:not(.sel) { opacity:0.4; }   /* al llegar a 4, las no elegidas se atenúan */
+.ob-actions { margin-top:auto; padding-top:18px; display:flex; flex-direction:column; gap:8px; }
+.ob-primary {
+  width:100%; padding:15px; border-radius:15px; border:none; cursor:pointer;
+  background:var(--orange); color:#fff; font-family:inherit; font-weight:700; font-size:1rem;
+  transition:opacity .2s;
+}
+.ob-primary:disabled { opacity:0.4; cursor:default; }
+.ob-primary:active:not(:disabled) { opacity:0.9; }
+.ob-ghost {
+  width:100%; padding:13px; border-radius:15px; cursor:pointer;
+  background:none; border:1px solid var(--border); color:var(--text-soft);
+  font-family:inherit; font-weight:600; font-size:0.92rem;
+}
+.ob-skip {
+  margin:18px auto 0; padding:8px 16px; cursor:pointer; min-height:44px;
+  background:none; border:none; color:var(--text-dim); font-family:inherit;
+  font-size:0.85rem; text-decoration:underline;
+}
+/* Cierre personalizado */
+.ob-cierre { justify-content:center; text-align:center; }
+.ob-cierre-line { font-family:'Crimson Pro',Georgia,serif; font-size:1.2rem; line-height:1.5; color:var(--text); margin:14px 0; }
+.ob-cierre .ob-primary { margin-top:28px; }
 </style>
 </head>
 <body>
@@ -589,7 +641,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 
   // ── Estado / máquina de 3 fases ─────────────────────────────────
   var estado = {
-    fase: 'elenco',            // 'elenco' | 'acogida' | 'handoff'
+    fase: 'elenco',            // 'onboarding' | 'elenco' | 'acogida' | 'handoff'
     modo: 'navegar',           // 'navegar' | 'buscar' | 'ejes'
     ejeActivo: null,
     query: '',
@@ -598,7 +650,12 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     pasoAcogida: 0,
     senales: [],               // [{tipo, valor, eco}]
     elencoRecentrar: null,     // id del pain a re-centrar al volver de la acogida (se consume una vez)
-    misterioPin: ''            // dev: dígitos del mid tecleados en el numberpad del modo Misterio
+    misterioPin: '',           // dev: dígitos del mid tecleados en el numberpad del modo Misterio
+    // Onboarding de afinidad (Fase B)
+    obPaso: 0,                 // 0=bienvenida · 1=tono · 2=áreas · 3=anhelo · 4=cierre
+    obTono: null,              // clave de TONOS (P1)
+    obAnhelo: null,            // clave de ANHELOS (P3)
+    obAreas: []                // claves de AREAS elegidas (P2, máx 4)
   };
 
   // ── Helpers ─────────────────────────────────────────────────────
@@ -624,6 +681,64 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     return '<svg class="'+(cls||'')+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+inner+'</svg>';
   }
 
+  // ── Onboarding de afinidad · datos (Fase B) ─────────────────────
+  // Cada array sirve a la vez de UI y de mapeo. TONOS/ANHELOS llevan el fragmento
+  // (frag) de la pantalla de cierre. AREAS mapea cada opción de P2 a su eje.
+  var TONOS = [
+    { clave:'cansado',    texto:'Cansado/a',       frag:'con cansancio' },
+    { clave:'inquieto',   texto:'Inquieto/a',      frag:'con inquietud' },
+    { clave:'herida',     texto:'Con una herida',  frag:'con una herida' },
+    { clave:'buscando',   texto:'Buscando a Dios', frag:'en busca de Dios' },
+    { clave:'agradecido', texto:'Agradecido/a',    frag:'con el corazón agradecido' },
+    { clave:'nose',       texto:'No sé bien',      frag:'sin saber bien cómo' }
+  ];
+  var ANHELOS = [
+    { clave:'consuelo',       texto:'Consuelo',       frag:'consuelo' },
+    { clave:'claridad',       texto:'Claridad',       frag:'claridad' },
+    { clave:'fuerza',         texto:'Fuerza',         frag:'fortaleza' },
+    { clave:'reconciliacion', texto:'Reconciliación', frag:'reconciliación' },
+    { clave:'gratitud',       texto:'Gratitud',       frag:'más gratitud aún' },
+    { clave:'estarcondios',   texto:'Estar con Dios', frag:'Su presencia' }
+  ];
+  var AREAS = [
+    { clave:'cuerpo',    eje:'cuerpo',      texto:'Mi cuerpo' },
+    { clave:'salud',     eje:'cuerpo',      texto:'Mi salud' },
+    { clave:'familia',   eje:'vinculos',    texto:'Mi familia' },
+    { clave:'hijos',     eje:'vinculos',    texto:'La relación con mis hijos' },
+    { clave:'padres',    eje:'vinculos',    texto:'La relación con mis padres' },
+    { clave:'amor',      eje:'vinculos',    texto:'Mis relaciones amorosas' },
+    { clave:'soledad',   eje:'vinculos',    texto:'Mi soledad' },
+    { clave:'duelo',     eje:'vinculos',    texto:'Un duelo / una pérdida' },
+    { clave:'amigos',    eje:'social',      texto:'La relación con mis amigos' },
+    { clave:'laboral',   eje:'social',      texto:'Mis relaciones laborales' },
+    { clave:'dinero',    eje:'recursos',    texto:'Mi dinero' },
+    { clave:'trabajo',   eje:'recursos',    texto:'Mi trabajo' },
+    { clave:'tiempo',    eje:'recursos',    texto:'Mi tiempo' },
+    { clave:'tristeza',  eje:'emociones',   texto:'Mi tristeza' },
+    { clave:'ansiedad',  eje:'emociones',   texto:'Mi ansiedad' },
+    { clave:'enojo',     eje:'emociones',   texto:'Mi enojo' },
+    { clave:'miedo',     eje:'emociones',   texto:'Mi miedo' },
+    { clave:'sentido',   eje:'existencial', texto:'El sentido de mi vida' },
+    { clave:'fe',        eje:'existencial', texto:'Mi fe' },
+    { clave:'dios',      eje:'existencial', texto:'Mi relación con Dios' },
+    { clave:'pasado',    eje:'existencial', texto:'Mi pasado' },
+    { clave:'reacciones',eje:'actitud',     texto:'Mis reacciones' },
+    { clave:'paz',       eje:'actitud',     texto:'Mi falta de paz' },
+    { clave:'habitos',   eje:'actitud',     texto:'Mis hábitos' },
+    { clave:'verme',     eje:'actitud',     texto:'Mi forma de verme a mí misma/o' }
+  ];
+  // Fórmula simple (Fase C afinará): cada área elegida suma +1 a su eje.
+  function pesosDeAreas(areasSel){
+    var ejes = _ejesVacios();
+    (areasSel || []).forEach(function(clave){
+      var a = AREAS.filter(function(x){ return x.clave === clave; })[0];
+      if (a && ejes[a.eje] != null) ejes[a.eje] += 1;
+    });
+    return ejes;
+  }
+  function tonoFrag(k){ var t = TONOS.filter(function(x){return x.clave===k;})[0]; return t ? t.frag : ''; }
+  function anheloFrag(k){ var a = ANHELOS.filter(function(x){return x.clave===k;})[0]; return a ? a.frag : ''; }
+
   // Resuelve el tipo de acogida (string = default; objeto = alterna → usamos su .tipo)
   function tipoDe(entry){ return (typeof entry === 'string') ? entry : (entry && entry.tipo); }
 
@@ -638,10 +753,73 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   }
 
   // ── Hook de afinidad (TODO) ─────────────────────────────────────
-  // Bloque futuro: escribir a users/{uid}/... cuando la mini sesión sea real.
+  // Señal IMPLÍCITA de uso (por Misterio), llamada al terminar la Acogida. Se
+  // mantiene como TODO: su implementación (acumular uso en campo aparte) es de
+  // otra fase; NO contamina el perfil del onboarding-test de abajo.
   function guardarAfinidad(pain, senales){
     // TODO: persistir afinidad por eje/tag en Firestore.
     try { console.log('[guardarAfinidad]', pain && pain.id, senales); } catch(e){}
+  }
+
+  // ── Perfil de afinidad · onboarding-test (Fase B) ───────────────
+  // Señal EXPLÍCITA (el test guiado). Puebla users/{uid}/profile/afinidad.
+  // Fase C leerá perfil.ejes para reordenar el elenco (aún NO se reordena).
+  var _AF_KEY = 'cruzando_afinidad';   // mirror de localStorage (respaldo + flag "visto")
+  function _ejesVacios(){ return { emociones:0, vinculos:0, cuerpo:0, existencial:0, recursos:0, social:0, actitud:0 }; }
+  function _localPerfil(){
+    try { var raw = localStorage.getItem(_AF_KEY); return raw ? JSON.parse(raw) : null; } catch(e){ return null; }
+  }
+  function _qpRehacer(){
+    try { return new URLSearchParams(location.search).get('rehacer') === '1'; } catch(e){ return false; }
+  }
+  // Lee el perfil: Firestore primero; si no hay (o falla la red), el mirror local.
+  function _cargarPerfil(user){
+    var FS = window._fbFirestore;
+    if (!FS || !FS.getDoc) return Promise.resolve(_localPerfil());
+    try {
+      var ref = FS.doc(_db, 'users', user.uid, 'profile', 'afinidad');
+      return FS.getDoc(ref).then(function(snap){
+        return (snap && snap.exists) ? snap.data() : _localPerfil();
+      }).catch(function(){ return _localPerfil(); });
+    } catch(e){ return Promise.resolve(_localPerfil()); }
+  }
+  // Escritura: localStorage primero (síncrono, marca pendingSync), luego Firestore
+  // vía el shim; si Firestore confirma, se limpia pendingSync.
+  function guardarPerfilAfinidad(perfil){
+    var doc = {
+      version: 1,
+      status:  perfil.status || 'complete',
+      tono:    perfil.tono || null,
+      anhelo:  perfil.anhelo || null,
+      areas:   perfil.areas || [],
+      ejes:    perfil.ejes || _ejesVacios()
+    };
+    _perfil = doc.ejes;   // en memoria para la sesión (Fase C)
+    try { localStorage.setItem(_AF_KEY, JSON.stringify(Object.assign({ pendingSync:true }, doc))); } catch(e){}
+    _escribirAfinidadFirestore(doc);
+  }
+  function _escribirAfinidadFirestore(doc){
+    var FS = window._fbFirestore, uid = window._obUID;
+    if (!FS || !FS.setDoc || !uid || !_db) return;   // sin canal → queda pendingSync en localStorage
+    try {
+      var ref = FS.doc(_db, 'users', uid, 'profile', 'afinidad');
+      FS.setDoc(ref, {
+        version: doc.version, status: doc.status, tono: doc.tono,
+        anhelo: doc.anhelo, areas: doc.areas, ejes: doc.ejes,
+        updatedAt: FS.serverTimestamp ? FS.serverTimestamp() : null
+      }, { merge:true })
+      .then(function(){ _clearPendingSync(); })
+      .catch(function(){ /* pendingSync sigue true → se reintenta en el próximo arranque */ });
+    } catch(e){}
+  }
+  function _clearPendingSync(){
+    var p = _localPerfil(); if (!p) return;
+    p.pendingSync = false;
+    try { localStorage.setItem(_AF_KEY, JSON.stringify(p)); } catch(e){}
+  }
+  function _retryPendingSync(){
+    var p = _localPerfil();
+    if (p && p.pendingSync) _escribirAfinidadFirestore(p);
   }
 
   // ── Carga de los 4 JSON ─────────────────────────────────────────
@@ -680,14 +858,21 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 
   // ── Router ──────────────────────────────────────────────────────
   function render(){
-    // El botón "volver" solo aparece dentro de acogida/handoff
-    $('s-back').style.visibility = (estado.fase === 'elenco') ? 'hidden' : 'visible';
+    // El botón "volver" se oculta en el elenco y en la bienvenida del onboarding.
+    var hideBack = (estado.fase === 'elenco') ||
+                   (estado.fase === 'onboarding' && estado.obPaso === 0);
+    $('s-back').style.visibility = hideBack ? 'hidden' : 'visible';
+    if (estado.fase === 'onboarding') return renderOnboarding();
     if (estado.fase === 'elenco')  return renderElenco();
     if (estado.fase === 'acogida') return renderAcogida();
     if (estado.fase === 'handoff') return renderHandoff();
   }
 
   function onBack(){
+    if (estado.fase === 'onboarding') {
+      if (estado.obPaso > 0) { estado.obPaso--; return render(); }
+      return;   // bienvenida: el atrás lo maneja el gesto (→ index)
+    }
     estado._acgEntrada = false;   // retroceso → recepción/progreso fijos, sin re-animar
     if (estado.fase === 'handoff') { estado.fase = 'acogida'; estado.pasoAcogida = Math.max(0,(estado.misterioSel.acogida||[]).length-1); return render(); }
     if (estado.fase === 'acogida') {
@@ -701,6 +886,143 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 
   // Respeta prefers-reduced-motion en toda micro-animación
   var reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+  // ── FASE 0 · Onboarding de afinidad ─────────────────────────────
+  // 5 pantallas (una por capa), pausadas: bienvenida → tono → áreas → anhelo →
+  // cierre. Textos cerrados. Persiste al completar (Comenzar) o al saltar.
+  function renderOnboarding(){
+    var v = $('view');
+    switch (estado.obPaso) {
+      case 0: return _obBienvenida(v);
+      case 1: return _obTono(v);
+      case 2: return _obAreas(v);
+      case 3: return _obAnhelo(v);
+      case 4: return _obCierre(v);
+    }
+  }
+  function _obProgress(n){
+    var d = ''; for (var i = 1; i <= 3; i++) d += '<span class="p'+(i<=n?' on':'')+'"></span>';
+    return '<div class="ob-progress" aria-hidden="true">'+d+'</div>';
+  }
+  // Pantalla 0 · Bienvenida
+  function _obBienvenida(v){
+    v.innerHTML =
+      '<div class="ob-screen san-an">'+
+        '<div class="ob-lead">CruzAndo es un camino de sanación y crecimiento con el Santo Rosario.</div>'+
+        '<h1 class="ob-title">¿Puedo ayudarte?</h1>'+
+        '<div class="ob-actions">'+
+          '<button class="ob-primary" onclick="obGuiar()">Guíame, por favor</button>'+
+          '<button class="ob-ghost" onclick="obSaltar()">Explorar por mi cuenta</button>'+
+        '</div>'+
+      '</div>';
+    _sanEntrada();
+  }
+  // Pantalla 1 · Tono (single → avanza al tocar)
+  function _obTono(v){
+    v.innerHTML =
+      '<div class="ob-screen">'+
+        _obProgress(1)+
+        '<h1 class="ob-title san-an">¿Cómo llegas hoy?</h1>'+
+        '<div class="ob-grid ob-grid-2">'+
+          TONOS.map(function(t,i){
+            return '<button class="ob-opt san-an'+(estado.obTono===t.clave?' sel':'')+'" style="animation-delay:'+(0.08+i*0.05).toFixed(2)+'s" onclick="obPickTono(\''+t.clave+'\')">'+esc(t.texto)+'</button>';
+          }).join('')+
+        '</div>'+
+        '<button class="ob-skip" onclick="obSaltar()">Saltar</button>'+
+      '</div>';
+    _sanEntrada();
+  }
+  // Pantalla 2 · Áreas (multi, máx 4 con desmarcado)
+  function _obAreas(v){
+    v.innerHTML =
+      '<div class="ob-screen">'+
+        _obProgress(2)+
+        '<h1 class="ob-title san-an">¿Qué deseas sanar hoy?</h1>'+
+        '<div class="ob-sub san-an">Elige las que más pesan hoy (hasta 4)</div>'+
+        '<div class="ob-areas'+(estado.obAreas.length>=4?' maxed':'')+'" id="ob-areas">'+
+          AREAS.map(function(a){
+            var on = estado.obAreas.indexOf(a.clave) !== -1;
+            return '<button class="ob-area'+(on?' sel':'')+'" data-clave="'+a.clave+'" aria-pressed="'+(on?'true':'false')+'">'+esc(a.texto)+'</button>';
+          }).join('')+
+        '</div>'+
+        '<div class="ob-actions">'+
+          '<button class="ob-primary" id="ob-areas-cont" onclick="obAreasCont()"'+(estado.obAreas.length<1?' disabled':'')+'>Continuar</button>'+
+          '<button class="ob-ghost" onclick="obSaltar()">Saltar</button>'+
+        '</div>'+
+      '</div>';
+    var box = $('ob-areas');
+    Array.prototype.forEach.call(box.querySelectorAll('.ob-area'), function(b){
+      b.addEventListener('click', function(){ obToggleArea(b.getAttribute('data-clave')); });
+    });
+    _sanEntrada();
+  }
+  // Pantalla 3 · Anhelo (single → avanza al tocar)
+  function _obAnhelo(v){
+    v.innerHTML =
+      '<div class="ob-screen">'+
+        _obProgress(3)+
+        '<h1 class="ob-title san-an">¿Qué deseas recibir?</h1>'+
+        '<div class="ob-grid ob-grid-2">'+
+          ANHELOS.map(function(a,i){
+            return '<button class="ob-opt san-an'+(estado.obAnhelo===a.clave?' sel':'')+'" style="animation-delay:'+(0.08+i*0.05).toFixed(2)+'s" onclick="obPickAnhelo(\''+a.clave+'\')">'+esc(a.texto)+'</button>';
+          }).join('')+
+        '</div>'+
+        '<button class="ob-skip" onclick="obSaltar()">Saltar</button>'+
+      '</div>';
+    _sanEntrada();
+  }
+  // Pantalla 4 · Cierre (personalizado con los fragmentos tono+anhelo)
+  function _obCierre(v){
+    var tf = tonoFrag(estado.obTono), af = anheloFrag(estado.obAnhelo);
+    v.innerHTML =
+      '<div class="ob-screen ob-cierre">'+
+        '<div class="ho-flow">'+
+          '<p class="ob-cierre-line san-an" style="animation-delay:.1s">Hoy llegas '+esc(tf)+', y deseas recibir '+esc(af)+'.</p>'+
+          '<p class="ob-cierre-line san-an" style="animation-delay:.5s">He preparado un camino pensando en ti — aunque eres libre de elegir el sendero que tu corazón prefiera.</p>'+
+          '<p class="ob-cierre-line san-an" style="animation-delay:.9s">Respira hondo, abre tu corazón: comencemos a cruzar.</p>'+
+        '</div>'+
+        '<button class="ob-primary san-an" style="animation-delay:1.3s" onclick="obComenzar()">Comenzar</button>'+
+      '</div>';
+    _sanEntrada();
+  }
+
+  // Handlers del onboarding
+  window.obGuiar = function(){ estado.obPaso = 1; render(); window.scrollTo(0,0); };
+  window.obSaltar = function(){ _completarOnboarding('skipped'); };
+  window.obPickTono = function(k){ estado.obTono = k; estado.obPaso = 2; render(); window.scrollTo(0,0); };
+  window.obPickAnhelo = function(k){ estado.obAnhelo = k; estado.obPaso = 4; render(); window.scrollTo(0,0); };
+  window.obAreasCont = function(){ if (estado.obAreas.length < 1) return; estado.obPaso = 3; render(); window.scrollTo(0,0); };
+  window.obComenzar = function(){ _completarOnboarding('complete'); };
+  // Multi máx-4-con-desmarcado: quitar reactiva; añadir se bloquea al llegar a 4.
+  window.obToggleArea = function(clave){
+    var i = estado.obAreas.indexOf(clave);
+    if (i !== -1) estado.obAreas.splice(i, 1);
+    else { if (estado.obAreas.length >= 4) return; estado.obAreas.push(clave); }
+    var box = $('ob-areas'); if (!box) return;
+    box.classList.toggle('maxed', estado.obAreas.length >= 4);
+    Array.prototype.forEach.call(box.querySelectorAll('.ob-area'), function(b){
+      var on = estado.obAreas.indexOf(b.getAttribute('data-clave')) !== -1;
+      b.classList.toggle('sel', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    var cont = $('ob-areas-cont'); if (cont) cont.disabled = estado.obAreas.length < 1;
+  };
+
+  // Cierra el onboarding: guarda el perfil (completo o vacío por saltar) y entra
+  // al elenco. NO reordena (Fase C); solo persiste.
+  function _completarOnboarding(status){
+    var completo = (status === 'complete');
+    var perfil = {
+      status: status,
+      tono:   completo ? estado.obTono : null,
+      anhelo: completo ? estado.obAnhelo : null,
+      areas:  completo ? estado.obAreas.slice() : [],
+      ejes:   completo ? pesosDeAreas(estado.obAreas) : _ejesVacios()
+    };
+    guardarPerfilAfinidad(perfil);
+    estado.fase = 'elenco'; estado.modo = 'navegar';
+    render(); window.scrollTo(0,0);
+  }
 
   // ── FASE 1 · Elenco ─────────────────────────────────────────────
   function renderElenco(){
@@ -1443,6 +1765,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   // cierra el velo de foco si está abierto; si no, vuelve al inicio.
   CZGestures.init({ onBack: function(){
     if ($('foco')) { cerrarFoco(); return true; }
+    if (estado.fase === 'onboarding' && estado.obPaso > 0) { onBack(); return true; }
     window.navTo('index.html');
   }});
 
@@ -1453,18 +1776,24 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   function _arranque(user){
     window._obDB  = _db;
     window._obUID = user.uid;   // uid para Fase B (persistir el perfil de afinidad)
-    // Plan real desde el doc → window.currentPlan; así effectivePlan() no depende
-    // del caché frío (developer por deep link no cae en falso 'free').
-    _db.collection('users').doc(user.uid).get()
-      .then(function(snap){
-        var userData = (snap && snap.exists) ? snap.data() : {};
-        window.currentPlan = window.resolvePlan ? window.resolvePlan(userData) : 'free';
-      })
-      .catch(function(){ /* sin doc/red → effectivePlan cae a "ver como"/caché/'free' */ })
-      .then(function(){
-        DEV = _plan() === 'developer';   // gate resuelto de verdad, antes del primer render
-        cargar();
-      });
+    // En paralelo: doc de usuario (plan real → window.currentPlan; así effectivePlan()
+    // no depende del caché frío) + doc de afinidad (perfil del onboarding). Ambos con
+    // fallback a null para no bloquear el arranque si falla la red.
+    Promise.all([
+      _db.collection('users').doc(user.uid).get().catch(function(){ return null; }),
+      _cargarPerfil(user)
+    ]).then(function(res){
+      var userData = (res[0] && res[0].exists) ? res[0].data() : {};
+      window.currentPlan = window.resolvePlan ? window.resolvePlan(userData) : 'free';
+      DEV = _plan() === 'developer';        // gate resuelto de verdad, antes del primer render
+      var perfil = res[1];
+      _retryPendingSync();                  // reintenta subir un perfil que quedó pendiente
+      if (perfil && perfil.ejes) _perfil = perfil.ejes;   // Fase C leerá esto
+      // Onboarding si: se pide rehacer (?rehacer=1) o no hay perfil previo.
+      if (_qpRehacer() || !perfil) { estado.fase = 'onboarding'; estado.obPaso = 0; }
+      else { estado.fase = 'elenco'; }
+      cargar();
+    });
   }
   _auth.onAuthStateChanged(function(u){
     if (u) _arranque(u);
