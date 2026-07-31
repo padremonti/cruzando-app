@@ -48,6 +48,16 @@ users/{uid}/reflections/{nivelId}_{bloque}_{misterioIdx}_q{qi}
   .question    (texto de la pregunta)
   .text        (respuesta del usuario)
   .confirmedAt Timestamp
+
+users/{uid}/profile/afinidad          (onboarding de sanar.html)
+  .version, .status   'complete' | 'skipped'
+  .tono, .anhelo      (claves de las selecciones crudas; null si skipped)
+  .areas              [slugs elegidos en P2]
+  .ejes               { emociones, vinculos, cuerpo, existencial, recursos, social, actitud } (pesos)
+  .createdAt          Timestamp (solo 1ª vez; sobrevive al rehacer)
+  .updatedAt          Timestamp
+
+users/{uid}/profile/onboarding        (flags de tutorial — plan-utils.js, NO confundir con afinidad)
 ```
 
 ## Modelo de misterios
@@ -102,16 +112,22 @@ Aparece solo en misterios 1, 6, 11, 16 (primero de cada bloque).
 
 ## Sanar (sanar.html) — entrada emocional
 
-Módulo maduro (~1400 líneas, autocontenido en una IIFE). Máquina de 3 fases (`estado.fase`):
+Módulo maduro (~1250 líneas de IIFE). Carga **Firebase compat + `plan-utils.js`** (patrón de orar/audio): 3 scripts compat + inline init (`initializeApp`, `_db`/`_auth`, shim `window._fbFirestore`). **Arranque diferido tras `onAuthStateChanged`**: con sesión captura `uid` (`window._obUID`), resuelve el plan real del doc (`window.currentPlan = resolvePlan(userData)`) y arranca; sin sesión → redirect a `index.html`. El gate developer (`DEV`) se resuelve así de verdad (no del caché frío; deep link no cae en falso `free`); `effectivePlan()` honra el "ver como".
 
+Máquina de 4 fases (`estado.fase`): `onboarding` → `elenco` → `acogida` → `handoff`.
+
+0. **Onboarding de afinidad** (Fase B) — test guiado de 5 pantallas (`estado.obPaso` 0-4): bienvenida → tono (P1 single) → áreas (P2 multi, máx 4 con desmarcado) → anhelo (P3 single) → cierre personalizado. Datos en constantes `TONOS`/`ANHELOS`/`AREAS` (cada área mapea a un eje). Se muestra si no hay perfil **o** `?rehacer=1`; si ya hay perfil, salta al elenco. **Desacoplado de la carga de datos**: se pinta al instante y los JSON del elenco bajan en 2º plano (`cargarDatos()`/`entrarElenco()`); si fallan al terminar → aviso amable con reintentar, no error seco.
 1. **Elenco** — catálogo de *pains* (dolores) en un **wheel 3D con scroll-snap**. Cuatro modos:
-   - `navegar` (recorrer todo), `buscar` (texto libre: frase + tags ocultos), `ejes` (chips por eje), `misterio` (numberpad tipo PIN para cargar un `mid` — **solo plan `developer`**, vía `_effectivePlan()` sobre storage).
+   - `navegar` (recorrer todo), `buscar` (texto libre: frase + tags ocultos), `ejes` (chips por eje), `misterio` (numberpad tipo PIN para cargar un `mid` — **solo plan `developer`**).
+   - **Orden del wheel centralizado en `ordenElenco(list, modo, _perfil)`**: user+navegar → **afinidad** (`ordenarPorAfinidad`, lo más afín primero por peso del `ejePrincipal`; empate = orden original; sin perfil/`skipped` → intacto; nunca filtra); developer+navegar → orden de itinerario (mid canónico); buscar/ejes → sin reordenar.
    - Tocar la tarjeta central abre un **velo de foco** de confirmación antes de entrar.
-2. **Acogida** — 1-N pasos definidos por Misterio en `m.acogida`. **7 mecánicas interactivas** ya implementadas: `corazones`, `termometro` (slider vertical), `cuerpo` (silueta + lista accesible), `sendero` (tiempo), `cercania` (colocar el "yo" ante Lux), `peso` (bulto creciente con arte R2), `mosaico` (fallback universal). Cada paso hace `commit(tipo, valor, eco)`; los ecos se reservan para el handoff. Soporta retroceso restaurando estado.
+2. **Acogida** — 1-N pasos definidos por Misterio en `m.acogida`. **7 mecánicas interactivas**: `corazones`, `termometro` (slider vertical), `cuerpo` (silueta + lista accesible), `sendero` (tiempo), `cercania` (colocar el "yo" ante Lux), `peso` (bulto creciente con arte R2), `mosaico` (fallback universal). Cada paso hace `commit(tipo, valor, eco)`; los ecos se reservan para el handoff. Soporta retroceso restaurando estado.
 3. **Handoff** — muestra los ecos acumulados uno a uno y presenta el Misterio-puerta. Botón "Entrar al Misterio" → `mini.html?mid=…&pain=…`.
 
+**Perfil de afinidad** → `users/{uid}/profile/afinidad`: `{ version, status:'complete'|'skipped', tono, anhelo, areas[], ejes{7 claves}, createdAt, updatedAt }`. `ejes` = pesos por eje (cada área elegida +1); es lo que Fase C lee para ordenar. `guardarPerfilAfinidad()` escribe **localStorage primero** (`cruzando_afinidad`, mirror + flag "visto" + `pendingSync`) y luego Firestore vía el shim; `createdAt` se fija solo la 1ª vez (read-before-write, sobrevive al rehacer), `updatedAt` siempre; si falla la red, `pendingSync` reintenta en el próximo arranque.
+
 **Datos** (`data/`): `tags.json`, `acogida-plantillas-v1.json`, `{elemento}-pains.json`, `pains-index.json`. Piloto sobre `ELEMENTO = '0101'` (único elenco con datos hoy).
-**Pendiente:** `guardarAfinidad()` es un `TODO` — aún no persiste afinidad por eje/tag en Firestore.
+**Pendiente:** `guardarAfinidad(pain,senales)` (señal implícita de uso, post-acogida) sigue como `TODO` — separado del perfil del test.
 
 ## Mini sesión (mini.html) — Misterio-puerta
 
@@ -131,13 +147,14 @@ Buckets R2: `R2_ILU` (ilustraciones), `R2_MUS` (música/lrc), `R2_AUD` (audios).
 | audio.html | ✅ | ✅ | ✅ | ✅ | ✅ progresivos |
 | orar.html | ✅ | ✅ (parcial) | ✅ | ✅ | ✅ |
 | diario.html | ⚠️ no revisado | ⚠️ | ⚠️ | — | — |
-| sanar.html | ✅ | ✅ `cruzando_theme` | ✅ gate `developer` | — | ❌ `guardarAfinidad` TODO |
+| sanar.html | ✅ | ✅ `cruzando_theme` | ✅ Firebase+`plan-utils`, gate `developer` tras Auth | onboarding afinidad | ❌ (perfil sí persiste; `guardarAfinidad` uso TODO) |
 | mini.html | — (pantalla completa) | ✅ `cruzando_theme` | — | — | ❌ diario/crédito TODO |
 
 ## Pendientes conocidos
 
 1. `diario.html` — revisar nav bar, tema y plan (nunca auditado en este ciclo).
-2. `sanar.html` — `guardarAfinidad()` no persiste nada en Firestore (solo `console.log`). Datos solo para `ELEMENTO = '0101'`.
-3. `mini.html` — guardar el diario en `reflections/…`, alternar pistas de rezo MA/MB/L_MA por posición/idioma, y marcar "completado" + consumir crédito al salir (todos `TODO`).
-4. Contenido Mundo 2 — faltan `0201.json`, `0202.json`, etc. (audio, preguntas, cantos).
-5. Verificación en producción: que las respuestas del modal de audio.html aparezcan en diario.html.
+2. `sanar.html` — el perfil de afinidad (onboarding) ya persiste; queda `guardarAfinidad(pain,senales)` (señal implícita de uso, post-acogida) como `TODO`. Datos solo para `ELEMENTO = '0101'`. **Sin verificar en navegador** (Auth real): confirmar que `_perfil` llega del doc tras Auth y que el elenco se repinta reordenado.
+3. **Settings** de `index.html` y `crecer.html` — añadir botón "Rehacer mi perfil de afinidad" → enlace a `sanar.html?rehacer=1` (tarea aparte, sanar ya reconoce el parámetro).
+4. `mini.html` — guardar el diario en `reflections/…`, alternar pistas de rezo MA/MB/L_MA por posición/idioma, y marcar "completado" + consumir crédito al salir (todos `TODO`).
+5. Contenido Mundo 2 — faltan `0201.json`, `0202.json`, etc. (audio, preguntas, cantos).
+6. Verificación en producción: que las respuestas del modal de audio.html aparezcan en diario.html.
