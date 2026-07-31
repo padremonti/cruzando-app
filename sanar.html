@@ -801,16 +801,32 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   function _escribirAfinidadFirestore(doc){
     var FS = window._fbFirestore, uid = window._obUID;
     if (!FS || !FS.setDoc || !uid || !_db) return;   // sin canal → queda pendingSync en localStorage
-    try {
-      var ref = FS.doc(_db, 'users', uid, 'profile', 'afinidad');
-      FS.setDoc(ref, {
-        version: doc.version, status: doc.status, tono: doc.tono,
-        anhelo: doc.anhelo, areas: doc.areas, ejes: doc.ejes,
-        updatedAt: FS.serverTimestamp ? FS.serverTimestamp() : null
-      }, { merge:true })
-      .then(function(){ _clearPendingSync(); })
-      .catch(function(){ /* pendingSync sigue true → se reintenta en el próximo arranque */ });
-    } catch(e){}
+    var ref;
+    try { ref = FS.doc(_db, 'users', uid, 'profile', 'afinidad'); } catch(e){ return; }
+    var payload = {
+      version: doc.version, status: doc.status, tono: doc.tono,
+      anhelo: doc.anhelo, areas: doc.areas, ejes: doc.ejes,
+      updatedAt: FS.serverTimestamp ? FS.serverTimestamp() : null
+    };
+    function write(nuevo){
+      // updatedAt siempre; createdAt SOLO si el doc es nuevo. Con merge:true, no
+      // incluir createdAt conserva el original (rehacer/actualizar no lo pisan).
+      if (nuevo && FS.serverTimestamp) payload.createdAt = FS.serverTimestamp();
+      FS.setDoc(ref, payload, { merge:true })
+        .then(function(){ _clearPendingSync(); })
+        .catch(function(){ /* pendingSync sigue true → se reintenta en el próximo arranque */ });
+    }
+    // Leemos el doc para saber si ya tiene createdAt: si lo tiene, no lo tocamos;
+    // si es nuevo, lo fijamos ahora. Si la lectura falla, no arriesgamos pisarlo
+    // (write(false)); un retry posterior con lectura exitosa lo fijará si faltaba.
+    if (FS.getDoc) {
+      FS.getDoc(ref).then(function(snap){
+        var tiene = !!(snap && snap.exists && snap.data() && snap.data().createdAt);
+        write(!tiene);
+      }).catch(function(){ write(false); });
+    } else {
+      write(true);
+    }
   }
   function _clearPendingSync(){
     var p = _localPerfil(); if (!p) return;
@@ -823,38 +839,65 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   }
 
   // ── Carga de los 4 JSON ─────────────────────────────────────────
-  async function cargar(){
-    async function j(archivo){
-      try { var r = await fetch(base + 'data/' + archivo); if (r.ok) return await r.json(); } catch(e){}
-      return null;
-    }
-    var res = await Promise.all([
-      j('tags.json'),
-      j('acogida-plantillas-v1.json'),
-      j(ELEMENTO + '-pains.json'),
-      j('pains-index.json')
-    ]);
-    TAGS = res[0];
-    PLANT = res[1] && res[1].plantillas;
-    SIDE = res[2];
-    INDEX = res[3];
-
-    if (!TAGS || !SIDE || !INDEX) {
-      $('view').innerHTML = '<div class="empty">No se pudo cargar el contenido de Sanar.<br>Intenta de nuevo más tarde.</div>';
-      return;
-    }
-
-    (SIDE.misterios || []).forEach(function(m){
-      misterioByMid[m.mid] = m;
-      (m.pains || []).forEach(function(p){
-        var pn = { id:p.id, texto:p.texto, ejePrincipal:p.ejePrincipal, tags:p.tags||[], mid:m.mid, misterio:m };
-        pains.push(pn);
-        painById[pn.id] = pn;
+  // Desacoplada del render: el onboarding NO necesita estos datos y se pinta de
+  // inmediato; los JSON bajan en segundo plano. Solo el elenco los requiere.
+  var _datosListos = false;      // true cuando pains/TAGS/etc. están construidos
+  var _datosPromise = null;      // carga en vuelo (para no duplicar fetch)
+  function cargarDatos(){
+    if (_datosListos) return Promise.resolve(true);
+    if (_datosPromise) return _datosPromise;
+    _datosPromise = (async function(){
+      async function j(archivo){
+        try { var r = await fetch(base + 'data/' + archivo); if (r.ok) return await r.json(); } catch(e){}
+        return null;
+      }
+      var res = await Promise.all([
+        j('tags.json'),
+        j('acogida-plantillas-v1.json'),
+        j(ELEMENTO + '-pains.json'),
+        j('pains-index.json')
+      ]);
+      TAGS = res[0];
+      PLANT = res[1] && res[1].plantillas;
+      SIDE = res[2];
+      INDEX = res[3];
+      if (!TAGS || !SIDE || !INDEX) return false;   // fallo → el llamador decide el aviso
+      // Reconstruye (idempotente: seguro ante reintentos)
+      pains = []; painById = {}; misterioByMid = {};
+      (SIDE.misterios || []).forEach(function(m){
+        misterioByMid[m.mid] = m;
+        (m.pains || []).forEach(function(p){
+          var pn = { id:p.id, texto:p.texto, ejePrincipal:p.ejePrincipal, tags:p.tags||[], mid:m.mid, misterio:m };
+          pains.push(pn);
+          painById[pn.id] = pn;
+        });
       });
-    });
-
-    render();
+      _datosListos = true;
+      return true;
+    })().then(function(ok){ _datosPromise = null; return ok; });
+    return _datosPromise;
   }
+
+  // Entra al elenco garantizando los datos. Si ya están → render directo. Si no,
+  // muestra "Preparando…" y espera la carga; si falla del todo → aviso amable.
+  function entrarElenco(){
+    if (_datosListos) { render(); window.scrollTo(0,0); return; }
+    $('view').innerHTML = '<div class="empty">Preparando tu camino…</div>';
+    cargarDatos().then(function(ok){
+      if (ok) { render(); window.scrollTo(0,0); }
+      else _avisoSinDatos();
+    });
+  }
+  // Aviso cálido (no error técnico) cuando los JSON no cargaron.
+  function _avisoSinDatos(){
+    $('view').innerHTML =
+      '<div class="empty">'+
+        'Estamos preparando tu camino…<br><br>'+
+        'Parece que la conexión falló. Inténtalo de nuevo en un momento.'+
+        '<button class="btn-primary" style="display:block;max-width:220px;margin:22px auto 0" onclick="reintentarDatos()">Reintentar</button>'+
+      '</div>';
+  }
+  window.reintentarDatos = function(){ entrarElenco(); };
 
   // ── Router ──────────────────────────────────────────────────────
   function render(){
@@ -1021,7 +1064,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     };
     guardarPerfilAfinidad(perfil);
     estado.fase = 'elenco'; estado.modo = 'navegar';
-    render(); window.scrollTo(0,0);
+    entrarElenco();   // datos ya deberían estar listos; si no, "Preparando…" / aviso amable
   }
 
   // ── FASE 1 · Elenco ─────────────────────────────────────────────
@@ -1790,9 +1833,14 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
       _retryPendingSync();                  // reintenta subir un perfil que quedó pendiente
       if (perfil && perfil.ejes) _perfil = perfil.ejes;   // Fase C leerá esto
       // Onboarding si: se pide rehacer (?rehacer=1) o no hay perfil previo.
-      if (_qpRehacer() || !perfil) { estado.fase = 'onboarding'; estado.obPaso = 0; }
-      else { estado.fase = 'elenco'; }
-      cargar();
+      if (_qpRehacer() || !perfil) {
+        estado.fase = 'onboarding'; estado.obPaso = 0;
+        render();          // pinta el onboarding YA, sin esperar los JSON
+        cargarDatos();     // JSON del elenco en segundo plano (listos al pulsar Comenzar)
+      } else {
+        estado.fase = 'elenco';
+        entrarElenco();    // elenco: requiere datos (espera + aviso amable si fallan)
+      }
     });
   }
   _auth.onAuthStateChanged(function(u){
