@@ -20,6 +20,38 @@
 <title>Mini sesión · CruzAndo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600;700&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+
+<!-- ── Fundación: Firebase (compat) — mismo patrón que sanar/orar/audio ──
+     Genérica, no solo para el completado: aquí montarán los futuros TODOs de
+     mini (diario en reflections/…, consumir crédito). Auth resuelve en paralelo;
+     la reproducción NO espera a Auth (arranque desde la URL sigue síncrono). -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
+  authDomain: "cruzando-app.firebaseapp.com",
+  projectId: "cruzando-app",
+  storageBucket: "cruzando-app.firebasestorage.app",
+  messagingSenderId: "408196948528",
+  appId: "1:408196948528:web:de291e8afc969252e943f5"
+};
+firebase.initializeApp(firebaseConfig);
+const _db   = firebase.firestore();
+const _auth = firebase.auth();
+// Shim compat → API modular (reutilizable por diario/crédito futuros de mini).
+window._fbFirestore = {
+  doc: function(db){
+    var segs = Array.prototype.slice.call(arguments, 1), ref = db;
+    for (var i = 0; i < segs.length; i++) ref = (i % 2 === 0) ? ref.collection(segs[i]) : ref.doc(segs[i]);
+    return ref;
+  },
+  getDoc: function(ref){ return ref.get(); },
+  setDoc: function(ref, data, opts){ return opts && opts.merge ? ref.set(data, { merge:true }) : ref.set(data); },
+  serverTimestamp: function(){ return firebase.firestore.FieldValue.serverTimestamp(); }
+};
+</script>
 <style>
 :root{
   /* Estructura (chrome oscuro cinematográfico) */
@@ -494,7 +526,13 @@ let stepIdx=-1, playing=false;
 
 function advanceFromCanto(){ cantoPause(); stepIdx=-1; goStep(0); }
 function goStep(i){
-  if(i>=STEPS.length){ goEpilogue(); return; }
+  if(i>=STEPS.length){
+    marcarCompletado();   // Pieza 1: rezó canto→UBIBLE→CONT→rezo→PRAY → marca el pain completado (progress/sanar)
+    // TODO (crédito · futuro): consumir crédito AQUÍ, al llegar al epílogo (no a la
+    // salida) — "completó = pagó", un solo momento, con guardia de una vez por
+    // sesión (como _completadoMarcado). El modelo económico se diseña aparte.
+    goEpilogue(); return;
+  }
   stepIdx=i; const s=STEPS[i];
   showMoment('player');
   $('stills').classList.add('hidden'); $('hero').classList.remove('hidden');
@@ -627,7 +665,7 @@ function goEpilogue(){ audio.pause(); playing=false; hideAdvance(); showMoment('
 function backToEpilogue(){ cantoPause(); epilogueMode=false; goEpilogue(); }
 $('epiCanto').onclick=()=>startCanto(true);
 $('epiDiario').onclick=openDiary;
-$('epiSalir').onclick=()=>{ /* TODO: marcar 'completado' + consumir crédito antes de salir */ volver(); };
+$('epiSalir').onclick=()=>{ volver(); };   // completado ya se marcó al llegar al epílogo; crédito → TODO reubicado allí
 
 /* ═══════════ Director de escena ═══════════ */
 function showMoment(name){
@@ -727,6 +765,72 @@ function setCantoPP(){
     ? '<path d="M7 5h3.2v14H7zM13.8 5H17v14h-3.2z" fill="currentColor"/>'   // ⏸ sonando
     : '<path d="M8 5v14l11-7z" fill="currentColor"/>';                       // ▶ pausado
   $('cantoPP').setAttribute('aria-label', p?'Pausar canto':'Reanudar canto');
+}
+
+/* ═══════════ COMPLETADO · marca el pain al llegar al epílogo (Pieza 1) ═══════════ */
+/* Fundación Firebase cableada en <head>: _db, _auth, window._fbFirestore.
+   Auth resuelve EN PARALELO — la reproducción no lo espera. El uid solo se usa
+   aquí, al epílogo (minutos después del arranque), así que Auth ya resolvió.
+   Respaldo localStorage + pendingSync: una oración real nunca se pierde por red. */
+let _uid = null;
+let _completadoMarcado = false;                 // guardia de sesión: una marca por sesión (idempotencia)
+const _PC_KEY = 'cruzando_pains_completados';   // cola local de pendientes { painId: nºpendientes }
+
+_auth.onAuthStateChanged(u => {
+  _uid = u ? u.uid : null;
+  window._obDB = _db; window._obUID = _uid;     // expuesto para diario/crédito futuros
+  if (_uid) _flushPendientes();                 // sube lo que quedó pendiente por red
+  else console.warn('[mini] sin sesión: se reza igual; el completado se cachea hasta que haya uid');
+});
+
+function _pcLocal(){ try { return JSON.parse(localStorage.getItem(_PC_KEY) || '{}'); } catch(e){ return {}; } }
+function _pcSave(o){ try { localStorage.setItem(_PC_KEY, JSON.stringify(o)); } catch(e){} }
+
+/* Marca el pain completado (embudo del epílogo). Guarda SIEMPRE en localStorage
+   (síncrono, fiable) como pendiente; luego intenta Firestore. Guardia de sesión:
+   una vez por sesión (re-visitar el epílogo no re-marca). */
+function marcarCompletado(){
+  if (_completadoMarcado) return;               // ya marcado esta sesión
+  if (!PAINID) return;                          // sin pain en la URL → nada que marcar
+  _completadoMarcado = true;
+  const m = _pcLocal();
+  m[PAINID] = (m[PAINID] || 0) + 1;             // +1 completación pendiente de confirmar
+  _pcSave(m);
+  _escribirCompletado(PAINID);
+}
+
+/* Escribe users/{uid}/progress/sanar → pains[painId] = {firstCompletedAt,
+   lastCompletedAt, count} (merge). Read-before-write: conserva firstCompletedAt,
+   refresca lastCompletedAt, suma las pendientes al count. Al confirmar, descuenta
+   los pendientes; si falla, quedan para _flushPendientes. */
+function _escribirCompletado(painId){
+  const FS = window._fbFirestore;
+  if (!FS || !FS.setDoc || !FS.getDoc || !_uid || !_db) return;   // sin canal → sigue pendiente
+  const pend = _pcLocal()[painId] || 0;
+  if (pend <= 0) return;
+  const ref = FS.doc(_db, 'users', _uid, 'progress', 'sanar');
+  FS.getDoc(ref).then(snap => {
+    const data = (snap && snap.exists) ? snap.data() : {};
+    const prev = (data.pains && data.pains[painId]) || {};
+    const st = FS.serverTimestamp();
+    const entry = {
+      firstCompletedAt: prev.firstCompletedAt || st,   // conserva la primera vez
+      lastCompletedAt:  st,                             // siempre la última
+      count: (prev.count || 0) + pend                  // + las completaciones pendientes
+    };
+    const payload = { pains: {}, updatedAt: st };
+    payload.pains[painId] = entry;
+    return FS.setDoc(ref, payload, { merge:true }).then(() => {
+      const mm = _pcLocal();                            // descuenta lo confirmado (por si entró otra entre medias)
+      if ((mm[painId] || 0) <= pend) delete mm[painId]; else mm[painId] -= pend;
+      _pcSave(mm);
+    });
+  }).catch(() => { /* queda pendiente → _flushPendientes en el próximo arranque/Auth */ });
+}
+
+function _flushPendientes(){
+  const m = _pcLocal();
+  Object.keys(m).forEach(pid => { if (m[pid] > 0) _escribirCompletado(pid); });
 }
 
 /* ═══════════ Arranque — datos listos, gesto de inicio ═══════════ */

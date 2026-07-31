@@ -201,6 +201,16 @@ body {
   font-size:0.7rem; font-weight:700; letter-spacing:0.3px; color:var(--_eje,#888);
 }
 .pain-eje svg { width:13px; height:13px; }
+/* Check "rezado" (Pieza 2) — esquina superior derecha, discreto; hijo del botón
+   → se desvanece con la opacidad 3D del wheel junto con la tarjeta. */
+.pain-check {
+  position:absolute; top:10px; right:12px;
+  width:18px; height:18px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--brand-ultra); color:var(--brand-soft);
+}
+.pain-check svg { width:11px; height:11px; }
+.pain-card.done { padding-right:38px; }   /* sitio para el check sin pisar la frase */
 
 .empty { color:var(--text-dim); text-align:center; padding:34px 10px; font-size:0.9rem; }
 
@@ -783,6 +793,19 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
       }).catch(function(){ return _localPerfil(); });
     } catch(e){ return Promise.resolve(_localPerfil()); }
   }
+  // Pieza 2: lee users/{uid}/progress/sanar → Set de painIds completados (los que
+  // mini marcó al llegar al epílogo). Fallback Set vacío si no hay doc o falla la red.
+  function _cargarCompletados(user){
+    var FS = window._fbFirestore;
+    if (!FS || !FS.getDoc) return Promise.resolve(new Set());
+    try {
+      var ref = FS.doc(_db, 'users', user.uid, 'progress', 'sanar');
+      return FS.getDoc(ref).then(function(snap){
+        var pains = (snap && snap.exists && snap.data().pains) || {};
+        return new Set(Object.keys(pains));
+      }).catch(function(){ return new Set(); });
+    } catch(e){ return Promise.resolve(new Set()); }
+  }
   // Escritura: localStorage primero (síncrono, marca pendingSync), luego Firestore
   // vía el shim; si Firestore confirma, se limpia pendingSync.
   function guardarPerfilAfinidad(perfil){
@@ -1175,13 +1198,14 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 
   // ── Orden del elenco · PUNTO ÚNICO ──────────────────────────────
   // Toda decisión de orden del wheel pasa por aquí:
-  //   • user + 'navegar'      → afinidad (lo más afín primero); sin perfil → orden JSON.
-  //   • developer + 'navegar' → orden de itinerario (mid canónico ascendente).
+  //   • user + 'navegar'      → afinidad primaria + completado secundario (4 grupos); sin señal → orden JSON.
+  //   • developer + 'navegar' → orden de itinerario (mid canónico ascendente); sin check ni hundimiento.
   //   • 'buscar' / 'ejes'     → no se reordenan (búsqueda movida por el usuario).
-  var _perfil = null;   // Fase B/C: pesos por eje del perfil (poblado tras Auth / al completar el test)
+  var _perfil = null;              // Fase B/C: pesos por eje del perfil (poblado tras Auth / al completar el test)
+  var _completados = new Set();    // Pieza 2: painIds rezados en mini (progress/sanar); consulta O(1)
   function ordenElenco(list, modo, perfil){
     if (modo === 'navegar' && DEV) return _ordenItinerario(list);
-    if (modo === 'navegar')        return ordenarPorAfinidad(list, perfil);   // user
+    if (modo === 'navegar')        return ordenarPorAfinidad(list, perfil, _completados);   // user
     return list;
   }
   // Itinerario (developer): por mid canónico ascendente. El mid es zero-padded
@@ -1193,19 +1217,28 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
       return A < B ? -1 : A > B ? 1 : 0;
     });
   }
-  // Afinidad (Fase C, algoritmo simple): puntúa cada pain por el peso del perfil
-  // en su ejePrincipal y ordena de mayor a menor. Empate → conserva el orden
-  // original (estable, con el índice como desempate) para no barajar dentro de un
-  // mismo eje. Sin perfil o perfil vacío (saltado) → devuelve la lista intacta.
-  // NO filtra: los pains de eje sin peso bajan, pero siguen presentes (libertad).
-  function ordenarPorAfinidad(list, perfil){
-    if (!perfil) return list;
+  // Afinidad (Fase C) + completado (Pieza 2): sort estable de CLAVE COMPUESTA —
+  //   1º afinidad descendente (peso del perfil en el ejePrincipal),
+  //   2º a igual afinidad, pendiente (0) antes que completado (1),
+  //   3º a igual todo, orden original (índice).
+  // Produce los 4 grupos: afín-pendiente → afín-completado → no-afín-pendiente →
+  // no-afín-completado, SIN tratarlos como bloques (el sort compuesto los ordena).
+  // El completado desempata DENTRO de la banda de afinidad, no globalmente
+  // (un afín-completado queda por encima de un no-afín-pendiente).
+  // NO filtra: todo sigue presente y clicable (libertad). Sin afinidad NI
+  // completados → lista intacta. 2 args (sin completados) = comportamiento Fase C.
+  function ordenarPorAfinidad(list, perfil, completados){
+    var hayComp = completados && completados.size;
     var hayPeso = false;
-    for (var k in perfil) { if (perfil[k] > 0) { hayPeso = true; break; } }
-    if (!hayPeso) return list;   // perfil vacío / status 'skipped' → sin reordenar
+    if (perfil) for (var k in perfil) { if (perfil[k] > 0) { hayPeso = true; break; } }
+    if (!hayPeso && !hayComp) return list;   // ni afinidad ni completados → sin reordenar
     return list
-      .map(function(p, i){ return { p:p, i:i, s:(perfil[p.ejePrincipal] || 0) }; })
-      .sort(function(a, b){ return (b.s - a.s) || (a.i - b.i); })   // más afín primero; empate → orden original
+      .map(function(p, i){ return {
+        p:p, i:i,
+        s:(perfil && perfil[p.ejePrincipal]) || 0,          // afinidad
+        c:(hayComp && completados.has(p.id)) ? 1 : 0        // completado (secundario, dentro de la banda)
+      }; })
+      .sort(function(a, b){ return (b.s - a.s) || (a.c - b.c) || (a.i - b.i); })
       .map(function(x){ return x.p; });
   }
 
@@ -1262,10 +1295,14 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 
   function painCard(p){
     var e = ejeData(p.ejePrincipal);
+    // Check "rezado" SOLO en modo user (el developer inspecciona contenido, no su
+    // historial personal). Va dentro del botón → se desvanece con la opacidad 3D.
+    var done = !DEV && _completados.has(p.id);
     // La tarjeta muestra SOLO la frase + color/label del eje. Nunca los tags.
-    return '<button class="pain-card" data-id="'+p.id+'" style="--_eje:'+e.color+'" onclick="onWheelTap(this,\''+p.id+'\')">'+
+    return '<button class="pain-card'+(done?' done':'')+'" data-id="'+p.id+'" style="--_eje:'+e.color+'" onclick="onWheelTap(this,\''+p.id+'\')">'+
       esc(p.texto)+
       '<span class="pain-eje">'+ejeSVG(p.ejePrincipal)+esc(e.label)+'</span>'+
+      (done ? '<span class="pain-check" aria-label="Rezado" title="Rezado"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span>' : '')+
       '</button>';
   }
 
@@ -1833,16 +1870,18 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     window._obDB  = _db;
     window._obUID = user.uid;   // uid para Fase B (persistir el perfil de afinidad)
     // En paralelo: doc de usuario (plan real → window.currentPlan; así effectivePlan()
-    // no depende del caché frío) + doc de afinidad (perfil del onboarding). Ambos con
-    // fallback a null para no bloquear el arranque si falla la red.
+    // no depende del caché frío) + doc de afinidad (perfil del onboarding) + pains
+    // completados (Pieza 2). Todos con fallback para no bloquear el arranque si falla la red.
     Promise.all([
       _db.collection('users').doc(user.uid).get().catch(function(){ return null; }),
-      _cargarPerfil(user)
+      _cargarPerfil(user),
+      _cargarCompletados(user)
     ]).then(function(res){
       var userData = (res[0] && res[0].exists) ? res[0].data() : {};
       window.currentPlan = window.resolvePlan ? window.resolvePlan(userData) : 'free';
       DEV = _plan() === 'developer';        // gate resuelto de verdad, antes del primer render
       var perfil = res[1];
+      _completados = res[2] || new Set();   // Pieza 2: pains rezados en mini (check + orden)
       _retryPendingSync();                  // reintenta subir un perfil que quedó pendiente
       if (perfil && perfil.ejes) _perfil = perfil.ejes;   // Fase C leerá esto
       // Onboarding si: se pide rehacer (?rehacer=1) o no hay perfil previo.
