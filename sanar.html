@@ -1174,16 +1174,14 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   }
 
   // ── Orden del elenco · PUNTO ÚNICO ──────────────────────────────
-  // Toda decisión de orden del wheel pasa por aquí. Hoy:
-  //   • user + 'navegar'      → orden actual (tal como llega del JSON).
+  // Toda decisión de orden del wheel pasa por aquí:
+  //   • user + 'navegar'      → afinidad (lo más afín primero); sin perfil → orden JSON.
   //   • developer + 'navegar' → orden de itinerario (mid canónico ascendente).
   //   • 'buscar' / 'ejes'     → no se reordenan (búsqueda movida por el usuario).
-  // Fase C: en la rama user de 'navegar', sustituir el return por
-  //   ordenarPorAfinidad(list, perfil). No hay que reestructurar nada más.
-  var _perfil = null;   // Fase B/C: perfil de afinidad del usuario (aún sin poblar)
+  var _perfil = null;   // Fase B/C: pesos por eje del perfil (poblado tras Auth / al completar el test)
   function ordenElenco(list, modo, perfil){
     if (modo === 'navegar' && DEV) return _ordenItinerario(list);
-    // user + 'navegar' → orden actual. Fase C: return ordenarPorAfinidad(list, perfil);
+    if (modo === 'navegar')        return ordenarPorAfinidad(list, perfil);   // user
     return list;
   }
   // Itinerario (developer): por mid canónico ascendente. El mid es zero-padded
@@ -1194,6 +1192,21 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
       var A = String(a.mid || ''), B = String(b.mid || '');
       return A < B ? -1 : A > B ? 1 : 0;
     });
+  }
+  // Afinidad (Fase C, algoritmo simple): puntúa cada pain por el peso del perfil
+  // en su ejePrincipal y ordena de mayor a menor. Empate → conserva el orden
+  // original (estable, con el índice como desempate) para no barajar dentro de un
+  // mismo eje. Sin perfil o perfil vacío (saltado) → devuelve la lista intacta.
+  // NO filtra: los pains de eje sin peso bajan, pero siguen presentes (libertad).
+  function ordenarPorAfinidad(list, perfil){
+    if (!perfil) return list;
+    var hayPeso = false;
+    for (var k in perfil) { if (perfil[k] > 0) { hayPeso = true; break; } }
+    if (!hayPeso) return list;   // perfil vacío / status 'skipped' → sin reordenar
+    return list
+      .map(function(p, i){ return { p:p, i:i, s:(perfil[p.ejePrincipal] || 0) }; })
+      .sort(function(a, b){ return (b.s - a.s) || (a.i - b.i); })   // más afín primero; empate → orden original
+      .map(function(x){ return x.p; });
   }
 
   function renderList(){
