@@ -6,40 +6,78 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == uid;
     }
 
-    match /users/{uid} {
-      allow read, write: if isOwner(uid);
-
-      match /audioProgress/{doc} {
-        allow read, write: if isOwner(uid);
-      }
-      match /freeProgress/{doc} {
-        allow read, write: if isOwner(uid);
-      }
-      match /progress/{doc} {
-        allow read, write: if isOwner(uid);
-      }
-      match /reflections/{doc} {
-        allow read, write: if isOwner(uid);
-      }
-      match /gamification/{doc} {
-        allow read, write: if isOwner(uid);
-      }
-      match /dailyGoal/{doc} {
-        allow read, write: if isOwner(uid);
-      }
-      match /unlockedCantos/{doc} {
-        allow read, write: if isOwner(uid);
-      }
-      match /bookmark/{doc} {
-        allow read, write: if isOwner(uid);
-      }
-      match /talleres/{doc} {
-        allow read, write: if isOwner(uid);
-      }
-      match /profile/{doc} {
-        allow read, write: if isOwner(uid);
-      }
+    // Campos de users/{uid} que SOLO el Admin SDK puede escribir.
+    // 'plan' y 'betaExpiresAt' determinan el acceso de pago; los de Stripe son
+    // el enlace con la cuenta de cobro. Que el cliente pudiera escribirlos era
+    // el agujero de auto-ascenso a premium.
+    function blindados() {
+      return ['plan', 'betaExpiresAt', 'stripeCustomerId', 'stripeUpdatedAt'];
     }
+
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+
+      // Alta: el cliente crea su propio doc, pero solo puede nacer 'free'.
+      allow create: if isOwner(uid)
+                    && request.resource.data.get('plan', 'free') == 'free'
+                    && !request.resource.data.keys().hasAny(
+                         ['betaExpiresAt', 'stripeCustomerId', 'stripeUpdatedAt']);
+
+      // Escritura normal: displayName, photoURL, totalMeters, preferencias…
+      // todo lo suyo, nunca los campos blindados.
+      //
+      // diff().affectedKeys() solo señala las claves cuyo VALOR cambió: un
+      // setDoc(..., {merge:true}) que reenvíe plan:'free' idéntico pasa sin
+      // problema. Estricta con los ascensos, tolerante con los reenvíos.
+      allow update: if isOwner(uid)
+                    && !request.resource.data.diff(resource.data)
+                         .affectedKeys().hasAny(blindados());
+
+      allow delete: if false;
+
+      // ── Cajones del sistema económico: el usuario lee, solo el servidor
+      //    escribe. Las Cloud Functions (Admin SDK) saltan estas reglas.
+      match /billing/{doc}  { allow read: if isOwner(uid); allow write: if false; }
+      match /rentals/{doc}  { allow read: if isOwner(uid); allow write: if false; }
+      match /ledger/{doc}   { allow read: if isOwner(uid); allow write: if false; }
+
+      // ── Subcolecciones de contenido del usuario ──────────────────────────
+      match /audioProgress/{doc}  { allow read, write: if isOwner(uid); }
+      match /freeProgress/{doc}   { allow read, write: if isOwner(uid); }
+      match /progress/{doc}       { allow read, write: if isOwner(uid); }
+      match /reflections/{doc}    { allow read, write: if isOwner(uid); }
+      match /gamification/{doc}   { allow read, write: if isOwner(uid); }
+      match /dailyGoal/{doc}      { allow read, write: if isOwner(uid); }
+      match /unlockedCantos/{doc} { allow read, write: if isOwner(uid); }
+      match /bookmark/{doc}       { allow read, write: if isOwner(uid); }
+      match /talleres/{doc}       { allow read, write: if isOwner(uid); }
+      match /profile/{doc}        { allow read, write: if isOwner(uid); }
+
+      // Faltaban: un match /users/{uid} NO cubre sus subcolecciones, así que
+      // estas dos estaban siendo denegadas. Las compras de la tienda de extras
+      // (extras.html) y el diario de los retiros (retiros.js) no se guardaban.
+      match /extras/{doc}         { allow read, write: if isOwner(uid); }
+      match /diario/{doc}         { allow read, write: if isOwner(uid); }
+    }
+
+    // ── Configuración compartida ───────────────────────────────────────────
+    // Acotado a 'discounts' en vez de config/{doc}: es el único documento que
+    // la app lee (index.html / crecer.html) y desde el código no se puede
+    // enumerar qué más vive bajo config/ en la base real. Abrir solo lo usado.
+    // Sin esta regla la lectura fallaba siempre y el canje de descuentos caía
+    // al catch — estaba muerto desde el principio.
+    match /config/discounts {
+      allow read:  if request.auth != null;
+      allow write: if false;
+    }
+
+    // ── Infraestructura server-only ────────────────────────────────────────
+    // stripeEvents:    recibos de idempotencia del webhook.
+    // stripeCustomers: mapa customerId → uid (3ª vía de resolución del uid).
+    // Sin regla el acceso ya sería denegado; se declaran explícitas para que la
+    // intención quede escrita y nadie las abra por descuido más adelante.
+    match /stripeEvents/{doc}    { allow read, write: if false; }
+    match /stripeCustomers/{doc} { allow read, write: if false; }
 
   }
 }

@@ -2922,7 +2922,7 @@ window.applyCode = async function() {
   if (code === BETA_CODE) {
     codeApplied = 'beta';
     inpEl.classList.add('valid'); inpEl.classList.remove('invalid');
-    fbEl.textContent = '¡Código válido! 60 días de acceso Premium sin costo.';
+    fbEl.textContent = '¡Código válido! ' + BETA_DAYS + ' días de acceso Premium sin costo.';
     fbEl.className = 'code-feedback ok';
     btnEl.textContent = 'Activar acceso Beta';
     return;
@@ -2954,21 +2954,28 @@ window.applyCode = async function() {
 document.getElementById('btn-premium-continuar').addEventListener('click', async function() {
   if (!currentUser) return;
 
-  // Caso 1: código beta → activar plan beta directamente sin Stripe
+  // Caso 1: código beta → activar plan beta sin Stripe.
+  // El canje lo ejecuta el servidor (canjearCodigo): las reglas de Firestore
+  // blindan plan y betaExpiresAt, así que el cliente ya no puede escribirlos.
+  // La validación real del código vive en la Function; la constante BETA_CODE
+  // de este archivo es solo un pre-chequeo para habilitar el botón.
   if (codeApplied === 'beta') {
+    var _fbCode = document.getElementById('code-feedback');
     try {
-      var expires = new Date();
-      expires.setDate(expires.getDate() + BETA_DAYS);
-      await setDoc(doc(db, 'users', currentUser.uid), {
-        plan: 'beta',
-        betaExpiresAt: expires
-      }, { merge: true });
+      const { getFunctions, httpsCallable } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-functions.js');
+      const _fbApp = window.fbApp || fbApp;
+      const canjearCodigo = httpsCallable(getFunctions(_fbApp, 'us-central1'), 'canjearCodigo');
+      await canjearCodigo({ code: document.getElementById('inp-code').value.trim().toUpperCase() });
       closeModal('modal-premium');
       // Refrescar la pantalla
       var userData = await getDoc(doc(db, 'users', currentUser.uid));
       renderHome(userData.data());
     } catch(e) {
       console.warn('[CruzAndo] activar beta:', e);
+      if (_fbCode) {
+        _fbCode.textContent = (e && e.message) ? e.message : 'No se pudo activar el código.';
+        _fbCode.className   = 'code-feedback err';
+      }
     }
     return;
   }

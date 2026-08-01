@@ -105,6 +105,7 @@ exports.evaluarRetiro = functions
 // ══════════════════════════════════════════════════════
 
 const admin = require('firebase-admin');
+const ECO   = require('./economia');
 
 if (!admin.apps.length) admin.initializeApp();
 const db = admin.firestore();
@@ -114,21 +115,37 @@ const PRICE_IDS = {
   anual:   'price_1TbO2rCDSMAtjE9ewW8WOqtN',
 };
 
+// Código beta. Vive AQUÍ, no en el cliente: la constante de index.html/crecer.html
+// queda solo como pre-chequeo cosmético (habilita el botón); la validación real
+// es esta. Antes el código estaba únicamente en el cliente, a la vista de
+// cualquiera en devtools.
+const BETA_CODE = 'BETA2026';
+
+// Versión de la API de Stripe FIJADA a propósito. En 2025-03-31 Stripe movió
+// current_period_end de la suscripción al item; sin fijarla, un `npm update`
+// cambiaría la forma de la respuesta en silencio. (economia.leerPeriodEnd tiene
+// además un fallback al item, por si algún día se sube la versión a conciencia.)
+const STRIPE_API_VERSION = '2023-10-16';
+
+function stripeClient() {
+  return require('stripe')(STRIPE_SECRET_KEY.value(), { apiVersion: STRIPE_API_VERSION });
+}
+
+// Retención de los recibos de idempotencia (stripeEvents). Configurar una
+// política de TTL de Firestore sobre el campo `expiresAt` de esa colección.
+const EVENTOS_TTL_DIAS = 30;
+
 // ── 1. Crear sesión de Checkout ───────────────────────
 exports.createCheckoutSession = functions
   .region('us-central1')
   .runWith({ secrets: ['STRIPE_SECRET_KEY'] })
   .https.onCall(async (data, context) => {
 
-    const stripe = require('stripe')(STRIPE_SECRET_KEY.value());
+    const stripe = stripeClient();
 
     if (!context.auth) {
       throw new functions.https.HttpsError('unauthenticated', 'Debes iniciar sesión.');
     }
-
-    const stripeKey = STRIPE_SECRET_KEY.value();
-    console.log('Stripe key presente:', !!stripeKey, '| longitud:', stripeKey?.length, '| prefijo:', stripeKey?.substring(0, 7));
-    console.log('Plan recibido:', data.plan);
 
     const { plan } = data;
     const priceId  = PRICE_IDS[plan];
@@ -139,6 +156,11 @@ exports.createCheckoutSession = functions
     const uid   = context.auth.uid;
     const email = context.auth.token.email || '';
 
+    // `tipo` explícito: el webhook bifurca por él antes de decidir nada. No
+    // depender solo de `mode` deja el camino listo para los paquetes de
+    // créditos (Pieza 5), que llegan como mode:'payment'.
+    const meta = { uid, tipo: 'suscripcion' };
+
     const session = await stripe.checkout.sessions.create({
       mode:                 'subscription',
       payment_method_types: ['card'],
@@ -146,20 +168,31 @@ exports.createCheckoutSession = functions
       line_items:           [{ price: priceId, quantity: 1 }],
       success_url:          'https://cruzando.app/?checkout=success',
       cancel_url:           'https://cruzando.app/?checkout=cancel',
-      metadata:             { uid },
-      subscription_data:    { metadata: { uid } },
+      metadata:             meta,
+      subscription_data:    { metadata: meta },
     });
 
     return { url: session.url };
   });
 
-// ── 2. Webhook — actualizar plan en Firestore ─────────
+// ── 2. Webhook ────────────────────────────────────────
+// Fuente de verdad de la suscripción: customer.subscription.*
+//
+// Las invoices NO deciden acceso. Llevan su propio metadata (vacío) y obligarían
+// a un retrieve extra por evento; en cambio customer.subscription.created/updated
+// traen de forma nativa el uid (vía subscription_data.metadata), el status, el
+// current_period_end y el price. Stripe emite subscription.updated en cada
+// renovación, así que la vigencia se mantiene sola.
+//
+// El árbol de decisión completo vive en economia.procesarEvento(), que recibe db
+// y stripe inyectados: así se puede verificar con dobles, sin emulador. Esta
+// función es solo el envoltorio HTTP (firma + códigos de estado).
 exports.stripeWebhook = functions
   .region('us-central1')
   .runWith({ secrets: ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET'] })
   .https.onRequest(async (req, res) => {
 
-    const stripe = require('stripe')(STRIPE_SECRET_KEY.value());
+    const stripe = stripeClient();
     const sig    = req.headers['stripe-signature'];
     const secret = STRIPE_WEBHOOK_SECRET.value();
     let event;
@@ -167,44 +200,26 @@ exports.stripeWebhook = functions
     try {
       event = stripe.webhooks.constructEvent(req.rawBody, sig, secret);
     } catch (err) {
-      console.error('Webhook signature error:', err.message);
+      console.error('[webhook] firma inválida:', err.message);
       return res.status(400).send('Webhook error: ' + err.message);
     }
 
-    const uid = event?.data?.object?.metadata?.uid
-             || event?.data?.object?.subscription_data?.metadata?.uid;
-
-    if (!uid) {
-      console.warn('No uid en metadata, evento ignorado:', event.type);
-      return res.json({ received: true });
+    try {
+      await ECO.procesarEvento(event, {
+        db:        db,
+        stripe:    stripe,
+        PRICE_IDS: PRICE_IDS,
+        ahora:     new Date(),
+        ttlDias:   EVENTOS_TTL_DIAS
+      });
+    } catch (e) {
+      // 500 → Stripe reintenta. Es lo que queremos ante un fallo real: el
+      // recibo de idempotencia solo se escribe si la transacción completó.
+      console.error('[webhook] fallo procesando', event.id, event.type, e);
+      return res.status(500).send('Error procesando el evento.');
     }
 
-    const userRef = db.collection('users').doc(uid);
-
-    switch (event.type) {
-
-      case 'checkout.session.completed':
-      case 'invoice.paid': {
-        var updateData = { plan: 'premium', stripeUpdatedAt: new Date().toISOString() };
-        if (event.data.object.customer) {
-          updateData.stripeCustomerId = event.data.object.customer;
-        }
-        await userRef.set(updateData, { merge: true });
-        console.log('Plan → premium:', uid);
-        break;
-      }
-
-      case 'customer.subscription.deleted':
-      case 'invoice.payment_failed':
-        await userRef.set({ plan: 'free', stripeUpdatedAt: new Date().toISOString() }, { merge: true });
-        console.log('Plan → free:', uid);
-        break;
-
-      default:
-        console.log('Evento ignorado:', event.type);
-    }
-
-    res.json({ received: true });
+    return res.json({ received: true });
   });
 
 // ── 3. Portal de gestión de suscripción ──────────────────
@@ -217,7 +232,7 @@ exports.createPortalSession = functions
       throw new functions.https.HttpsError('unauthenticated', 'Debes iniciar sesión.');
     }
 
-    const stripe = require('stripe')(STRIPE_SECRET_KEY.value());
+    const stripe = stripeClient();
     const uid    = context.auth.uid;
 
     const userDoc    = await db.collection('users').doc(uid).get();
@@ -233,4 +248,160 @@ exports.createPortalSession = functions
     });
 
     return { url: session.url };
+  });
+
+// ══════════════════════════════════════════════════════
+// CIMIENTO ECONÓMICO — alta, canje de códigos, estado de cuenta
+// ══════════════════════════════════════════════════════
+
+// ── 4. crearCuentaEconomica ──────────────────────────────
+// Siembra billing/state + los 5 créditos de regalo al registrarse.
+//
+// Cubre a los usuarios NUEVOS. Los que ya existían (la comunidad beta actual)
+// no reciben nada por aquí — a ellos los cubre la vía perezosa de ensureBilling,
+// que se dispara en su primer gasto. Entre los dos mecanismos la cobertura es
+// completa y NO hace falta ningún script de backfill.
+//
+// Las dos vías pasan por el mismo ensureBilling, que es idempotente por la
+// existencia de billing/state: quien reciba el regalo aquí no lo vuelve a
+// recibir después, y viceversa.
+//
+// No depende de que exista users/{uid}: en Firestore un documento de
+// subcolección puede existir sin su documento padre, así que da igual si este
+// trigger corre antes o después del ensureUserDoc del cliente.
+exports.crearCuentaEconomica = functions
+  .region('us-central1')
+  .auth.user()
+  .onCreate(async (user) => {
+    const ahora = new Date();
+    try {
+      await db.runTransaction(async (tx) => {
+        await ECO.ensureBilling(db, user.uid, tx, ahora);
+      });
+      console.log('[alta] billing sembrado con', ECO.CREDITOS_REGALO,
+                  'créditos de regalo:', user.uid);
+    } catch (e) {
+      // No se relanza a propósito: si esto falla, la vía perezosa lo cubre en el
+      // primer gasto. Un fallo aquí no debe dejar al usuario sin cuenta.
+      console.error('[alta] fallo sembrando billing (la vía perezosa lo cubrirá):',
+                    user.uid, e);
+    }
+  });
+
+// ── 5. canjearCodigo ─────────────────────────────────────
+// Sustituye al setDoc del cliente que las reglas nuevas bloquean.
+// El cliente ya no puede escribir plan/betaExpiresAt: este es el único camino.
+exports.canjearCodigo = functions
+  .region('us-central1')
+  .https.onCall(async (data, context) => {
+
+    if (!context.auth) {
+      throw new functions.https.HttpsError('unauthenticated', 'Debes iniciar sesión.');
+    }
+
+    const uid  = context.auth.uid;
+    const code = String((data && data.code) || '').trim().toUpperCase();
+
+    if (!code) {
+      throw new functions.https.HttpsError('invalid-argument', 'Escribe un código.');
+    }
+    if (code !== BETA_CODE) {
+      throw new functions.https.HttpsError('not-found', 'Código no válido.');
+    }
+
+    const ahora   = new Date();
+    const expira  = new Date(ahora.getTime() + ECO.BETA_DIAS * ECO.DIA_MS);
+    const userRef = db.collection('users').doc(uid);
+    // El registro de canjes vive bajo billing/ → server-only, el cliente lo lee
+    // pero no lo puede falsificar para volver a canjear.
+    const canjesRef = userRef.collection('billing').doc('canjes');
+
+    await db.runTransaction(async (tx) => {
+      // ── lecturas ──
+      const canjesSnap = await tx.get(canjesRef);
+      const canjes     = (canjesSnap.exists && canjesSnap.data().codigos) || {};
+      const userSnap   = await tx.get(userRef);
+      const planActual = String((userSnap.exists && userSnap.data().plan) || 'free')
+                           .toLowerCase().trim();
+
+      if (canjes[code]) {
+        throw new functions.https.HttpsError(
+          'already-exists', 'Ya usaste ese código.');
+      }
+      if (planActual === 'developer') {
+        throw new functions.https.HttpsError(
+          'failed-precondition', 'Tu cuenta ya tiene acceso completo.');
+      }
+      // Un suscriptor que canjea beta se quedaría atrapado: 'beta' no lo gobierna
+      // Stripe, así que planEspejo() no volvería a restaurarlo nunca a premium.
+      if (planActual === 'premium' || planActual === 'pro') {
+        throw new functions.https.HttpsError(
+          'failed-precondition', 'Ya tienes una suscripción activa.');
+      }
+
+      // ── escrituras ──
+      const codigos = Object.assign({}, canjes);
+      codigos[code] = { at: ahora, dias: ECO.BETA_DIAS };
+
+      tx.set(userRef, { plan: 'beta', betaExpiresAt: expira }, { merge: true });
+      tx.set(canjesRef, { codigos: codigos, updatedAt: ahora }, { merge: true });
+    });
+
+    console.log('[canje] beta activado:', uid, '·', ECO.BETA_DIAS, 'días');
+    return { ok: true, plan: 'beta', dias: ECO.BETA_DIAS, expiresAt: expira.toISOString() };
+  });
+
+// ── 6. estadoCuenta ──────────────────────────────────────
+// Ventana de inspección del cimiento. Ninguna UI la llama todavía: existe para
+// poder verificar la Pieza 1 desde la consola antes de construir encima.
+//
+// Dispara ensureBilling — es decir, es una de las puertas de la VÍA PEREZOSA:
+// un beta tester que ya existía recibe aquí sus 5 créditos la primera vez que
+// se le consulta el estado. La otra puerta será entrarPain() en la Pieza 2.
+exports.estadoCuenta = functions
+  .region('us-central1')
+  .https.onCall(async (data, context) => {
+
+    if (!context.auth) {
+      throw new functions.https.HttpsError('unauthenticated', 'Debes iniciar sesión.');
+    }
+
+    const uid   = context.auth.uid;
+    const ahora = new Date();
+
+    let billing = null;
+    await db.runTransaction(async (tx) => {
+      const r = await ECO.ensureBilling(db, uid, tx, ahora);
+      billing = r.data;
+    });
+
+    const userSnap = await db.collection('users').doc(uid).get();
+    const rentSnap = await db.collection('users').doc(uid).collection('rentals').get();
+
+    const rentals = rentSnap.docs.map(function (d) {
+      const r = d.data();
+      return {
+        painId:    r.painId,
+        mid:       r.mid,
+        expiresAt: r.expiresAt ? ECO.msDe(r.expiresAt) : null,
+        via:       r.via,
+        origen:    r.origen
+      };
+    });
+
+    return {
+      plan:    (userSnap.exists && userSnap.data().plan) || 'free',
+      credits: billing.credits,
+      sub: {
+        status:            billing.sub.status,
+        plan:              billing.sub.plan,
+        currentPeriodEnd:  billing.sub.currentPeriodEnd
+                             ? ECO.msDe(billing.sub.currentPeriodEnd) : null,
+        cancelAtPeriodEnd: billing.sub.cancelAtPeriodEnd,
+        vigente:           ECO.suscripcionVigente(billing.sub, ahora.getTime())
+      },
+      activeRentals: Object.keys(ECO.podarRentas(billing.activeRentals, ahora.getTime())),
+      rentals:       rentals,
+      lifetime:      billing.lifetime
+    };
   });
