@@ -1336,7 +1336,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 
   // ── Orden del elenco · PUNTO ÚNICO ──────────────────────────────
   // Toda decisión de orden del wheel pasa por aquí:
-  //   • user + 'navegar'      → afinidad primaria + completado secundario (4 grupos); sin señal → orden JSON.
+  //   • user + 'navegar'      → renta vigente primero, luego afinidad, luego completado; sin señal → orden JSON.
   //   • developer + 'navegar' → orden de itinerario (mid canónico ascendente); sin check ni hundimiento.
   //   • 'buscar' / 'ejes'     → no se reordenan (búsqueda movida por el usuario).
   var _perfil = null;              // Fase B/C: pesos por eje del perfil (poblado tras Auth / al completar el test)
@@ -1355,28 +1355,44 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
       return A < B ? -1 : A > B ? 1 : 0;
     });
   }
-  // Afinidad (Fase C) + completado (Pieza 2): sort estable de CLAVE COMPUESTA —
-  //   1º afinidad descendente (peso del perfil en el ejePrincipal),
-  //   2º a igual afinidad, pendiente (0) antes que completado (1),
-  //   3º a igual todo, orden original (índice).
-  // Produce los 4 grupos: afín-pendiente → afín-completado → no-afín-pendiente →
-  // no-afín-completado, SIN tratarlos como bloques (el sort compuesto los ordena).
-  // El completado desempata DENTRO de la banda de afinidad, no globalmente
-  // (un afín-completado queda por encima de un no-afín-pendiente).
-  // NO filtra: todo sigue presente y clicable (libertad). Sin afinidad NI
-  // completados → lista intacta. 2 args (sin completados) = comportamiento Fase C.
+  // ¿Este pain tiene renta vigente? Estado LOCAL de access.js: 0 lecturas.
+  // Un suscriptor devuelve 'sub' para todos, así que no tiene rentas que subir
+  // — y es correcto: entra en cualquiera, no hay nada que priorizar.
+  function _rentado(id){
+    if (!window.CZAccess || !CZAccess.listo || !CZAccess.listo()) return false;
+    var st = CZAccess.estado(id);
+    return !!(st && st.acceso === 'renta');
+  }
+
+  // Renta (Pieza 2) + afinidad (Fase C) + completado: sort estable de CLAVE
+  // COMPUESTA —
+  //   1º renta vigente primero (0) antes que sin renta (1),
+  //   2º afinidad descendente (peso del perfil en el ejePrincipal),
+  //   3º a igual afinidad, pendiente (0) antes que completado (1),
+  //   4º a igual todo, orden original (índice).
+  // La renta manda sobre la afinidad a propósito: la afinidad es una conjetura
+  // del perfil, la renta es un acto deliberado del usuario CON fecha de
+  // caducidad. Quien gastó un crédito tiene una semana para volver, y volver
+  // debe costarle un gesto, no una búsqueda.
+  // Dentro de cada banda se conserva la lógica anterior (afín-pendiente →
+  // afín-completado → no-afín-pendiente → no-afín-completado), así que un pain
+  // rentado Y rezado sigue arriba —le quedan días de acceso y re-rezarlo no
+  // vuelve a cobrar— pero por debajo de los rentados que aún no ha rezado.
+  // NO filtra: todo sigue presente y clicable. Sin ninguna señal → lista intacta.
   function ordenarPorAfinidad(list, perfil, completados){
     var hayComp = completados && completados.size;
     var hayPeso = false;
     if (perfil) for (var k in perfil) { if (perfil[k] > 0) { hayPeso = true; break; } }
-    if (!hayPeso && !hayComp) return list;   // ni afinidad ni completados → sin reordenar
-    return list
-      .map(function(p, i){ return {
-        p:p, i:i,
-        s:(perfil && perfil[p.ejePrincipal]) || 0,          // afinidad
-        c:(hayComp && completados.has(p.id)) ? 1 : 0        // completado (secundario, dentro de la banda)
-      }; })
-      .sort(function(a, b){ return (b.s - a.s) || (a.c - b.c) || (a.i - b.i); })
+    var dec = list.map(function(p, i){ return {
+      p:p, i:i,
+      r:_rentado(p.id) ? 0 : 1,                           // renta vigente (primaria)
+      s:(perfil && perfil[p.ejePrincipal]) || 0,          // afinidad
+      c:(hayComp && completados.has(p.id)) ? 1 : 0        // completado (dentro de la banda)
+    }; });
+    var hayRenta = dec.some(function(x){ return x.r === 0; });
+    if (!hayPeso && !hayComp && !hayRenta) return list;   // ninguna señal → sin reordenar
+    return dec
+      .sort(function(a, b){ return (a.r - b.r) || (b.s - a.s) || (a.c - b.c) || (a.i - b.i); })
       .map(function(x){ return x.p; });
   }
 
