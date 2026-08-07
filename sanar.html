@@ -2003,9 +2003,21 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
       restaurar(); avisoAcceso('No se pudo abrir la oración. Inténtalo de nuevo.');
     }).catch(function(e){
       console.warn('[acceso] entrar:', e);
-      restaurar(); avisoAcceso('No hay conexión. Inténtalo en un momento.');
+      restaurar(); avisoAcceso(_msgError(e));
     });
   };
+
+  // Un fallo del servidor no es un fallo de red. Decir "no hay conexión" cuando
+  // el problema está del otro lado manda a buscar donde no hay nada — pasó con
+  // entrarPain sin desplegar: el navegador reportaba CORS y la app, wifi.
+  function _msgError(e){
+    var c = (e && e.code) || '';
+    if (c === 'functions/unauthenticated') return 'Tu sesión expiró. Vuelve a entrar.';
+    if (c === 'functions/invalid-argument') return 'Esta oración no está disponible.';
+    if (c === 'functions/unavailable' || (!navigator.onLine))
+      return 'No hay conexión. Inténtalo en un momento.';
+    return 'El servidor no respondió. Inténtalo en un momento.';
+  }
 
   function avisoAcceso(txt){
     var v = $('view'); if (!v) return;
@@ -2072,7 +2084,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
         console.warn('[acceso] cobro:', e);
         go.disabled = false; cancel.disabled = false;
         go.textContent = 'Utiliza 1 crédito';
-        avisoAcceso('No se pudo completar. Inténtalo de nuevo.');
+        avisoAcceso(_msgError(e));
       });
     });
     $('acc-go').focus();
