@@ -351,7 +351,34 @@ exports.canjearCodigo = functions
     return { ok: true, plan: 'beta', dias: ECO.BETA_DIAS, expiresAt: expira.toISOString() };
   });
 
-// ── 6. estadoCuenta ──────────────────────────────────────
+// ── 6. entrarPain ────────────────────────────────────────
+// El cobro. Toda la lógica vive en economia.entrarPain(); aquí solo va la
+// autenticación y la traducción de errores. El cliente NUNCA descuenta un
+// crédito: las reglas hacen billing/state write:false, así que este es el
+// único camino posible.
+exports.entrarPain = functions
+  .region('us-central1')
+  .https.onCall(async (data, context) => {
+
+    if (!context.auth) {
+      throw new functions.https.HttpsError('unauthenticated', 'Debes iniciar sesión.');
+    }
+
+    try {
+      return await ECO.entrarPain(context.auth.uid, data || {}, {
+        db:    db,
+        ahora: new Date()
+      });
+    } catch (e) {
+      if (e && e.code === 'pain-invalido') {
+        throw new functions.https.HttpsError('invalid-argument', 'Oración no válida.');
+      }
+      console.error('[entrarPain] fallo:', context.auth.uid, data && data.painId, e);
+      throw new functions.https.HttpsError('internal', 'No se pudo abrir la oración.');
+    }
+  });
+
+// ── 7. estadoCuenta ──────────────────────────────────────
 // Ventana de inspección del cimiento. Ninguna UI la llama todavía: existe para
 // poder verificar la Pieza 1 desde la consola antes de construir encima.
 //

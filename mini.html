@@ -52,6 +52,10 @@ window._fbFirestore = {
   serverTimestamp: function(){ return firebase.firestore.FieldValue.serverTimestamp(); }
 };
 </script>
+<!-- plan-utils: resolvePlan, para saber si este usuario entra por bypass.
+     access.js: solo se usa para LEER el acceso — mini nunca cobra. -->
+<script src="plan-utils.js"></script>
+<script src="access.js"></script>
 <style>
 :root{
   /* Estructura (chrome oscuro cinematográfico) */
@@ -194,6 +198,17 @@ body.light .q-textarea{background:rgba(255,255,255,.6);border-color:rgba(10,37,4
 .sg-btn{padding:15px 30px;border-radius:26px;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:15px;font-weight:600;background:linear-gradient(160deg,var(--gold),var(--gold-deep));color:#1a1305}
 .sg-btn:disabled{opacity:.5;cursor:default;background:rgba(243,234,216,.2);color:var(--parch)}
 .sg-btn:active:not(:disabled){transform:scale(.96)}
+
+/* Bloqueo por falta de acceso (Pieza 2). Cubre todo, incluida una oración ya
+   empezada: si la verificación llega tarde y dice que no, se corta. */
+.acc-block{position:fixed;inset:0;z-index:95;display:flex;align-items:center;justify-content:center;padding:1.4rem;background:radial-gradient(120% 80% at 50% 20%,rgba(10,20,32,.88),rgba(5,6,12,.98));backdrop-filter:blur(6px)}
+.acc-block-card{max-width:320px;text-align:center;color:var(--parch)}
+.acc-block-ic{width:52px;height:52px;border-radius:50%;background:rgba(2,187,224,.12);color:#02BBE0;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem}
+.acc-block-ic svg{width:26px;height:26px}
+.acc-block-title{font-family:'Crimson Pro',serif;font-size:23px;font-weight:600;line-height:1.25;margin-bottom:6px}
+.acc-block-sub{font-size:14px;opacity:.7;margin-bottom:26px}
+.acc-block-btn{padding:15px 30px;border-radius:26px;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:15px;font-weight:600;background:#02BBE0;color:#04343c}
+.acc-block-btn:active{transform:scale(.96)}
 
 .hidden{display:none!important}
 </style>
@@ -844,9 +859,83 @@ function paintTexts(){
 }
 const startGate=$('startGate'), startBtn=$('startBtn');
 startBtn.onclick=()=>{ startGate.classList.add('hidden'); startCanto(false); };
+
+/* ═══════════ ACCESO (Pieza 2) ═══════════
+   mini VERIFICA, nunca cobra. El cobro ya ocurrió en el handoff de sanar.
+
+   El camino normal no paga peaje de latencia: sanar deja un testigo en
+   sessionStorage justo antes de navegar, y con él la puerta se abre en cuanto
+   los datos están listos. Un deep-link puro (sin testigo) espera a la
+   verificación autoritativa. En LOS DOS casos la verificación corre igual: si
+   dice que no, se bloquea aunque la oración ya hubiera empezado.
+
+   Aviso honesto: los assets de R2 son públicos y sin firmar, así que esto es un
+   gate de producto, no criptográfico. Cerrarlo de verdad exigiría firmar las
+   URLs de R2, que es un proyecto aparte. */
+let _datosListos=false, _accesoOk=null;
+
+function _testigoFresco(){
+  try{
+    const raw=sessionStorage.getItem('cruzando_entrada');
+    if(!raw) return false;
+    const t=JSON.parse(raw);
+    return !!(t && t.painId===PAINID && (Date.now()-t.ts)<60000);
+  }catch(e){ return false; }
+}
+
+function _revisarPuerta(){
+  if(_accesoOk===false){ _bloquearAcceso(); return; }
+  if(!_datosListos) return;
+  if(_accesoOk===true || _testigoFresco() || !PAINID){
+    startBtn.disabled=false; startBtn.textContent='Tocar para orar';
+  }else{
+    startBtn.disabled=true;  startBtn.textContent='Comprobando acceso…';
+  }
+}
+
+function _bloquearAcceso(){
+  if($('accBlock')) return;
+  try{ audio.pause(); playing=false; }catch(e){}
+  try{ cantoPause(); }catch(e){}
+  const ov=document.createElement('div');
+  ov.className='acc-block'; ov.id='accBlock';
+  ov.setAttribute('role','dialog'); ov.setAttribute('aria-modal','true');
+  ov.innerHTML=
+    '<div class="acc-block-card">'+
+      '<div class="acc-block-ic">'+
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+
+          '<rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>'+
+      '</div>'+
+      '<div class="acc-block-title">Esta oración necesita un crédito</div>'+
+      '<div class="acc-block-sub">Vuelve a Sanar para abrirla.</div>'+
+      '<button class="acc-block-btn" id="accBlockGo">Volver a Sanar</button>'+
+    '</div>';
+  document.body.appendChild(ov);
+  $('accBlockGo').onclick=()=>{ location.href = base + 'sanar.html'; };
+  $('accBlockGo').focus();
+}
+
+_auth.onAuthStateChanged(u=>{
+  if(!u || !PAINID || !window.CZAccess) return;   // sin pain que verificar → puerta normal
+  Promise.all([
+    _db.collection('users').doc(u.uid).get().catch(()=>null),
+    CZAccess.init(_db, u.uid)
+  ]).then(res=>{
+    const ud=(res[0] && res[0].exists) ? res[0].data() : {};
+    window.currentPlan = window.resolvePlan ? window.resolvePlan(ud) : 'free';
+    const st=CZAccess.estado(PAINID);
+    _accesoOk = (st.acceso==='sub' || st.acceso==='renta');
+    _revisarPuerta();
+  }).catch(e=>{
+    // Sin red no se castiga al usuario: si trae testigo fresco, entra.
+    console.warn('[mini] verificación de acceso falló:', e);
+    _revisarPuerta();
+  });
+});
+
 loadData()
-  .then(()=>{ paintTexts(); startBtn.disabled=false; startBtn.textContent='Tocar para orar'; })
-  .catch(err=>{ console.error('[mini] loadData falló →', err); paintTexts(); startBtn.disabled=false; startBtn.textContent='Tocar para orar'; });
+  .then(()=>{ paintTexts(); _datosListos=true; _revisarPuerta(); })
+  .catch(err=>{ console.error('[mini] loadData falló →', err); paintTexts(); _datosListos=true; _revisarPuerta(); });
 </script>
 </body>
 </html>

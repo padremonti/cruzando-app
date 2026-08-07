@@ -25,6 +25,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<!-- functions-compat: solo sanar lo necesita (llama a entrarPain). mini no cobra. -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-functions-compat.js"></script>
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
@@ -50,6 +52,7 @@ window._fbFirestore = {
 };
 </script>
 <script src="plan-utils.js"></script>
+<script src="access.js"></script>
 <style>
 *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
 
@@ -346,6 +349,141 @@ body {
 .foco-btn{ width:100%; padding:14px; border-radius:14px; border:none; font-family:inherit; font-size:1rem; font-weight:700; cursor:pointer; -webkit-tap-highlight-color:transparent; }
 .foco-btn-go{ background:var(--orange); color:#fff; }
 .foco-btn-cancel{ background:transparent; color:var(--text-soft); font-weight:600; }
+
+/* ═══ PIEZA 2 · Pantallas del sistema económico ═══════════════════════════
+   Los mockups venían con su propio vocabulario de tokens (--surface-0,
+   --text-primary…). Traducidos a los de sanar para que funcionen en los DOS
+   temas: --surface-0→--bg2, --surface-2→--card2, --text-primary→--text,
+   --text-secondary→--text-soft, --text-muted→--text-dim, --text-accent→--brand,
+   --bg-accent→--brand-ultra, --text-success→--brand.
+   El cian #02BBE0 va literal donde es marca — y resulta que --brand ya ES ese
+   color exacto, así que la moneda usa el token. */
+
+.acc-overlay{
+  position:fixed; inset:0; z-index:70; display:flex; align-items:center; justify-content:center;
+  padding:1rem; background:rgba(0,0,0,.55); backdrop-filter:blur(3px);
+  opacity:0; transition:opacity .28s ease; overflow-y:auto;
+}
+.acc-overlay.on{ opacity:1; }
+.acc-card{
+  background:var(--card2); border:0.5px solid var(--border); border-radius:16px;
+  padding:1.8rem 1.4rem; width:min(320px,92vw); text-align:center;
+  box-shadow:0 18px 50px -12px rgba(0,0,0,.6);
+}
+.acc-card-sc{ padding:1.4rem 1.2rem; }
+.acc-title{ margin:0 0 4px; font-size:17px; font-weight:700; color:var(--text); }
+.acc-sub{ font-size:13px; color:var(--text-soft); margin:0 0 1.6rem; line-height:1.5; }
+
+/* Escena de la moneda: cae por la ranura y desaparece tras una máscara del
+   MISMO color de la tarjeta → ilusión de entrar en una caja invisible. */
+.acc-escena{ position:relative; height:120px; margin:0 auto; width:90px; }
+.acc-moneda{
+  position:absolute; left:50%; top:0; margin-left:-20px; width:40px; height:40px;
+  border-radius:50%; background:var(--brand); color:#04343c; font-weight:700; font-size:17px;
+  display:flex; align-items:center; justify-content:center; z-index:1; opacity:0;
+}
+.acc-moneda.cae{ animation:accCae 1s cubic-bezier(.55,.1,.72,1) forwards; }
+@keyframes accCae{
+  0%{ opacity:0; top:0; transform:rotateY(0); }
+  15%{ opacity:1; top:10px; }
+  75%{ opacity:1; top:60px; transform:rotateY(210deg); }
+  100%{ opacity:1; top:82px; transform:rotateY(250deg); }
+}
+.acc-mascara{ position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:90px; height:44px; background:var(--card2); z-index:2; }
+.acc-ranura{ position:absolute; bottom:42px; left:50%; transform:translateX(-50%); width:54px; height:7px; border-radius:4px; background:var(--text); opacity:.8; z-index:3; }
+.acc-total{ font-size:13px; color:var(--text-soft); margin:.4rem 0 0; }
+.acc-total b{ font-size:26px; font-weight:700; color:var(--text); display:inline-block; min-width:24px; transition:transform .25s, color .25s; }
+.acc-total b.pulso{ transform:scale(1.35); color:var(--brand); }
+.acc-aviso-1{ font-size:12px; color:var(--text-dim); margin:.9rem 0 0; }
+.acc-btns{ display:flex; flex-direction:column; gap:8px; margin-top:1.5rem; }
+.acc-btn{ width:100%; padding:14px; border-radius:14px; border:none; font-family:inherit; font-size:1rem; font-weight:700; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.acc-btn-go{ background:var(--brand); color:#04343c; }
+.acc-btn-go:disabled{ opacity:.6; cursor:default; }
+.acc-btn-cancel{ background:transparent; color:var(--text-soft); font-weight:600; }
+.acc-btn-cancel:disabled{ opacity:.4; cursor:default; }
+
+/* Pantalla C · sin créditos */
+.acc-enc{ margin-bottom:1.2rem; }
+.acc-ic{ width:44px; height:44px; border-radius:50%; background:var(--brand-ultra); color:var(--brand); display:flex; align-items:center; justify-content:center; margin:0 auto .7rem; }
+.acc-ic svg{ width:22px; height:22px; }
+.acc-secc{ font-size:12px; color:var(--text-dim); margin:1.1rem 0 .6rem; font-weight:600; text-align:left; }
+.acc-paq{
+  display:flex; align-items:center; justify-content:space-between; width:100%;
+  background:var(--bg2); border:0.5px solid var(--border); border-radius:12px;
+  padding:.75rem .9rem; margin-bottom:8px; cursor:pointer; font-family:inherit;
+  transition:border-color .15s; -webkit-tap-highlight-color:transparent;
+}
+.acc-paq:hover{ border-color:var(--brand); }
+.acc-paq.destacado{ border:2px solid var(--brand); }
+.acc-paq-izq{ display:flex; align-items:center; gap:10px; }
+.acc-moneda-mini{ width:30px; height:30px; border-radius:50%; background:var(--brand); color:#04343c; font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
+.acc-paq-cant{ display:block; font-size:15px; font-weight:600; color:var(--text); text-align:left; }
+.acc-paq-unit{ display:block; font-size:11px; color:var(--text-dim); text-align:left; }
+.acc-paq-precio{ font-size:15px; font-weight:600; color:var(--text); }
+.acc-badge{ font-size:10px; background:var(--brand-ultra); color:var(--brand); padding:2px 7px; border-radius:20px; margin-left:6px; font-weight:600; }
+.acc-sub-titulo{ font-size:24px; font-weight:700; color:var(--text); text-align:center; line-height:1.25; margin:1.6rem 0 .3rem; }
+.acc-big{ color:var(--brand); }
+.acc-sub-sub{ text-align:center; font-size:13px; color:var(--text-soft); margin:0 0 1rem; }
+.acc-sub-opts{ display:flex; gap:8px; }
+.acc-sub-opt{ flex:1; text-align:center; background:var(--bg2); border:0.5px solid var(--border); border-radius:12px; padding:.8rem .5rem; cursor:pointer; font-family:inherit; transition:border-color .15s; }
+.acc-sub-opt:hover{ border-color:var(--brand); }
+.acc-sub-opt.anual{ border:2px solid var(--brand); }
+.acc-sub-opt .acc-p{ display:block; font-size:17px; font-weight:700; color:var(--text); }
+.acc-sub-opt .acc-c{ display:block; font-size:11px; color:var(--text-dim); margin-top:2px; }
+.acc-ahorro{ display:block; font-size:10px; color:var(--brand); margin-top:3px; }
+.acc-cerrar{ text-align:center; margin-top:1.1rem; }
+.acc-cerrar button{ background:none; border:none; color:var(--text-dim); font-size:13px; cursor:pointer; font-family:inherit; }
+
+/* Aviso efímero (errores de red del cobro) */
+.acc-aviso{
+  position:fixed; left:50%; bottom:88px; transform:translateX(-50%); z-index:80;
+  background:var(--card2); color:var(--text); border:0.5px solid var(--border);
+  border-radius:12px; padding:10px 16px; font-size:.85rem; max-width:86vw; text-align:center;
+  box-shadow:0 10px 30px -8px rgba(0,0,0,.5);
+}
+
+/* ── Splash de transición al Misterio ── */
+.spl-overlay{
+  position:fixed; inset:0; z-index:90; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; padding:2rem 1.6rem; text-align:center;
+  background:linear-gradient(160deg,#02343c,#021d22); overflow:hidden;
+}
+.spl-halo{
+  position:absolute; top:44%; left:50%; width:220px; height:220px; margin:-140px 0 0 -110px;
+  border-radius:50%; background:radial-gradient(circle,rgba(2,187,224,.2),transparent 70%);
+  animation:splResp 3.2s ease-in-out infinite;
+}
+@keyframes splResp{ 0%,100%{ transform:scale(.88); opacity:.65 } 50%{ transform:scale(1.12); opacity:1 } }
+.spl-cruz{ position:relative; z-index:1; width:50px; height:50px; margin-bottom:1.8rem; animation:splAparece 1s ease-out; }
+.spl-cruz svg{ width:100%; height:100%; }
+@keyframes splAparece{ 0%{ opacity:0; transform:scale(.6) } 100%{ opacity:1; transform:scale(1) } }
+.spl-frase{ position:relative; z-index:1; min-height:120px; display:flex; flex-direction:column; gap:.7rem; justify-content:center; }
+.spl-parte{ color:#e8f7fb; font-size:21px; font-weight:500; line-height:1.3; opacity:0; transform:translateY(8px); animation:splSube 1s ease-out forwards; }
+.spl-parte:nth-child(1){ animation-delay:.4s; }
+.spl-parte:nth-child(2){ animation-delay:1.6s; }
+.spl-parte:nth-child(3){ animation-delay:2.8s; color:#02BBE0; }
+@keyframes splSube{ to{ opacity:1; transform:translateY(0) } }
+/* reduceMotion: las tres frases de golpe, sin halo que respire ni cruz que crezca */
+.spl-quieto .spl-parte{ animation:none; opacity:1; transform:none; }
+.spl-quieto .spl-parte:nth-child(3){ color:#02BBE0; }
+.spl-quieto .spl-halo{ animation:none; }
+.spl-quieto .spl-cruz{ animation:none; }
+
+/* ── Marca de acceso vigente en el elenco (arriba-IZQUIERDA) ──
+   El check de completado vive arriba-derecha; esquinas distintas para que no
+   choquen. Dentro del botón → se desvanece con la opacidad 3D del wheel. */
+.pain-acceso{
+  position:absolute; top:10px; left:10px; z-index:2;
+  display:inline-flex; align-items:center; gap:4px;
+  background:var(--brand-ultra); color:var(--brand);
+  border:0.5px solid var(--brand); border-radius:20px;
+  padding:2px 8px; font-size:10px; font-weight:700; letter-spacing:.01em;
+  pointer-events:none;
+}
+.pain-acceso svg{ width:10px; height:10px; }
+/* La pastilla vive sobre la esquina superior izquierda, donde empieza el texto:
+   la tarjeta que la lleva necesita aire arriba para no quedar pisada. */
+.pain-card.conacceso{ padding-top:34px; }
 
 /* ── Coach-marks (onboarding de primer uso) ── */
 .coach {
@@ -1298,10 +1436,17 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     // Check "rezado" SOLO en modo user (el developer inspecciona contenido, no su
     // historial personal). Va dentro del botón → se desvanece con la opacidad 3D.
     var done = !DEV && _completados.has(p.id);
+    // Marca de acceso vigente (Pieza 2): pastilla cian arriba-IZQUIERDA con los
+    // días que quedan de la renta. Solo en modo user, y solo si hay renta de
+    // ESTE pain — un suscriptor no la ve (entra en todos, no la aporta nada).
+    // Estado LOCAL: 0 lecturas, se calcula del caché ya hidratado.
+    var acc = (!DEV && window.CZAccess) ? CZAccess.estado(p.id) : null;
+    var vig = (acc && acc.acceso === 'renta' && acc.etiqueta) ? acc.etiqueta : null;
     // La tarjeta muestra SOLO la frase + color/label del eje. Nunca los tags.
-    return '<button class="pain-card'+(done?' done':'')+'" data-id="'+p.id+'" style="--_eje:'+e.color+'" onclick="onWheelTap(this,\''+p.id+'\')">'+
+    return '<button class="pain-card'+(done?' done':'')+(vig?' conacceso':'')+'" data-id="'+p.id+'" style="--_eje:'+e.color+'" onclick="onWheelTap(this,\''+p.id+'\')">'+
       esc(p.texto)+
       '<span class="pain-eje">'+ejeSVG(p.ejePrincipal)+esc(e.label)+'</span>'+
+      (vig ? '<span class="pain-acceso" aria-label="Con acceso, '+esc(vig)+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M7 10V7a4 4 0 0 1 8 0v1.5"/></svg>'+esc(vig)+'</span>' : '')+
       (done ? '<span class="pain-check" aria-label="Rezado" title="Rezado"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span>' : '')+
       '</button>';
   }
@@ -1820,15 +1965,212 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
           hoEl('ho-mal',   oBase + 1.2, esc(m.mal || ''))+
         '</div>'+
       '</div>'+
-      hoBtn('btn-primary', oBase + 1.8, 'irMini()',      'Entrar al Misterio')+
+      hoBtn('btn-primary', oBase + 1.8, 'entrarMisterio(this)', 'Entrar al Misterio')+
       hoBtn('btn-ghost',   oBase + 2.0, 'volverElenco()', 'Elegir otro dolor');
 
     _sanEntrada();   // toggle .san-go → dispara las animaciones (no-op bajo reduceMotion)
   }
 
   window.irMini = function(){
-    var mid = estado.misterioSel.mid;
-    navTo('mini.html?mid=' + encodeURIComponent(mid) + '&pain=' + encodeURIComponent(estado.painSel.id));
+    var mid = estado.misterioSel.mid, pid = estado.painSel.id;
+    // Testigo para mini: le dice que este acceso acaba de verificarse en el
+    // servidor, para que no penalice con una espera el camino normal. NO es un
+    // mecanismo de seguridad — mini verifica igual, siempre (ver mini.html).
+    try {
+      sessionStorage.setItem('cruzando_entrada',
+        JSON.stringify({ painId: pid, ts: Date.now() }));
+    } catch(e){}
+    navTo('mini.html?mid=' + encodeURIComponent(mid) + '&pain=' + encodeURIComponent(pid));
+  };
+
+  // ── COBRO · el botón "Entrar al Misterio" ───────────────────────
+  // Bifurca con la respuesta del SERVIDOR, no con el caché local: la primera
+  // llamada va con confirmado:false y no escribe nada, así que es barata y
+  // autoritativa. El caché local solo pinta las marcas del elenco.
+  window.entrarMisterio = function(btn){
+    var p = estado.painSel, m = estado.misterioSel;
+    if (!p || !m) return;
+    if (!window.CZAccess) { irMini(); return; }    // sin módulo → no bloquear la oración
+
+    var etiquetaPrev = btn ? btn.textContent : '';
+    if (btn) { btn.disabled = true; btn.textContent = 'Un momento…'; }
+    function restaurar(){ if (btn) { btn.disabled = false; btn.textContent = etiquetaPrev; } }
+
+    CZAccess.entrar(p.id, { confirmado:false, origen:'sanar' }).then(function(r){
+      if (r && r.ok) { restaurar(); abrirSplash(); return; }          // sub o renta
+      if (r && r.motivo === 'requiere-confirmacion') { restaurar(); abrirCobro(r.saldo); return; }
+      if (r && r.motivo === 'sin-saldo') { restaurar(); abrirSinCreditos(); return; }
+      restaurar(); avisoAcceso('No se pudo abrir la oración. Inténtalo de nuevo.');
+    }).catch(function(e){
+      console.warn('[acceso] entrar:', e);
+      restaurar(); avisoAcceso('No hay conexión. Inténtalo en un momento.');
+    });
+  };
+
+  function avisoAcceso(txt){
+    var v = $('view'); if (!v) return;
+    var d = document.createElement('div');
+    d.className = 'acc-aviso'; d.setAttribute('role','status'); d.textContent = txt;
+    v.appendChild(d);
+    setTimeout(function(){ if (d.parentNode) d.remove(); }, 4200);
+  }
+
+  // ── PANTALLA A · confirmación con moneda ────────────────────────
+  // Overlay, no fase: estado.fase sigue en 'handoff' todo el tiempo, así que si
+  // algo falla el usuario sigue de pie en el handoff con su botón. Mismo patrón
+  // que el velo de foco.
+  var _accEsc = null;
+  function cerrarAcc(){
+    var ov = $('acc-ov');
+    if (_accEsc) { document.removeEventListener('keydown', _accEsc); _accEsc = null; }
+    if (ov) ov.remove();
+  }
+  function montarAcc(html, aria){
+    cerrarAcc();
+    var ov = el('<div class="acc-overlay" id="acc-ov" role="dialog" aria-modal="true" aria-label="'+aria+'">'+html+'</div>');
+    document.body.appendChild(ov);
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ ov.classList.add('on'); }); });
+    return ov;
+  }
+
+  function abrirCobro(saldo){
+    var m = estado.misterioSel, p = estado.painSel;
+    var ov = montarAcc(
+      '<div class="acc-card">'+
+        '<h3 class="acc-title">'+esc(m.titulo)+'</h3>'+
+        '<p class="acc-sub">desde «'+esc(p.texto || '')+'»</p>'+
+        '<div class="acc-escena">'+
+          '<div class="acc-moneda" id="acc-moneda">C</div>'+
+          '<div class="acc-mascara"></div>'+
+          '<div class="acc-ranura"></div>'+
+        '</div>'+
+        '<p class="acc-total">Te quedan <b id="acc-num">'+saldo+'</b> créditos</p>'+
+        '<p class="acc-aviso-1">Acceso a esta oración durante 1 semana</p>'+
+        '<div class="acc-btns">'+
+          '<button class="acc-btn acc-btn-go" id="acc-go">Utiliza 1 crédito</button>'+
+          '<button class="acc-btn acc-btn-cancel" id="acc-cancel">Ahora no</button>'+
+        '</div>'+
+      '</div>', 'Confirmar el uso de un crédito');
+
+    $('acc-cancel').addEventListener('click', cerrarAcc);
+    _accEsc = function(e){ if (e.key === 'Escape') cerrarAcc(); };
+    document.addEventListener('keydown', _accEsc);
+
+    $('acc-go').addEventListener('click', function(){
+      var go = this, cancel = $('acc-cancel');
+      go.disabled = true; cancel.disabled = true;      // anti doble-cobro visual
+      go.textContent = 'Un momento…';
+      CZAccess.entrar(p.id, { confirmado:true, origen:'sanar' }).then(function(r){
+        if (r && r.ok && r.cobrado) return animarMoneda(r.saldo);
+        if (r && r.ok) return Promise.resolve();       // ya tenía acceso (carrera benigna)
+        if (r && r.motivo === 'sin-saldo') { cerrarAcc(); abrirSinCreditos(); return null; }
+        throw new Error(r && r.motivo || 'sin-resultado');
+      }).then(function(seguir){
+        if (seguir === null) return;                   // ya se desvió a sin-créditos
+        cerrarAcc(); abrirSplash();
+      }).catch(function(e){
+        console.warn('[acceso] cobro:', e);
+        go.disabled = false; cancel.disabled = false;
+        go.textContent = 'Utiliza 1 crédito';
+        avisoAcceso('No se pudo completar. Inténtalo de nuevo.');
+      });
+    });
+    $('acc-go').focus();
+  }
+
+  // La moneda cae en la ranura y desaparece tras una máscara del color de la
+  // tarjeta (ilusión de caja invisible); el contador baja con un pulso.
+  // Bajo reduceMotion no cae: solo se actualiza el número.
+  function animarMoneda(saldoNuevo){
+    return new Promise(function(res){
+      var num = $('acc-num'), mon = $('acc-moneda');
+      if (reduceMotion || !mon || !num) { if (num) num.textContent = saldoNuevo; setTimeout(res, 320); return; }
+      mon.classList.add('cae');
+      setTimeout(function(){
+        num.textContent = saldoNuevo;
+        num.classList.add('pulso');
+        setTimeout(function(){ num.classList.remove('pulso'); }, 260);
+      }, 720);
+      setTimeout(res, 1250);
+    });
+  }
+
+  // ── PANTALLA B · splash de transición ───────────────────────────
+  // Corre completo (~4s) y entra solo. Bajo reduceMotion: las tres frases de
+  // golpe y salida inmediata.
+  function abrirSplash(){
+    cerrarAcc();
+    var ov = el(
+      '<div class="spl-overlay'+(reduceMotion ? ' spl-quieto' : '')+'" id="spl-ov" role="status" aria-live="polite">'+
+        '<div class="spl-halo"></div>'+
+        '<div class="spl-cruz">'+
+          '<svg viewBox="0 0 24 24" fill="none" stroke="#02BBE0" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+
+            '<path d="M12 3v18"/><path d="M7 8h10"/></svg>'+
+        '</div>'+
+        '<div class="spl-frase">'+
+          '<div class="spl-parte">Respira hondo…</div>'+
+          '<div class="spl-parte">Abre tu corazón…</div>'+
+          '<div class="spl-parte">Comencemos a cruzar.</div>'+
+        '</div>'+
+      '</div>');
+    document.body.appendChild(ov);
+    setTimeout(function(){ window.irMini(); }, reduceMotion ? 400 : 4200);
+  }
+
+  // ── PANTALLA C · sin créditos ───────────────────────────────────
+  // Los botones NO ejecutan pago real: eso es la Pieza 5. Registran la
+  // intención para saber qué paquete se toca antes de construir el checkout.
+  var PAQUETES = [
+    { n:5,  precio:'$50 MXN',  unit:'$10 MXN c/u',   destacado:false },
+    { n:15, precio:'$100 MXN', unit:'$6.67 MXN c/u', destacado:false },
+    { n:25, precio:'$150 MXN', unit:'$6 MXN c/u',    destacado:true  }
+  ];
+  function abrirSinCreditos(){
+    var paqs = PAQUETES.map(function(q){
+      return '<button class="acc-paq'+(q.destacado ? ' destacado' : '')+'" onclick="intencionCompra(\'paquete-'+q.n+'\')">'+
+               '<span class="acc-paq-izq">'+
+                 '<span class="acc-moneda-mini">C</span>'+
+                 '<span><span class="acc-paq-cant">'+q.n+' créditos'+
+                   (q.destacado ? '<span class="acc-badge">mejor valor</span>' : '')+
+                 '</span><span class="acc-paq-unit">'+q.unit+'</span></span>'+
+               '</span>'+
+               '<span class="acc-paq-precio">'+q.precio+'</span>'+
+             '</button>';
+    }).join('');
+
+    montarAcc(
+      '<div class="acc-card acc-card-sc">'+
+        '<div class="acc-enc">'+
+          '<div class="acc-ic">'+
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+
+              '<circle cx="12" cy="12" r="8"/><path d="M12 8.5v7M10 10.5h3a1.5 1.5 0 0 1 0 3h-2a1.5 1.5 0 0 0 0 3h3"/></svg>'+
+          '</div>'+
+          '<h3 class="acc-title">Te quedaste sin créditos</h3>'+
+          '<p class="acc-sub">Con un crédito, desbloqueas esta sesión por una semana.</p>'+
+        '</div>'+
+        '<div class="acc-secc">Comprar créditos</div>'+
+        paqs+
+        '<div class="acc-sub-titulo">Suscríbete:<br><span class="acc-big">acceso ilimitado</span></div>'+
+        '<p class="acc-sub-sub">Todas las oraciones y más funciones</p>'+
+        '<div class="acc-sub-opts">'+
+          '<button class="acc-sub-opt" onclick="intencionCompra(\'sub-mensual\')">'+
+            '<span class="acc-p">$200 MXN</span><span class="acc-c">al mes</span></button>'+
+          '<button class="acc-sub-opt anual" onclick="intencionCompra(\'sub-anual\')">'+
+            '<span class="acc-p">$2,000 MXN</span><span class="acc-c">al año</span>'+
+            '<span class="acc-ahorro">2 meses gratis</span></button>'+
+        '</div>'+
+        '<div class="acc-cerrar"><button id="acc-cancel">Ahora no</button></div>'+
+      '</div>', 'Te quedaste sin créditos');
+
+    $('acc-cancel').addEventListener('click', cerrarAcc);
+    _accEsc = function(e){ if (e.key === 'Escape') cerrarAcc(); };
+    document.addEventListener('keydown', _accEsc);
+  }
+
+  // Placeholder de la Pieza 5 — aquí irá el checkout real.
+  window.intencionCompra = function(que){
+    try { console.log('[intención de compra]', que); } catch(e){}
+    avisoAcceso('La compra estará disponible muy pronto.');
   };
   window.volverElenco = function(){
     estado.fase = 'elenco'; estado.painSel = null; estado.misterioSel = null;
@@ -1875,13 +2217,22 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     Promise.all([
       _db.collection('users').doc(user.uid).get().catch(function(){ return null; }),
       _cargarPerfil(user),
-      _cargarCompletados(user)
+      _cargarCompletados(user),
+      // 4ª lectura (Pieza 2): billing/state. Va DENTRO del Promise.all para que
+      // no cueste latencia — se resuelve en paralelo con las otras tres.
+      _db.collection('users').doc(user.uid)
+         .collection('billing').doc('state').get().catch(function(){ return null; })
     ]).then(function(res){
       var userData = (res[0] && res[0].exists) ? res[0].data() : {};
       window.currentPlan = window.resolvePlan ? window.resolvePlan(userData) : 'free';
       DEV = _plan() === 'developer';        // gate resuelto de verdad, antes del primer render
       var perfil = res[1];
       _completados = res[2] || new Set();   // Pieza 2: pains rezados en mini (check + orden)
+      // Hidratación síncrona del módulo de acceso: 0 lecturas extra, 0 espera.
+      if (window.CZAccess) {
+        window.CZAccess.conectar(_db, user.uid);
+        window.CZAccess.hidratar(res[3]);
+      }
       _retryPendingSync();                  // reintenta subir un perfil que quedó pendiente
       if (perfil && perfil.ejes) _perfil = perfil.ejes;   // Fase C leerá esto
       // Onboarding si: se pide rehacer (?rehacer=1) o no hay perfil previo.

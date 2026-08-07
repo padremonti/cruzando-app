@@ -253,6 +253,160 @@ function finDeRenta(ahora) {
   return new Date(msDe(ahora) + VENTANA_DIAS * DIA_MS);
 }
 
+// ── motivoBypass ─────────────────────────────────────────────────────────────
+// ¿Este usuario entra sin gastar crédito? Devuelve el motivo o null.
+// Se evalúa en memoria, con los dos documentos ya leídos.
+//
+// Nota sobre 'premium'/'pro' del espejo: la fuente de verdad de una suscripción
+// de Stripe es billing/state.sub, pero el campo plan es desde la Pieza 1
+// server-only, así que un 'premium' ahí solo puede haberlo puesto el webhook o
+// un administrador a mano. Se honra por lo mismo que se honran developer y
+// beta: son concesiones administradas. Si no se honrara, un premium concedido a
+// mano (sin pasar por Stripe) chocaría contra el muro de pago.
+function motivoBypass(userData, billing, ahoraMs) {
+  const plan = String((userData && userData.plan) || 'free').toLowerCase().trim();
+  if (plan === 'developer') return 'developer';
+  if (plan === 'beta') {
+    const exp = msDe(userData && userData.betaExpiresAt);
+    if (exp !== null && ahoraMs <= exp) return 'beta';
+    // beta vencida → no hay bypass, sigue la cascada
+  }
+  if (plan === 'premium' || plan === 'pro') return 'plan-premium';
+  if (suscripcionVigente(billing && billing.sub, ahoraMs)) return 'suscripcion';
+  return null;
+}
+
+// ── entrarPain ───────────────────────────────────────────────────────────────
+// El cobro. UNA transacción, todas las lecturas primero, atómica por definición.
+//
+// Cascada:
+//   1 developer  2 beta vigente  3 premium/sub vigente (+3d gracia)  → via 'sub'
+//   4 renta vigente de ESTE pain                                     → via 'renta'
+//   5 saldo < 1                                    → {ok:false, sin-saldo}
+//   6 falta confirmado:true                        → {ok:false, requiere-confirmacion}
+//   7 cobrar: -1 crédito, renta +7d, asiento en el ledger            → via 'credito'
+//
+// Los caminos 1-6 NO escriben nada. Solo el 7 toca dinero.
+//
+// El paso 6 es el que hace imposible el cobro mudo: por muy rancio que esté el
+// caché del cliente, el servidor no descuenta un crédito si nadie confirmó.
+//
+// Doble tap: dos llamadas concurrentes leen la misma versión de billing/state;
+// Firestore deja commitear a una y aborta la otra por contención. Al reintentar,
+// la segunda relee, ve la renta recién escrita, cae en el paso 4 y devuelve
+// via:'renta' sin cobrar. Un solo cargo — la garantía viene de que la
+// comprobación de renta vive DENTRO de la transacción, no del botón del cliente.
+const PAIN_RE  = /^\d{6}[a-z]$/;
+const ORIGENES = ['sanar', 'deeplink'];
+
+async function entrarPain(uid, args, deps) {
+  const db      = deps.db;
+  const ahora   = deps.ahora || new Date();
+  const ahoraMs = ahora.getTime();
+
+  // El painId se valida por formato en el servidor; el mid se DERIVA de él.
+  // No se acepta un mid del cliente: sería una vía para pagar por un pain y
+  // abrir otro Misterio.
+  const painId = String((args && args.painId) || '').trim().toLowerCase();
+  if (!PAIN_RE.test(painId)) {
+    const err = new Error('painId con formato inválido: ' + painId);
+    err.code = 'pain-invalido';
+    throw err;
+  }
+  const mid        = painId.slice(0, 6);
+  const confirmado = (args && args.confirmado) === true;
+  const origen     = (args && ORIGENES.indexOf(args.origen) >= 0) ? args.origen : 'sanar';
+  const pideSimular = (args && args.simular === 'free');
+
+  let out = null;
+
+  await db.runTransaction(async function (tx) {
+    // ═══ LECTURAS ═══
+    const userRef  = db.collection('users').doc(uid);
+    const userSnap = await tx.get(userRef);
+    const userData = userSnap.exists ? userSnap.data() : {};
+    const billing  = await ensureBilling(db, uid, tx, ahora);
+    const b        = billing.data;
+
+    const saldo  = b.credits || 0;
+    const rentas = b.activeRentals || {};
+
+    // 'ver como free': solo se honra si el plan REAL es developer. Sirve para
+    // recorrer el flujo de cobro completo con una cuenta de desarrollo.
+    const planReal  = String(userData.plan || 'free').toLowerCase().trim();
+    const simulando = pideSimular && planReal === 'developer';
+
+    // ── 1-3 · bypass sin gastar ──
+    const bypass = simulando ? null : motivoBypass(userData, b, ahoraMs);
+    if (bypass) {
+      out = { ok: true, via: 'sub', cobrado: false, saldo: saldo, motivo: bypass };
+      return;
+    }
+
+    // ── 4 · renta vigente de este pain ──
+    if (rentaVigente(rentas, painId, ahoraMs)) {
+      out = { ok: true, via: 'renta', cobrado: false, saldo: saldo,
+              expiresAt: msDe(rentas[painId]) };
+      return;
+    }
+
+    // ── 5 · sin saldo ──
+    if (saldo < 1) {
+      out = { ok: false, motivo: 'sin-saldo', saldo: 0 };
+      return;
+    }
+
+    // ── 6 · nadie ha confirmado → NO se cobra ──
+    if (!confirmado) {
+      out = { ok: false, motivo: 'requiere-confirmacion', saldo: saldo };
+      return;
+    }
+
+    // ═══ 7 · COBRAR (las únicas escrituras de dinero) ═══
+    const expira   = finDeRenta(ahora);
+    const podadas  = podarRentas(rentas, ahoraMs);   // se limpian las vencidas
+    podadas[painId] = expira;
+    const nuevo    = saldo - 1;
+
+    const lifetime = Object.assign({ granted: 0, purchased: 0, spent: 0 }, b.lifetime || {});
+    lifetime.spent = (lifetime.spent || 0) + 1;
+
+    tx.set(billing.ref, {
+      credits:       nuevo,
+      activeRentals: podadas,
+      lifetime:      lifetime,
+      updatedAt:     ahora
+    }, { merge: true });
+
+    tx.set(userRef.collection('rentals').doc(painId), {
+      painId:    painId,
+      mid:       mid,
+      rentedAt:  ahora,
+      expiresAt: expira,
+      via:       'credito',
+      origen:    origen
+    });
+
+    // Id determinista en vez de autoId: el ledger es la cuenta de re-rentas
+    // (un asiento 'spend' por cobro, con ref = painId) y así dos cargos
+    // imposibles del mismo pain en el mismo milisegundo colisionarían en vez
+    // de duplicarse.
+    tx.set(userRef.collection('ledger').doc('spend_' + painId + '_' + ahoraMs), {
+      type:         'spend',
+      delta:        -1,
+      balanceAfter: nuevo,
+      ref:          painId,
+      at:           ahora,
+      meta:         { mid: mid, origen: origen, simulado: simulando }
+    });
+
+    out = { ok: true, via: 'credito', cobrado: true, saldo: nuevo,
+            expiresAt: expira.getTime(), simulando: simulando };
+  });
+
+  return out;
+}
+
 // ── procesarEvento ───────────────────────────────────────────────────────────
 // Todo el árbol de decisión del webhook. Vive aquí, y no en index.js, para que
 // se pueda ejercitar con un `db` de mentira: sin emulador de Firestore no habría
@@ -392,6 +546,6 @@ module.exports = {
   resolverTipo, resolverUid, procesarEvento,
   // billing
   billingInicial, ensureBilling,
-  // rentas (Pieza 2)
-  podarRentas, rentaVigente, finDeRenta
+  // rentas y cobro (Pieza 2)
+  podarRentas, rentaVigente, finDeRenta, motivoBypass, entrarPain, PAIN_RE
 };

@@ -21,6 +21,26 @@
       "pains": [
         {
           "id": "010101a",
+          "texto": "Con frecuencia me escondo cuando necesito llorar, o desahogarme.",
+          "ejePrincipal": "actitud",
+          "tags": [
+            "vulnerabilidad",
+            "interioridad",
+            "fragilidad"
+          ]
+        },
+        {
+          "id": "010101b",
+          "texto": "Me cuesta pedir ayuda; depender de otros me hace sentir menos.",
+          "ejePrincipal": "actitud",
+          "tags": [
+            "pediayuda",
+            "humildad",
+            "vulnerabilidad"
+          ]
+        },
+        {
+          "id": "010101c",
           "texto": "Me llegó una noticia o un cambio sin garantías, y la incertidumbre me paraliza.",
           "ejePrincipal": "existencial",
           "tags": [
@@ -63,6 +83,16 @@
             "juicioajeno",
             "dignidad"
           ]
+        },
+        {
+          "id": "010102c",
+          "texto": "Quiero acompañar a alguien frágil pero no sé cómo; quiero hacerlo sin lástima ni sentirme superior.",
+          "ejePrincipal": "vinculos",
+          "tags": [
+            "acompanar",
+            "servir",
+            "compasion"
+          ]
         }
       ]
     },
@@ -82,6 +112,15 @@
       "pains": [
         {
           "id": "010103a",
+          "texto": "No me alcanza: falta dinero, luz, agua, salud.",
+          "ejePrincipal": "recursos",
+          "tags": [
+            "escasez",
+            "pobreza"
+          ]
+        },
+        {
+          "id": "010103b",
           "texto": "Estoy lejos de casa, desplazado, sin un lugar donde me reciban.",
           "ejePrincipal": "recursos",
           "tags": [
@@ -91,8 +130,8 @@
           ]
         },
         {
-          "id": "010103b",
-          "texto": "La falta de dinero me hace sentir fracasado o indigno.",
+          "id": "010103c",
+          "texto": "La falta de recursos me hace sentir indigno o fracasado.",
           "ejePrincipal": "social",
           "tags": [
             "dignidad",
@@ -127,6 +166,16 @@
         },
         {
           "id": "010104b",
+          "texto": "Presiento una despedida que aún no llega y me angustia por adelantado.",
+          "ejePrincipal": "vinculos",
+          "tags": [
+            "dueloanticipado",
+            "despedidas",
+            "angustia"
+          ]
+        },
+        {
+          "id": "010104c",
           "texto": "Por ser honesto o recto, incomodo a la gente y me rechazan.",
           "ejePrincipal": "actitud",
           "tags": [
@@ -162,6 +211,16 @@
         },
         {
           "id": "010105b",
+          "texto": "Me pesa dejar atrás mi infancia, mi casa, mis costumbres...",
+          "ejePrincipal": "vinculos",
+          "tags": [
+            "soltar",
+            "crecer",
+            "despedidas"
+          ]
+        },
+        {
+          "id": "010105c",
           "texto": "Tomar mis propias decisiones me genera culpa frente a mi familia.",
           "ejePrincipal": "actitud",
           "tags": [
@@ -205,6 +264,15 @@
             "cansancio",
             "tiempo"
           ]
+        },
+        {
+          "id": "010106c",
+          "texto": "La rutina diaria se siente sin sentido, pura repetición.",
+          "ejePrincipal": "cuerpo",
+          "tags": [
+            "rutina",
+            "habitos"
+          ]
         }
       ]
     },
@@ -234,11 +302,21 @@
         {
           "id": "010107b",
           "texto": "Cuando falta algo, me paralizo o culpo a otros.",
-          "ejePrincipal": "actitud",
+          "ejePrincipal": "recursos",
           "tags": [
             "escasez",
             "culpa",
             "control"
+          ]
+        },
+        {
+          "id": "010107c",
+          "texto": "En mi situación de pobreza, no encuentro una salida, ni un camino de abundancia.",
+          "ejePrincipal": "recursos",
+          "tags": [
+            "pobreza",
+            "abundancia",
+            "esperanza"
           ]
         }
       ]
@@ -259,6 +337,16 @@
       "pains": [
         {
           "id": "010108a",
+          "texto": "¿Por qué me pasó esto, si me he portado bien?",
+          "ejePrincipal": "existencial",
+          "tags": [
+            "sentidodeldolor",
+            "culpa",
+            "sufrimiento"
+          ]
+        },
+        {
+          "id": "010108b",
           "texto": "Cuando sufren los inocentes, ¿dónde está Dios?",
           "ejePrincipal": "existencial",
           "tags": [
@@ -268,7 +356,7 @@
           ]
         },
         {
-          "id": "010108b",
+          "id": "010108c",
           "texto": "He pensado que mi sufrimiento es un castigo por algo que hice.",
           "ejePrincipal": "emociones",
           "tags": [
@@ -305,11 +393,21 @@
         {
           "id": "010109b",
           "texto": "Estoy viviendo algo que no puedo explicar, y eso me asusta.",
-          "ejePrincipal": "emociones",
+          "ejePrincipal": "existencial",
           "tags": [
             "misterio",
             "incertidumbre",
             "miedo"
+          ]
+        },
+        {
+          "id": "010109c",
+          "texto": "La incertidumbre y el misterio me generan angustia.",
+          "ejePrincipal": "existencial",
+          "tags": [
+            "incertidumbre",
+            "misterio",
+            "angustia"
           ]
         }
       ]
@@ -385,6 +483,16 @@
         },
         {
           "id": "010111b",
+          "texto": "Pienso que ser fuerte o espiritual es no tener miedo.",
+          "ejePrincipal": "emociones",
+          "tags": [
+            "miedo",
+            "interioridad",
+            "vulnerabilidad"
+          ]
+        },
+        {
+          "id": "010111c",
           "texto": "Tengo miedo de algo que se acerca, y no sé qué hacer.",
           "ejePrincipal": "emociones",
           "tags": [
@@ -402,7 +510,7 @@
       },
       "mid": "010112",
       "titulo": "Flagelación",
-      "mal": "Un cuerpo vivo es un cuerpo que siente.",
+      "mal": "Un cuerpo que siente es un cuerpo que puede doler.",
       "acogida": [
         "cuerpo",
         "peso",
@@ -422,17 +530,16 @@
         {
           "id": "010112b",
           "texto": "Hay sensaciones (ruido, olor, temperatura, dolor) que me resultan insoportables.",
-          "ejePrincipal": "emociones",
+          "ejePrincipal": "cuerpo",
           "tags": [
             "sensibilidad",
-            "cuerpo",
-            "control"
+            "cuerpo"
           ]
         },
         {
           "id": "010112c",
           "texto": "Rechazo mi cuerpo, o me avergüenza su fragilidad.",
-          "ejePrincipal": "actitud",
+          "ejePrincipal": "cuerpo",
           "tags": [
             "cuerpo",
             "vulnerabilidad",
