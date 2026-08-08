@@ -789,7 +789,8 @@ function setCantoPP(){
    Respaldo localStorage + pendingSync: una oración real nunca se pierde por red. */
 let _uid = null;
 let _completadoMarcado = false;                 // guardia de sesión: una marca por sesión (idempotencia)
-const _PC_KEY = 'cruzando_pains_completados';   // cola local de pendientes { painId: nºpendientes }
+let _accesoTipo = null;                         // 'sub' | 'renta' — respaldo del via (Pieza 3)
+const _PC_KEY = 'cruzando_pains_completados';   // cola local de pendientes { painId: {n, vias} }
 
 _auth.onAuthStateChanged(u => {
   _uid = u ? u.uid : null;
@@ -798,7 +799,50 @@ _auth.onAuthStateChanged(u => {
   else console.warn('[mini] sin sesión: se reza igual; el completado se cachea hasta que haya uid');
 });
 
-function _pcLocal(){ try { return JSON.parse(localStorage.getItem(_PC_KEY) || '{}'); } catch(e){ return {}; } }
+/* ── vía de acceso (Pieza 3) ───────────────────────────────────────────────
+   mini no cobra, así que no conoce el `via` de primera mano. Dos fuentes:
+     1ª  el testigo que sanar dejó al navegar, con el `via` que devolvió
+         entrarPain — la respuesta del servidor en el momento de entrar;
+     2ª  si no hay testigo (deep-link, sessionStorage limpiado), lo deriva de
+         su propia verificación de acceso (_accesoTipo, ya calculado al cargar).
+   Así ningún camino de entrada se queda sin vía. */
+function _viaDeEntrada(){
+  try{
+    const raw = sessionStorage.getItem('cruzando_entrada');
+    if (raw){
+      const t = JSON.parse(raw);
+      if (t && t.painId === PAINID && t.via) return t.via;
+    }
+  }catch(e){}
+  return _accesoTipo;                            // respaldo: 'sub' | 'renta' | null
+}
+
+/* Colapsa a DOS categorías. Una 'renta' es un crédito gastado en una visita
+   anterior: contarla aparte dejaría sin respuesta la pregunta que importa
+   —cuántos rezos vienen de suscripción y cuántos de crédito—, porque las
+   re-entradas dentro de la semana caerían en un cubo propio. */
+function _viaTelemetria(v){
+  if (v === 'sub') return 'sub';
+  if (v === 'credito' || v === 'renta') return 'credito';
+  return null;                                   // desconocida → no se cuenta
+}
+
+/* La cola offline guardaba {painId: n}. Ahora {painId: {n, vias:{sub,credito}}}.
+   La migración ocurre en LECTURA: una entrada numérica antigua se convierte en
+   {n, vias:{}} — se conserva el conteo y las vías quedan como desconocidas.
+   Ningún dato pendiente en un dispositivo real se pierde por el cambio. */
+function _pcLocal(){
+  try {
+    const raw = JSON.parse(localStorage.getItem(_PC_KEY) || '{}');
+    const out = {};
+    Object.keys(raw).forEach(k => {
+      const v = raw[k];
+      if (typeof v === 'number') out[k] = { n: v, vias: {} };                    // forma antigua
+      else if (v && typeof v === 'object') out[k] = { n: v.n || 0, vias: v.vias || {} };
+    });
+    return out;
+  } catch(e){ return {}; }
+}
 function _pcSave(o){ try { localStorage.setItem(_PC_KEY, JSON.stringify(o)); } catch(e){} }
 
 /* Marca el pain completado (embudo del epílogo). Guarda SIEMPRE en localStorage
@@ -809,7 +853,11 @@ function marcarCompletado(){
   if (!PAINID) return;                          // sin pain en la URL → nada que marcar
   _completadoMarcado = true;
   const m = _pcLocal();
-  m[PAINID] = (m[PAINID] || 0) + 1;             // +1 completación pendiente de confirmar
+  const e = m[PAINID] || { n:0, vias:{} };
+  e.n += 1;                                     // +1 completación pendiente de confirmar
+  const via = _viaTelemetria(_viaDeEntrada());
+  if (via) e.vias[via] = (e.vias[via] || 0) + 1;
+  m[PAINID] = e;
   _pcSave(m);
   _escribirCompletado(PAINID);
 }
@@ -821,23 +869,43 @@ function marcarCompletado(){
 function _escribirCompletado(painId){
   const FS = window._fbFirestore;
   if (!FS || !FS.setDoc || !FS.getDoc || !_uid || !_db) return;   // sin canal → sigue pendiente
-  const pend = _pcLocal()[painId] || 0;
+  const pe   = _pcLocal()[painId];
+  const pend = pe ? pe.n : 0;
   if (pend <= 0) return;
+  const pendVias = (pe && pe.vias) || {};
   const ref = FS.doc(_db, 'users', _uid, 'progress', 'sanar');
   FS.getDoc(ref).then(snap => {
     const data = (snap && snap.exists) ? snap.data() : {};
     const prev = (data.pains && data.pains[painId]) || {};
+    const pv   = prev.vias || {};
     const st = FS.serverTimestamp();
     const entry = {
       firstCompletedAt: prev.firstCompletedAt || st,   // conserva la primera vez
       lastCompletedAt:  st,                             // siempre la última
-      count: (prev.count || 0) + pend                  // + las completaciones pendientes
+      count: (prev.count || 0) + pend,                 // + las completaciones pendientes
+      // Aditivo: las entradas antiguas no tienen `vias` y arrancan de cero. La
+      // suma NO tiene por qué igualar a `count` — la diferencia son las
+      // completaciones de vía desconocida (anteriores a la Pieza 3, o sin red
+      // en el momento de entrar).
+      vias: {
+        sub:     (pv.sub     || 0) + (pendVias.sub     || 0),
+        credito: (pv.credito || 0) + (pendVias.credito || 0)
+      }
     };
     const payload = { pains: {}, updatedAt: st };
     payload.pains[painId] = entry;
     return FS.setDoc(ref, payload, { merge:true }).then(() => {
-      const mm = _pcLocal();                            // descuenta lo confirmado (por si entró otra entre medias)
-      if ((mm[painId] || 0) <= pend) delete mm[painId]; else mm[painId] -= pend;
+      const mm  = _pcLocal();                           // descuenta lo confirmado (por si entró otra entre medias)
+      const cur = mm[painId];
+      if (!cur) return;
+      if (cur.n <= pend) { delete mm[painId]; }
+      else {
+        cur.n -= pend;
+        Object.keys(pendVias).forEach(k => {
+          cur.vias[k] = Math.max(0, (cur.vias[k] || 0) - pendVias[k]);
+        });
+        mm[painId] = cur;
+      }
       _pcSave(mm);
     });
   }).catch(() => { /* queda pendiente → _flushPendientes en el próximo arranque/Auth */ });
@@ -845,7 +913,7 @@ function _escribirCompletado(painId){
 
 function _flushPendientes(){
   const m = _pcLocal();
-  Object.keys(m).forEach(pid => { if (m[pid] > 0) _escribirCompletado(pid); });
+  Object.keys(m).forEach(pid => { if (m[pid] && m[pid].n > 0) _escribirCompletado(pid); });
 }
 
 /* ═══════════ Arranque — datos listos, gesto de inicio ═══════════ */
@@ -924,7 +992,8 @@ _auth.onAuthStateChanged(u=>{
     const ud=(res[0] && res[0].exists) ? res[0].data() : {};
     window.currentPlan = window.resolvePlan ? window.resolvePlan(ud) : 'free';
     const st=CZAccess.estado(PAINID);
-    _accesoOk = (st.acceso==='sub' || st.acceso==='renta');
+    _accesoOk   = (st.acceso==='sub' || st.acceso==='renta');
+    _accesoTipo = _accesoOk ? st.acceso : null;   // respaldo del via si falta el testigo
     _revisarPuerta();
   }).catch(e=>{
     // Sin red no se castiga al usuario: si trae testigo fresco, entra.

@@ -915,9 +915,57 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   // Señal IMPLÍCITA de uso (por Misterio), llamada al terminar la Acogida. Se
   // mantiene como TODO: su implementación (acumular uso en campo aparte) es de
   // otra fase; NO contamina el perfil del onboarding-test de abajo.
+  // Las claves de un mapa de Firestore no admiten . ~ * / [ ]
+  function _claveOk(k){
+    return typeof k === 'string' && k.length > 0 && k.length <= 64 && !/[.~*\/\[\]]/.test(k);
+  }
+
+  // Señal IMPLÍCITA de uso (Pieza 3). Vive en users/{uid}/profile/uso, SEPARADO
+  // de profile/afinidad: uno es lo que la persona DECLARÓ en el test, el otro lo
+  // que HACE. El día que se contradigan hay que poder saber cuál es cuál.
+  //
+  // Se dispara al terminar la Acogida —que es gratis—, así que recoge a todo el
+  // que se acerca. Registrarlo en el completado de mini sesgaría el dato por el
+  // embudo de cobro, contando solo a quien pudo pagar.
+  //
+  // PRIVACIDAD · decisión deliberada: de `senales` NO se persiste NADA. Trae el
+  // valor crudo de cada mecánica de la Acogida — la intensidad del termómetro,
+  // las zonas del cuerpo que marcó, la distancia a la que se colocó de Lux. Eso
+  // es un registro íntimo de dónde le duele a alguien y cuánto. Para ordenar el
+  // elenco basta con saber QUÉ le atrae, no cuánto sufre. El parámetro se
+  // conserva en la firma porque el call site ya lo pasa y documenta lo que hay
+  // disponible; que esté a mano y aun así no se guarde es justo lo que conviene
+  // dejar escrito, para que nadie lo añada más adelante "ya que está ahí".
+  //
+  // Telemetría no crítica: sin cola de reintento. Si se pierde un registro, no
+  // pasa nada — no es una oración, es una estadística.
   function guardarAfinidad(pain, senales){
-    // TODO: persistir afinidad por eje/tag en Firestore.
-    try { console.log('[guardarAfinidad]', pain && pain.id, senales); } catch(e){}
+    if (!pain || !window._obUID || !_db) return;
+    var FV = (window.firebase && firebase.firestore && firebase.firestore.FieldValue) || null;
+    if (!FV || !FV.increment) return;
+    var uno = function(){ return FV.increment(1); };   // instancia nueva por campo
+
+    // increment en vez de read-before-write: son contadores, no hay lectura que
+    // hacer y dos pestañas abiertas no se pisan.
+    var payload = { version: 1, total: uno(), updatedAt: FV.serverTimestamp() };
+
+    if (_claveOk(pain.ejePrincipal)) {
+      payload.ejes = {}; payload.ejes[pain.ejePrincipal] = uno();
+    }
+    var tags = (pain.tags || []).filter(_claveOk);
+    if (tags.length) {
+      payload.tags = {};
+      tags.forEach(function(t){ payload.tags[t] = uno(); });
+    }
+    if (_claveOk(pain.id)) {
+      payload.pains = {};
+      payload.pains[pain.id] = { veces: uno(), ultimaVez: FV.serverTimestamp() };
+    }
+
+    _db.collection('users').doc(window._obUID)
+       .collection('profile').doc('uso')
+       .set(payload, { merge:true })
+       .catch(function(e){ console.warn('[uso] no se pudo registrar:', e); });
   }
 
   // ── Perfil de afinidad · onboarding-test (Fase B) ───────────────
@@ -2003,9 +2051,14 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     // Testigo para mini: le dice que este acceso acaba de verificarse en el
     // servidor, para que no penalice con una espera el camino normal. NO es un
     // mecanismo de seguridad — mini verifica igual, siempre (ver mini.html).
+    //
+    // Lleva además el `via` que devolvió entrarPain (Pieza 3): mini no cobra, así
+    // que no puede saber por sí mismo cómo se entró. Ésta es la fuente PRIMARIA;
+    // si el testigo falta (deep-link, sessionStorage limpiado), mini lo deriva de
+    // su propia verificación de acceso.
     try {
       sessionStorage.setItem('cruzando_entrada',
-        JSON.stringify({ painId: pid, ts: Date.now() }));
+        JSON.stringify({ painId: pid, ts: Date.now(), via: estado.viaEntrada || null }));
     } catch(e){}
     navTo('mini.html?mid=' + encodeURIComponent(mid) + '&pain=' + encodeURIComponent(pid));
   };
@@ -2024,7 +2077,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     function restaurar(){ if (btn) { btn.disabled = false; btn.textContent = etiquetaPrev; } }
 
     CZAccess.entrar(p.id, { confirmado:false, origen:'sanar' }).then(function(r){
-      if (r && r.ok) { restaurar(); abrirSplash(); return; }          // sub o renta
+      if (r && r.ok) { restaurar(); estado.viaEntrada = r.via; abrirSplash(); return; }  // sub o renta
       if (r && r.motivo === 'requiere-confirmacion') { restaurar(); abrirCobro(r.saldo); return; }
       if (r && r.motivo === 'sin-saldo') { restaurar(); abrirSinCreditos(); return; }
       restaurar(); avisoAcceso('No se pudo abrir la oración. Inténtalo de nuevo.');
@@ -2100,6 +2153,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
       go.disabled = true; cancel.disabled = true;      // anti doble-cobro visual
       go.textContent = 'Un momento…';
       CZAccess.entrar(p.id, { confirmado:true, origen:'sanar' }).then(function(r){
+        if (r && r.ok) estado.viaEntrada = r.via;      // se propaga a mini en el testigo
         if (r && r.ok && r.cobrado) return animarMoneda(r.saldo);
         if (r && r.ok) return Promise.resolve();       // ya tenía acceso (carrera benigna)
         if (r && r.motivo === 'sin-saldo') { cerrarAcc(); abrirSinCreditos(); return null; }
