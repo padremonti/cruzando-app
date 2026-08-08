@@ -432,7 +432,18 @@ body {
 .acc-sub-opt .acc-c{ display:block; font-size:11px; color:var(--text-dim); margin-top:2px; }
 .acc-ahorro{ display:block; font-size:10px; color:var(--brand); margin-top:3px; }
 .acc-cerrar{ text-align:center; margin-top:1.1rem; }
-.acc-cerrar button{ background:none; border:none; color:var(--text-dim); font-size:13px; cursor:pointer; font-family:inherit; }
+/* Discreto pero legible: --text-dim daba 2.08:1 en oscuro y 2.93:1 en claro
+   (AA pide 4.5:1 a este tamaño). --text-soft sube a 5.61:1 y 6.36:1 sin añadir
+   peso visual — sigue sin competir con los botones de compra, que llevan fondo
+   o borde cian. De paso queda igual que el "Ahora no" de la tarjeta de cobro
+   (.acc-btn-cancel), que ya usaba --text-soft.
+   El padding no se ve (no hay fondo) pero agranda el área táctil. */
+.acc-cerrar button{
+  background:none; border:none; color:var(--text-soft); font-size:13px;
+  cursor:pointer; font-family:inherit; padding:10px 16px; border-radius:10px;
+  -webkit-tap-highlight-color:transparent;
+}
+.acc-cerrar button:hover{ color:var(--text); }
 
 /* Aviso efímero (errores de red del cobro) */
 .acc-aviso{
