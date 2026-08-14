@@ -373,6 +373,35 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   color:#fff; cursor:pointer; transition:opacity 0.2s;
 }
 .btn-primary:active { opacity:0.85; }
+
+/* ── Diálogo: rehacer perfil de sanación ──
+   Rehacer es renovar, no destruir: por eso la cruz de CruzAndo en cian y no un
+   icono de alerta. Todo por tokens salvo el cian de marca, que es igual en los
+   dos temas. */
+.rehacer-ic {
+  width:56px; height:56px; border-radius:50%; background:var(--brand-ultra);
+  display:flex; align-items:center; justify-content:center; margin:0 auto 16px;
+}
+.rehacer-ic svg { width:28px; height:28px; }
+.rehacer-text {
+  font-size:0.88rem; line-height:1.6; color:var(--text-soft);
+  text-align:center; margin-bottom:24px;
+}
+.rehacer-btn-go {
+  width:100%; padding:14px; background:var(--brand); border:none; border-radius:12px;
+  font-family:inherit; font-size:0.88rem; font-weight:700; color:#04343c;
+  cursor:pointer; transition:opacity 0.2s;
+}
+.rehacer-btn-go:active { opacity:0.85; }
+.rehacer-btn-cancel {
+  width:100%; padding:14px; margin-top:10px; background:transparent;
+  border:1.5px solid var(--border); border-radius:12px;
+  font-family:inherit; font-size:0.88rem; font-weight:600; color:var(--text-soft);
+  cursor:pointer; transition:border-color 0.2s, color 0.2s;
+}
+.rehacer-btn-cancel:hover { border-color:var(--text-dim); color:var(--text); }
+/* El foco entra en el diálogo, no en un botón: abrir no debe dejar armado el "Sí". */
+.modal-sheet:focus { outline:none; }
 .btn-primary:disabled { opacity:0.4; cursor:not-allowed; }
 .modal-error { font-size:0.74rem; color:#E74C3C; text-align:center; margin-top:8px; min-height:18px; }
 .modal-switch { font-size:0.74rem; color:var(--text-dim); text-align:center; margin-top:12px; cursor:pointer; }
@@ -1141,7 +1170,7 @@ body.hub-clean .hub-door-santuario { animation-delay:1.2s !important; }
       <div class="drawer-item-icon">🎓</div>
       <div><div class="drawer-item-label">Reactivar tutoriales</div><div class="drawer-item-sub">Volver a ver los pasos iniciales</div></div>
     </button>
-    <button class="drawer-item" onclick="closeDrawer(); navigateTo('sanar.html?rehacer=1')">
+    <button class="drawer-item" onclick="window._abrirRehacer()">
       <div class="drawer-item-icon">🌱</div>
       <div><div class="drawer-item-label">Rehacer mi perfil de sanación</div><div class="drawer-item-sub">Volver a responder las preguntas de Sanar</div></div>
     </button>
@@ -1225,6 +1254,23 @@ body.hub-clean .hub-door-santuario { animation-delay:1.2s !important; }
   </div>
 
   <!-- ═══ MODAL PREFERENCIAS ═══ -->
+  <!-- Confirmación antes de rehacer el perfil de sanación -->
+  <div class="modal-overlay" id="modal-rehacer" onclick="if(event.target===this)window._cerrarRehacer()">
+    <div class="modal-sheet" id="modal-rehacer-sheet" role="dialog" aria-modal="true"
+         aria-labelledby="rehacer-title" tabindex="-1">
+      <div class="rehacer-ic">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#02BBE0" stroke-width="1.6"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 3v18"/><path d="M7 8h10"/>
+        </svg>
+      </div>
+      <div class="modal-title" id="rehacer-title">¿Rehacer tu perfil de sanación?</div>
+      <p class="rehacer-text">Volverás a responder las preguntas de Sanar. Tu perfil actual será reemplazado por tus nuevas respuestas, y el camino se reordenará según ellas.</p>
+      <button class="rehacer-btn-go" onclick="window._confirmarRehacer()">Sí, rehacer mi perfil</button>
+      <button class="rehacer-btn-cancel" onclick="window._cerrarRehacer()">Ahora no</button>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="modal-prefs" onclick="if(event.target===this)closePrefs()">
     <div class="modal-sheet">
       <div class="modal-title">Preferencias</div>
@@ -3145,6 +3191,28 @@ window._cerrarRezarModal = function() {
 // ── Navegación ────────────────────────────────────────────────────
 window.openModal  = function(id) { document.getElementById(id).classList.add('open'); };
 window.closeModal = function(id) { document.getElementById(id).classList.remove('open'); };
+
+// ── Diálogo de rehacer perfil de sanación ────────────────────────
+// El gesto de atrás ya cierra cualquier .modal-overlay.open (ver CZGestures),
+// así que aquí solo hace falta añadir Esc, que este archivo no manejaba.
+var _rehacerEsc = null;
+window._abrirRehacer = function() {
+  closeDrawer();
+  openModal('modal-rehacer');
+  _rehacerEsc = function(e) { if (e.key === 'Escape') window._cerrarRehacer(); };
+  document.addEventListener('keydown', _rehacerEsc);
+  // Foco en el diálogo, no en un botón: abrir no debe dejar el "Sí" a un Enter.
+  var sheet = document.getElementById('modal-rehacer-sheet');
+  if (sheet) sheet.focus();
+};
+window._cerrarRehacer = function() {
+  if (_rehacerEsc) { document.removeEventListener('keydown', _rehacerEsc); _rehacerEsc = null; }
+  closeModal('modal-rehacer');
+};
+window._confirmarRehacer = function() {
+  window._cerrarRehacer();
+  navigateTo('sanar.html?rehacer=1');
+};
 window.navigateTo = function(url, e) {
   if (e) {
     var r = document.createElement('div');
