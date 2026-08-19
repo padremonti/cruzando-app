@@ -663,17 +663,15 @@ function openDiary(){
   [0,1,2].forEach(qi=>{
     const ta=$('qta'+qi); if(!ta) return;
     ta.value=ans[qi]||'';                                  // conserva lo escrito al reabrir
-    ta.addEventListener('input',()=>{ ans[qi]=ta.value; });
+    // Guarda mientras escribe (debounce) y en firme al salir del campo: si
+    // cierra la pestaña a mitad de sesión, lo escrito ya está a salvo.
+    ta.addEventListener('input',()=>{ ans[qi]=ta.value; guardarReflexion(qi, ta.value); });
+    ta.addEventListener('blur', ()=>{ ans[qi]=ta.value; guardarReflexion(qi, ta.value, true); });
   });
   $('diaryPop').classList.add('show');
 }
-$('diaryClose').onclick=()=>$('diaryPop').classList.remove('show');
-$('diarySave').onclick=()=>{
-  [0,1,2].forEach(qi=>{ const ta=$('qta'+qi); if(ta)ans[qi]=ta.value; });
-  /* TODO: guardar en el diario real — una reflexión por pregunta, como orar.html:
-     users/{uid}/reflections/{nivelId}_{bloque}_{misterioIdx}_q{qi} */
-  $('diaryPop').classList.remove('show');
-};
+$('diaryClose').onclick=()=>{ _volcarReflexiones(); $('diaryPop').classList.remove('show'); };
+$('diarySave').onclick =()=>{ _volcarReflexiones(); $('diaryPop').classList.remove('show'); };
 
 /* ═══════════ EPÍLOGO ═══════════ */
 function goEpilogue(){ audio.pause(); playing=false; hideAdvance(); showMoment('epilogue'); $('stills').classList.add('hidden'); $('hero').classList.remove('hidden'); updateProgress(); }
@@ -795,7 +793,7 @@ const _PC_KEY = 'cruzando_pains_completados';   // cola local de pendientes { pa
 _auth.onAuthStateChanged(u => {
   _uid = u ? u.uid : null;
   window._obDB = _db; window._obUID = _uid;     // expuesto para diario/crédito futuros
-  if (_uid) _flushPendientes();                 // sube lo que quedó pendiente por red
+  if (_uid) { _flushPendientes(); _flushReflexiones(); }   // sube lo que quedó pendiente por red
   else console.warn('[mini] sin sesión: se reza igual; el completado se cachea hasta que haya uid');
 });
 
@@ -914,6 +912,99 @@ function _escribirCompletado(painId){
 function _flushPendientes(){
   const m = _pcLocal();
   Object.keys(m).forEach(pid => { if (m[pid] && m[pid].n > 0) _escribirCompletado(pid); });
+}
+
+/* ═══════════ REFLEXIONES → users/{uid}/reflections ═══════════
+   Lo que el usuario escribe en el popup del diario. Mismo destino que orar.html
+   y audio.html, pero con id PROPIO:
+
+     mini_{painId}_q{qi}        (sin pain en la URL → mini_{mid}_q{qi})
+
+   No se reutiliza el id de orar ({nivelId}_{bloque}_{misterioIdx}_q{qi}) a
+   propósito: rezar el mismo Misterio desde dos dolores distintos son dos
+   oraciones, y compartir id haría que una sobrescribiera a la otra en silencio.
+   Como orar lee sus reflexiones construyendo su id, estas ni se ven entre sí.
+
+   Determinista → reescribir la misma reflexión ACTUALIZA (merge), no duplica.
+
+   Se guarda mientras se escribe (debounce), no solo al epílogo: si cierra la
+   pestaña a mitad de sesión, lo escrito no se pierde. */
+const _REF_KEY = 'cruzando_refs_pendientes';
+const _BLOQUES = ['gozosos','luminosos','dolorosos','gloriosos'];
+
+function _refLocal(){ try { return JSON.parse(localStorage.getItem(_REF_KEY) || '{}'); } catch(e){ return {}; } }
+function _refSave(o){ try { localStorage.setItem(_REF_KEY, JSON.stringify(o)); } catch(e){} }
+
+function _refDocId(qi){ return 'mini_' + (PAINID || MIDQ) + '_q' + qi; }
+
+/* Todo se deriva del mid, como el resto de mini. El set es el COMPLETO que
+   diario.html necesita para pintar la tarjeta: sin `bloque` no hay color de
+   franja ni chip, y sin `misterioIdx` no hay ordinal ("Cuarto Misterio").
+   `misterioNombre` no se pinta en las tarjetas de oración, pero sí entra en el
+   buscador del diario. */
+function _refPayload(qi, texto){
+  const qs = parseQ((typeof MISTERIO !== 'undefined' && MISTERIO && MISTERIO.meditacion) || '');
+  return {
+    nivelId:        elemento,
+    bloque:         _BLOQUES[Math.floor((numero - 1) / 5)] || 'gozosos',
+    misterioIdx:    (numero - 1) % 5,
+    questionIdx:    qi,
+    question:       qs[qi] || QL[qi] || '',
+    text:           texto,
+    origen:         'oracion',
+    misterioNombre: (typeof MISTERIO !== 'undefined' && MISTERIO && MISTERIO.titulo) || '',
+    painId:         PAINID || '',
+    mid:            MIDQ
+  };
+}
+
+const _refTimers = {};
+/* inmediato=true en blur / cerrar / "Guardar en el diario"; con debounce
+   mientras teclea. Las vacías no se escriben. */
+function guardarReflexion(qi, texto, inmediato){
+  texto = (texto || '').trim();
+  if (_refTimers[qi]) { clearTimeout(_refTimers[qi]); _refTimers[qi] = null; }
+  if (!texto) return;
+  if (inmediato) _persistirReflexion(qi, texto);
+  else _refTimers[qi] = setTimeout(() => _persistirReflexion(qi, texto), 800);
+}
+function _volcarReflexiones(){
+  [0,1,2].forEach(qi => {
+    const ta = $('qta' + qi);
+    if (ta) { ans[qi] = ta.value; guardarReflexion(qi, ta.value, true); }
+  });
+}
+
+/* Encola SIEMPRE primero (localStorage, síncrono y fiable) y luego intenta
+   Firestore. Sin sesión o sin red, el texto espera al próximo arranque. Nada de
+   esto bloquea la reproducción. */
+function _persistirReflexion(qi, texto){
+  const id = _refDocId(qi);
+  const q  = _refLocal();
+  q[id] = { payload: _refPayload(qi, texto), escritoEn: Date.now() };
+  _refSave(q);
+  _escribirReflexion(id, false);
+}
+
+function _escribirReflexion(id, diferido){
+  const FS = window._fbFirestore;
+  if (!FS || !FS.setDoc || !_uid || !_db) return;   // sin canal → sigue en cola
+  const item = _refLocal()[id];
+  if (!item) return;
+  // Al subir una reflexión que quedó encolada, la fecha honesta es la de cuando
+  // la escribió, no la de cuando por fin hubo red.
+  const cuando = diferido ? new Date(item.escritoEn) : FS.serverTimestamp();
+  const datos  = Object.assign({}, item.payload, { confirmedAt: cuando });
+  FS.setDoc(FS.doc(_db, 'users', _uid, 'reflections', id), datos, { merge:true }).then(() => {
+    const qq = _refLocal();
+    // Solo desencolar si no la reescribió mientras subía.
+    if (qq[id] && qq[id].escritoEn === item.escritoEn) { delete qq[id]; _refSave(qq); }
+  }).catch(() => { /* queda en cola → _flushReflexiones en el próximo arranque */ });
+}
+
+function _flushReflexiones(){
+  const q = _refLocal();
+  Object.keys(q).forEach(id => _escribirReflexion(id, true));
 }
 
 /* ═══════════ Arranque — datos listos, gesto de inicio ═══════════ */
