@@ -925,7 +925,10 @@ function _flushPendientes(){
    oraciones, y compartir id haría que una sobrescribiera a la otra en silencio.
    Como orar lee sus reflexiones construyendo su id, estas ni se ven entre sí.
 
-   Determinista → reescribir la misma reflexión ACTUALIZA (merge), no duplica.
+   El id lleva además un SELLO DE SESIÓN, y ahí está la diferencia de fondo con
+   orar: allí la reflexión es la respuesta del itinerario y reescribirla es
+   editarla; aquí es un registro histórico y no editable. Rezar el mismo dolor
+   un año después merece su propia entrada, no sustituir la de entonces.
 
    Se guarda mientras se escribe (debounce), no solo al epílogo: si cierra la
    pestaña a mitad de sesión, lo escrito no se pierde. */
@@ -935,7 +938,44 @@ const _BLOQUES = ['gozosos','luminosos','dolorosos','gloriosos'];
 function _refLocal(){ try { return JSON.parse(localStorage.getItem(_REF_KEY) || '{}'); } catch(e){ return {}; } }
 function _refSave(o){ try { localStorage.setItem(_REF_KEY, JSON.stringify(o)); } catch(e){} }
 
-function _refDocId(qi){ return 'mini_' + (PAINID || MIDQ) + '_q' + qi; }
+/* ── Sello de sesión de oración ──
+   El id tiene que ser ESTABLE mientras escribe (el debounce reescribe el mismo
+   documento; si cambiara, una reflexión dejaría veinte) y DISTINTO entre
+   oraciones. La unidad no es el día, es la vez que se sentó a orar: rezar el
+   mismo dolor por la mañana y por la noche son dos momentos.
+
+   Recargar a mitad de la oración no debe partirla en dos, así que el sello vive
+   en sessionStorage y solo se renueva cuando la llegada es una navegación de
+   verdad —venir de sanar— y no una recarga ni un atrás/adelante. Eso cubre
+   también sanar → mini → volver a sanar → mini en la misma pestaña: son dos
+   navegaciones, luego dos oraciones.
+
+   El sello va del reloj del dispositivo, pero solo compone el id: la fecha que
+   se muestra en el diario sigue siendo confirmedAt, que la pone el servidor. */
+const _SES_KEY = 'cruzando_ref_ses_' + (PAINID || MIDQ);
+
+function _selloSesion(){
+  const d = new Date(), p = n => String(n).padStart(2,'0');
+  return '' + d.getFullYear() + p(d.getMonth()+1) + p(d.getDate()) +
+         'T' + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
+}
+function _tipoLlegada(){
+  try {
+    const nav = performance.getEntriesByType('navigation')[0];
+    return (nav && nav.type) || 'navigate';
+  } catch(e){ return 'navigate'; }
+}
+const _refSesion = (function(){
+  let s = null;
+  try { s = sessionStorage.getItem(_SES_KEY); } catch(e){}
+  const tipo = _tipoLlegada();
+  if (s && (tipo === 'reload' || tipo === 'back_forward')) return s;   // la misma oración
+  s = _selloSesion();
+  try { sessionStorage.setItem(_SES_KEY, s); } catch(e){}              // sin sessionStorage: degrada, no rompe
+  return s;
+}());
+
+function _refDocId(qi){ return 'mini_' + (PAINID || MIDQ) + '_' + _refSesion + '_q' + qi; }
 
 /* Todo se deriva del mid, como el resto de mini. El set es el COMPLETO que
    diario.html necesita para pintar la tarjeta: sin `bloque` no hay color de
@@ -954,7 +994,8 @@ function _refPayload(qi, texto){
     origen:         'oracion',
     misterioNombre: (typeof MISTERIO !== 'undefined' && MISTERIO && MISTERIO.titulo) || '',
     painId:         PAINID || '',
-    mid:            MIDQ
+    mid:            MIDQ,
+    sesion:         _refSesion   // las 3 preguntas de una misma oración lo comparten
   };
 }
 

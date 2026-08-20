@@ -1039,10 +1039,13 @@ auth.onAuthStateChanged(async (user) => {
       return;
     }
 
-    // Hay reflexiones
-    chip.textContent = `${total} reflexión${total !== 1 ? 'es' : ''}`;
+    // Hay reflexiones.
+    // El plural NO se forma añadiendo 'es' a "reflexión": la tilde desaparece
+    // ("reflexiones", no "reflexiónes"). Se construye desde la raíz.
+    const nRefl = `${total} reflexi${total !== 1 ? 'ones' : 'ón'}`;
+    chip.textContent = nRefl;
     chip.classList.add('visible');
-    sub.textContent = `${total} reflexión${total !== 1 ? 'es' : ''} guardada${total !== 1 ? 's' : ''}`;
+    sub.textContent = `${nRefl} guardada${total !== 1 ? 's' : ''}`;
 
     document.getElementById('toolbar').style.display = 'flex';
     document.getElementById('loadingScreen').style.display = 'none';
