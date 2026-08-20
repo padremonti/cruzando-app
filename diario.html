@@ -346,6 +346,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 
 /* ── TARJETA DE REFLEXIÓN ── */
 .reflection-card {
+  position:relative;              /* ancla del (⋯) */
   background:var(--card);
   border:1px solid var(--border);
   border-radius:16px;
@@ -450,6 +451,123 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   text-align:right;
 }
 
+/* ── PAPELERA ────────────────────────────────────────────────────────────
+   Borrado suave. Mover a la papelera no pregunta (se deshace); borrar del
+   todo sí, siempre. */
+
+/* (⋯) de cada tarjeta — la primera acción por tarjeta del archivo */
+.card-menu-btn {
+  position:absolute; top:6px; right:8px; z-index:2;
+  background:none; border:none; cursor:pointer;
+  color:var(--text-dim); font-size:1.1rem; line-height:1;
+  padding:6px 10px; border-radius:8px;
+  -webkit-tap-highlight-color:transparent;
+}
+.card-menu-btn:hover { color:var(--text); background:var(--bg2); }
+/* Al body y position:fixed: la tarjeta tiene overflow:hidden y recortaría el
+   menú si viviera dentro de ella. */
+.card-menu {
+  position:fixed; z-index:120;
+  background:var(--card); border:1px solid var(--border); border-radius:12px;
+  box-shadow:0 10px 30px -8px rgba(0,0,0,.45); overflow:hidden; min-width:180px;
+}
+.card-menu-item {
+  display:block; width:100%; text-align:left; background:none; border:none;
+  padding:12px 14px; font-family:inherit; font-size:0.82rem; color:var(--text);
+  cursor:pointer;
+}
+.card-menu-item:hover { background:var(--bg2); }
+
+/* Tarjetas dentro de la papelera */
+.reflection-card.en-papelera { opacity:0.72; }
+.card-acciones { display:flex; gap:8px; margin-top:12px; }
+.card-accion {
+  flex:1; padding:9px 10px; border-radius:10px; cursor:pointer;
+  font-family:inherit; font-size:0.76rem; font-weight:600;
+  background:transparent; border:1px solid var(--border); color:var(--text-soft);
+  transition:border-color .15s, color .15s;
+}
+.card-accion:hover { border-color:var(--brand); color:var(--text); }
+.card-accion.peligro { color:var(--orange); }
+.card-accion.peligro:hover { border-color:var(--orange); }
+
+/* Botón de entrada a la papelera (en la barra de herramientas) */
+.papelera-btn {
+  display:inline-flex; align-items:center; gap:6px; align-self:flex-start;
+  padding:7px 12px; border-radius:20px; cursor:pointer;
+  background:transparent; border:1px solid var(--border); color:var(--text-soft);
+  font-family:inherit; font-size:0.76rem; font-weight:600;
+}
+.papelera-btn:hover { border-color:var(--text-dim); color:var(--text); }
+.papelera-btn svg { width:14px; height:14px; }
+.papelera-count {
+  background:var(--bg2); color:var(--text-dim); border-radius:20px;
+  padding:1px 7px; font-size:0.68rem;
+}
+
+/* Barra del modo papelera */
+.papelera-bar {
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  margin-top:6px;
+}
+.papelera-volver, .papelera-vaciar {
+  background:none; border:none; cursor:pointer; font-family:inherit;
+  font-size:0.8rem; font-weight:600; padding:8px 4px;
+  display:inline-flex; align-items:center; gap:4px;
+}
+.papelera-volver { color:var(--text-soft); }
+.papelera-volver:hover { color:var(--text); }
+.papelera-volver svg { width:14px; height:14px; }
+.papelera-vaciar { color:var(--orange); }
+.papelera-vaciar:hover { text-decoration:underline; }
+.papelera-vacia {
+  text-align:center; color:var(--text-dim); font-size:0.85rem; padding:48px 20px;
+}
+
+/* Aviso efímero (fallos de red al borrar/restaurar) */
+.diario-aviso {
+  position:fixed; left:50%; bottom:24px; transform:translateX(-50%); z-index:80;
+  background:var(--card); color:var(--text); border:1px solid var(--border);
+  border-radius:12px; padding:10px 16px; font-size:0.82rem;
+  max-width:86vw; text-align:center; box-shadow:0 10px 30px -8px rgba(0,0,0,.5);
+}
+
+/* Diálogo de borrado definitivo */
+.conf-overlay {
+  display:none; position:fixed; inset:0; z-index:200;
+  background:rgba(0,0,0,0.65); align-items:center; justify-content:center; padding:1.2rem;
+}
+.conf-overlay.open { display:flex; }
+.conf-sheet {
+  background:var(--card); border:1px solid var(--border); border-radius:18px;
+  padding:26px 22px; width:min(340px,92vw); text-align:center;
+  box-shadow:0 18px 50px -12px rgba(0,0,0,.6);
+}
+.conf-sheet:focus { outline:none; }
+.conf-ic {
+  width:52px; height:52px; border-radius:50%; background:var(--bg2);
+  color:var(--orange); display:flex; align-items:center; justify-content:center;
+  margin:0 auto 14px;
+}
+.conf-ic svg { width:24px; height:24px; }
+.conf-title {
+  font-family:'Crimson Pro',serif; font-size:1.3rem; font-weight:600;
+  color:var(--text); margin-bottom:8px;
+}
+.conf-text { font-size:0.85rem; line-height:1.6; color:var(--text-soft); margin-bottom:22px; }
+.conf-btn-go {
+  width:100%; padding:13px; border-radius:12px; border:none; cursor:pointer;
+  font-family:inherit; font-size:0.86rem; font-weight:700;
+  background:var(--orange); color:#fff;
+}
+.conf-btn-go:active { opacity:0.85; }
+.conf-btn-cancel {
+  width:100%; padding:13px; margin-top:9px; border-radius:12px; cursor:pointer;
+  background:transparent; border:1px solid var(--border);
+  font-family:inherit; font-size:0.86rem; font-weight:600; color:var(--text-soft);
+}
+.conf-btn-cancel:hover { border-color:var(--text-dim); color:var(--text); }
+
 /* ── SEPARADORES DE FECHA ── */
 .date-separator {
   display:flex; align-items:center; gap:10px;
@@ -550,6 +668,24 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
       <button class="filtro-pill"        id="filtro-oracion" onclick="setFiltro('oracion')">Oración</button>
       <button class="filtro-pill"        id="filtro-sanar"   onclick="setFiltro('sanar')">Sanar</button>
     </div>
+
+    <!-- Papelera: no es una pastilla más (no es una forma de mirar el diario,
+         sino un modo de gestión). Solo aparece si hay algo dentro. -->
+    <button class="papelera-btn" id="btn-papelera" onclick="abrirPapelera()" style="display:none">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>
+      </svg>
+      Papelera <span class="papelera-count" id="papelera-count">0</span>
+    </button>
+
+    <div class="papelera-bar" id="papeleraBar" style="display:none">
+      <button class="papelera-volver" onclick="cerrarPapelera()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg> Volver al diario
+      </button>
+      <button class="papelera-vaciar" onclick="vaciarPapelera()">Vaciar papelera</button>
+    </div>
     <div class="sort-row">
       <span class="sort-label" id="sortLabel">Mostrando más recientes primero</span>
       <button class="sort-btn" id="sortBtn" onclick="toggleSort()">
@@ -592,6 +728,23 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 
   <!-- ══ PANTALLA: Lista de reflexiones ══ -->
   <div id="listScreen" style="display:none"></div>
+
+  <!-- ══ Confirmación de borrado definitivo ══
+       Solo para lo irreversible: mover a la papelera no pregunta (se deshace). -->
+  <div class="conf-overlay" id="confOverlay" onclick="if(event.target===this)cerrarConfirmacion()">
+    <div class="conf-sheet" id="confSheet" role="dialog" aria-modal="true"
+         aria-labelledby="conf-title" tabindex="-1">
+      <div class="conf-ic">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>
+        </svg>
+      </div>
+      <div class="conf-title" id="conf-title"></div>
+      <p class="conf-text" id="conf-text"></p>
+      <button class="conf-btn-go" id="conf-go"></button>
+      <button class="conf-btn-cancel" onclick="cerrarConfirmacion()">Cancelar</button>
+    </div>
+  </div>
 
   <!-- Frase de cierre -->
   <p class="footer-frase" id="footerFrase">¡Goza el camino!</p>
@@ -750,10 +903,12 @@ function escapeHtml(s) {
 /* ════════════════════════════════════════════════════
    ESTADO
    ════════════════════════════════════════════════════ */
-let allReflections = [];    // array con todos los docs
+let allReflections = [];    // array con todos los docs (incluidas las de la papelera)
 let sortAsc        = false; // false = recientes primero
 let currentQuery   = '';
-let filtroOrigen   = 'todas'; // 'todas' | 'retiro' | 'oracion'
+let filtroOrigen   = 'todas'; // 'todas' | 'retiro' | 'oracion' | 'sanar'
+let modoPapelera   = false; // true = viendo la papelera, no el diario
+let uidActual      = null;  // para escribir en la colección correcta
 
 /* ════════════════════════════════════════════════════
    NAVEGACIÓN
@@ -873,8 +1028,20 @@ function renderList(items, query) {
       preguntaHtml = `<div class="card-pregunta">${escapeHtml(pregLabel)}</div>${showPregText ? `<p class="card-question-text">${highlight(pregText, query)}</p>` : ''}`;
     }
 
+    // En el diario: el (⋯) para mandarla a la papelera.
+    // En la papelera: restaurar o borrar del todo, sin menú.
+    const idEsc = escapeHtml(String(r.id)).replace(/'/g, '&#39;');
+    const menuBtnHtml = modoPapelera ? '' :
+      `<button class="card-menu-btn" aria-label="Opciones de esta reflexión"
+               onclick="event.stopPropagation();abrirMenuTarjeta(this,'${idEsc}')">⋯</button>`;
+    const accionesHtml = !modoPapelera ? '' :
+      `<div class="card-acciones">
+         <button class="card-accion" onclick="restaurarEntrada('${idEsc}')">Restaurar</button>
+         <button class="card-accion peligro" onclick="borrarDefinitivo('${idEsc}')">Borrar definitivamente</button>
+       </div>`;
+
     html += `
-      <div class="reflection-card" style="animation-delay:${delay}ms">
+      <div class="reflection-card${modoPapelera ? ' en-papelera' : ''}" style="animation-delay:${delay}ms">
         <div class="card-stripe ${stripeClass}" ${stripeStyle}></div>
         <div class="card-body">
           <div class="card-meta">${metaHtml}</div>
@@ -882,7 +1049,9 @@ function renderList(items, query) {
           ${preguntaHtml}
           <p class="card-text">${textHtml}</p>
           <div class="card-date">${escapeHtml(dateLabel)}</div>
+          ${accionesHtml}
         </div>
+        ${menuBtnHtml}
       </div>`;
   });
 
@@ -900,8 +1069,214 @@ function esDeSanar(r) {
   return r.origen === 'sanar' || !!r.painId;
 }
 
+/* ── PAPELERA ──
+   Borrado suave: la entrada conserva su documento y gana un `borradoAt`.
+   El filtrado se hace AQUÍ, en memoria, y no con where('borradoAt','==',null):
+   en Firestore un `== null` no casa con los documentos donde el campo NO
+   EXISTE, así que esa consulta dejaría fuera todo lo escrito hasta hoy. */
+function estaBorrada(r) { return !!r.borradoAt; }
+
+function _refDoc(r) {
+  return db.collection('users').doc(uidActual).collection(r._col).doc(r.id);
+}
+function _buscar(id) { return allReflections.find(r => r.id === id); }
+
+/* Mover a la papelera. El documento NO se toca más allá de ganar borradoAt:
+   el texto sigue entero, y restaurar es quitar ese campo. */
+async function moverAPapelera(id) {
+  const r = _buscar(id); if (!r || !uidActual) return;
+  cerrarMenuTarjeta();
+  const antes = r.borradoAt;
+  r.borradoAt = new Date();          // optimista: la lista responde al instante
+  refrescarTodo();
+  try {
+    await _refDoc(r).set({ borradoAt: firebase.firestore.FieldValue.serverTimestamp() },
+                         { merge: true });
+  } catch (e) {
+    console.warn('[diario] mover a papelera:', e);
+    r.borradoAt = antes; refrescarTodo();     // se deshace si el servidor dice que no
+    avisoDiario('No se pudo mover a la papelera.');
+  }
+}
+
+async function restaurarEntrada(id) {
+  const r = _buscar(id); if (!r || !uidActual) return;
+  const antes = r.borradoAt;
+  r.borradoAt = null;
+  refrescarTodo();
+  try {
+    await _refDoc(r).update({ borradoAt: firebase.firestore.FieldValue.delete() });
+  } catch (e) {
+    console.warn('[diario] restaurar:', e);
+    r.borradoAt = antes; refrescarTodo();
+    avisoDiario('No se pudo restaurar.');
+  }
+}
+
+/* Borrado definitivo: esto sí destruye. Siempre tras confirmación. */
+async function _borrarDeVerdad(ids) {
+  const items = ids.map(_buscar).filter(Boolean);
+  if (!items.length || !uidActual) return;
+  try {
+    await Promise.all(items.map(r => _refDoc(r).delete()));
+    allReflections = allReflections.filter(r => ids.indexOf(r.id) === -1);
+    refrescarTodo();
+  } catch (e) {
+    console.warn('[diario] borrado definitivo:', e);
+    avisoDiario('No se pudo borrar.');
+  }
+}
+
+function borrarDefinitivo(id) {
+  confirmarBorrado(
+    '¿Borrar definitivamente?',
+    'Esta reflexión se perderá para siempre. No hay forma de recuperarla.',
+    'Sí, borrar',
+    () => _borrarDeVerdad([id])
+  );
+}
+
+function vaciarPapelera() {
+  const ids = allReflections.filter(estaBorrada).map(r => r.id);
+  if (!ids.length) return;
+  confirmarBorrado(
+    '¿Vaciar la papelera?',
+    `Se perderán para siempre ${ids.length} ${ids.length === 1 ? 'entrada' : 'entradas'}. No hay forma de recuperarlas.`,
+    'Sí, vaciar',
+    () => _borrarDeVerdad(ids)
+  );
+}
+
+/* Entrar y salir de la papelera. No es una pastilla más: es otro modo — se
+   gestiona, no se lee — así que oculta los filtros y cambia la cabecera. */
+function abrirPapelera() {
+  modoPapelera = true;
+  cerrarMenuTarjeta();
+  refrescarTodo();
+  window.scrollTo(0, 0);
+}
+function cerrarPapelera() {
+  modoPapelera = false;
+  refrescarTodo();
+  window.scrollTo(0, 0);
+}
+
+/* Repinta todo lo que depende del estado: cabecera, contador, barra y lista. */
+function refrescarTodo() {
+  const vivas    = allReflections.filter(r => !estaBorrada(r)).length;
+  const borradas = allReflections.length - vivas;
+
+  const chip = document.getElementById('countChip');
+  const sub  = document.getElementById('headerSub');
+  const barra = document.getElementById('papeleraBar');
+  const filtros = document.getElementById('filtrosRow');
+  const busq = document.querySelector('.search-wrap');
+  const orden = document.querySelector('.sort-row');
+  const btnPap = document.getElementById('btn-papelera');
+
+  if (btnPap) {
+    btnPap.style.display = borradas ? '' : 'none';
+    const n = document.getElementById('papelera-count');
+    if (n) n.textContent = borradas;
+  }
+  if (barra)   barra.style.display   = modoPapelera ? 'flex' : 'none';
+  if (filtros) filtros.style.display = modoPapelera ? 'none' : '';
+  if (busq)    busq.style.display    = modoPapelera ? 'none' : '';
+  if (orden)   orden.style.display   = modoPapelera ? 'none' : '';
+
+  if (modoPapelera) {
+    if (chip) chip.textContent = `${borradas} en papelera`;
+    if (sub)  sub.textContent  = 'Puedes restaurarlas o borrarlas del todo';
+  } else {
+    // El plural NO se forma añadiendo 'es' a "reflexión": la tilde desaparece
+    // ("reflexiones", no "reflexiónes"). Se construye desde la raíz.
+    const nRefl = `${vivas} reflexi${vivas !== 1 ? 'ones' : 'ón'}`;
+    if (chip) chip.textContent = nRefl;
+    if (sub)  sub.textContent  = `${nRefl} guardada${vivas !== 1 ? 's' : ''}`;
+  }
+  applyFilters();
+}
+
+function renderPapelera() {
+  const items = allReflections.filter(estaBorrada).sort((a, b) => {
+    const ms = x => x.borradoAt ? (x.borradoAt.toDate ? x.borradoAt.toDate().getTime()
+                                                      : new Date(x.borradoAt).getTime()) : 0;
+    return ms(b) - ms(a);
+  });
+  ['emptyScreen','noResultsScreen','loadingScreen','authScreen'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.style.display = 'none';
+  });
+  document.getElementById('listScreen').style.display = 'flex';
+  if (!items.length) {
+    document.getElementById('listScreen').innerHTML =
+      '<div class="papelera-vacia">La papelera está vacía.</div>';
+    return;
+  }
+  renderList(items, '');
+}
+
+/* ── Diálogo de confirmación (solo para lo irreversible) ── */
+let _confAccion = null, _confEsc = null;
+function confirmarBorrado(titulo, texto, etiqueta, accion) {
+  cerrarMenuTarjeta();
+  _confAccion = accion;
+  document.getElementById('conf-title').textContent = titulo;
+  document.getElementById('conf-text').textContent  = texto;
+  const go = document.getElementById('conf-go');
+  go.textContent = etiqueta;
+  go.onclick = () => { const f = _confAccion; cerrarConfirmacion(); if (f) f(); };
+  document.getElementById('confOverlay').classList.add('open');
+  _confEsc = e => { if (e.key === 'Escape') cerrarConfirmacion(); };
+  document.addEventListener('keydown', _confEsc);
+  // Foco en el diálogo, no en el botón: abrir no debe dejar armado el borrado.
+  document.getElementById('confSheet').focus();
+}
+function cerrarConfirmacion() {
+  if (_confEsc) { document.removeEventListener('keydown', _confEsc); _confEsc = null; }
+  _confAccion = null;
+  document.getElementById('confOverlay').classList.remove('open');
+}
+
+/* Aviso efímero para los fallos de red. */
+function avisoDiario(txt) {
+  const d = document.createElement('div');
+  d.className = 'diario-aviso'; d.setAttribute('role', 'status'); d.textContent = txt;
+  document.body.appendChild(d);
+  setTimeout(() => d.remove(), 4000);
+}
+
+/* ── Menú (⋯) de la tarjeta ── */
+let _menuAbierto = null;
+function cerrarMenuTarjeta() {
+  if (_menuAbierto) { _menuAbierto.remove(); _menuAbierto = null; }
+  document.removeEventListener('click', _cerrarMenuFuera, true);
+}
+function _cerrarMenuFuera(e) {
+  if (_menuAbierto && !_menuAbierto.contains(e.target)) cerrarMenuTarjeta();
+}
+function abrirMenuTarjeta(btn, id) {
+  const yaEstaba = _menuAbierto && _menuAbierto.dataset.id === id;
+  cerrarMenuTarjeta();
+  if (yaEstaba) return;
+  const m = document.createElement('div');
+  m.className = 'card-menu'; m.dataset.id = id;
+  m.innerHTML = '<button class="card-menu-item" onclick="moverAPapelera(\'' +
+                id.replace(/'/g, "\\'") + '\')">Mover a la papelera</button>';
+  document.body.appendChild(m);
+  const r = btn.getBoundingClientRect();
+  m.style.top = (r.bottom + 6) + 'px';
+  // Se alinea por la derecha del botón, sin salirse de la pantalla.
+  m.style.left = Math.max(8, Math.min(r.right - m.offsetWidth,
+                                      window.innerWidth - m.offsetWidth - 8)) + 'px';
+  _menuAbierto = m;
+  setTimeout(() => document.addEventListener('click', _cerrarMenuFuera, true), 0);
+}
+
 function applyFilters() {
-  let items = [...allReflections];
+  // En la papelera se ven exactamente las borradas, sin pastillas ni orden.
+  if (modoPapelera) { renderPapelera(); return; }
+
+  let items = allReflections.filter(r => !estaBorrada(r));
 
   // Filtro de origen
   if (filtroOrigen === 'retiro') {
@@ -1022,11 +1397,16 @@ auth.onAuthStateChanged(async (user) => {
     const snapRefl = await db.collection('users').doc(user.uid).collection('reflections').get().catch(() => ({ docs: [] }));
     const snapDiario = await db.collection('users').doc(user.uid).collection('diario').get().catch(() => ({ docs: [] }));
 
-    const reflections = snapRefl.docs.map(d => ({ id: d.id, origen: d.data().origen || 'oracion', ...d.data() }));
+    // _col: de qué colección salió cada entrada. Hace falta para poder escribir
+    // en ella (papelera, restaurar, borrar) sin adivinar la ruta después.
+    const reflections = snapRefl.docs.map(d => ({ id: d.id, _col: 'reflections',
+                                                  origen: d.data().origen || 'oracion', ...d.data() }));
     const diarioEntries = snapDiario.docs.map(d => {
       const data = d.data();
       return {
         id:             d.id,
+        _col:           'diario',
+        borradoAt:      data.borradoAt || null,
         confirmedAt:    data.fecha,
         text:           data.texto,
         question:       data.pregunta,
@@ -1039,31 +1419,29 @@ auth.onAuthStateChanged(async (user) => {
       };
     });
     allReflections = [...reflections, ...diarioEntries];
+    uidActual = user.uid;
 
-    const total = allReflections.length;
-    const chip  = document.getElementById('countChip');
-    const sub   = document.getElementById('headerSub');
+    const vivas    = allReflections.filter(r => !estaBorrada(r)).length;
+    const borradas = allReflections.length - vivas;
 
-    if (total === 0) {
+    // Vacío de verdad: nada escrito y nada en la papelera.
+    if (!vivas && !borradas) {
       document.getElementById('toolbar').style.display = 'none';
       document.getElementById('loadingScreen').style.display = 'none';
       document.getElementById('emptyScreen').style.display   = 'flex';
       return;
     }
 
-    // Hay reflexiones.
-    // El plural NO se forma añadiendo 'es' a "reflexión": la tilde desaparece
-    // ("reflexiones", no "reflexiónes"). Se construye desde la raíz.
-    const nRefl = `${total} reflexi${total !== 1 ? 'ones' : 'ón'}`;
-    chip.textContent = nRefl;
-    chip.classList.add('visible');
-    sub.textContent = `${nRefl} guardada${total !== 1 ? 's' : ''}`;
-
+    document.getElementById('countChip').classList.add('visible');
     document.getElementById('toolbar').style.display = 'flex';
     document.getElementById('loadingScreen').style.display = 'none';
     document.getElementById('listScreen').style.display = 'flex';
 
-    applyFilters();
+    // Si TODO está en la papelera, se entra directamente a ella: de lo
+    // contrario el diario se vería vacío y no habría forma de restaurar nada.
+    if (!vivas && borradas) modoPapelera = true;
+
+    refrescarTodo();   // pinta cabecera, contador, barra y lista
 
   } catch (err) {
     console.error('Error cargando reflexiones:', err);
