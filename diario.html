@@ -548,6 +548,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
       <button class="filtro-pill activo" id="filtro-todas"  onclick="setFiltro('todas')">Todas</button>
       <button class="filtro-pill"        id="filtro-retiro" onclick="setFiltro('retiro')">Retiros</button>
       <button class="filtro-pill"        id="filtro-oracion" onclick="setFiltro('oracion')">Oración</button>
+      <button class="filtro-pill"        id="filtro-sanar"   onclick="setFiltro('sanar')">Sanar</button>
     </div>
     <div class="sort-row">
       <span class="sort-label" id="sortLabel">Mostrando más recientes primero</span>
@@ -891,14 +892,25 @@ function renderList(items, query) {
 /* ════════════════════════════════════════════════════
    FILTRO Y ORDEN
    ════════════════════════════════════════════════════ */
+/* ¿Nació esta reflexión en Sanar?
+   Dos señales, y la segunda es una red: mini escribe origen:'sanar' desde la
+   Pieza 3, pero las escritas antes llevan 'oracion' y solo se distinguen por
+   traer painId. Así las antiguas aparecen donde deben sin migrar nada. */
+function esDeSanar(r) {
+  return r.origen === 'sanar' || !!r.painId;
+}
+
 function applyFilters() {
   let items = [...allReflections];
 
   // Filtro de origen
   if (filtroOrigen === 'retiro') {
     items = items.filter(r => r.origen === 'taller' || r.origen === 'evaluacion_taller');
+  } else if (filtroOrigen === 'sanar') {
+    items = items.filter(esDeSanar);
   } else if (filtroOrigen === 'oracion') {
-    items = items.filter(r => !r.origen || r.origen === 'oracion');
+    // Excluye las de Sanar: si no, saldrían en las dos pastillas.
+    items = items.filter(r => (!r.origen || r.origen === 'oracion') && !esDeSanar(r));
   }
 
   // Filtro de búsqueda (incluye texto, pregunta y nombre del misterio)
@@ -941,7 +953,7 @@ function toggleSort() {
 
 function setFiltro(origen) {
   filtroOrigen = origen;
-  ['todas','retiro','oracion'].forEach(function(f) {
+  ['todas','retiro','oracion','sanar'].forEach(function(f) {
     const btn = document.getElementById('filtro-' + f);
     if (btn) btn.classList.toggle('activo', f === origen);
   });

@@ -991,7 +991,9 @@ function _refPayload(qi, texto){
     questionIdx:    qi,
     question:       qs[qi] || QL[qi] || '',
     text:           texto,
-    origen:         'oracion',
+    // 'sanar', no 'oracion': el diario las filtra aparte. Sigue siendo oración,
+    // pero nace de un dolor concreto y es un registro histórico, no editable.
+    origen:         'sanar',
     misterioNombre: (typeof MISTERIO !== 'undefined' && MISTERIO && MISTERIO.titulo) || '',
     painId:         PAINID || '',
     mid:            MIDQ,
