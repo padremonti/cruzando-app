@@ -1,4 +1,6 @@
 import { initializeApp }             from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { initializeAppCheck, ReCaptchaV3Provider }
+                                  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js';
 import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
@@ -10,6 +12,16 @@ const _app  = initializeApp({
   messagingSenderId: '408196948528',
   appId:             '1:408196948528:web:de291e8afc969252e943f5'
 });
+// ── App Check (reCAPTCHA v3) — clave en appcheck-key.js; vacía = no-op ──
+try {
+  if (window.RECAPTCHA_SITE_KEY) {
+    initializeAppCheck(_app, {
+      provider: new ReCaptchaV3Provider(window.RECAPTCHA_SITE_KEY),
+      isTokenAutoRefreshEnabled: true
+    });
+  }
+} catch(e) { console.warn('[AppCheck]', e); }
+
 const _auth = getAuth(_app);
 const _db   = getFirestore(_app);
 

@@ -803,7 +803,9 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
      FIREBASE SDK v10 (compat) vía CDN
      ══════════════════════════════════════════ -->
 <script src="utils.js"></script>
+<script src="appcheck-key.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
@@ -1372,6 +1374,10 @@ function showScreen(name) {
    ════════════════════════════════════════════════════ */
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
+// ── App Check (reCAPTCHA v3) — clave en appcheck-key.js; vacía = no-op ──
+try {
+  if (window.RECAPTCHA_SITE_KEY) firebase.appCheck().activate(window.RECAPTCHA_SITE_KEY, true);
+} catch(e) { console.warn('[AppCheck]', e); }
 }
 const auth = firebase.auth();
 const db   = firebase.firestore();

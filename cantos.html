@@ -951,8 +951,11 @@ body.light .tool-btn svg { background: rgba(0,0,0,0.04); }
   </nav>
 </div>
 
+<script src="appcheck-key.js"></script>
 <script type="module">
 import { initializeApp }    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { initializeAppCheck, ReCaptchaV3Provider }
+                                  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js';
 import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import { getFirestore, collection, getDocs, getDoc, doc, setDoc, updateDoc }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
@@ -966,6 +969,19 @@ const FIREBASE_CONFIG = {
   appId: "1:1059345488674:web:9e2b53e1a5ac6f1f6b1b78"
 };
 const app  = initializeApp(FIREBASE_CONFIG);
+
+// ── App Check (reCAPTCHA v3) ──────────────────────────────
+// Atestación invisible: el backend de Firebase distingue la app real de un
+// bot. La clave vive en appcheck-key.js — vacía = no-op, no rompe nada.
+// El bloqueo (enforcement) se activa en la consola, no desde aquí.
+try {
+  if (window.RECAPTCHA_SITE_KEY) {
+    initializeAppCheck(app, {
+      provider: new ReCaptchaV3Provider(window.RECAPTCHA_SITE_KEY),
+      isTokenAutoRefreshEnabled: true
+    });
+  }
+} catch(e) { console.warn('[AppCheck]', e); }
 const auth = getAuth(app);
 const db   = getFirestore(app);
 

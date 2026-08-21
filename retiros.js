@@ -114,6 +114,14 @@
       appId:             '1:408196948528:web:de291e8afc969252e943f5'
     };
     if (!firebase.apps.length) firebase.initializeApp(cfg);
+    // ── App Check (reCAPTCHA v3) — clave en appcheck-key.js; vacía = no-op ──
+    // Guardia propia: _initFirebase() puede llamarse más de una vez.
+    try {
+      if (window.RECAPTCHA_SITE_KEY && !window._appCheckOn) {
+        firebase.appCheck().activate(window.RECAPTCHA_SITE_KEY, true);
+        window._appCheckOn = true;
+      }
+    } catch(e) { console.warn('[AppCheck]', e); }
     _db   = firebase.firestore();
     _auth = firebase.auth();
   }

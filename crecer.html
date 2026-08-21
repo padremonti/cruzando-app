@@ -273,6 +273,33 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 }
 .btn-login-email:active { transform:scale(0.97); }
 
+/* ── Acceso en dos caminos: Entrar / Crear cuenta ── */
+#login-paths, #login-providers {
+  display:flex; flex-direction:column; align-items:center; gap:14px; width:100%;
+}
+.login-terms {
+  width:100%; max-width:300px; text-align:left;
+  background:var(--card); border:1.5px solid var(--border);
+  border-radius:14px; padding:12px 14px; transition:border-color 0.2s;
+}
+.login-terms.warn { border-color:#E74C3C; }
+.login-terms-row { display:flex; align-items:flex-start; gap:11px; cursor:pointer; }
+.login-terms-row input {
+  width:20px; height:20px; flex-shrink:0; margin-top:1px;
+  accent-color:var(--orange); cursor:pointer;
+}
+.login-terms-row span { font-size:0.78rem; line-height:1.55; color:var(--text-soft); }
+.login-terms-row a { color:var(--orange); text-decoration:underline; }
+.login-terms-err {
+  display:none; max-width:300px; font-size:0.74rem; color:#E74C3C;
+  line-height:1.45; text-align:center;
+}
+.login-terms-err.on { display:block; }
+.login-back {
+  background:none; border:none; font-size:0.85rem; color:var(--text-soft);
+  cursor:pointer; font-family:inherit;
+}
+
 /* ── Preferencias — toggles ── */
 .pref-toggle-row {
   display:flex; align-items:center; justify-content:space-between;
@@ -1435,7 +1462,27 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
       <rect x="0" y="46.2" width="100" height="7.6" fill="#02BBE0"/>
     </svg>
     <div class="login-title">CruzAndo</div>
-    <div class="login-sub">Inicia sesión para guardar tu progreso en el camino.</div>
+    <div class="login-sub" id="login-sub">Inicia sesión para guardar tu progreso en el camino.</div>
+
+    <!-- Paso 1 — los dos caminos. "Entrar" es el regreso (sin fricción) y
+         "Crear cuenta" es el alta (con aceptación de términos). Separarlos es
+         lo que permite pedir la casilla solo a quien se registra. -->
+    <div id="login-paths">
+      <button class="btn-login-google" id="btn-path-entrar">Entrar</button>
+      <div class="login-divider">o</div>
+      <button class="btn-login-email" id="btn-path-crear">Crear cuenta</button>
+    </div>
+
+    <!-- Paso 2 — el proveedor. Los mismos dos botones sirven a los dos
+         caminos; lo que cambia es authMode y, en el alta, la casilla. -->
+    <div id="login-providers" style="display:none">
+    <div class="login-terms" id="login-terms" style="display:none">
+      <label class="login-terms-row">
+        <input type="checkbox" id="chk-terminos">
+        <span>Acepto los <a href="terminos.html" target="_blank" rel="noopener">Términos de Servicio</a> y la <a href="privacidad.html" target="_blank" rel="noopener">Política de Privacidad</a>.</span>
+      </label>
+    </div>
+    <div class="login-terms-err" id="terms-error"></div>
     <button class="btn-login-google" id="btn-google">
       <svg width="18" height="18" viewBox="0 0 24 24">
         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -1449,6 +1496,8 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     <button class="btn-login-email" id="btn-show-email">
       Continuar con correo electrónico
     </button>
+    <button class="login-back" id="btn-login-back">Volver</button>
+    </div>
   </div>
 
   <!-- ═══ MODAL PREFERENCIAS ═══ -->
@@ -1825,14 +1874,18 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 
 <script src="utils.js"></script>
 
+<script src="appcheck-key.js"></script>
 <script type="module">
 // ── Firebase SDK ──────────────────────────────────────────────────
 import { initializeApp }           from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { initializeAppCheck, ReCaptchaV3Provider }
+                                  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js';
 import { getAuth, onAuthStateChanged,
          signInWithPopup, GoogleAuthProvider,
          signInWithEmailAndPassword,
          createUserWithEmailAndPassword,
-         signOut }                 from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+         signOut, deleteUser,
+         getAdditionalUserInfo }   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import { getFirestore, doc, getDoc, getDocs, collection,
          query, where,
          setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
@@ -1862,6 +1915,19 @@ const LAUNCH_DISCOUNT   = "LAUNCH50"; // código de 50% OFF lanzamiento
 // ── Init ──────────────────────────────────────────────────────────
 const fbApp = initializeApp(FIREBASE_CONFIG);
 window.fbApp = fbApp;
+
+// ── App Check (reCAPTCHA v3) ──────────────────────────────
+// Atestación invisible: el backend de Firebase distingue la app real de un
+// bot. La clave vive en appcheck-key.js — vacía = no-op, no rompe nada.
+// El bloqueo (enforcement) se activa en la consola, no desde aquí.
+try {
+  if (window.RECAPTCHA_SITE_KEY) {
+    initializeAppCheck(fbApp, {
+      provider: new ReCaptchaV3Provider(window.RECAPTCHA_SITE_KEY),
+      isTokenAutoRefreshEnabled: true
+    });
+  }
+} catch(e) { console.warn('[AppCheck]', e); }
 const auth  = getAuth(fbApp);
 const db    = getFirestore(fbApp);
 window._fbFirestore = { doc, getDoc, setDoc, serverTimestamp };
@@ -2600,7 +2666,9 @@ onAuthStateChanged(auth, async function(user) {
     window._forceFirestorePlan = true;
   }
 
-  if (!user) { currentUser = null; showScreen('login'); return; }
+  // _avisoAlta: al deshacer un alta accidental esto se dispara con user=null
+  // y reiniciaría la pantalla encima del aviso que hay que leer.
+  if (!user) { currentUser = null; if (!_avisoAlta) mostrarCaminos(); showScreen('login'); return; }
   currentUser = user;
 
   // ══ FASE 1: pintar todo desde localStorage — sin red ══════════════
@@ -2666,6 +2734,7 @@ onAuthStateChanged(auth, async function(user) {
   var dirty = isProgressCacheDirty();
 
   var userData = await ensureUserDoc(user);
+  flushConsentimiento();   // cola de consentimiento pendiente (no bloquea)
   window._lastUserData = userData;
 
   var realPlan = resolvePlan(userData);
@@ -2931,49 +3000,216 @@ function renderTuCamino(bookmark, progreso, user) {
   }
 }
 
-// ── Login Google ──────────────────────────────────────────────────
-document.getElementById('btn-google').addEventListener('click', async function() {
+// ── Consentimiento de términos ──────────────────────────────
+// La casilla es un acto de la UI; la PRUEBA la escribe el servidor (callable
+// aceptarTerminos: write-once, serverTimestamp, campo blindado en las reglas).
+// Entre una y otra puede fallar la red, así que el intento queda anotado en
+// localStorage y se reintenta al resolver onAuthStateChanged — mismo patrón de
+// pendingSync que mini/sanar. Una aceptación real no se pierde por la conexión.
+var TERMINOS_VERSION = '2026-08';
+var CONSENT_KEY      = 'cruzando_consent_pending';
+
+function marcarConsentimientoPendiente(metodo, uid) {
   try {
-    var provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
+    localStorage.setItem(CONSENT_KEY, JSON.stringify({
+      uid: uid, metodo: metodo, version: TERMINOS_VERSION, at: Date.now()
+    }));
+  } catch(e) {}
+}
+
+var _consentEnVuelo = null;
+function flushConsentimiento() {
+  if (_consentEnVuelo) return _consentEnVuelo;
+
+  var pend = null;
+  try { pend = JSON.parse(localStorage.getItem(CONSENT_KEY) || 'null'); } catch(e) {}
+  if (!pend) return Promise.resolve();
+
+  var user = auth.currentUser;
+  // El uid ata la aceptación a QUIEN la dio: si en este dispositivo entra otra
+  // persona antes de que salga el reintento, no hereda su consentimiento.
+  if (!user || (pend.uid && pend.uid !== user.uid)) return Promise.resolve();
+
+  _consentEnVuelo = (async function() {
+    try {
+      // El doc de usuario primero: si la callable se adelantara, crearía
+      // users/{uid} y ensureUserDoc ya no escribiría email ni displayName.
+      await ensureUserDoc(user);
+      var mod = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-functions.js');
+      var aceptar = mod.httpsCallable(mod.getFunctions(fbApp, 'us-central1'), 'aceptarTerminos');
+      await aceptar({ version: pend.version || TERMINOS_VERSION,
+                      metodo:  pend.metodo  || 'email' });
+      try { localStorage.removeItem(CONSENT_KEY); } catch(e) {}
+    } catch(e) {
+      // Se queda en la cola: el próximo arranque lo reintenta.
+      console.warn('[terminos] pendiente de registrar:', e && e.message);
+    }
+    _consentEnVuelo = null;
+  })();
+
+  return _consentEnVuelo;
+}
+
+// ── Pantalla de acceso: dos caminos ───────────────────────────
+// 'login'    = Entrar. Quien vuelve no ve casilla ni fricción.
+// 'register' = Crear cuenta. Exige aceptar los términos por los DOS métodos.
+var authMode = 'login';
+
+// Sostiene el aviso de "esa cuenta no existe" mientras onAuthStateChanged
+// pasa por user=null. Lo baja la siguiente decisión de la persona.
+var _avisoAlta = false;
+
+function _terminosLimpiarAviso() {
+  var box = document.getElementById('login-terms');
+  if (box) box.classList.remove('warn');
+  var err = document.getElementById('terms-error');
+  if (err) { err.textContent = ''; err.classList.remove('on'); }
+}
+
+function _terminosReset() {
+  var chk = document.getElementById('chk-terminos');
+  if (chk) chk.checked = false;          // NUNCA premarcada
+  _terminosLimpiarAviso();
+}
+
+function mostrarCaminos() {
+  authMode = 'login';
+  document.getElementById('login-paths').style.display = '';
+  document.getElementById('login-providers').style.display = 'none';
+  document.getElementById('login-sub').textContent =
+    'Inicia sesión para guardar tu progreso en el camino.';
+  _terminosReset();
+}
+
+function abrirCamino(modo) {
+  authMode = modo;
+  document.getElementById('login-paths').style.display = 'none';
+  document.getElementById('login-providers').style.display = '';
+  document.getElementById('login-sub').textContent = modo === 'register'
+    ? 'Crea tu cuenta para empezar el camino.'
+    : 'Inicia sesión para guardar tu progreso en el camino.';
+  document.getElementById('login-terms').style.display = modo === 'register' ? '' : 'none';
+  _terminosReset();
+}
+
+// Puerta ÚNICA del alta: sin casilla marcada no se crea nada, ni por correo ni
+// por Google. Avisa donde está la casilla, no en un alert perdido.
+function terminosAceptados() {
+  if (authMode !== 'register') return true;
+  var chk = document.getElementById('chk-terminos');
+  if (chk && chk.checked) return true;
+  var box = document.getElementById('login-terms');
+  var err = document.getElementById('terms-error');
+  if (box) box.classList.add('warn');
+  if (err) {
+    err.textContent = 'Para crear tu cuenta, acepta los Términos de Servicio y la Política de Privacidad.';
+    err.classList.add('on');
+  }
+  return false;
+}
+
+document.getElementById('btn-path-entrar').addEventListener('click', function() { _avisoAlta = false; abrirCamino('login'); });
+document.getElementById('btn-path-crear').addEventListener('click', function() { _avisoAlta = false; abrirCamino('register'); });
+document.getElementById('btn-login-back').addEventListener('click', function() { _avisoAlta = false; mostrarCaminos(); });
+document.getElementById('chk-terminos').addEventListener('change', function() {
+  if (this.checked) _terminosLimpiarAviso();
+});
+
+// ── Login Google ─────────────────────────────────────
+// El popup de Google CREA la cuenta si el correo es nuevo: no distingue entrar
+// de registrarse. Por eso en el camino "Entrar" hay que mirar isNewUser — una
+// cuenta nacida ahí no pasó por la casilla.
+document.getElementById('btn-google').addEventListener('click', async function() {
+  if (!terminosAceptados()) return;
+  var esAlta = authMode === 'register';
+  try {
+    var result = await signInWithPopup(auth, new GoogleAuthProvider());
+    var nuevo  = false;
+    try { nuevo = !!(getAdditionalUserInfo(result) || {}).isNewUser; } catch(e) {}
+
+    if (!esAlta && nuevo) { await _deshacerAltaAccidental(result.user); return; }
+
+    if (esAlta) {
+      marcarConsentimientoPendiente('google', result.user.uid);
+      flushConsentimiento();
+    }
   } catch(e) { console.warn('[CruzAndo] Google login:', e.message); }
 });
 
-// ── Modal email ───────────────────────────────────────────────────
-var modalMode = 'login';
+// Cuenta recién creada por error en el camino "Entrar": se deshace. Tiene un
+// segundo de vida y está vacía; lo que no se puede dejar en pie es una cuenta
+// sin consentimiento registrado. Si el borrado fallara, al menos se cierra la
+// sesión para no dejar dentro a alguien que no aceptó nada.
+async function _deshacerAltaAccidental(user) {
+  _avisoAlta = true;
+  try {
+    await deleteUser(user);
+  } catch(e) {
+    console.warn('[CruzAndo] no se pudo deshacer el alta:', e && e.message);
+    try { await signOut(auth); } catch(e2) {}
+  }
+  abrirCamino('register');
+  var err = document.getElementById('terms-error');
+  if (err) {
+    err.textContent = 'Ese correo todavía no tiene cuenta en CruzAndo. Acepta los términos y vuelve a continuar con Google para crearla.';
+    err.classList.add('on');
+  }
+}
+
+// ── Modal email ──────────────────────────────────────
+// El modo lo fija el camino elegido, no un enlace dentro del modal: así el alta
+// por correo no puede empezar sin haber pasado por la casilla.
 document.getElementById('btn-show-email').addEventListener('click', function() {
-  modalMode = 'login';
-  document.getElementById('modal-title').textContent = 'Iniciar sesión';
-  document.getElementById('modal-switch-text').textContent = 'Crear una';
-  document.getElementById('inp-name').style.display = 'none';
+  if (!terminosAceptados()) return;
+  var esAlta = authMode === 'register';
+  document.getElementById('modal-title').textContent       = esAlta ? 'Crear cuenta' : 'Iniciar sesión';
+  document.getElementById('modal-switch-text').textContent = esAlta ? 'Ya tengo una' : 'Crear una';
+  var sw = document.getElementById('modal-switch');
+  if (sw && sw.firstChild) sw.firstChild.nodeValue = esAlta ? '¿Ya tienes cuenta? ' : '¿No tienes cuenta? ';
+  document.getElementById('inp-name').style.display        = esAlta ? '' : 'none';
+  document.getElementById('btn-modal-submit').textContent  = esAlta ? 'Crear cuenta' : 'Entrar';
   document.getElementById('modal-error').textContent = '';
   openModal('modal-email');
 });
 document.getElementById('btn-modal-close').addEventListener('click', function() { closeModal('modal-email'); });
+
+// Cambiar de camino desde el modal: se cierra y se vuelve a la pantalla en el
+// otro modo. Si el destino es el alta, ahí espera la casilla — no hay atajo.
 document.getElementById('modal-switch').addEventListener('click', function() {
-  modalMode = modalMode === 'login' ? 'register' : 'login';
-  document.getElementById('modal-title').textContent = modalMode === 'register' ? 'Crear cuenta' : 'Iniciar sesión';
-  document.getElementById('modal-switch-text').textContent = modalMode === 'register' ? 'Ya tengo una' : 'Crear una';
-  document.getElementById('inp-name').style.display = modalMode === 'register' ? '' : 'none';
-  document.getElementById('modal-error').textContent = '';
+  var destino = authMode === 'login' ? 'register' : 'login';
+  closeModal('modal-email');
+  abrirCamino(destino);
+  if (destino === 'login') document.getElementById('btn-show-email').click();
 });
+
 document.getElementById('btn-modal-submit').addEventListener('click', async function() {
   var email    = document.getElementById('inp-email').value.trim();
   var password = document.getElementById('inp-password').value;
   var name     = document.getElementById('inp-name').value.trim();
   var errEl    = document.getElementById('modal-error');
+  var esAlta   = authMode === 'register';
   errEl.textContent = '';
   if (!email || !password) { errEl.textContent = 'Por favor completa todos los campos.'; return; }
+  // Segundo cerrojo: la casilla vive detrás del modal y no se puede tocar con
+  // él abierto, pero el alta no se lanza sin comprobarla otra vez aquí.
+  if (esAlta && !terminosAceptados()) {
+    errEl.textContent = 'Acepta los Términos y la Política de Privacidad para crear tu cuenta.';
+    return;
+  }
   try {
-    if (modalMode === 'login') {
+    if (!esAlta) {
       await signInWithEmailAndPassword(auth, email, password);
     } else {
       if (!name) { errEl.textContent = 'Escribe tu nombre.'; return; }
+      // Orden del alta: crear la cuenta —App Check muerde AQUÍ, y si rechaza no
+      // nace nada— → doc de usuario → constancia del consentimiento.
       var result = await createUserWithEmailAndPassword(auth, email, password);
+      marcarConsentimientoPendiente('email', result.user.uid);
       await setDoc(doc(db, 'users', result.user.uid), {
         email, displayName: name, photoURL: '',
         createdAt: serverTimestamp(), plan: 'free'
       });
+      flushConsentimiento();
     }
     closeModal('modal-email');
   } catch(e) {
@@ -2983,7 +3219,9 @@ document.getElementById('btn-modal-submit').addEventListener('click', async func
       'auth/invalid-credential':  'Correo o contraseña incorrectos.',
       'auth/email-already-in-use':'Ese correo ya tiene una cuenta.',
       'auth/weak-password':       'La contraseña debe tener al menos 6 caracteres.',
-      'auth/invalid-email':       'El correo no es válido.'
+      'auth/invalid-email':       'El correo no es válido.',
+      'auth/firebase-app-check-token-is-invalid':
+                                  'No pudimos verificar el dispositivo. Recarga la página e inténtalo de nuevo.'
     };
     errEl.textContent = msgs[e.code] || 'Error: ' + e.message;
   }

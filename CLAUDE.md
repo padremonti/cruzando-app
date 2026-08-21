@@ -187,6 +187,29 @@ Buckets R2: `R2_ILU` (ilustraciones), `R2_MUS` (música/lrc), `R2_AUD` (audios).
 - Arquitectura técnica (Stripe, shape Firestore, cobro atómico) **en inspección, sin implementar**.
 - **Crédito en mini**: comentario TODO reubicado al epílogo ("completó = pagó", con guardia por sesión) — documentado, **no construido**. No implementar por pedazos: espera el modelo completo.
 
+## Consentimiento de términos + App Check (registro)
+
+*Estado: implementado + bancos de prueba en node. **PENDIENTE**: registrar la clave reCAPTCHA y probar el alta en dispositivo.*
+
+**Pantalla de acceso en dos caminos** (`index.html` y `crecer.html`, gemelos):
+`#login-paths` (Entrar / Crear cuenta) → `#login-providers` (Google / correo + Volver).
+La variable `authMode` (`'login'|'register'`) manda; la casilla `#chk-terminos` **solo** se muestra y solo bloquea en `register`. Quien vuelve no ve casilla.
+
+- `terminosAceptados()` es la **puerta única** del alta: la llaman el botón de Google, el de correo y el submit del modal. Nunca premarcada (`_terminosReset()` al entrar al camino).
+- El enlace "¿No tienes cuenta?" del modal **no** cambia de modo dentro del modal: lo cierra y devuelve al camino correspondiente, para que el alta no empiece sin pasar por la casilla.
+- **Google crea la cuenta si el correo es nuevo**, aunque se haya pulsado "Entrar". Por eso se mira `getAdditionalUserInfo(result).isNewUser` y, si nació ahí, se deshace con `deleteUser` (`_deshacerAltaAccidental`). Lo mismo cierra el agujero de `audio.html`, cuya pantalla es solo de entrada y remite al inicio para el alta.
+
+**La constancia** — callable `aceptarTerminos({version, metodo})` (functions/index.js #9):
+escribe `users/{uid}.terminos = { aceptado, fecha (serverTimestamp), version, metodo }`, **write-once** (read-before-write: conserva la primera fecha). La versión la fija `TERMINOS_VERSION` del **servidor**, no el cliente. `terminos` está en `blindados()` de `firestore.rules` y en la lista de la regla `create`: el cliente no lo puede fabricar, alterar ni borrar. **No toca `crearCuentaEconomica`** (aquel siembra `billing/state`, campo distinto, sin carrera).
+
+**Orden del alta** (email): casilla → `createUserWithEmailAndPassword` (App Check muerde aquí; si rechaza no nace nada) → `setDoc(users/{uid})` → `aceptarTerminos`. Si la callable falla por red, el intento queda en `localStorage.cruzando_consent_pending` (con `uid`, para no regalarle el consentimiento a otra persona del mismo dispositivo) y `flushConsentimiento()` reintenta tras `ensureUserDoc` en `onAuthStateChanged`.
+
+**App Check (reCAPTCHA v3, invisible)** — inicializado en las 12 superficies que arrancan Firebase (modulares: index, crecer, audio, cantos, world.js; compat: sanar, mini, orar, rezar, diario, extras, retiros). La clave vive **solo** en `appcheck-key.js` (`window.RECAPTCHA_SITE_KEY`); **vacía = no-op** en todas. El **bloqueo se activa en la consola**, no en el código: enforcement sobre Auth está en *Preview* y es todo-o-nada, así que primero va en **monitoreo**.
+
+**Bancos de prueba:** `functions/test-terminos.js` (la callable real, con Firebase de mentira) y `tools/test-terminos-cliente.js` (extrae el bloque de `index.html` y lo corre en un `vm`; verifica además que `crecer.html` sigue siendo su gemelo).
+
+**Beta actuales: fuera de esta entrega** por decisión — grupo conocido, sin consentimiento diferido. Solo las altas nuevas registran `terminos`.
+
 ## Principios de contenido
 
 - **Curaduría exigente de vínculos pain→Misterio**: vincular un pain a un Misterio es decisión **pastoral seria**, no tag de conveniencia. Pocos pains por Misterio, cada uno justificado (a veces 1-2). Un vínculo se justifica solo si ese Misterio + esa Acogida responde genuinamente a esa necesidad.
@@ -221,3 +244,6 @@ Buckets R2: `R2_ILU` (ilustraciones), `R2_MUS` (música/lrc), `R2_AUD` (audios).
 8. `diario.html` — revisar nav bar, tema y plan (nunca auditado).
 9. Contenido Mundo 2 — faltan `0201.json`, `0202.json`, etc.
 10. Verificación en producción: respuestas del modal de audio.html → diario.html.
+11. **App Check**: registrar la clave de sitio reCAPTCHA v3 para `cruzando.app`, pegarla en `appcheck-key.js`, desplegar y mirar métricas unos días **antes** de activar el bloqueo en la consola (Auth primero; Firestore/Functions después).
+12. Alta en dispositivo: casilla bloqueando por los dos métodos, `users/{uid}.terminos` escrito, y que "Entrar" siga sin fricción.
+13. `firebase-service.js` es código muerto (ninguna página lo carga) y todavía registra sin casilla: borrarlo o alinearlo si alguna vez se conecta.

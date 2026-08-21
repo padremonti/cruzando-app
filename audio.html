@@ -1639,6 +1639,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 <script src="canto.js"></script>
 <script src="letanias.js"></script>
 <script src="rosario-final.js"></script>
+<script src="appcheck-key.js"></script>
 <script type="module">
 /* ══════════════════════════════════════════════
    CruzAndo · Sesión Diaria · audio.html
@@ -1649,13 +1650,17 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 // FIREBASE CONFIG — reemplazar con tu config
 // ────────────────────────────────────────────
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { initializeAppCheck, ReCaptchaV3Provider }
+                                  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js';
 import {
   getAuth,
   signInWithEmailAndPassword,
   signInWithPopup,
   GoogleAuthProvider,
   onAuthStateChanged,
-  signOut
+  signOut,
+  deleteUser,
+  getAdditionalUserInfo
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import {
   getFirestore,
@@ -1679,6 +1684,19 @@ const firebaseConfig = {
 // ────────────────────────────────────────────
 
 const app  = initializeApp(firebaseConfig);
+
+// ── App Check (reCAPTCHA v3) ──────────────────────────────
+// Atestación invisible: el backend de Firebase distingue la app real de un
+// bot. La clave vive en appcheck-key.js — vacía = no-op, no rompe nada.
+// El bloqueo (enforcement) se activa en la consola, no desde aquí.
+try {
+  if (window.RECAPTCHA_SITE_KEY) {
+    initializeAppCheck(app, {
+      provider: new ReCaptchaV3Provider(window.RECAPTCHA_SITE_KEY),
+      isTokenAutoRefreshEnabled: true
+    });
+  }
+} catch(e) { console.warn('[AppCheck]', e); }
 const auth = getAuth(app);
 const db   = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
@@ -2147,7 +2165,22 @@ $('btn-email-login').onclick = async () => {
 
 $('btn-google-login').onclick = async () => {
   try {
-    await signInWithPopup(auth, googleProvider);
+    // Esta pantalla es solo para ENTRAR: el alta vive en el inicio, que es
+    // donde está la casilla de términos. Pero el popup de Google crea la
+    // cuenta si el correo es nuevo — no distingue entrar de registrarse—, así
+    // que una cuenta nacida aquí se deshace en el acto: no habría aceptado
+    // nada, y además se llevaría los créditos de bienvenida.
+    const result = await signInWithPopup(auth, googleProvider);
+    let nuevo = false;
+    try { nuevo = !!(getAdditionalUserInfo(result) || {}).isNewUser; } catch(e) {}
+    if (nuevo) {
+      try { await deleteUser(result.user); }
+      catch(e) { try { await signOut(auth); } catch(e2) {} }
+      const el = $('login-error');
+      el.innerHTML = 'Ese correo todavía no tiene cuenta. ' +
+        '<a href="index.html" style="color:inherit;text-decoration:underline">Créala desde el inicio</a>.';
+      el.style.display = 'block';
+    }
   } catch(e) {
     showLoginError('No se pudo iniciar con Google.');
   }

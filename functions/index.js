@@ -704,3 +704,73 @@ exports.reclamarCompra = functions
       throw new functions.https.HttpsError('internal', 'No se pudo verificar la compra.');
     }
   });
+
+// ── 9. aceptarTerminos ───────────────────────────────────
+// Deja constancia SERVER-SIDE de que el usuario aceptó los Términos y la
+// Política de Privacidad al crear su cuenta. Esto es la PRUEBA de
+// consentimiento, y por eso no la escribe el cliente:
+//
+//   · la fecha la pone el servidor (serverTimestamp), no el reloj del móvil;
+//   · la versión la fija ESTA constante, no lo que mande el cliente — el
+//     cliente solo informa qué versión vio, y si no coinciden se registra en
+//     el log (suele ser una página vieja cacheada, no un ataque);
+//   · las reglas blindan el campo 'terminos': el cliente no lo puede fabricar,
+//     alterar ni borrar. Un consentimiento editable por quien lo otorga no
+//     probaría nada.
+//
+// WRITE-ONCE: si ya hay fecha, se conserva la PRIMERA. Volver a llamar es
+// inofensivo — es lo que permite reintentar desde la cola de pendientes del
+// cliente sin miedo a mover la fecha original.
+//
+// No toca crearCuentaEconomica: aquel siembra billing/state, este escribe un
+// campo de users/{uid}. Distinto documento, sin carrera.
+const TERMINOS_VERSION = '2026-08';
+
+exports.aceptarTerminos = functions
+  .region('us-central1')
+  .https.onCall(async (data, context) => {
+
+    if (!context.auth) {
+      throw new functions.https.HttpsError('unauthenticated', 'Debes iniciar sesión.');
+    }
+
+    const uid    = context.auth.uid;
+    const metodo = (data && data.metodo) === 'google' ? 'google' : 'email';
+    const vista  = String((data && data.version) || '').trim();
+
+    if (vista && vista !== TERMINOS_VERSION) {
+      console.warn('[terminos] el cliente vio', vista, 'y el servidor registra',
+                   TERMINOS_VERSION, '·', uid);
+    }
+
+    const userRef = db.collection('users').doc(uid);
+    let yaEstaba  = false;
+
+    await db.runTransaction(async (tx) => {
+      const snap = await tx.get(userRef);
+      const prev = (snap.exists && snap.data().terminos) || null;
+
+      if (prev && prev.fecha) { yaEstaba = true; return; }
+
+      const escritura = {
+        terminos: {
+          aceptado: true,
+          fecha:    admin.firestore.FieldValue.serverTimestamp(),
+          version:  TERMINOS_VERSION,
+          metodo:   metodo
+        }
+      };
+
+      // Si el doc todavía no existe (la llamada se adelantó al alta del
+      // cliente), que no nazca sin plan: 'free' es el único que las reglas
+      // admiten en un alta y el único que resolvePlan() da por defecto.
+      if (!snap.exists) escritura.plan = 'free';
+
+      tx.set(userRef, escritura, { merge: true });
+    });
+
+    console.log('[terminos]', yaEstaba ? 'ya constaba' : 'registrado',
+                '·', uid, '·', metodo, '·', TERMINOS_VERSION);
+
+    return { ok: true, version: TERMINOS_VERSION, yaEstaba: yaEstaba };
+  });

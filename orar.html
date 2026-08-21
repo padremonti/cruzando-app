@@ -15,7 +15,9 @@
 <title>CruzAndo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<script src="appcheck-key.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script>
@@ -28,6 +30,10 @@ const firebaseConfig = {
   appId: "1:408196948528:web:de291e8afc969252e943f5"
 };
 firebase.initializeApp(firebaseConfig);
+// ── App Check (reCAPTCHA v3) — clave en appcheck-key.js; vacía = no-op ──
+try {
+  if (window.RECAPTCHA_SITE_KEY) firebase.appCheck().activate(window.RECAPTCHA_SITE_KEY, true);
+} catch(e) { console.warn('[AppCheck]', e); }
 const _db   = firebase.firestore();
 const _auth = firebase.auth();
 window._fbFirestore = {

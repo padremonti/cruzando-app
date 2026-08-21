@@ -10,8 +10,13 @@ service cloud.firestore {
     // 'plan' y 'betaExpiresAt' determinan el acceso de pago; los de Stripe son
     // el enlace con la cuenta de cobro. Que el cliente pudiera escribirlos era
     // el agujero de auto-ascenso a premium.
+    //
+    // 'terminos' es la prueba de consentimiento legal: la escribe la callable
+    // aceptarTerminos con Admin SDK. Si el cliente pudiera tocarla podría
+    // inventarse una fecha —o borrarla— y dejar de probar nada.
     function blindados() {
-      return ['plan', 'betaExpiresAt', 'stripeCustomerId', 'stripeUpdatedAt'];
+      return ['plan', 'betaExpiresAt', 'stripeCustomerId', 'stripeUpdatedAt',
+              'terminos'];
     }
 
     match /users/{uid} {
@@ -21,7 +26,8 @@ service cloud.firestore {
       allow create: if isOwner(uid)
                     && request.resource.data.get('plan', 'free') == 'free'
                     && !request.resource.data.keys().hasAny(
-                         ['betaExpiresAt', 'stripeCustomerId', 'stripeUpdatedAt']);
+                         ['betaExpiresAt', 'stripeCustomerId', 'stripeUpdatedAt',
+                          'terminos']);
 
       // Escritura normal: displayName, photoURL, totalMeters, preferencias…
       // todo lo suyo, nunca los campos blindados.

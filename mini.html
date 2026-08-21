@@ -25,7 +25,9 @@
      Genérica, no solo para el completado: aquí montarán los futuros TODOs de
      mini (diario en reflections/…, consumir crédito). Auth resuelve en paralelo;
      la reproducción NO espera a Auth (arranque desde la URL sigue síncrono). -->
+<script src="appcheck-key.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script>
@@ -38,6 +40,10 @@ const firebaseConfig = {
   appId: "1:408196948528:web:de291e8afc969252e943f5"
 };
 firebase.initializeApp(firebaseConfig);
+// ── App Check (reCAPTCHA v3) — clave en appcheck-key.js; vacía = no-op ──
+try {
+  if (window.RECAPTCHA_SITE_KEY) firebase.appCheck().activate(window.RECAPTCHA_SITE_KEY, true);
+} catch(e) { console.warn('[AppCheck]', e); }
 const _db   = firebase.firestore();
 const _auth = firebase.auth();
 // Shim compat → API modular (reutilizable por diario/crédito futuros de mini).
