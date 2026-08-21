@@ -1,4 +1,7 @@
-const functions             = require('firebase-functions');
+// El namespace v1 va EXPLÍCITO: desde firebase-functions 6.x el import raíz
+// devuelve la API de 2ª generación. Estas 8 funciones son gen 1 a propósito
+// (ver crearCuentaEconomica: en gen 2 no existe un trigger de fondo de Auth).
+const functions             = require('firebase-functions/v1');
 const { defineSecret }      = require('firebase-functions/params');
 const OpenAI                = require('openai');
 
