@@ -179,6 +179,60 @@
     return init(_db, _uid);
   }
 
+  // ── COMPRA (Pieza 5) ───────────────────────────────────────────────────────
+  // El cliente manda la CLAVE del paquete ('p15') y el dolor desde el que
+  // compra. Nunca un importe: el precio lo pone Stripe desde el price_id que
+  // elige el servidor. Devuelve la URL del checkout — quien llama redirige.
+
+  function _fns() {
+    if (!window.firebase || !firebase.app || !firebase.app().functions) {
+      return null;
+    }
+    return firebase.app().functions(REGION);
+  }
+
+  // Modo de Stripe. Solo sirve de algo en una cuenta developer: el servidor
+  // ignora 'test' para cualquier otro plan. Se activa desde la consola con
+  //   sessionStorage.setItem('cruzando_stripe_modo','test')
+  function _modo() {
+    try { return sessionStorage.getItem('cruzando_stripe_modo') === 'test' ? 'test' : 'live'; }
+    catch (e) { return 'live'; }
+  }
+
+  function _llamar(nombre, payload) {
+    var fns = _fns();
+    if (!fns) return Promise.reject(new Error('functions-compat no está cargado'));
+    return fns.httpsCallable(nombre)(payload).then(function (res) {
+      return (res && res.data) || {};
+    });
+  }
+
+  function comprar(paquete, opts) {
+    opts = opts || {};
+    return _llamar('comprarCreditos', {
+      paquete: paquete,
+      painId:  opts.painId || null,
+      retorno: opts.retorno || 'sanar',
+      modo:    _modo()
+    });
+  }
+
+  function suscribir(plan, opts) {
+    opts = opts || {};
+    return _llamar('createCheckoutSession', {
+      plan:    plan,
+      painId:  opts.painId || null,
+      retorno: opts.retorno || 'sanar',
+      modo:    _modo()
+    });
+  }
+
+  // La red: si el webhook no llegó, esto pregunta a Stripe y acredita. Es
+  // idempotente en el servidor — llamarla de más nunca duplica créditos.
+  function reclamar(sessionId) {
+    return _llamar('reclamarCompra', { sessionId: sessionId || null, modo: _modo() });
+  }
+
   window.CZAccess = {
     hidratar: hidratar,
     init:     init,
@@ -188,6 +242,10 @@
     listo:    listo,
     esBypass: esBypass,
     entrar:   entrar,
-    refrescar: refrescar
+    refrescar: refrescar,
+    // compra (Pieza 5)
+    comprar:  comprar,
+    suscribir: suscribir,
+    reclamar: reclamar
   };
 }());

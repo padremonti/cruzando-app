@@ -1,5 +1,5 @@
 // El namespace v1 va EXPLÍCITO: desde firebase-functions 6.x el import raíz
-// devuelve la API de 2ª generación. Estas 8 funciones son gen 1 a propósito
+// devuelve la API de 2ª generación. Estas 10 funciones son gen 1 a propósito
 // (ver crearCuentaEconomica: en gen 2 no existe un trigger de fondo de Auth).
 const functions             = require('firebase-functions/v1');
 const { defineSecret }      = require('firebase-functions/params');
@@ -7,6 +7,14 @@ const OpenAI                = require('openai');
 
 const STRIPE_SECRET_KEY     = defineSecret('STRIPE_SECRET_KEY');
 const STRIPE_WEBHOOK_SECRET = defineSecret('STRIPE_WEBHOOK_SECRET');
+
+// Universo de TEST. Vive junto al de Live, en la misma función desplegada: el
+// webhook verifica la firma contra los dos secretos y el que valide decide con
+// qué cliente se procesa el evento. Así se puede recorrer el ciclo de compra
+// completo dentro de la app real —sin cobrar dinero— también DESPUÉS de salir a
+// producción, que es cuando hace más falta.
+const STRIPE_SECRET_KEY_TEST     = defineSecret('STRIPE_SECRET_KEY_TEST');
+const STRIPE_WEBHOOK_SECRET_TEST = defineSecret('STRIPE_WEBHOOK_SECRET_TEST');
 
 // La API key se configura manualmente con:
 // firebase functions:config:set openai.key="..."
@@ -113,10 +121,61 @@ const ECO   = require('./economia');
 if (!admin.apps.length) admin.initializeApp();
 const db = admin.firestore();
 
-const PRICE_IDS = {
-  mensual: 'price_1TbO3hCDSMAtjE9eb0Y8Je4X',
-  anual:   'price_1TbO2rCDSMAtjE9ewW8WOqtN',
+// ── Precios ───────────────────────────────────────────────────────────────
+// Todo en MXN con IVA INCLUIDO (tax_behavior:'inclusive' en Stripe): el usuario
+// paga exactamente la cifra anunciada y el 16% va dentro.
+//
+// EXPANSIÓN INTERNACIONAL: para añadir USD NO hay que tocar nada de esto. Se le
+// añade una currency_option al MISMO price en Stripe y Checkout elige la moneda
+// según el comprador. Un price por paquete y universo, para siempre.
+
+// Suscripción, por universo.
+const PRICE_SUB = {
+  live: {
+    mensual: 'price_1TbO3hCDSMAtjE9eb0Y8Je4X',
+    anual:   'price_1TbO2rCDSMAtjE9ewW8WOqtN'
+  },
+  test: {
+    mensual: 'price_1TIcVOCRd4PM0jIp9oEF54j4',
+    anual:   'price_1TIca0CRd4PM0jIparwSPFfT'
+  }
 };
+
+// Mapa PLANO price → plan, el que usa el webhook. Lleva los DOS universos por
+// clave: un evento de test trae el price de test y debe resolver a 'mensual'
+// igual que el de Live (planDesdePrice acepta lista, ver economia.js).
+const PRICE_IDS = {
+  mensual: [PRICE_SUB.live.mensual, PRICE_SUB.test.mensual],
+  anual:   [PRICE_SUB.live.anual,   PRICE_SUB.test.anual]
+};
+
+// Paquetes de créditos (Pieza 5). Las cantidades NO están aquí: viven en
+// ECO.PAQUETES, que es la fuente de verdad del acreditado. Esto es solo el
+// enlace con el catálogo de Stripe.
+const PRICE_PAQUETES = {
+  live: {
+    p5:  'price_PENDIENTE_live_p5',
+    p15: 'price_PENDIENTE_live_p15',
+    p25: 'price_PENDIENTE_live_p25'
+  },
+  test: {
+    p5:  'price_1U6xoCCRd4PM0jIpLYjOKilX',
+    p15: 'price_1U6xojCRd4PM0jIp2kaatykF',
+    p25: 'price_1U6xp4CRd4PM0jIphVH3TiRb'
+  }
+};
+
+// Un price sin rellenar daría un error críptico de Stripe a mitad del checkout.
+// Mejor un error claro antes de salir de casa.
+function exigirPrecio(priceId, modo, que) {
+  if (!priceId || priceId.indexOf('price_PENDIENTE') === 0) {
+    console.error('[precio] falta el price_id de', que, 'en modo', modo);
+    throw new functions.https.HttpsError(
+      'failed-precondition',
+      'Este paquete todavía no está disponible. Inténtalo más tarde.');
+  }
+  return priceId;
+}
 
 // Código beta. Vive AQUÍ, no en el cliente: la constante de index.html/crecer.html
 // queda solo como pre-chequeo cosmético (habilita el botón); la validación real
@@ -130,8 +189,46 @@ const BETA_CODE = 'BETA2026';
 // además un fallback al item, por si algún día se sube la versión a conciencia.)
 const STRIPE_API_VERSION = '2023-10-16';
 
-function stripeClient() {
-  return require('stripe')(STRIPE_SECRET_KEY.value(), { apiVersion: STRIPE_API_VERSION });
+// Un secreto no configurado no debe tumbar la función: se degrada al universo
+// que sí exista (en la práctica, Live).
+function valorSecreto(s) {
+  try { return s.value() || ''; } catch (e) { return ''; }
+}
+
+// Cliente del universo pedido. null si ese universo no está configurado.
+function stripeClient(modo) {
+  const clave = (modo === 'test')
+    ? valorSecreto(STRIPE_SECRET_KEY_TEST)
+    : valorSecreto(STRIPE_SECRET_KEY);
+  if (!clave) return null;
+  return require('stripe')(clave, { apiVersion: STRIPE_API_VERSION });
+}
+
+function exigirStripe(modo) {
+  const s = stripeClient(modo);
+  if (!s) {
+    throw new functions.https.HttpsError(
+      'failed-precondition',
+      modo === 'test' ? 'El modo de prueba no está configurado.'
+                      : 'El sistema de pagos no está disponible.');
+  }
+  return s;
+}
+
+// ── modoPedido ─────────────────────────────────────────────────────────────
+// EL MODO TEST SOLO LO PUEDE PEDIR UNA CUENTA developer. Para cualquier otro
+// usuario el universo es SIEMPRE Live, diga lo que diga el cliente. Se
+// comprueba contra el doc de Firestore (server-only desde la Pieza 1), no
+// contra nada que venga del navegador.
+async function modoPedido(uid, data) {
+  if (!data || data.modo !== 'test') return 'live';
+  const snap = await db.collection('users').doc(uid).get();
+  const plan = String((snap.exists && snap.data().plan) || 'free').toLowerCase().trim();
+  if (plan !== 'developer') {
+    console.warn('[modo] se pidió test sin ser developer, se fuerza live:', uid);
+    return 'live';
+  }
+  return 'test';
 }
 
 // Retención de los recibos de idempotencia (stripeEvents). Configurar una
@@ -141,42 +238,163 @@ const EVENTOS_TTL_DIAS = 30;
 // ── 1. Crear sesión de Checkout ───────────────────────
 exports.createCheckoutSession = functions
   .region('us-central1')
-  .runWith({ secrets: ['STRIPE_SECRET_KEY'] })
+  .runWith({ secrets: ['STRIPE_SECRET_KEY', 'STRIPE_SECRET_KEY_TEST'] })
   .https.onCall(async (data, context) => {
-
-    const stripe = stripeClient();
 
     if (!context.auth) {
       throw new functions.https.HttpsError('unauthenticated', 'Debes iniciar sesión.');
     }
 
-    const { plan } = data;
-    const priceId  = PRICE_IDS[plan];
+    const uid   = context.auth.uid;
+    const email = context.auth.token.email || '';
+    const plan  = data && data.plan;
+
+    const modo    = await modoPedido(uid, data);
+    const priceId = (PRICE_SUB[modo] || {})[plan];
     if (!priceId) {
       throw new functions.https.HttpsError('invalid-argument', 'Plan no válido.');
     }
+    exigirPrecio(priceId, modo, 'suscripción ' + plan);
 
-    const uid   = context.auth.uid;
-    const email = context.auth.token.email || '';
+    const stripe = exigirStripe(modo);
 
     // `tipo` explícito: el webhook bifurca por él antes de decidir nada. No
-    // depender solo de `mode` deja el camino listo para los paquetes de
-    // créditos (Pieza 5), que llegan como mode:'payment'.
-    const meta = { uid, tipo: 'suscripcion' };
+    // depender solo de `mode` es lo que mantiene separados los dos caminos
+    // ahora que los paquetes de créditos llegan como mode:'payment'.
+    const meta = { uid, tipo: 'suscripcion', modo };
+
+    // Retorno por LISTA BLANCA (economia.urlRetorno): el cliente manda la clave
+    // 'sanar' o 'index', jamás una URL. Suscribirse desde el muro de Sanar debe
+    // devolver a Sanar, con el dolor que se estaba orando.
+    const crudo   = String((data && data.painId) || '').trim().toLowerCase();
+    const painId  = ECO.PAIN_RE.test(crudo) ? crudo : null;
+    if (painId) meta.painId = painId;
+    const destino = ECO.urlRetorno(data && data.retorno);
+    const cola    = painId ? '&pain=' + encodeURIComponent(painId) : '';
 
     const session = await stripe.checkout.sessions.create({
       mode:                 'subscription',
       payment_method_types: ['card'],
+      locale:               'es-419',
       customer_email:       email,
+      client_reference_id:  uid,
       line_items:           [{ price: priceId, quantity: 1 }],
-      success_url:          'https://cruzando.app/?checkout=success',
-      cancel_url:           'https://cruzando.app/?checkout=cancel',
+      success_url:          destino + '?checkout=success&sid={CHECKOUT_SESSION_ID}' + cola,
+      cancel_url:           destino + '?checkout=cancel' + cola,
       metadata:             meta,
       subscription_data:    { metadata: meta },
     });
 
-    return { url: session.url };
+    try {
+      await ECO.registrarCheckout(db, uid, session,
+        { tipo: 'suscripcion', plan: plan, painId: painId, modo: modo }, new Date());
+    } catch (e) {
+      console.warn('[suscripción] no se pudo registrar el checkout:', e && e.message);
+    }
+
+    return { url: session.url, sessionId: session.id, modo };
   });
+
+// ── 1b. Comprar un paquete de créditos ────────────────
+// El flujo nuevo de la Pieza 5: pago ÚNICO (mode:'payment'), no suscripción.
+//
+// El cliente manda una CLAVE de paquete ('p15') y nada más. No manda importe,
+// ni cantidad de créditos, ni price_id. El servidor mapea clave → price_id y
+// Stripe pone el monto. Manipular el precio desde el navegador no es difícil:
+// es imposible, porque el precio nunca pasa por ahí.
+exports.comprarCreditos = functions
+  .region('us-central1')
+  .runWith({ secrets: ['STRIPE_SECRET_KEY', 'STRIPE_SECRET_KEY_TEST'] })
+  .https.onCall(async (data, context) => {
+
+    if (!context.auth) {
+      throw new functions.https.HttpsError('unauthenticated', 'Debes iniciar sesión.');
+    }
+
+    const uid     = context.auth.uid;
+    const email   = context.auth.token.email || '';
+    const paquete = String((data && data.paquete) || '').trim();
+
+    if (!ECO.PAQUETES[paquete]) {
+      throw new functions.https.HttpsError('invalid-argument', 'Paquete no válido.');
+    }
+
+    const modo    = await modoPedido(uid, data);
+    const priceId = exigirPrecio((PRICE_PAQUETES[modo] || {})[paquete], modo, 'paquete ' + paquete);
+    const stripe  = exigirStripe(modo);
+
+    // Reutilizar el cliente de Stripe si ya existe, para que las compras y la
+    // suscripción vivan bajo el mismo cliente en el dashboard. Solo en Live: un
+    // customer de Live no existe en el universo de test.
+    let customerId = null;
+    if (modo === 'live') {
+      try {
+        const snap = await db.collection('users').doc(uid).get();
+        customerId = (snap.exists && snap.data().stripeCustomerId) || null;
+      } catch (e) {
+        console.warn('[compra] no se pudo leer stripeCustomerId:', e && e.message);
+      }
+    }
+
+    let params;
+    try {
+      params = ECO.paramsCheckoutCreditos({
+        uid:        uid,
+        email:      email,
+        paquete:    paquete,
+        priceId:    priceId,
+        painId:     data && data.painId,
+        retorno:    data && data.retorno,
+        customerId: customerId,
+        modo:       modo
+      });
+    } catch (e) {
+      console.error('[compra] params inválidos:', e && e.message);
+      throw new functions.https.HttpsError('invalid-argument', 'Paquete no válido.');
+    }
+
+    const session = await stripe.checkout.sessions.create(params);
+
+    // Rastro de la intención: es lo que permite a reclamarCompra encontrar un
+    // pago sin que el cliente recuerde el id de la sesión.
+    try {
+      await ECO.registrarCheckout(db, uid, session, {
+        tipo:     'creditos',
+        paquete:  paquete,
+        creditos: ECO.PAQUETES[paquete].creditos,
+        painId:   params.metadata.painId || null,
+        modo:     modo
+      }, new Date());
+    } catch (e) {
+      console.warn('[compra] no se pudo registrar el checkout:', e && e.message);
+    }
+
+    console.log('[compra] sesión creada:', session.id, '·', paquete, '·', modo, '·', uid);
+    return { url: session.url, sessionId: session.id, modo };
+  });
+
+// ── verificarEvento ───────────────────────────────────
+// Verifica la firma contra los DOS universos y devuelve cuál validó.
+// constructEvent es criptografía local (HMAC del cuerpo crudo): no llama a la
+// API, así que da igual con qué cliente se invoque — el que decide es el
+// secreto. Sin el whsec_ correspondiente no hay evento válido, y por eso un
+// webhook falsificado no existe.
+function verificarEvento(rawBody, sig) {
+  const verificador = require('stripe')(valorSecreto(STRIPE_SECRET_KEY) || 'sk_placeholder',
+                                        { apiVersion: STRIPE_API_VERSION });
+  const universos = [
+    { modo: 'test', secreto: valorSecreto(STRIPE_WEBHOOK_SECRET_TEST) },
+    { modo: 'live', secreto: valorSecreto(STRIPE_WEBHOOK_SECRET) }
+  ];
+  for (let i = 0; i < universos.length; i++) {
+    const u = universos[i];
+    if (!u.secreto) continue;
+    try {
+      return { event: verificador.webhooks.constructEvent(rawBody, sig, u.secreto), modo: u.modo };
+    } catch (e) { /* prueba el siguiente universo */ }
+  }
+  return null;
+}
 
 // ── 2. Webhook ────────────────────────────────────────
 // Fuente de verdad de la suscripción: customer.subscription.*
@@ -192,25 +410,28 @@ exports.createCheckoutSession = functions
 // función es solo el envoltorio HTTP (firma + códigos de estado).
 exports.stripeWebhook = functions
   .region('us-central1')
-  .runWith({ secrets: ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET'] })
+  .runWith({ secrets: ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET',
+                       'STRIPE_SECRET_KEY_TEST', 'STRIPE_WEBHOOK_SECRET_TEST'] })
   .https.onRequest(async (req, res) => {
 
-    const stripe = stripeClient();
-    const sig    = req.headers['stripe-signature'];
-    const secret = STRIPE_WEBHOOK_SECRET.value();
-    let event;
+    const sig = req.headers['stripe-signature'];
 
-    try {
-      event = stripe.webhooks.constructEvent(req.rawBody, sig, secret);
-    } catch (err) {
-      console.error('[webhook] firma inválida:', err.message);
-      return res.status(400).send('Webhook error: ' + err.message);
+    // Dos universos, un endpoint. La firma es específica de cada endpoint de
+    // Stripe, así que un evento solo puede validar contra UNO de los dos
+    // secretos: el que valide dice de qué universo viene. Sin ambigüedad y sin
+    // duplicar la función.
+    const verificado = verificarEvento(req.rawBody, sig);
+    if (!verificado) {
+      console.error('[webhook] firma inválida (no valida ni con test ni con live)');
+      return res.status(400).send('Webhook error: firma inválida');
     }
+    const event = verificado.event;
+    const modo  = verificado.modo;
 
     try {
       await ECO.procesarEvento(event, {
         db:        db,
-        stripe:    stripe,
+        stripe:    stripeClient(modo),   // el cliente del universo del evento
         PRICE_IDS: PRICE_IDS,
         ahora:     new Date(),
         ttlDias:   EVENTOS_TTL_DIAS
@@ -235,7 +456,7 @@ exports.createPortalSession = functions
       throw new functions.https.HttpsError('unauthenticated', 'Debes iniciar sesión.');
     }
 
-    const stripe = stripeClient();
+    const stripe = exigirStripe('live');
     const uid    = context.auth.uid;
 
     const userDoc    = await db.collection('users').doc(uid).get();
@@ -434,4 +655,52 @@ exports.estadoCuenta = functions
       rentals:       rentals,
       lifetime:      billing.lifetime
     };
+  });
+
+// ── 8. reclamarCompra ────────────────────────────────────
+// LA RED. La que convierte "pagué y no me llegó nada" en algo que no se puede
+// sostener: si el webhook nunca llegó —endpoint caído, evento perdido, los 3
+// días de reintentos agotados—, el propio usuario dispara la comprobación desde
+// la pantalla de "estamos activando tus créditos".
+//
+// No acredita por su cuenta: le pregunta a Stripe y delega en el MISMO
+// acreditarCompra que usa el webhook, con la misma llave de idempotencia
+// (ledger/purchase_{sid}). Por eso llamar aquí y que el webhook llegue tarde NO
+// duplica: el segundo en llegar encuentra el asiento escrito y se retira.
+//
+// Toda la lógica vive en economia.js con `db` y `stripe` inyectados; aquí solo
+// van la autenticación y la elección del universo.
+exports.reclamarCompra = functions
+  .region('us-central1')
+  .runWith({ secrets: ['STRIPE_SECRET_KEY', 'STRIPE_SECRET_KEY_TEST'] })
+  .https.onCall(async (data, context) => {
+
+    if (!context.auth) {
+      throw new functions.https.HttpsError('unauthenticated', 'Debes iniciar sesión.');
+    }
+
+    const uid = context.auth.uid;
+    const sid = String((data && data.sessionId) || '').trim();
+
+    // El universo se deduce del propio id de la sesión (cs_test_… es de test),
+    // no de lo que diga el cliente: con la clave equivocada el retrieve fallaría
+    // y un pago real quedaría sin reclamar.
+    const stripeDe = function (id) {
+      return stripeClient(String(id || '').indexOf('cs_test_') === 0 ? 'test' : 'live');
+    };
+
+    try {
+      const r = await ECO.reclamarCompra(uid, { sessionId: sid }, {
+        db:       db,
+        stripeDe: stripeDe,
+        ahora:    new Date(),
+        ttlDias:  EVENTOS_TTL_DIAS
+      });
+      console.log('[reclamo]', uid, '·', sid || '(sin id)', '→',
+                  r.ok ? ('acreditados ' + r.acreditados.length) : r.motivo);
+      return r;
+    } catch (e) {
+      console.error('[reclamo] fallo:', uid, sid, e);
+      throw new functions.https.HttpsError('internal', 'No se pudo verificar la compra.');
+    }
   });

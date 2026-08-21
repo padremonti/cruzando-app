@@ -41,6 +41,12 @@ service cloud.firestore {
       match /rentals/{doc}  { allow read: if isOwner(uid); allow write: if false; }
       match /ledger/{doc}   { allow read: if isOwner(uid); allow write: if false; }
 
+      // Rastro de las compras iniciadas (Pieza 5). El cliente LEE —de ahí sale
+      // el aviso de "compra en curso"— pero no escribe: si pudiera, podría
+      // inventarse una compra pendiente. Lo escribe comprarCreditos y lo cierra
+      // el acreditado.
+      match /checkouts/{doc} { allow read: if isOwner(uid); allow write: if false; }
+
       // ── Subcolecciones de contenido del usuario ──────────────────────────
       match /audioProgress/{doc}  { allow read, write: if isOwner(uid); }
       match /freeProgress/{doc}   { allow read, write: if isOwner(uid); }
@@ -76,8 +82,11 @@ service cloud.firestore {
     // stripeCustomers: mapa customerId → uid (3ª vía de resolución del uid).
     // Sin regla el acceso ya sería denegado; se declaran explícitas para que la
     // intención quede escrita y nadie las abra por descuido más adelante.
+    // stripeOrphans:   pagos cobrados que no se pudieron acreditar solos
+    //                  (metadata ilegible / uid irresoluble) → revisión a mano.
     match /stripeEvents/{doc}    { allow read, write: if false; }
     match /stripeCustomers/{doc} { allow read, write: if false; }
+    match /stripeOrphans/{doc}   { allow read, write: if false; }
 
   }
 }

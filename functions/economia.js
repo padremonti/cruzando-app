@@ -28,6 +28,32 @@ const DIA_MS = 24 * 60 * 60 * 1000;
 // developer que probó el checkout).
 const PLANES_STRIPE = ['free', 'premium', 'pro'];
 
+// ── Paquetes de créditos (Pieza 5) ───────────────────────────────────────────
+// LA FUENTE DE VERDAD DE CUÁNTO SE ACREDITA. El cliente manda una clave
+// ('p15'), nunca una cantidad ni un importe; el servidor mira esta tabla. Ni
+// un metadata corrompido ni un cliente manipulado pueden acreditar de más.
+//
+// montoEsperado va en centavos MXN y NO se usa para cobrar (el importe lo pone
+// Stripe desde el price): solo sirve para verificar el cuadre y para rescatar
+// un pago cuyo metadata llegara ilegible. Los precios son IVA INCLUIDO
+// (tax_behavior:'inclusive' en Stripe), así que el usuario paga exactamente
+// esto y el 16% va dentro.
+const PAQUETES = {
+  p5:  { creditos: 5,  montoEsperado:  5000, etiqueta: '5 créditos'  },
+  p15: { creditos: 15, montoEsperado: 10000, etiqueta: '15 créditos' },
+  p25: { creditos: 25, montoEsperado: 15000, etiqueta: '25 créditos' }
+};
+const MONEDA = 'mxn';
+
+// ── Retornos permitidos tras el checkout ─────────────────────────────────────
+// LISTA BLANCA. El cliente manda una CLAVE ('sanar'), jamás una URL: si mandara
+// la URL tendríamos un redirect abierto — mandar a alguien a pagar de verdad y
+// devolverlo a un dominio ajeno con aspecto de CruzAndo.
+const RETORNOS = {
+  index: 'https://cruzando.app/',
+  sanar: 'https://cruzando.app/sanar.html'
+};
+
 // ── msDe ─────────────────────────────────────────────────────────────────────
 // Normaliza a milisegundos lo que Firestore/Stripe/JS pueden devolver como
 // fecha. Mismo patrón que resolvePlan() en plan-utils.js.
@@ -57,11 +83,17 @@ function leerPeriodEnd(s) {
 }
 
 // ── planDesdePrice ───────────────────────────────────────────────────────────
+// El valor de cada clave puede ser un price_id o una LISTA de price_id. La
+// lista existe por el modo test: el mismo plan 'mensual' tiene un price en el
+// universo Live y otro en el de test, y un evento de test debe resolver a
+// 'mensual' igual que el de Live — no a 'mensual_test'.
 function planDesdePrice(priceId, PRICE_IDS) {
   if (!priceId) return null;
   const claves = Object.keys(PRICE_IDS || {});
   for (let i = 0; i < claves.length; i++) {
-    if (PRICE_IDS[claves[i]] === priceId) return claves[i];
+    const v = PRICE_IDS[claves[i]];
+    if (Array.isArray(v)) { if (v.indexOf(priceId) !== -1) return claves[i]; }
+    else if (v === priceId) return claves[i];
   }
   return null;
 }
@@ -138,6 +170,13 @@ async function resolverUid(event, deps) {
   // 1 · metadata directo — checkout.session y customer.subscription.*
   if (obj.metadata && obj.metadata.uid) {
     return { uid: obj.metadata.uid, via: 'metadata' };
+  }
+
+  // 1b · client_reference_id — redundancia gratis del checkout. Lo escribimos
+  //      nosotros junto al metadata; si un día el metadata se pierde por el
+  //      camino, este campo sigue ahí y es visible en el dashboard.
+  if (obj.object === 'checkout.session' && obj.client_reference_id) {
+    return { uid: obj.client_reference_id, via: 'client_reference_id' };
   }
 
   // 2 · invoice → recuperar la suscripción, que sí lleva el uid en metadata
@@ -407,6 +446,442 @@ async function entrarPain(uid, args, deps) {
   return out;
 }
 
+// ═════════════════════════════════════════════════════════════════════════════
+// PIEZA 5 — COMPRA DE PAQUETES DE CRÉDITOS
+// ═════════════════════════════════════════════════════════════════════════════
+
+// ── paqueteDeMonto ───────────────────────────────────────────────────────────
+// Rescate: identifica el paquete por el importe cuando el metadata no lo dice.
+// Existe para NO PERDER UN PAGO, nunca para decidir un cobro.
+function paqueteDeMonto(monto, moneda) {
+  if (typeof monto !== 'number') return null;
+  if (moneda && String(moneda).toLowerCase() !== MONEDA) return null;
+  const claves = Object.keys(PAQUETES);
+  for (let i = 0; i < claves.length; i++) {
+    if (PAQUETES[claves[i]].montoEsperado === monto) return claves[i];
+  }
+  return null;
+}
+
+// ── urlRetorno ───────────────────────────────────────────────────────────────
+function urlRetorno(clave) {
+  return RETORNOS[clave] || RETORNOS.index;
+}
+
+// ── paramsCheckoutCreditos ───────────────────────────────────────────────────
+// Pura: construye el cuerpo de stripe.checkout.sessions.create para un paquete.
+//
+// Aquí NO viaja ningún importe. El monto lo pone Stripe a partir del price_id
+// que eligió el servidor; el cliente solo escogió una clave de paquete. Esa es
+// toda la defensa contra la manipulación de precio, y es estructural.
+function paramsCheckoutCreditos(a) {
+  const paq = PAQUETES[a && a.paquete];
+  if (!paq) {
+    const e = new Error('paquete inválido: ' + (a && a.paquete));
+    e.code = 'paquete-invalido';
+    throw e;
+  }
+  if (!a.priceId) {
+    const e = new Error('falta el price_id del paquete ' + a.paquete);
+    e.code = 'price-faltante';
+    throw e;
+  }
+
+  // El painId se valida con el mismo formato que entrarPain antes de entrar en
+  // una URL: es lo único del cliente que acaba incrustado en el retorno.
+  const crudo  = String(a.painId || '').trim().toLowerCase();
+  const painId = PAIN_RE.test(crudo) ? crudo : null;
+
+  const meta = {
+    uid:      a.uid,
+    tipo:     'creditos',                      // ← lo que lee resolverTipo()
+    paquete:  a.paquete,                       // ← la CLAVE: la cantidad se mira en PAQUETES
+    creditos: String(paq.creditos),            // informativo, para el dashboard y el log
+    modo:     a.modo === 'test' ? 'test' : 'live'
+  };
+  if (painId) meta.painId = painId;
+
+  const destino = urlRetorno(a.retorno);
+  const cola    = painId ? '&pain=' + encodeURIComponent(painId) : '';
+
+  const params = {
+    mode:                 'payment',           // ← la diferencia estructural con la suscripción
+    payment_method_types: ['card'],
+    locale:               'es-419',
+    line_items:           [{ price: a.priceId, quantity: 1 }],
+    client_reference_id:  a.uid,
+    metadata:             meta,
+    payment_intent_data:  { metadata: meta },  // el cargo también lleva el uid (reembolsos)
+    success_url:          destino + '?compra=ok&sid={CHECKOUT_SESSION_ID}' + cola,
+    cancel_url:           destino + '?compra=cancel' + cola
+  };
+
+  // Reutilizar el cliente de Stripe si ya existe (el de la suscripción) para no
+  // duplicarlo en el dashboard. La rama de créditos NUNCA escribe
+  // stripeCustomerId: ese campo es el enlace que usa el portal de suscripción.
+  if (a.customerId)  params.customer = a.customerId;
+  else if (a.email)  params.customer_email = a.email;
+
+  return params;
+}
+
+// ── registrarCheckout ────────────────────────────────────────────────────────
+// Rastro de la INTENCIÓN de compra, escrito al crear la sesión. Sirve para dos
+// cosas: que reclamarCompra pueda buscar sin que el cliente recuerde el id, y
+// dejar a la vista las compras que se iniciaron y nunca se completaron.
+//
+// Vive bajo users/{uid}/ a propósito: la consulta se resuelve con el índice de
+// un solo campo (sin índice compuesto) y no puede alcanzar las compras de nadie
+// más aunque la consulta se escribiera mal.
+function registrarCheckout(db, uid, session, info, ahora) {
+  return db.collection('users').doc(uid).collection('checkouts').doc(session.id).set({
+    sid:      session.id,
+    uid:      uid,
+    tipo:     info.tipo || 'creditos',
+    paquete:  info.paquete  || null,
+    creditos: info.creditos || null,
+    plan:     info.plan     || null,
+    painId:   info.painId   || null,
+    modo:     info.modo     || 'live',
+    estado:   'creada',
+    at:       ahora
+  }, { merge: true });
+}
+
+// ── reciboEvento ─────────────────────────────────────────────────────────────
+function reciboEvento(deps, uid, ahora, ttlDias) {
+  return {
+    type:      (deps && deps.eventType) || 'checkout.session.completed',
+    uid:       uid,
+    viaUid:    'metadata',
+    at:        ahora,
+    expiresAt: new Date(ahora.getTime() + ttlDias * DIA_MS)
+  };
+}
+
+// ── acreditarCompra ──────────────────────────────────────────────────────────
+// EL NÚCLEO. La única puerta por la que entran créditos comprados, y la usan
+// las DOS vías —el webhook y reclamarCompra— con la misma llave de idempotencia.
+// Por eso da igual quién llegue primero, ni si llegan a la vez: un pago = un
+// acreditado, exacto.
+//
+// Doble llave:
+//   · stripeEvents/{eventId}             → reintento del MISMO evento (solo webhook)
+//   · users/{uid}/ledger/purchase_{sid}  → EL PAGO, venga por donde venga
+//
+// La segunda es la semántica y la que de verdad manda: una sesión de checkout =
+// un pago = un asiento. El id es determinista, así que la colisión es imposible
+// de esquivar.
+//
+// Atomicidad: una sola transacción. O se escribe el saldo, el asiento, el
+// rastro y el recibo, o no se escribe nada y Stripe reintenta.
+//
+// deps: { db, ahora, eventId?, eventType?, via?, ttlDias? }
+async function acreditarCompra(session, deps) {
+  const db      = deps.db;
+  const ahora   = deps.ahora || new Date();
+  const ttlDias = deps.ttlDias || 30;
+  const eventId = deps.eventId || null;
+  const via     = deps.via || 'webhook';
+
+  const sid = session && session.id;
+  if (!sid) {
+    const e = new Error('sesión de checkout sin id');
+    e.code = 'sesion-invalida';
+    throw e;
+  }
+
+  const meta = session.metadata || {};
+  const uid  = meta.uid || session.client_reference_id || null;
+
+  // Solo acredita el dinero efectivamente cobrado.
+  if (session.payment_status !== 'paid') {
+    return { accion: 'no-pagada', sid: sid, uid: uid };
+  }
+
+  // QUÉ acreditar: SIEMPRE de la tabla del servidor. `metadata.creditos` es un
+  // testigo para el log, jamás la cantidad que se suma.
+  let clave  = (meta.paquete && PAQUETES[meta.paquete]) ? meta.paquete : null;
+  let alerta = null;
+  if (!clave) {
+    clave = paqueteDeMonto(session.amount_total, session.currency);
+    if (clave) alerta = 'paquete-desconocido-rescatado-por-monto';
+  }
+
+  // Pagó y no sabemos qué darle. Reintentar no arregla nada, así que en vez de
+  // lanzar (Stripe reintentaría 3 días y se rendiría) se deja constancia
+  // accionable. UN PAGO NUNCA SE QUEDA SIN RASTRO.
+  if (!uid || !clave) {
+    const motivo = !uid ? 'sin-uid' : 'paquete-irreconocible';
+    try {
+      await db.collection('stripeOrphans').doc(sid).set({
+        sid:         sid,
+        uid:         uid || null,
+        eventId:     eventId,
+        paqueteMeta: meta.paquete || null,
+        amountTotal: (typeof session.amount_total === 'number') ? session.amount_total : null,
+        currency:    session.currency || null,
+        motivo:      motivo,
+        at:          ahora
+      }, { merge: true });
+    } catch (e) {
+      console.error('[ALERTA] no se pudo registrar la compra huérfana:', sid, e && e.message);
+    }
+    console.error('[ALERTA] compra pagada SIN acreditar, revisar a mano:', sid, motivo);
+    return { accion: 'huerfana', sid: sid, uid: uid, motivo: motivo };
+  }
+
+  const paq = PAQUETES[clave];
+
+  // Descuadre de importe: SE ACREDITA IGUAL y se alerta. La única forma de
+  // llegar aquí es que hayamos cambiado el precio con una sesión en vuelo, o un
+  // cupón. En ambos casos el usuario pagó — negarle los créditos por un
+  // descuadre contable es el peor de los dos errores posibles.
+  if (typeof session.amount_total === 'number' && session.amount_total !== paq.montoEsperado) {
+    alerta = alerta || 'monto-inesperado';
+    console.error('[ALERTA] importe inesperado en', sid, '· esperado', paq.montoEsperado,
+                  '· recibido', session.amount_total, '→ se acredita igual');
+  }
+
+  const pi = (typeof session.payment_intent === 'string')
+    ? session.payment_intent
+    : ((session.payment_intent && session.payment_intent.id) || null);
+
+  let resultado = { accion: 'acreditado', sid: sid, uid: uid,
+                    paquete: clave, creditos: paq.creditos };
+
+  await db.runTransaction(async function (tx) {
+    // ═══ TODAS LAS LECTURAS PRIMERO (regla de Firestore) ═══
+    const userRef    = db.collection('users').doc(uid);
+    const asientoRef = userRef.collection('ledger').doc('purchase_' + sid);
+    const evtRef     = eventId ? db.collection('stripeEvents').doc(eventId) : null;
+
+    // Llave 1 · el mismo evento reintentado por Stripe.
+    if (evtRef) {
+      const evtSnap = await tx.get(evtRef);
+      if (evtSnap.exists) {
+        console.log('[compra] evento ya procesado, sin efecto:', eventId);
+        resultado = { accion: 'duplicado', sid: sid, uid: uid };
+        return;
+      }
+    }
+
+    // Llave 2 · el pago ya acreditado por la OTRA vía (webhook ↔ reclamo).
+    const asientoSnap = await tx.get(asientoRef);
+    if (asientoSnap.exists) {
+      const prev = asientoSnap.data() || {};
+      // Se deja el recibo del evento igualmente: ese evento queda procesado.
+      if (evtRef) tx.set(evtRef, reciboEvento(deps, uid, ahora, ttlDias));
+      console.log('[compra] pago ya acreditado por otra vía, sin duplicar:', sid);
+      resultado = { accion: 'ya-acreditado', sid: sid, uid: uid,
+                    creditos: prev.delta || 0, saldo: prev.balanceAfter };
+      return;
+    }
+
+    // ensureBilling lee y luego escribe → después de todas las lecturas.
+    const billing = await ensureBilling(db, uid, tx, ahora);
+    const b       = billing.data;
+
+    // ═══ ESCRITURAS ═══
+    const saldo = b.credits || 0;
+    const nuevo = saldo + paq.creditos;
+
+    const lifetime = Object.assign({ granted: 0, purchased: 0, spent: 0 }, b.lifetime || {});
+    lifetime.purchased = (lifetime.purchased || 0) + paq.creditos;
+
+    tx.set(billing.ref, {
+      credits:   nuevo,
+      lifetime:  lifetime,
+      updatedAt: ahora
+    }, { merge: true });
+
+    tx.set(asientoRef, {
+      type:         'purchase',
+      delta:        paq.creditos,
+      balanceAfter: nuevo,
+      ref:          sid,
+      at:           ahora,
+      meta: {
+        paquete:       clave,
+        sessionId:     sid,
+        eventId:       eventId,
+        paymentIntent: pi,
+        amountTotal:   (typeof session.amount_total === 'number') ? session.amount_total : null,
+        currency:      session.currency || null,
+        modo:          meta.modo === 'test' ? 'test' : 'live',
+        via:           via,
+        alerta:        alerta
+      }
+    });
+
+    // Cierra el rastro de la intención (lo abrió comprarCreditos).
+    tx.set(userRef.collection('checkouts').doc(sid), {
+      estado:       'acreditada',
+      creditos:     paq.creditos,
+      acreditadaAt: ahora,
+      viaAcreditado: via
+    }, { merge: true });
+
+    if (evtRef) tx.set(evtRef, reciboEvento(deps, uid, ahora, ttlDias));
+
+    resultado.saldo = nuevo;
+    console.log('[compra] +' + paq.creditos + ' créditos (' + clave + ') a', uid,
+                '· saldo', nuevo, '· vía', via);
+  });
+
+  return resultado;
+}
+
+// ── acreditarEvento ──────────────────────────────────────────────────────────
+// La rama de créditos del webhook. Traduce evento → sesión y delega en el núcleo.
+//
+// Atiende async_payment_succeeded además de completed: hoy no ocurre (solo
+// aceptamos tarjeta), pero es el camino de OXXO/SPEI, que en México acabará
+// pidiéndose. Dejarlo escrito cuesta cuatro líneas y evita un rediseño.
+const EVENTOS_CREDITOS = [
+  'checkout.session.completed',
+  'checkout.session.async_payment_succeeded'
+];
+
+async function acreditarEvento(event, deps) {
+  const obj  = (event && event.data && event.data.object) || {};
+  const tipo = event && event.type;
+
+  if (tipo === 'checkout.session.expired' || tipo === 'checkout.session.async_payment_failed') {
+    console.log('[webhook] compra no completada, sin efecto:', event.id, tipo);
+    return { accion: 'ignorado' };
+  }
+  if (EVENTOS_CREDITOS.indexOf(tipo) === -1 || obj.object !== 'checkout.session') {
+    console.log('[webhook] evento de créditos no relevante, ignorado:', event.id, tipo);
+    return { accion: 'ignorado' };
+  }
+  if (obj.payment_status !== 'paid') {
+    // Pago diferido en curso: el dinero aún no está. Llegará async_payment_*.
+    console.log('[webhook] checkout completado pero sin pagar, se espera el async:', obj.id);
+    return { accion: 'pago-pendiente' };
+  }
+
+  return await acreditarCompra(obj, Object.assign({}, deps, {
+    eventId:   event.id,
+    eventType: tipo,
+    via:       'webhook'
+  }));
+}
+
+// ── reclamarCompra ───────────────────────────────────────────────────────────
+// LA RED. Convierte "pagué y no me llegó" en algo que no se puede sostener en
+// el tiempo: si el webhook nunca llegó (endpoint caído, evento perdido, los 3
+// días de reintentos agotados), el propio usuario dispara la comprobación.
+//
+// No acredita por su cuenta: le pregunta a Stripe y delega en acreditarCompra,
+// el MISMO núcleo idempotente del webhook. Si el webhook llega tarde, se
+// encuentra el asiento ya escrito y no duplica. Verificado en el banco de
+// pruebas en los dos órdenes posibles.
+//
+// deps: { db, stripe | stripeDe(sid), ahora, ttlDias }
+const RECLAMO_VENTANA_DIAS = 7;   // no se rebusca más atrás
+const RECLAMO_MAX          = 5;   // sesiones consultadas por llamada
+
+function clienteStripe(deps, sid) {
+  if (deps && typeof deps.stripeDe === 'function') return deps.stripeDe(sid);
+  return deps && deps.stripe;
+}
+
+async function reclamarCompra(uid, args, deps) {
+  const db    = deps.db;
+  const ahora = deps.ahora || new Date();
+  const sid   = String((args && args.sessionId) || '').trim();
+
+  let candidatos = [];
+
+  if (sid) {
+    candidatos = [sid];
+  } else {
+    // Sin id: las últimas intenciones de compra de ESTE usuario. La consulta
+    // vive dentro de users/{uid}, así que no puede alcanzar las de nadie más.
+    const limite = ahora.getTime() - RECLAMO_VENTANA_DIAS * DIA_MS;
+    let snap = null;
+    try {
+      snap = await db.collection('users').doc(uid).collection('checkouts')
+               .orderBy('at', 'desc').limit(10).get();
+    } catch (e) {
+      console.warn('[reclamo] no se pudieron listar los checkouts:', e && e.message);
+    }
+    const docs = (snap && snap.docs) || [];
+    for (let i = 0; i < docs.length && candidatos.length < RECLAMO_MAX; i++) {
+      const d = docs[i].data() || {};
+      if (d.estado === 'acreditada') continue;     // ya cerrada
+      if (d.tipo && d.tipo !== 'creditos') continue;
+      const at = msDe(d.at);
+      if (at !== null && at < limite) continue;    // demasiado vieja
+      candidatos.push(docs[i].id);
+    }
+  }
+
+  if (!candidatos.length) {
+    return { ok: false, motivo: 'sin-compras', acreditados: [], saldo: null };
+  }
+
+  const acreditados = [];
+  let motivo = 'sin-compras';
+  let saldo  = null;
+
+  for (let i = 0; i < candidatos.length; i++) {
+    const id     = candidatos[i];
+    const stripe = clienteStripe(deps, id);
+    if (!stripe) { motivo = 'stripe-no-configurado'; continue; }
+
+    let session = null;
+    try {
+      session = await stripe.checkout.sessions.retrieve(id);
+    } catch (e) {
+      console.warn('[reclamo] retrieve falló:', id, e && e.message);
+      motivo = 'no-encontrada';
+      continue;
+    }
+
+    // DUEÑO. Sin esta comprobación, conocer el id de una sesión ajena bastaría
+    // para reclamar la compra de otro.
+    const propietario = (session.metadata && session.metadata.uid) ||
+                        session.client_reference_id || null;
+    if (propietario !== uid) {
+      console.warn('[reclamo] sesión de otro usuario, rechazada:', id);
+      motivo = 'ajena';
+      continue;
+    }
+    if (!(session.metadata && session.metadata.tipo === 'creditos')) {
+      motivo = 'no-es-creditos';
+      continue;
+    }
+    if (session.payment_status !== 'paid') {
+      motivo = 'no-pagada';
+      continue;
+    }
+
+    const r = await acreditarCompra(session, {
+      db:      db,
+      ahora:   ahora,
+      ttlDias: deps.ttlDias,
+      via:     'reclamo'
+    });
+
+    if (r.accion === 'acreditado') {
+      acreditados.push({ sid: id, creditos: r.creditos });
+      saldo = r.saldo;
+    } else {
+      motivo = (r.accion === 'ya-acreditado') ? 'ya-acreditado' : r.accion;
+      if (typeof r.saldo === 'number') saldo = r.saldo;
+    }
+  }
+
+  return {
+    ok:          acreditados.length > 0,
+    motivo:      acreditados.length ? null : motivo,
+    acreditados: acreditados,
+    saldo:       saldo
+  };
+}
+
 // ── procesarEvento ───────────────────────────────────────────────────────────
 // Todo el árbol de decisión del webhook. Vive aquí, y no en index.js, para que
 // se pueda ejercitar con un `db` de mentira: sin emulador de Firestore no habría
@@ -432,12 +907,11 @@ async function procesarEvento(event, deps) {
   // ── Bifurcación por tipo, ANTES de mirar event.type ──
   const tipo = resolverTipo(event);
   if (tipo === 'creditos') {
-    // Paquete de créditos → Pieza 5. Se reconoce y se sale SIN tocar el plan.
-    // Esta rama es justamente lo que impide que un pago único se malinterprete
-    // como suscripción y regale premium.
-    console.log('[webhook] evento de créditos reconocido, sin efecto en Pieza 1:',
-                event.id, event.type);
-    return { accion: 'creditos-diferido' };
+    // Paquete de créditos (Pieza 5). Camino completamente separado del de la
+    // suscripción: acredita saldo y NO toca el plan. Esta bifurcación es lo que
+    // impide que un pago único se malinterprete como suscripción y regale
+    // premium — y que una suscripción regale créditos.
+    return await acreditarEvento(event, deps);
   }
   if (tipo === 'desconocido') {
     console.log('[webhook] tipo no reconocido, ignorado:', event.id, event.type);
@@ -538,6 +1012,7 @@ module.exports = {
   // parámetros
   CREDITOS_REGALO, VENTANA_DIAS, GRACIA_DIAS, BETA_DIAS,
   SCHEMA_VERSION, DIA_MS, PLANES_STRIPE, EVENTOS_RELEVANTES,
+  PAQUETES, MONEDA, RETORNOS, EVENTOS_CREDITOS,
   // helpers
   msDe, leerPeriodEnd, planDesdePrice,
   // suscripción
@@ -547,5 +1022,8 @@ module.exports = {
   // billing
   billingInicial, ensureBilling,
   // rentas y cobro (Pieza 2)
-  podarRentas, rentaVigente, finDeRenta, motivoBypass, entrarPain, PAIN_RE
+  podarRentas, rentaVigente, finDeRenta, motivoBypass, entrarPain, PAIN_RE,
+  // compra de paquetes (Pieza 5)
+  paqueteDeMonto, urlRetorno, paramsCheckoutCreditos, registrarCheckout,
+  acreditarCompra, acreditarEvento, reclamarCompra
 };

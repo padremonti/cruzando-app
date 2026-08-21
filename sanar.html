@@ -2021,12 +2021,17 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     var lastEco = hasEcos ? (0.7 + (ecos.length - 1) * 1.5) : 0;
     var oBase   = hasEcos ? (lastEco + 2.0) : 0.2;   // respiro tras el último eco
 
+    // _hoInstant: al volver de una compra el handoff se repinta SIN coreografía.
+    // Nadie quiere ver otros 8 segundos de ecos justo después de pagar. Es de un
+    // solo uso: se consume al final de este render.
+    var instant = reduceMotion || estado._hoInstant;
+
     function hoEl(cls, delay, html){
-      if (reduceMotion) return '<div class="'+cls+'">'+html+'</div>';
+      if (instant) return '<div class="'+cls+'">'+html+'</div>';
       return '<div class="'+cls+' ho-an" style="animation-delay:'+(+delay).toFixed(2)+'s">'+html+'</div>';
     }
     function hoBtn(cls, delay, onclick, label){
-      if (reduceMotion) return '<button class="'+cls+'" onclick="'+onclick+'">'+label+'</button>';
+      if (instant) return '<button class="'+cls+'" onclick="'+onclick+'">'+label+'</button>';
       return '<button class="'+cls+' ho-an" style="animation-delay:'+(+delay).toFixed(2)+'s" onclick="'+onclick+'">'+label+'</button>';
     }
 
@@ -2043,6 +2048,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
       hoBtn('btn-primary', oBase + 1.8, 'entrarMisterio(this)', 'Entrar al Misterio')+
       hoBtn('btn-ghost',   oBase + 2.0, 'volverElenco()', 'Elegir otro dolor');
 
+    estado._hoInstant = false;   // de un solo uso
     _sanEntrada();   // toggle .san-go → dispara las animaciones (no-op bajo reduceMotion)
   }
 
@@ -2112,9 +2118,11 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   // algo falla el usuario sigue de pie en el handoff con su botón. Mismo patrón
   // que el velo de foco.
   var _accEsc = null;
+  var _accCleanup = null;   // el overlay de confirmación deja aquí su listener de Firestore
   function cerrarAcc(){
     var ov = $('acc-ov');
     if (_accEsc) { document.removeEventListener('keydown', _accEsc); _accEsc = null; }
+    if (_accCleanup) { try { _accCleanup(); } catch(e){} _accCleanup = null; }
     if (ov) ov.remove();
   }
   function montarAcc(html, aria){
@@ -2220,7 +2228,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   ];
   function abrirSinCreditos(){
     var paqs = PAQUETES.map(function(q){
-      return '<button class="acc-paq'+(q.destacado ? ' destacado' : '')+'" onclick="intencionCompra(\'paquete-'+q.n+'\')">'+
+      return '<button class="acc-paq'+(q.destacado ? ' destacado' : '')+'" onclick="intencionCompra(\'paquete-'+q.n+'\', this)">'+
                '<span class="acc-paq-izq">'+
                  '<span class="acc-moneda-mini">C</span>'+
                  '<span><span class="acc-paq-cant">'+q.n+' créditos'+
@@ -2246,9 +2254,9 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
         '<div class="acc-sub-titulo">Suscríbete:<br><span class="acc-big">acceso ilimitado</span></div>'+
         '<p class="acc-sub-sub">Todas las oraciones y más funciones</p>'+
         '<div class="acc-sub-opts">'+
-          '<button class="acc-sub-opt" onclick="intencionCompra(\'sub-mensual\')">'+
+          '<button class="acc-sub-opt" onclick="intencionCompra(\'sub-mensual\', this)">'+
             '<span class="acc-p">$200 MXN</span><span class="acc-c">al mes</span></button>'+
-          '<button class="acc-sub-opt anual" onclick="intencionCompra(\'sub-anual\')">'+
+          '<button class="acc-sub-opt anual" onclick="intencionCompra(\'sub-anual\', this)">'+
             '<span class="acc-p">$2,000 MXN</span><span class="acc-c">al año</span>'+
             '<span class="acc-ahorro">2 meses gratis</span></button>'+
         '</div>'+
@@ -2260,11 +2268,276 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     document.addEventListener('keydown', _accEsc);
   }
 
-  // Placeholder de la Pieza 5 — aquí irá el checkout real.
-  window.intencionCompra = function(que){
-    try { console.log('[intención de compra]', que); } catch(e){}
-    avisoAcceso('La compra estará disponible muy pronto.');
+  // ── COMPRA REAL (Pieza 5) ───────────────────────────────────────
+  // Los botones de la pantalla sin-créditos llevan a Stripe. El cliente manda
+  // solo la CLAVE ('p15' / 'mensual'): ni el importe ni la cantidad de créditos
+  // pasan por aquí, así que no hay nada que manipular desde el navegador.
+  var COMPRA_KEY = 'cruzando_compra';
+  var _MAPA_COMPRA = {
+    'paquete-5':  { tipo:'creditos', clave:'p5'  },
+    'paquete-15': { tipo:'creditos', clave:'p15' },
+    'paquete-25': { tipo:'creditos', clave:'p25' },
+    'sub-mensual':{ tipo:'sub',      clave:'mensual' },
+    'sub-anual':  { tipo:'sub',      clave:'anual'   }
   };
+
+  // Antes de saltar a Stripe se guarda DÓNDE estaba el usuario. El redirect
+  // borra la máquina de fases; sin esto, volver de pagar significaría rehacer
+  // la acogida entera. sessionStorage sobrevive la ida y vuelta en la misma
+  // pestaña; el espejo en localStorage (con caducidad) cubre el caso de que
+  // Stripe se abra en otra.
+  function _guardarCompraPendiente(){
+    var p = estado.painSel, m = estado.misterioSel;
+    if (!p) return;
+    var dato = {
+      painId: p.id,
+      mid:    m && m.mid,
+      senales: estado.senales || [],
+      pasoAcogida: estado.pasoAcogida || 0,
+      ts: Date.now()
+    };
+    var txt = JSON.stringify(dato);
+    try { sessionStorage.setItem(COMPRA_KEY, txt); } catch(e){}
+    try { localStorage.setItem(COMPRA_KEY, txt); } catch(e){}
+  }
+  function _leerCompraPendiente(){
+    var txt = null;
+    try { txt = sessionStorage.getItem(COMPRA_KEY); } catch(e){}
+    if (!txt) { try { txt = localStorage.getItem(COMPRA_KEY); } catch(e){} }
+    if (!txt) return null;
+    try {
+      var d = JSON.parse(txt);
+      // El espejo de localStorage caduca: media hora es de sobra para pagar, y
+      // evita restaurar un handoff de hace tres días.
+      if (!d || !d.ts || (Date.now() - d.ts) > 30 * 60 * 1000) return null;
+      return d;
+    } catch(e){ return null; }
+  }
+  function _limpiarCompraPendiente(){
+    try { sessionStorage.removeItem(COMPRA_KEY); } catch(e){}
+    try { localStorage.removeItem(COMPRA_KEY); } catch(e){}
+  }
+
+  window.intencionCompra = function(que, btn){
+    var m = _MAPA_COMPRA[que];
+    if (!m) return;
+    if (!window.CZAccess || !CZAccess.comprar) {
+      avisoAcceso('La compra no está disponible en este momento.');
+      return;
+    }
+
+    // Bloqueo de toda la tarjeta: dos toques = dos sesiones de checkout.
+    var card = document.querySelector('.acc-card-sc');
+    if (card) { if (card.dataset.yendo === '1') return; card.dataset.yendo = '1'; }
+    var etiqueta = btn ? btn.innerHTML : '';
+    if (btn) btn.classList.add('cargando');
+
+    function fallo(e){
+      console.warn('[compra] no se pudo iniciar:', e);
+      if (card) card.dataset.yendo = '';
+      if (btn) { btn.classList.remove('cargando'); btn.innerHTML = etiqueta; }
+      avisoAcceso(_msgError(e));
+    }
+
+    _guardarCompraPendiente();
+
+    var pid  = estado.painSel && estado.painSel.id;
+    var opts = { painId: pid, retorno: 'sanar' };
+    var pide = (m.tipo === 'creditos') ? CZAccess.comprar(m.clave, opts)
+                                       : CZAccess.suscribir(m.clave, opts);
+    pide.then(function(r){
+      if (r && r.url) { location.href = r.url; return; }
+      fallo(new Error('sin url de checkout'));
+    }).catch(fallo);
+  };
+
+  // ── REGRESO DE STRIPE ───────────────────────────────────────────
+  // El webhook es asíncrono: el usuario puede volver ANTES de que sus créditos
+  // existan. Todo lo de aquí abajo existe para que nunca crea que pagó en vano.
+  function _paramsCompra(){
+    var q = new URLSearchParams(location.search);
+    var c = q.get('compra');                 // paquetes de créditos
+    var k = q.get('checkout');               // suscripción (contrato de index.html)
+    if (!c && !k) return null;
+    return {
+      tipo:   c ? 'creditos' : 'sub',
+      exito:  (c === 'ok' || k === 'success'),
+      sid:    q.get('sid'),
+      painId: q.get('pain')
+    };
+  }
+  // Se limpia la URL para que un refresh no vuelva a disparar el flujo.
+  function _limpiarUrlCompra(){
+    try { history.replaceState({}, '', location.pathname); } catch(e){}
+  }
+
+  function _restaurarTrasCompra(pend, painIdUrl){
+    var pid = (pend && pend.painId) || painIdUrl;
+    if (!pid || !painById[pid]) return false;
+    var p = painById[pid];
+    estado.painSel     = p;
+    estado.misterioSel = (pend && pend.mid && misterioByMid[pend.mid]) || p.misterio;
+    estado.senales     = (pend && Array.isArray(pend.senales)) ? pend.senales : [];
+    estado.pasoAcogida = (pend && typeof pend.pasoAcogida === 'number') ? pend.pasoAcogida : 0;
+    estado.fase        = 'handoff';
+    estado._hoInstant  = true;    // sin coreografía: viene de pagar
+    return true;
+  }
+
+  function _reanudarCompra(info){
+    var pend = _leerCompraPendiente();
+    _limpiarCompraPendiente();
+    $('view').innerHTML = '<div class="empty">Preparando tu camino…</div>';
+    cargarDatos().then(function(ok){
+      if (!ok) { _avisoSinDatos(); return; }
+      var restaurado = _restaurarTrasCompra(pend, info.painId);
+      if (!restaurado) {
+        // Sin rastro del dolor (otra pestaña, storage limpio): al elenco, con
+        // el dolor centrado si lo sabemos. Se pierde la acogida, no la compra.
+        estado.fase = 'elenco';
+        if (info.painId) estado.elencoRecentrar = info.painId;
+      }
+      render(); window.scrollTo(0,0);
+
+      if (info.exito) abrirConfirmando(info);
+      else if (restaurado) avisoAcceso('Compra cancelada. Cuando quieras, aquí sigue.');
+    });
+  }
+
+  // ── Overlay "confirmando tu compra" ─────────────────────────────
+  // No sondea: ESCUCHA. El asiento del ledger tiene un id determinista
+  // (purchase_{sessionId}) y las reglas permiten al usuario leer su ledger, así
+  // que en cuanto el webhook lo escribe, esta pantalla lo ve. El propio asiento
+  // trae balanceAfter, así que ni siquiera hay que releer el saldo.
+  var ESPERA_MS = 25000;
+
+  function abrirConfirmando(info){
+    var esCred = (info.tipo === 'creditos');
+    montarAcc(
+      '<div class="acc-card">'+
+        '<h3 class="acc-title" id="cc-tit">Confirmando tu compra…</h3>'+
+        '<p class="acc-sub" id="cc-msg">'+
+          (esCred ? 'Un momento, estamos activando tus créditos.'
+                  : 'Un momento, estamos activando tu suscripción.')+
+        '</p>'+
+        '<div class="acc-escena"><div class="acc-moneda" id="acc-moneda">C</div></div>'+
+        '<div class="acc-btns" id="cc-btns"></div>'+
+      '</div>', 'Confirmando tu compra');
+
+    var cerrado = false, unsub = null, timer = null;
+
+    function limpiar(){
+      if (timer) { clearTimeout(timer); timer = null; }
+      if (unsub) { try { unsub(); } catch(e){} unsub = null; }
+    }
+    _accCleanup = limpiar;
+
+    function exito(creditos, saldo){
+      if (cerrado) return;
+      cerrado = true; limpiar();
+      var tit = $('cc-tit'), msg = $('cc-msg'), btns = $('cc-btns');
+      if (tit) tit.textContent = esCred ? '¡Listo!' : 'Suscripción activa';
+      if (msg) {
+        // `creditos` puede venir en 0 cuando el servidor responde "ya estaba
+        // acreditado" (no sabe de cuántos hablamos): entonces se informa del
+        // saldo, que es lo que el usuario quiere saber de verdad.
+        if (!esCred) {
+          msg.textContent = 'Ya tienes acceso a todas las oraciones.';
+        } else if (creditos > 0) {
+          msg.innerHTML = 'Se sumaron <b>'+creditos+'</b> créditos.'+
+                          (typeof saldo === 'number' ? ' Ahora tienes <b>'+saldo+'</b>.' : '');
+        } else if (typeof saldo === 'number') {
+          msg.innerHTML = 'Tus créditos ya están activos. Tienes <b>'+saldo+'</b>.';
+        } else {
+          msg.textContent = 'Tu compra ya está activa.';
+        }
+      }
+      if (btns) btns.innerHTML = '';
+      // Deja el caché coherente para que el elenco y el handoff se pinten bien.
+      var fin = function(){ setTimeout(function(){ if ($('acc-ov')) cerrarAcc(); }, 1500); };
+      if (CZAccess.refrescar) CZAccess.refrescar().then(fin).catch(fin); else fin();
+    }
+
+    function lento(){
+      if (cerrado) return;
+      var msg = $('cc-msg'), btns = $('cc-btns');
+      // NUNCA se dice que falló: el pago está hecho.
+      if (msg) msg.textContent = esCred
+        ? 'Tu pago se registró correctamente. Estamos activando tus créditos.'
+        : 'Tu pago se registró correctamente. Estamos activando tu suscripción.';
+      if (btns && !btns.innerHTML) {
+        btns.innerHTML = '<button class="acc-btn acc-btn-go" id="cc-retry">Reintentar</button>'+
+                         '<button class="acc-btn acc-btn-cancel" id="cc-cerrar">Cerrar</button>';
+        $('cc-cerrar').addEventListener('click', function(){ cerrado = true; limpiar(); cerrarAcc(); });
+        $('cc-retry').addEventListener('click', reintentar);
+      }
+    }
+
+    function reintentar(){
+      var b = $('cc-retry');
+      if (b) { b.disabled = true; b.textContent = 'Comprobando…'; }
+      // La red del servidor: pregunta a Stripe y acredita si procede. Es
+      // idempotente — si el webhook llega a la vez, no se duplica nada.
+      CZAccess.reclamar(info.sid).then(function(r){
+        if (r && r.ok && r.acreditados && r.acreditados.length) {
+          var tot = r.acreditados.reduce(function(a, x){ return a + (x.creditos||0); }, 0);
+          exito(tot, r.saldo);
+          return;
+        }
+        if (r && r.motivo === 'ya-acreditado') { esperarSaldo(); return; }
+        if (b) { b.disabled = false; b.textContent = 'Reintentar'; }
+        var msg = $('cc-msg');
+        if (msg && r && r.motivo === 'no-pagada') {
+          msg.textContent = 'El pago no se completó, así que no se te cobró nada.';
+        } else if (msg) {
+          msg.textContent = 'Seguimos activando tu compra. Si en unos minutos no aparece, escribe a contacto@cruzando.app y lo resolvemos.';
+        }
+      }).catch(function(e){
+        console.warn('[compra] reclamo:', e);
+        if (b) { b.disabled = false; b.textContent = 'Reintentar'; }
+      });
+    }
+
+    // Relee el saldo cuando el servidor dice que ya estaba acreditado.
+    function esperarSaldo(){
+      if (!CZAccess.refrescar) { exito(0, null); return; }
+      CZAccess.refrescar().then(function(){ exito(0, CZAccess.saldo()); })
+                          .catch(function(){ exito(0, null); });
+    }
+
+    // Suscripción: el testigo es el flip del plan, no un asiento del ledger.
+    if (!esCred) {
+      var refU = _db.collection('users').doc(window._obUID);
+      try {
+        unsub = refU.onSnapshot(function(snap){
+          var d = snap && snap.exists ? snap.data() : null;
+          var p = String((d && d.plan) || 'free').toLowerCase();
+          if (p === 'premium' || p === 'pro') { window.currentPlan = 'premium'; exito(0, null); }
+        }, function(){ /* sin listener: queda el botón de reintentar */ });
+      } catch(e){}
+      timer = setTimeout(lento, ESPERA_MS);
+      return;
+    }
+
+    // Créditos: el asiento con id determinista. Si no hay sid (caso raro) se va
+    // directo al camino lento, que sabe buscar la compra sin él.
+    if (!info.sid) { lento(); return; }
+    var ref = _db.collection('users').doc(window._obUID)
+                 .collection('ledger').doc('purchase_' + info.sid);
+    try {
+      unsub = ref.onSnapshot(function(snap){
+        if (snap && snap.exists) {
+          var d = snap.data() || {};
+          exito(d.delta || 0, d.balanceAfter);
+        }
+      }, function(err){
+        console.warn('[compra] listener:', err);
+        lento();
+      });
+    } catch(e){ lento(); }
+
+    timer = setTimeout(lento, ESPERA_MS);
+  }
   window.volverElenco = function(){
     estado.fase = 'elenco'; estado.painSel = null; estado.misterioSel = null;
     estado.pasoAcogida = 0; estado.senales = [];
@@ -2328,6 +2601,12 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
       }
       _retryPendingSync();                  // reintenta subir un perfil que quedó pendiente
       if (perfil && perfil.ejes) _perfil = perfil.ejes;   // Fase C leerá esto
+
+      // Regreso de Stripe (Pieza 5). Va ANTES que el onboarding: quien acaba de
+      // pagar vuelve a su oración, no a un test de afinidad.
+      var _compra = _paramsCompra();
+      if (_compra) { _limpiarUrlCompra(); _reanudarCompra(_compra); return; }
+
       // Onboarding si: se pide rehacer (?rehacer=1) o no hay perfil previo.
       if (_qpRehacer() || !perfil) {
         estado.fase = 'onboarding'; estado.obPaso = 0;
