@@ -154,9 +154,9 @@ const PRICE_IDS = {
 // enlace con el catálogo de Stripe.
 const PRICE_PAQUETES = {
   live: {
-    p5:  'price_PENDIENTE_live_p5',
-    p15: 'price_PENDIENTE_live_p15',
-    p25: 'price_PENDIENTE_live_p25'
+    p5:  'price_1U6yayCDSMAtjE9eyMLK2K1I',
+    p15: 'price_1U6yb1CDSMAtjE9eCCkjL1kL',
+    p25: 'price_1U6yb4CDSMAtjE9eZYtVv7CV'
   },
   test: {
     p5:  'price_1U6xoCCRd4PM0jIpLYjOKilX',
