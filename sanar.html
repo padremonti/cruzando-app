@@ -2100,6 +2100,12 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     var c = (e && e.code) || '';
     if (c === 'functions/unauthenticated') return 'Tu sesión expiró. Vuelve a entrar.';
     if (c === 'functions/invalid-argument') return 'Esta oración no está disponible.';
+    // failed-precondition lo usa el servidor para hablarle al usuario (p. ej.
+    // un paquete todavía sin precio configurado). Su mensaje ya viene escrito
+    // para leerse; traducirlo a "el servidor no respondió" sería mentir.
+    if (c === 'functions/failed-precondition') {
+      return (e && e.message) || 'Esto no está disponible por ahora.';
+    }
     if (c === 'functions/unavailable' || (!navigator.onLine))
       return 'No hay conexión. Inténtalo en un momento.';
     return 'El servidor no respondió. Inténtalo en un momento.';
