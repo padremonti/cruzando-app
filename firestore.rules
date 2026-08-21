@@ -66,10 +66,13 @@ service cloud.firestore {
       match /profile/{doc}        { allow read, write: if isOwner(uid); }
 
       // Faltaban: un match /users/{uid} NO cubre sus subcolecciones, así que
-      // estas dos estaban siendo denegadas. Las compras de la tienda de extras
-      // (extras.html) y el diario de los retiros (retiros.js) no se guardaban.
+      // estas tres estaban siendo denegadas. Las compras de la tienda de extras
+      // (extras.html) y el diario de los retiros (retiros.js) no se guardaban;
+      // y las esferas de recompensa no llegaban a mostrarse nunca — world.js no
+      // podía escribirlas y crecer.html no podía leerlas (el catch lo callaba).
       match /extras/{doc}         { allow read, write: if isOwner(uid); }
       match /diario/{doc}         { allow read, write: if isOwner(uid); }
+      match /recompensas/{doc}    { allow read, write: if isOwner(uid); }
     }
 
     // ── Configuración compartida ───────────────────────────────────────────
