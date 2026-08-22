@@ -17,6 +17,10 @@
   };
 
   function applySavedSkin() {
+    // Kit de recompensas en standby: sin tienda visible, una skin comprada antes
+    // (o por un developer) se vería como un tema fantasma que nadie puede quitar.
+    // La preferencia NO se borra: sigue en localStorage.activeSkin esperando.
+    if (!(window.recompensasON && window.recompensasON())) return;
     var skinId = localStorage.getItem('activeSkin');
     if (!skinId) return;
     var skin = SKINS_CATALOG[skinId];

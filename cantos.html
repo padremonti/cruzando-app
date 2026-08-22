@@ -735,6 +735,7 @@ body.light .tool-btn svg { background: rgba(0,0,0,0.04); }
   max-height: 50vh; border-top: 1px solid var(--border);
 }
 </style>
+<script src="flags.js"></script>
 <script src="plan-utils.js"></script>
 <script src="utils.js"></script>
 <script src="gestures.js"></script>
@@ -890,6 +891,9 @@ body.light .tool-btn svg { background: rgba(0,0,0,0.04); }
         <span class="filter-label">Extras</span>
         <span class="filter-count" id="ext-count">0</span>
       </button>
+      <!-- Kit de recompensas en standby: sin tienda no hay cantos extra que
+           filtrar, y una fila con contador 0 se lee como sección vacía. -->
+      <script>(function(){ if (!window.recompensasON()) { var f = document.getElementById('filter-extras'); if (f) f.style.display = 'none'; } })();</script>
       <button class="filter-row active" id="filter-todas" onclick="setPlaylistFilter('todas')">
         <span class="filter-icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

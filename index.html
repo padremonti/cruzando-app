@@ -1156,6 +1156,7 @@ body.hub-clean .hub-door-santuario { animation-delay:1.2s !important; }
   border-radius: 12px; max-width: 280px;
 }
 </style>
+<script src="flags.js"></script>
 <script src="plan-utils.js"></script>
 </head>
 <body>
@@ -1189,6 +1190,9 @@ body.hub-clean .hub-door-santuario { animation-delay:1.2s !important; }
       <div class="drawer-item-icon">✦</div>
       <div><div class="drawer-item-label">Extras</div><div class="drawer-item-sub">Contenido adicional Premium</div></div>
     </button>
+    <!-- Kit de recompensas en standby: sin tienda detrás, el botón se oculta entero.
+         Un "Próximamente" seguiría prometiendo lo que el MVP no cumple. -->
+    <script>(function(){ if (!window.recompensasON()) { var b = document.getElementById('drawer-extras-btn'); if (b) b.style.display = 'none'; } })();</script>
     <button class="drawer-item" onclick="closeDrawer(); openPrefs()">
       <div class="drawer-item-icon">⚙️</div>
       <div><div class="drawer-item-label">Preferencias</div><div class="drawer-item-sub">Tema, audio, micro</div></div>
@@ -2266,6 +2270,7 @@ function _openPopupSheet() {
 window._openPopupSheet = _openPopupSheet;
 
 function goToExtras() {
+  if (!window.recompensasON()) return;   // kit en standby: el botón del drawer está oculto
   var plan = window.effectivePlan ? window.effectivePlan() : 'free';
   if (plan === 'developer') { navigateTo('extras.html'); return; }
   _showExtrasComingSoon();

@@ -359,9 +359,28 @@ body.light .shop-hero-grad {
 .app-nav-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; }
 .app-nav-label { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.3px; }
 </style>
+<script src="flags.js"></script>
 <script src="utils.js"></script>
 </head>
 <body>
+
+<!-- ══ Kit de recompensas en standby ══════════════════════════════════════
+     La tienda no tiene entrada en la UI mientras el flag esté apagado. Esta
+     guarda cubre la puerta trasera: quien llegue por URL directa, marcador o
+     historial no ve una tienda a medias, se le devuelve al camino. Se ejecuta
+     antes de pintar nada (la página queda en blanco un instante, no expuesta).
+     Se conserva la salida para developer: sin ella no habría forma de seguir
+     construyendo la tienda con el flag apagado. ══════════════════════════ -->
+<script>
+(function () {
+  if (window.recompensasON()) return;
+  var verComo = sessionStorage.getItem('cruzando_view_as');
+  var soyDev  = !verComo && localStorage.getItem('cruzando_plan_cache') === 'developer';
+  if (soyDev) return;
+  var base = location.origin + location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1);
+  location.replace(base + 'crecer.html');
+}());
+</script>
 
 <div class="shell">
 

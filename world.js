@@ -395,7 +395,7 @@ const _db   = getFirestore(_app);
           ? '<span class="nodo-num" style="color:var(--text-soft)">🔒</span>'
           : '<span class="nodo-num" style="color:' + color + '">' + nivel.num + '</span>';
 
-      const cofreHtml = esCompletado
+      const cofreHtml = (esCompletado && window.recompensasON())
         ? '<div class="nodo-cofre"' +
             ' id="cofre-' + nivel.id + '"' +
             ' onclick="window.abrirCofre(\'' + nivel.id + '\',' + mundo.id + ',event)">' +
@@ -561,10 +561,11 @@ const _db   = getFirestore(_app);
       sacudirNodo(nivelId);
       return;
     }
-    if (estado === 'disponible' || estado === 'en_progreso') {
+    // 'completado' entra igual que los demás: con el kit en standby no hay cofre
+    // que reciba el tap, y un cuaderno terminado debe poder reabrirse siempre.
+    if (estado === 'disponible' || estado === 'en_progreso' || estado === 'completado') {
       location.href = 'orar.html?c=' + nivelId;
     }
-    // completado → el cofre maneja el tap
   };
 
   // ── Abrir cofre ──────────────────────────────────────────────────

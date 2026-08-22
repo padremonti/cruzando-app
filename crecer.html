@@ -979,6 +979,21 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 .light .pater-cross::before, .light .pater-cross::after { background:rgba(0,0,0,0.3); }
 .pater-cross::before { width:2px; height:7px; left:50%; transform:translateX(-50%); }
 .pater-cross::after  { width:7px; height:2px; top:37%; left:0; }
+/* Separador de tramo — la cara "kit apagado" del nodo de fin de bloque.
+   Más chico que un Misterio (104px) y más grande que un pater (18px):
+   se lee como marca de tramo, no como destino ni como cuenta del rosario.
+   Sin onclick y con pointer-events:none — no se toca, no promete nada. */
+.tramo-node {
+  position:absolute; transform:translate(-50%,-50%); z-index:4;
+  width:32px; height:32px; border-radius:50%;
+  background:var(--pater-bg); border:1.5px solid var(--pater-border);
+  display:flex; align-items:center; justify-content:center;
+  pointer-events:none;
+}
+.tramo-dot {
+  width:8px; height:8px; border-radius:50%;
+  background:var(--pater-border); opacity:0.75;
+}
 .lux-companion {
   position:absolute; z-index:6; pointer-events:none;
   animation:luxFloat 3s ease-in-out infinite;
@@ -1354,6 +1369,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   border-radius: 12px; max-width: 280px;
 }
 </style>
+<script src="flags.js"></script>
 <script src="plan-utils.js"></script>
 </head>
 <body>
@@ -1387,6 +1403,9 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
       <div class="drawer-item-icon">✦</div>
       <div><div class="drawer-item-label">Extras</div><div class="drawer-item-sub">Contenido adicional Premium</div></div>
     </button>
+    <!-- Kit de recompensas en standby: sin tienda detrás, el botón se oculta entero.
+         Un "Próximamente" seguiría prometiendo lo que el MVP no cumple. -->
+    <script>(function(){ if (!window.recompensasON()) { var b = document.getElementById('drawer-extras-btn'); if (b) b.style.display = 'none'; } })();</script>
     <button class="drawer-item" onclick="closeDrawer(); openPrefs()">
       <div class="drawer-item-icon">⚙️</div>
       <div><div class="drawer-item-label">Preferencias</div><div class="drawer-item-sub">Tema, audio, micro</div></div>
@@ -2410,6 +2429,7 @@ function _openPopupSheet() {
 window._openPopupSheet = _openPopupSheet;
 
 function goToExtras() {
+  if (!window.recompensasON()) return;   // kit en standby: el botón del drawer está oculto
   var plan = window.effectivePlan ? window.effectivePlan() : 'free';
   if (plan === 'developer') { navigateTo('extras.html'); return; }
   _showExtrasComingSoon();
@@ -2863,7 +2883,7 @@ onAuthStateChanged(auth, async function(user) {
     }
   } catch(e) {}
 
-  if (user && user.uid) {
+  if (user && user.uid && window.recompensasON()) {
     verificarRecompensas(user.uid);
   }
 });
@@ -3708,12 +3728,24 @@ function buildMap() {
     canvas.appendChild(el);
   });
 
+  // Nodo de fin de bloque (cada 5 Misterios). Un solo interruptor, dos caras:
+  // kit encendido → cofre de recompensa; apagado → separador pequeño y mudo que
+  // solo marca la división de tramo. La posición (p.x/p.y) y chestState no cambian,
+  // así que reactivar el flag devuelve el cofre con su estado correcto.
   pts.filter(function(p){ return p.type==='treasure'; }).forEach(function(p) {
+    var node = document.createElement('div');
+    node.style.cssText = 'left:' + p.x + 'px;top:' + p.y + 'px;';
+
+    if (!window.recompensasON()) {
+      node.className = 'tramo-node';
+      node.innerHTML = '<div class="tramo-dot"></div>';
+      canvas.appendChild(node);
+      return;
+    }
+
     var bloque = BLOQUES_MAP[p.bi];
     var state  = window.chestState[p.bi];
-    var node   = document.createElement('div');
     node.className = 'treasure-node' + (state==='locked' ? ' locked' : '');
-    node.style.cssText = 'left:' + p.x + 'px;top:' + p.y + 'px;';
     var emoji = state==='opened' ? '📦' : state==='locked' ? '🔒' : '🎁';
     var label = state==='opened' ? 'Abierto' : state==='locked' ? 'Bloqueado' : '¡Abrir!';
     node.innerHTML = '<div class="treasure-chest ' + state + '">' + emoji + '</div><div class="treasure-label">' + label + '</div>';
@@ -4268,6 +4300,7 @@ window._goToFreeActiveMisterio = function() {
 
 /* ══ POPUP COFRE ══ */
 function openTreasure(bi, state) {
+  if (!window.recompensasON()) return;   // kit en standby: el nodo es separador mudo
   if (window.CZSound) CZSound('chestOpen');
   var b=BLOQUES_MAP[bi], c=b.color, t=b.treasure;
   document.getElementById('treasure-bg').style.background='radial-gradient(ellipse at 50% 60%,' + c + '30 0%,transparent 65%)';

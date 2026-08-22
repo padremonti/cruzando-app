@@ -24,6 +24,7 @@ PWA de formación espiritual católica. El usuario reza los 20 Misterios del Ros
 | `mini.html` | Mini sesión de UN Misterio (el "Misterio-puerta" que señaló Sanar). Reproductor cinematográfico a pantalla completa. Todo derivado del `mid`. Firebase compat cableado; marca el pain completado al epílogo. |
 | `canto.js` / `canto.css` | Motor de karaoke de canto compartido (extraído de audio+rezar). `Canto.init({...})`; CSS por `<link>`, HTML del overlay inyectado por el módulo. `mini.html` NO lo usa (ancestro divergente). |
 | `utils.js` | `window.isPremium(userData)` y `window.resolvePlan(userData)`. Cargado en todas las páginas. |
+| `flags.js` | Interruptores de producto. Hoy: `MOSTRAR_RECOMPENSAS = false` + puerta `window.recompensasON()`. Ver § Kit de recompensas. |
 
 ## Modelo de datos Firestore
 
@@ -181,6 +182,44 @@ Buckets R2: `R2_ILU` (ilustraciones), `R2_MUS` (música/lrc), `R2_AUD` (audios).
 - **Refresco**: `mini.volver()` = `location.href` a `sanar.html` → recarga completa → re-lee `progress/sanar` (sin detección de foco).
 - **PENDIENTE en dispositivo**: ciclo completo (rezar en mini → volver → check + reordenado), render del check en el wheel 3D, offline (rezar sin red → sube al reabrir).
 
+## Kit de recompensas (STANDBY — oculto tras flag para el MVP)
+
+*Estado: implementado + banco de pruebas (`tools/test-flag-recompensas.js`, 35 pruebas). **PENDIENTE prueba visual en dispositivo.***
+
+El kit estaba a medio construir y se apagó entero para el lanzamiento al grupo de prueba. **Nada se borró y ningún dato de Firestore se toca**: la ocultación es 100 % de presentación.
+
+**El interruptor** — `flags.js` (patrón de `appcheck-key.js`): `window.MOSTRAR_RECOMPENSAS = false` + la puerta única `window.recompensasON()`. Se compara contra `true` **exacto**: una página que olvide cargar `flags.js` deja el kit **oculto**, no visible — falla del lado seguro. Cargado en 9 páginas (index, crecer, extras, cantos, world, audio, orar, rezar, diario), **siempre antes de `utils.js`**. Encender en el futuro = `false` → `true`, una línea.
+
+**Qué apaga** (10 guardas de una línea):
+
+| Pieza | Dónde |
+|---|---|
+| Nodo cada-5 → separador mudo | `crecer.html` render del `forEach` de `type==='treasure'` |
+| Popup del cofre | `openTreasure()` sale temprano |
+| Esferas 🎁 de recompensa pendiente | no se llama `verificarRecompensas()` |
+| Botón "Extras" del drawer | oculto entero en `index`+`crecer` (no un "Próximamente": no prometer lo que no se cumple) + `goToExtras()` bloqueado |
+| Tienda por URL directa | velo/`location.replace` al tope de `extras.html` (salida conservada para `developer`) |
+| Filtro "Extras" de la biblioteca | fila oculta en `cantos.html` (contador 0 = sección vacía) |
+| Toast "🏅 ¡Medalla desbloqueada!" | callado en `audio`+`orar` — **el dato se sigue escribiendo**, solo se calla el aviso |
+| Skin fantasma | `applySavedSkin()` bajo el flag (`localStorage.activeSkin` NO se borra) |
+| Cofre por cuaderno | `world.js` |
+
+**El nodo cada-5 no desaparece, se transforma.** Tres estados, un interruptor: hoy = cofre · MVP = `.tramo-node` (separador de 32 px, `pointer-events:none`, sin `onclick`, sin cofre/etiqueta/candado, tokens `--pater-bg`/`--pater-border`) · futuro = cofre otra vez. Jerarquía deliberada: 32 px contra los 104 px de un Misterio y los 18 px de un pater — marca de tramo, ni destino ni cuenta del rosario.
+
+**No descuadra nada** (verificado): `computeAllPositions`, `DONE_COUNT` y `drawMapPath` **sin tocar**. El nodo es `position:absolute` → su tamaño no participa del layout; `globalIdx` solo avanza en los Misterios; el sendero se dibuja solo sobre `mPts`. `chestState` se sigue calculando y cacheando igual, así que al encender el flag el cofre vuelve con su estado correcto sin migración.
+
+**Frontera con los metros** — la acumulación (corazón del MVP) queda intacta. La **única resta** de `totalMeters` en toda la app vive en `extras.html` (`executePurchase`), dentro de la tienda oculta: inalcanzable. `DONE_COUNT` (progreso) y `chestState` (cofre) se calculan en el mismo bucle pero son independientes; el bucle no se tocó.
+
+**Ojo con el nombre**: `canjearCodigo` (functions #9) son **códigos promocionales de beta**, NO la tienda. Colisión de nombre. No tocar al trabajar el kit.
+
+### ⚠️ DEUDA BLOQUEANTE antes de encender el flag
+
+`extras.html` **deja pagar dos veces el mismo producto**. Firestore guarda `extras/purchases.items` como **objetos** `{id,type,purchasedAt}`, pero `getProductState()` hace `userPurchases.indexOf(product.id)` sobre **strings**: nunca coincide, así que tras recargar la página lo comprado vuelve a mostrarse como "Canjear" y se cobra de nuevo. (En la misma sesión sí funciona, porque tras comprar se concatena el `id` suelto — otra inconsistencia de forma del mismo dato.)
+
+**Arreglarlo —o eliminarlo en el rediseño de la tienda— ANTES de poner `MOSTRAR_RECOMPENSAS = true`.** No exponer la tienda con este bug.
+
+**Otros pendientes del kit** (no bloqueantes, pero es lo que había "a medias"): los premios que anuncia el popup del cofre son texto fijo en `BLOQUES_MAP` y no existen en el catálogo; `openTreasure` no otorga nada y su estado `opened` no persiste; el cofre de `world.js` es placeholder puro; BGM y estampitas se compran pero nada las consume; `SKINS_CATALOG` de `utils.js` es un espejo manual del JSON que se desincroniza a la primera skin nueva.
+
 ## Modelo económico (DISEÑADO, NO implementado — proyecto futuro)
 
 - **Híbrido**: suscripción (mensual/anual, todo incluido) **O** créditos (renta pain por pain). **Unidad = pain**; 1 crédito = 1 pain. **Cobro al ENTRAR**. Ventana de acceso **1 semana**. Paquetes vía **Stripe** + créditos de regalo al registrarse. El completado anotará vía `sub | credito` para analytics.
@@ -226,6 +265,7 @@ escribe `users/{uid}.terminos = { aceptado, fecha (serverTimestamp), version, me
 | diario.html | ⚠️ no revisado | ⚠️ | ⚠️ | — | — |
 | sanar.html | ✅ | ✅ `cruzando_theme` | ✅ Firebase+`plan-utils`, gate `developer` tras Auth | onboarding afinidad | ❌ (perfil + completados persisten; `guardarAfinidad` uso TODO) |
 | mini.html | — (pantalla completa) | ✅ `cruzando_theme` | ✅ Firebase compat (uid tras Auth, no bloquea) | — | ❌ marca completado ✅; diario/crédito TODO |
+| extras.html (tienda) | ✅ | ✅ | ✅ | — | 🔒 **oculta** tras `MOSTRAR_RECOMPENSAS` (standby) |
 
 *Reskins (audio/rezar/orar) y karaoke/`canto.js`: implementados + harness/golden test, **pendiente prueba visual en dispositivo**.*
 
@@ -247,3 +287,5 @@ escribe `users/{uid}.terminos = { aceptado, fecha (serverTimestamp), version, me
 11. **App Check**: registrar la clave de sitio reCAPTCHA v3 para `cruzando.app`, pegarla en `appcheck-key.js`, desplegar y mirar métricas unos días **antes** de activar el bloqueo en la consola (Auth primero; Firestore/Functions después).
 12. Alta en dispositivo: casilla bloqueando por los dos métodos, `users/{uid}.terminos` escrito, y que "Entrar" siga sin fricción.
 13. `firebase-service.js` es código muerto (ninguna página lo carga) y todavía registra sin casilla: borrarlo o alinearlo si alguna vez se conecta.
+14. **Kit de recompensas en standby** — prueba **visual** en dispositivo con `MOSTRAR_RECOMPENSAS = false`: que el nodo cada-5 se vea como separador discreto (claro y oscuro), que el camino no se descuadre, que no quede ningún cofre/botón/filtro muerto, y que los metros se sigan acumulando y mostrando normal.
+15. **DEUDA BLOQUEANTE del kit** — el doble cobro de `extras.html` (`getProductState` compara objetos contra strings) debe arreglarse **o eliminarse en el rediseño de la tienda ANTES** de poner `MOSTRAR_RECOMPENSAS = true`. Ver § Kit de recompensas.

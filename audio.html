@@ -1634,6 +1634,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 </div>
 
 <!-- ── Firebase SDK ── -->
+<script src="flags.js"></script>
 <script src="utils.js"></script>
 <script src="gestures.js"></script>
 <script src="canto.js"></script>
@@ -4023,7 +4024,9 @@ async function completeSession() {
         if (!items.some(it => it.id === medalId)) {
           items.push({ id: medalId, type: 'medal', earnedAt: new Date().toISOString() });
           await setDoc(extrasRef, { items }, { merge: true });
-          setTimeout(() => showToast('🏅 ¡Medalla desbloqueada!'), 1200);
+          // El dato SIEMPRE se escribe (no se pierde la medalla ganada); con el kit
+          // en standby solo se calla el aviso, que apuntaría a una vitrina oculta.
+          if (window.recompensasON()) setTimeout(() => showToast('🏅 ¡Medalla desbloqueada!'), 1200);
         }
       } catch (e) { console.warn('[CruzAndo] medal:', e.message); }
     }

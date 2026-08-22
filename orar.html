@@ -1041,6 +1041,7 @@ body.light .popup-close-bottom{border-color:var(--border);color:var(--text-dim)}
 
 </div><!-- /shell -->
 
+<script src="flags.js"></script>
 <script src="utils.js"></script>
 <!-- Bloque final del Rosario (Letanías → Salve → conclusiva), módulos compartidos -->
 <link rel="stylesheet" href="canto.css">
@@ -1813,7 +1814,8 @@ async function completeMystery(){
           if(!items.some(it=>it.id===medalId)){
             items.push({id:medalId,type:'medal',earnedAt:new Date().toISOString()});
             await extrasRef.set({items},{merge:true});
-            setTimeout(()=>showSlide(0,'🏅 ¡Medalla desbloqueada!'),1200);
+            // El dato SIEMPRE se escribe; con el kit en standby solo se calla el aviso.
+            if(window.recompensasON())setTimeout(()=>showSlide(0,'🏅 ¡Medalla desbloqueada!'),1200);
           }
         }catch(e){console.warn('[CruzAndo] medal:',e.message);}
       }
