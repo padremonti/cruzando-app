@@ -954,7 +954,8 @@ body.light .popup-close-bottom{border-color:var(--border);color:var(--text-dim)}
       <div class="maria-placeholder" id="maria-container">🙏</div>
       <h2 class="celebration-title" id="celeb-title"></h2>
       <p class="celebration-sub" id="celeb-sub"></p>
-      <button class="btn btn-primary btn-block" id="btn-celeb-home">Regresar a inicio</button>
+      <button class="btn btn-primary btn-block" id="btn-celeb-home" style="margin-bottom:10px">Continuar</button>
+      <button class="btn btn-outline btn-block" id="btn-celeb-mapa">Volver al camino</button>
     </div>
   </div>
 
@@ -1011,13 +1012,13 @@ body.light .popup-close-bottom{border-color:var(--border);color:var(--text-dim)}
       <span class="app-nav-label">Audio</span>
     </button>
 
-    <button class="app-nav-item" onclick="navTap(this);salirConAviso('index.html')">
+    <button class="app-nav-item" onclick="navTap(this);salirConAviso('crecer.html')">
       <div class="app-nav-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
         </svg>
       </div>
-      <span class="app-nav-label">Inicio</span>
+      <span class="app-nav-label">Crecer</span>
     </button>
 
   </nav>
@@ -1127,7 +1128,7 @@ function updateToggleHref(){
   if(tab) tab.href=`audio.html?nivel=${nivel}&cuaderno=${cua}&misterio=${currentGlobalMystery}`;
 }
 function goPrevMystery(){
-  if(currentGlobalMystery<=1){salirConAviso('index.html');return;}   // salir del primero = salir de la sesión
+  if(currentGlobalMystery<=1){salirConAviso('crecer.html');return;}   // salir del primero = salir de la sesión
   const{block,idx}=getMysteryBlock(--currentGlobalMystery);
   loadMystery(block,idx);
 }
@@ -1148,7 +1149,9 @@ function showAdvanceLevelPrompt(){
   const nId=String(n).padStart(2,'0')+String(c).padStart(2,'0');
   $('celeb-title').textContent='¡Veinte Misterios completados!';
   $('celeb-sub').textContent='Has rezado los 20 misterios de este cuaderno. ¡Magnífico camino!';
+  $('btn-celeb-home').textContent='Siguiente cuaderno';
   $('btn-celeb-home').onclick=()=>loadCuaderno(nId);
+  $('btn-celeb-mapa').onclick=()=>salirConAviso('crecer.html', true);
   show('scr-celebration');
 }
 async function loadCuaderno(nId){
@@ -1839,9 +1842,14 @@ async function completeMystery(){
 function showCelebration(){
   $('celeb-title').textContent=`¡${BFN[blk]} completados!`;
   $('celeb-sub').textContent=`Has rezado los 5 misterios ${BN[blk].toLowerCase()} de este cuaderno. ¡Bien hecho!`;
+  /* Dos salidas de verdad: seguir en el Libro (recarga orar en este nivel, que
+     resuelve solo el siguiente bloque incompleto) o irse al camino. Antes había un
+     único botón que decía "Regresar a inicio" y recargaba orar: la etiqueta mentía. */
+  $('btn-celeb-home').textContent='Seguir rezando';
   $('btn-celeb-home').onclick=()=>{
     location.href=location.origin+location.pathname.substring(0,location.pathname.lastIndexOf('/')+1)+'orar.html?c='+nivelId;
   };
+  $('btn-celeb-mapa').onclick=()=>salirConAviso('crecer.html', true);
   var grandImg = $('mariano-grand-img');
   if (grandImg) grandImg.src = MARIANO_CELEB;
   show('scr-celebration');
@@ -2179,33 +2187,37 @@ function initSwipe(){
 /* ─── SALIDA ───
    Nunca se abandona una sesión con audio sonando sin preguntar: el swipe a la derecha, el
    atrás del sistema y el botón Inicio pasan todos por aquí. Sin audio, la salida es directa. */
-let _exitPend=null;
+let _exitPend=null, _exitDirecto=false;
 
 function salirDeOrar(){
   pausarTodo();
   if(bgmEl)bgmEl.pause();
-  const dest=_exitPend||'index.html';
-  _exitPend=null;
-  // Volvemos por la entrada de index que ya existe en el historial, así el gesto hacia
+  const dest=_exitPend||'crecer.html';
+  const directo=_exitDirecto;
+  _exitPend=null; _exitDirecto=false;
+  // Volvemos por la entrada de crecer que ya existe en el historial, así el gesto hacia
   // adelante devuelve al usuario a la sesión en vez de dejarlo en un callejón.
-  if(dest==='index.html' && history.length>2) history.back();
+  // Salvo cuando se pide salida directa: "Seguir rezando" recarga orar y mete su propia
+  // entrada, así que encadenar bloques y luego retroceder devolvería al orar anterior.
+  if(!directo && dest==='crecer.html' && history.length>2) history.back();
   else goTo(dest);
 }
-function salirConAviso(pg){
-  _exitPend=pg||'index.html';
+function salirConAviso(pg, directo){
+  _exitPend=pg||'crecer.html';
+  _exitDirecto=!!directo;
   if(algoSonando()){ $('exit-modal').classList.add('open'); return true; }
   salirDeOrar();
   return false;
 }
 window.salirConAviso=salirConAviso;
-window._exitCancel=function(){ $('exit-modal').classList.remove('open'); _exitPend=null; };
+window._exitCancel=function(){ $('exit-modal').classList.remove('open'); _exitPend=null; _exitDirecto=false; };
 window._exitConfirm=function(){ $('exit-modal').classList.remove('open'); salirDeOrar(); };
 
 /* Atrás propio: cierra primero lo que esté abierto; si no hay nada, sale (con aviso). */
 function backDeOrar(){
   if($('exit-modal').classList.contains('open')){ window._exitCancel(); return true; }
   if($('tool-popup').classList.contains('open')){ closeToolPopup(); return true; }
-  return salirConAviso('index.html');
+  return salirConAviso('crecer.html');
 }
 function initBtns(){
   document.querySelectorAll('.tool-btn').forEach(function(b){

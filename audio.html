@@ -1586,13 +1586,13 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     <span class="app-nav-label">Libro</span>
   </button>
 
-  <button class="app-nav-item" onclick="navTap(this); navGuard('index.html')">
+  <button class="app-nav-item" onclick="navTap(this); navGuard('crecer.html')">
     <div class="app-nav-icon">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
       </svg>
     </div>
-    <span class="app-nav-label">Inicio</span>
+    <span class="app-nav-label">Crecer</span>
   </button>
 
 </nav>
@@ -2009,7 +2009,7 @@ function applyBlockColor(block) {
 window._logout = () => {
   signOut(auth).then(() => { location.href = 'index.html'; }).catch(() => { location.href = 'index.html'; });
 };
-window._goHome = () => { location.href = 'index.html'; };
+window._goHome = () => { location.href = 'crecer.html'; };
 
 let _prevMysteryBusy = false;
 window._goToPrevMystery = async () => {
@@ -2348,7 +2348,7 @@ async function loadUserAndStart(skipProgressRead = false) {
   var _stReq  = _nivelStatus[_reqNivelId] || 'published';
   var _planAu = userPlan || 'free';
   if (_planAu !== 'developer' && (_stReq === 'dev' || _stReq === 'empty')) {
-    window.location.replace('index.html?msg=nivel_en_desarrollo');
+    window.location.replace('crecer.html?msg=nivel_en_desarrollo');
     return;
   }
 
@@ -4390,7 +4390,7 @@ window.navGuardSeamless  = navGuardSeamless;
     if (mnc && mnc.style.pointerEvents === 'auto') { hideNavConfirm(); return true; }
     const mo = $('modal-overlay');
     if (mo && mo.classList.contains('open')) { closeModal(); return true; }
-    navGuard('index.html');
+    navGuard('crecer.html');
     return !!(nc && nc.classList.contains('open'));   // true si navGuard pidió confirmación (nos quedamos)
   }
 
@@ -4452,13 +4452,13 @@ initAuth();
     letter-spacing:2px">
     00:00:00
   </div>
-  <button onclick="window.location.href='index.html'"
+  <button onclick="window._goHome()"
     style="padding:16px 40px;border-radius:28px;border:none;
     background:var(--brand);color:#fff;
     font-family:'Cormorant Garamond',Georgia,serif;
     font-size:1.4rem;font-weight:600;cursor:pointer;
     -webkit-tap-highlight-color:transparent;">
-    Ir al inicio
+    Volver al camino
   </button>
   <button onclick="document.getElementById('free-manana-overlay').style.display='none'; window._repeatSession();"
     style="margin-top:14px;padding:13px 40px;border-radius:28px;
@@ -4493,15 +4493,15 @@ initAuth();
       ¿Quieres los tres modos y todos los Niveles sin esperar?
       Desbloquéalo con Premium.
     </div>
-    <button onclick="window.location.href='index.html'"
+    <button onclick="window._goHome()"
       style="padding:16px 40px;border-radius:28px;border:none;
       background:var(--brand);color:#fff;
       font-family:'Cormorant Garamond',Georgia,serif;
       font-size:1.4rem;font-weight:600;cursor:pointer;
       -webkit-tap-highlight-color:transparent;">
-      Ir al inicio
+      Volver al camino
     </button>
-    <button onclick="window.location.href='index.html?premium=1'"
+    <button onclick="window.location.href='crecer.html?premium=1'"
       style="margin-top:14px;padding:13px 40px;border-radius:28px;
       background:none;border:1.5px solid var(--border);color:var(--text-soft);
       font-family:'Cormorant Garamond',Georgia,serif;

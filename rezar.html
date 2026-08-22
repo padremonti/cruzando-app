@@ -1037,7 +1037,7 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
       <h2 class="celebration-title" id="celeb-title"></h2>
       <p class="celebration-sub" id="celeb-sub"></p>
       <button class="btn btn-primary btn-block" id="btn-celeb-home" style="margin-bottom:12px">Siguiente</button>
-      <button class="btn btn-secondary btn-block" id="btn-celeb-index" style="opacity:0.7">Ir al inicio</button>
+      <button class="btn btn-secondary btn-block" id="btn-celeb-index" style="opacity:0.7">Volver al camino</button>
     </div>
   </div>
 
@@ -1075,13 +1075,13 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
       <span class="app-nav-label">Audio</span>
     </button>
 
-    <button class="app-nav-item" onclick="window._safeGoTo('index.html');navTap(this)">
+    <button class="app-nav-item" onclick="window._safeGoTo('crecer.html');navTap(this)">
       <div class="app-nav-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
         </svg>
       </div>
-      <span class="app-nav-label">Inicio</span>
+      <span class="app-nav-label">Crecer</span>
     </button>
 
   </nav>
@@ -2275,7 +2275,7 @@ function initNavSwipe(){
 function backDeRezar(){
   if($('exit-modal').classList.contains('open')){ window._exitCancel(); return true; }
   if($('tool-popup')?.classList.contains('open')){ closeToolPopup(); return true; }
-  safeGoTo('index.html');
+  safeGoTo('crecer.html');
   return $('exit-modal').classList.contains('open');
 }
 
@@ -2511,14 +2511,14 @@ function celebrar(){
     btnPrimary.textContent = 'Rezar ' + BN[nextBlk];
     btnPrimary.onclick     = ()=>goTo(nextUrl);
   } else {
-    btnPrimary.textContent = 'Ir al inicio';
-    btnPrimary.onclick     = ()=>goTo('index.html');
+    btnPrimary.textContent = 'Volver al camino';
+    btnPrimary.onclick     = ()=>goTo('crecer.html');
   }
 
   var btnSec = $('btn-celeb-index');
   if(btnSec){
     btnSec.style.display = nextUrl ? '' : 'none';
-    btnSec.onclick       = ()=>goTo('index.html');
+    btnSec.onclick       = ()=>goTo('crecer.html');
   }
 
   var grandImg = $('mariano-slide-img');

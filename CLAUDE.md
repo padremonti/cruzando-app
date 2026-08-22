@@ -27,6 +27,29 @@ PWA de formación espiritual católica. El usuario reza los 20 Misterios del Ros
 | `flags.js` | Interruptores de producto. Hoy: `MOSTRAR_RECOMPENSAS = false` + puerta `window.recompensasON()`. Ver § Kit de recompensas. |
 | `bloques.js` | **Origen único del color de los cuatro bloques.** `window.COLORES_BLOQUE` + `window.rgbaBloque(bloque, alfa)`, y estampa 12 variables CSS (`--goz`, `--goz-color`, `--goz-rgb`, ×4). Va en el `<head>`. Ver § Colores de bloque. |
 
+## Navegación: dónde termina una sesión
+
+**Hay dos hogares, y no son intercambiables:** `index.html` es la **pantalla de acceso y hub**; `crecer.html` es el **mapa** — el camino con nodos, y el único que tiene motor de mapa (`computeAllPositions`, `drawMapPath`, `BLOQUES_MAP`). Estructuralmente `crecer` es `index` **más** el mapa: las 18 secciones de primer nivel son idénticas, y por eso el bloque de acceso está duplicado (§ Consentimiento, "los gemelos"). `crecer.html` **no enlaza a `index.html` por ningún sitio**: el flujo es un embudo de un solo sentido.
+
+**Los cuatro modos de rezo vuelven al mapa (`crecer.html`).** Antes cada uno terminaba en un sitio distinto: audio y rezar en el hub, sanar en el mapa, y orar en sí mismo. Puntos de salida:
+
+| Modo | Sale por |
+|---|---|
+| `audio` | `window._goHome()` — lo usan `salirDelEpilogo()`, el candado "vuelve mañana" y el overlay del DEMO. **Un solo sitio codifica el destino.** |
+| `orar` | `salirConAviso(dest, directo)` → `salirDeOrar()`; barra de navegación y los dos botones "Volver al camino" de la celebración |
+| `rezar` | `safeGoTo` / `goTo` desde la barra, el gesto atrás y los dos botones de la celebración |
+| `sanar` | `navTo('crecer.html')` (ya lo hacía). `mini` devuelve a `sanar`, no al mapa: es su propio bucle |
+
+**Solo cuatro rutas siguen yendo a `index.html`**, y todas son de acceso: `signOut` y el enlace de alta en audio, y el `onAuthStateChanged` sin usuario de orar y rezar.
+
+**La salida de orar es nueva.** Su celebración tenía un único botón con la etiqueta fija `Regresar a inicio` que los dos manejadores sobrescribían sin tocar el texto: uno recargaba `orar.html?c=…` y el otro llamaba `loadCuaderno()`. La etiqueta mentía en los dos casos y no había forma de salir salvo la barra. Ahora ofrece **Seguir rezando / Siguiente cuaderno** (texto fijado por cada manejador) y **Volver al camino**.
+
+⚠️ Esa salida pide **salida directa** (`salirConAviso('crecer.html', true)`): "Seguir rezando" recarga orar y mete su propia entrada en el historial, así que el atajo de `history.back()` de `salirDeOrar` devolvería al orar anterior en vez de al mapa. La bandera `_exitDirecto` se limpia en `salirDeOrar` y en `_exitCancel`.
+
+**`world.html` está inalcanzable.** Su único enlace vive en `mostrarEsferas()` (`crecer.html`), que solo corre bajo `recompensasON()` — se apagó con el kit de recompensas sin que nadie lo notara.
+
+**Banco de pruebas:** `tools/test-navegacion.js` (13 pruebas). Comprueba línea a línea que ninguna salida de sesión se escape al hub (con excepciones por **línea completa**, no por subcadena), que las tres barras lleven al mapa etiquetadas "Crecer", y que la salida de orar siga cableada en sus dos finales. Importa porque el splash de racha se engancha justo en estos puntos.
+
 ## Modelo de datos Firestore
 
 ```
