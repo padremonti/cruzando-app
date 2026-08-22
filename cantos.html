@@ -30,13 +30,12 @@
   --text-dim:      #806858;
   --orange:        #FF7A00;
   --green:         #4CAF50;
-  --block-color:      #E8A0A0;
-  --block-color-glow: rgba(232,160,160,0.35);
-  --block-color-bg:   rgba(232,160,160,0.18);
-  --rosa:   #E8A0A0;
-  --azul:   #02BBE0;
-  --rojo:   #C0392B;
-  --dorado: #D4A017;
+  /* Bloque en curso: lo reescribe updateBlockColor() en caliente desde
+     BLOCK_COLORS; esto es solo el valor de arranque. Los colores de bloque
+     los estampa bloques.js. */
+  --block-color:      var(--goz-color);
+  --block-color-glow: rgba(var(--goz-rgb),0.35);
+  --block-color-bg:   rgba(var(--goz-rgb),0.18);
   --brand:         #02BBE0;
   --brand-soft:    #43DDF8;
   --brand-ultra:   rgba(2,187,224,0.12);
@@ -735,6 +734,7 @@ body.light .tool-btn svg { background: rgba(0,0,0,0.04); }
   max-height: 50vh; border-top: 1px solid var(--border);
 }
 </style>
+<script src="bloques.js"></script>
 <script src="flags.js"></script>
 <script src="plan-utils.js"></script>
 <script src="utils.js"></script>
@@ -1008,10 +1008,10 @@ const INTERSTITIAL_KEY   = 'cruzando_interstitial_fecha';
 var _cantoPlayCount     = 0;
 var _INTERSTITIAL_EVERY = 4;
 const BLOCK_COLORS = {
-  gozosos:  { color:'#E8A0A0', glow:'rgba(232,160,160,0.35)', bg:'rgba(232,160,160,0.18)', label:'MISTERIOS GOZOSOS' },
-  luminosos:{ color:'#01BBE1', glow:'rgba(1,187,225,0.3)',    bg:'rgba(1,187,225,0.15)',   label:'MISTERIOS LUMINOSOS' },
-  dolorosos:{ color:'#C0392B', glow:'rgba(192,57,43,0.35)',   bg:'rgba(192,57,43,0.18)',   label:'MISTERIOS DOLOROSOS' },
-  gloriosos:{ color:'#D4A017', glow:'rgba(212,160,23,0.35)',  bg:'rgba(212,160,23,0.18)',  label:'MISTERIOS GLORIOSOS' },
+  gozosos:  { color:COLORES_BLOQUE.gozosos,   glow:rgbaBloque('gozosos',0.35),   bg:rgbaBloque('gozosos',0.18),   label:'MISTERIOS GOZOSOS' },
+  luminosos:{ color:COLORES_BLOQUE.luminosos, glow:rgbaBloque('luminosos',0.3),  bg:rgbaBloque('luminosos',0.15), label:'MISTERIOS LUMINOSOS' },
+  dolorosos:{ color:COLORES_BLOQUE.dolorosos, glow:rgbaBloque('dolorosos',0.35), bg:rgbaBloque('dolorosos',0.18), label:'MISTERIOS DOLOROSOS' },
+  gloriosos:{ color:COLORES_BLOQUE.gloriosos, glow:rgbaBloque('gloriosos',0.35), bg:rgbaBloque('gloriosos',0.18), label:'MISTERIOS GLORIOSOS' },
 };
 const BLOCK_LABELS = { gozosos:'Misterios Gozosos', luminosos:'Misterios Luminosos',
                        dolorosos:'Misterios Dolorosos', gloriosos:'Misterios Gloriosos' };

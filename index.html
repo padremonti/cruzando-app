@@ -45,7 +45,7 @@
   --brand-ultra:   rgba(2,187,224,0.12);
   --brand-glow:    rgba(2,187,224,0.25);
   --hub-cyan:      #02BBE0;   /* cian del hub (subtítulos/flecha) — oscuro */
-  --goz: #D4A017; --lum: #01BBE1; --dol: #C0392B; --glo: #8E44AD;
+  /* Colores de bloque (--goz/--lum/--dol/--glo) los estampa bloques.js */
   --map-bg:           #004C5B;
   --stats-bg:         rgba(0,41,49,0.92);
   --nav-bg:           rgba(0,41,49,0.97);
@@ -1156,6 +1156,7 @@ body.hub-clean .hub-door-santuario { animation-delay:1.2s !important; }
   border-radius: 12px; max-width: 280px;
 }
 </style>
+<script src="bloques.js"></script>
 <script src="flags.js"></script>
 <script src="plan-utils.js"></script>
 </head>
@@ -2127,7 +2128,7 @@ function renderHome(userData) {
                ? window._firestoreProgress
                : getProgreso(currentNivelId);
   var blocks = ['gozosos','luminosos','dolorosos','gloriosos'];
-  var BLOQUE_COLORS = { gozosos:'#E8A0A0', luminosos:'#01BBE1', dolorosos:'#C0392B', gloriosos:'#D4A017' };
+  var BLOQUE_COLORS = window.COLORES_BLOQUE;
   blocks.forEach(function(b) {
     var arr  = (data && data.progress && data.progress[b]) ? data.progress[b] : [null,null,null,null,null];
     var done = arr.filter(function(x) { return x !== null; }).length;

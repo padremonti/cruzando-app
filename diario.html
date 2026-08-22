@@ -38,10 +38,7 @@
   --brand-soft:    #43DDF8;
   --brand-ultra:   rgba(2,187,224,0.12);
   --brand-glow:    rgba(2,187,224,0.25);
-  --goz: #D4A017;
-  --lum: #01BBE1;
-  --dol: #C0392B;
-  --glo: #8E44AD;
+  /* Colores de bloque (--goz/--lum/--dol/--glo) los estampa bloques.js */
 }
 
 body.light {
@@ -390,10 +387,10 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   padding:2px 9px; border-radius:20px;
   letter-spacing:0.3px;
 }
-.chip-gozosos  { background:rgba(212,160,23,0.15); color:var(--goz); }
-.chip-luminosos{ background:rgba(1,187,225,0.15);  color:var(--lum); }
-.chip-dolorosos{ background:rgba(192,57,43,0.15);  color:var(--dol); }
-.chip-gloriosos{ background:rgba(142,68,173,0.15); color:var(--glo); }
+.chip-gozosos  { background:rgba(var(--goz-rgb),0.15); color:var(--goz); }
+.chip-luminosos{ background:rgba(var(--lum-rgb),0.15); color:var(--lum); }
+.chip-dolorosos{ background:rgba(var(--dol-rgb),0.15); color:var(--dol); }
+.chip-gloriosos{ background:rgba(var(--glo-rgb),0.15); color:var(--glo); }
 
 .card-misterio {
   font-size:1rem; font-weight:600;
@@ -632,6 +629,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   color:var(--lum);
 }
 </style>
+<script src="bloques.js"></script>
 <script src="plan-utils.js"></script>
 </head>
 <body>

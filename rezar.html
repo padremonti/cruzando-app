@@ -51,6 +51,7 @@ window._fbFirestore = {
   serverTimestamp: function() { return firebase.firestore.FieldValue.serverTimestamp(); }
 };
 </script>
+<script src="bloques.js"></script>
 <script src="plan-utils.js"></script>
 <script src="flags.js"></script>
 <script src="utils.js"></script>
@@ -70,7 +71,7 @@ window._fbFirestore = {
   --lvl-bold:#02BBE0;--lvl-base:#FF7F09;--lvl-soft:#43DDF8;
   --lvl-mist:#FFA34E;--lvl-light:#C3F5FE;--lvl-ultra:rgba(2,187,224,0.10);
   --lvl-bold-rgb:2,187,224;
-  --goz-color:#E8A0A0;--lum-color:#01BBE1;--dol-color:#C0392B;--glo-color:#D4A017;
+  /* Colores de bloque (--goz/--lum/--dol/--glo) los estampa bloques.js */
   --brand:#02BBE0;--brand-soft:#43DDF8;
   --brand-ultra:rgba(2,187,224,0.10);--brand-glow:rgba(2,187,224,0.20);
 }
@@ -1129,7 +1130,7 @@ const BLOCKS = ['gozosos','luminosos','dolorosos','gloriosos'];
 const BN  = {gozosos:'Gozosos',luminosos:'Luminosos',dolorosos:'Dolorosos',gloriosos:'Gloriosos'};
 const BFN = {gozosos:'Misterios Gozosos',luminosos:'Misterios Luminosos',dolorosos:'Misterios Dolorosos',gloriosos:'Misterios Gloriosos'};
 const BEM = {gozosos:'🌟',luminosos:'✨',dolorosos:'✝️',gloriosos:'👑'};
-const BCL = {gozosos:'#E8A0A0',luminosos:'#01BBE1',dolorosos:'#C0392B',gloriosos:'#D4A017'};
+const BCL = window.COLORES_BLOQUE;
 const BCL_RGB = {gozosos:'232,160,160',luminosos:'1,187,225',dolorosos:'192,57,43',gloriosos:'212,160,23'};
 const BFM = {gozosos:1,luminosos:6,dolorosos:11,gloriosos:16};
 const TBG = {gozosos:'rgba(232,160,160,0.18)',luminosos:'rgba(1,187,225,0.15)',dolorosos:'rgba(192,57,43,0.15)',gloriosos:'rgba(212,160,23,0.15)'};

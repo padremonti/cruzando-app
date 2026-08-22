@@ -44,7 +44,7 @@
   --brand-soft:    #43DDF8;
   --brand-ultra:   rgba(2,187,224,0.12);
   --brand-glow:    rgba(2,187,224,0.25);
-  --goz: #D4A017; --lum: #01BBE1; --dol: #C0392B; --glo: #8E44AD;
+  /* Colores de bloque (--goz/--lum/--dol/--glo) los estampa bloques.js */
   --map-bg:           #004C5B;
   --stats-bg:         rgba(0,41,49,0.92);
   --nav-bg:           rgba(0,41,49,0.97);
@@ -1369,6 +1369,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   border-radius: 12px; max-width: 280px;
 }
 </style>
+<script src="bloques.js"></script>
 <script src="flags.js"></script>
 <script src="plan-utils.js"></script>
 </head>
@@ -2287,7 +2288,7 @@ function renderHome(userData) {
                ? window._firestoreProgress
                : getProgreso(currentNivelId);
   var blocks = ['gozosos','luminosos','dolorosos','gloriosos'];
-  var BLOQUE_COLORS = { gozosos:'#E8A0A0', luminosos:'#01BBE1', dolorosos:'#C0392B', gloriosos:'#D4A017' };
+  var BLOQUE_COLORS = window.COLORES_BLOQUE;
   blocks.forEach(function(b) {
     var arr  = (data && data.progress && data.progress[b]) ? data.progress[b] : [null,null,null,null,null];
     var done = arr.filter(function(x) { return x !== null; }).length;
@@ -3604,7 +3605,7 @@ window.navTap = navTap;
 <script>
 /* ══ DATOS DEL MAPA ══ */
 var BLOQUES_MAP = [
-  { key:'goz', color:'#E8A0A0', name:'Gozosos',  icon_active:'☀️', icon_locked:'⭐',
+  { key:'goz', color:COLORES_BLOQUE.gozosos, name:'Gozosos',  icon_active:'☀️', icon_locked:'⭐',
     misterios:['Anunciación','Visitación','Natividad','Presentación','Hallazgo'],
     treasure:{
       title:'¡Misterios Gozosos!', sub:'Completaste los 5 Misterios Gozosos',
@@ -3613,7 +3614,7 @@ var BLOQUES_MAP = [
         {icon:'👣',iconBg:'rgba(255,122,0,0.15)', name:'+1,000 metros',      desc:'Bonus de bloque completado',  tag:'metros'},
         {icon:'📜',iconBg:'rgba(76,175,125,0.15)',name:'Estampita Gozosos',  desc:'La Anunciación · Guarda en tu Diario',tag:'nuevo'},
       ]}},
-  { key:'lum', color:'#01BBE1', name:'Luminosos', icon_active:'💧', icon_locked:'💎',
+  { key:'lum', color:COLORES_BLOQUE.luminosos, name:'Luminosos', icon_active:'💧', icon_locked:'💎',
     misterios:['Bautismo','Caná','Reino','Transfiguración','Eucaristía'],
     treasure:{
       title:'¡Misterios Luminosos!', sub:'Completaste los 5 Misterios Luminosos',
@@ -3622,7 +3623,7 @@ var BLOQUES_MAP = [
         {icon:'👣',iconBg:'rgba(255,122,0,0.15)', name:'+1,000 metros',     desc:'Bonus de bloque completado',tag:'metros'},
         {icon:'🏅',iconBg:'rgba(212,160,23,0.15)',name:'Medalla Luminosos', desc:'Cruz del Bautismo · Para tu colección',tag:'nuevo'},
       ]}},
-  { key:'dol', color:'#C0392B', name:'Dolorosos', icon_active:'🌹', icon_locked:'🌹',
+  { key:'dol', color:COLORES_BLOQUE.dolorosos, name:'Dolorosos', icon_active:'🌹', icon_locked:'🌹',
     misterios:['Agonía','Azotes','Corona de Espinas','Camino de la Cruz','Crucifixión'],
     treasure:{
       title:'¡Misterios Dolorosos!', sub:'Completaste los 5 Misterios Dolorosos',
@@ -3630,7 +3631,7 @@ var BLOQUES_MAP = [
         {icon:'🎵',iconBg:'rgba(192,57,43,0.15)', name:'Canto desbloqueado',desc:'"Stabat Mater" · Misterios Dolorosos',tag:'nuevo'},
         {icon:'👣',iconBg:'rgba(255,122,0,0.15)', name:'+1,000 metros',     desc:'Bonus de bloque completado',tag:'metros'},
       ]}},
-  { key:'glo', color:'#D4A017', name:'Gloriosos', icon_active:'✨', icon_locked:'✨',
+  { key:'glo', color:COLORES_BLOQUE.gloriosos, name:'Gloriosos', icon_active:'✨', icon_locked:'✨',
     misterios:['Resurrección','Ascensión','Pentecostés','Asunción','Coronación'],
     treasure:{
       title:'¡Misterios Gloriosos!', sub:'Completaste los 5 Misterios Gloriosos',

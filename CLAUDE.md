@@ -25,6 +25,7 @@ PWA de formación espiritual católica. El usuario reza los 20 Misterios del Ros
 | `canto.js` / `canto.css` | Motor de karaoke de canto compartido (extraído de audio+rezar). `Canto.init({...})`; CSS por `<link>`, HTML del overlay inyectado por el módulo. `mini.html` NO lo usa (ancestro divergente). |
 | `utils.js` | `window.isPremium(userData)` y `window.resolvePlan(userData)`. Cargado en todas las páginas. |
 | `flags.js` | Interruptores de producto. Hoy: `MOSTRAR_RECOMPENSAS = false` + puerta `window.recompensasON()`. Ver § Kit de recompensas. |
+| `bloques.js` | **Origen único del color de los cuatro bloques.** `window.COLORES_BLOQUE` + `window.rgbaBloque(bloque, alfa)`, y estampa 12 variables CSS (`--goz`, `--goz-color`, `--goz-rgb`, ×4). Va en el `<head>`. Ver § Colores de bloque. |
 
 ## Modelo de datos Firestore
 
@@ -73,6 +74,20 @@ users/{uid}/progress/sanar            (pains completados en mini.html — ciclo 
 - Misterio 11-15 → bloque `dolorosos` (idx 0-4)
 - Misterio 16-20 → bloque `gloriosos` (idx 0-4)
 - `nivelId` = `String(nivel).padStart(2,'0') + String(cuaderno).padStart(2,'0')` → ej. `'0101'`
+
+## Colores de bloque
+
+**La definición** (decisión de producto, no un ajuste): `gozosos` **rosa** `#E8A0A0` · `luminosos` **cian** `#01BBE1` · `dolorosos` **rojo** `#C0392B` · `gloriosos` **oro** `#D4A017`.
+
+**Origen único: `bloques.js`.** Sirve a las dos caras — `window.COLORES_BLOQUE` / `window.rgbaBloque(bloque, alfa)` para el JS, y 12 variables estampadas en `<html>` para el CSS (`--goz` / `--goz-color` / `--goz-rgb`, y lum, dol, glo). Va en el **`<head>`** de las 7 páginas que usan color de bloque (index, crecer, audio, orar, rezar, cantos, diario): estampa variables y tiene que correr antes del primer pintado o las franjas parpadean.
+
+**Por qué existe.** El color estaba copiado a mano en seis páginas y se había desviado en tres direcciones a la vez: `audio`/`index`/`crecer`/`diario` declaraban Gozosos en **oro** y Gloriosos en **morado** (valores de una etapa anterior), la pantalla final del micro pintaba su cruz en **verde y amarillo** (una cuarta paleta que no existía en ningún otro sitio), y los 28 `data/{nivelId}.json` llevaban todavía la vieja en `tema.bloques`. El Diario era el bug visible: se rezaba en rosa y se leía el propio diario en oro.
+
+**Ojo:** `tema.bloques` de los JSON **no lo lee nadie** (los `.bloques` del código son `microData.bloques`, de `{nivelId}-micro.json`, otro archivo). Se dejó corregido en vez de borrado porque es a lo que uno estira la mano al buscar "el color del bloque" — pero el origen es `bloques.js`. `tema.paleta` sí es real y distinta por Mundo: es la paleta del cuaderno, no la del bloque.
+
+**No confundir con los colores de Mundo.** `_mundoColors` y `{id, name, color}` de index/crecer son los 7 Mundos y comparten algún hexadecimal por casualidad. Semántica distinta, no tocar.
+
+**Banco de pruebas:** `tools/test-colores-bloque.js` (34 pruebas). Corre `bloques.js` de verdad en un `vm` y audita las 7 páginas y los 28 JSON: que nadie redeclare las variables, que nadie hornee un hexadecimal junto al nombre de un bloque, y que cada página cargue `bloques.js` en el `<head>` antes del primer uso. Existe para que la deriva no vuelva — cazó una quinta copia en `index.html` que los `grep` a mano no habían visto.
 
 ## Archivos de datos (`data/`)
 

@@ -51,10 +51,7 @@
   --brand-soft:    #43DDF8;
   --brand-ultra:   rgba(2,187,224,0.12);
   --brand-glow:    rgba(2,187,224,0.25);
-  --goz-color:     #D4A017;
-  --lum-color:     #01BBE1;
-  --dol-color:     #C0392B;
-  --glo-color:     #8E44AD;
+  /* Colores de bloque (--goz/--lum/--dol/--glo) los estampa bloques.js */
 }
 
 /* ── Tema claro ── */
@@ -1369,6 +1366,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   border-radius: 12px; max-width: 280px;
 }
 </style>
+<script src="bloques.js"></script>
 <script src="plan-utils.js"></script>
 </head>
 <body>
@@ -1857,10 +1855,10 @@ const TBG_AUDIO = {gozosos:'var(--card)',luminosos:'var(--card)',dolorosos:'var(
 
 // Colores por bloque
 const BLOCK_COLORS = {
-  gozosos:  { bold:'#E8A0A0', dot:'🌟' },
-  luminosos:{ bold:'#01BBE1', dot:'✨' },
-  dolorosos:{ bold:'#C0392B', dot:'✝️' },
-  gloriosos:{ bold:'#D4A017', dot:'👑' }
+  gozosos:  { bold: COLORES_BLOQUE.gozosos,   dot:'🌟' },
+  luminosos:{ bold: COLORES_BLOQUE.luminosos, dot:'✨' },
+  dolorosos:{ bold: COLORES_BLOQUE.dolorosos, dot:'✝️' },
+  gloriosos:{ bold: COLORES_BLOQUE.gloriosos, dot:'👑' }
 };
 const MUNDO_NOMBRES = {
   1:'la Cruz', 2:'las Emociones', 3:'la Mente',
@@ -2854,7 +2852,7 @@ function renderMicroAudio(b, nivelId) {
 
     // Pantalla final
     if (step >= total) {
-      const blockColor = { gozosos:'#27AE60', luminosos:'#F4D03F', dolorosos:'#C0392B', gloriosos:'#8E44AD' }[b] || '#FF7A00';
+      const blockColor = COLORES_BLOQUE[b] || '#FF7A00';
       content.innerHTML =
         '<div class="micro-final">' +
           '<div class="micro-final-cross">' +
