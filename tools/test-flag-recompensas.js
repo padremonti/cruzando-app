@@ -106,7 +106,7 @@ ok('flag OFF → ningún nodo menciona cofre, candado ni etiqueta', () => {
   });
 });
 
-ok('flag OFF → el separador queda donde estaba el cofre (misma x/y)', () => {
+ok('flag OFF → el render respeta la posición recibida (solo cambia la cara del nodo)', () => {
   const off = renderizarNodos(false), on = renderizarNodos(true);
   off.forEach((el, i) => eq(el.style.cssText, on[i].style.cssText, 'nodo ' + i + ' cambió de posición'));
 });
@@ -121,6 +121,88 @@ ok('flag ON → vuelve el cofre con su estado correcto (reversibilidad)', () => 
   if (typeof n[0].onclick !== 'function') throw new Error('el cofre debe recuperar su onclick');
   eq(n[1].className, 'treasure-node locked', 'bloque incompleto → cofre bloqueado');
   eq(n[1].onclick, null, 'un cofre locked no se toca');
+});
+
+console.log('\n── Reparto del tramo entre bloques (opción A) ──');
+
+/* Corre computeAllPositions de verdad, con el flag en un estado dado. */
+function posiciones(flagON) {
+  const ini = CRECER.indexOf('function computeAllPositions(cuaderno) {');
+  if (ini === -1) throw new Error('no encontré computeAllPositions en crecer.html');
+  const fuente = CRECER.slice(ini, CRECER.indexOf('\n}', ini) + 2);
+
+  const consts = ['MAP_W', 'MAP_CX', 'MAP_AMP', 'MAP_NODE_H', 'MAP_BLOCK_GAP', 'MAP_TOP',
+                  'MAP_STEP', 'MAP_TRAMO_F', 'MAP_PATER_F'];
+  const decls = consts.map(n => {
+    const m = CRECER.match(new RegExp('^var ' + n + '\\s*=.*$', 'm'));
+    if (!m) throw new Error('no encontré la constante ' + n + ' en crecer.html');
+    return m[0];
+  }).join('\n');
+
+  const ctx = vm.createContext({ window: {}, console, Math });
+  vm.runInContext(FLAGS, ctx);
+  ctx.window.MOSTRAR_RECOMPENSAS = flagON;
+  ctx.BLOQUES_MAP = [0, 1, 2, 3].map(() => ({ misterios: [0, 0, 0, 0, 0], color: '#000' }));
+  vm.runInContext(decls + '\n' + fuente + '\nvar RES = computeAllPositions(1);', ctx);
+  return ctx.RES;
+}
+
+/* Altos visuales reales de cada pieza (CSS de crecer.html), para medir los vacíos. */
+const ALTO = { misterio: 124, pater: 18, cofre: 120, separador: 32 };
+
+function vacios(res, altoNodo) {
+  const p   = res.pts;
+  const q5  = p.find(x => x.type === 'misterio' && x.bi === 0 && x.mi === 4);
+  const tra = p.find(x => x.type === 'treasure' && x.bi === 0);
+  const pat = p.filter(x => x.type === 'pater')[0];
+  const sig = p.find(x => x.type === 'misterio' && x.bi === 1 && x.mi === 0);
+  return [
+    Math.round((tra.y - altoNodo / 2)      - (q5.y  + ALTO.misterio / 2)),
+    Math.round((pat.y - ALTO.pater / 2)    - (tra.y + altoNodo / 2)),
+    Math.round((sig.y - ALTO.misterio / 2) - (pat.y + ALTO.pater / 2))
+  ];
+}
+
+ok('flag OFF → el tramo se reparte en tres vacíos parejos', () => {
+  const v = vacios(posiciones(false), ALTO.separador);
+  const dif = Math.max.apply(null, v) - Math.min.apply(null, v);
+  if (dif > 2) throw new Error('vacíos desparejos: ' + v.join(' / ') + ' px (diferencia ' + dif + ')');
+  if (v[0] > 90) throw new Error('sigue habiendo demasiado aire tras la última esfera: ' + v[0] + ' px');
+  v.forEach(x => { if (x < 20) throw new Error('un vacío quedó demasiado apretado: ' + v.join(' / ')); });
+});
+
+ok('flag OFF → el vacío grande se redujo respecto al reparto del cofre', () => {
+  const antes = 145;   // 0.35 con un nodo de 32px: lo que se vio en dispositivo
+  const ahora = vacios(posiciones(false), ALTO.separador)[0];
+  if (ahora >= antes) throw new Error('no mejoró: ' + ahora + ' px (antes ' + antes + ')');
+});
+
+ok('flag ON → vuelve el reparto de siempre (0.35 / 0.65)', () => {
+  const p   = posiciones(true).pts;
+  const tra = p.find(x => x.type === 'treasure' && x.bi === 0);
+  const pat = p.filter(x => x.type === 'pater')[0];
+  const q5  = p.find(x => x.type === 'misterio' && x.bi === 0 && x.mi === 4);
+  const base = q5.y + 132;
+  eq(Math.round(tra.y - base), Math.round(260 * 0.35), 'el cofre debe volver a 0.35 del tramo');
+  eq(Math.round(pat.y - base), Math.round(260 * 0.65), 'el pater debe volver a 0.65 del tramo');
+});
+
+ok('flag ON → el cofre sigue sin encimarse con la esfera ni con el pater', () => {
+  const v = vacios(posiciones(true), ALTO.cofre);
+  v.forEach((x, i) => { if (x < 0) throw new Error('choque en el hueco ' + (i + 1) + ': ' + v.join(' / ')); });
+});
+
+ok('el reparto NO mueve ningún Misterio ni cambia el alto del mapa', () => {
+  const off = posiciones(false), on = posiciones(true);
+  eq(off.totalH, on.totalH, 'totalH cambió → se movería el bioma y el canvas');
+  const m = r => r.pts.filter(p => p.type === 'misterio').map(p => p.x + ',' + p.y).join(' ');
+  eq(m(off), m(on), 'se movió alguna esfera de Misterio');
+});
+
+ok('el separador y el pater conservan su x (el sendero no se tuerce)', () => {
+  const off = posiciones(false), on = posiciones(true);
+  const xs = r => r.pts.filter(p => p.type !== 'misterio').map(p => p.x.toFixed(4)).join(' ');
+  eq(xs(off), xs(on), 'cambió alguna x: la opción A solo reparte en vertical');
 });
 
 console.log('\n── Puerta única (flags.js) ──');

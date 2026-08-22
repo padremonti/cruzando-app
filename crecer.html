@@ -3651,6 +3651,17 @@ var MAP_AMP    = 50;
 var MAP_NODE_H    = 132;
 var MAP_BLOCK_GAP = 260; // espacio extra entre bloques: tesoro + pater sin encimarse con esferas
 var MAP_TOP       = 32;
+
+// Reparto vertical del tramo entre bloques. Las dos fracciones dependen del
+// TAMAÑO del nodo de fin de bloque: el cofre (104px + etiqueta) necesitaba sitio
+// arriba para no encimarse con la última esfera; el separador mudo (32px) con
+// esas mismas fracciones deja 145px de vacío y el tramo se siente desierto.
+// Cada juego reparte el hueco en tres vacíos parejos para su tamaño de nodo.
+// Solo mueven dos divs absolutos: no tocan totalH (que suma MAP_BLOCK_GAP
+// entero pase lo que pase), ni el bioma, ni el sendero (se traza solo sobre
+// los Misterios), ni la posición de ninguna esfera.
+var MAP_TRAMO_F = { cofre: 0.35, separador: 0.072 };   // nodo de fin de bloque
+var MAP_PATER_F = { cofre: 0.65, separador: 0.447 };   // pater que le sigue
 var MAP_STEP      = (2 * Math.PI) / 8;
 
 function computeAllPositions(cuaderno) {
@@ -3667,8 +3678,9 @@ function computeAllPositions(cuaderno) {
       var xPrev  = pts[pts.length-1].x;
       var xNext  = MAP_CX + MAP_AMP * Math.sin((gi + phaseOff) * MAP_STEP);
       var xChest = (xPrev + xNext) / 2;
-      pts.push({ type:'treasure', x:xChest,            y:y + MAP_BLOCK_GAP * 0.35, bi:bi });
-      pts.push({ type:'pater',    x:(xChest+xNext)/2, y:y + MAP_BLOCK_GAP * 0.65, color:BLOQUES_MAP[bi+1].color });
+      var kit    = window.recompensasON() ? 'cofre' : 'separador';
+      pts.push({ type:'treasure', x:xChest,            y:y + MAP_BLOCK_GAP * MAP_TRAMO_F[kit], bi:bi });
+      pts.push({ type:'pater',    x:(xChest+xNext)/2, y:y + MAP_BLOCK_GAP * MAP_PATER_F[kit], color:BLOQUES_MAP[bi+1].color });
       y += MAP_BLOCK_GAP;
     }
   });
