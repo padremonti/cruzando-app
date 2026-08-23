@@ -30,6 +30,14 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
+  /* Cuentas del rezo — DOS TINTAS, no un hueco que se rellena.
+     La cuenta sin rezar es una cuenta de verdad, en perla apagada; al rezarla
+     cambia de tinta a --lvl-bold. Así el decenario se lee como objeto desde el
+     primer momento, no como una barra de progreso a medio llenar. */
+  --cuenta-apagada:       rgba(243,234,216,0.30);
+  --cuenta-borde:         rgba(243,234,216,0.50);
+  --cuenta-pater-apagada: rgba(243,234,216,0.42);
+  --cuenta-pater-borde:   rgba(243,234,216,0.68);
   /* ── Tema oscuro (default) ── */
   --bg:            #002931;
   --bg-rgb:        0,41,49;
@@ -348,7 +356,7 @@ body.light .audio-hero-subtitulo {
 }
 .bead{
   width:16px;height:16px;border-radius:50%;
-  border:2px solid rgba(255,255,255,0.35);background:rgba(255,255,255,0.08);
+  border:2px solid var(--cuenta-borde);background:var(--cuenta-apagada);
   transition:background .18s,border-color .18s,transform .12s;
 }
 .bead.lit-normal,.bead.lit-correct,.bead.lit-white,.bead.active{border-color:var(--lvl-bold);background:var(--lvl-bold)}
@@ -359,7 +367,7 @@ body.audio-playing .bead.active{animation:beadPulseFilled .9s ease-in-out infini
 }
 .bead-pater{
   width:12px;height:12px;border-radius:50%;
-  border:2px solid rgba(255,255,255,0.55);background:rgba(255,255,255,0.15);
+  border:2px solid var(--cuenta-pater-borde);background:var(--cuenta-pater-apagada);
   transition:background .18s,border-color .18s;margin-bottom:4px;
 }
 .bead-pater.lit-normal,.bead-pater.lit-white,.bead-pater.active{background:var(--lvl-bold);border-color:var(--lvl-bold)}
@@ -1367,6 +1375,10 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 }
 </style>
 <script src="bloques.js"></script>
+<link rel="stylesheet" href="cierre.css">
+<script src="sarta.js"></script>
+<script src="cuentas.js"></script>
+<script src="cierre.js"></script>
 <script src="racha.js"></script>
 <script src="racha-splash.js"></script>
 <script src="plan-utils.js"></script>
@@ -1712,7 +1724,6 @@ const IMG_BASE  = 'https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev/';
 
 // ── Mariano poses ──────────────────────────
 const MARIANO_WALK  = IMG_BASE + 'mariano_01.webp';
-const MARIANO_CELEB = IMG_BASE + 'mariano_celeb.webp';
 const MARIANO_TOTAL = 10;
 var   _marianoIdx   = 0;
 
@@ -1856,6 +1867,20 @@ const DAY_BLOCKS = { 0:'gloriosos', 1:'gozosos', 2:'dolorosos', 3:'gloriosos', 4
 const TBG_AUDIO = {gozosos:'var(--card)',luminosos:'var(--card)',dolorosos:'var(--card)',gloriosos:'var(--card)'};
 
 // Colores por bloque
+/* Columna de cuentas del rezo: el motor vive en cuentas.js (compartido con
+   orar.html). El audio va por GETTER, no por referencia: abrirCantoEpilogo()
+   REASIGNA audioEl, y una referencia guardada dejaría el tick mirando a un
+   audio muerto. Declarado aquí arriba porque startPlayerSession() lo usa
+   mucho antes en el archivo. */
+const _cuentas = Cuentas.crear({
+  audio: () => audioEl,
+  /* Al aparecer la Cruz, la decena está entera: la columna se congela y sigue
+     visible —TAL CUAL quedó, sin atenuar— durante Q1/Q2/Q3 y la oración final.
+     Antes se borraba en el primer cambio de pista: se le quitaba de la vista al
+     usuario justo lo que acababa de rezar. Y es el frame 1 del decenario. */
+  congelarAlCompletar: true
+});
+
 const BLOCK_COLORS = {
   gozosos:  { bold: COLORES_BLOQUE.gozosos,   dot:'🌟' },
   luminosos:{ bold: COLORES_BLOQUE.luminosos, dot:'✨' },
@@ -2804,9 +2829,7 @@ function startPlayerSession(prepBlock) {
   Canto.preload();
 
   // Reset de las cuentas del Rosario al cambiar de Misterio (que no continúen donde quedaron)
-  _currentSyncKey = null;
-  renderBeadsCol();
-  _beadsHide();
+  _cuentas.reiniciar(true);
 
   // Botón "Preparación" en el hero (solo si micro ya fue completado en este bloque)
   const prepHero   = $('prep-hero');
@@ -3349,49 +3372,6 @@ function getSegProgress(trackIdx) {
 }
 
 /* ─── Cuentas del Rosario: indicador pasivo sincronizado a la track (bead_sync.json) ─── */
-let _beadSync = null, _currentSyncKey = null;
-async function loadBeadSync(){
-  if(_beadSync)return;
-  try{ const r=await fetch('./data/bead_sync.json'); _beadSync=r.ok?await r.json():{}; }
-  catch(e){ _beadSync={}; }
-}
-function renderBeadsCol(){
-  const col=$('beads-col'); if(!col)return;
-  col.innerHTML='';
-  const pater=document.createElement('div'); pater.className='bead-pater'; pater.id='bead-pater'; col.appendChild(pater);
-  const sep=document.createElement('div'); sep.className='bead-sep'; col.appendChild(sep);
-  for(let i=0;i<10;i++){ const d=document.createElement('div'); d.className='bead'; col.appendChild(d); }
-  const lux=document.createElement('div'); lux.className='bead-lux-cross'; lux.id='bead-lux-cross';
-  lux.innerHTML='<div class="lux-glow"><svg width="22" height="22" viewBox="0 0 100 100"><rect x="46.2" y="0" width="7.6" height="100" fill="white" opacity="0.95"/><rect x="0" y="36" width="100" height="7.6" fill="white" opacity="0.95"/></svg></div>';
-  col.appendChild(lux);
-}
-function _getBeadEl(idx){ if(idx===0)return $('bead-pater'); return document.querySelectorAll('#beads-col .bead')[idx-1]||null; }
-function _beadsShow(){ const w=$('beads-col-wrap'); if(w)w.style.display='flex'; }
-function _beadsHide(){ const w=$('beads-col-wrap'); if(w)w.style.display='none'; }
-function _updateSyncKey(trackUrl){
-  if(!_beadSync||!trackUrl){ _currentSyncKey=null; _beadsHide(); return; }
-  const name=trackUrl.split('/').pop().replace(/\?.*$/,'').replace(/\.(m4a|mp3)$/i,'').toUpperCase();
-  const found=Object.keys(_beadSync).find(k=>k.toUpperCase()===name)||null;
-  const changed=(found!==_currentSyncKey);
-  _currentSyncKey=found;
-  if(found){ if(changed)renderBeadsCol(); _beadsShow(); }
-  else _beadsHide();
-}
-function _tickBeads(){
-  if(!audioEl||!_currentSyncKey||!_beadSync)return;
-  const windows=_beadSync[_currentSyncKey]; if(!windows)return;
-  const t=audioEl.currentTime;
-  let active=-1;
-  for(let i=0;i<windows.length;i++){ if(t>=windows[i].start&&t<=windows[i].end){active=i;break;} }
-  for(let i=0;i<windows.length;i++){
-    const el=_getBeadEl(i); if(!el)continue;
-    el.classList.remove('active','lit-normal');
-    if(i===active)el.classList.add('active');
-    else if(t>windows[i].end)el.classList.add('lit-normal');
-  }
-  const lux=$('bead-lux-cross');
-  if(lux){ const last=windows[windows.length-1]; if(t>last.end)lux.classList.add('show'); else lux.classList.remove('show'); }
-}
 
 function goTrack(idx) {
   const { playlist } = currentSession;
@@ -3420,7 +3400,7 @@ function goTrack(idx) {
   audioEl = new Audio(track.url);
 
   // Beads: mostrar/avanzar solo en la track de Rezo (MA/MB/L_MA/L_MB)
-  _updateSyncKey(track.url);
+  _cuentas.pista(track.url);
 
   // Pantalla de canto: se abre al entrar al track de música y se cierra en cualquier
   // otra salida (fin natural, error, Saltar, botones de developer). El else es
@@ -3463,7 +3443,7 @@ function goTrack(idx) {
       if (fill) fill.style.width = pct + '%';
     }
 
-    _tickBeads();
+    _cuentas.tick();
   };
 
   audioEl.onended = () => {
@@ -3849,7 +3829,7 @@ function onPlaylistEnded() {
    Todos:                      Escuchar el canto · Repetir sesión · Salir
    premium / beta / developer: + Siguiente misterio
    DEMO 0101 m1-19:            + Siguiente misterio (también para free)
-   free en 0101 m20:           solo "Continuar 🎉" (la celebración toma el control) */
+   free en 0101 m20:           solo "Continuar" (la celebración toma el control) */
 
 const ICO_CANTO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
 const ICO_SALIR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>';
@@ -3883,7 +3863,7 @@ function renderEpilogoActions() {
 
   // 0101 m20 con free: el DEMO se ha cerrado, la celebración manda (como hasta ahora)
   if (window._freeDemoJustCleared) {
-    actions.appendChild(epiBtn('Continuar 🎉', true, () => window.showDemoCompleto()));
+    actions.appendChild(epiBtn('Continuar', true, () => window.showDemoCompleto()));
     return;
   }
 
@@ -4024,9 +4004,12 @@ async function completeSession() {
     audioProgress.blockBonuses = blockBonuses;
     sessionMeters += METERS_BLOCK_BONUS;
     await addMetersToFirestore(METERS_BLOCK_BONUS);
-    showSlide(METERS_BLOCK_BONUS, '¡Bloque completo!');
     if (window.CZSound) CZSound('blockClear');
-    setTimeout(() => showToast(`+${METERS_BLOCK_BONUS}m · ¡Bloque ${BLOCK_NAMES[block]} completado!`), 400);
+    /* Los cinco Misterios del bloque son un Rosario. Sustituye al Mariano y al
+       toast que antes se disparaban aquí y que el epílogo tapaba a los pocos
+       cientos de milisegundos: ahora el cierre se ve, y los metros van dentro. */
+    _rosarioPendiente = METERS_BLOCK_BONUS;
+    if (cuadernoCompleto(nivel, cuaderno)) _rosetonPendiente = true;
   }
 
   // ── Onboarding: cierre bloque 1 ──────────────────────────────
@@ -4113,8 +4096,17 @@ async function completeSession() {
   // Helper de botones (presentación)
   renderEpilogoActions();
 
-  $('scr-complete').classList.add('open');
-  $('fab-questions') && ($('fab-questions').style.display = 'none');
+  /* El decenario primero, el epílogo después. La columna que el usuario tuvo a
+     la derecha toda la sesión se cierra en el objeto que acaba de rezar, y solo
+     cuando termina sube el epílogo — encadenado, no apilado encima.
+     mostrarDecenario() resuelve al instante si el módulo no está. */
+  mostrarDecenario()
+    .then(mostrarRosario)      // si el bloque se cerró, el Rosario va después
+    .then(mostrarRoseton)      // y si con él se cerró el cuaderno, el rosetón
+    .then(() => {
+      $('scr-complete').classList.add('open');
+      $('fab-questions') && ($('fab-questions').style.display = 'none');
+    });
 
   // La celebración del DEMO (0101 m20) sigue tomando el control sola.
   // El candado diario del free, en cambio, ya NO interrumpe el epílogo:
@@ -4123,6 +4115,78 @@ async function completeSession() {
     window._freeDemoJustCleared = false;
     setTimeout(window.showDemoCompleto, 2000);
   }
+}
+
+/* ── El decenario ───────────────────────────────────────────────────────────
+   Toma la foto de la columna tal como quedó —congelada desde que apareció la
+   Cruz— y la cierra en el decenario que da Sarta. Once cuentas contra once.
+
+   Nunca bloquea el cierre: si el módulo no cargó, o la columna no está entera
+   (decena saltada, sesión sin rezo), resuelve al instante y el epílogo sube
+   como siempre. Una animación no puede impedir que el usuario termine. */
+function mostrarDecenario() {
+  if (!window.Cierre || !window.Sarta || !_cuentas) return Promise.resolve(false);
+  try {
+    const foto = _cuentas.instantanea();
+    if (!Cierre.decenaCompleta(foto)) return Promise.resolve(false);
+    const c = BLOCK_COLORS[currentSession.block];
+    return Cierre.decenario({
+      desde:  foto,
+      color:  (c && c.bold) || COLORES_BLOQUE.gozosos,
+      titulo: 'Misterio recorrido',
+      metros: sessionMeters
+    }).catch(() => false);
+  } catch (e) { return Promise.resolve(false); }
+}
+
+/* ── El Rosario ─────────────────────────────────────────────────────────────
+   Los cinco decenarios del bloque se enlazan en la camándula. Lo marca el
+   bonus de bloque, que es el único sitio donde se sabe que los cinco Misterios
+   están rezados por primera vez. */
+let _rosarioPendiente = 0, _rosetonPendiente = false;
+
+/* ¿Están los VEINTE de este cuaderno? No basta con cerrar el cuarto bloque: el
+   usuario puede rezar los bloques en cualquier orden, así que el cuaderno se
+   cierra cuando el historial tiene los 20 Misterios de este nivel y cuaderno. */
+function cuadernoCompleto(nivel, cuaderno) {
+  const h = (audioProgress && audioProgress.history) || [];
+  const vistos = new Set(
+    h.filter(x => x.n === nivel && x.c === cuaderno).map(x => x.m)
+  );
+  return vistos.size >= 20;
+}
+
+/* ── El rosetón ─────────────────────────────────────────────────────────────
+   El cierre del cuaderno no es una sarta: es un vitral. El vidrio son los
+   cuatro colores de bloque —los cuatro Rosarios rezados— y la piedra sale de
+   tema.paleta del propio cuaderno, así que los siete Mundos dan siete rosetones
+   distintos con un solo componente. */
+function mostrarRoseton() {
+  if (!_rosetonPendiente) return Promise.resolve(false);
+  _rosetonPendiente = false;
+  if (!window.Cierre || !Cierre.roseton) return Promise.resolve(false);
+  try {
+    return Cierre.roseton({
+      paleta:  (currentData && currentData.tema && currentData.tema.paleta) || {},
+      colores: ['gozosos','luminosos','dolorosos','gloriosos']
+                 .map(b => (BLOCK_COLORS[b] || {}).bold || COLORES_BLOQUE[b]),
+      titulo:  'Cuaderno recorrido'
+    }).catch(() => false);
+  } catch (e) { return Promise.resolve(false); }
+}
+function mostrarRosario() {
+  if (!_rosarioPendiente) return Promise.resolve(false);
+  const metros = _rosarioPendiente;
+  _rosarioPendiente = 0;
+  if (!window.Cierre || !window.Sarta) return Promise.resolve(false);
+  try {
+    const c = BLOCK_COLORS[currentSession.block];
+    return Cierre.rosario({
+      color:  (c && c.bold) || COLORES_BLOQUE.gozosos,
+      titulo: 'Rosario recorrido',
+      metros: metros
+    }).catch(() => false);
+  } catch (e) { return Promise.resolve(false); }
 }
 
 function closeEpilogo() {
@@ -4456,7 +4520,7 @@ document.addEventListener('visibilitychange', function() {
   }
 });
 
-loadBeadSync();
+_cuentas.cargarSync();
 initAuth();
 </script>
 <script src="sounds.js"></script>
@@ -4523,7 +4587,6 @@ initAuth();
     pointer-events:none;overflow:hidden;"></div>
   <div style="position:relative;z-index:1;display:flex;flex-direction:column;
     align-items:center;max-width:360px;">
-    <div style="font-size:3.5rem;margin-bottom:20px">🎉</div>
     <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:2rem;
       font-weight:600;color:var(--text);line-height:1.2;margin-bottom:14px">
       ¡Completaste el DEMO!

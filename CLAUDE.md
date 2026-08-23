@@ -25,7 +25,191 @@ PWA de formación espiritual católica. El usuario reza los 20 Misterios del Ros
 | `canto.js` / `canto.css` | Motor de karaoke de canto compartido (extraído de audio+rezar). `Canto.init({...})`; CSS por `<link>`, HTML del overlay inyectado por el módulo. `mini.html` NO lo usa (ancestro divergente). |
 | `utils.js` | `window.isPremium(userData)` y `window.resolvePlan(userData)`. Cargado en todas las páginas. |
 | `flags.js` | Interruptores de producto. Hoy: `MOSTRAR_RECOMPENSAS = false` + puerta `window.recompensasON()`. Ver § Kit de recompensas. |
+| `cierre.js` / `cierre.css` | **El cierre de una sesión de rezo.** `Cierre.decenario({desde, color, titulo, metros})` → promesa. La columna se cierra en decenario. CSS por `<link>`, trayectorias generadas por el módulo. Ver § El cierre. |
+| `sarta.js` | **Geometría del decenario y la camándula.** `Sarta.geometria(forma, {decenas})` — `decenas:1` da el decenario (16 cuentas), `decenas:5` la camándula (60). Pura, sin DOM. Ver § La sarta. |
+| `cuentas.js` | **Motor pasivo de la columna de cuentas del rezo** (1 Padrenuestro + 10 Ave Marías + Cruz Lux). `Cuentas.crear({audio: () => el})`. Lo usan audio y orar; rezar y mini conservan el suyo. Ver § Columna de cuentas. |
 | `bloques.js` | **Origen único del color de los cuatro bloques.** `window.COLORES_BLOQUE` + `window.rgbaBloque(bloque, alfa)`, y estampa 12 variables CSS (`--goz`, `--goz-color`, `--goz-rgb`, ×4). Va en el `<head>`. Ver § Colores de bloque. |
+
+## El cierre de una sesión (`cierre.js`)
+
+*Estado: los **tres cierres** implementados —decenario, Rosario y rosetón— con salida a las Letanías + banco de pruebas (`tools/test-cierre.js`, 73). **PENDIENTE prueba visual en dispositivo.***
+
+**La columna del rezo se cierra en decenario.** Es el mismo objeto que el usuario tuvo a la derecha toda la sesión, enrollado. Once cuentas contra once, Padrenuestro con Padrenuestro:
+
+| | Sale de | Llega a |
+|---|---|---|
+| Cuentas | `Cuentas.instantanea()` — posiciones **reales** en pantalla | `Sarta.geometria('circulo', {decenas:1})` |
+| Cruz | la Lux de la columna | la Cruz del decenario |
+
+De ahí que **el primer frame sea idéntico al último de la sesión**: nadie ve un corte. Hay una prueba que comprueba que el 0% de cada trayectoria cae donde estaba su cuenta.
+
+**Dónde se dispara, y si espera** — no es lo mismo en los cuatro:
+
+| Modo | Cuándo | ¿Espera? |
+|---|---|---|
+| `audio` | fin de sesión, en `completeSession` | **sí** — el epílogo sube después |
+| `mini` | al acabar el **Gloria**, saliendo del paso de rezo | **no** — la Oración final ya suena debajo |
+| `rezar` | al cerrar cada decena, en `onTrackEnded` | **no** — la siguiente pista ya arranca |
+| `orar` | al pulsar **Amén**, tras marcar el Misterio | **sí** — nada suena y el usuario pulsó |
+
+La decisión de producto detrás del "no espera": **sin tiempo muerto** entre lo que se rezó y lo que sigue.
+
+### El Rosario
+
+Los cinco decenarios se desenrollan y se enlazan en la camándula. **La correspondencia no hay que inventarla:** el lazo son 55 = 5 × 11, y la cuenta *i* del decenario *k* es la cuenta `k·11+i` del lazo. Cada cuenta lleva su `decena`, así que el escalonado por grupos sale solo.
+
+Cada decenario **arranca enrollado** sobre el punto medio de su futuro arco, con el radio que le toca a 13 unidades de recorrido — así las cinco sartas se leen como cinco decenarios de verdad, no como cinco manchas.
+
+**La coreografía** (3 s, un beat más que el decenario): las cinco decenas entran **de una en una** (90 ms entre decenas, 12 ms dentro de cada una, para que el aro se abra en vez de estirarse) · los **cinco Padrenuestros destellan** al quedar en su juntura, que es lo que hace legible que el lazo son cinco tramos · la cola desciende · **la Cruz sube desde debajo del encuadre** y toma su sitio al final de la cola: es la última en llegar y su llegada dispara el resplandor, de ahí su carácter de sello · la palabra espera a la Cruz (2,55 s).
+
+**Dónde:**
+
+| Modo | Cuándo |
+|---|---|
+| `audio` | en el bonus de bloque —el único sitio donde se sabe que los cinco están rezados por primera vez— y se muestra entre el decenario y el epílogo |
+| `orar` | al completar los cinco puntos del bloque, antes de la pantalla de celebración |
+| `rezar` | en su celebración: rezar **es** el Rosario de una sentada |
+
+⚠️ **En audio sustituyó al Mariano y al toast del bloque.** Se disparaban justo ahí y el epílogo los tapaba a los pocos cientos de milisegundos (era el hallazgo (c) del inventario). Los metros del bonus van ahora dentro del Rosario, que sí se ve. Hay una prueba que vigila que no vuelvan.
+
+### Y desemboca en las Letanías
+
+Al cerrar un set de cinco, la tradición reza las Letanías. Terminado el Rosario, es a donde apunta el cierre — **ofrecidas, nunca impuestas**: en los tres el botón es secundario, nunca el primario.
+
+| Modo | Cómo |
+|---|---|
+| `audio` | el epílogo ya las ofrecía en 5/10/15/20; el Rosario ahora va antes |
+| `orar` | **nuevo**: `btn-celeb-letanias` en la pantalla de celebración, cableado en sus **dos** finales (bloque de cinco y cuaderno de veinte) |
+| `rezar` | ya entraba solo en `RosarioFinal`; se corrigió el **orden** |
+
+⚠️ **En rezar el orden estaba invertido.** `mostrarRosario()` vivía dentro de `celebrar()`, que corre como el `onCerrar` de `RosarioFinal`: el Rosario se coronaba con las Letanías **antes de haberse mostrado**. Ahora se cierra en `onSessionComplete()` —que pasó a `async`— y de ahí se entra a las Letanías.
+
+Al salir de las Letanías se vuelve a la misma pantalla (`onCerrar`), y si `rosario-final.js` no está cargado el botón no aparece: no se promete lo que no se puede cumplir.
+
+### El rosetón — el cuaderno
+
+**El único cierre que no es una sarta.** Se cambia de material: de objetos en una cuerda a **luz atravesando color**. Y el nombre lo da el propio Rosario — un rosetón es la rosa de piedra y vidrio de las catedrales, la misma raíz.
+
+Dos materiales, los dos de datos que ya existían:
+
+| | Sale de |
+|---|---|
+| **El vidrio** | los cuatro colores de bloque — los cuatro Rosarios rezados son los cuatro paños |
+| **La piedra y la luz** | `tema.paleta` del cuaderno (`soft`, `light`, `ultra`) |
+
+Como cada Mundo tiene su paleta, **salen siete rosetones distintos con un solo componente**.
+
+**Veinte pétalos = veinte Misterios.** Se dibujan los veinte desde el principio pero **entran de cinco en cinco**, así que mientras no hay tracería se leen como las cuatro cuñas de los cuatro bloques; lo que los separa en veinte son los nervios menores que llegan después. Por eso no hay que transformar trazados: solo aparecen líneas.
+
+**La coreografía** (3,5 s, el más raro de los tres — uno cada 20 Misterios): la noche cae al fondo del propio cuaderno · las **cuatro cuñas** entran, 140 ms entre bloques · la **tracería** se dibuja del centro hacia afuera —primero los cuatro nervios mayores y el aro, después los dieciséis menores: eso es la rosa abriéndose— · la **luz atraviesa** y proyecta fuera del encuadre · la **Lux ocupa el óculo** y llega la palabra.
+
+⚠️ **El cuaderno son los veinte, no el cuarto bloque.** Los bloques se pueden rezar en cualquier orden, así que cerrar gloriosos no significa haber cerrado el cuaderno. En audio, `cuadernoCompleto()` cuenta los 20 Misterios distintos del historial acotados a ese nivel y cuaderno; en orar, `showAdvanceLevelPrompt()` **es** exactamente ese momento.
+
+### Los emojis salieron sustituidos, no borrados
+
+| Qué | Lo sustituye |
+|---|---|
+| **🎉** del overlay "¡Completaste el DEMO!" | el rosetón, que corre antes (0101 m20 **es** el cuaderno cerrado) |
+| **🙏** en el círculo degradado de la celebración de orar | el Rosario, que corre justo antes |
+| El **confetti** de `_obConfetti` | **lluvia de Lux**: 14 cruces en oro y pergamino en vez de 48 rectángulos en siete colores que no aparecían en ningún otro sitio de la app. **Conserva el nombre y la firma**, así que los llamadores —el cierre del bloque 1 y el overlay del DEMO— no cambiaron |
+
+*Queda un 🙏 en `showDailyLimit()` de audio (la pantalla de "vuelve mañana"). No es una celebración y nada lo sustituye ahí; se dejó a la espera de decisión.*
+
+**`Cierre.decenaCompleta(foto)`** es la guarda común: mira si la **Cruz está encendida**, que es lo que `Cuentas` hace justo al pasar la última ventana del rezo. El decenario es la imagen de una decena rezada, no de una columna a medias.
+
+**`mini` y `rezar` conservan su motor de cuentas** y solo crean una instancia de `Cuentas` para **leer** con `instantanea()`: mini el suyo (aro pequeño, oro sobre noche) y rezar el interactivo. Es exactamente para lo que existe `instantanea()`. `mini` usa además su propio oro `#E8B94A` en vez del color de bloque: allí toda la paleta es oro-sobre-noche y un decenario rosa desentonaría con su propia pantalla.
+
+**Encadena, no se apila.** Devuelve promesa, igual que `RachaSplash.mostrarSiHay()`. En `completeSession` el epílogo sube **después**: `mostrarDecenario().then(abrirEpilogo)`. Las capas: decenario **940** → epílogo 500 (debajo, sube después) → splash de racha **950** (al salir al mapa). El banco vigila que el decenario nunca tape al splash.
+
+⚠️ **Nunca impide terminar la sesión.** Si el módulo no cargó, si `Sarta` falta, si la columna no está entera (decena saltada, `rect` corrupto), `mostrarDecenario()` resuelve al instante y el epílogo sube como siempre. Cinco pruebas cubren esa degradación. Una animación no puede dejar al usuario encerrado.
+
+**CSS generado, no un bucle.** Las once trayectorias dependen de dónde estaba cada cuenta en pantalla, así que hay que generarlas — pero se generan como `@keyframes` de `transform`, no como un `requestAnimationFrame` que escriba `cx`/`cy`. Así las mueve el compositor y no compiten con las escrituras a Firestore que ocurren en ese mismo momento. La hoja se retira con el velo.
+
+**La coreografía** (2,5 s de núcleo + reposo): velo · las cuentas viajan a su sitio **escalonadas 30 ms**, combadas un 12% hacia afuera para que la sarta se recoja en vez de teletransportarse · la Cruz baja con rebote y **una** oscilación de péndulo (a esta velocidad, dos se leen como temblor) · un halo recorre el anillo · la palabra y los metros. Toque en cualquier parte → salta al decenario formado; `prefers-reduced-motion` lo entrega ya formado.
+
+**Tokens de movimiento** (`cierre.css`): `--ease-rito` (el rebote que ya usaba `luxAppear`), `--ease-velo` (el de mini), `--ease-salida`, y `--t-breve` / `--t-gesto` / `--t-rito`. Sustituyen a las seis curvas y ocho duraciones sueltas que había repartidas por los reproductores.
+
+## La sarta (`sarta.js`)
+
+*Estado: geometría + banco de pruebas (`tools/test-sarta.js`, 47). **La animación que la usa no está construida** — ver § Animaciones de cierre.*
+
+**Una sarta, dos escalas.** El mismo objeto parametrizado por el número de decenas, así que no hay dos geometrías que mantener:
+
+| | Lazo | Cola | Cruz | Total |
+|---|---|---|---|---|
+| `decenas: 1` — **decenario** | 1 Padrenuestro + 10 Avemarías | — | ✓ | **11** |
+| `decenas: 5` — **camándula** | 5 Padrenuestros + 50 Avemarías | 5 | ✓ | **60** |
+
+**La cola es de la camándula, no de la sarta en general.** Bajando desde la unión: Padrenuestro, 3 Avemarías, Padrenuestro, Cruz. El **decenario no la lleva**: es el aro de diez Avemarías con su Padrenuestro, y de ese Padrenuestro cuelga la Cruz. Por defecto `cola` vale `decenas > 1`; se puede forzar en los dos sentidos.
+
+**Espaciado con una sola regla** —doble junto a un Padrenuestro, sencillo entre Avemarías— de la que salen el lazo, la cola, y la separación de la Cruz en los dos casos.
+
+**Tres formas**, y la elegida para la animación es **`circulo`**: el decenario se cierra en círculo, así que las cinco decenas son cinco arcos **iguales de 72°** y se lee «son mis mismas cuentas, recolocadas». Con `gota` o `capricho` cada decena tendría curvatura distinta y el desenrollado habría que resolverlo cinco veces. `gota` queda guardada para el sello estático (la marca en el mapa, el Diario): es la más holgada y la que más se lee como objeto.
+
+**Cabe en un teléfono.** A 342 px de ancho (pantalla de 390 con márgenes) la cuenta mide 10,3 px de diámetro y el Padrenuestro 14,9 — comparable a los 11 px de `mini.html`. Holgura mínima entre cuentas: círculo 2,3 px, gota 2,7, capricho 1,7. Sin un solo solape. *Mi estimación previa de que no cabría partía de conservar el paso de la columna del rezo; encoger la cuenta era la salida.*
+
+⚠️ **Dos correcciones sobre el boceto original** (`rosaries.js`), las dos con prueba dedicada:
+- **La Cruz colgaba de la mitad de la tercera decena** en `circulo`: el muestreo arrancaba arriba mientras la unión estaba abajo, así que salía a 180° del primer Padrenuestro, por la Avemaría 6. `gota` y `capricho` no lo tenían.
+- **Faltaba el Padrenuestro que toca la Cruz.** Eran 59 cuentas; con él son 60.
+
+⚠️ **La cuenta crece con las decenas — el decenario es el mismo dibujo a otro zoom.** El trazado mide lo mismo siempre, pero el recorrido baja de 65 unidades a 13 al pasar de camándula a decenario: la unidad de espacio crece ×5. Con la cuenta fija en radio 3, el decenario salía con **5 diámetros de aire** entre cuenta y cuenta —23 veces más que la camándula— y perdía la forma; y la cola, estirada por esa misma unidad, dejaba **la Cruz en `y=571` sobre un lienzo de 300**, invisible. Por eso el radio y la Cruz se escalan por `65 / recorrido` (factor exacto, independiente de la forma) y el dibujo se reencuadra después. A 5 decenas el factor es 1: **la camándula no se mueve ni un punto**, y hay una prueba que fija sus coordenadas.
+
+⚠️ **La Cruz NO escala con el espaciado: escala con el aro.** No es una cuenta — es el emblema que remata el objeto. Escalándola con la unidad, la del decenario salía tan alta como ancho es el aro (`Cruz/aro = 1,00` contra 0,23 en la camándula) y se leía como una Cruz con un aro colgando. Con el aro por vara:
+
+| | Cruz/aro | Cruz/cuenta | Cruz en pantalla | Cordón |
+|---|---|---|---|---|
+| Camándula | 0,23 | 6,0 | 62 px | 0,065 del aro |
+| Decenario | 0,40 | 2,4 | 108 px | 0,065 del aro |
+
+**La del decenario va al doble** (`COLA.cruzDecenario`), y es decisión de diseño, no inconsistencia: en la camándula la Cruz es un elemento entre sesenta cuentas y una cola; en el decenario es el **único ornamento** de un objeto simple, y a la proporción de la camándula se leía tímida.
+
+**El cordón se mide igual, contra el aro** (`COLA.cordon`): en unidades de espacio dejaba medio aro de hilo desnudo, porque la unidad del decenario es cinco veces mayor.
+
+**`caja`** describe lo que de verdad ocupa el dibujo. El decenario es estrecho y alto —aro pequeño, cola larga— y ocupa un tercio del ancho del lienzo, así que quien lo pinte solo puede recortar con eso.
+
+**Reparto por distancia, no por parámetro.** Las posiciones salen de la longitud de arco acumulada: por t del bezier, las cuentas se apelotonarían en las curvas cerradas de la gota y se abrirían en los tramos rectos. Hay una prueba que mide esa desviación.
+
+**`puntoEn(forma, fracción)`** devuelve un punto del lazo por fracción de recorrido — es lo que permitirá interpolar cada cuenta desde la columna recta hasta su sitio sin recalcular la geometría en cada frame. Y cada cuenta lleva su `decena`, para escalonar la animación por grupos.
+
+**Codificación:** `rosaries.js` llegó con UTF-8 leído como Latin-1 («CamÃ¡ndulas», «AvemarÃ­as»), igual que el demo del splash. Hay una prueba que vigila que no vuelva a colarse.
+
+## Columna de cuentas (`cuentas.js`)
+
+*Estado: extraído + dos tintas + congelación, con **golden test** (`tools/test-cuentas.js`, 28 pruebas: motor viejo congelado contra el nuevo, 146 instantes sobre las pistas reales de `bead_sync.json`). **PENDIENTE prueba visual en dispositivo.***
+
+**Qué es.** La columna que acompaña al rezo, sincronizada con `data/bead_sync.json` (11 ventanas por pista: 1 Padrenuestro + 10 Ave Marías). Estaba copiada en los cuatro reproductores.
+
+**Quién lo usa y quién no** — el mapa real, medido:
+
+| Módulo | Situación |
+|---|---|
+| `audio` · `orar` | **Eran la misma copia**: 37 líneas con 4 de diferencia, y las 4 eran el nombre del elemento de audio (`audioEl` / `rezoEl`). Ahora usan el módulo. |
+| `mini` | Misma lógica pasiva con otros nombres (`#beadsCol`, `.bead-lux` en oro). Puede adoptarlo cambiando la config; se dejó por ser el ancestro divergente, igual que con `canto.js`. |
+| `rezar` | **No es el mismo motor.** Sus cuentas son **interactivas**: el usuario las toca al rezar, con detección de toques, saltos y spam (`lit-correct` / `lit-white` / `lit-spam`, `beadCount`, `_beadTapTimes`). Es un superconjunto; forzarlo aquí sería arriesgar esa función sin ganar nada. |
+
+⚠️ **El audio va por getter, no por referencia.** `abrirCantoEpilogo()` de audio **reasigna** `audioEl = new Audio(...)`; con una referencia guardada, el `tick` se quedaría mirando a un audio muerto. Hay una prueba dedicada.
+
+⚠️ **La instancia se declara antes de su primer uso.** `const` no tiene hoisting, y `startPlayerSession()` / `renderSession()` la usan cientos de líneas antes del punto donde nació la declaración. El banco vigila el orden.
+
+**`instantanea()` sirve a los cuatro.** Solo lee el DOM —posiciones y estado de cada cuenta, más la Lux— así que la animación del decenario podrá clonar la columna de mini y de rezar sin que adopten el motor. Reconoce también los estados propios de rezar (`lit-white`, `lit-correct`, `lit-spam`) como "rezada". Es lo que hace que el **"frame 1"** de la animación sea idéntico al último frame de la sesión.
+
+### Dos tintas, no un hueco
+
+La cuenta sin rezar era literalmente un agujero: `background:rgba(255,255,255,0.08)` en audio/orar/rezar y `transparent` en mini. Ahora es **una cuenta de verdad en perla apagada** que al rezarse **cambia de tinta**, no que se rellena. Así el decenario se lee como objeto desde el primer momento —que es lo que la animación va a enrollar— y no como una barra de progreso a medio llenar.
+
+Cuatro tokens en el `:root` de cada reproductor (`--cuenta-apagada`, `--cuenta-borde`, `--cuenta-pater-apagada`, `--cuenta-pater-borde`), en el pergamino `#F3EAD8` que la app ya usa en canto, mini y el splash. Un futuro `cuentas.css` compartido solo tendría que mudarlos.
+
+⚠️ **En `rezar` hubo que tocar la afordancia.** Su cuenta activa era `background:transparent` **a propósito** —está hueca porque espera tu toque—. Con las apagadas ya rellenas, la activa habría quedado **más vacía que las que aún faltan**, invirtiendo el significado. Ahora la activa lleva la tinta apagada de fondo y conserva su borde de color y su pulso. Es el punto que más pide revisión visual.
+
+### La columna sobrevive al rezo (solo en audio)
+
+`congelarAlCompletar: true`. Cuando el `tick` enciende la Cruz —la decena está entera— la columna se **congela**: `pista()` deja de tocarla y ningún cambio de pista la borra. Sigue visible **tal cual quedó, sin atenuar**, durante Q1/Q2/Q3 y la oración final. `reiniciar()` la descongela al cambiar de Misterio.
+
+Antes se ocultaba en el primer cambio de pista: al usuario se le quitaba de la vista justo lo que acababa de rezar. **Es mejora por sí sola**, y además es el "frame 1" del que partirá el decenario.
+
+`orar` **no** congela: allí la columna pertenece al tool de rezo y el usuario sigue leyendo en la misma pantalla. El banco vigila que siga siendo así.
+
+**Nota del banco:** el motor viejo va congelado dentro del test como referencia. Lleva un `__sembrarSync()` añadido **solo para el banco**: `let` crea enlace léxico y no se ve desde el contexto del `vm`, así que los datos hay que sembrarlos desde dentro. No altera su comportamiento.
 
 ## Navegación: dónde termina una sesión
 

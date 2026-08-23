@@ -52,6 +52,10 @@ window._fbFirestore = {
 };
 </script>
 <script src="bloques.js"></script>
+<link rel="stylesheet" href="cierre.css">
+<script src="sarta.js"></script>
+<script src="cuentas.js"></script>
+<script src="cierre.js"></script>
 <script src="racha.js"></script>
 <script src="racha-splash.js"></script>
 <script src="plan-utils.js"></script>
@@ -66,6 +70,14 @@ window._fbFirestore = {
 
 /* ── Variables CSS ── */
 :root{
+  /* Cuentas del rezo — DOS TINTAS, no un hueco que se rellena.
+     La cuenta sin rezar es una cuenta de verdad, en perla apagada; al rezarla
+     cambia de tinta a --lvl-bold. Así el decenario se lee como objeto desde el
+     primer momento, no como una barra de progreso a medio llenar. */
+  --cuenta-apagada:       rgba(243,234,216,0.30);
+  --cuenta-borde:         rgba(243,234,216,0.50);
+  --cuenta-pater-apagada: rgba(243,234,216,0.42);
+  --cuenta-pater-borde:   rgba(243,234,216,0.68);
   --bg:#E6DED3;--bg-rgb:230,222,211;--card:#FFFCF7;--border:#D9D1C7;
   --text:#2B2622;--text-soft:#6B6259;--text-dim:#9B9389;
   --input-bg:#FFFCF7;--sec-bg:#EDE5D8;--shadow:rgba(43,38,34,0.08);
@@ -368,8 +380,8 @@ body.light .misterio-subtitulo{color:#002931;text-shadow:0 0 8px rgba(255,255,25
 }
 .bead{
   width:16px;height:16px;border-radius:50%;
-  border:2px solid rgba(255,255,255,0.35);
-  background:rgba(255,255,255,0.08);
+  border:2px solid var(--cuenta-borde);
+  background:var(--cuenta-apagada);
   transition:background 0.18s,border-color 0.18s,transform 0.12s;
 }
 .bead.lit{
@@ -377,8 +389,11 @@ body.light .misterio-subtitulo{color:#002931;text-shadow:0 0 8px rgba(255,255,25
   box-shadow:0 0 8px rgba(255,122,0,0.5);
   animation:bead-pop 0.18s ease-out;
 }
-/* Bead ACTIVO vacío — pulso sin relleno */
-.bead.active,.bead-pater.active{border-color:var(--lvl-bold);background:transparent}
+/* Bead ACTIVO — pulso y borde de color; el fondo sigue siendo la tinta apagada.
+   Antes era transparent, pero con las cuentas ya rellenas eso dejaba la activa
+   MÁS vacía que las que aún faltan, invirtiendo el significado. */
+.bead.active{border-color:var(--lvl-bold);background:var(--cuenta-apagada)}
+.bead-pater.active{border-color:var(--lvl-bold);background:var(--cuenta-pater-apagada)}
 /* Bead ACTIVO tapeado — relleno */
 .bead.active.lit-correct,.bead-pater.active.lit-correct,
 .bead.active.lit-normal,.bead-pater.active.lit-normal{border-color:var(--lvl-bold);background:var(--lvl-bold)}
@@ -396,7 +411,7 @@ body.audio-playing .bead.active.lit-normal,body.audio-playing .bead-pater.active
 @keyframes beadGold{0%{box-shadow:0 0 0 0 rgba(255,215,0,0)}30%{box-shadow:0 0 0 8px rgba(255,215,0,0.6)}100%{box-shadow:0 0 0 14px rgba(255,215,0,0)}}
 .bead.gold-flash{animation:bead-pop 0.18s ease-out,beadGold 0.7s ease-out}
 @keyframes beadBonusFloat{0%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-28px)}}
-.bead-pater.active     {background:transparent}
+.bead-pater.active     {background:var(--cuenta-pater-apagada)}
 .bead-pater.lit-white  {background:rgba(255,255,255,0.85);border-color:rgba(255,255,255,0.85);animation:none}
 .bead-pater.lit-spam   {background:#888;border-color:#888;animation:none}
 .bead-pater.gold-flash {animation:bead-pop 0.18s ease-out,beadGold 0.7s ease-out}
@@ -2497,8 +2512,40 @@ async function onTrackEnded(){
     await completeMystery();
     if(track.mIdx===4) rezoConcluido=true;
     if(!_freeNoGana){ await addMeters(MR_REZO); showSlide(MR_REZO); }
+    /* La decena se cierra en decenario mientras la siguiente pista ya arranca:
+       sin await, para que no haya tiempo muerto. */
+    mostrarDecenario();
   }
   playNext();
+}
+
+/* ── El decenario ───────────────────────────────────────────────────────────
+   rezar conserva su motor de cuentas —son INTERACTIVAS, el usuario las toca al
+   rezar— y esta instancia existe solo para LEER la columna con instantanea().
+   Por eso instantanea() reconoce también lit-white, lit-correct y lit-spam. */
+let _cuentasLectura=null;
+function mostrarDecenario(){
+  if(!window.Cierre || !window.Sarta || !window.Cuentas) return Promise.resolve(false);
+  try{
+    if(!_cuentasLectura) _cuentasLectura=Cuentas.crear({});
+    const foto=_cuentasLectura.instantanea();
+    if(!Cierre.decenaCompleta(foto)) return Promise.resolve(false);
+    return Cierre.decenario({
+      desde:  foto,
+      color:  (BCL && BCL[blk]) || COLORES_BLOQUE.gozosos,
+      titulo: 'Misterio recorrido'
+    }).catch(()=>false);
+  }catch(e){ return Promise.resolve(false); }
+}
+
+function mostrarRosario(){
+  if(!window.Cierre || !window.Sarta) return Promise.resolve(false);
+  try{
+    return Cierre.rosario({
+      color:  (BCL && BCL[blk]) || COLORES_BLOQUE.gozosos,
+      titulo: 'Rosario recorrido'
+    }).catch(()=>false);
+  }catch(e){ return Promise.resolve(false); }
 }
 
 function playNext(){
@@ -2524,9 +2571,13 @@ function playNext(){
 /* Terminados los 5 Misterios: si el usuario reza las oraciones finales, las sirve
    rosario-final.js (Letanías con karaoke → Salve → conclusiva) y la celebración
    espera a que cierre. Si no, se celebra directamente. */
-function onSessionComplete(){
+async function onSessionComplete(){
   _stopBeadTimer();
   if(rezarAudio) rezarAudio.pause();
+  /* La camándula se cierra PRIMERO: se ve el Rosario entero y de ahí se entra a
+     las Letanías. Antes la animación caía dentro de celebrar(), o sea después
+     de las Letanías: se coronaba el Rosario antes de haberlo mostrado. */
+  await mostrarRosario();
   if(rezarPrefs().letanias && window.RosarioFinal){
     RosarioFinal.abrir({ onCerrar: celebrar });
     return;

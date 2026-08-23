@@ -56,6 +56,14 @@ window._fbFirestore = {
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
 :root{
+  /* Cuentas del rezo — DOS TINTAS, no un hueco que se rellena.
+     La cuenta sin rezar es una cuenta de verdad, en perla apagada; al rezarla
+     cambia de tinta a --lvl-bold. Así el decenario se lee como objeto desde el
+     primer momento, no como una barra de progreso a medio llenar. */
+  --cuenta-apagada:       rgba(243,234,216,0.30);
+  --cuenta-borde:         rgba(243,234,216,0.50);
+  --cuenta-pater-apagada: rgba(243,234,216,0.42);
+  --cuenta-pater-borde:   rgba(243,234,216,0.68);
   --bg:#E6DED3;--bg-rgb:230,222,211;--card:#FFFCF7;--border:#D9D1C7;
   --text:#2B2622;--text-soft:#6B6259;--text-dim:#9B9389;
   --input-bg:#FFFCF7;--sec-bg:#F5F0E8;--shadow:rgba(43,38,34,0.08);
@@ -208,7 +216,6 @@ body{
 /* ── Celebración ── */
 .celebration-screen{text-align:center;padding:40px 24px}
 .maria-img{width:200px;height:200px;border-radius:50%;object-fit:cover;border:4px solid var(--lvl-soft);margin:0 auto 24px;box-shadow:0 8px 32px var(--shadow)}
-.maria-placeholder{width:200px;height:200px;border-radius:50%;margin:0 auto 24px;background:linear-gradient(135deg,var(--lvl-ultra),var(--lvl-light));border:4px solid var(--lvl-soft);display:flex;align-items:center;justify-content:center;font-size:4rem;box-shadow:0 8px 32px var(--shadow)}
 .celebration-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.9rem;font-weight:600;margin-bottom:8px;line-height:1.15}
 .celebration-sub{font-size:0.88rem;color:var(--text-soft);margin-bottom:24px;line-height:1.7}
 
@@ -216,17 +223,11 @@ body{
 .loading-screen,.error-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80dvh;padding:40px 24px;text-align:center}
 .spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--lvl-bold);border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:18px}
 
-/* ── Confetti ── */
-.confetti-container{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:999}
-.confetti-piece{position:absolute;width:8px;height:8px;border-radius:2px;animation:confettiFall 2.5s ease-out forwards}
-.grand-confetti{position:fixed;width:8px;height:8px;border-radius:50%;animation:confettiFall 2.5s ease-out forwards;pointer-events:none}
-
 /* ── Animaciones ── */
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(1.4)}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 @keyframes slideUp{from{opacity:0;transform:translateY(22px) scale(0.98)}to{opacity:1;transform:translateY(0) scale(1)}}
-@keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
 @keyframes fadeInOut{0%{opacity:0;transform:translateX(-50%) translateY(-4px)}15%{opacity:1;transform:translateX(-50%) translateY(0)}80%{opacity:1}100%{opacity:0}}
 @keyframes navSpring{0%{transform:scale(1)}35%{transform:scale(0.78)}65%{transform:scale(1.18)}82%{transform:scale(0.95)}100%{transform:scale(1)}}
 .fade-in{animation:fadeIn 0.4s ease both}
@@ -271,22 +272,6 @@ body.light .app-nav-item{color:rgba(0,41,49,0.45)}
 .meters-float{position:absolute;top:50%;right:220px;font-size:1rem;font-weight:800;color:var(--green);text-shadow:0 2px 8px rgba(52,168,83,0.4);animation:metersFloat 2.5s ease-out}
 .meters-float .extra-badge{display:block;font-size:0.58rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#FFD700;text-shadow:0 1px 6px rgba(255,215,0,0.5);margin-bottom:2px}
 @keyframes metersFloat{0%{transform:translateY(0);opacity:0}30%{opacity:1}70%{opacity:1}100%{transform:translateY(-40px);opacity:0}}
-.mariano-grand-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:101;pointer-events:none}
-.mariano-grand-container{position:relative;width:260px;height:260px}
-.mariano-grand{width:260px;height:auto;margin-bottom:20px;animation:popScale 0.6s cubic-bezier(0.68,-0.55,0.265,1.55) forwards}
-@keyframes popScale{0%{transform:scale(0);opacity:0}60%{transform:scale(1.1);opacity:1}100%{transform:scale(1);opacity:1}}
-.mariano-grand-lux{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
-.mariano-grand-lux svg{width:32px;height:32px}
-.mariano-grand-lux.orbit1 svg{animation:luxOrbit1 3s ease-in-out infinite}
-.mariano-grand-lux.orbit2 svg{animation:luxOrbit2 3s ease-in-out infinite}
-.mariano-grand-lux.orbit3 svg{animation:luxOrbit3 3s ease-in-out infinite}
-.mariano-grand-lux.orbit4 svg{animation:luxOrbit4 3s ease-in-out infinite}
-@keyframes luxOrbit1{0%{transform:rotate(0deg) translateX(120px) rotate(0deg) scale(1)}25%{transform:rotate(90deg) translateX(120px) rotate(-90deg) scale(1.5)}50%{transform:rotate(180deg) translateX(120px) rotate(-180deg) scale(1)}75%{transform:rotate(270deg) translateX(120px) rotate(-270deg) scale(1.5)}100%{transform:rotate(360deg) translateX(120px) rotate(-360deg) scale(1)}}
-@keyframes luxOrbit2{0%{transform:rotate(45deg) translateX(120px) rotate(-45deg) scale(1)}25%{transform:rotate(135deg) translateX(120px) rotate(-135deg) scale(1.6)}50%{transform:rotate(225deg) translateX(120px) rotate(-225deg) scale(1)}75%{transform:rotate(315deg) translateX(120px) rotate(-315deg) scale(1.6)}100%{transform:rotate(405deg) translateX(120px) rotate(-405deg) scale(1)}}
-@keyframes luxOrbit3{0%{transform:rotate(0deg) translateX(120px) rotate(0deg) scale(1.3)}33%{transform:rotate(120deg) translateX(120px) rotate(-120deg) scale(1)}66%{transform:rotate(240deg) translateX(120px) rotate(-240deg) scale(1.7)}100%{transform:rotate(360deg) translateX(120px) rotate(-360deg) scale(1.3)}}
-@keyframes luxOrbit4{0%{transform:rotate(90deg) translateX(120px) rotate(-90deg) scale(1.2)}20%{transform:rotate(162deg) translateX(120px) rotate(-162deg) scale(1.5)}40%{transform:rotate(234deg) translateX(120px) rotate(-234deg) scale(1)}60%{transform:rotate(306deg) translateX(120px) rotate(-306deg) scale(1.6)}80%{transform:rotate(378deg) translateX(120px) rotate(-378deg) scale(1.1)}100%{transform:rotate(450deg) translateX(120px) rotate(-450deg) scale(1.2)}}
-.mariano-grand-meters{text-align:center;color:#fff;font-size:1.55rem;font-weight:800;text-shadow:0 4px 16px rgba(0,0,0,0.5);margin-top:20px}
-.mariano-grand-text{text-align:center;color:#fff;font-size:1rem;margin-top:8px;text-shadow:0 2px 8px rgba(0,0,0,0.5)}
 
 /* ══════════════════════════════════════
    ZONA A — Hero del Misterio
@@ -384,7 +369,7 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
 }
 .bead{
   width:16px;height:16px;border-radius:50%;
-  border:2px solid rgba(255,255,255,0.35);background:rgba(255,255,255,0.08);
+  border:2px solid var(--cuenta-borde);background:var(--cuenta-apagada);
   transition:background .18s,border-color .18s,transform .12s;
 }
 .bead.lit-normal,.bead.lit-correct,.bead.lit-white,.bead.active{border-color:var(--lvl-bold);background:var(--lvl-bold)}
@@ -395,7 +380,7 @@ body.audio-playing .bead.active{animation:beadPulseFilled .9s ease-in-out infini
 }
 .bead-pater{
   width:12px;height:12px;border-radius:50%;
-  border:2px solid rgba(255,255,255,0.55);background:rgba(255,255,255,0.15);
+  border:2px solid var(--cuenta-pater-borde);background:var(--cuenta-pater-apagada);
   transition:background .18s,border-color .18s;margin-bottom:4px;
 }
 .bead-pater.lit-normal,.bead-pater.lit-white,.bead-pater.active{background:var(--lvl-bold);border-color:var(--lvl-bold)}
@@ -713,6 +698,10 @@ body.light .popup-close-bottom{border-color:var(--border);color:var(--text-dim)}
 }
 </style>
 <script src="bloques.js"></script>
+<link rel="stylesheet" href="cierre.css">
+<script src="sarta.js"></script>
+<script src="cuentas.js"></script>
+<script src="cierre.js"></script>
 <script src="racha.js"></script>
 <script src="racha-splash.js"></script>
 <script src="plan-utils.js"></script>
@@ -953,9 +942,9 @@ body.light .popup-close-bottom{border-color:var(--border);color:var(--text-dim)}
   <!-- ═══ CELEBRACIÓN ═══ -->
   <div class="screen" id="scr-celebration">
     <div class="celebration-screen fade-in">
-      <div class="maria-placeholder" id="maria-container">🙏</div>
       <h2 class="celebration-title" id="celeb-title"></h2>
       <p class="celebration-sub" id="celeb-sub"></p>
+      <button class="btn btn-outline btn-block" id="btn-celeb-letanias" style="margin-bottom:10px">Letanías</button>
       <button class="btn btn-primary btn-block" id="btn-celeb-home" style="margin-bottom:10px">Continuar</button>
       <button class="btn btn-outline btn-block" id="btn-celeb-mapa">Volver al camino</button>
     </div>
@@ -1025,22 +1014,6 @@ body.light .popup-close-bottom{border-color:var(--border);color:var(--text-dim)}
 
   </nav>
 
-  <!-- Mariano grand celebration -->
-  <div class="mariano-grand-overlay" id="mariano-grand-overlay" style="display:none">
-    <div class="mariano-grand-container">
-      <img id="mariano-grand-img" class="mariano-grand" alt="Mariano">
-      <div class="mariano-grand-lux" id="mariano-grand-lux">
-        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <g filter="url(#luxGlow)">
-            <rect x="46.1926" y="0.285" width="7.6148" height="99.43" fill="#FFFCF7"/>
-            <rect x="0" y="46.2068" width="100" height="7.5864" fill="#FFFCF7"/>
-          </g>
-        </svg>
-      </div>
-      <div class="mariano-grand-meters" id="mariano-grand-meters"></div>
-      <div class="mariano-grand-text" id="mariano-grand-text"></div>
-      <div id="grand-confetti-container"></div>
-    </div>
   </div>
 
 </div><!-- /shell -->
@@ -1065,7 +1038,6 @@ const MUSB = 'https://pub-faed94e375aa443e846e07f81ef93274.r2.dev/';
 
 // ── Mariano poses ──────────────────────────
 const MARIANO_WALK  = IMGB + 'mariano_01.webp';
-const MARIANO_CELEB = IMGB + 'mariano_celeb.webp';
 const MARIANO_TOTAL = 10;
 var   _marianoIdx   = 0;
 
@@ -1079,6 +1051,11 @@ const BLOCKS = ['gozosos','luminosos','dolorosos','gloriosos'];
 const BN  = {gozosos:'Gozosos',luminosos:'Luminosos',dolorosos:'Dolorosos',gloriosos:'Gloriosos'};
 const BFN = {gozosos:'Misterios Gozosos',luminosos:'Misterios Luminosos',dolorosos:'Misterios Dolorosos',gloriosos:'Misterios Gloriosos'};
 const BEM = {gozosos:'🌟',luminosos:'✨',dolorosos:'✝️',gloriosos:'👑'};
+/* Columna de cuentas del rezo: motor compartido en cuentas.js. Aquí el tiempo
+   lo marca el elemento del rezo. Declarado arriba porque renderSession() lo usa
+   mucho antes en el archivo. */
+const _cuentas = Cuentas.crear({ audio: () => rezoEl });
+
 const BCL = window.COLORES_BLOQUE;
 const BCL_RGB = {gozosos:'232,160,160',luminosos:'1,187,225',dolorosos:'192,57,43',gloriosos:'212,160,23'};
 function applyBlockAccent(block){
@@ -1145,7 +1122,9 @@ async function markMysteryComplete(block,idx){
   await completeMystery();
   blk=prev;bIdx=prevIdx;
 }
-function showAdvanceLevelPrompt(){
+async function showAdvanceLevelPrompt(){
+  /* Aquí están los veinte: es el cuaderno cerrado. */
+  await mostrarRoseton();
   let n=nivel,c=cua+1;
   if(c>4){c=1;n++;}
   const nId=String(n).padStart(2,'0')+String(c).padStart(2,'0');
@@ -1154,6 +1133,7 @@ function showAdvanceLevelPrompt(){
   $('btn-celeb-home').textContent='Siguiente cuaderno';
   $('btn-celeb-home').onclick=()=>loadCuaderno(nId);
   $('btn-celeb-mapa').onclick=()=>salirConAviso('crecer.html', true);
+  ofrecerLetanias();
   show('scr-celebration');
 }
 async function loadCuaderno(nId){
@@ -1598,7 +1578,7 @@ function renderSession(){
   resetAudios();   // Misterio nuevo = pistas nuevas: ninguna posición se arrastra
   $('voice-player').style.display='none';
   // Reset de beads al cambiar de Misterio (re-render aunque la track sea del mismo tipo)
-  _currentSyncKey=null; _beadsHide();
+  _cuentas.reiniciar();
   ans={0:'',1:'',2:''};firstAns={0:false,1:false,2:false};
   currentGlobalMystery=mNum(blk,bIdx);
 
@@ -1747,6 +1727,9 @@ function populatePopup(t){
         if(b.disabled)return;   // el avance se dispara una sola vez
         b.disabled=true;
         await markMysteryComplete(blk,bIdx);
+        /* Aquí SÍ se espera: no hay nada sonando y el usuario pulsó para
+           avanzar, así que el decenario cierra antes de cargar el siguiente. */
+        await mostrarDecenario();
         if(currentGlobalMystery<20){
           currentGlobalMystery++;
           const{block,idx}=getMysteryBlock(currentGlobalMystery);
@@ -1845,7 +1828,14 @@ async function completeMystery(){
   // Refresh beads
   renderHeroBeads(dots);
   if(dots.every(Boolean)){
-    setTimeout(async()=>{if(window.CZSound)CZSound('blockClear');await addMeters(MR_BNS);showSlide(MR_BNS,'¡Bloque completo!');showCelebration();},600);
+    setTimeout(async()=>{
+      if(window.CZSound)CZSound('blockClear');
+      await addMeters(MR_BNS);
+      /* Los cinco Misterios del bloque son un Rosario: se cierra antes de la
+         pantalla de celebración, y los metros del bonus van dentro. */
+      await mostrarRosario(MR_BNS);
+      showCelebration();
+    },600);
     if(blk==='gloriosos'&&cua===4){
       if(window.CZSound)CZSound('levelClear');
       const MUNDO_MEDAL_MAP={1:'medal_cruz',2:'medal_emociones',3:'medal_mente',4:'medal_corazon',5:'medal_relaciones',6:'medal_amor',7:'medal_tiempo'};
@@ -1879,6 +1869,57 @@ async function completeMystery(){
     );
   }
 }
+/* ── El decenario ───────────────────────────────────────────────────────────
+   orar ya usa cuentas.js, así que la instantánea sale de la misma instancia.
+   Su columna NO se congela —la del tool de rezo sigue viva mientras se lee— de
+   modo que la guarda de decena completa es lo que decide si el cierre procede. */
+function mostrarDecenario(){
+  if(!window.Cierre || !window.Sarta || !_cuentas) return Promise.resolve(false);
+  try{
+    const foto=_cuentas.instantanea();
+    if(!Cierre.decenaCompleta(foto)) return Promise.resolve(false);
+    return Cierre.decenario({
+      desde:  foto,
+      color:  (BCL && BCL[blk]) || COLORES_BLOQUE.gozosos,
+      titulo: 'Misterio recorrido'
+    }).catch(()=>false);
+  }catch(e){ return Promise.resolve(false); }
+}
+
+/* El cierre del cuaderno: un vitral, no una sarta. El vidrio son los cuatro
+   colores de bloque y la piedra sale de tema.paleta de este cuaderno. */
+function mostrarRoseton(){
+  if(!window.Cierre || !Cierre.roseton) return Promise.resolve(false);
+  try{
+    return Cierre.roseton({
+      paleta:  (data && data.tema && data.tema.paleta) || {},
+      colores: BLOCKS.map(b => (BCL && BCL[b]) || COLORES_BLOQUE[b]),
+      titulo:  'Cuaderno recorrido'
+    }).catch(()=>false);
+  }catch(e){ return Promise.resolve(false); }
+}
+
+function mostrarRosario(metros){
+  if(!window.Cierre || !window.Sarta) return Promise.resolve(false);
+  try{
+    return Cierre.rosario({
+      color:  (BCL && BCL[blk]) || COLORES_BLOQUE.gozosos,
+      titulo: 'Rosario recorrido',
+      metros: metros
+    }).catch(()=>false);
+  }catch(e){ return Promise.resolve(false); }
+}
+
+/* Al cerrar un set de cinco, la tradición reza las Letanías. Se OFRECEN, nunca
+   se imponen: por eso no son el botón primario. Al terminar —o al salir— se
+   vuelve a esta misma pantalla. Si el módulo no está, el botón no aparece. */
+function ofrecerLetanias(){
+  const b=$('btn-celeb-letanias'); if(!b) return;
+  if(!window.RosarioFinal){ b.style.display='none'; return; }
+  b.style.display='';
+  b.onclick=()=>{ pausarTodo(); RosarioFinal.abrir({ onCerrar:()=>show('scr-celebration') }); };
+}
+
 function showCelebration(){
   $('celeb-title').textContent=`¡${BFN[blk]} completados!`;
   $('celeb-sub').textContent=`Has rezado los 5 misterios ${BN[blk].toLowerCase()} de este cuaderno. ¡Bien hecho!`;
@@ -1890,8 +1931,7 @@ function showCelebration(){
     location.href=location.origin+location.pathname.substring(0,location.pathname.lastIndexOf('/')+1)+'orar.html?c='+nivelId;
   };
   $('btn-celeb-mapa').onclick=()=>salirConAviso('crecer.html', true);
-  var grandImg = $('mariano-grand-img');
-  if (grandImg) grandImg.src = MARIANO_CELEB;
+  ofrecerLetanias();
   show('scr-celebration');
 }
 
@@ -1938,10 +1978,10 @@ function nuevaVoz(t){
 function initVP(){
   if(!rezoEl){
     rezoEl=new Audio();
-    rezoEl.addEventListener('play',  ()=>{ _updateSyncKey(rezoEl.src); marcarSonando(); setRezoIcon(true); });
+    rezoEl.addEventListener('play',  ()=>{ _cuentas.pista(rezoEl.src); marcarSonando(); setRezoIcon(true); });
     rezoEl.addEventListener('pause', ()=>{ marcarSonando(); setRezoIcon(false); });   // las cuentas se quedan donde están
     rezoEl.addEventListener('ended', ()=>{ marcarSonando(); setRezoIcon(false); bgmBack(); premiar('rezo'); });
-    rezoEl.addEventListener('timeupdate', _tickBeads);
+    rezoEl.addEventListener('timeupdate', () => _cuentas.tick());
   }
   if(!contemplaEl) contemplaEl=nuevaVoz('contemplar');
   if(!cantoEl)     cantoEl=nuevaVoz('canto');
@@ -2025,49 +2065,6 @@ function setRezoIcon(playing){
 }
 
 /* ─── Cuentas del Rosario: indicador pasivo sincronizado a la track (bead_sync.json) ─── */
-let _beadSync=null, _currentSyncKey=null;
-async function loadBeadSync(){
-  if(_beadSync)return;
-  try{ const r=await fetch('./data/bead_sync.json'); _beadSync=r.ok?await r.json():{}; }
-  catch(e){ _beadSync={}; }
-}
-function renderBeadsCol(){
-  const col=$('beads-col'); if(!col)return;
-  col.innerHTML='';
-  const pater=document.createElement('div'); pater.className='bead-pater'; pater.id='bead-pater'; col.appendChild(pater);
-  const sep=document.createElement('div'); sep.className='bead-sep'; col.appendChild(sep);
-  for(let i=0;i<10;i++){ const d=document.createElement('div'); d.className='bead'; col.appendChild(d); }
-  const lux=document.createElement('div'); lux.className='bead-lux-cross'; lux.id='bead-lux-cross';
-  lux.innerHTML='<div class="lux-glow"><svg width="22" height="22" viewBox="0 0 100 100"><rect x="46.2" y="0" width="7.6" height="100" fill="white" opacity="0.95"/><rect x="0" y="36" width="100" height="7.6" fill="white" opacity="0.95"/></svg></div>';
-  col.appendChild(lux);
-}
-function _getBeadEl(idx){ if(idx===0)return $('bead-pater'); return document.querySelectorAll('#beads-col .bead')[idx-1]||null; }
-function _beadsShow(){ const w=$('beads-col-wrap'); if(w)w.style.display='flex'; }
-function _beadsHide(){ const w=$('beads-col-wrap'); if(w)w.style.display='none'; }
-function _updateSyncKey(trackUrl){
-  if(!_beadSync||!trackUrl){ _currentSyncKey=null; _beadsHide(); return; }
-  const name=trackUrl.split('/').pop().replace(/\?.*$/,'').replace(/\.(m4a|mp3)$/i,'').toUpperCase();
-  const found=Object.keys(_beadSync).find(k=>k.toUpperCase()===name)||null;
-  const changed=(found!==_currentSyncKey);
-  _currentSyncKey=found;
-  if(found){ if(changed)renderBeadsCol(); _beadsShow(); }
-  else _beadsHide();
-}
-function _tickBeads(){
-  if(!rezoEl||!_currentSyncKey||!_beadSync)return;
-  const windows=_beadSync[_currentSyncKey]; if(!windows)return;
-  const t=rezoEl.currentTime;
-  let active=-1;
-  for(let i=0;i<windows.length;i++){ if(t>=windows[i].start&&t<=windows[i].end){active=i;break;} }
-  for(let i=0;i<windows.length;i++){
-    const el=_getBeadEl(i); if(!el)continue;
-    el.classList.remove('active','lit-normal');
-    if(i===active)el.classList.add('active');
-    else if(t>windows[i].end)el.classList.add('lit-normal');
-  }
-  const lux=$('bead-lux-cross');
-  if(lux){ const last=windows[windows.length-1]; if(t>last.end)lux.classList.add('show'); else lux.classList.remove('show'); }
-}
 
 function toggleRezo(){
   if(!rezoEl) return;
@@ -2282,7 +2279,7 @@ function initBtns(){
 }
 
 bgmOn=prefs().bgm!==false;
-loadBeadSync();
+_cuentas.cargarSync();
 initBtns();
 initSwipe();
 CZGestures.init({ onBack: backDeOrar });

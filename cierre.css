@@ -1,0 +1,168 @@
+/* ═══════════════════════════════════════════════════════════════════
+   CruzAndo — cierre de una sesión de rezo
+   ═══════════════════════════════════════════════════════════════════
+
+   El velo, la composición y los TOKENS DE MOVIMIENTO. Las trayectorias de
+   cada cuenta las genera cierre.js: dependen de dónde estaba la columna
+   en pantalla, así que no pueden vivir aquí.
+
+   Material heredado de racha-splash.css y de la pantalla de canto: velo
+   hondo a sangre, tinta pergamino, Cormorant para la palabra. Así el
+   decenario y el splash de racha encadenan como un solo cierre en vez de
+   apilarse como dos pantallas. */
+
+:root{
+  /* ── Tokens de movimiento ──────────────────────────────────────────
+     Antes había seis curvas y ocho duraciones sueltas repartidas por los
+     reproductores. Estas son las que quedan. --ease-rito es el rebote que
+     ya usaba luxAppear; --ease-velo es el de mini. */
+  --ease-rito: cubic-bezier(.34, 1.56, .64, 1);
+  --ease-velo: cubic-bezier(.2, .7, .3, 1);
+  --ease-salida: cubic-bezier(.25, .46, .45, .94);
+
+  --t-breve: .22s;   /* un toque, una tarjeta */
+  --t-gesto: .6s;    /* la Lux aparece */
+  --t-rito: 1.1s;    /* la sarta se cierra */
+}
+
+.cierre-velo{
+  --ci-tinta: #F3EAD8;
+  --ci-velo: rgba(5, 7, 14, .90);
+
+  position: fixed;
+  inset: 0;
+  z-index: 940;              /* sobre el epílogo (500) y las celebraciones (900);
+                                bajo el splash de racha (950), que va después */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--ci-velo);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  opacity: 0;
+  transition: opacity .35s var(--ease-velo);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.cierre-velo.dentro{ opacity: 1 }
+.cierre-velo.fuera{ opacity: 0; transition-duration: .35s }
+
+/* El lienzo ocupa la pantalla entera y su viewBox va 1:1 con el viewport:
+   así el clon de la columna nace en sus coordenadas reales, sin conversión,
+   y el primer frame es idéntico al último de la sesión. */
+.cierre-lienzo{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+/* El rosetón cae al fondo hondo del propio cuaderno: cada Mundo tiene su
+   paleta, así que la noche que precede a la rosa es distinta en los siete. */
+.cierre-velo.es-roseton{
+  background:
+    radial-gradient(circle at 50% 42%, var(--ci-noche-cuaderno, transparent) 0%, transparent 62%),
+    var(--ci-velo);
+}
+
+.cierre-lienzo circle,
+.cierre-lienzo rect,
+.cierre-lienzo path,
+.cierre-lienzo line{
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+
+/* La palabra y los metros, bajo la sarta */
+.cierre-pie{
+  position: absolute;
+  left: 0; right: 0;
+  bottom: max(9vh, 64px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 0 24px;
+  text-align: center;
+  pointer-events: none;
+}
+.cierre-titulo{
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(26px, 7vw, 34px);
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--ci-tinta);
+  opacity: 0;
+}
+.cierre-metros{
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: .82rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  color: var(--ci-tinta);
+  opacity: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.cierre-velo.anima .cierre-titulo{ animation: cierreAparece .45s var(--ease-velo) 2.05s forwards }
+.cierre-velo.anima .cierre-metros{ animation: cierreAparece .45s var(--ease-velo) 2.20s forwards }
+/* El Rosario tiene dos beats más —la cola y la Cruz— así que su palabra
+   espera a que la Cruz haya encajado. El rosetón, a que la Lux ocupe el óculo. */
+.cierre-velo.anima .cierre-titulo.tarde{ animation-delay: 2.55s }
+.cierre-velo.anima .cierre-metros.tarde{ animation-delay: 2.70s }
+.cierre-velo.anima .cierre-titulo.muy-tarde{ animation-delay: 3.05s }
+.cierre-velo.anima .cierre-metros.muy-tarde{ animation-delay: 3.20s }
+
+@keyframes cierreAparece{
+  from{ opacity: 0; transform: translateY(8px) }
+  to  { opacity: 1; transform: none }
+}
+
+/* El halo que recorre el anillo encendiendo las cuentas a su paso */
+.cierre-halo{
+  fill: none;
+  stroke-linecap: round;
+  opacity: 0;
+}
+.cierre-velo.anima .cierre-halo{
+  animation: cierreHalo .5s linear 1.80s forwards;
+}
+/* En el Rosario el resplandor lo dispara la llegada de la Cruz, y recorre un
+   perímetro cinco veces mayor: necesita más tiempo. */
+.cierre-velo.anima .cierre-halo.halo-rosario{
+  animation-duration: .75s;
+  animation-delay: 2.45s;
+}
+@keyframes cierreHalo{
+  from{ opacity: .85; stroke-dashoffset: var(--halo-largo) }
+  to  { opacity: 0;   stroke-dashoffset: 0 }
+}
+
+/* ── Estado final, sin recorrido ──
+   Lo usan el salto por toque y prefers-reduced-motion. */
+.cierre-velo.quieto .cierre-lienzo circle,
+.cierre-velo.quieto .cierre-lienzo rect,
+.cierre-velo.quieto .cierre-lienzo path,
+.cierre-velo.quieto .cierre-lienzo line{
+  animation: none !important; transform: none !important; stroke-dashoffset: 0 !important;
+}
+/* El resplandor es un destello de paso: en el estado final ya se apagó. */
+.cierre-velo.quieto .cierre-lienzo circle[opacity="0"]{ opacity: 0 }
+.cierre-velo.quieto .cierre-titulo,
+.cierre-velo.quieto .cierre-metros{ animation: none !important; opacity: 1; transform: none }
+.cierre-velo.quieto .cierre-halo{ animation: none !important; opacity: 0 }
+
+@media (prefers-reduced-motion: reduce){
+  .cierre-velo.anima .cierre-lienzo circle,
+  .cierre-velo.anima .cierre-lienzo rect,
+  .cierre-velo.anima .cierre-lienzo path,
+  .cierre-velo.anima .cierre-lienzo line,
+  .cierre-velo.anima .cierre-halo{
+    animation: none !important; transform: none !important; stroke-dashoffset: 0 !important;
+  }
+  .cierre-velo.anima .cierre-titulo,
+  .cierre-velo.anima .cierre-metros{ animation: none !important; opacity: 1; transform: none }
+}

@@ -61,11 +61,24 @@ window._fbFirestore = {
 <!-- plan-utils: resolvePlan, para saber si este usuario entra por bypass.
      access.js: solo se usa para LEER el acceso — mini nunca cobra. -->
 <script src="plan-utils.js"></script>
+<link rel="stylesheet" href="cierre.css">
+<script src="sarta.js"></script>
+<script src="cuentas.js"></script>
+<script src="cierre.js"></script>
 <script src="racha.js"></script>
 <script src="racha-splash.js"></script>
 <script src="access.js"></script>
 <style>
 :root{
+  /* Cuentas del rezo — DOS TINTAS, no un hueco que se rellena.
+     La cuenta sin rezar es una cuenta de verdad, en perla apagada; al rezarla
+     cambia de tinta a --lvl-bold. Así el decenario se lee como objeto desde el
+     primer momento, no como una barra de progreso a medio llenar. */
+  --cuenta-apagada:       rgba(243,234,216,0.30);
+  --cuenta-borde:         rgba(243,234,216,0.50);
+  --cuenta-pater-apagada: rgba(243,234,216,0.42);
+  --cuenta-pater-borde:   rgba(243,234,216,0.68);
+
   /* Estructura (chrome oscuro cinematográfico) */
   --parch:#F3EAD8; --bg:#05060c;
   /* Acento por Mundo — se sobreescribe desde tema.paleta del JSON; por defecto, dorado (fallback, no rompe) */
@@ -131,8 +144,8 @@ body.light{--parch:#0a2530;--bg:#EAF4F6}
 
 /* beads */
 .beads-col{position:absolute;right:16px;bottom:132px;z-index:7;display:flex;flex-direction:column;align-items:center;gap:7px}
-.bead{width:11px;height:11px;border-radius:50%;border:1.5px solid rgba(243,234,216,.35);background:transparent;transition:all .4s}
-.bead-pater{width:15px;height:15px;border-radius:50%;border:1.5px solid rgba(243,234,216,.45);background:transparent;transition:all .4s}
+.bead{width:11px;height:11px;border-radius:50%;border:1.5px solid var(--cuenta-borde);background:var(--cuenta-apagada);transition:all .4s}
+.bead-pater{width:15px;height:15px;border-radius:50%;border:1.5px solid var(--cuenta-pater-borde);background:var(--cuenta-pater-apagada);transition:all .4s}
 .bead.active,.bead-pater.active{border-color:var(--gold);background:var(--gold)}
 .bead.active,.bead-pater.active{animation:beadPulse .9s ease-in-out infinite}
 @keyframes beadPulse{0%,100%{box-shadow:0 0 0 0 rgba(232,185,74,.5)}50%{box-shadow:0 0 0 6px rgba(232,185,74,0)}}
@@ -557,6 +570,11 @@ function goStep(i){
     // sesión (como _completadoMarcado). El modelo económico se diseña aparte.
     goEpilogue(); return;
   }
+  /* Al acabar el Gloria —fin del rezo— la columna se cierra en decenario
+     MIENTRAS la Oración final ya suena debajo: sin await, para que no haya
+     tiempo muerto entre lo que se rezó y lo que sigue. */
+  if(stepIdx>=0 && STEPS[stepIdx] && STEPS[stepIdx].beads && !STEPS[i].beads) mostrarDecenario();
+
   stepIdx=i; const s=STEPS[i];
   showMoment('player');
   $('stills').classList.add('hidden'); $('hero').classList.remove('hidden');
@@ -696,6 +714,27 @@ function showMoment(name){
 }
 
 /* ═══════════ Navegación / tema (patrón del repo) ═══════════ */
+/* ── El decenario ───────────────────────────────────────────────────────────
+   mini conserva su propio motor de cuentas (aro pequeño, oro): esta instancia
+   de Cuentas existe solo para LEER la columna con instantanea(). No la gobierna.
+
+   El color es el oro de mini, no el del bloque: aquí toda la paleta es
+   oro-sobre-noche y un decenario rosa desentonaría con su propia pantalla. */
+let _cuentasLectura=null;
+function mostrarDecenario(){
+  if(!window.Cierre || !window.Sarta || !window.Cuentas) return Promise.resolve(false);
+  try{
+    if(!_cuentasLectura) _cuentasLectura=Cuentas.crear({col:'beadsCol', luxId:'bead-lux'});
+    const foto=_cuentasLectura.instantanea();
+    if(!Cierre.decenaCompleta(foto)) return Promise.resolve(false);
+    return Cierre.decenario({
+      desde:  foto,
+      color:  '#E8B94A',
+      titulo: 'Misterio recorrido'
+    }).catch(()=>false);
+  }catch(e){ return Promise.resolve(false); }
+}
+
 function volver(){
   // El splash de racha es el último beat del cierre: se muestra antes de irse,
   // y solo el día en que la racha subió. mostrarSiHay() resuelve al instante

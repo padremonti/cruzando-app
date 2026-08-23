@@ -350,25 +350,36 @@
   //  ONBOARDING CIERRE BLOQUE 1
   // ─────────────────────────────────────────────
 
+  /* Lluvia de Lux — conserva el nombre y la firma de _obConfetti a propósito:
+     los llamadores (el cierre del bloque 1 y el overlay del DEMO) no cambian.
+
+     Antes eran 48 rectángulos en siete colores —naranja, oro, cian, morado,
+     verde, magenta, rojo— que no aparecen en ningún otro sitio de la app. Ahora
+     son catorce cruces Lux en oro y blanco, cayendo lento y con la rotación
+     amortiguada. Mismo sitio en el código, otro registro. */
   function _obConfetti(containerId) {
     var container = document.getElementById(containerId);
     if (!container) return;
-    var COLORS = ['#FF7A00','#FFD700','#01BBE1','#8E44AD','#27AE60','#E91E8C','#C0392B'];
+    var TINTAS = ['#E8B94A', '#F3EAD8'];
     container.innerHTML = '';
-    for (var i = 0; i < 48; i++) {
-      var piece  = document.createElement('div');
-      var color  = COLORS[i % COLORS.length];
-      var left   = Math.random() * 100;
-      var delay  = (Math.random() * 1.8).toFixed(2);
-      var size   = 6 + Math.random() * 8;
-      piece.style.cssText =
-        'position:absolute;top:-20px;left:' + left + '%;' +
-        'width:' + size + 'px;height:' + size + 'px;' +
-        'border-radius:' + (Math.random() > 0.5 ? '50%' : '2px') + ';' +
-        'background:' + color + ';' +
-        'animation:confettiFall 2.8s ease-out ' + delay + 's forwards;' +
-        'opacity:0.9;';
-      container.appendChild(piece);
+    for (var i = 0; i < 14; i++) {
+      var pieza = document.createElement('div');
+      var tinta = TINTAS[i % TINTAS.length];
+      var left  = 4 + Math.random() * 92;
+      var delay = (Math.random() * 2.0).toFixed(2);
+      var lado  = 11 + Math.random() * 9;
+      var grosor = Math.max(2, lado * 0.19);
+      pieza.style.cssText =
+        'position:absolute;top:-28px;left:' + left + '%;' +
+        'width:' + lado + 'px;height:' + lado + 'px;' +
+        'opacity:' + (0.55 + Math.random() * 0.35).toFixed(2) + ';' +
+        'animation:confettiFall 3.4s linear ' + delay + 's forwards;';
+      pieza.innerHTML =
+        '<span style="position:absolute;left:50%;top:0;width:' + grosor + 'px;height:100%;' +
+        'margin-left:' + (-grosor / 2) + 'px;background:' + tinta + '"></span>' +
+        '<span style="position:absolute;top:34%;left:0;width:100%;height:' + grosor + 'px;' +
+        'background:' + tinta + '"></span>';
+      container.appendChild(pieza);
     }
   }
   window._obConfetti = _obConfetti;
