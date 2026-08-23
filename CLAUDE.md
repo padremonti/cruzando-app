@@ -139,6 +139,53 @@ Actualmente existen datos para Mundo 1 (`0101`–`0104`). Mundo 2 solo tiene `02
 **orar.html — por audio completado:**
 - `rezar`: +1200m / `contempl`: +800m / `canto`: +600m
 
+## Racha de días consecutivos
+
+*Estado: marcador y splash implementados + banco de pruebas (`tools/test-racha.js`, 79). **PENDIENTE prueba visual en dispositivo.***
+
+**Qué gana un día: UN Misterio rezado, en cualquiera de los cuatro modos** (audio, orar, rezar y **mini** — un Misterio-puerta de Sanar es un Misterio rezado)**.** Simétrico a propósito — no cuesta más ganar el día en el Libro que en Audio.
+
+**No sirven los metros.** `dailyGoal/data.historial` cuenta metros, y un día de solo escuchar una pregunta (150 m) no es un Misterio rezado. Por eso la racha lleva su propio registro.
+
+**Dónde vive** — `users/{uid}/dailyGoal/data` → campo `racha = { ultimoDia: 'YYYY-MM-DD', actual, mejor }`. Ese documento se eligió por dos razones prácticas: `dailyGoal/{doc}` **ya está permitido en `firestore.rules`** (una subcolección nueva habría exigido desplegar reglas, y las reglas listan cada subcolección una a una), y **index/crecer ya lo leen en el arranque**, así que el marcador no cuesta ni una lectura extra. *(No en `gamification/stats`: dispara el trigger de `badge-check.js` en cada escritura.)*
+
+**`racha.js` es lógica pura** — sin red ni SDK, como `functions/economia.js`. Cada página hace su propia E/S (audio con el SDK modular, orar/rezar con compat) y le pregunta al módulo qué hacer. Por eso se prueba entero en node.
+
+| Función | Qué resuelve |
+|---|---|
+| `calcular(previa, hoy)` | → `{cambio, racha, previa}`. **Idempotente por día**: encadenar Misterios devuelve `cambio:false` a partir del segundo. De aquí sale la garantía de que el splash salga una sola vez al día. |
+| `paraMostrar(racha, hoy)` | La regla de vigencia: hoy o ayer → el número; más atrás → 0. **Nunca se muestra `actual` a ciegas**: se queda viejo en cuanto pasa un día y enseñaría una racha de 30 a quien lleva un mes fuera. |
+| `fusionar(a, b)` | Gana la más avanzada. Cubre a la vez el rezo sin red y el segundo dispositivo, sin cola de reintentos. |
+| `pendienteHoy(racha, hoy)` | Viva pero hoy sin ganar todavía. |
+
+**Enganches** — `registrarRachaHoy()` en los cuatro modos: `completeSession()` de audio, `completeMystery()` de orar y de rezar, y el umbral del epílogo en mini (junto a `marcarCompletado`, pero **sin depender de `PAINID`**: se reza el Misterio, haya pain o no). Tres detalles que el banco vigila:
+
+- Se registra **antes** del `if(dots[bIdx])return` de `completeMystery`: rezar un Misterio ya rezado sigue siendo rezar, y la racha pregunta si hoy rezaste, no si avanzaste.
+- **Primero localStorage, luego Firestore** (`cruzando_racha`): una oración no se pierde por red; la siguiente escritura reconcilia con `fusionar`.
+- El guardián de sesión lleva **el día, no un booleano** (`_rachaDiaRegistrado === hoy`): una pestaña abierta que cruza la medianoche puede ganar el día siguiente.
+
+**Romper la racha no castiga.** No hay aviso de pérdida ni cuenta atrás: el marcador muestra 0 y el siguiente Misterio la deja en 1. `mejor` sobrevive siempre.
+
+**El marcador** (`streak-display`, el 🔥 de la barra de stats de index y crecer) llevaba un `0` escrito a mano en el HTML que **nadie escribía nunca**. Ahora `pintarRacha()` lo pinta en las dos fases del arranque: desde localStorage sin red, y corregido con `fusionar` cuando llega el snapshot. *(Ojo: `checkMetaStreak()` no es la racha pese al nombre — es la meta de metros. Colisión de nombre, como `canjearCodigo`.)*
+
+### El splash de incremento
+
+Se muestra **al final de todo, justo antes de volver al mapa**, y solo el día en que la racha subió. `racha-splash.js` es autosuficiente: inyecta su CSS una vez y monta el velo bajo demanda.
+
+**La garantía de "una sola vez al día" no vive en el splash**: viene de que `Racha.calcular` es idempotente, así que el segundo modo que se rece hoy nunca llama a `marcar()`. El flujo es `registrarRachaHoy()` → `RachaSplash.marcar(de, a)` si hubo cambio → `goTo('crecer.html')` → `await RachaSplash.mostrarSiHay()`.
+
+**Enganchado en el embudo, no en cada botón:** el `goTo()` de audio, orar y rezar comprueba si el destino es el mapa; así quedan cubiertos la barra de navegación, los botones de las celebraciones y el epílogo de una vez. Dos rutas necesitan enganche a mano: la rama de `history.back()` de `salirDeOrar` (no pasa por `goTo`) y el `volver()` de mini (va a sanar, no al mapa). El `_goHome()` de audio ahora pasa por `goTo` en vez de navegar a pelo.
+
+⚠️ **Toda salida lleva alternativa** (`.then(ir, ir)` y `else ir()`): si `racha-splash.js` no cargara, la navegación no puede quedarse colgada.
+
+**El material, no la coreografía.** La secuencia viene del demo y se conserva entera —el número viejo sube y se va, el nuevo entra desde abajo con rebote, la llama se enciende— pero **no es una tarjeta con sombra sobre un velo gris**, que es el registro de las apps de rachas: va a sangre sobre el mismo velo hondo de la pantalla de canto y del diálogo de salida de mini, para encadenar con el cierre del Misterio en vez de apilarse encima. Cormorant Garamond para el número, 🔥 conservado, `z-index: 950` (sobre el epílogo 500 y las celebraciones 900; bajo el DEMO completado 9999).
+
+**Paleta propia y cerrada** (`--rs-tinta`, `--rs-llama`, `--rs-velo-bg`): `--orange` solo existe en index/crecer y mini ni siquiera tiene `--text`. Sobre un velo oscuro se ve igual en las cinco páginas y en los dos temas sin depender de nadie.
+
+**Núcleo 2.0 s + 0.35 s de salida.** Toque en cualquier parte → salta al estado final y cierra; `prefers-reduced-motion` entrega la composición ya formada. Dos temporizadores de cierre (el normal y una red de seguridad) para que la navegación que espera detrás nunca se quede bloqueada.
+
+*El demo original (`racha-splash.js` que pasó el usuario) no entró tal cual: venía con mojibake (UTF-8 leído como Latin-1 — el 🔥 salía como `ð¥`), la mitad del CSS inyectado sin usar (define `.splash-number`/`.splash-message.pop` pero el JS ponía `style.animation` en línea), naranja `#FF7F09` horneado, `z-index:999` colisionando, y sin salto ni `reduced-motion`.*
+
 ## Micro-aprendizaje (audio.html)
 
 Aparece solo en misterios 1, 6, 11, 16 (primero de cada bloque).

@@ -1370,6 +1370,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 }
 </style>
 <script src="bloques.js"></script>
+<script src="racha.js"></script>
 <script src="flags.js"></script>
 <script src="plan-utils.js"></script>
 </head>
@@ -2699,6 +2700,7 @@ onAuthStateChanged(auth, async function(user) {
   metrosHoy       = localHist[todayKey] ?? 0;
   window._dailyHist = localHist;
   updateOdometro();
+  pintarRacha(Racha.leerLocal());
 
   var _cNivel     = localStorage.getItem('cruzando_current_nivel')   || '0101';
   var _cFrontier  = localStorage.getItem('cruzando_frontier_nivel')  || _cNivel;
@@ -2783,6 +2785,11 @@ onAuthStateChanged(auth, async function(user) {
       metrosHoy  = Math.max(gd.historial?.[todayKey] ?? 0, localHist[todayKey] ?? 0);
       window._dailyHist = gd.historial ?? {};
       updateOdometro();
+      // La del servidor puede ir por detrás si el último rezo fue sin red, o por
+      // delante si vino de otro aparato: gana la más avanzada.
+      var _racha = Racha.fusionar(Racha.leerLocal(), gd.racha);
+      Racha.guardarLocal(_racha);
+      pintarRacha(_racha);
       checkMetaStreak();
     }
   } catch(e) {}
@@ -3418,6 +3425,16 @@ function updateOdometro() {
     showOdometroTemporarily();
   }
   window._odoPrevHoy = metrosHoy;
+}
+
+/* ── Marcador de racha (🔥 de la barra de stats) ──────────────────────────
+   Nunca muestra el 'actual' guardado a ciegas: se queda viejo en cuanto pasa
+   un día sin rezar, y enseñaría una racha de 30 a quien lleva un mes fuera.
+   Racha.paraMostrar aplica la regla — hoy o ayer la enseña, más atrás es 0. */
+function pintarRacha(racha) {
+  var el = document.getElementById('streak-display');
+  if (!el || !window.Racha) return;
+  el.textContent = Racha.paraMostrar(racha, getTodayKey());
 }
 
 function checkMetaStreak() {

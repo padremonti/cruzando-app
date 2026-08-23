@@ -61,6 +61,8 @@ window._fbFirestore = {
 <!-- plan-utils: resolvePlan, para saber si este usuario entra por bypass.
      access.js: solo se usa para LEER el acceso — mini nunca cobra. -->
 <script src="plan-utils.js"></script>
+<script src="racha.js"></script>
+<script src="racha-splash.js"></script>
 <script src="access.js"></script>
 <style>
 :root{
@@ -548,6 +550,7 @@ let stepIdx=-1, playing=false;
 function advanceFromCanto(){ cantoPause(); stepIdx=-1; goStep(0); }
 function goStep(i){
   if(i>=STEPS.length){
+    registrarRachaHoy();   // un Misterio-puerta rezado gana el día de racha
     marcarCompletado();   // Pieza 1: rezó canto→UBIBLE→CONT→rezo→PRAY → marca el pain completado (progress/sanar)
     // TODO (crédito · futuro): consumir crédito AQUÍ, al llegar al epílogo (no a la
     // salida) — "completó = pagó", un solo momento, con guardia de una vez por
@@ -693,7 +696,13 @@ function showMoment(name){
 }
 
 /* ═══════════ Navegación / tema (patrón del repo) ═══════════ */
-function volver(){ location.href = base + 'sanar.html'; }
+function volver(){
+  // El splash de racha es el último beat del cierre: se muestra antes de irse,
+  // y solo el día en que la racha subió. mostrarSiHay() resuelve al instante
+  // si no hay nada pendiente, así que la salida nunca se retrasa de más.
+  var ir = function(){ location.href = base + 'sanar.html'; };
+  if (window.RachaSplash) RachaSplash.mostrarSiHay().then(ir, ir); else ir();
+}
 
 /* ── Diálogo de confirmación al salir ────────────────────────────────
    Atrás pausa cualquier audio en curso (canto o rezo), recuerda qué reanudar,
@@ -852,6 +861,42 @@ function _pcSave(o){ try { localStorage.setItem(_PC_KEY, JSON.stringify(o)); } c
 /* Marca el pain completado (embudo del epílogo). Guarda SIEMPRE en localStorage
    (síncrono, fiable) como pendiente; luego intenta Firestore. Guardia de sesión:
    una vez por sesión (re-visitar el epílogo no re-marca). */
+/* ── Racha de días consecutivos ──────────────────────────────────────────────
+   Un Misterio-puerta rezado es un Misterio rezado: gana el día igual que audio,
+   orar y rezar. La lógica vive en racha.js (pura, probada en node); esto es E/S
+   con el shim _fbFirestore, el mismo canal que usa la marca del pain.
+
+   No depende de PAINID —se reza el Misterio, haya pain o no— ni de que Auth haya
+   resuelto: sin canal, la racha queda en el espejo local y el próximo modo la
+   reconcilia con Racha.fusionar(). */
+let _rachaDiaRegistrado = null;
+async function registrarRachaHoy(){
+  const hoy = getTodayKey();
+  if (_rachaDiaRegistrado === hoy) return null;
+  _rachaDiaRegistrado = hoy;
+
+  const FS = window._fbFirestore;
+  const local = Racha.leerLocal();
+  let previa = local;
+
+  if (FS && FS.getDoc && FS.doc && _uid && _db) {
+    try {
+      const snap = await FS.getDoc(FS.doc(_db, 'users', _uid, 'dailyGoal', 'data'));
+      if (snap && snap.exists) previa = Racha.fusionar(local, snap.data().racha);
+    } catch(e) {}
+  }
+
+  const r = Racha.calcular(previa, hoy);
+  Racha.guardarLocal(r.racha);          // primero local: una oración no se pierde por red
+  if (r.cambio) {
+    if (window.RachaSplash) RachaSplash.marcar(r.previa, r.racha.actual);
+    if (FS && FS.setDoc && FS.doc && _uid && _db) {
+      try { await FS.setDoc(FS.doc(_db,'users',_uid,'dailyGoal','data'), { racha: r.racha }, { merge:true }); } catch(e) {}
+    }
+  }
+  return r;
+}
+
 function marcarCompletado(){
   if (_completadoMarcado) return;               // ya marcado esta sesión
   if (!PAINID) return;                          // sin pain en la URL → nada que marcar
