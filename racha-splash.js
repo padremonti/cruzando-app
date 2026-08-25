@@ -56,7 +56,16 @@
        POR ABAJO, así que la ventana recorta los dos recorridos. */
     '.rs-nums{position:relative;width:132px;height:96px;overflow:hidden}',
     '.rs-num{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);',
-    '  font-family:"Cormorant Garamond",Georgia,serif;font-size:76px;font-weight:700;',
+    /* Crimson Pro, no Cormorant Garamond: el "1" de Cormorant es un asta con
+       serifas mínimas y se lee como el numeral romano I, no como el dígito. Y
+       de paso, el peso 700 no lo carga ninguna página (llegan hasta 600), así
+       que el navegador lo engordaba a mano y el asta salía aún más ambigua.
+       Crimson Pro está cargada en las cinco páginas del splash, es serif —el
+       registro no cambia— y su uno lleva bandera arriba y base abajo.
+       lining/tabular por si alguna cara cayera en cifras de texto. */
+    '  font-family:"Crimson Pro",Georgia,serif;font-size:76px;font-weight:600;',
+    '  font-variant-numeric:lining-nums tabular-nums;',
+    '  font-feature-settings:"lnum" 1,"tnum" 1;',
     '  line-height:1;color:var(--rs-tinta);white-space:nowrap}',
     '.rs-num.rs-nuevo{opacity:0}',
 
