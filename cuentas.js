@@ -112,17 +112,32 @@
     /* La pista manda: si su nombre está en bead_sync la columna aparece (y se
        repinta si cambió de pista); si no, se esconde. */
     function pista(trackUrl) {
+      /* La clave se calcula ANTES de mirar la congelación: hace falta para
+         distinguir "esta pista no reza" (Q1, Q2, la oración final: ahí la
+         columna congelada se queda tal cual) de "esta pista reza otra decena"
+         (volver al rezo con los saltos de sección, o el Misterio siguiente:
+         ahí hay que descongelar y empezar de nuevo). Antes se retornaba antes
+         de calcularla, y una vez congelada la columna ya no volvía a arrancar
+         en toda la sesión. */
+      var hallada = null;
+      if (sync && trackUrl) {
+        var nombre = trackUrl.split('/').pop()
+                       .replace(/\?.*$/, '')
+                       .replace(/\.(m4a|mp3)$/i, '')
+                       .toUpperCase();
+        hallada = Object.keys(sync).filter(function (k) {
+          return k.toUpperCase() === nombre;
+        })[0] || null;
+      }
+
       // Congelada: la decena ya se rezó y su columna se queda hasta el final
-      // de la sesión. Ningún cambio de pista la borra.
-      if (congelada) return true;
+      // de la sesión. Ningún cambio de pista la borra... salvo otra decena.
+      if (congelada) {
+        if (!hallada || hallada === clave) return true;
+        congelada = false;
+      }
+
       if (!sync || !trackUrl) { clave = null; ocultar(); return false; }
-      var nombre = trackUrl.split('/').pop()
-                     .replace(/\?.*$/, '')
-                     .replace(/\.(m4a|mp3)$/i, '')
-                     .toUpperCase();
-      var hallada = Object.keys(sync).filter(function (k) {
-        return k.toUpperCase() === nombre;
-      })[0] || null;
       var cambio = (hallada !== clave);
       clave = hallada;
       if (hallada) { if (cambio) render(); mostrar(); return true; }
@@ -130,13 +145,20 @@
       return false;
     }
 
-    /* Misterio nuevo = cuentas desde cero. Olvidar la clave basta para que la
-       próxima pista() se dé por cambiada y repinte; `repintar` las deja limpias
-       ya mismo, para que no se vean las del Misterio anterior en el intervalo. */
-    function reiniciar(repintar) {
+    /* Misterio nuevo = cuentas desde cero, y eso incluye BORRARLAS.
+
+       ⚠️ Aquí había un parámetro `repintar` opcional, y sin él "reiniciar" no
+       reiniciaba nada visible: olvidaba la clave y escondía la columna, pero
+       las once cuentas conservaban su `lit-normal` y la Cruz su `show`. audio
+       pasaba `true`; orar no, y por eso al pasar al Misterio siguiente sin
+       rezar el decenario del anterior seguía dando por buena la guarda —y como
+       la columna estaba escondida, sus rects eran ceros y las cuentas salían
+       volando desde la esquina (0,0). El parámetro era una trampa tendida: se
+       repinta siempre. */
+    function reiniciar() {
       clave = null;
       congelada = false;
-      if (repintar) render();
+      render();
       ocultar();
     }
 
@@ -147,6 +169,16 @@
     function ventanas() { return (sync && clave) ? sync[clave] : null; }
 
     function tick() {
+      /* Congelada = intocable. tick() no acumula estado: REPINTA las once
+         cuentas desde cero a partir de currentTime en cada timeupdate. Al
+         terminar el rezo y arrancar la pista siguiente, currentTime vuelve a
+         ~0 mientras `clave` sigue apuntando a las ventanas del rezo (pista()
+         retornó temprano por estar congelada), así que ninguna ventana había
+         pasado y borraba las once tintas y apagaba la Cruz. La columna
+         sobrevivía, pero vacía —y el decenario del final moría en la guarda,
+         que exige justo esa Cruz—. El frame pintado un instante antes de
+         congelar ya es el completo: conservarlo es todo lo que hay que hacer. */
+      if (congelada) return;
       var el = dameAudio();
       if (!el || !clave || !sync) return;
       var vs = ventanas(); if (!vs) return;

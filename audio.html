@@ -2813,7 +2813,7 @@ function startPlayerSession(prepBlock) {
   Canto.preload();
 
   // Reset de las cuentas del Rosario al cambiar de Misterio (que no continúen donde quedaron)
-  _cuentas.reiniciar(true);
+  _cuentas.reiniciar();
 
   // Botón "Preparación" en el hero (solo si micro ya fue completado en este bloque)
   const prepHero   = $('prep-hero');

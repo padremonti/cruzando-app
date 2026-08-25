@@ -363,8 +363,38 @@ const PISTAS = ['https://x/global/MA.m4a', 'https://x/global/MB.m4a',
     eq(retrato(cong.dom.porId, cong.dom.col.hijos), antes);
   });
 
+  ok('congelada, un tick de la pista siguiente NO la apaga', () => {
+    /* ESTE era el fallo que se veía en audio. tick() no acumula: repinta las
+       once cuentas desde cero a partir de currentTime. Al arrancar Q1 el
+       currentTime vuelve a ~0 mientras `clave` sigue apuntando a las ventanas
+       del rezo, así que ninguna había pasado: borraba las once tintas y
+       apagaba la Cruz. La columna sobrevivía, pero vacía —y el decenario del
+       final moría en la guarda, que exige justo esa Cruz—. */
+    const antes = retrato(cong.dom.porId, cong.dom.col.hijos);
+    cong.audioEl.currentTime = 0.4;          // la pregunta acaba de empezar
+    cong.motor.tick();
+    cong.audioEl.currentTime = 12.7;
+    cong.motor.tick();
+    eq(retrato(cong.dom.porId, cong.dom.col.hijos), antes,
+       'la columna congelada se repintó con el tiempo de otra pista');
+    eq(cong.dom.porId['bead-lux-cross'].classList.contains('show'), true,
+       'la Cruz se apagó, y con ella el decenario del final');
+  });
+
+  ok('volver al rezo SÍ la descongela y la repinta', () => {
+    /* Los saltos de sección (◀◀ ▶▶, solo developer) pueden devolver al rezo, y
+       el Misterio siguiente trae otra pista de rezo. Antes pista() retornaba
+       antes de calcular la clave, así que una vez congelada la columna ya no
+       volvía a arrancar en toda la sesión. */
+    cong.motor.pista('https://x/global/MB.m4a');
+    eq(cong.motor.estaCongelada(), false);
+    eq(cong.dom.porId['beads-col-wrap'].style.display, 'flex');
+    eq(cong.dom.porId['bead-lux-cross'].classList.contains('show'), false,
+       'la Cruz de la decena anterior sobrevivió al repintado');
+  });
+
   ok('Misterio nuevo la descongela y la limpia', () => {
-    cong.motor.reiniciar(true);
+    cong.motor.reiniciar();
     eq(cong.motor.estaCongelada(), false);
     eq(cong.dom.porId['beads-col-wrap'].style.display, 'none');
     eq(cong.dom.porId['bead-lux-cross'].classList.contains('show'), false);
@@ -379,6 +409,39 @@ const PISTAS = ['https://x/global/MA.m4a', 'https://x/global/MB.m4a',
     eq(sinCong.motor.estaCongelada(), false);
     sinCong.motor.pista('https://x/q/Q_1_1_1.mp3');
     eq(sinCong.dom.porId['beads-col-wrap'].style.display, 'none');
+  });
+
+  ok('reiniciar() limpia SIN pedírselo', () => {
+    /* Aquí había un parámetro `repintar` opcional, y sin él "reiniciar" no
+       reiniciaba nada visible: olvidaba la clave y escondía la columna, pero
+       las once cuentas conservaban su tinta y la Cruz su `show`. audio pasaba
+       true; orar no. Al pasar al Misterio siguiente en orar, esa Cruz heredada
+       dejaba pasar la guarda del decenario aunque no se hubiera rezado —y como
+       la columna estaba escondida, sus rects eran ceros y las cuentas salían
+       volando desde la esquina (0,0). */
+    const foto = sinCong.motor.instantanea();
+    if (!foto.lux || !foto.lux.visible)
+      throw new Error('la columna no quedó rezada; la prueba no probaría nada');
+    sinCong.motor.reiniciar();                       // sin argumento
+    const r = retrato(sinCong.dom.porId, sinCong.dom.col.hijos);
+    eq(r.lux, [], 'la Cruz del Misterio anterior sobrevive');
+    eq(r.pater, [], 'el Padrenuestro conserva su tinta');
+    r.aves.forEach(c => eq(c, [], 'una Avemaría conserva su tinta'));
+    eq(r.aves.length, 10, 'la columna se repintó incompleta');
+    eq(r.visible, 'none');
+  });
+
+  ok('ninguna página pide ya el repintado a mano', () => {
+    /* El parámetro era una trampa tendida: si vuelve, vuelve el bug de orar. */
+    ['audio.html', 'orar.html'].forEach(f => {
+      const s = leer(f);
+      if (/reiniciar\(\s*(true|false)\s*\)/.test(s))
+        throw new Error(f + ' vuelve a pasarle argumento a reiniciar()');
+      if (!/_cuentas\.reiniciar\(\)/.test(s))
+        throw new Error(f + ' ya no reinicia las cuentas al cambiar de Misterio');
+    });
+    if (/function reiniciar\(\w/.test(leer('cuentas.js')))
+      throw new Error('reiniciar() recuperó su parámetro opcional');
   });
 
   ok('audio.html  · pide la congelación; orar no', () => {

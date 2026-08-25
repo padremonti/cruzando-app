@@ -1601,7 +1601,11 @@ function renderSession(){
   awd=new Set();tool=null;
   resetAudios();   // Misterio nuevo = pistas nuevas: ninguna posición se arrastra
   $('voice-player').style.display='none';
-  // Reset de beads al cambiar de Misterio (re-render aunque la track sea del mismo tipo)
+  /* Misterio nuevo, cuentas desde cero: reiniciar() repinta la columna, así que
+     ni las tintas ni la Cruz del Misterio anterior sobreviven al cambio. Antes
+     esto llamaba a reiniciar() cuando el repintado era opcional y orar no lo
+     pedía: la Cruz heredada dejaba pasar la guarda del decenario aunque no se
+     hubiera rezado. */
   _cuentas.reiniciar();
   ans={0:'',1:'',2:''};firstAns={0:false,1:false,2:false};
   currentGlobalMystery=mNum(blk,bIdx);

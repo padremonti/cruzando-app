@@ -33,7 +33,7 @@ PWA de formación espiritual católica. El usuario reza los 20 Misterios del Ros
 
 ## El cierre de una sesión (`cierre.js`)
 
-*Estado: los **tres cierres** implementados —decenario, Rosario y rosetón— con salida a las Letanías + banco de pruebas (`tools/test-cierre.js`, 78). **Decenario verificado en dispositivo en `mini`; el de `rezar` acaba de destrabarse (ver el aviso de la guarda). Resto PENDIENTE de prueba visual.***
+*Estado: los **tres cierres** implementados —decenario, Rosario y rosetón— con salida a las Letanías + banco de pruebas (`tools/test-cierre.js`, 81). **Decenario verificado en dispositivo en `mini`; el de `rezar` acaba de destrabarse (ver el aviso de la guarda). Resto PENDIENTE de prueba visual.***
 
 **La columna del rezo se cierra en decenario.** Es el mismo objeto que el usuario tuvo a la derecha toda la sesión, enrollado. Once cuentas contra once, Padrenuestro con Padrenuestro:
 
@@ -116,7 +116,7 @@ Como cada Mundo tiene su paleta, **salen siete rosetones distintos con un solo c
 
 *Queda un 🙏 en `showDailyLimit()` de audio (la pantalla de "vuelve mañana"). No es una celebración y nada lo sustituye ahí; se dejó a la espera de decisión.*
 
-**`Cierre.decenaCompleta(foto)`** es la guarda común: mira si la **Cruz está encendida**, que es lo que `Cuentas` hace justo al pasar la última ventana del rezo. El decenario es la imagen de una decena rezada, no de una columna a medias.
+**`Cierre.decenaCompleta(foto)`** es la guarda común, y mira **dos** cosas: que la **Cruz esté encendida** —lo que `Cuentas` hace justo al pasar la última ventana del rezo— y que la columna **tenga sitio en pantalla**. El decenario es la imagen de una decena rezada, no de una columna a medias ni de una columna escondida: una columna con `display:none` devuelve rects en cero, y de ahí salía el artefacto de las cuentas partiendo de (0,0). Ante la duda **no se anima**: animar mal es peor que no animar.
 
 ⚠️ **En `rezar` esa guarda no se cumplía nunca, y el decenario moría en silencio.** Sus cuentas son interactivas y encender la Lux vivía **solo** dentro de `countBead()`, el `onclick` del botón *Contar*: quien rezaba sin ir tocando —el caso normal, contar es opcional— terminaba la decena con las once cuentas en blanco y la Cruz apagada, así que `decenaCompleta()` daba `false` y no se creaba ni el velo. *No era el eje Z: el velo (940) siempre estuvo sobre el karaoke (400), y los dos cuelgan de `body`.*
 
@@ -182,7 +182,7 @@ Ahora la Cruz se enciende **por la vía pasiva también** (`_encenderLux()`, lla
 
 ## Columna de cuentas (`cuentas.js`)
 
-*Estado: extraído + dos tintas + congelación, con **golden test** (`tools/test-cuentas.js`, 28 pruebas: motor viejo congelado contra el nuevo, 146 instantes sobre las pistas reales de `bead_sync.json`). **PENDIENTE prueba visual en dispositivo.***
+*Estado: extraído + dos tintas + congelación, con **golden test** (`tools/test-cuentas.js`, 32 pruebas: motor viejo congelado contra el nuevo, 146 instantes sobre las pistas reales de `bead_sync.json`). **PENDIENTE prueba visual en dispositivo.***
 
 **Qué es.** La columna que acompaña al rezo, sincronizada con `data/bead_sync.json` (11 ventanas por pista: 1 Padrenuestro + 10 Ave Marías). Estaba copiada en los cuatro reproductores.
 
@@ -215,6 +215,12 @@ Cuatro tokens en el `:root` de cada reproductor (`--cuenta-apagada`, `--cuenta-b
 Antes se ocultaba en el primer cambio de pista: al usuario se le quitaba de la vista justo lo que acababa de rezar. **Es mejora por sí sola**, y además es el "frame 1" del que partirá el decenario.
 
 `orar` **no** congela: allí la columna pertenece al tool de rezo y el usuario sigue leyendo en la misma pantalla. El banco vigila que siga siendo así.
+
+⚠️ **La congelación solo blindaba la mitad, y en audio las cuentas se apagaban solas.** `congelada` protegía a `pista()`, pero **`tick()` seguía corriendo** — y `tick()` no acumula estado: **repinta las once desde cero** a partir de `currentTime` en cada `timeupdate`. Al terminar el rezo y arrancar Q1, el tiempo vuelve a ~0 mientras `clave` sigue apuntando a las ventanas del rezo, así que ninguna había pasado: borraba las once tintas y **apagaba la Cruz**. La columna sobrevivía, pero vacía — y el decenario de `completeSession` moría en la guarda, que exige justo esa Cruz. Ahora `tick()` sale al instante si está congelada: el frame pintado un instante antes ya es el completo.
+
+⚠️ **Y una vez congelada no volvía a arrancar en toda la sesión.** `pista()` retornaba **antes** de calcular la clave, así que volver al rezo con los saltos de sección no la despertaba. Ahora la clave se calcula primero y la congelación se levanta **solo** si aparece otra clave de rezo: Q1/Q2/Q3 y la oración final no están en `bead_sync`, así que la dejan congelada como debe ser.
+
+⚠️ **`reiniciar()` no reiniciaba nada visible.** Tenía un parámetro `repintar` **opcional**: sin él olvidaba la clave y escondía la columna, pero las once cuentas conservaban su tinta y la Cruz su `show`. audio pasaba `true`; **orar no**. Efecto en orar: al pasar al Misterio siguiente sin rezar, la Cruz heredada dejaba pasar la guarda del decenario, y como la columna estaba escondida sus rects eran ceros y **las once cuentas salían volando desde la esquina (0,0)**. El parámetro era una trampa tendida: **se repinta siempre** y desapareció de la firma. Dos pruebas lo vigilan, una de ellas sobre las páginas.
 
 **Nota del banco:** el motor viejo va congelado dentro del test como referencia. Lleva un `__sembrarSync()` añadido **solo para el banco**: `let` crea enlace léxico y no se ve desde el contexto del `vm`, así que los datos hay que sembrarlos desde dentro. No altera su comportamiento.
 

@@ -508,12 +508,30 @@
   }
 
   /* ¿Se rezó la decena entera? El decenario es la imagen de una decena rezada,
-     no de una columna a medias. Basta con mirar la Cruz: Cuentas la enciende
-     justo al pasar la última ventana del rezo. Cada página decide con esto si
-     el cierre está justificado. */
+     no de una columna a medias. Se miran dos cosas:
+
+     1. La Cruz encendida — Cuentas la enciende justo al pasar la última
+        ventana del rezo, así que es la firma de la decena cerrada.
+     2. Que la columna TENGA SITIO en pantalla. Una columna escondida devuelve
+        rects en cero, y de ahí salió el artefacto de las cuentas volando desde
+        la esquina (0,0): la Cruz heredada del Misterio anterior dejaba pasar
+        la guarda mientras la geometría ya no existía. La regla del cierre es
+        que ante la duda NO se anima; animar mal es peor que no animar.
+
+     Cada página decide con esto si el cierre está justificado. */
   function decenaCompleta(foto) {
-    return !!(foto && foto.cuentas && foto.cuentas.length === 11 &&
-              foto.lux && foto.lux.visible === true);
+    if (!(foto && foto.cuentas && foto.cuentas.length === 11 &&
+          foto.lux && foto.lux.visible === true)) return false;
+
+    var caja = foto.rect;
+    if (!caja || !(caja.width > 0) || !(caja.height > 0)) return false;
+
+    // Once cuentas apiladas una sobre otra no son una columna.
+    var a = foto.cuentas[0].rect, z = foto.cuentas[10].rect;
+    if (!a || !z) return false;
+    if (!(Math.abs(a.left - z.left) > 0 || Math.abs(a.top - z.top) > 0)) return false;
+
+    return true;
   }
 
   window.Cierre = {

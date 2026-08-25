@@ -382,6 +382,36 @@ await ok('la guarda de decena completa mira la Cruz', () => {
   eq(C.decenaCompleta({}), false);
 });
 
+await ok('una columna escondida no anima: ahí salían las cuentas de (0,0)', () => {
+  /* Una columna con display:none devuelve rects en cero. La Cruz heredada del
+     Misterio anterior dejaba pasar la guarda mientras la geometría ya no
+     existía, y las once cuentas partían de la esquina superior izquierda.
+     Ante la duda NO se anima: animar mal es peor que no animar. */
+  const { C } = montar();
+  const foto = fotoColumna();
+  foto.rect = { left: 0, top: 0, width: 0, height: 0 };
+  foto.cuentas.forEach(c => { c.rect = { left: 0, top: 0, width: 0, height: 0 }; });
+  if (C.decenaCompleta(foto))
+    throw new Error('da por buena una columna sin sitio en pantalla');
+});
+
+await ok('once cuentas en el mismo punto tampoco son una columna', () => {
+  const { C } = montar();
+  const foto = fotoColumna();
+  const p = { left: 100, top: 200, width: 16, height: 16 };
+  foto.cuentas.forEach(c => { c.rect = { left: p.left, top: p.top, width: 16, height: 16 }; });
+  if (C.decenaCompleta(foto))
+    throw new Error('once cuentas apiladas no describen un decenario');
+});
+
+await ok('la columna de verdad sigue pasando la guarda', () => {
+  /* La red de seguridad no puede morder al caso legítimo. */
+  const { C } = montar();
+  if (!C.decenaCompleta(fotoColumna()))
+    throw new Error('la guarda se comió el caso bueno');
+});
+
+
 console.log('\n── El Rosario ──');
 
 const CON_ROSARIO = ['audio.html', 'orar.html', 'rezar.html'];
