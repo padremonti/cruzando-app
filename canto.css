@@ -17,6 +17,15 @@
 .canto-kb.run{animation:cantoKenburns var(--ckbdur,15s) ease-out forwards}
 @keyframes cantoKenburns{from{transform:scale(1) translate(0,0)}to{transform:scale(var(--ckbz,1.09)) translate(var(--ckbx,0),var(--ckby,0))}}
 @media (prefers-reduced-motion: reduce){.canto-kb.run{animation:none!important}.canto-lay{transition-duration:.001ms!important}}
+/* Sin arte: este Misterio no tiene carrusel ni imagen única. No se deja negro
+   —se lee como algo roto— sino un fondo quieto: la noche de la app con un halo
+   alto, del color que la página quiera dar en --canto-tinte-rgb (por defecto,
+   el pergamino). Sin Ken Burns: no hay nada que recorrer. */
+.canto-stills.sin-arte{
+  background:
+    radial-gradient(120% 74% at 50% 10%, rgba(var(--canto-tinte-rgb,243,234,216),.17) 0%, transparent 64%),
+    linear-gradient(180deg,#0c1020 0%,#070912 58%,#05060c 100%)}
+
 .canto-scrim{position:absolute;inset:0;z-index:2;pointer-events:none;
   background:linear-gradient(180deg,rgba(6,7,14,.60) 0%,rgba(6,7,14,.20) 22%,rgba(6,7,14,.42) 55%,rgba(6,7,14,.86) 82%,rgba(6,7,14,.96) 100%)}
 

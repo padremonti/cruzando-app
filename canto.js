@@ -219,6 +219,7 @@
     function buildContent() {
       isStatic = !lrcText;
       curLine = -1; imgIdx = -1; imgUrls = []; frontA = true;
+      conArte();          // el canto anterior no decide el fondo de este
 
       $(id.title).textContent = titulo || (cfg.getTitulo ? cfg.getTitulo() : '') || '';
 
@@ -262,6 +263,12 @@
       buildContent();
 
       if (cfg.onOpen) cfg.onOpen();
+      /* El tinte del fondo de respaldo: el color del bloque que se está rezando.
+         Si la página no lo da, canto.css cae en el pergamino. */
+      if (cfg.getTinteRgb) {
+        var t = cfg.getTinteRgb();
+        if (t) $(id.root).style.setProperty('--canto-tinte-rgb', t);
+      }
       detectImages();
       $(id.root).classList.add('open');
       syncIcon();
@@ -395,11 +402,36 @@
       })();
     }
 
-    // Sin carrusel: la imagen única (la misma que ya se ve debajo, así que está cacheada)
+    /* Sin carrusel: la imagen única, la misma que ya se ve en el hero de la
+       página. Se COMPRUEBA antes de pintarla: showStill() pintaba a ciegas, y
+       si la imagen no existía la capa se quedaba transparente con su Ken Burns
+       corriendo sobre nada — una pantalla negra con una animación invisible.
+       Era un camino que solo recorre audio (en rezar todos los cantos tienen
+       carrusel, así que showStill no se usa nunca y el fallo estaba tapado). */
     function finishDetect() {
       if (imgUrls.length > 0) return;
       var still = cfg.getStillUrl ? cfg.getStillUrl() : null;
-      if (still) showStill(still);
+      if (!still) { sinArte(); return; }
+      var im = new Image();
+      im.onload  = function () { if (open) showStill(still); };
+      im.onerror = function () { if (open) sinArte(); };
+      im.src = still;
+    }
+
+    /* Este Misterio no tiene arte de canto: ni carrusel ni imagen única. No se
+       deja la pantalla en negro —eso se lee como algo roto—: se dibuja un fondo
+       quieto, sin Ken Burns, porque no hay nada que recorrer. La letra sigue
+       siendo la protagonista, que es de lo que va esta pantalla. */
+    function sinArte() {
+      var st = $(id.stills); if (!st) return;
+      st.classList.add('sin-arte');
+      var a = $(id.layA), b2 = $(id.layB);
+      if (a) a.classList.remove('front');
+      if (b2) b2.classList.remove('front');
+    }
+
+    function conArte() {
+      var st = $(id.stills); if (st) st.classList.remove('sin-arte');
     }
 
     function layers() {
@@ -409,6 +441,7 @@
     }
 
     function paint(inKb, url, zoom, panX, panY, durS) {
+      conArte();
       inKb.style.background         = "url('" + url + "')";
       inKb.style.backgroundSize     = 'cover';
       inKb.style.backgroundPosition = 'center';

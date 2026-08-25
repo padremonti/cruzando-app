@@ -2427,6 +2427,7 @@ const Canto = Karaoke.create({
   getLrcUrl:        () => MUSB + 'lrc/M_' + cantoMid() + '.lrc',
   getImgCandidates: () => { const mid = cantoMid(); return CANTO_LETTERS.map(l => IMGB + 'cantos/' + mid + '/P_' + mid + l + '.webp'); },
   getStillUrl:      () => IMGB + 'P_' + cantoMid() + '.webp',
+  getTinteRgb:      () => window.rgbBloque ? rgbBloque(blk) : '',
   loadFallbackLetra: async () => {
     const c = Karaoke.getCanto(await Karaoke.loadCantos(nivelId), blk, bIdx);
     return c ? { letra: c.letra, titulo: c.titulo } : null;

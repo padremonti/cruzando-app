@@ -509,7 +509,12 @@ Buckets R2: `R2_ILU` (ilustraciones), `R2_MUS` (música/lrc), `R2_AUD` (audios).
 *Estado: implementado + harness + **golden test** (motor viejo vs. nuevo, frame a frame). **PENDIENTE prueba visual en dispositivo.***
 
 - Pantalla de canto **full-screen** con `.lrc` sincronizado, Ken Burns, botón **Saltar** (20s en sesión / 0s en epílogo).
-- **Escalera de degradación (3 peldaños):** `.lrc` → letra estática de `{nivelId}-cantos.json` → no abre.
+- **Escalera de degradación de la LETRA (3 peldaños):** `.lrc` → letra estática de `{nivelId}-cantos.json` → no abre.
+- **Escalera de degradación de la IMAGEN (3 peldaños), nueva:** carrusel `cantos/{mid}/P_{mid}{a-i}.webp` → imagen única `P_{mid}.webp` (la misma del hero) → **fondo sin arte**.
+
+⚠️ **La imagen no tenía escalera: `finishDetect()` pintaba la única SIN COMPROBARLA.** Si tampoco existía, la capa se quedaba transparente con su Ken Burns corriendo sobre nada — pantalla negra con una animación invisible. Era un camino que **solo recorre audio**: en `rezar` todos los cantos tienen carrusel, así que `showStill()` no se usa nunca y el fallo estaba tapado. Ahora la única se sondea con `new Image()` antes de pintarse, y si falla —o si no hay— entra `.canto-stills.sin-arte`: la noche de la app con un halo alto **del color del bloque** (`--canto-tinte-rgb`, que las páginas dan con el nuevo `window.rgbBloque`), **quieto**, porque sin imagen no hay nada que recorrer. La letra sigue siendo la protagonista, que es de lo que va la pantalla.
+
+*Banco: `tools/test-canto.js` (10). Son pruebas de **fuente**, no de ejecución: `mount()` usa `innerHTML` y correr el motor pediría un parser de HTML de verdad. Vigilan el cableado, que es donde estuvo el error.*
 - `audio` **Fase 1** (karaoke en sesión) + **Fase 2** (epílogo simplificado: helper de botones que reutiliza el karaoke; matriz de planes free/premium/demo; +200m con guardia; "vuelve mañana" diferido a Salir). `rezar` **Fase 3** (BGM se pausa/reanuda según estado previo).
 - **Fase 4 — `canto.js` compartido**: motor extraído de audio+rezar (**mini NO lo usa**, es el ancestro divergente). CSS en `canto.css` (`<link>`), HTML del overlay inyectado por el módulo. Consumidores futuros (retiro, cantos) → `<script>` + `Canto.init({...})`.
 

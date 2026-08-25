@@ -3251,6 +3251,7 @@ const Canto = Karaoke.create({
     return CANTO_LETTERS.map(l => IMG_BASE + 'cantos/' + mid + '/P_' + mid + l + '.webp');
   },
   getStillUrl:      () => IMG_BASE + 'P_' + cantoMid() + '.webp',
+  getTinteRgb:      () => window.rgbBloque ? rgbBloque(currentSession && currentSession.block) : '',
   // Letra de respaldo: la del cuaderno ({nivelId}-cantos.json), sin marcas de tiempo
   loadFallbackLetra: async () => {
     const s = currentSession;

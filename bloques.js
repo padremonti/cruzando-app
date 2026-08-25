@@ -50,6 +50,13 @@
     return hex ? 'rgba(' + _rgb(hex) + ',' + a + ')' : 'rgba(0,0,0,' + a + ')';
   };
 
+  /* El trío suelto, para cuando hace falta componer un rgba() en CSS con una
+     opacidad propia: rgb(var(--x-rgb), .17). Mismo alias que rgbaBloque. */
+  window.rgbBloque = function (bloque) {
+    var hex = COLORES[bloque] || COLORES[ALIAS[bloque]];
+    return hex ? _rgb(hex) : '';
+  };
+
   // Estampa las variables en <html>. Estilo en línea: gana sobre :root, que
   // es justo lo que se quiere — ninguna página vuelve a declararlas.
   // Mismo recurso que ya usa applyBlockColor() de audio.html con --lvl-bold.
