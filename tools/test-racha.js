@@ -512,10 +512,17 @@ CON_SPLASH.forEach(f => {
   });
 });
 
-await ok('orar        · la rama de history.back() también lo pide', () => {
+await ok('orar        · el splash va por un solo camino', () => {
+  /* Antes salir al mapa tenía dos ramas —goTo y history.back()— y el splash
+     había que pedirlo en las dos. Quitado el atajo, queda un solo embudo. */
   const s = leer('orar.html');
-  if (!/RachaSplash\.mostrarSiHay\(\)\.then\(atras,\s*atras\)/.test(s))
-    throw new Error('salir por el historial se saltaría el splash');
+  /* Sin comentarios: el que explica por qué se quitó el atajo lo menciona. */
+  const cuerpo = (s.match(/function salirDeOrar[\s\S]*?\n\}/) || [''])[0]
+    .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  if (/history\.back/.test(cuerpo))
+    throw new Error('volvió la segunda rama: el splash se saltaría por ahí');
+  if (!/pg\.indexOf\('crecer\.html'\)===0 && window\.RachaSplash/.test(s))
+    throw new Error('goTo dejó de pedir el splash al salir al mapa');
 });
 
 await ok('audio       · _goHome pasa por el embudo con splash', () => {

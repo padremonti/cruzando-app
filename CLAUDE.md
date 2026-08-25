@@ -29,6 +29,7 @@ PWA de formación espiritual católica. El usuario reza los 20 Misterios del Ros
 | `sarta.js` | **Geometría del decenario y la camándula.** `Sarta.geometria(forma, {decenas})` — `decenas:1` da el decenario (16 cuentas), `decenas:5` la camándula (60). Pura, sin DOM. Ver § La sarta. |
 | `cuentas.js` | **Motor pasivo de la columna de cuentas del rezo** (1 Padrenuestro + 10 Ave Marías + Cruz Lux). `Cuentas.crear({audio: () => el})`. Lo usan audio y orar; rezar y mini conservan el suyo. Ver § Columna de cuentas. |
 | `bloques.js` | **Origen único del color de los cuatro bloques.** `window.COLORES_BLOQUE` + `window.rgbaBloque(bloque, alfa)`, y estampa 12 variables CSS (`--goz`, `--goz-color`, `--goz-rgb`, ×4). Va en el `<head>`. Ver § Colores de bloque. |
+| `niveles.js` | **Origen único del itinerario**: `NIVELES_ORDER`, `NIVEL_STATUS`, `NIVEL_NAMES` + `Niveles.publicado/siguientePublicado/nombre`. Va en el `<head>` de index, crecer, audio y diario. Ver § El itinerario. |
 
 ## El cierre de una sesión (`cierre.js`)
 
@@ -211,6 +212,27 @@ Antes se ocultaba en el primer cambio de pista: al usuario se le quitaba de la v
 
 **Nota del banco:** el motor viejo va congelado dentro del test como referencia. Lleva un `__sembrarSync()` añadido **solo para el banco**: `let` crea enlace léxico y no se ve desde el contexto del `vm`, así que los datos hay que sembrarlos desde dentro. No altera su comportamiento.
 
+## El itinerario (`niveles.js`)
+
+*Estado: extraído + pruebas dentro de `tools/test-navegacion.js` (34 en total). **PENDIENTE prueba en dispositivo** — ver el aviso del final de esta sección.*
+
+**Las tres tablas que describen el camino** —el orden de los 28 cuadernos, su estado de publicación y su nombre— estaban declaradas dentro de las páginas: `NIVELES_ORDER` y `NIVEL_STATUS` en index y crecer; `NIVEL_NAMES` además en audio y diario, cuatro copias idénticas. Ahora salen de un solo sitio, igual que el color de bloque.
+
+| | Qué es |
+|---|---|
+| `Niveles.ORDEN` | los 28 ids en orden de itinerario |
+| `Niveles.ESTADO` | `'published'` (textos **y** audio) · `'dev'` (textos en `data/`, falta el audio) · `'empty'` (nada). Hoy solo **0101–0104** están publicados |
+| `Niveles.NOMBRES` | el nombre corto (`'Cruz 1-1: Males'`). El selector de crecer parte por `': '` para sacar el subtítulo |
+| `siguientePublicado(id)` | el siguiente cuaderno publicado, o **`null`** si no hay |
+
+⚠️ **`audio.html` leía dos tablas que allí no existían.** El bucle que busca el siguiente cuaderno al terminar el Misterio 20 hacía `window.NIVELES_ORDER || []` → `[]`, `indexOf` → `-1`, y el `for` no entraba nunca. **Un usuario free que cerraba los 20 Misterios se quedaba en el mismo cuaderno.** Ahora usa `Niveles.siguientePublicado(curNivelId)`.
+
+⚠️ **Al cerrar 0104 sigue sin haber adónde ir**, y eso ya no es un bug de código: los Mundos 2 a 7 están en `'dev'`, así que `siguientePublicado('0104')` devuelve `null` **a propósito** y el usuario se queda en su cuaderno. Se destrabará solo cuando 0201 pase a `'published'`. El arreglo cambia el comportamiento real hoy en **0101→0102→0103→0104**.
+
+⚠️ **La guarda de "nivel en desarrollo" de audio también estaba muerta, y ahora vive.** `audio.html:2356` hacía `(window.NIVEL_STATUS || {})`, siempre `{}`, así que `_stReq` caía en `'published'` por defecto y el `location.replace('crecer.html?msg=nivel_en_desarrollo')` **no se disparaba jamás**. Con las tablas cargadas, un usuario no-developer que entre a audio en un cuaderno `dev` o `empty` es devuelto al mapa con su aviso —que es lo que el código pedía— en vez de encontrarse un 404 de audio y la pantalla de "próximamente". El developer queda exento por la misma condición que ya tenía.
+
+**`extras.html` conserva su propia tabla a propósito.** Usa otro formato (`'Cruz · Males'`) y tiene subtítulos para los Mundos 2-7 que la canónica no lleva: unificarlas es decisión de contenido, no de código. Hay una prueba que la vigila para que la diferencia siga siendo deliberada.
+
 ## Navegación: dónde termina una sesión
 
 **Hay dos hogares, y no son intercambiables:** `index.html` es la **pantalla de acceso y hub**; `crecer.html` es el **mapa** — el camino con nodos, y el único que tiene motor de mapa (`computeAllPositions`, `drawMapPath`, `BLOQUES_MAP`). Estructuralmente `crecer` es `index` **más** el mapa: las 18 secciones de primer nivel son idénticas, y por eso el bloque de acceso está duplicado (§ Consentimiento, "los gemelos"). `crecer.html` **no enlaza a `index.html` por ningún sitio**: el flujo es un embudo de un solo sentido.
@@ -230,9 +252,47 @@ Antes se ocultaba en el primer cambio de pista: al usuario se le quitaba de la v
 
 ⚠️ Esa salida pide **salida directa** (`salirConAviso('crecer.html', true)`): "Seguir rezando" recarga orar y mete su propia entrada en el historial, así que el atajo de `history.back()` de `salirDeOrar` devolvería al orar anterior en vez de al mapa. La bandera `_exitDirecto` se limpia en `salirDeOrar` y en `_exitCancel`.
 
+⚠️ **La salida de orar NO usa `history.back()`.** Había un atajo —si el destino era el mapa y quedaba historial, se retrocedía para que el gesto adelante devolviera a la sesión— pero `history.back()` va a la página **anterior**, que solo es `crecer` si se llegó directo desde allí: entrando desde audio, por enlace directo o tras recargar orar, el botón "Crecer" acababa en otro sitio. Ahora `salirDeOrar()` siempre navega al destino. Con él se fue la bandera `_exitDirecto`, que solo existía para eximirse de ese atajo.
+
+### Dónde estoy ≠ hasta dónde he llegado
+
+**Los tres modos progresan igual.** audio, orar y rezar escriben en `users/{uid}/progress/{nivelId}`, y la frontera del mapa se calcula **exactamente de ahí** — no del historial de audio. No es cierto que solo audio haga progresar.
+
+Lo que estaba descuadrado era el **marcador de nivel**, `localStorage.cruzando_current_nivel`. crecer decide qué nivel enseñar con:
+
+```js
+return bookmark || frontier;   // crecer.html · getCurrentNivelFromFirestore
+```
+
+**El marcador manda sobre la frontera**, y lo escribían solo audio, crecer e index. Efecto real: rezabas un bloque en 2-2 desde el Libro, volvías al mapa y te enseñaba otro nivel — el progreso estaba guardado, pero el mapa miraba a otro sitio.
+
+Y una segunda mitad: `orar` y `rezar` caían a `'0101'` cuando no había `?c=`, así que entrar por la barra de navegación te devolvía al Mundo 1 aunque estuvieras rezando el 2-2.
+
+Ahora los dos **escriben** el marcador al fijar nivel y lo **leen** como valor por defecto (`p.get('c') || nivelRecordado() || '0101'`), con `recordarNivel` / `nivelRecordado` validando que sean cuatro dígitos.
+
+⚠️ **La frontera no sirve para "dónde estoy":** solo avanza con el nivel **entero** (los 20 Misterios, los cuatro bloques). Con 5 de 20 en 2-2 no se mueve, y eso es correcto. Por eso el marcador tiene que llevar la posición, aparte del avance.
+
+### El developer recorre lo que su progreso desbloqueó
+
+Los Mundos 2 a 7 están en `NIVEL_STATUS` como `dev`/`empty`, pero **sus textos ya existen** en `data/{nivelId}.json` (los 28 archivos están completos y con la misma forma que el Mundo 1). Lo que falta es el **audio en R2**.
+
+Tres puertas, y las tres eximen al developer:
+
+| Dónde | Qué hace |
+|---|---|
+| `crecer` · `selectNivel()` | avisa "en desarrollo" salvo para developer |
+| `crecer` · `buildLevelPicker()` | el candado del orbe mira **el progreso** (la frontera), no el estado de publicación |
+| `audio` · `audioEl.onerror` | ⚠️ **la que fallaba** |
+
+⚠️ **audio deducía "en desarrollo" de un 404.** No hay comprobación de permisos: si la pista `start` no carga, `showComingSoon()` levanta el muro. Con los Mundos 2-7 sin audio, eso alcanzaba también al developer. Ahora la pantalla solo sale para el usuario normal.
+
+⚠️ **Y al developer no se le auto-avanza.** Cada pista que falta dispara `onerror` → `goTrack(idx+1)`: en un nivel sin audio, la sesión entera pasaría en un instante, no se vería nada y el Misterio quedaría **marcado como rezado**. Para el developer el reproductor se queda en la sección y se mueve con los saltos `◀◀ ▶▶`, que ya son solo suyos.
+
+*Ojo: `NIVEL_STATUS` y `NIVELES_ORDER` se definen solo en `index.html` y `crecer.html`. En `audio.html` llegan `undefined`, así que su comprobación de nivel publicado (`_stReq`) es inerte, y el bucle de avance del free (`_NSTATUS[...] === 'published'`) nunca encuentra el siguiente nivel.*
+
 **`world.html` está inalcanzable.** Su único enlace vive en `mostrarEsferas()` (`crecer.html`), que solo corre bajo `recompensasON()` — se apagó con el kit de recompensas sin que nadie lo notara.
 
-**Banco de pruebas:** `tools/test-navegacion.js` (13 pruebas). Comprueba línea a línea que ninguna salida de sesión se escape al hub (con excepciones por **línea completa**, no por subcadena), que las tres barras lleven al mapa etiquetadas "Crecer", y que la salida de orar siga cableada en sus dos finales. Importa porque el splash de racha se engancha justo en estos puntos.
+**Banco de pruebas:** `tools/test-navegacion.js` (25 pruebas). Comprueba línea a línea que ninguna salida de sesión se escape al hub (con excepciones por **línea completa**, no por subcadena), que las tres barras lleven al mapa etiquetadas "Crecer", y que la salida de orar siga cableada en sus dos finales. Importa porque el splash de racha se engancha justo en estos puntos.
 
 ## Modelo de datos Firestore
 
@@ -547,16 +607,17 @@ escribe `users/{uid}.terminos = { aceptado, fecha (serverTimestamp), version, me
 2. Karaoke / `canto.js` — prueba **visual** (harness + golden test ya pasados).
 3. `sanar.html` Fases B-C — que `_perfil` llegue del doc tras Auth y el elenco se repinte reordenado (Fase A ya probada).
 4. Ciclo "completado" end-to-end — rezar en mini → volver a sanar → check + reordenado; render del check en wheel 3D; offline (rezar sin red → sube al reabrir).
+5. **Itinerario** (`niveles.js`) — comprobar en dispositivo: que un **free** que cierra el Misterio 20 de 0101 despierte en **0102** Misterio 1, y que un no-developer que abra audio en un cuaderno `dev` (p. ej. 0202) sea devuelto al mapa con el aviso `nivel_en_desarrollo` en vez de toparse con la pantalla de "próximamente". El developer debe seguir entrando a todos.
 
 **Tareas anotadas (aparte):**
-5. **Settings** de `index.html`/`crecer.html` — botón "Rehacer mi perfil de afinidad" → `sanar.html?rehacer=1` (sanar ya reconoce el parámetro).
-6. `sanar.html` — `guardarAfinidad(pain,senales)` (señal implícita de uso) sigue `TODO`, para una fase futura que combine test+uso.
-7. `mini.html` — diario en `reflections/…`, alternar pistas MA/MB/L_MA, y crédito (esperan el **modelo económico**, no implementar por pedazos).
-8. `diario.html` — revisar nav bar, tema y plan (nunca auditado).
-9. Contenido Mundo 2 — faltan `0201.json`, `0202.json`, etc.
-10. Verificación en producción: respuestas del modal de audio.html → diario.html.
-11. **App Check**: registrar la clave de sitio reCAPTCHA v3 para `cruzando.app`, pegarla en `appcheck-key.js`, desplegar y mirar métricas unos días **antes** de activar el bloqueo en la consola (Auth primero; Firestore/Functions después).
-12. Alta en dispositivo: casilla bloqueando por los dos métodos, `users/{uid}.terminos` escrito, y que "Entrar" siga sin fricción.
-13. `firebase-service.js` es código muerto (ninguna página lo carga) y todavía registra sin casilla: borrarlo o alinearlo si alguna vez se conecta.
-14. **Kit de recompensas en standby** — prueba **visual** en dispositivo con `MOSTRAR_RECOMPENSAS = false`: que el nodo cada-5 se vea como separador discreto (claro y oscuro), que el camino no se descuadre, que no quede ningún cofre/botón/filtro muerto, y que los metros se sigan acumulando y mostrando normal.
-15. **DEUDA BLOQUEANTE del kit** — el doble cobro de `extras.html` (`getProductState` compara objetos contra strings) debe arreglarse **o eliminarse en el rediseño de la tienda ANTES** de poner `MOSTRAR_RECOMPENSAS = true`. Ver § Kit de recompensas.
+6. **Settings** de `index.html`/`crecer.html` — botón "Rehacer mi perfil de afinidad" → `sanar.html?rehacer=1` (sanar ya reconoce el parámetro).
+7. `sanar.html` — `guardarAfinidad(pain,senales)` (señal implícita de uso) sigue `TODO`, para una fase futura que combine test+uso.
+8. `mini.html` — diario en `reflections/…`, alternar pistas MA/MB/L_MA, y crédito (esperan el **modelo económico**, no implementar por pedazos).
+9. `diario.html` — revisar nav bar, tema y plan (nunca auditado).
+10. Contenido Mundo 2 — faltan `0201.json`, `0202.json`, etc.
+11. Verificación en producción: respuestas del modal de audio.html → diario.html.
+12. **App Check**: registrar la clave de sitio reCAPTCHA v3 para `cruzando.app`, pegarla en `appcheck-key.js`, desplegar y mirar métricas unos días **antes** de activar el bloqueo en la consola (Auth primero; Firestore/Functions después).
+13. Alta en dispositivo: casilla bloqueando por los dos métodos, `users/{uid}.terminos` escrito, y que "Entrar" siga sin fricción.
+14. `firebase-service.js` es código muerto (ninguna página lo carga) y todavía registra sin casilla: borrarlo o alinearlo si alguna vez se conecta.
+15. **Kit de recompensas en standby** — prueba **visual** en dispositivo con `MOSTRAR_RECOMPENSAS = false`: que el nodo cada-5 se vea como separador discreto (claro y oscuro), que el camino no se descuadre, que no quede ningún cofre/botón/filtro muerto, y que los metros se sigan acumulando y mostrando normal.
+16. **DEUDA BLOQUEANTE del kit** — el doble cobro de `extras.html` (`getProductState` compara objetos contra strings) debe arreglarse **o eliminarse en el rediseño de la tienda ANTES** de poner `MOSTRAR_RECOMPENSAS = true`. Ver § Kit de recompensas.

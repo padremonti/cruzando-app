@@ -1374,6 +1374,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   border-radius: 12px; max-width: 280px;
 }
 </style>
+<script src="niveles.js"></script>
 <script src="bloques.js"></script>
 <link rel="stylesheet" href="cierre.css">
 <script src="sarta.js"></script>
@@ -1890,24 +1891,7 @@ const BLOCK_COLORS = {
 const MUNDO_NOMBRES = {
   1:'la Cruz', 2:'las Emociones', 3:'la Mente',
   4:'el Corazón', 5:'las Relaciones', 6:'el Amor', 7:'el Tiempo'
-};
-const NIVEL_NAMES = {
-  '0101':'Cruz 1-1: Males',      '0102':'Cruz 1-2: Pecado',
-  '0103':'Cruz 1-3: Conversión', '0104':'Cruz 1-4: Gracia',
-  '0201':'Emociones 2-1',        '0202':'Emociones 2-2',
-  '0203':'Emociones 2-3',        '0204':'Emociones 2-4',
-  '0301':'Mente 3-1',            '0302':'Mente 3-2',
-  '0303':'Mente 3-3',            '0304':'Mente 3-4',
-  '0401':'Corazón 4-1',          '0402':'Corazón 4-2',
-  '0403':'Corazón 4-3',          '0404':'Corazón 4-4',
-  '0501':'Relaciones 5-1',       '0502':'Relaciones 5-2',
-  '0503':'Relaciones 5-3',       '0504':'Relaciones 5-4',
-  '0601':'Amor 6-1',             '0602':'Amor 6-2',
-  '0603':'Amor 6-3',             '0604':'Amor 6-4',
-  '0701':'Tiempo 7-1',           '0702':'Tiempo 7-2',
-  '0703':'Tiempo 7-3',           '0704':'Tiempo 7-4',
-};
-const BLOCK_FULL_NAMES = {
+};const BLOCK_FULL_NAMES = {
   gozosos:'Misterios Gozosos', luminosos:'Misterios Luminosos',
   dolorosos:'Misterios Dolorosos', gloriosos:'Misterios Gloriosos'
 };
@@ -3409,13 +3393,32 @@ function goTrack(idx) {
 
   audioEl.onerror = () => {
     console.warn('Audio no encontrado:', track.url);
-    // Si falla el START (primer track), el nivel no está publicado aún
-    if (track.folder === 'start') {
+    /* Si falla el START, el nivel no tiene audio todavía: para el usuario normal
+       eso ES "en desarrollo", y la pantalla se lo dice.
+
+       Pero el developer tiene que poder RECORRER lo que su progreso ya
+       desbloqueó aunque el audio no exista: los textos de los Mundos 2 a 7 ya
+       están en data/{nivelId}.json y hay que poder revisarlos. Para él la pista
+       que falta se salta como cualquier otra, en vez de levantar el muro. */
+    const _dev = (window.effectivePlan ? window.effectivePlan() : 'free') === 'developer';
+    if (track.folder === 'start' && !_dev) {
       showComingSoon();
       return;
     }
     markSegProgress(idx, 100);
     if (isCanto(idx)) bgmResume();
+
+    /* Al developer NO se le auto-avanza. En un nivel sin audio, cada pista daría
+       error y la cadena de avances recorrería la sesión entera en un instante:
+       no vería nada y el Misterio quedaría marcado como rezado. Se queda en la
+       sección, y se mueve con los saltos de developer. */
+    if (_dev) {
+      isPlaying = false;
+      updatePlayPauseBtn();
+      showToast('Sin audio aquí · usa los saltos de sección');
+      return;
+    }
+
     // Si quedan tracks, avanzar; si no, terminar
     if (idx + 1 < currentSession.playlist.length) {
       goTrack(idx + 1);
@@ -3933,12 +3936,17 @@ async function completeSession() {
     let nextNivelId   = curNivelId;
     if (nextMisterio > 20) {
       nextMisterio = 1;
-      const _NORDER  = window.NIVELES_ORDER || [];
-      const _NSTATUS = window.NIVEL_STATUS  || {};
-      const _idx = _NORDER.indexOf(curNivelId);
-      for (let i = _idx + 1; i < _NORDER.length; i++) {
-        if (_NSTATUS[_NORDER[i]] === 'published') { nextNivelId = _NORDER[i]; break; }
-      }
+      /* Este bucle vivía aquí en línea y leía window.NIVELES_ORDER / NIVEL_STATUS,
+         que solo se declaraban en el hub y en el mapa: en audio llegaban vacíos,
+         el índice salía -1 y el bucle no entraba nunca. Un free que terminaba el
+         Misterio 20 se quedaba en el mismo cuaderno. Ahora las tablas vienen de
+         niveles.js y la búsqueda es del módulo.
+
+         Si no hay siguiente publicado —hoy, al cerrar 0104, porque los Mundos 2
+         a 7 están en 'dev'— se queda en el suyo y vuelve al Misterio 1: no hay
+         adónde mandarlo todavía. */
+      const _sig = window.Niveles ? Niveles.siguientePublicado(curNivelId) : null;
+      if (_sig) nextNivelId = _sig;
     }
 
     try {

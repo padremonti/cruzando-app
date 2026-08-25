@@ -2712,6 +2712,7 @@ async function loadAndEnter(nId,block,idx){
   nivelId=nId;
   nivel=parseInt(nivelId.slice(0,2))||1;
   cua=parseInt(nivelId.slice(2,4))||1;
+  recordarNivel(nivelId);
   blk=block;
   bIdx=idx;
 
@@ -2759,12 +2760,34 @@ function initAuth(){
   });
 }
 
+/* ── Marcador de nivel entre modos ──────────────────────────────────────────
+   crecer decide qué nivel enseñar con `bookmark || frontier`, y el bookmark es
+   este `cruzando_current_nivel`. Lo escribían audio, crecer e index; orar y
+   rezar no. Efecto: rezabas un bloque en 2-2, volvías al mapa y te enseñaba
+   otro nivel — el progreso estaba guardado, pero el mapa miraba a otro sitio.
+
+   La frontera no sirve para esto: solo avanza con el nivel ENTERO (los 20), así
+   que "dónde estoy" tiene que llevarlo el marcador, aparte de "hasta dónde he
+   llegado". */
+function recordarNivel(id){
+  try{ if(/^\d{4}$/.test(id||'')) localStorage.setItem('cruzando_current_nivel', id); }catch(e){}
+}
+function nivelRecordado(){
+  try{
+    const b=localStorage.getItem('cruzando_current_nivel');
+    return /^\d{4}$/.test(b||'') ? b : null;
+  }catch(e){ return null; }
+}
+
 async function loadAndStart(){
   showLoading();
   const p=new URLSearchParams(location.search);
-  nivelId=p.get('c')||'0101';
+  /* Sin ?c= —entrando por la barra de navegación— se seguía al Mundo 1 aunque
+     el usuario estuviera rezando otro nivel. Ahora manda el marcador. */
+  nivelId=p.get('c')||nivelRecordado()||'0101';
   nivel=parseInt(nivelId.slice(0,2))||1;
   cua=parseInt(nivelId.slice(2,4))||1;
+  recordarNivel(nivelId);
 
   try{
     const snap=await FS.collection('users').doc(usr.uid).get();

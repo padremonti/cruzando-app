@@ -629,6 +629,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   color:var(--lum);
 }
 </style>
+<script src="niveles.js"></script>
 <script src="bloques.js"></script>
 <script src="plan-utils.js"></script>
 </head>
@@ -827,23 +828,6 @@ const firebaseConfig = {
    ════════════════════════════════════════════════════ */
 
 // Nombres de niveles (Mundo-Nivel → etiqueta)
-const NIVEL_NAMES = {
-  '0101':'Cruz 1-1: Males',      '0102':'Cruz 1-2: Pecado',
-  '0103':'Cruz 1-3: Conversión', '0104':'Cruz 1-4: Gracia',
-  '0201':'Emociones 2-1',        '0202':'Emociones 2-2',
-  '0203':'Emociones 2-3',        '0204':'Emociones 2-4',
-  '0301':'Mente 3-1',            '0302':'Mente 3-2',
-  '0303':'Mente 3-3',            '0304':'Mente 3-4',
-  '0401':'Corazón 4-1',          '0402':'Corazón 4-2',
-  '0403':'Corazón 4-3',          '0404':'Corazón 4-4',
-  '0501':'Relaciones 5-1',       '0502':'Relaciones 5-2',
-  '0503':'Relaciones 5-3',       '0504':'Relaciones 5-4',
-  '0601':'Amor 6-1',             '0602':'Amor 6-2',
-  '0603':'Amor 6-3',             '0604':'Amor 6-4',
-  '0701':'Tiempo 7-1',           '0702':'Tiempo 7-2',
-  '0703':'Tiempo 7-3',           '0704':'Tiempo 7-4',
-};
-
 const BLOQUE_NAMES = {
   gozosos:   'Misterios Gozosos',
   luminosos: 'Misterios Luminosos',
