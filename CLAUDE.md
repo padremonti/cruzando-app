@@ -33,7 +33,7 @@ PWA de formación espiritual católica. El usuario reza los 20 Misterios del Ros
 
 ## El cierre de una sesión (`cierre.js`)
 
-*Estado: los **tres cierres** implementados —decenario, Rosario y rosetón— con salida a las Letanías + banco de pruebas (`tools/test-cierre.js`, 73). **PENDIENTE prueba visual en dispositivo.***
+*Estado: los **tres cierres** implementados —decenario, Rosario y rosetón— con salida a las Letanías + banco de pruebas (`tools/test-cierre.js`, 78). **Decenario verificado en dispositivo en `mini`; el de `rezar` acaba de destrabarse (ver el aviso de la guarda). Resto PENDIENTE de prueba visual.***
 
 **La columna del rezo se cierra en decenario.** Es el mismo objeto que el usuario tuvo a la derecha toda la sesión, enrollado. Once cuentas contra once, Padrenuestro con Padrenuestro:
 
@@ -117,6 +117,12 @@ Como cada Mundo tiene su paleta, **salen siete rosetones distintos con un solo c
 *Queda un 🙏 en `showDailyLimit()` de audio (la pantalla de "vuelve mañana"). No es una celebración y nada lo sustituye ahí; se dejó a la espera de decisión.*
 
 **`Cierre.decenaCompleta(foto)`** es la guarda común: mira si la **Cruz está encendida**, que es lo que `Cuentas` hace justo al pasar la última ventana del rezo. El decenario es la imagen de una decena rezada, no de una columna a medias.
+
+⚠️ **En `rezar` esa guarda no se cumplía nunca, y el decenario moría en silencio.** Sus cuentas son interactivas y encender la Lux vivía **solo** dentro de `countBead()`, el `onclick` del botón *Contar*: quien rezaba sin ir tocando —el caso normal, contar es opcional— terminaba la decena con las once cuentas en blanco y la Cruz apagada, así que `decenaCompleta()` daba `false` y no se creaba ni el velo. *No era el eje Z: el velo (940) siempre estuvo sobre el karaoke (400), y los dos cuelgan de `body`.*
+
+Ahora la Cruz se enciende **por la vía pasiva también** (`_encenderLux()`, llamada desde `_tickBeads` al cerrarse la undécima ventana), y de paso repara un hueco visual propio de rezar: antes esa Cruz no se veía nunca sin tocar. La consolidación `_cerrarColumnaDecena()` corre justo antes de la instantánea y termina lo que el tick habría hecho —el tick va a 80 ms y se detiene al pausar el audio, así que si la última ventana cierra con la pista la cuenta 10 se quedaba `active` y sin tinta.
+
+⚠️ **Encender la Cruz es una luz, no un cobro.** Los **25 m por cuenta** son el premio de tocar **a tiempo** —el incentivo para rezar atento— y siguen viviendo solo en `countBead()`. Ni `_encenderLux()` ni `_cerrarColumnaDecena()` llaman a `addMeters` ni pintan bonus, y la consolidación usa la tinta de "pasó sin tocar" (`lit-white`), **nunca** la de oro (`lit-correct`). Por la misma razón **el acorde de tres notas y la vibración se quedan en la vía táctil**: son la recompensa de haber contado las once. Tres pruebas lo vigilan.
 
 **`mini` y `rezar` conservan su motor de cuentas** y solo crean una instancia de `Cuentas` para **leer** con `instantanea()`: mini el suyo (aro pequeño, oro sobre noche) y rezar el interactivo. Es exactamente para lo que existe `instantanea()`. `mini` usa además su propio oro `#E8B94A` en vez del color de bloque: allí toda la paleta es oro-sobre-noche y un decenario rosa desentonaría con su propia pantalla.
 

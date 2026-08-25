@@ -1797,6 +1797,11 @@ function _tickBeads(){
 
   _beadActive=active;
 
+  /* Once cuentas cerradas = decena cerrada, se hayan tocado o no. La Cruz se
+     enciende aquí y no al final de la pista, para que no haya salto entre lo
+     que el usuario ve y la animación del decenario que parte de ello. */
+  if(beadCount>=11)_encenderLux();
+
   if(active>=0){
     // Iluminar en blanco todos los beads saltados
     while(beadCount<active){
@@ -1914,17 +1919,62 @@ function _showBeadBonus(beadEl){
   setTimeout(()=>{el.remove();},950);
 }
 
-function _onBeadComplete(){
+/* ── La Cruz se enciende se toque o no ────────────────────────────────────
+   La Lux es la imagen de la decena CERRADA, y la decena se cierra igual si el
+   usuario no fue tocando: el tick pasivo va marcando en lit-white cada cuenta
+   cuya ventana pasó y deja beadCount en 11. Pero encender la Lux vivía solo en
+   el tap número 11, así que quien reza sin contar —el caso normal, contar es
+   opcional— no la veía nunca... y el decenario del final moría en silencio en
+   la guarda `Cierre.decenaCompleta`, que exige exactamente eso: la Cruz
+   encendida.
+
+   ⚠️ Lo que NO se reparte por la vía pasiva son los metros. Los 25 m por cuenta
+   son el premio de tocar a tiempo —el incentivo para rezar atento— y siguen
+   viviendo solo en countBead(). Aquí no se llama a addMeters ni se pinta bonus.
+   Se enciende una luz, no se cobra un premio. */
+function _encenderLux(){
   const lux=$('bead-lux-cross');
-  if(lux){
-    lux.classList.remove('show');
-    void lux.offsetWidth;
-    lux.classList.add('show');
-    lux.style.filter='drop-shadow(0 0 12px rgba(255,255,255,0.8))';
-    setTimeout(function(){lux.style.filter='';},2000);
-  }
+  if(!lux||lux.classList.contains('show'))return false;   // idempotente
+  lux.classList.add('show');
+  lux.style.filter='drop-shadow(0 0 12px rgba(255,255,255,0.8))';
+  setTimeout(function(){lux.style.filter='';},2000);
+  return true;
+}
+
+function _onBeadComplete(){
+  /* El acorde y la vibración sí son recompensa de haber contado las once: se
+     quedan en la vía táctil. La Cruz, no. */
+  const lux=$('bead-lux-cross');
+  if(lux){ lux.classList.remove('show'); void lux.offsetWidth; }
+  _encenderLux();
   playBeadComplete();
   if(navigator.vibrate)navigator.vibrate([30,60,30,60,80]);
+}
+
+/* Consolidación determinista, justo antes de la instantánea del decenario.
+   El tick corre cada 80 ms y se detiene en cuanto el audio pausa: si la última
+   ventana termina a la vez que la pista, la cuenta 10 se queda 'active' y sin
+   tinta, y el decenario la dibujaría distinta a sus diez hermanas. Aquí se
+   termina lo que el tick habría hecho —tinta de "pasó sin tocar", nunca la de
+   oro— y se enciende la Cruz. Sin metros, por lo mismo de arriba. */
+function _cerrarColumnaDecena(){
+  const wrap=$('beads-col-wrap');
+  if(!_currentSyncKey||!wrap||wrap.style.display==='none')return false;
+  for(let i=0;i<=10;i++){
+    const el=_getBeadEl(i);
+    if(!el)continue;
+    el.classList.remove('active');
+    if(!el.classList.contains('lit-correct')&&
+       !el.classList.contains('lit-normal')&&
+       !el.classList.contains('lit-spam')&&
+       !el.classList.contains('lit-white')){
+      el.classList.add('lit-white');
+    }
+  }
+  beadCount=11;
+  _beadActive=-1;
+  _encenderLux();
+  return true;
 }
 
 function countBead(){
@@ -2512,8 +2562,10 @@ async function onTrackEnded(){
     await completeMystery();
     if(track.mIdx===4) rezoConcluido=true;
     if(!_freeNoGana){ await addMeters(MR_REZO); showSlide(MR_REZO); }
-    /* La decena se cierra en decenario mientras la siguiente pista ya arranca:
-       sin await, para que no haya tiempo muerto. */
+    /* La decena se cierra en decenario mientras la siguiente pista —el canto—
+       ya arranca: sin await, para que no haya tiempo muerto. El velo (940) va
+       por encima del karaoke (400), así que se ve sobre las imágenes. */
+    _cerrarColumnaDecena();
     mostrarDecenario();
   }
   playNext();

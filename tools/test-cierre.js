@@ -825,6 +825,79 @@ await ok('cierre.js y cierre.css están en UTF-8 limpio', () => {
   });
 });
 
+
+console.log('\n── rezar: la Cruz se enciende se toque o no ──');
+
+const _cuerpo = (src, fn) =>
+  (src.match(new RegExp('function ' + fn + '\\(\\)[\\s\\S]*?\\n\\}')) || [''])[0];
+
+await ok('rezar    · la Lux ya no depende del tap 11', () => {
+  /* En rezar las cuentas son interactivas, y encender la Lux vivía SOLO dentro
+     de countBead() —el onclick del botón Contar—. Quien rezaba sin contar
+     terminaba la decena con la columna entera en blanco y la Cruz apagada, así
+     que Cierre.decenaCompleta() daba false y el decenario moría en silencio. */
+  const s = leer('rezar.html');
+  if (!/function _encenderLux/.test(s))
+    throw new Error('no existe la vía de encendido separada del tap');
+  const tick = _cuerpo(s, '_tickBeads');
+  if (!/_encenderLux/.test(tick))
+    throw new Error('el tick pasivo no enciende la Cruz al cerrar la decena');
+  if (!/beadCount>=11\)_encenderLux/.test(tick.replace(/ /g, '')))
+    throw new Error('la enciende sin comprobar que la decena esté cerrada');
+});
+
+await ok('rezar    · la vía pasiva NO reparte metros', () => {
+  /* Los 25 m por cuenta son el premio de tocar a tiempo: el incentivo para
+     rezar atento. Encender la Cruz es una luz, no un cobro. */
+  const s = leer('rezar.html');
+  ['_encenderLux', '_cerrarColumnaDecena'].forEach(fn => {
+    const c = _cuerpo(s, fn);
+    if (!c) throw new Error('no encontré ' + fn);
+    if (/addMeters|_showBeadBonus/.test(c))
+      throw new Error(fn + ' reparte metros que el usuario no ganó');
+    if (/add\(\s*'lit-correct/.test(c))
+      throw new Error(fn + ' pinta la tinta de oro, que es la del tap a tiempo');
+  });
+});
+
+await ok('rezar    · el acorde y la vibración siguen siendo del tap', () => {
+  /* La Cruz es la imagen de la decena cerrada (siempre); el acorde de tres
+     notas y la vibración son la recompensa de haber contado las once. */
+  const s   = leer('rezar.html');
+  const lux = _cuerpo(s, '_encenderLux');
+  if (/playBeadComplete|navigator\.vibrate/.test(lux))
+    throw new Error('la vía pasiva se lleva la recompensa del tap');
+  const comp = _cuerpo(s, '_onBeadComplete');
+  if (!/playBeadComplete/.test(comp) || !/navigator\.vibrate/.test(comp))
+    throw new Error('el tap perdió su recompensa');
+  if (!/_encenderLux/.test(comp))
+    throw new Error('el tap dejó de encender la Cruz');
+});
+
+await ok('rezar    · la columna se consolida antes de la instantánea', () => {
+  /* El tick corre cada 80 ms y se detiene al pausar el audio: si la última
+     ventana termina con la pista, la cuenta 10 se queda 'active' y sin tinta,
+     y el decenario la dibujaría distinta a sus diez hermanas. */
+  const s = leer('rezar.html').replace(/[ \t]/g, '');
+  const i = s.indexOf('_cerrarColumnaDecena();');
+  if (i === -1) throw new Error('no se consolida la columna al cerrar el Misterio');
+  const j = s.indexOf('mostrarDecenario();', i);
+  if (j === -1) throw new Error('la consolidación quedó suelta, sin decenario detrás');
+  if (s.slice(i + '_cerrarColumnaDecena();'.length, j).trim() !== '')
+    throw new Error('algo se metió entre la consolidación y la instantánea');
+});
+
+await ok('rezar    · el velo del cierre va por encima del karaoke', () => {
+  /* No era el bug —el decenario nunca llegaba a crearse— pero es la condición
+     que hace posible verlo sobre las imágenes del canto: los dos cuelgan de
+     document.body, así que solo los separa el z-index. */
+  const mv = leer('cierre.css').match(/\.cierre-velo[\s\S]{0,400}?z-index:\s*(\d+)/);
+  const mk = leer('canto.css').match(/\.karaoke\{[^}]*z-index:(\d+)/);
+  if (!mv || !mk) throw new Error('no pude leer alguno de los dos z-index');
+  if (!(+mv[1] > +mk[1]))
+    throw new Error('el velo (' + mv[1] + ') no está sobre el karaoke (' + mk[1] + ')');
+});
+
   console.log('' + '─'.repeat(0));  console.log('\n' + '─'.repeat(64));
   if (fallos) {
     console.log('  ✗ ' + fallos + ' fallo(s), ' + pasos + ' pasada(s)');
