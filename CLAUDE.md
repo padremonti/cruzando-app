@@ -518,6 +518,38 @@ Buckets R2: `R2_ILU` (ilustraciones), `R2_MUS` (música/lrc), `R2_AUD` (audios).
 - `audio` **Fase 1** (karaoke en sesión) + **Fase 2** (epílogo simplificado: helper de botones que reutiliza el karaoke; matriz de planes free/premium/demo; +200m con guardia; "vuelve mañana" diferido a Salir). `rezar` **Fase 3** (BGM se pausa/reanuda según estado previo).
 - **Fase 4 — `canto.js` compartido**: motor extraído de audio+rezar (**mini NO lo usa**, es el ancestro divergente). CSS en `canto.css` (`<link>`), HTML del overlay inyectado por el módulo. Consumidores futuros (retiro, cantos) → `<script>` + `Canto.init({...})`.
 
+### El arte del canto: completo o no se publica (decisión 2026-08-25)
+
+**`audio.html` no se rebaja.** Es el producto que se ofrece incluso gratis —una sesión al día— y el canto es su remate. Se sopesó y **se descartó** la alternativa de "experiencia parcial mientras llega el arte": una pantalla a medias ahí se lee como producto incompleto, no como contenido en camino, y el free es justo quien menos margen da para eso. El cuaderno se publica con su arte, o no se publica.
+
+**El respaldo de `canto.js` se queda, pero como seguro, no como estrategia.** Cubre una imagen que falte, tarde o falle. El objetivo es no verlo nunca.
+
+**Lo que la decisión deja como trabajo, medido el 2026-08-25** (contra `C:\R2\cruzando-ilustraciones\cantos`):
+
+| Cuaderno | Estado | Con carrusel | Faltan |
+|---|---|---|---|
+| 1-1 · 1-2 | `published` | 20 / 20 | — |
+| **1-3** | `published` | M1–M6 | **M7 … M20** (14) |
+| **1-4** | `published` | — | **M1 … M20** (20) |
+
+**34 Misterios**, a las 8,2 imágenes por Misterio que llevan 1-1 y 1-2: **~280 imágenes**. Los Mundos 2 a 7 no cuentan mientras sigan en `dev` en `niveles.js`. *(`1_3_7` tiene la carpeta creada y vacía: se comporta igual que no existir.)*
+
+### El manifiesto: cómo entra el arte, y por qué nunca se toca a mano
+
+`cantos/manifest.json` **lo genera `tools/generate-cantos-manifest.js` como paso 1 de 4 de `tools/cruzando-sync-real.bat`**, leyendo la carpeta local **antes** de que rclone suba nada. Si node falla, el .bat cancela el sync entero: el manifiesto no puede quedar desfasado respecto a las imágenes que describe. La salida es determinista (claves y listas ordenadas, sin marca de tiempo), así que si el arte no cambió el archivo sale idéntico y rclone no lo resube.
+
+**El flujo es siempre: dejar los `.webp` en `cantos/{n}_{c}_{m}/` → correr el .bat.**
+
+⚠️ **Subir arte por el panel de Cloudflare rompe la garantía.** Con `imgTrust:true` el motor no sondea nada: una imagen nueva que no esté listada es **invisible** hasta el próximo sync, y una borrada que siga listada deja la capa transparente. La regla no es burocracia — es la condición que permite quitar el sondeo.
+
+### Las dos mejoras aprobadas son de velocidad, no de experiencia
+
+*Medido el 2026-08-25 contra el bucket real. Ninguna toca lo que el usuario ve; las dos hacen que la experiencia completa llegue antes. **Pendientes, no implementadas.***
+
+**1. Manifiesto por Misterio + `imgTrust`.** Hoy cada canto sondea sus imágenes **en cadena** y remata con un 404 para descubrir que no hay una más — y un 404 del bucket público de R2 **pesa 27 KB** (devuelve una página de error HTML completa). Medido en `1_1_1`: 7 aciertos (159 KB) + 1 fallo (27 KB), **~3,1 s de peticiones encadenadas**; la primera imagen sí entra a los 0,37 s. Con el manifiesto no sondea nada: pinta la primera y carga las demás según le tocan. El generador **ya calcula ese mapa por Misterio** (`porMisterio`) y lo descarta al agrupar por bloque; publicarlo cuesta 1,0 KB gzip para 46 entradas. `cantos.html` ya consume el manifiesto de bloques con `imgTrust:true` — es el patrón a seguir, no uno a inventar.
+
+**2. `Cache-Control` en el bucket de ilustraciones.** Hoy **no manda ninguna cabecera de caché**: solo `ETag` y `Last-Modified`, así que todo depende de la heurística del navegador, que en iOS es la más tacaña. Con carruseles completos son ~200 KB por canto y el free repite sesión cada día. Es una casilla en Cloudflare, no código, y beneficia a los 160 heroes y a la app entera.
+
 ## Ciclo "completado" (Piezas 1-2)
 
 *Estado: implementado + lógica probada en node. **PENDIENTE prueba end-to-end en navegador.***
@@ -632,6 +664,8 @@ escribe `users/{uid}.terminos = { aceptado, fecha (serverTimestamp), version, me
 8. `mini.html` — diario en `reflections/…`, alternar pistas MA/MB/L_MA, y crédito (esperan el **modelo económico**, no implementar por pedazos).
 9. `diario.html` — revisar nav bar, tema y plan (nunca auditado).
 10. Contenido Mundo 2 — faltan `0201.json`, `0202.json`, etc.
+10b. **Arte de canto de lo ya publicado** — 34 Misterios sin carrusel en cuadernos `published`: **1-3 M7–M20** y **1-4 completo** (~280 imágenes). Es el trabajo que abre la decisión de no degradar `audio.html`. Ver § El arte del canto.
+10c. **Manifiesto por Misterio + `Cache-Control` en R2** — las dos mejoras de velocidad aprobadas y **sin implementar**. Ver § Las dos mejoras aprobadas.
 11. Verificación en producción: respuestas del modal de audio.html → diario.html.
 12. **App Check**: registrar la clave de sitio reCAPTCHA v3 para `cruzando.app`, pegarla en `appcheck-key.js`, desplegar y mirar métricas unos días **antes** de activar el bloqueo en la consola (Auth primero; Firestore/Functions después).
 13. Alta en dispositivo: casilla bloqueando por los dos métodos, `users/{uid}.terminos` escrito, y que "Entrar" siga sin fricción.
