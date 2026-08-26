@@ -542,6 +542,18 @@ Buckets R2: `R2_ILU` (ilustraciones), `R2_MUS` (música/lrc), `R2_AUD` (audios).
 
 ⚠️ **Subir arte por el panel de Cloudflare rompe la garantía.** Con `imgTrust:true` el motor no sondea nada: una imagen nueva que no esté listada es **invisible** hasta el próximo sync, y una borrada que siga listada deja la capa transparente. La regla no es burocracia — es la condición que permite quitar el sondeo.
 
+### Los `.lrc`: dónde viven y por qué conviven dos formatos
+
+**Local `C:\R2\cruzando-music\lrc\` → paso 3/4 del `.bat` → `pub-faed94e…r2.dev/lrc/M_{n}_{c}_{m}.lrc`.** Las tres páginas leen la misma carpeta: `audio` con `LRC_BASE` (que ya incluye `/lrc/`), `rezar` con `MUSB + 'lrc/'`, `mini` con `R2_MUS + '/lrc/'`. **Solo esa carpeta se sirve.**
+
+⚠️ **Había 105 `.lrc` sueltos en la RAÍZ del bucket que nadie leía** (2026-08-25). 66 eran copia de los de `lrc/`; los otros **39 existían solo ahí** — y eran exactamente 1-4 M6–M20, 2-1 M2–M20 y 2-2 M1–M5, los mismos que un inventario superficial daba por "sin letra sincronizada". No faltaban: estaban donde la app no mira. Se movieron los 39, se borraron los 65 duplicados idénticos, y de `M_2_1_1.lrc` (el único con dos versiones distintas) se conservó **el más antiguo**. Resultado: raíz 0, `lrc/` 105.
+
+**Dos formatos conviven en `lrc/`, y es deliberado.** 65 archivos son la versión limpia (marca de tiempo + texto) y 40 son el **formato fuente de autoría**: cabecera `[ti:/ar:/al:]`, bloque `[stills]` y directivas `[cut:N]` / `[kb:slow|hold|in]` en línea. **`parseLrc` digiere los dos** — salta las cabeceras ([canto.js:79](canto.js#L79)), reconoce `[stills]`/`[lyrics]`, y borra las directivas del texto con `\[[a-z]+:[^\]]*\]`. Comprobado archivo por archivo contra el parser real: los 105 parsean limpios, ninguno vacío, ninguna directiva colándose en la letra. Y las dos versiones de `M_2_1_1` parseaban a las **mismas 17 líneas**.
+
+**Decisión (2026-08-25): NO uniformarlos.** Las directivas son material de autoría del usuario y no rompen nada. Si una sesión futura las ve y le parecen deriva, esto es la respuesta: no lo son.
+
+*(`[stills]` y `[cut]` alimentaban el fondo en una etapa anterior; hoy el carrusel avanza por su cuenta. El comentario de `mini.html` lo dice: «stills/cut ya no alimentan el fondo».)*
+
 ### Las dos mejoras aprobadas son de velocidad, no de experiencia
 
 *Medido el 2026-08-25 contra el bucket real. Ninguna toca lo que el usuario ve; las dos hacen que la experiencia completa llegue antes. **Pendientes, no implementadas.***
@@ -664,7 +676,7 @@ escribe `users/{uid}.terminos = { aceptado, fecha (serverTimestamp), version, me
 8. `mini.html` — diario en `reflections/…`, alternar pistas MA/MB/L_MA, y crédito (esperan el **modelo económico**, no implementar por pedazos).
 9. `diario.html` — revisar nav bar, tema y plan (nunca auditado).
 10. Contenido Mundo 2 — faltan `0201.json`, `0202.json`, etc.
-10b. **Arte de canto de lo ya publicado** — 34 Misterios sin carrusel en cuadernos `published`: **1-3 M7–M20** y **1-4 completo** (~280 imágenes). Es el trabajo que abre la decisión de no degradar `audio.html`. Ver § El arte del canto.
+10b. **Arte de canto de lo ya publicado** — 34 Misterios sin carrusel en cuadernos `published`: **1-3 M7–M20** y **1-4 completo** (~280 imágenes). Es el trabajo que abre la decisión de no degradar `audio.html`. **Es lo único que falta**: la letra sincronizada ya está completa en los cuatro cuadernos publicados (ver § Los `.lrc`). Ver § El arte del canto.
 10c. **Manifiesto por Misterio + `Cache-Control` en R2** — las dos mejoras de velocidad aprobadas y **sin implementar**. Ver § Las dos mejoras aprobadas.
 11. Verificación en producción: respuestas del modal de audio.html → diario.html.
 12. **App Check**: registrar la clave de sitio reCAPTCHA v3 para `cruzando.app`, pegarla en `appcheck-key.js`, desplegar y mirar métricas unos días **antes** de activar el bloqueo en la consola (Auth primero; Firestore/Functions después).

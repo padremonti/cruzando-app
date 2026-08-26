@@ -2331,7 +2331,10 @@ async function ensureUserDoc(user, extraData) {
 }
 
 // ── Determinar nivel activo desde Firestore ───────────────────────
-// Orden de todos los niveles del itinerariovar BLOCKS = ['gozosos','luminosos','dolorosos','gloriosos'];
+// El orden de los niveles del itinerario vive en niveles.js (window.NIVELES_ORDER).
+// OJO: esta declaración quedó tragada por el comentario de arriba en c316f82 y el
+// ReferenceError silencioso rompió el cálculo de la frontera. No volver a pegarlas.
+var BLOCKS = ['gozosos','luminosos','dolorosos','gloriosos'];
 
 var OFFICIAL_NAMES = {
   gozosos: [
@@ -2376,6 +2379,23 @@ function getMysteryName(misterio) {
   return OFFICIAL_NAMES[info.block][info.idx];
 }
 
+// La clave de la frontera va VERSIONADA, y por una razón concreta: entre c316f82
+// y este arreglo, `BLOCKS` estaba tragado por un comentario, el ReferenceError
+// caía en el catch de abajo y la frontera degradaba a '0101' — valor que la cola
+// de onAuthStateChanged persistía y que la FASE 1 volvía a preferir sobre el
+// bookmark en la carga siguiente. Se reescribía a sí mismo para siempre.
+// Cambiar de clave jubila la v1 envenenada y fuerza UN recálculo por dispositivo,
+// sin tocar Firestore ni pedirle nada al usuario.
+var FRONTIER_KEY = 'cruzando_frontier_v2';
+
+// Un nivel está entero cuando sus cuatro bloques tienen los cinco Misterios.
+// Vive aparte para poder nombrarlo y probarlo suelto: es la línea que reventó.
+function nivelCompleto(d) {
+  return BLOCKS.every(function(b) {
+    return d.progress[b] && d.progress[b].every(function(x) { return x !== null; });
+  });
+}
+
 async function getCurrentNivelFromFirestore(user) {
   // 1. Bookmark de localStorage — instantáneo
   var bookmark = null;
@@ -2385,8 +2405,8 @@ async function getCurrentNivelFromFirestore(user) {
   } catch(e) {}
 
   // 2. Frontier secuencial con early exit: solo lee hasta el primer nivel incompleto
+  var frontier = NIVELES_ORDER[0];
   try {
-    var frontier = NIVELES_ORDER[0];
     for (var i = 0; i < NIVELES_ORDER.length; i++) {
       var id   = NIVELES_ORDER[i];
       var snap = await getDoc(doc(db, 'users', user.uid, 'progress', id));
@@ -2396,26 +2416,30 @@ async function getCurrentNivelFromFirestore(user) {
       var d = snap.data();
       if (!d || !d.progress) { frontier = id; break; }
 
-      var allDone = BLOCKS.every(function(b) {
-        return d.progress[b] && d.progress[b].every(function(x) { return x !== null; });
-      });
-
       frontier = id;
-      if (!allDone) break;
-      if (i === NIVELES_ORDER.length - 1) frontier = id;
+      if (!nivelCompleto(d)) break;
     }
-
-    try { localStorage.setItem('cruzando_frontier_nivel', frontier); } catch(e) {}
-
-    window.frontierNivelId = frontier;
-    return bookmark || frontier;
   } catch(e) {
-    console.warn('[CruzAndo] getCurrentNivelFromFirestore:', e);
+    // Un fallo de código y una caída de red degradaban igual y en silencio: eso
+    // es lo que escondió el bug de BLOCKS. Ahora se distinguen — el de código
+    // grita con console.error — y NINGUNO de los dos persiste nada: una frontera
+    // degradada no se escribe, para que no se reescriba a sí misma nunca más.
+    var _esBug = (e instanceof ReferenceError) || (e instanceof TypeError);
+    window._frontierDegradado = _esBug ? 'bug' : 'red';
+    if (_esBug) console.error('[CruzAndo] frontera: error de CÓDIGO, no de red —', e);
+    else        console.warn ('[CruzAndo] frontera: sin red, se usa el último valor conocido —', e);
+
     var cachedFrontier = null;
-    try { cachedFrontier = localStorage.getItem('cruzando_frontier_nivel'); } catch(e2) {}
-    window.frontierNivelId = cachedFrontier || bookmark || '0101';
+    try { cachedFrontier = localStorage.getItem(FRONTIER_KEY); } catch(e2) {}
+    window.frontierNivelId = cachedFrontier || bookmark || NIVELES_ORDER[0];
     return bookmark || cachedFrontier || getCurrentNivel();
   }
+
+  // Solo se persiste una frontera calculada de verdad contra Firestore.
+  window._frontierDegradado = null;
+  try { localStorage.setItem(FRONTIER_KEY, frontier); } catch(e) {}
+  window.frontierNivelId = frontier;
+  return bookmark || frontier;
 }
 
 // ── Mostrar pantalla ──────────────────────────────────────────────
@@ -2490,7 +2514,8 @@ onAuthStateChanged(auth, async function(user) {
   if (_checkoutResult === 'success') {
     localStorage.removeItem('cruzando_plan_cache');
     localStorage.removeItem('cruzando_current_nivel');
-    localStorage.removeItem('cruzando_frontier_nivel');
+    localStorage.removeItem(FRONTIER_KEY);
+    localStorage.removeItem('cruzando_frontier_nivel');   // v1 jubilada
     sessionStorage.removeItem('cruzando_view_as');
     window._viewAs = null;
     history.replaceState({}, '', '/');
@@ -2512,7 +2537,7 @@ onAuthStateChanged(auth, async function(user) {
   pintarRacha(Racha.leerLocal());
 
   var _cNivel     = localStorage.getItem('cruzando_current_nivel')   || '0101';
-  var _cFrontier  = localStorage.getItem('cruzando_frontier_nivel')  || _cNivel;
+  var _cFrontier  = localStorage.getItem(FRONTIER_KEY)  || _cNivel;
   var _cDone      = parseInt(localStorage.getItem('cruzando_done_count') || '0');
   var _cChest     = JSON.parse(localStorage.getItem('cruzando_chest_state') || 'null');
   var _cPlan      = window._forceFirestorePlan
@@ -2536,6 +2561,10 @@ onAuthStateChanged(auth, async function(user) {
   window._firestoreProgress = _cProgress;
 
   var _hasCache = !!localStorage.getItem('cruzando_plan_cache');
+  // Sin frontera v2 en este aparato (instalación nueva, datos borrados, o la v1
+  // envenenada del bug de BLOCKS) hay que recalcularla contra Firestore, aunque
+  // el caché de plan esté fresco: si no, el selector se queda anclado en 1-1.
+  var _hasFrontier = !!localStorage.getItem(FRONTIER_KEY);
 
   // ── Onboarding splash: leer cache LOCAL primero (sin esperar Firestore) ──
   var _obFlagsCache = {};
@@ -2570,7 +2599,7 @@ onAuthStateChanged(auth, async function(user) {
 
   var realPlan = resolvePlan(userData);
 
-  if (dirty || !_hasCache) {
+  if (dirty || !_hasCache || !_hasFrontier) {
     var nivelId = await getCurrentNivelFromFirestore(user);
     currentNivelId        = nivelId;
     window.currentNivelId = nivelId;
@@ -2631,7 +2660,6 @@ onAuthStateChanged(auth, async function(user) {
     localStorage.setItem('cruzando_plan_cache',    realPlan);
     localStorage.setItem('cruzando_total_metros',  String(userData.totalMeters || 0));
     localStorage.setItem('cruzando_current_nivel', currentNivelId);
-    localStorage.setItem('cruzando_frontier_nivel', window.frontierNivelId || currentNivelId);
     localStorage.setItem('cruzando_done_count',    String(window.DONE_COUNT || 0));
     localStorage.setItem('cruzando_chest_state',   JSON.stringify(window.chestState || []));
     setProgressCache(currentNivelId, window._firestoreProgress);
