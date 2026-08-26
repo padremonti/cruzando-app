@@ -24,6 +24,7 @@ PWA de formación espiritual católica. El usuario reza los 20 Misterios del Ros
 | `mini.html` | Mini sesión de UN Misterio (el "Misterio-puerta" que señaló Sanar). Reproductor cinematográfico a pantalla completa. Todo derivado del `mid`. Firebase compat cableado; marca el pain completado al epílogo. |
 | `canto.js` / `canto.css` | Motor de karaoke de canto compartido (extraído de audio+rezar). `Canto.init({...})`; CSS por `<link>`, HTML del overlay inyectado por el módulo. `mini.html` NO lo usa (ancestro divergente). |
 | `utils.js` | `window.isPremium(userData)` y `window.resolvePlan(userData)`. Cargado en todas las páginas. |
+| `toast.js` | **El aviso breve.** `showToast(texto)` — autosuficiente: inyecta su CSS y monta su nodo bajo demanda. En index y crecer; audio conserva el suyo. Ver § El aviso breve. |
 | `flags.js` | Interruptores de producto. Hoy: `MOSTRAR_RECOMPENSAS = false` + puerta `window.recompensasON()`. Ver § Kit de recompensas. |
 | `cierre.js` / `cierre.css` | **El cierre de una sesión de rezo.** `Cierre.decenario({desde, color, titulo, metros})` → promesa. La columna se cierra en decenario. CSS por `<link>`, trayectorias generadas por el módulo. Ver § El cierre. |
 | `sarta.js` | **Geometría del decenario y la camándula.** `Sarta.geometria(forma, {decenas})` — `decenas:1` da el decenario (16 cuentas), `decenas:5` la camándula (60). Pura, sin DOM. Ver § La sarta. |
@@ -287,6 +288,74 @@ Y una segunda mitad: `orar` y `rezar` caían a `'0101'` cuando no había `?c=`, 
 Ahora los dos **escriben** el marcador al fijar nivel y lo **leen** como valor por defecto (`p.get('c') || nivelRecordado() || '0101'`), con `recordarNivel` / `nivelRecordado` validando que sean cuatro dígitos.
 
 ⚠️ **La frontera no sirve para "dónde estoy":** solo avanza con el nivel **entero** (los 20 Misterios, los cuatro bloques). Con 5 de 20 en 2-2 no se mueve, y eso es correcto. Por eso el marcador tiene que llevar la posición, aparte del avance.
+
+
+### ⚠️ La frontera se rompió en silencio, y se arregló en tres piezas
+
+*Estado: arreglado + dos bancos nuevos (`tools/test-frontera.js`, 28; `tools/test-globales.js`, 17). **PENDIENTE prueba en dispositivo** — ver el punto 17 de Pendientes.*
+
+**El síntoma:** un iPhone limpió los datos de Safari, volvió a entrar y el **selector de niveles se quedó anclado en 1-1** con los cuatro cuadernos del Mundo 1 rezados. Todo lo demás —metros, racha, cantos, los nodos del mapa— sí volvió.
+
+**La causa** estaba en `crecer.html` **e `index.html`**, en una sola línea. Al extraer `NIVELES_ORDER` a `niveles.js` (c316f82) se borró el array **y el salto de línea que cerraba su comentario**, y la declaración de abajo quedó dentro:
+
+```js
+// Orden de todos los niveles del itinerariovar BLOCKS = ['gozosos',…];
+```
+
+De ahí en cascada: `BLOCKS.every(…)` lanzaba `ReferenceError` en la primera vuelta de `getCurrentNivelFromFirestore` · el `try/catch` de degradación lo tomaba por una caída de red y bajaba la frontera a `'0101'` sin decir nada · la cola de `onAuthStateChanged` **persistía** ese `'0101'` · y la FASE 1 lo prefería sobre el bookmark en la carga siguiente. **Se reescribía a sí mismo para siempre.**
+
+Nadie lo notó durante semanas porque los aparatos ya traían un valor bueno de antes del commit: **borrar los datos de Safari no causó el bug, destapó el que ya estaba.**
+
+**Por qué lo demás sí funcionaba** — y es la firma del fallo:
+
+| Qué | De dónde sale | |
+|---|---|---|
+| Metros, racha, cantos | `users/{uid}` + `dailyGoal/data`, lectura directa | ✅ |
+| Nodos "cleared" del mapa | `renderHome` → `_firestoreProgress` → `DONE_COUNT` | ✅ |
+| `world.html` | sus 28 `progress/{id}` en paralelo, con su propia `BLOQUES` bien declarada | ✅ |
+| **Selector de esferas** | `buildLevelPicker` → `frontierNivelId` → **`BLOCKS`** | ❌ |
+| Nodo "Siguiente" | `_nextIdx2 <= _frontierIdx \|\| window.DONE_COUNT >= 20` | ⚠️ **la rama de `DONE_COUNT` lo rescató** |
+
+La única vía que siguió funcionando fue la única que tenía una alternativa a la frontera. Por eso el usuario podía seguir avanzando.
+
+**El arreglo, en tres piezas** — la primera sola no bastaba:
+
+1. **`BLOCKS` de vuelta a su propia línea**, en los dos gemelos.
+2. **Clave versionada `cruzando_frontier_v2`** (`FRONTIER_KEY`). La v1 quedó envenenada con `'0101'` en los aparatos ya afectados y la FASE 1 la prefería sobre todo lo demás; cambiar de clave la jubila y fuerza **un** recálculo por dispositivo, sin tocar Firestore. La puerta de la FASE 2 pasó a `dirty || !_hasCache || !_hasFrontier`: sin frontera guardada hay que recalcularla aunque el caché de plan esté fresco. Y **`getCurrentNivelFromFirestore` es ahora la única que escribe la clave** — se quitó el `setItem` de la cola de `onAuthStateChanged`, que era el eslabón de la autoperpetuación.
+3. **El `catch` dejó de mentir.** Distingue `ReferenceError`/`TypeError` (error de código → `console.error` + `window._frontierDegradado = 'bug'`) de una caída de red (→ `console.warn` + `'red'`), y **ninguno de los dos persiste nada**. El cálculo de completitud salió a `nivelCompleto(d)`, con nombre propio.
+
+**Y un cuarto detalle:** `repintarSelectorSiAbierto()` en la FASE 3. La frontera se recalcula en la FASE 2, que puede resolver con el selector ya abierto — y el selector solo se construye al abrirse.
+
+### El barrido que salió de ahí
+
+El bug no se ve leyendo: la línea parece un comentario normal. Lo que sí lo caza es comparar, por página, **lo que se usa contra lo que alguien declara o expone en `window`** — eso es `tools/test-globales.js` (parsea las 15 páginas con acorn; si acorn no está, avisa y **no finge** haber comprobado). Encontró cuatro huérfanos más del mismo tipo, tres arreglados:
+
+| Hallazgo | Estado |
+|---|---|
+| `db` y `currentUser` vivían en el `<script type="module">` y se usaban desde el `<script>` clásico (`_obCerrarSplash`) → **ReferenceError al cerrar el splash de onboarding**, que mataba el `setTimeout` y con él la navegación a `audio.html` y el `mapSeen` de Firestore | **arreglado** — `window.db` / `window.currentUser`, consumidos con `window.` delante |
+| `updateDoc` se usaba **sin importar** en `saveMetrosHoy` → siempre lanzaba, rescatado por el `setDoc merge` del `catch` (efecto neto idéntico, una llamada desperdiciada) | **arreglado** — añadido al `import` |
+| `onMetaSliderChange` de **index** llamaba a `updateOdometro` y a `metaMetros`, los dos del módulo → la vista previa del anillo nunca corría (crecer no lo tenía) | **arreglado** — puente `window._previewMeta`, gemelo del `_guardarMeta` que ya existía |
+| `showToast` **no existía** en index ni crecer (solo en audio) — las 3 llamadas van tras `if (window.showToast)`, así que el aviso de checkout y el de tutoriales **nunca salían** | **arreglado** — nuevo `toast.js` compartido, ver § El aviso breve |
+
+Los huérfanos que quedan están en la lista `GUARDADOS` del banco, con su razón. La lista **no se pudre**: uno nuevo hace fallar el banco, y uno que ya no haga falta también.
+
+*También salió código muerto: `renderAudioHome()` de `audio.html` llama a `openAudioHome`/`closeAudioHome`, que no existen — pero a `renderAudioHome` no la llama nadie.*
+
+### El aviso breve (`toast.js`)
+
+*Estado: implementado + banco de pruebas (`tools/test-toast.js`, 11 — el módulo corre de verdad contra un DOM de mentira). **PENDIENTE prueba visual en dispositivo.***
+
+De ahí salió el hallazgo (d): `showToast` se llamaba en **tres** sitios de index y crecer —los dos avisos de bienvenida tras el checkout y el de tutoriales reactivados— y la función solo vivía dentro de `audio.html`. La guarda `if (window.showToast)` evitaba el crash, así que el aviso simplemente **nunca salía**.
+
+**Por qué un módulo y no una cuarta copia.** El aviso de audio está pegado a su pantalla: un `<div>` estático en el HTML y CSS que depende de `--lvl-soft`, el color del bloque que se está rezando. Copiarlo habría dejado tres implementaciones del mismo objeto — la deriva que este repo ya pagó con el color de bloque y con las tablas del itinerario.
+
+`toast.js` es **autosuficiente**, como `racha-splash.js`: inyecta su CSS una vez y monta el elemento bajo demanda. Una página que lo quiera solo añade el `<script>`; no hay que tocarle el HTML ni el CSS. Va cargado en index y crecer, junto a `plan-utils.js`.
+
+**El material.** Va **centrado sobre la barra de navegación**, no en la esquina: el de audio es una notificación de metros —discreta, abajo a la derecha, mientras se reza— y estos son anuncios que hay que leer ("bienvenido a Premium"), largos, que en la esquina de un teléfono de 390 px se parten. Los colores salen de los tokens de la página (`--card`, `--border`, `--text`, `--shadow`) **con respaldo horneado**, así que sigue al tema claro/oscuro sin saber nada de él y no se rompe en una página que no los defina. Detecta `.app-nav`: sin barra debajo, baja al pie en vez de flotar en el aire. Lleva `role="status"` + `aria-live="polite"`.
+
+⚠️ **Dos avisos seguidos no se apilan:** el segundo releva al primero y **reinicia la cuenta**. Sin eso, el temporizador del primero cerraría el segundo a mitad de leerlo. Hay una prueba que lo vigila.
+
+⚠️ **`audio.html` conserva el suyo a propósito**, igual que `mini` conserva su karaoke: el de audio se tiñe con el color del bloque y vive en su barra de herramientas. Adoptar el compartido allí es decisión **visual**, no de código. El banco vigila que la diferencia siga siendo deliberada — y que audio no cargue los dos a la vez.
 
 ### El developer recorre lo que su progreso desbloqueó
 
@@ -673,6 +742,8 @@ escribe `users/{uid}.terminos = { aceptado, fecha (serverTimestamp), version, me
 3. `sanar.html` Fases B-C — que `_perfil` llegue del doc tras Auth y el elenco se repinte reordenado (Fase A ya probada).
 4. Ciclo "completado" end-to-end — rezar en mini → volver a sanar → check + reordenado; render del check en wheel 3D; offline (rezar sin red → sube al reabrir).
 5. **Itinerario** (`niveles.js`) — comprobar en dispositivo: que un **free** que cierra el Misterio 20 de 0101 despierte en **0102** Misterio 1, y que un no-developer que abra audio en un cuaderno `dev` (p. ej. 0202) sea devuelto al mapa con el aviso `nivel_en_desarrollo` en vez de toparse con la pantalla de "próximamente". El developer debe seguir entrando a todos.
+5b. **Frontera de progreso** — en el iPhone que destapó el bug: entrar y comprobar que el **selector de niveles** pinta encendidos los cuadernos ya rezados (no solo 1-1), sin borrar nada a mano — el cambio a `cruzando_frontier_v2` se encarga. Y que la consola no saque `[CruzAndo] frontera: error de CÓDIGO`. De paso: cerrar el splash de onboarding debe navegar a `audio.html`, y el slider de la meta diaria en `index` debe mover el anillo en vivo.
+5c. **El aviso breve** — prueba **visual**: forzar un `showToast(…)` desde la consola en index y crecer, en tema claro y oscuro, y comprobar que se lee entero sobre la barra de navegación y que no la tapa.
 
 **Tareas anotadas (aparte):**
 6. **Settings** de `index.html`/`crecer.html` — botón "Rehacer mi perfil de afinidad" → `sanar.html?rehacer=1` (sanar ya reconoce el parámetro).

@@ -205,11 +205,6 @@ function fuentesLocales(html) {
    Se listan para que no crezcan en silencio: uno nuevo hace fallar el banco, y
    uno que ya no haga falta también (la lista no se pudre). */
 const GUARDADOS = {
-  'index.html':  { showToast:      'no existe en esta página (solo en audio.html); las 3 ' +
-                                   'llamadas van tras `if (window.showToast)`, así que el ' +
-                                   'aviso de checkout y el de tutoriales nunca salen. ' +
-                                   'Decisión de producto: traer el toast o borrar las llamadas.' },
-  'crecer.html': { showToast:      'igual que en index.html (son gemelos).' },
   'audio.html':  { closeAudioHome: 'solo la llama renderAudioHome(), a la que no llama nadie: código muerto.',
                    openAudioHome:  'ídem.',
                    updatePlayUI:   "las 2 llamadas usan `typeof x === 'function'`, la única " +
