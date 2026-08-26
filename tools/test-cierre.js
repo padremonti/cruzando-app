@@ -856,6 +856,65 @@ await ok('cierre.js y cierre.css están en UTF-8 limpio', () => {
 });
 
 
+
+console.log('\n── La columna no salta al encenderse la Cruz ──');
+
+for (const f of ['audio.html', 'orar.html', 'rezar.html']) {
+  await ok(f.padEnd(13) + '· la Cruz reserva su sitio desde el principio', () => {
+    /* Con display:none la Cruz no ocupaba nada y al encenderse la columna crecía
+       ~49 px de golpe; anclada al centro (top:50% + translateY(-50%)), las once
+       cuentas saltaban hacia arriba justo antes de que arrancara el decenario,
+       que parte de esas mismas posiciones. */
+    const s = leer(f).replace(/\s+/g, '');
+    const base = s.match(/\.bead-lux-cross\{([^}]*)\}/);
+    if (!base) throw new Error('no encontré la regla base de la Cruz');
+    if (/display:none/.test(base[1]))
+      throw new Error('vuelve display:none: la columna saltará al encender la Cruz');
+    if (!/display:flex/.test(base[1]) || !/visibility:hidden/.test(base[1]))
+      throw new Error('la Cruz apagada tiene que ocupar su caja y no verse');
+    const show = s.match(/\.bead-lux-cross\.show\{([^}]*)\}/);
+    if (!show) throw new Error('no encontré la regla .show');
+    if (/display:/.test(show[1]))
+      throw new Error('encender la Cruz no puede cambiar el display: eso es el salto');
+    if (!/visibility:visible/.test(show[1]))
+      throw new Error('la Cruz encendida no se vuelve visible');
+  });
+}
+
+console.log('\n── rezar: el final del Rosario ocurre una sola vez ──');
+
+await ok('rezar    · la pantalla de canto no sobrevive al final', () => {
+  /* El return temprano de playNext() se saltaba el Canto.close() de abajo: la
+     pantalla quedaba abierta DEBAJO del velo del Rosario (940 sobre 400) y
+     reaparecía al retirarse el velo. */
+  const s = leer('rezar.html');
+  const c = (s.match(/function playNext\(\)[\s\S]*?\n\}/) || [''])[0];
+  if (!c) throw new Error('no encontré playNext');
+  const i = c.indexOf('plIdx>=playlist.length');
+  const j = c.indexOf('onSessionComplete()');
+  const k = c.indexOf('Canto.close()');
+  if (i === -1 || j === -1) throw new Error('cambió la salida del final');
+  if (!(k > i && k < j))
+    throw new Error('el karaoke no se cierra antes de rematar la sesión');
+});
+
+await ok('rezar    · Saltar al final no repite el Rosario', () => {
+  /* "Saltar" es onSkip → playNext(), así que el usuario podía volver a entrar y
+     el Rosario se pintaba por segunda vez antes de la celebración. */
+  const s = leer('rezar.html');
+  const c = (s.match(/async function onSessionComplete\(\)[\s\S]*?\n\}/) || [''])[0];
+  if (!/if\(_sesionCerrada\)return;/.test(c.replace(/ /g, '')))
+    throw new Error('onSessionComplete no es idempotente');
+  if (!/_sesionCerrada=true;/.test(c.replace(/ /g, '')))
+    throw new Error('no deja marcada la sesión como cerrada');
+  const p = (s.match(/function playNext\(\)[\s\S]*?\n\}/) || [''])[0].replace(/\s/g, '');
+  if (!/^functionplayNext\(\)\{if\(_sesionCerrada\)return;/.test(p))
+    throw new Error('playNext sigue avanzando después del final');
+  if (!/plIdx=playlist\.length;/.test(p))
+    throw new Error('plIdx sigue creciendo sin tope tras el final');
+});
+
+
 console.log('\n── rezar: la Cruz se enciende se toque o no ──');
 
 const _cuerpo = (src, fn) =>

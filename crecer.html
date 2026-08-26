@@ -1910,7 +1910,7 @@ import { getAuth, onAuthStateChanged,
          getAdditionalUserInfo }   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import { getFirestore, doc, getDoc, getDocs, collection,
          query, where,
-         setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+         setDoc, updateDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 // ── CONFIGURACIÓN FIREBASE ────────────────────────────────────────
 // *** PEGA AQUÍ TU firebaseConfig ***
@@ -1953,6 +1953,10 @@ try {
 const auth  = getAuth(fbApp);
 const db    = getFirestore(fbApp);
 window._fbFirestore = { doc, getDoc, setDoc, serverTimestamp };
+// El <script> clásico de más abajo no ve el ámbito de este módulo. Lo que
+// necesite de aquí se expone a mano, y se consume con `window.` delante para
+// que la frontera entre los dos bloques se lea en el sitio donde se cruza.
+window.db = db;
 
 // ── Aliases de plan-utils.js (cargado como script regular antes del módulo) ──
 const resolvePlan      = window.resolvePlan;
@@ -2675,8 +2679,9 @@ onAuthStateChanged(auth, async function(user) {
 
   // _avisoAlta: al deshacer un alta accidental esto se dispara con user=null
   // y reiniciaría la pantalla encima del aviso que hay que leer.
-  if (!user) { currentUser = null; if (!_avisoAlta) mostrarCaminos(); showScreen('login'); return; }
+  if (!user) { currentUser = null; window.currentUser = null; if (!_avisoAlta) mostrarCaminos(); showScreen('login'); return; }
   currentUser = user;
+  window.currentUser = user;   // el <script> clásico lo necesita (ver window.db)
 
   // ══ FASE 1: pintar todo desde localStorage — sin red ══════════════
   metaMetros      = parseInt(localStorage.getItem(META_KEY)) || META_DEFAULT;
@@ -2807,6 +2812,7 @@ onAuthStateChanged(auth, async function(user) {
 
   // ══ FASE 3: re-render con datos reales ══
   renderHome(Object.assign({}, userData, { plan: realPlan }));
+  if (window.repintarSelectorSiAbierto) window.repintarSelectorSiAbierto();
 
   try {
     localStorage.setItem('cruzando_plan_cache',    realPlan);
@@ -4450,7 +4456,7 @@ function _obCerrarSplash() {
       _oc['mapSeen'] = true;
       localStorage.setItem('cruzando_onboarding', JSON.stringify(_oc));
     } catch(e) {}
-    if (window._obSet) _obSet('mapSeen', db, currentUser ? currentUser.uid : null);
+    if (window._obSet) _obSet('mapSeen', window.db, window.currentUser ? window.currentUser.uid : null);
     if (window.navigateTo) navigateTo('audio.html?nivel=1&cuaderno=1&misterio=1');
   }, 500);
 }
@@ -4656,6 +4662,15 @@ function buildLevelPicker() {
   });
 }
 
+// La frontera se recalcula en la FASE 2 de onAuthStateChanged, que puede resolver
+// con el selector ya abierto — y él solo se construye al abrirse. Sin esto, quien
+// lo abre durante el arranque ve los orbes de la frontera vieja hasta cerrarlo y
+// volverlo a abrir. Si está cerrado no se toca: al abrirse se construye al día.
+function repintarSelectorSiAbierto() {
+  var p = document.getElementById('level-picker');
+  if (p && p.classList.contains('open')) buildLevelPicker();
+}
+
 function openLevelPicker() {
   buildLevelPicker();
   var p  = document.getElementById('level-picker');
@@ -4723,6 +4738,7 @@ window.toggleLevelPicker = toggleLevelPicker;
 window.openLevelPicker   = openLevelPicker;
 window.closeLevelPicker  = closeLevelPicker;
 window.selectNivel       = selectNivel;
+window.repintarSelectorSiAbierto = repintarSelectorSiAbierto;
 
 /* ══ META DEL DÍA — funciones llamadas desde HTML ══ */
 function onMetaSliderChange(val) {

@@ -1737,7 +1737,7 @@ import { getAuth, onAuthStateChanged,
          getAdditionalUserInfo }   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import { getFirestore, doc, getDoc, getDocs, collection,
          query, where,
-         setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+         setDoc, updateDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 // ── CONFIGURACIÓN FIREBASE ────────────────────────────────────────
 // *** PEGA AQUÍ TU firebaseConfig ***
@@ -1780,6 +1780,10 @@ try {
 const auth  = getAuth(fbApp);
 const db    = getFirestore(fbApp);
 window._fbFirestore = { doc, getDoc, setDoc, serverTimestamp };
+// El <script> clásico de más abajo no ve el ámbito de este módulo. Lo que
+// necesite de aquí se expone a mano, y se consume con `window.` delante para
+// que la frontera entre los dos bloques se lea en el sitio donde se cruza.
+window.db = db;
 
 // ── Aliases de plan-utils.js (cargado como script regular antes del módulo) ──
 const resolvePlan      = window.resolvePlan;
@@ -2524,8 +2528,9 @@ onAuthStateChanged(auth, async function(user) {
 
   // _avisoAlta: al deshacer un alta accidental esto se dispara con user=null
   // y reiniciaría la pantalla encima del aviso que hay que leer.
-  if (!user) { currentUser = null; if (!_avisoAlta) mostrarCaminos(); showScreen('login'); return; }
+  if (!user) { currentUser = null; window.currentUser = null; if (!_avisoAlta) mostrarCaminos(); showScreen('login'); return; }
   currentUser = user;
+  window.currentUser = user;   // el <script> clásico lo necesita (ver window.db)
 
   // ══ FASE 1: pintar todo desde localStorage — sin red ══════════════
   metaMetros      = parseInt(localStorage.getItem(META_KEY)) || META_DEFAULT;
@@ -3378,6 +3383,14 @@ function irAMetaSettings() {
 }
 window.irAMetaSettings = irAMetaSettings;
 
+// Vista previa del anillo mientras se arrastra el slider. Vive aquí porque
+// `metaMetros` y `updateOdometro` son del módulo: el <script> clásico que
+// maneja el slider no los alcanza, igual que con _guardarMeta.
+window._previewMeta = function(val) {
+  metaMetros = val;
+  updateOdometro();
+};
+
 window._guardarMeta = async function(val) {
   metaMetros = Math.min(Math.max(val, 500), META_MAX);
   try {
@@ -3765,7 +3778,7 @@ function _obCerrarSplash() {
       _oc['mapSeen'] = true;
       localStorage.setItem('cruzando_onboarding', JSON.stringify(_oc));
     } catch(e) {}
-    if (window._obSet) _obSet('mapSeen', db, currentUser ? currentUser.uid : null);
+    if (window._obSet) _obSet('mapSeen', window.db, window.currentUser ? window.currentUser.uid : null);
     if (window.navigateTo) navigateTo('audio.html?nivel=1&cuaderno=1&misterio=1');
   }, 500);
 }
@@ -3931,9 +3944,9 @@ function onMetaSliderChange(val) {
   var v = parseInt(val);
   var el = document.getElementById('prefs-meta-val');
   if (el) el.textContent = v.toLocaleString('es-MX');
-  // Preview en vivo del anillo (se persiste al pulsar "Guardar meta")
-  metaMetros = v;
-  updateOdometro();
+  // Preview en vivo del anillo (se persiste al pulsar "Guardar meta").
+  // Va por el puente: metaMetros y updateOdometro son del módulo, no de aquí.
+  if (window._previewMeta) window._previewMeta(v);
 }
 
 async function guardarMeta() {
