@@ -4187,7 +4187,8 @@ function mostrarRoseton() {
       paleta:  (currentData && currentData.tema && currentData.tema.paleta) || {},
       colores: ['gozosos','luminosos','dolorosos','gloriosos']
                  .map(b => (BLOCK_COLORS[b] || {}).bold || COLORES_BLOQUE[b]),
-      titulo:  'Cuaderno recorrido'
+      titulo:  'Nivel recorrido',
+      nombre:  (window.Niveles ? Niveles.nombre(curNivelId) : '')
     }).catch(() => false);
   } catch (e) { return Promise.resolve(false); }
 }

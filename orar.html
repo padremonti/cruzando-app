@@ -706,6 +706,7 @@ body.light .popup-close-bottom{border-color:var(--border);color:var(--text-dim)}
 }
 </style>
 <script src="bloques.js"></script>
+<script src="niveles.js"></script>
 <link rel="stylesheet" href="cierre.css">
 <script src="sarta.js"></script>
 <script src="cuentas.js"></script>
@@ -1930,7 +1931,8 @@ function mostrarRoseton(){
     return Cierre.roseton({
       paleta:  (data && data.tema && data.tema.paleta) || {},
       colores: BLOCKS.map(b => (BCL && BCL[b]) || COLORES_BLOQUE[b]),
-      titulo:  'Cuaderno recorrido'
+      titulo:  'Nivel recorrido',
+      nombre:  (window.Niveles ? Niveles.nombre(nivelId) : '')
     }).catch(()=>false);
   }catch(e){ return Promise.resolve(false); }
 }

@@ -736,6 +736,44 @@ await ok('el rosetón también se limpia solo', async () => {
   eq(C.enCurso(), false);
 });
 
+
+await ok('el rosetón dice QUÉ Nivel se cerró', () => {
+  /* Cerrar los veinte Misterios de un Nivel merece que se diga cuál: la palabra
+     pasa a antetítulo y el nombre —el canónico de niveles.js— toma el cuerpo. */
+  const { C, dom } = montar();
+  const p = C.roseton({ paleta: {}, colores: ['#E8A0A0','#01BBE1','#C0392B','#D4A017'],
+                        titulo: 'Nivel recorrido', nombre: 'Cruz 1-3: Conversión' });
+  const v = velo(dom);
+  const t = v.todos.find(e => (e.className || '').indexOf('cierre-titulo') === 0);
+  const n = v.todos.find(e => (e.className || '').indexOf('cierre-nombre') === 0);
+  if (!t) throw new Error('no hay palabra');
+  if (t.textContent !== 'Nivel recorrido')
+    throw new Error('la palabra dice: ' + t.textContent);
+  if (!n) throw new Error('no pinta el nombre del Nivel');
+  if (n.textContent !== 'Cruz 1-3: Conversión')
+    throw new Error('el nombre dice: ' + n.textContent);
+  if (!/con-nombre/.test(t.className))
+    throw new Error('la palabra no se retira a antetítulo: competiría con el nombre');
+  return saltar(dom, p);
+});
+
+await ok('sin nombre, el rosetón sigue siendo el de antes', () => {
+  /* Una página que no cargue niveles.js pasa cadena vacía: nada que pintar, y
+     la palabra conserva su cuerpo grande. */
+  const { C, dom } = montar();
+  const p = C.roseton({ paleta: {}, colores: ['#E8A0A0','#01BBE1','#C0392B','#D4A017'] });
+  const v = velo(dom);
+  const t = v.todos.find(e => (e.className || '').indexOf('cierre-titulo') === 0);
+  if (v.todos.some(e => (e.className || '').indexOf('cierre-nombre') === 0))
+    throw new Error('pinta un nombre vacío');
+  if (/con-nombre/.test(t.className))
+    throw new Error('sin nombre la palabra no debe encogerse');
+  if (t.textContent !== 'Nivel recorrido')
+    throw new Error('el texto por defecto dice: ' + t.textContent);
+  return saltar(dom, p);
+});
+
+
 console.log('\n── El cuaderno son los veinte ──');
 
 await ok('audio · cuadernoCompleto cuenta los 20, no el cuarto bloque', () => {

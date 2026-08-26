@@ -79,14 +79,23 @@
     });
   }
 
-  function pieDe(titulo, metros, tarde, extra) {
+  /* `nombre` es opcional y solo lo usa el rosetón: cerrar un Nivel entero —los
+     veinte Misterios— merece que se diga CUÁL. Cuando llega, la palabra pasa a
+     antetítulo y el nombre toma el cuerpo grande. */
+  function pieDe(titulo, metros, tarde, extra, nombre) {
     var suf = (tarde ? ' tarde' : '') + (extra ? ' ' + extra : '');
     var pie = document.createElement('div');
     pie.className = 'cierre-pie';
     var h = document.createElement('div');
-    h.className = 'cierre-titulo' + suf;
+    h.className = 'cierre-titulo' + (nombre ? ' con-nombre' : '') + suf;
     h.textContent = titulo;
     pie.appendChild(h);
+    if (nombre) {
+      var n = document.createElement('div');
+      n.className = 'cierre-nombre' + suf;
+      n.textContent = nombre;
+      pie.appendChild(n);
+    }
     if (metros > 0) {
       var m = document.createElement('div');
       m.className = 'cierre-metros' + suf;
@@ -503,7 +512,7 @@
 
     estilos(reglas.join('\n'));
     velo.appendChild(lienzo);
-    velo.appendChild(pieDe(opts.titulo || 'Cuaderno recorrido', opts.metros, true, 'muy-tarde'));
+    velo.appendChild(pieDe(opts.titulo || 'Nivel recorrido', opts.metros, true, 'muy-tarde', opts.nombre));
     return correr(velo, T_ROSETON);
   }
 

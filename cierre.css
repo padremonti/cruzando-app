@@ -97,6 +97,24 @@
   color: var(--ci-tinta);
   opacity: 0;
 }
+/* Cuando el cierre lleva nombre propio, la palabra se retira a antetítulo y el
+   nombre toma el cuerpo. Cerrar un Nivel entero merece que se diga CUÁL. */
+.cierre-titulo.con-nombre{
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+.cierre-nombre{
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(30px, 8.5vw, 42px);
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--ci-tinta);
+  opacity: 0;
+  text-wrap: balance;
+}
 .cierre-metros{
   font-family: 'Inter', system-ui, sans-serif;
   font-size: .82rem;
@@ -108,13 +126,16 @@
 }
 
 .cierre-velo.anima .cierre-titulo{ animation: cierreAparece .45s var(--ease-velo) 2.05s forwards }
+.cierre-velo.anima .cierre-nombre{ animation: cierreAparece .45s var(--ease-velo) 2.15s forwards }
 .cierre-velo.anima .cierre-metros{ animation: cierreAparece .45s var(--ease-velo) 2.20s forwards }
 /* El Rosario tiene dos beats más —la cola y la Cruz— así que su palabra
    espera a que la Cruz haya encajado. El rosetón, a que la Lux ocupe el óculo. */
 .cierre-velo.anima .cierre-titulo.tarde{ animation-delay: 2.55s }
+.cierre-velo.anima .cierre-nombre.tarde{ animation-delay: 2.65s }
 .cierre-velo.anima .cierre-metros.tarde{ animation-delay: 2.70s }
 .cierre-velo.anima .cierre-titulo.muy-tarde{ animation-delay: 3.05s }
-.cierre-velo.anima .cierre-metros.muy-tarde{ animation-delay: 3.20s }
+.cierre-velo.anima .cierre-nombre.muy-tarde{ animation-delay: 3.15s }
+.cierre-velo.anima .cierre-metros.muy-tarde{ animation-delay: 3.30s }
 
 @keyframes cierreAparece{
   from{ opacity: 0; transform: translateY(8px) }
@@ -152,6 +173,7 @@
 /* El resplandor es un destello de paso: en el estado final ya se apagó. */
 .cierre-velo.quieto .cierre-lienzo circle[opacity="0"]{ opacity: 0 }
 .cierre-velo.quieto .cierre-titulo,
+.cierre-velo.quieto .cierre-nombre,
 .cierre-velo.quieto .cierre-metros{ animation: none !important; opacity: 1; transform: none }
 .cierre-velo.quieto .cierre-halo{ animation: none !important; opacity: 0 }
 
@@ -164,5 +186,6 @@
     animation: none !important; transform: none !important; stroke-dashoffset: 0 !important;
   }
   .cierre-velo.anima .cierre-titulo,
+  .cierre-velo.anima .cierre-nombre,
   .cierre-velo.anima .cierre-metros{ animation: none !important; opacity: 1; transform: none }
 }

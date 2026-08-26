@@ -34,7 +34,7 @@ PWA de formación espiritual católica. El usuario reza los 20 Misterios del Ros
 
 ## El cierre de una sesión (`cierre.js`)
 
-*Estado: los **tres cierres** implementados —decenario, Rosario y rosetón— con salida a las Letanías + banco de pruebas (`tools/test-cierre.js`, 86). **Decenario verificado en dispositivo en `mini`; el de `rezar` acaba de destrabarse (ver el aviso de la guarda). Resto PENDIENTE de prueba visual.***
+*Estado: los **tres cierres** implementados —decenario, Rosario y rosetón— con salida a las Letanías + banco de pruebas (`tools/test-cierre.js`, 88). **Decenario verificado en dispositivo en `mini`; el de `rezar` acaba de destrabarse (ver el aviso de la guarda). Resto PENDIENTE de prueba visual.***
 
 **La columna del rezo se cierra en decenario.** Es el mismo objeto que el usuario tuvo a la derecha toda la sesión, enrollado. Once cuentas contra once, Padrenuestro con Padrenuestro:
 
@@ -102,6 +102,8 @@ Dos materiales, los dos de datos que ya existían:
 Como cada Mundo tiene su paleta, **salen siete rosetones distintos con un solo componente**.
 
 **Veinte pétalos = veinte Misterios.** Se dibujan los veinte desde el principio pero **entran de cinco en cinco**, así que mientras no hay tracería se leen como las cuatro cuñas de los cuatro bloques; lo que los separa en veinte son los nervios menores que llegan después. Por eso no hay que transformar trazados: solo aparecen líneas.
+
+**La palabra dice QUÉ Nivel se cerró.** Cerrar los veinte Misterios no es cerrar cualquier cosa, así que el pie del rosetón lleva **«Nivel recorrido» como antetítulo** y debajo el **nombre del Nivel en grande** (`Niveles.nombre(nivelId)`, el canónico). `pieDe()` acepta un `nombre` opcional: cuando llega, la palabra se retira a antetítulo (`.con-nombre`) para no competir con él. Sin nombre —una página que no cargue `niveles.js`— el pie es exactamente el de antes. *(Por eso `orar.html` carga ahora `niveles.js`: era la única de las dos que no lo tenía.)*
 
 **La coreografía** (3,5 s, el más raro de los tres — uno cada 20 Misterios): la noche cae al fondo del propio cuaderno · las **cuatro cuñas** entran, 140 ms entre bloques · la **tracería** se dibuja del centro hacia afuera —primero los cuatro nervios mayores y el aro, después los dieciséis menores: eso es la rosa abriéndose— · la **luz atraviesa** y proyecta fuera del encuadre · la **Lux ocupa el óculo** y llega la palabra.
 
