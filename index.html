@@ -370,6 +370,15 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   color:var(--orange); text-decoration:none;
 }
 .prefs-credits-link:hover { text-decoration:underline; }
+/* Declaración de uso de IA generativa — versión corta.
+   Alineada a la izquierda: son dos líneas de prosa, no una firma. */
+.prefs-credits-ia {
+  margin-top:12px; padding-top:12px;
+  border-top:1px solid var(--border);
+  font-size:0.66rem; line-height:1.55; color:var(--text-dim); text-align:left;
+}
+.prefs-credits-ia a { color:var(--orange); text-decoration:none; white-space:nowrap; }
+.prefs-credits-ia a:hover { text-decoration:underline; }
 
 /* ── Modal base ── */
 .modal-overlay {
@@ -1394,6 +1403,12 @@ body.hub-clean .hub-door-santuario { animation-delay:1.2s !important; }
         <div class="prefs-credits-label">Producción de audio</div>
         <div class="prefs-credits-producer"><a href="https://www.instagram.com/kicksound_lab?igsh=MzMyeHV0OXlqczA2&utm_source=qr" target="_blank" rel="noopener noreferrer" class="prefs-credits-link">KickSoundLab</a></div>
         <div class="prefs-credits-copy">© Todos los derechos reservados</div>
+        <div class="prefs-credits-ia">
+          Algunas voces, ilustraciones y música de CruzAndo fueron creadas con apoyo de
+          inteligencia artificial, bajo curaduría humana. El contenido espiritual y la
+          metodología son de autoría original.
+          <a href="privacidad.html" target="_blank" rel="noopener">Más información</a>
+        </div>
       </div>
 
       <button class="btn-modal-close" onclick="closePrefs()" style="margin-top:20px">Cerrar</button>
