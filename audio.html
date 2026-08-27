@@ -1821,7 +1821,10 @@ const AUDIO_FOLDERS = {
 };
 // Letras sincronizadas del canto — mismo bucket que la música, carpeta /lrc/
 // Convención idéntica al .m4a: M_{nivel}_{cuaderno}_{misterio}.lrc
-const LRC_BASE = 'https://pub-faed94e375aa443e846e07f81ef93274.r2.dev/lrc/';
+// El canto de BLOQUE (el que se desbloquea al cerrar los 5) vive en /cantos/,
+// con la convención CANTO_{nivel}_{cuaderno}_{bloqueIdx}.lrc
+const MUSIC_BASE = 'https://pub-faed94e375aa443e846e07f81ef93274.r2.dev/';
+const LRC_BASE   = MUSIC_BASE + 'lrc/';
 const BGM_BASE = R2_BASE + '/BGM/';
 const NUM_SEGS  = 10;  // segmentos visuales en la barra de progreso
 // El NIVEL del BGM está horneado en los propios MP3 (atenuados ~-30 dB en R2).
@@ -2546,6 +2549,17 @@ async function syncToOrarProgress(nivel, cuaderno, misterio) {
     prog[block][blockIdx] = Date.now();
     await setDoc(ref, { progress: prog }, { merge: true });
     try { localStorage.setItem('cruzando_progress_cache_dirty', 'true'); } catch(_) {}
+    /* El mapa pinta su FASE 1 desde este cache, SIN RED. Marcarlo sucio no basta:
+       sin refrescarlo, al volver del rezo el mapa ensena el estado viejo hasta que
+       la FASE 2 resuelve Auth y lee Firestore. Aqui el documento ya esta armado
+       en memoria, asi que dejarlo escrito cuesta una linea. Se fusiona con lo que
+       hubiera (microDone, journal...) para no perder campos que audio no toca. */
+    try {
+      const _k    = 'cruzando_progress_' + nivelId;
+      const _prev = JSON.parse(localStorage.getItem(_k) || '{}') || {};
+      _prev.progress = prog;
+      localStorage.setItem(_k, JSON.stringify(_prev));
+    } catch(_) {}
   } catch(e) {
     console.warn('[CruzAndo] syncToOrarProgress:', e);
   }
@@ -3260,14 +3274,10 @@ const Canto = Karaoke.create({
   },
   getStillUrl:      () => IMG_BASE + 'P_' + cantoMid() + '.webp',
   getTinteRgb:      () => window.rgbBloque ? rgbBloque(currentSession && currentSession.block) : '',
-  // Letra de respaldo: la del cuaderno ({nivelId}-cantos.json), sin marcas de tiempo
-  loadFallbackLetra: async () => {
-    const s = currentSession;
-    if (!s) return null;
-    const nivelId = String(s.nivel).padStart(2,'0') + String(s.cuaderno).padStart(2,'0');
-    const c = Karaoke.getCanto(await Karaoke.loadCantos(nivelId), s.block, s.blockIdx);
-    return c ? { letra: c.letra, titulo: c.titulo } : null;
-  },
+  /* Sin letra de respaldo: la del cuaderno era una copia de la del .lrc (medido, 80
+     de 80), y el título ahora sale del [ti:] del propio .lrc. Si el .lrc falta, el
+     título cae en getTitulo() —el nombre del Misterio— y la pantalla no abre, que es
+     la degradación de siempre. */
 
   isOpenNow:   () => !!currentSession && isCanto(currentTrack),
   onSkip:      () => cantoSkip(),
@@ -4079,33 +4089,34 @@ async function completeSession() {
   $('epilogo-titulo').textContent    = (currentSession.mysteryData && currentSession.mysteryData.titulo) || 'Misterio completado';
   $('epilogo-subtitulo').textContent = `${ORDS[misterio-1]} Misterio ${BLOCK_NAMES[block]} · Nivel ${nivel}-${cuaderno}`;
 
-  // Canto del bloque (para el desbloqueo). La letra del canto del epílogo ya está
-  // en memoria desde preloadCanto(): "Escuchar el canto" abre la pantalla de canto.
-  const nivelId   = String(nivel).padStart(2,'0') + String(cuaderno).padStart(2,'0');
-  const cantosData = await Karaoke.loadCantos(nivelId);   // caché única del módulo (guarda por nivelId)
-
-  // Desbloqueo de canto de bloque al completar los 5 misterios
+  /* Desbloqueo del canto de bloque al cerrar los 5 Misterios.
+     Título y letra salen del .lrc del canto de bloque —el mismo que la galería
+     reproduce— en vez de {nivelId}-cantos.json. Y solo se pide cuando de verdad
+     toca: antes se cargaba el cuaderno entero en CADA Misterio para usarlo uno
+     de cada cinco. */
   const BLOCK_IDX_MAP = { gozosos:1, luminosos:2, dolorosos:3, gloriosos:4 };
   const esUltimoDelBloque = [5,10,15,20].includes(misterio);
-  if (esUltimoDelBloque && currentUser && cantosData && cantosData.cantos && cantosData.cantos[block]) {
+  if (esUltimoDelBloque && currentUser) {
     const bloqueIdx = BLOCK_IDX_MAP[block];
     const cantoKey  = `${nivel}_${cuaderno}_${bloqueIdx}`;
     try {
       const yaDesbloqueado = await getDoc(doc(db, 'users', currentUser.uid, 'unlockedCantos', cantoKey));
       if (!yaDesbloqueado.exists()) {
-        const letraCompleta = cantosData.cantos[block]
-          .map(c => c.letra || '')
-          .join('\n\n───\n\n');
-        await setDoc(
-          doc(db, 'users', currentUser.uid, 'unlockedCantos', cantoKey),
-          {
-            titulo:    cantosData.cantos[block][0]?.titulo || block,
-            bloque:    block, nivel, cuaderno, bloqueIdx,
-            letra:     letraCompleta,
-            unlockedAt: Date.now()
-          }
-        );
-        setTimeout(() => showToast('🎵 Nuevo canto desbloqueado'), 800);
+        const lrc = await Karaoke.fetchLrc(MUSIC_BASE + 'cantos/CANTO_' + cantoKey + '.lrc');
+        // Sin .lrc de bloque no se inventa el canto: se deja para el backfill de
+        // cantos.html, que lo reintentará. Mejor sin tarjeta que con una vacía.
+        if (lrc && lrc.lineas.length) {
+          await setDoc(
+            doc(db, 'users', currentUser.uid, 'unlockedCantos', cantoKey),
+            {
+              titulo:    lrc.titulo || BLOCK_NAMES[block] || block,
+              bloque:    block, nivel, cuaderno, bloqueIdx,
+              letra:     Karaoke.letraDeBloque(lrc.plana),
+              unlockedAt: Date.now()
+            }
+          );
+          setTimeout(() => showToast('🎵 Nuevo canto desbloqueado'), 800);
+        }
       }
     } catch(e) { console.warn('[cantos unlock]', e); }
   }

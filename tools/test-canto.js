@@ -118,6 +118,62 @@ ok('bloques.js    · rgbBloque acompaña a rgbaBloque', () => {
     throw new Error('un bloque que no existe debe dar cadena vacía, no basura');
 });
 
+console.log('\n── Los cantos del cuaderno se jubilaron ──');
+
+/* data/{nivelId}-cantos.json guardaba la letra de cada canto y su título. La letra
+   ya estaba en el .lrc (medido: 80 de 80 en lo publicado) y el título vive ahora en
+   el [ti:] del propio asset, así que los cuatro archivos se borraron. Estas pruebas
+   existen para que no vuelvan por la puerta de atrás: un fetch olvidado devolvería
+   404 y la letra desaparecería sin que nadie lo notara. */
+
+ok('los cuatro data/*-cantos.json siguen borrados', () => {
+  const vivos = ['0101','0102','0103','0104']
+    .filter(n => fs.existsSync(path.join(RAIZ, 'data', n + '-cantos.json')));
+  if (vivos.length)
+    throw new Error('reaparecieron: ' + vivos.join(', ') + ' — el origen es el .lrc, no data/');
+});
+
+ok('ninguna página los pide ya', () => {
+  const mal = [];
+  for (const f of fs.readdirSync(RAIZ)) {
+    if (!/\.(html|js)$/.test(f)) continue;
+    for (const l of leer(f).split('\n')) {
+      // Solo el fetch cuenta: los comentarios que explican la migración pueden nombrarlo.
+      if (/fetch\([^)]*-cantos\.json/.test(l)) mal.push(f + ': ' + l.trim().slice(0, 70));
+    }
+  }
+  if (mal.length) throw new Error(mal.join('\n      '));
+});
+
+ok('canto.js da las dos lecturas del .lrc y ya no la del JSON', () => {
+  const s = leer('canto.js');
+  for (const f of ['parseLrcMeta', 'letraPlana', 'fetchLrc', 'letraDeBloque'])
+    if (!new RegExp('function\\s+' + f + '\\s*\\(').test(s)) throw new Error('falta ' + f);
+  if (/function\s+loadCantos\s*\(/.test(s))
+    throw new Error('loadCantos sigue ahí: era el lector del JSON jubilado');
+  // parseLrc para cantar, letraPlana para leer: si se fusionaran, orar perdería las estrofas
+  if (!/if \(!line\.trim\(\)\) continue;/.test(s))
+    throw new Error('parseLrc dejó de descartar los renglones vacíos');
+});
+
+ok('audio y la galería sacan el canto desbloqueado del .lrc de bloque', () => {
+  for (const f of ['audio.html', 'cantos.html']) {
+    const s = leer(f);
+    if (!/Karaoke\.fetchLrc\(/.test(s))    throw new Error(f + ' ya no lee el .lrc de bloque');
+    if (!/letraDeBloque\(/.test(s))        throw new Error(f + ' ya no parte la letra en sus Misterios');
+    if (/letraDeBloque\(\s*\w+\.lineas/.test(s))
+      throw new Error(f + ': pasa las líneas del karaoke en vez de la letra plana — se perderían las estrofas');
+  }
+});
+
+ok('orar conserva su popup de texto plano (es el libro digital)', () => {
+  const s = leer('orar.html');
+  if (!/popup-lyrics/.test(s))            throw new Error('desapareció el popup de letra');
+  if (!/precargarLetraCanto\s*\(/.test(s)) throw new Error('nadie precarga la letra del Misterio');
+  if (/Karaoke\.create\(/.test(s))
+    throw new Error('orar montó un karaoke: aquí el canto se LEE, a ritmo del usuario');
+});
+
 console.log('\n' + '─'.repeat(64));
 if (fallos) {
   console.log('  ✗ ' + fallos + ' fallo(s), ' + pasos + ' pasada(s)');

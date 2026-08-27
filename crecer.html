@@ -3810,6 +3810,23 @@ function buildMap() {
     }
   }
 
+  /* El progreso real, con sus dos dimensiones: que bloque y que Misterio dentro
+     de el. Es granularidad de MISTERIO, no de bloque: un free que lleva 3 de
+     gozosos ve esos 3, y un premium que cruzo los gloriosos enteros en rezar ve
+     los 16-20 y no los 1-5. */
+  function misterioHecho(bi, mi) {
+    var p = window._firestoreProgress && window._firestoreProgress.progress;
+    var arr = p && p[BLOQUES[bi]];
+    return !!(arr && arr[mi]);
+  }
+  /* El "aqui vas": el primer Misterio pendiente en orden de itinerario. Con el
+     progreso desordenado puede haber varios candidatos, y este es el que se lee
+     como "continua por aqui". Si estan los 20, no hay activo. */
+  var _siguienteGi = -1;
+  for (var _g = 0; _g < 20; _g++) {
+    if (!misterioHecho(Math.floor(_g / 5), _g % 5)) { _siguienteGi = _g; break; }
+  }
+
   mPts.forEach(function(pt) {
     var gi = pt.globalIdx; var bi = pt.bi; var mi = pt.mi;
     var bloque = BLOQUES_MAP[bi]; var nombre = bloque.misterios[mi];
@@ -3820,10 +3837,14 @@ function buildMap() {
       isActive = (gi === _freeActiveGi);
       isLocked = false;                 // nunca ocultar — todos visibles
     } else {
-      var doneCount = window.DONE_COUNT;
-      isDone   = gi < doneCount;
-      isActive = gi === doneCount;
-      isLocked = gi > doneCount;
+      /* Esto miraba `gi < DONE_COUNT`, y DONE_COUNT es un CONTEO, no un mapa.
+         El progreso se guarda por bloque y Misterio (progress[bloque][mi]) y los
+         bloques se rezan en CUALQUIER orden: quien rezaba los gloriosos (16-20)
+         tenia DONE_COUNT = 5 y el mapa le encendia los gozosos 1-5. Su progreso
+         estaba guardado; se pintaba en los nodos de otro bloque. */
+      isDone   = misterioHecho(bi, mi);
+      isActive = (gi === _siguienteGi);
+      isLocked = !isDone && !isActive;
     }
 
     var node = document.createElement('div');
@@ -3967,8 +3988,15 @@ function drawMapPath(svg, mPts) {
 
   // Segmentos completados por bloque (encima del camino base)
   BLOQUES_MAP.forEach(function(bloque, bi) {
-    var start=bi*5, done=Math.max(0,Math.min(window.DONE_COUNT-start,5));
+    /* Igual que los nodos: se pinta lo que de verdad se rezo, no un prefijo del
+       conteo. El tramo llega hasta el ULTIMO Misterio hecho del bloque, que es
+       lo que se lee como "por aqui ya pasaste". */
+    var _p   = window._firestoreProgress && window._firestoreProgress.progress;
+    var _arr = (_p && _p[BLOQUES[bi]]) || [];
+    var done = 0;
+    for (var _k = 0; _k < 5; _k++) if (_arr[_k]) done = _k + 1;
     if (done<=0) return;
+    var start=bi*5;
     var pts=mPts.slice(start, start+done+1);
     if (pts.length<2) return;
     var line=document.createElementNS('http://www.w3.org/2000/svg','path');

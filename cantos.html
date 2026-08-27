@@ -1948,9 +1948,10 @@ function escHTML(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-// Backfill: detecta bloques completados en progress/ y crea los unlockedCantos faltantes
+// Backfill: detecta bloques completados en progress/ y crea los unlockedCantos faltantes.
+// Título y letra salen del .lrc del canto de bloque —el mismo que esta galería
+// reproduce—, no de {nivelId}-cantos.json.
 async function backfillCantos(uid) {
-  const base = location.origin + location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1);
   const BLOCK_IDX_MAP = { gozosos:1, luminosos:2, dolorosos:3, gloriosos:4 };
   const BLOCKS = ['gozosos','luminosos','dolorosos','gloriosos'];
   try {
@@ -1968,14 +1969,15 @@ async function backfillCantos(uid) {
         const existing  = await getDoc(doc(db, 'users', uid, 'unlockedCantos', cantoKey));
         if (existing.exists()) continue;
         try {
-          const r = await fetch(base + 'data/' + nivelId + '-cantos.json');
-          if (!r.ok) continue;
-          const cantosData = await r.json();
-          if (!cantosData.cantos?.[block]) continue;
-          const letra  = cantosData.cantos[block].map(c => c.letra || '').join('\n\n───\n\n');
-          const titulo = cantosData.cantos[block][0]?.titulo || block;
+          // Por cantoLrcUrl, no a mano: la convención del nombre vive en un solo sitio.
+          const lrc = await window.Karaoke.fetchLrc(cantoLrcUrl({ nivel, cuaderno, bloqueIdx }));
+          // Sin .lrc no hay canto que desbloquear: se deja para cuando su arte suba.
+          if (!lrc || !lrc.lineas.length) continue;
           await setDoc(doc(db, 'users', uid, 'unlockedCantos', cantoKey),
-            { titulo, bloque: block, nivel, cuaderno, bloqueIdx, letra, unlockedAt: Date.now() });
+            { titulo: lrc.titulo || BLOCK_LABELS[block] || block,
+              bloque: block, nivel, cuaderno, bloqueIdx,
+              letra:  window.Karaoke.letraDeBloque(lrc.plana),
+              unlockedAt: Date.now() });
         } catch(e) { console.warn('[backfill canto]', nivelId, block, e); }
       }
     }

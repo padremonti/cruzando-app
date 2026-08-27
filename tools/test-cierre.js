@@ -561,9 +561,16 @@ await ok('orar y rezar lo cierran donde toca', () => {
   const orar = leer('orar.html');
   if (!/await mostrarRosario\(MR_BNS\);[\s\S]{0,40}?showCelebration\(\);/.test(orar))
     throw new Error('orar no lo cierra antes de la celebración');
+  /* En rezar se comprueba por ORDEN, no por cercanía: entre el Rosario y las
+     Letanías se coló el rosetón (el cuaderno, cuando se cierran los cuatro
+     bloques) y una ventana de caracteres fija se rompía con solo añadir un paso. */
   const rezar = leer('rezar.html');
-  if (!/await mostrarRosario\(\);[\s\S]{0,120}?RosarioFinal\.abrir/.test(rezar))
-    throw new Error('rezar no lo cierra antes de las Letanías');
+  const cuerpo = (rezar.match(/async function onSessionComplete\(\)[\s\S]*?\n\}/) || [''])[0];
+  const iRos = cuerpo.indexOf('await mostrarRosario()');
+  const iLet = cuerpo.indexOf('RosarioFinal.abrir');
+  if (iRos === -1) throw new Error('rezar dejó de cerrar el Rosario');
+  if (iLet === -1) throw new Error('rezar dejó de ofrecer las Letanías');
+  if (!(iRos < iLet)) throw new Error('rezar no lo cierra antes de las Letanías');
 });
 
 console.log('\n── Desemboca en las Letanías ──');
@@ -825,6 +832,81 @@ await ok('el 🎉 del DEMO y el 🙏 de la celebración de orar salieron', () =>
   if (leer('audio.html').indexOf('\u{1F389}') !== -1) throw new Error('sigue el 🎉 en audio');
   if (/maria-placeholder/.test(leer('orar.html'))) throw new Error('sigue el círculo con el 🙏');
 });
+
+
+console.log('\n── El mapa pinta el progreso REAL, no un conteo ──');
+
+await ok('crecer   · el nodo mira su bloque y su Misterio', () => {
+  /* Miraba `gi < DONE_COUNT`, y DONE_COUNT es un CONTEO: quien rezaba los
+     gloriosos (16-20) tenía 5 y el mapa le encendía los gozosos 1-5. */
+  const s = leer('crecer.html');
+  if (/isDone\s*=\s*gi\s*<\s*doneCount/.test(s))
+    throw new Error('vuelve el prefijo lineal: el progreso se pintará en otro bloque');
+  if (!/isDone\s*=\s*misterioHecho\(bi,\s*mi\)/.test(s))
+    throw new Error('el nodo no lee el progreso real');
+  const fn = (s.match(/function misterioHecho[\s\S]*?\n  \}/) || [''])[0];
+  if (!/p\[BLOQUES\[bi\]\]/.test(fn.replace(/\s/g, '')))
+    throw new Error('misterioHecho no indexa por bloque');
+  if (!/arr\[mi\]/.test(fn))
+    throw new Error('misterioHecho no indexa por Misterio: perdería la granularidad');
+});
+
+await ok('crecer   · el sendero pinta los tramos rezados', () => {
+  const s = leer('crecer.html');
+  if (/done\s*=\s*Math\.max\(0,\s*Math\.min\(window\.DONE_COUNT\s*-\s*start/.test(s))
+    throw new Error('el sendero vuelve a derivarse del conteo');
+  if (!/for \(var _k = 0; _k < 5; _k\+\+\) if \(_arr\[_k\]\) done = _k \+ 1;/.test(s))
+    throw new Error('el tramo no se mide sobre el progreso del bloque');
+});
+
+await ok('crecer   · la rama free conserva su camino forzado', () => {
+  /* El free avanza en línea recta por diseño (_freeActiveGi): esa rama no se
+     toca, y el arreglo es solo de la de premium/beta/developer. */
+  const s = leer('crecer.html');
+  if (!/isDone\s*=\s*\(gi < _freeActiveGi\)/.test(s))
+    throw new Error('se alteró el camino del plan free');
+});
+
+console.log('\n── El mapa no espera a la red para pintar bien ──');
+
+[['audio.html', 'cruzando_progress_'], ['orar.html', 'refrescarCacheMapa'],
+ ['rezar.html', 'refrescarCacheMapa']].forEach(([f, marca]) => {
+  ok(f.padEnd(13) + '· deja el caché del mapa al día', () => {
+    const s = leer(f);
+    if (!s.includes('cruzando_progress_cache_dirty'))
+      throw new Error('ya no marca el caché como sucio');
+    if (!s.includes(marca))
+      throw new Error('marca el caché sucio pero no lo refresca: el mapa pintará lo viejo');
+    if (!/localStorage\.setItem\(\s*['"]cruzando_progress_['"]\s*\+|localStorage\.setItem\(_k,/.test(s))
+      throw new Error('no escribe cruzando_progress_{nivelId}, que es lo que lee la FASE 1');
+  });
+});
+
+console.log('\n── rezar también corona el cuaderno ──');
+
+await ok('rezar    · el rosetón sale al cerrarse los cuatro bloques', () => {
+  const s = leer('rezar.html');
+  if (!/function cuadernoCompleto\(\)/.test(s))
+    throw new Error('no sabe cuándo está cerrado el cuaderno');
+  const c = (s.match(/function cuadernoCompleto\(\)[\s\S]*?\n\}/) || [''])[0];
+  if (!/BLOCKS\.every/.test(c))
+    throw new Error('el cuaderno son los CUATRO bloques, no el último');
+  const o = (s.match(/async function onSessionComplete\(\)[\s\S]*?\n\}/) || [''])[0];
+  const iR = o.indexOf('mostrarRosario()'), iX = o.indexOf('mostrarRoseton()');
+  const iL = o.indexOf('RosarioFinal');
+  if (iX === -1) throw new Error('rezar sigue sin rosetón');
+  if (!(iR < iX)) throw new Error('el rosetón tiene que ir después del Rosario');
+  if (iL !== -1 && !(iX < iL))
+    throw new Error('los cierres van seguidos: el rosetón antes de las Letanías');
+});
+
+await ok('rezar    · el rosetón no bloquea el final', () => {
+  const c = (leer('rezar.html').match(/function mostrarRoseton\(\)[\s\S]*?\n\}/) || [''])[0];
+  if (!/return Promise\.resolve\(false\)/.test(c))
+    throw new Error('sin salida temprana dejaría al usuario encerrado');
+  if (!/catch/.test(c)) throw new Error('sin catch');
+});
+
 
 console.log('\n── Cableado y capas ──');
 

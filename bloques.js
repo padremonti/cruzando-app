@@ -43,6 +43,12 @@
 
   window.COLORES_BLOQUE = COLORES;
 
+  /* La lista ORDENADA de los cuatro bloques, que es como se indexa el progreso
+     (progress[bloque][misterio]) y como se recorre el itinerario. Vive aquí por
+     lo mismo que el color: es la definición de los cuatro bloques, y cada página
+     tenía su propia copia. */
+  window.BLOQUES = ['gozosos', 'luminosos', 'dolorosos', 'gloriosos'];
+
   // Acepta el nombre largo ('gozosos') o el alias corto ('goz').
   window.rgbaBloque = function (bloque, alfa) {
     var hex = COLORES[bloque] || COLORES[ALIAS[bloque]];

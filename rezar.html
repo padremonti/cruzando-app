@@ -51,6 +51,7 @@ window._fbFirestore = {
   serverTimestamp: function() { return firebase.firestore.FieldValue.serverTimestamp(); }
 };
 </script>
+<script src="niveles.js"></script>
 <script src="bloques.js"></script>
 <link rel="stylesheet" href="cierre.css">
 <script src="sarta.js"></script>
@@ -2442,10 +2443,8 @@ const Canto = Karaoke.create({
   getImgCandidates: () => { const mid = cantoMid(); return CANTO_LETTERS.map(l => IMGB + 'cantos/' + mid + '/P_' + mid + l + '.webp'); },
   getStillUrl:      () => IMGB + 'P_' + cantoMid() + '.webp',
   getTinteRgb:      () => window.rgbBloque ? rgbBloque(blk) : '',
-  loadFallbackLetra: async () => {
-    const c = Karaoke.getCanto(await Karaoke.loadCantos(nivelId), blk, bIdx);
-    return c ? { letra: c.letra, titulo: c.titulo } : null;
-  },
+  /* Sin letra de respaldo: era copia de la del .lrc, y el título sale ya del [ti:]
+     del propio .lrc. Ver la misma nota en audio.html. */
 
   isOpenNow: () => isCantoTrack(playlist[plIdx]),
   // Saltar: el Misterio ya se rezó, se contó y se guardó ANTES de su canto, y el canto
@@ -2492,6 +2491,15 @@ function buildPlaylist(startIdx){
 }
 
 /* ─── COMPLETE MYSTERY ─── */
+/* El mapa pinta la FASE 1 desde este cache, SIN RED. Los reproductores marcaban
+   el cache como sucio pero no lo actualizaban, asi que al volver de rezar el mapa
+   ensenaba el estado viejo hasta que la FASE 2 resolvia Auth y leia Firestore.
+   Aqui ya tenemos el documento en memoria: dejarlo escrito cuesta una linea y el
+   mapa aparece correcto de inmediato. Guarda el nivelId por si cambia de nivel. */
+function refrescarCacheMapa(){
+  try{ localStorage.setItem('cruzando_progress_'+nivelId, JSON.stringify(prog||{})); }catch(_){}
+}
+
 async function completeMystery(){
   if(window.CZSound)CZSound('mysteryClear');
   if(!blk||!usr)return;
@@ -2518,6 +2526,7 @@ async function completeMystery(){
             modo:'rezar',savedAt:new Date()},{merge:true});
   }catch(e){}
   try{localStorage.setItem('cruzando_progress_cache_dirty','true');}catch(_){}
+  refrescarCacheMapa();
 
   if(dots.every(Boolean)){
     setTimeout(async()=>{
@@ -2615,6 +2624,33 @@ function mostrarRosario(){
   }catch(e){ return Promise.resolve(false); }
 }
 
+/* ── El rosetón: el cuaderno ──────────────────────────────────────────────────
+   rezar cierra UN bloque por sesión, así que el cuaderno se cierra cuando los
+   cuatro están enteros — y eso se lee directo de prog.progress, sin contar
+   historial. La paleta sale de las variables de la propia página (--lvl-*), que
+   es la que el usuario tiene delante. */
+function cuadernoCompleto(){
+  var p = prog && prog.progress;
+  if(!p) return false;
+  return BLOCKS.every(function(b){
+    return Array.isArray(p[b]) && p[b].length===5 && p[b].every(Boolean);
+  });
+}
+function mostrarRoseton(){
+  if(!window.Cierre || !Cierre.roseton) return Promise.resolve(false);
+  if(!cuadernoCompleto()) return Promise.resolve(false);
+  try{
+    var cs = getComputedStyle(document.documentElement);
+    var v  = function(n){ return (cs.getPropertyValue(n)||'').trim(); };
+    return Cierre.roseton({
+      paleta:  { soft:v('--lvl-soft'), light:v('--lvl-light'), ultra:v('--lvl-ultra') },
+      colores: BLOCKS.map(function(b){ return (BCL && BCL[b]) || COLORES_BLOQUE[b]; }),
+      titulo:  'Nivel recorrido',
+      nombre:  (window.Niveles ? Niveles.nombre(nivelId) : '')
+    }).catch(function(){ return false; });
+  }catch(e){ return Promise.resolve(false); }
+}
+
 function playNext(){
   if(_sesionCerrada) return;
   plIdx++;
@@ -2658,6 +2694,9 @@ async function onSessionComplete(){
      las Letanías. Antes la animación caía dentro de celebrar(), o sea después
      de las Letanías: se coronaba el Rosario antes de haberlo mostrado. */
   await mostrarRosario();
+  /* Y si con este bloque se cerraron los veinte, el cuaderno se corona antes de
+     las Letanías: los cierres van seguidos, y de ahí se pasa a lo que sigue. */
+  await mostrarRoseton();
   if(rezarPrefs().letanias && window.RosarioFinal){
     RosarioFinal.abrir({ onCerrar: celebrar });
     return;

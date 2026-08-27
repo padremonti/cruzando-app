@@ -22,19 +22,19 @@ PWA de formación espiritual católica. El usuario reza los 20 Misterios del Ros
 | `diario.html` | Diario de reflexiones. Lee `users/{uid}/reflections/*`. |
 | `sanar.html` | Entrada emocional al Rosario (pestaña "Sanar" del hub). Máquina de 4 fases: onboarding de afinidad → elenco de dolores → acogida interactiva → handoff. Navega a `mini.html?mid=…&pain=…`. |
 | `mini.html` | Mini sesión de UN Misterio (el "Misterio-puerta" que señaló Sanar). Reproductor cinematográfico a pantalla completa. Todo derivado del `mid`. Firebase compat cableado; marca el pain completado al epílogo. |
-| `canto.js` / `canto.css` | Motor de karaoke de canto compartido (extraído de audio+rezar). `Canto.init({...})`; CSS por `<link>`, HTML del overlay inyectado por el módulo. `mini.html` NO lo usa (ancestro divergente). |
+| `canto.js` / `canto.css` | Motor de karaoke de canto compartido (extraído de audio+rezar). `Canto.init({...})`; CSS por `<link>`, HTML del overlay inyectado por el módulo. `mini.html` NO lo usa (ancestro divergente). **Y el lector del `.lrc` para toda la app**: `parseLrc` (cantar) · `letraPlana` (leer) · `parseLrcMeta` · `fetchLrc` · `letraDeBloque`. Ver § El canto se explica solo. |
 | `utils.js` | `window.isPremium(userData)` y `window.resolvePlan(userData)`. Cargado en todas las páginas. |
 | `toast.js` | **El aviso breve.** `showToast(texto)` — autosuficiente: inyecta su CSS y monta su nodo bajo demanda. En index y crecer; audio conserva el suyo. Ver § El aviso breve. |
 | `flags.js` | Interruptores de producto. Hoy: `MOSTRAR_RECOMPENSAS = false` + puerta `window.recompensasON()`. Ver § Kit de recompensas. |
 | `cierre.js` / `cierre.css` | **El cierre de una sesión de rezo.** `Cierre.decenario({desde, color, titulo, metros})` → promesa. La columna se cierra en decenario. CSS por `<link>`, trayectorias generadas por el módulo. Ver § El cierre. |
 | `sarta.js` | **Geometría del decenario y la camándula.** `Sarta.geometria(forma, {decenas})` — `decenas:1` da el decenario (16 cuentas), `decenas:5` la camándula (60). Pura, sin DOM. Ver § La sarta. |
 | `cuentas.js` | **Motor pasivo de la columna de cuentas del rezo** (1 Padrenuestro + 10 Ave Marías + Cruz Lux). `Cuentas.crear({audio: () => el})`. Lo usan audio y orar; rezar y mini conservan el suyo. Ver § Columna de cuentas. |
-| `bloques.js` | **Origen único del color de los cuatro bloques.** `window.COLORES_BLOQUE` + `window.rgbaBloque(bloque, alfa)`, y estampa 12 variables CSS (`--goz`, `--goz-color`, `--goz-rgb`, ×4). Va en el `<head>`. Ver § Colores de bloque. |
+| `bloques.js` | **Origen único de los cuatro bloques**: su color y su lista ordenada (`window.BLOQUES`). `window.COLORES_BLOQUE` + `window.rgbaBloque(bloque, alfa)`, y estampa 12 variables CSS (`--goz`, `--goz-color`, `--goz-rgb`, ×4). Va en el `<head>`. Ver § Colores de bloque. |
 | `niveles.js` | **Origen único del itinerario**: `NIVELES_ORDER`, `NIVEL_STATUS`, `NIVEL_NAMES` + `Niveles.publicado/siguientePublicado/nombre`. Va en el `<head>` de index, crecer, audio y diario. Ver § El itinerario. |
 
 ## El cierre de una sesión (`cierre.js`)
 
-*Estado: los **tres cierres** implementados —decenario, Rosario y rosetón— con salida a las Letanías + banco de pruebas (`tools/test-cierre.js`, 88). **Decenario verificado en dispositivo en `mini`; el de `rezar` acaba de destrabarse (ver el aviso de la guarda). Resto PENDIENTE de prueba visual.***
+*Estado: los **tres cierres** implementados —decenario, Rosario y rosetón— con salida a las Letanías + banco de pruebas (`tools/test-cierre.js`, 96). **Decenario verificado en dispositivo en `mini`; el de `rezar` acaba de destrabarse (ver el aviso de la guarda). Resto PENDIENTE de prueba visual.***
 
 **La columna del rezo se cierra en decenario.** Es el mismo objeto que el usuario tuvo a la derecha toda la sesión, enrollado. Once cuentas contra once, Padrenuestro con Padrenuestro:
 
@@ -70,7 +70,7 @@ Cada decenario **arranca enrollado** sobre el punto medio de su futuro arco, con
 |---|---|
 | `audio` | en el bonus de bloque —el único sitio donde se sabe que los cinco están rezados por primera vez— y se muestra entre el decenario y el epílogo |
 | `orar` | al completar los cinco puntos del bloque, antes de la pantalla de celebración |
-| `rezar` | en su celebración: rezar **es** el Rosario de una sentada |
+| `rezar` | en su celebración: rezar **es** el Rosario de una sentada. Y si con ese bloque se cierran los cuatro, el **rosetón** va justo detrás (`cuadernoCompleto()` lee `prog.progress`, sin contar historial; la paleta sale de las `--lvl-*` de la propia página) |
 
 ⚠️ **En audio sustituyó al Mariano y al toast del bloque.** Se disparaban justo ahí y el epílogo los tapaba a los pocos cientos de milisegundos (era el hallazgo (c) del inventario). Los metros del bonus van ahora dentro del Rosario, que sí se ve. Hay una prueba que vigila que no vuelvan.
 
@@ -292,6 +292,32 @@ Ahora los dos **escriben** el marcador al fijar nivel y lo **leen** como valor p
 ⚠️ **La frontera no sirve para "dónde estoy":** solo avanza con el nivel **entero** (los 20 Misterios, los cuatro bloques). Con 5 de 20 en 2-2 no se mueve, y eso es correcto. Por eso el marcador tiene que llevar la posición, aparte del avance.
 
 
+### El mapa pintaba el progreso en el bloque equivocado
+
+*Estado: arreglado + 8 pruebas en `tools/test-cierre.js`. **PENDIENTE prueba en dispositivo.***
+
+⚠️ **El mapa trataba el progreso como un prefijo lineal.** Cada nodo decidía su estado con `gi < DONE_COUNT`, y `DONE_COUNT` es un **conteo** —la suma de Misterios hechos de los cuatro bloques—, no un mapa. Quien rezaba los **gloriosos** (Misterios 16-20) tenía `DONE_COUNT = 5` y el mapa le encendía **gozosos 1-5**. El sendero hacía lo mismo (`done = DONE_COUNT - bi*5`). El progreso estaba bien guardado; se pintaba en los nodos de otro bloque.
+
+El modelo de datos tiene **dos dimensiones** —`progress[bloque][misterio]`— y los bloques se rezan en cualquier orden desde orar y rezar. El mapa era el único sitio que asumía orden. Ahora `misterioHecho(bi, mi)` lee el hueco exacto: granularidad de **Misterio dentro de bloque**, que es lo que necesitan tanto el free (avanza de uno en uno) como el premium (puede cruzar bloques enteros en una sesión de rezar).
+
+**La rama del plan free no se tocó**: su camino *sí* es lineal por diseño (`_freeActiveGi`), y el fallo era solo de la rama premium/beta/developer. Hay una prueba que lo vigila.
+
+**El "aquí vas"** (`isActive`) es ahora el **primer Misterio pendiente en orden de itinerario**: con el progreso desordenado hay varios candidatos, y ese es el que se lee como "continúa por aquí".
+
+⚠️ **`BLOCKS` no era visible desde el script del mapa.** El script del mapa vive en un `<script>` distinto del que declara `var BLOCKS`, y el banco `tools/test-globales.js` lo cazó al primer intento. La lista ordenada de los cuatro bloques pasó a **`bloques.js` como `window.BLOQUES`** — que ya es el origen único de los cuatro bloques, así que es donde pertenece.
+
+### El mapa ya no espera a la red para pintar bien
+
+⚠️ **Ningún reproductor refrescaba el caché del mapa.** `cruzando_progress_{nivelId}` lo escribían **solo** `crecer.html` e `index.html`; audio, orar y rezar marcaban `cruzando_progress_cache_dirty` pero no actualizaban el dato. Al volver de una sesión, la **FASE 1** pintaba desde el caché viejo —sin red, instantánea— y había que esperar a que la **FASE 2** resolviera Auth y leyera Firestore para que la FASE 3 repintara. Ese era el "tarda demasiado en actualizarse el mapa".
+
+Los tres ya tienen el documento en memoria cuando escriben a Firestore, así que dejarlo en el caché cuesta una línea (`refrescarCacheMapa()` en orar y rezar; en audio, dentro de `syncToOrarProgress`, **fusionando** para no perder los campos que audio no toca —`microDone`, `journal`—). El `dirty` se mantiene: la FASE 2 sigue confirmando contra Firestore.
+
+### El nodo "Siguiente" bloqueado NO es un fallo
+
+`_accessible = _nextIdx2 <= _frontierIdx || DONE_COUNT >= 20` ([crecer.html](crecer.html)). El nodo **siempre se dibuja**; sale con candado hasta que la frontera lo alcanza o están los 20 Misterios. Cerrar **un bloque** (5 de 20) no lo desbloquea, y es correcto: la frontera solo avanza con el **nivel entero**.
+
+**El estado de publicación no entra en ese candado.** Solo aparece al **pulsar** el nodo (`selectNivel` avisa "en desarrollo"), y de eso el developer está exento. Que 2-2 esté en `dev` no tiene nada que ver con que el nodo salga bloqueado en 2-1.
+
 ### ⚠️ La frontera se rompió en silencio, y se arregló en tres piezas
 
 *Estado: arreglado + dos bancos nuevos (`tools/test-frontera.js`, 28; `tools/test-globales.js`, 17). **PENDIENTE prueba en dispositivo** — ver el punto 17 de Pendientes.*
@@ -448,9 +474,10 @@ users/{uid}/progress/sanar            (pains completados en mini.html — ciclo 
 ```
 {nivelId}.json          Misterios, preguntas y texto del cuaderno
 {nivelId}-micro.json    Micro-aprendizaje por bloque (tarjetas + preguntas de apropiación)
-{nivelId}-cantos.json   Letras de cantos por bloque/misterio
 ```
 Actualmente existen datos para Mundo 1 (`0101`–`0104`). Mundo 2 solo tiene `0201-micro.json`.
+
+⚠️ **`{nivelId}-cantos.json` ya no existe** (borrado 2026-08-26). Su contenido vive en el `.lrc` de cada canto. Ver § El canto se explica solo.
 
 ## Sistema de metros (gamificación)
 
@@ -584,7 +611,7 @@ Buckets R2: `R2_ILU` (ilustraciones), `R2_MUS` (música/lrc), `R2_AUD` (audios).
 *Estado: implementado + harness + **golden test** (motor viejo vs. nuevo, frame a frame). **PENDIENTE prueba visual en dispositivo.***
 
 - Pantalla de canto **full-screen** con `.lrc` sincronizado, Ken Burns, botón **Saltar** (20s en sesión / 0s en epílogo).
-- **Escalera de degradación de la LETRA (3 peldaños):** `.lrc` → letra estática de `{nivelId}-cantos.json` → no abre.
+- **Escalera de degradación de la LETRA (2 peldaños):** `.lrc` → no abre. *El peldaño intermedio —la letra estática de `{nivelId}-cantos.json`— desapareció con el archivo: era una copia de la del `.lrc`, así que no cubría ningún caso que el `.lrc` no cubriera ya. `loadFallbackLetra` sigue existiendo en el motor y lo usa la galería, que sí tiene otra fuente (Firestore).*
 - **Escalera de degradación de la IMAGEN (3 peldaños), nueva:** carrusel `cantos/{mid}/P_{mid}{a-i}.webp` → imagen única `P_{mid}.webp` (la misma del hero) → **fondo sin arte**.
 
 ⚠️ **La imagen no tenía escalera: `finishDetect()` pintaba la única SIN COMPROBARLA.** Si tampoco existía, la capa se quedaba transparente con su Ken Burns corriendo sobre nada — pantalla negra con una animación invisible. Era un camino que **solo recorre audio**: en `rezar` todos los cantos tienen carrusel, así que `showStill()` no se usa nunca y el fallo estaba tapado. Ahora la única se sondea con `new Image()` antes de pintarse, y si falla —o si no hay— entra `.canto-stills.sin-arte`: la noche de la app con un halo alto **del color del bloque** (`--canto-tinte-rgb`, que las páginas dan con el nuevo `window.rgbBloque`), **quieto**, porque sin imagen no hay nada que recorrer. La letra sigue siendo la protagonista, que es de lo que va la pantalla.
@@ -617,13 +644,56 @@ Buckets R2: `R2_ILU` (ilustraciones), `R2_MUS` (música/lrc), `R2_AUD` (audios).
 
 ⚠️ **Subir arte por el panel de Cloudflare rompe la garantía.** Con `imgTrust:true` el motor no sondea nada: una imagen nueva que no esté listada es **invisible** hasta el próximo sync, y una borrada que siga listada deja la capa transparente. La regla no es burocracia — es la condición que permite quitar el sondeo.
 
+### El canto se explica solo (2026-08-26)
+
+*Estado: migración **aplicada** a los 121 `.lrc` de `C:\R2\cruzando-music` + los cuatro JSON borrados + banco de pruebas (`tools/test-lrc-titulos.js`, 18, con la letra sellada en `lrc-baseline.json`) y 5 guardas nuevas en `tools/test-canto.js`. **PENDIENTE: correr el sync a R2 y prueba visual en dispositivo.***
+
+**Los cuatro `data/{nivelId}-cantos.json` se jubilaron.** Guardaban la letra de los 20 cantos de cada cuaderno y su título. La **letra ya estaba en el `.lrc`** —medido con el parser real, 80 de 80 en los cuadernos publicados: 76 idénticas, 2 con diferencias de puntuación y 2 (`0104` M1 y M9) con las estrofas en otro orden. En esas dos **manda el `.lrc`**: va pegado al audio que de verdad suena; el JSON era texto escrito que se desvió del disco.
+
+**Lo único que no estaba en el asset eran dos cosas, y las dos se mudaron a él:**
+
+| Qué | Dónde vive ahora |
+|---|---|
+| **El título** del canto (16: uno por bloque, compartido por sus 5 Misterios) | el `[ti:]` de cada `.lrc` |
+| **Los cortes de estrofa** — cómo el autor parte el texto para leerlo | los renglones vacíos del `.lrc` |
+
+Así **un canto nuevo llega con su nombre puesto** y no hay tabla paralela que se desincronice. Es la misma lección que este repo ya pagó con el color de bloque y con las tablas del itinerario.
+
+**Dos lecturas del mismo archivo, y son distintas a propósito:**
+
+| | Para qué | Qué hace con el renglón vacío |
+|---|---|---|
+| `parseLrc` | **cantar** — un evento por línea, con su segundo | lo descarta: al karaoke le sobra |
+| `letraPlana` | **leer** — el popup de orar, la hoja de la galería | lo **conserva**: es la separación de estrofas |
+
+⚠️ **Por eso los cortes de estrofa había que migrarlos, no deducirlos.** El `.lrc` traía menos que el JSON: en 1-1, cuatro estrofas legibles quedaban en dos bloques de ocho versos. Da igual en el karaoke (una línea cada vez) pero no en `orar`, que es texto para leer. Se alinearon las dos versiones por **subsecuencia común más larga**, no por índice — 76 de 80 coinciden verso a verso, pero alinear a ciegas los dos reordenados de 1-4 les habría metido cortes en mitad de una estrofa. Lo que no se empareja se queda como está: **ante la duda, no se toca**. Resultado: 134 renglones en 62 archivos; la paridad de estrofas subió de 27/80 a 66/80.
+
+*Las 14 que siguen difiriendo no son un defecto: el `.lrc` agrupa el estribillo como se canta («Buena noticia, Dios no huye del dolor.») y el JSON lo partía como se imprime, en versos cortos. Son dos tipografías del mismo texto, y manda la del disco.*
+
+⚠️ **El karaoke estaba pintando basura en pantalla.** 99 líneas en **98 de los 105** `.lrc` por Misterio empezaban con la numeración de estrofa —*«1. No fue fácil tu comienzo,»*— y `parseLrc` limpia directivas pero no eso. Salió en la misma pasada. **En los 16 `CANTO_*.lrc` de bloque se conserva**: allí ese número no es basura, es la estructura que separa los 5 Misterios, y es justo por donde `letraDeBloque` parte la letra que se guarda en `unlockedCantos`.
+
+**Dónde tocó, y qué cambió de verdad:**
+
+| Sitio | Antes | Ahora |
+|---|---|---|
+| `audio` · `rezar` · `loadFallbackLetra` | letra de respaldo del JSON | **borrado** — era copia de la del `.lrc`; el título sale del `[ti:]` |
+| `audio` · desbloqueo de `unlockedCantos` | JSON del cuaderno, cargado en **cada** Misterio | `CANTO_{n}_{c}_{b}.lrc`, y solo cuando cierra el bloque |
+| `cantos` · `backfillCantos` | ídem | ídem, por `cantoLrcUrl` |
+| `orar` · popup «Canto» | 3 fetch del JSON + texto plano | 1 fetch del `.lrc` del Misterio + el mismo texto plano |
+
+**La forma del dato no cambió**, así que los `unlockedCantos` ya escritos en producción siguen valiendo: `letraDeBloque` reproduce los cinco tramos unidos por `───` partiendo por las marcas del `.lrc`, y el estribillo de entrada va con el Misterio 1 —como iba cuando la letra se armaba concatenando los cinco textos.
+
+**`orar` se queda con el texto plano, y es decisión de producto.** Ya carga `canto.css` + `canto.js`, ya reproduce el `m4a` y ya tiene el `.lrc`: montarle el karaoke sincronizado era gratis. **No se hizo.** `orar` es el «libro digital» — la modalidad para quien prefiere **menos estimulación** e ir a su ritmo en todo momento. La pantalla sincronizada empuja; el texto quieto espera. Hay una prueba que falla si alguien le monta un `Karaoke.create` allí.
+
+**El migrador está gastado.** `tools/lrc-migrar-titulos.js` corrió sus dos pasadas y su fuente ya no existe: relanzarlo avisa y no hace nada. Se conserva como acta. Quien quiera comprobar el resultado usa `tools/test-lrc-titulos.js`, que **no depende del JSON**: lleva los 16 títulos congelados en su propio código y la letra sellada verso a verso en `lrc-baseline.json` (`--sellar` la vuelve a sellar cuando el contenido cambie a propósito). El respaldo de los `.lrc` originales quedó en `C:\R2\_respaldo-lrc\{sello}\`, **fuera** del árbol que rclone sincroniza.
+
 ### Los `.lrc`: dónde viven y por qué conviven dos formatos
 
 **Local `C:\R2\cruzando-music\lrc\` → paso 3/4 del `.bat` → `pub-faed94e…r2.dev/lrc/M_{n}_{c}_{m}.lrc`.** Las tres páginas leen la misma carpeta: `audio` con `LRC_BASE` (que ya incluye `/lrc/`), `rezar` con `MUSB + 'lrc/'`, `mini` con `R2_MUS + '/lrc/'`. **Solo esa carpeta se sirve.**
 
 ⚠️ **Había 105 `.lrc` sueltos en la RAÍZ del bucket que nadie leía** (2026-08-25). 66 eran copia de los de `lrc/`; los otros **39 existían solo ahí** — y eran exactamente 1-4 M6–M20, 2-1 M2–M20 y 2-2 M1–M5, los mismos que un inventario superficial daba por "sin letra sincronizada". No faltaban: estaban donde la app no mira. Se movieron los 39, se borraron los 65 duplicados idénticos, y de `M_2_1_1.lrc` (el único con dos versiones distintas) se conservó **el más antiguo**. Resultado: raíz 0, `lrc/` 105.
 
-**Dos formatos conviven en `lrc/`, y es deliberado.** 65 archivos son la versión limpia (marca de tiempo + texto) y 40 son el **formato fuente de autoría**: cabecera `[ti:/ar:/al:]`, bloque `[stills]` y directivas `[cut:N]` / `[kb:slow|hold|in]` en línea. **`parseLrc` digiere los dos** — salta las cabeceras ([canto.js:79](canto.js#L79)), reconoce `[stills]`/`[lyrics]`, y borra las directivas del texto con `\[[a-z]+:[^\]]*\]`. Comprobado archivo por archivo contra el parser real: los 105 parsean limpios, ninguno vacío, ninguna directiva colándose en la letra. Y las dos versiones de `M_2_1_1` parseaban a las **mismas 17 líneas**.
+**Dos formatos conviven en `lrc/`, y es deliberado.** La mayoría es la versión limpia (marca de tiempo + texto); el **formato fuente de autoría** añade bloque `[stills]` y directivas `[cut:N]` / `[kb:slow|hold|in]` en línea. *(Corrección de inventario, 2026-08-26: aquí se decía «65 y 40». Medido archivo por archivo, **solo `M_2_1_1.lrc` traía cabecera** y solo él usa `[stills]`/`[cut:]`. Hoy 97 de 121 llevan `[ti:]`, pero puesto por la migración, no por autoría.)* **`parseLrc` digiere los dos** — salta las cabeceras ([canto.js:79](canto.js#L79)), reconoce `[stills]`/`[lyrics]`, y borra las directivas del texto con `\[[a-z]+:[^\]]*\]`. Comprobado archivo por archivo contra el parser real: los 105 parsean limpios, ninguno vacío, ninguna directiva colándose en la letra. Y las dos versiones de `M_2_1_1` parseaban a las **mismas 17 líneas**.
 
 **Decisión (2026-08-25): NO uniformarlos.** Las directivas son material de autoría del usuario y no rompen nada. Si una sesión futura las ve y le parecen deriva, esto es la respuesta: no lo son.
 
@@ -746,6 +816,8 @@ escribe `users/{uid}.terminos = { aceptado, fecha (serverTimestamp), version, me
 5. **Itinerario** (`niveles.js`) — comprobar en dispositivo: que un **free** que cierra el Misterio 20 de 0101 despierte en **0102** Misterio 1, y que un no-developer que abra audio en un cuaderno `dev` (p. ej. 0202) sea devuelto al mapa con el aviso `nivel_en_desarrollo` en vez de toparse con la pantalla de "próximamente". El developer debe seguir entrando a todos.
 5b. **Frontera de progreso** — en el iPhone que destapó el bug: entrar y comprobar que el **selector de niveles** pinta encendidos los cuadernos ya rezados (no solo 1-1), sin borrar nada a mano — el cambio a `cruzando_frontier_v2` se encarga. Y que la consola no saque `[CruzAndo] frontera: error de CÓDIGO`. De paso: cerrar el splash de onboarding debe navegar a `audio.html`, y el slider de la meta diaria en `index` debe mover el anillo en vivo.
 5c. **El aviso breve** — prueba **visual**: forzar un `showToast(…)` desde la consola en index y crecer, en tema claro y oscuro, y comprobar que se lee entero sobre la barra de navegación y que no la tapa.
+
+5d. **El canto sin su JSON** — primero **correr `tools\cruzando-sync-real.bat`**: hasta que suba, el bucket sigue sirviendo los `.lrc` viejos (sin `[ti:]`, con el «N. » y sin los cortes) mientras el código ya espera los nuevos — el título saldría vacío y caería en el nombre del Misterio. Después, en dispositivo: que el karaoke de `audio` y `rezar` muestre **«Buena noticia»** y no «1. No fue fácil tu comienzo,»; que el popup «Canto» de `orar` abra con su título y **sus estrofas separadas**; y que al cerrar un bloque de cinco la tarjeta nueva de la galería salga con nombre y con la letra partida en cinco tramos. Ver § El canto se explica solo.
 
 **Tareas anotadas (aparte):**
 6. **Settings** de `index.html`/`crecer.html` — botón "Rehacer mi perfil de afinidad" → `sanar.html?rehacer=1` (sanar ya reconoce el parámetro).

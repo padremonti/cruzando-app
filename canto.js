@@ -63,6 +63,25 @@
     fwd10: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M21 4v4.5h-4.5"/><text x="11.5" y="16" font-size="8" font-weight="700" fill="currentColor" stroke="none" text-anchor="middle">10</text></svg>'
   };
 
+  /* ═══════════ Cabecera del .lrc ═══════════
+     El TÍTULO del canto vive en el propio asset, en su [ti:]. Antes vivía solo en
+     data/{nivelId}-cantos.json — era el único dato de aquel archivo que no estaba ya
+     en el .lrc, y por eso el archivo no se podía jubilar. Estampado en el asset, un
+     canto nuevo llega con su nombre puesto y no hay tabla paralela que mantener.
+     parseLrc lo sigue descartando de los versos; esto lo lee aparte. */
+  function parseLrcMeta(text) {
+    var meta = {};
+    if (!text) return meta;
+    var lines = text.split(/\r?\n/);
+    for (var i = 0; i < lines.length; i++) {
+      var m = lines[i].trim().match(/^\[(ti|ar|al|by):([^\]]*)\]/i);
+      if (m) meta[m[1].toLowerCase()] = m[2].trim();
+      // La cabecera vive arriba: en cuanto empieza la letra, no hay más que leer.
+      else if (/^\s*\[\d+:\d/.test(lines[i])) break;
+    }
+    return meta;
+  }
+
   /* ═══════════ Parser .lrc ═══════════
      Convierte [mm:ss.xx] a segundos; ignora metadatos ([ti:], [ar:]…) y directivas
      ([cut:], [fx:]) que aquí no se usan. */
@@ -88,25 +107,80 @@
     return out;
   }
 
-  /* ═══════════ Cantos del cuaderno ({nivelId}-cantos.json) ═══════════
-     Vive aquí porque es la letra de respaldo del canto, y una sola caché para toda
-     la app. El nivelId guarda contra servir la letra de otro cuaderno cuando la
-     página cambia de nivel sin recargar (audio.html: advanceAndRestart). */
-  var CANTOS_DATA = null, cantosNivelId = null;
-
-  function loadCantos(nivelId) {
-    if (nivelId !== cantosNivelId) { CANTOS_DATA = null; cantosNivelId = nivelId; }
-    if (CANTOS_DATA) return Promise.resolve(CANTOS_DATA);
-    var base = location.origin + location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1);
-    return fetch(base + 'data/' + nivelId + '-cantos.json')
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (j) { CANTOS_DATA = j; return j; })
-      .catch(function () { return null; });
+  /* ═══════════ La letra como TEXTO, para leerla ═══════════
+     parseLrc sirve al karaoke: una línea por evento, y los renglones vacíos sobran.
+     Para LEER —el popup de canto de orar.html, la hoja de letra de la galería— los
+     renglones vacíos son justo lo que hace falta: son la separación de estrofas.
+     Por eso hay dos lecturas del mismo archivo, no una sola con parches. */
+  function letraPlana(text) {
+    var out = [], lines = String(text || '').split(/\r?\n/);
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i].replace(/\s+$/, ''), t = line.trim();
+      if (/^\[(ti|ar|al|by|offset):/i.test(t)) continue;          // cabecera
+      if (/^\[(stills|lyrics)\]$/i.test(t))   continue;           // secciones del formato de autoría
+      var tm = line.match(/^\s*\[\d+:\d+(?:\.\d+)?\]/);
+      if (!tm) { if (!t) out.push(''); continue; }                // renglón vacío = corte de estrofa
+      out.push(line.slice(tm[0].length).replace(/\[[a-z]+:[^\]]*\]/ig, '').trim());
+    }
+    return out.join('\n').replace(/\n{3,}/g, '\n\n').replace(/^\n+|\n+$/g, '');
   }
 
-  function getCanto(cantosData, block, blockIdx) {
-    if (!cantosData || !cantosData.cantos || !cantosData.cantos[block]) return null;
-    return cantosData.cantos[block][blockIdx] || null;
+  /* ═══════════ Un .lrc suelto, sin abrir la pantalla ═══════════
+     Para quien necesita la letra o el título de un canto que NO se está tocando:
+     audio.html y cantos.html, al cerrar un bloque, escriben el canto desbloqueado
+     leyendo su .lrc de bloque. Antes eso salía de {nivelId}-cantos.json.
+     Caché de una entrada: es siempre el mismo canto durante ese momento. */
+  var LRC_CACHE = {};
+
+  function fetchLrc(url) {
+    if (LRC_CACHE[url]) return LRC_CACHE[url];
+    LRC_CACHE[url] = fetch(url)
+      .then(function (r) { return r.ok ? r.text() : null; })
+      .then(function (t) {
+        if (!t) return null;
+        return {
+          titulo: parseLrcMeta(t).ti || '',
+          lineas: parseLrc(t).map(function (e) { return e.text; }),   // para sincronizar
+          plana:  letraPlana(t)                                       // para leer
+        };
+      })
+      .catch(function () { return null; });
+    return LRC_CACHE[url];
+  }
+
+  /* La letra de un canto de BLOQUE, con sus cinco Misterios separados.
+     El .lrc de bloque marca cada Misterio con un «N. » al empezar su estrofa (por eso
+     ahí esa marca se conserva y en el .lrc por Misterio se quitó). Partiendo por ella
+     sale exactamente la forma que antes se armaba concatenando los cinco textos del
+     JSON: cinco tramos unidos por «───». Los docs de unlockedCantos ya escritos siguen
+     valiendo, porque la forma del dato no cambia.
+     Recibe la letra PLANA, no las líneas del karaoke: esto se lee, y los cortes de
+     estrofa tienen que sobrevivir al viaje. */
+  function letraDeBloque(plana) {
+    var partes = [], cur = [], lineas = String(plana || '').split('\n');
+    var preludio = '', vistoMarca = false;
+    var cerrar = function () {
+      var t = cur.join('\n').replace(/^\n+|\n+$/g, '');
+      if (t) partes.push(t);
+      cur = [];
+    };
+    for (var i = 0; i < lineas.length; i++) {
+      var m = lineas[i].match(/^([1-5])[.)]\s+(.*)$/);
+      if (m) {
+        /* Casi todos los cantos de bloque abren por el estribillo, antes de la primera
+           estrofa numerada. Ese arranque no es un sexto tramo: va con el Misterio 1,
+           igual que iba cuando la letra se armaba concatenando los cinco textos. */
+        if (!vistoMarca) { preludio = cur.join('\n').replace(/^\n+|\n+$/g, ''); cur = []; vistoMarca = true; }
+        else cerrar();
+        cur = [m[2]];
+      } else cur.push(lineas[i]);
+    }
+    cerrar();
+    if (preludio) {
+      if (partes.length) partes[0] = preludio + '\n\n' + partes[0];
+      else partes.push(preludio);
+    }
+    return partes.join('\n\n───\n\n');
   }
 
   /* ═══════════ Una instancia de karaoke ═══════════ */
@@ -202,11 +276,16 @@
         .then(function (t) {
           // Sin marcas de tiempo no sirve para karaoke: se tratará como letra estática
           if (t && /\[\d+:\d/.test(t)) lrcText = t;
+          // El título sale del propio .lrc. Un canto sin [ti:] (cuaderno aún sin
+          // publicar) lo deja vacío y decide la página con getTitulo().
+          if (t) titulo = parseLrcMeta(t).ti || '';
         })
         .catch(function () { /* sin .lrc: se intenta la letra de respaldo */ })
         .then(function () { return cfg.loadFallbackLetra ? cfg.loadFallbackLetra() : null; })
         .then(function (f) {
-          if (f) { letraTxt = f.letra || null; titulo = f.titulo || ''; }
+          // El .lrc manda sobre el respaldo también en el título: va pegado al audio
+          // que de verdad suena.
+          if (f) { letraTxt = f.letra || null; titulo = titulo || f.titulo || ''; }
         })
         .catch(function () { /* sin respaldo: si tampoco hay .lrc, no se abre la pantalla */ })
         .then(function () {
@@ -528,11 +607,14 @@
   }
 
   window.Karaoke = {
-    create:     create,
+    create:       create,
     // Utilidades que las páginas necesitan fuera del karaoke
-    // (audio.html: desbloqueo de unlockedCantos al cerrar un bloque).
-    parseLrc:   parseLrc,
-    loadCantos: loadCantos,
-    getCanto:   getCanto
+    // (audio.html y cantos.html: desbloqueo de unlockedCantos al cerrar un bloque,
+    //  que saca título y letra del .lrc de bloque sin abrir la pantalla).
+    parseLrc:     parseLrc,
+    parseLrcMeta:  parseLrcMeta,
+    letraPlana:    letraPlana,
+    fetchLrc:      fetchLrc,
+    letraDeBloque: letraDeBloque
   };
 })();

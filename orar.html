@@ -1082,7 +1082,10 @@ const QC  = ['#FF7A00','#C0392B','#27AE60'];
 const MR_REZO=1200, MR_CONT=800, MR_CANTO=600, MR_QF=650, MR_QU=325, MR_BNS=1000, MR_MICRO=600;
 
 /* ─── STATE ─── */
-let usr=null, data=null, cantoJ=null, microJ=null;
+let usr=null, data=null, microJ=null;
+/* La letra del canto del Misterio en curso: { titulo, letra }. Sale del .lrc —el
+   mismo archivo que suena— y ya no de data/{nivelId}-cantos.json. */
+let cantoLetra=null, _cantoLrcPedido='';
 let microDone=false, prog=null;
 let nivelId='0101', nivel=1, cua=1;
 let blk=null, bIdx=0;
@@ -1170,7 +1173,6 @@ async function loadCuaderno(nId){
   recordarNivel(nivelId);
   const base=location.origin+location.pathname.substring(0,location.pathname.lastIndexOf('/')+1);
   try{const r=await fetch(base+'data/'+nivelId+'.json');if(r.ok)data=await r.json();}catch(e){}
-  try{const r=await fetch(base+'data/'+nivelId+'-cantos.json');if(r.ok)cantoJ=await r.json();}catch(e){}
   try{const snap=await FS.collection('users').doc(usr.uid).collection('progress').doc(nivelId).get();prog=snap.exists?snap.data():{};}catch(e){prog={};}
   // Elegir primer bloque/misterio incompleto del nuevo nivel
   const pBlk=prog?.progress||{};let found=false;
@@ -1453,7 +1455,6 @@ async function loadAndEnter(nId,block,idx){
   try{const snap=await FS.collection('users').doc(usr.uid).get();const ud=snap.exists?snap.data():{};window.resolvePlan&&window.resolvePlan(ud);totalM=ud.totalMeters||0;const mv=$('meters-value');if(mv)mv.textContent=totalM.toLocaleString('es-MX')+'m';}catch(e){}
   const base=location.origin+location.pathname.substring(0,location.pathname.lastIndexOf('/')+1);
   try{const r=await fetch(base+'data/'+nivelId+'.json');if(r.ok)data=await r.json();}catch(e){}
-  try{const r=await fetch(base+'data/'+nivelId+'-cantos.json');if(r.ok)cantoJ=await r.json();}catch(e){}
   try{const snap=await FS.collection('users').doc(usr.uid).collection('progress').doc(nivelId).get();prog=snap.exists?snap.data():{};}catch(e){prog={};}
   await checkMicro();
 }
@@ -1497,7 +1498,6 @@ async function loadAndStart(){
 
   const base=location.origin+location.pathname.substring(0,location.pathname.lastIndexOf('/')+1);
   try{const r=await fetch(base+'data/'+nivelId+'.json');if(r.ok)data=await r.json();}catch(e){}
-  try{const r=await fetch(base+'data/'+nivelId+'-cantos.json');if(r.ok)cantoJ=await r.json();}catch(e){}
 
   try{
     const snap=await FS.collection('users').doc(usr.uid).collection('progress').doc(nivelId).get();
@@ -1618,6 +1618,7 @@ function renderSession(){
   _cuentas.reiniciar();
   ans={0:'',1:'',2:''};firstAns={0:false,1:false,2:false};
   currentGlobalMystery=mNum(blk,bIdx);
+  precargarLetraCanto();
 
   const md=mData(blk,bIdx),m=mNum(blk,bIdx);
   const hi=$('hero-img');
@@ -1738,9 +1739,8 @@ function populatePopup(t){
         _closeBtn();
       break;
     case 'canto':{
-      const canto=cantoJ?.cantos?.[blk]?.[bIdx];
-      bd.innerHTML=(canto?.titulo?`<p class="popup-song-title">${esc(canto.titulo)}</p>`:'')+
-        `<p class="popup-lyrics">${esc(canto?.letra||'Letra no disponible')}</p>`+
+      bd.innerHTML=(cantoLetra?.titulo?`<p class="popup-song-title">${esc(cantoLetra.titulo)}</p>`:'')+
+        `<p class="popup-lyrics">${esc(cantoLetra?.letra||'Letra no disponible')}</p>`+
         _closeBtn();
       break;
     }
@@ -1841,6 +1841,15 @@ async function loadRefs(){
 }
 
 /* ─── COMPLETE MYSTERY ─── */
+/* El mapa pinta la FASE 1 desde este cache, SIN RED. Los reproductores marcaban
+   el cache como sucio pero no lo actualizaban, asi que al volver de rezar el mapa
+   ensenaba el estado viejo hasta que la FASE 2 resolvia Auth y leia Firestore.
+   Aqui ya tenemos el documento en memoria: dejarlo escrito cuesta una linea y el
+   mapa aparece correcto de inmediato. Guarda el nivelId por si cambia de nivel. */
+function refrescarCacheMapa(){
+  try{ localStorage.setItem('cruzando_progress_'+nivelId, JSON.stringify(prog||{})); }catch(_){}
+}
+
 async function completeMystery(){
   if(window.CZSound)CZSound('mysteryClear');
   if(!blk||!usr)return;
@@ -1856,6 +1865,7 @@ async function completeMystery(){
     await FS.collection('users').doc(usr.uid).collection('progress').doc(nivelId)
       .set({progress:{[blk]:dots}},{merge:true});
     try{localStorage.setItem('cruzando_progress_cache_dirty','true');}catch(_){}
+    refrescarCacheMapa();
   }catch(e){console.error('[CruzAndo] completeMystery:',e);}
   // Sincronizar cursor de audio para que ambos modos compartan posición
   try{
@@ -1971,6 +1981,26 @@ function showCelebration(){
   $('btn-celeb-mapa').onclick=()=>salirConAviso('crecer.html');
   ofrecerLetanias();
   show('scr-celebration');
+}
+
+/* ─── La letra del canto ───
+   Aquí el canto se LEE, no se sigue en karaoke: orar es el libro digital, y quien
+   entra por esta puerta viene a ir a su ritmo. Por eso el popup sigue siendo texto
+   plano —con sus estrofas, que para eso letraPlana conserva los renglones vacíos—
+   y no la pantalla sincronizada de audio y rezar.
+
+   Se precarga al entrar al Misterio para que el popup abra con el texto ya puesto.
+   El guardián de petición evita que una respuesta lenta pinte la letra de un
+   Misterio que el usuario ya dejó atrás. */
+function precargarLetraCanto(){
+  cantoLetra=null;
+  const url=`${MUSB}lrc/M_${nivel}_${cua}_${mNum(blk,bIdx)}.lrc`;
+  _cantoLrcPedido=url;
+  if(!window.Karaoke) return;
+  Karaoke.fetchLrc(url).then(l=>{
+    if(_cantoLrcPedido!==url) return;
+    if(l&&l.plana) cantoLetra={titulo:l.titulo||'',letra:l.plana};
+  }).catch(()=>{});
 }
 
 /* ─── VOICE PLAYER ─── */
