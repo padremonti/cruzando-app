@@ -539,8 +539,14 @@ await ok('audio  · el Rosario va entre el decenario y el epílogo', () => {
   const s = leer('audio.html');
   if (!/mostrarDecenario\(\)\s*\.then\(mostrarRosario\)/.test(s))
     throw new Error('no encadena decenario → Rosario');
-  if (!/_rosarioPendiente = METERS_BLOCK_BONUS/.test(s))
-    throw new Error('no lo marca en el bonus de bloque, que es donde se sabe');
+  /* Antes lo marcaba el BONUS de bloque, que se cobra una sola vez y para
+     siempre: quien ya lo tenía no volvía a ver la animación. Ahora lo marca la
+     vuelta —cinco decenas REZADAS—, que se repite. El bonus solo aporta la
+     cifra de metros, si la hubo. */
+  if (/_rosarioPendiente = METERS_BLOCK_BONUS/.test(s))
+    throw new Error('el rito vuelve a colgar del premio');
+  if (!/_rosarioMetros = METERS_BLOCK_BONUS/.test(s))
+    throw new Error('el bonus dejó de aportar su cifra al pie del Rosario');
 });
 
 await ok('audio  · el Mariano y el toast del bloque ya no compiten', () => {
@@ -558,9 +564,14 @@ await ok('orar y rezar lo cierran donde toca', () => {
   /* No es el mismo sitio en los dos, y no debe serlo: orar cierra el bloque y
      pasa a su celebración; rezar cierra la sesión entera y de ahí entra a las
      Letanías, así que el Rosario tiene que verse antes que ellas. */
-  const orar = leer('orar.html');
-  if (!/await mostrarRosario\(MR_BNS\);[\s\S]{0,40}?showCelebration\(\);/.test(orar))
-    throw new Error('orar no lo cierra antes de la celebración');
+  /* En orar el Rosario salió de `dots.every(Boolean)` —que solo corre una vez
+     en la vida— y pasó al Amén, detrás del decenario: ahí es donde la vuelta
+     acaba de cerrarse y donde el usuario ya pulsó para avanzar. */
+  const orar = leer('orar.html').replace(/\s/g, '');
+  const iD = orar.indexOf('awaitmostrarDecenario();');
+  if (iD === -1) throw new Error('orar dejó de cerrar el decenario en el Amén');
+  if (orar.indexOf('awaitmostrarRosario();', iD) !== iD + 'awaitmostrarDecenario();'.length)
+    throw new Error('el Rosario no va inmediatamente detrás del decenario');
   /* En rezar se comprueba por ORDEN, no por cercanía: entre el Rosario y las
      Letanías se coló el rosetón (el cuaderno, cuando se cierran los cuatro
      bloques) y una ventana de caracteres fija se rompía con solo añadir un paso. */
@@ -802,8 +813,15 @@ await ok('audio · el rosetón va al final de la cadena', () => {
 
 await ok('orar · lo cierra donde están los veinte', () => {
   const s = leer('orar.html');
-  if (!/async function showAdvanceLevelPrompt\(\)\{[\s\S]{0,140}?await mostrarRoseton\(\);/.test(s))
+  const cuerpo = (s.match(/async function showAdvanceLevelPrompt\(\)[\s\S]*?\n\}/) || [''])[0];
+  if (!/mostrarRoseton\(\)/.test(cuerpo))
     throw new Error('showAdvanceLevelPrompt no lo cierra');
+  /* Y el rosetón manda sobre el reconocimiento de la vuelta: el hito no se
+     comparte con el aviso de haber repetido el recorrido. */
+  const c2 = cuerpo.replace(/\s/g, '');
+  const g = c2.indexOf('_vueltaPendiente=false;');
+  if (g === -1 || c2.indexOf('mostrarVuelta()', g) === -1)
+    throw new Error('la vuelta podría salir encima del rosetón');
 });
 
 for (const f of ['audio.html', 'orar.html']) {

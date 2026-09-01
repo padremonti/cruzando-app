@@ -49,6 +49,16 @@
      tenía su propia copia. */
   window.BLOQUES = ['gozosos', 'luminosos', 'dolorosos', 'gloriosos'];
 
+  /* El nombre visible del bloque. Estaba copiado cuatro veces y ya divergiendo:
+     BFN en orar y en rezar (idénticos), BLOCK_NAMES en audio (¡en singular!) y
+     BLOQUE_NAMES en diario. Es la misma deriva que pagó el color. */
+  window.NOMBRES_BLOQUE = {
+    gozosos:   'Misterios Gozosos',
+    luminosos: 'Misterios Luminosos',
+    dolorosos: 'Misterios Dolorosos',
+    gloriosos: 'Misterios Gloriosos'
+  };
+
   // Acepta el nombre largo ('gozosos') o el alias corto ('goz').
   window.rgbaBloque = function (bloque, alfa) {
     var hex = COLORES[bloque] || COLORES[ALIAS[bloque]];

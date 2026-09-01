@@ -628,6 +628,12 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   background:rgba(1,187,225,0.13);
   color:var(--lum);
 }
+/* La vuelta: recorrer OTRA VEZ los veinte Misterios de un Nivel. No es una
+   reflexión de un Misterio ni un retiro; es la toma de conciencia del regreso. */
+.chip-vuelta {
+  background:rgba(212,160,23,0.14);
+  color:var(--glo);
+}
 </style>
 <script src="niveles.js"></script>
 <script src="bloques.js"></script>
@@ -984,13 +990,21 @@ function renderList(items, query) {
     }
 
     const isTaller   = r.origen === 'taller' || r.origen === 'evaluacion_taller';
+    const isVuelta   = r.origen === 'vuelta';
     const dateLabel  = formatDate(r.confirmedAt);
     const textHtml   = highlight(r.text || '', query);
     const delay      = Math.min(idx * 40, 400);
 
     let stripeClass, stripeStyle, metaHtml, misterioHtml, preguntaHtml;
 
-    if (isTaller) {
+    if (isVuelta) {
+      stripeClass = '';
+      stripeStyle = 'style="background:var(--glo);opacity:0.55"';
+      metaHtml    = `<span class="card-nivel">${escapeHtml(r.nivelNombre || NIVEL_NAMES[r.nivelId] || '')}</span>` +
+                    '<span class="card-bloque-chip chip-vuelta">Vuelta</span>';
+      misterioHtml = '';
+      preguntaHtml = r.question ? `<div class="card-pregunta">${highlight(r.question, query)}</div>` : '';
+    } else if (isTaller) {
       stripeClass = '';
       stripeStyle = 'style="background:var(--orange);opacity:0.55"';
       const origenChip = r.origen === 'evaluacion_taller'
@@ -1404,7 +1418,9 @@ auth.onAuthStateChanged(async (user) => {
         tallerNombre:   data.tallerNombre || '',
         misterioNombre: data.misterioNombre || '',
         misterioIndex:  data.misterioIndex,
-        preguntaIndex:  data.preguntaIndex
+        preguntaIndex:  data.preguntaIndex,
+        nivelId:        data.nivelId     || '',
+        nivelNombre:    data.nivelNombre || ''
       };
     });
     allReflections = [...reflections, ...diarioEntries];

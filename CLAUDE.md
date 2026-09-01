@@ -27,6 +27,8 @@ PWA de formación espiritual católica. El usuario reza los 20 Misterios del Ros
 | `toast.js` | **El aviso breve.** `showToast(texto)` — autosuficiente: inyecta su CSS y monta su nodo bajo demanda. En index y crecer; audio conserva el suyo. Ver § El aviso breve. |
 | `flags.js` | Interruptores de producto. Hoy: `MOSTRAR_RECOMPENSAS = false` + puerta `window.recompensasON()`. Ver § Kit de recompensas. |
 | `cierre.js` / `cierre.css` | **El cierre de una sesión de rezo.** `Cierre.decenario({desde, color, titulo, metros})` → promesa. La columna se cierra en decenario. CSS por `<link>`, trayectorias generadas por el módulo. Ver § El cierre. |
+| `rosario.js` | **La vuelta del Rosario**: cinco decenas REZADAS de un bloque son un Rosario, y se repite. Lógica pura, sin red ni DOM. Ver § La vuelta del Rosario. |
+| `vuelta.js` / `vuelta.css` | **El reconocimiento de haber recorrido otra vez el Nivel** + la entrada de diario. Autosuficiente. Ver § La vuelta del Rosario. |
 | `sarta.js` | **Geometría del decenario y la camándula.** `Sarta.geometria(forma, {decenas})` — `decenas:1` da el decenario (16 cuentas), `decenas:5` la camándula (60). Pura, sin DOM. Ver § La sarta. |
 | `cuentas.js` | **Motor pasivo de la columna de cuentas del rezo** (1 Padrenuestro + 10 Ave Marías + Cruz Lux). `Cuentas.crear({audio: () => el})`. Lo usan audio y orar; rezar y mini conservan el suyo. Ver § Columna de cuentas. |
 | `bloques.js` | **Origen único de los cuatro bloques**: su color y su lista ordenada (`window.BLOQUES`). `window.COLORES_BLOQUE` + `window.rgbaBloque(bloque, alfa)`, y estampa 12 variables CSS (`--goz`, `--goz-color`, `--goz-rgb`, ×4). Va en el `<head>`. Ver § Colores de bloque. |
@@ -142,6 +144,87 @@ Ahora la Cruz se enciende **por la vía pasiva también** (`_encenderLux()`, lla
 **La coreografía** (2,5 s de núcleo + reposo): velo · las cuentas viajan a su sitio **escalonadas 30 ms**, combadas un 12% hacia afuera para que la sarta se recoja en vez de teletransportarse · la Cruz baja con rebote y **una** oscilación de péndulo (a esta velocidad, dos se leen como temblor) · un halo recorre el anillo · la palabra y los metros. Toque en cualquier parte → salta al decenario formado; `prefers-reduced-motion` lo entrega ya formado.
 
 **Tokens de movimiento** (`cierre.css`): `--ease-rito` (el rebote que ya usaba `luxAppear`), `--ease-velo` (el de mini), `--ease-salida`, y `--t-breve` / `--t-gesto` / `--t-rito`. Sustituyen a las seis curvas y ocho duraciones sueltas que había repartidas por los reproductores.
+
+## La vuelta del Rosario (`rosario.js` · `vuelta.js`)
+
+*Estado: implementado + banco de pruebas (`tools/test-vuelta.js`, 38) y 3 aserciones reescritas en `tools/test-cierre.js`. **PENDIENTE prueba en dispositivo.***
+
+**Rezar el Rosario es una costumbre, no un hito.** Cerrar cinco Misterios de un bloque es un acto piadoso cotidiano que se repite, aunque no traiga contenido nuevo. Pero la animación colgaba del **avance**, que ocurre una sola vez, así que solo se veía la primerísima vez — en los tres modos, con tres mecanismos distintos:
+
+| Modo | De qué colgaba | Por qué solo salía una vez |
+|---|---|---|
+| `audio` | `!blockBonuses[bonusKey]` | el bonus se cobra una vez y **para siempre** |
+| `orar` · `rezar` | `if(dots.every(Boolean))` | `completeMystery` corta si el Misterio ya estaba marcado, así que ese `if` solo puede correr una vez en la vida |
+
+Y en audio había una segunda avería: `doneInBlock` contaba **`audioProgress.history`**, el historial privado de audio. Quien rezaba cuatro Misterios en el Libro y el quinto en audio tenía `size === 1` → ni bonus ni Rosario, **aunque el bloque estuviera cerrado de verdad**. `cuadernoCompleto()` arrastraba el mismo defecto: para quien mezclaba modos, el rosetón no llegaba jamás.
+
+### El premio y el rito son cosas distintas
+
+| | Regla |
+|---|---|
+| **Metros ordinarios** (rezo 1200, contemplación 800, canto 600, preguntas) | **cada vez que se reza**, para premium/beta/developer. El free no re-gana (`_freeNoGana` ← `yaGanado`) |
+| **Bonus de primera vez** (bloque +1000) | **una sola vez**, todos los planes |
+| **La animación** | cada vez que se cierra una **vuelta** |
+
+⚠️ **Por eso `_rosarioPendiente` y `_rosarioMetros` son dos variables y no una.** Antes `_rosarioPendiente` guardaba los metros *y* servía de booleano. Con el desacople hay vueltas que se cierran **sin bonus** —porque ya se cobró—, y ahí el pie **no pinta cifra**: `pieDe()` omite la línea con `metros <= 0`. El rito no promete un premio que no hubo.
+
+### Solo cuenta lo REZADO
+
+**La guarda del decenario es la prueba.** `Cierre.decenaCompleta()` exige once cuentas y la Cruz encendida, y la Cruz solo se enciende cuando la última ventana de `bead_sync` pasó con el audio sonando. Quien pasa páginas en el Libro avanza en `progress` pero **no llena la vuelta**.
+
+Por eso `marcarVuelta()` se llama **justo donde esa guarda ya dijo que sí**, síncrono, y no al resolverse la animación: en `rezar` el decenario no se espera, y hacerlo después sería una carrera con `onSessionComplete`.
+
+### El dato
+
+Dos campos en el documento que los tres modos ya cargan — **`progress/{doc}` permite escritura libre al dueño, así que no hubo que desplegar reglas**:
+
+```
+users/{uid}/progress/{nivelId}
+  .progress   { gozosos:[ts×5], … }          ← avance temático. Intacto.
+  .vuelta     { gozosos:[ts×5], … }          ← decenas REZADAS de la vuelta en curso
+  .rosarios   { gozosos:3, luminosos:2, … }  ← Rosarios cerrados de cada bloque
+```
+
+- **Rosario del bloque:** se llena `vuelta[bloque]` → animación → `rosarios[bloque]++` y `vuelta[bloque]` a ceros.
+- **Vuelta del Nivel:** es `Math.min(...rosarios)`. Cuando ese mínimo sube, se recorrieron otra vez los veinte. **No hay que limpiar nada y el número de vuelta sale solo.**
+
+`rosario.js` es lógica pura como `racha.js` —sin red, sin SDK, sin DOM— y cada página hace su E/S. Espejo en `localStorage` (`cruzando_vuelta_{nivelId}`) primero y Firestore después; `fusionar()` reconcilia dos dispositivos sin cola de reintentos, y da prioridad a quien va por una vuelta más avanzada (la vuelta en curso del otro pertenece a una anterior).
+
+**Decisiones de producto que el código fija:**
+- **`mini` no participa.** Es una unidad autocontenida y puntual: no suma al bloque ni al Nivel. Los **Retiros** futuros heredarán ese trato. Hay una prueba que lo vigila.
+- **La vuelta es por Nivel**, que es donde el dato ya vive.
+- **Mezclar bloques no cuenta**: `vuelta` se indexa por bloque, así que dos gozosos y tres luminosos dejan dos vueltas a medias, no un Rosario. Un Rosario es un *set*.
+- **Un Rosario son cinco decenas DISTINTAS**: rezar nueve veces el tercer Misterio llena un hueco, no nueve.
+
+### El Rosario dice qué Rosario fue
+
+El color ya era el del bloque (la camándula entera se dibuja en él). Faltaba el **nombre**, y la pieza ya existía: el `nombre` opcional de `pieDe()`, el mismo del rosetón. Antetítulo «ROSARIO RECORRIDO» + «**Misterios Gozosos**» en grande.
+
+⚠️ Ese nombre estaba **copiado cuatro veces y ya divergiendo** — `BFN` en orar y en rezar (idénticos), `BLOCK_NAMES` en audio (¡en singular!) y `BLOQUE_NAMES` en diario. Pasó a **`bloques.js` como `window.NOMBRES_BLOQUE`**, que ya es el origen único de los cuatro bloques.
+
+### El reconocimiento de la vuelta del Nivel
+
+**El rosetón se queda como hito y no se repite.** Lo que se repite es la vuelta, y tiene su propia pantalla (`vuelta.js` + `vuelta.css`, autosuficientes como `toast.js`):
+
+```
+              VUELTA COMPLETA
+           Cruz 1-3: Conversión
+     Has recorrido de nuevo este Nivel.
+     ¿Qué has descubierto en esta ocasión?
+        [ Escribir en mi diario ]
+              Ahora no
+```
+
+**Deliberadamente sin geometría.** El decenario es una sarta, el Rosario una camándula, el rosetón un vitral — objetos. Esto es una palabra y una pregunta; darle un objeto propio lo pondría a competir con el rosetón o a imitarlo. Comparte el velo y la tipografía de la familia `cierre` y nada más. Paleta propia y cerrada, porque sale en tres páginas que no definen las mismas variables.
+
+**«De nuevo», no «por segunda vez»:** el número exacto es rígido y a la tercera o la décima vuelta suena a contabilidad, no a reconocimiento.
+
+**Y a diferencia de los tres cierres, esta espera**: hay algo que leer y algo que decidir. No se cierra sola ni salta al toque. El «Ahora no» está siempre — **ofrecido, nunca impuesto**, la misma regla que las Letanías.
+
+⚠️ **El rosetón manda.** Si sale, el reconocimiento se calla (`_vueltaPendiente = false`): no se comparte el primer recorrido con el aviso de haberlo repetido. En la práctica, la vuelta se ve de la segunda en adelante.
+
+**Lo escrito va a `users/{uid}/diario/{id}`** —no a `reflections`: una reflexión está atada a un Misterio y a una pregunta numerada del cuaderno, y esto es sobre el recorrido entero—. La colección ya existía, ya estaba en las reglas y `diario.html` ya la pintaba; solo se añadió la rama `origen: 'vuelta'` con su chip. Si la red falla, la pantalla **no se cierra ni pierde el texto**: avisa y deja reintentar.
+
 
 ## La sarta (`sarta.js`)
 
@@ -818,6 +901,8 @@ escribe `users/{uid}.terminos = { aceptado, fecha (serverTimestamp), version, me
 5c. **El aviso breve** — prueba **visual**: forzar un `showToast(…)` desde la consola en index y crecer, en tema claro y oscuro, y comprobar que se lee entero sobre la barra de navegación y que no la tapa.
 
 5d. **El canto sin su JSON** — primero **correr `tools\cruzando-sync-real.bat`**: hasta que suba, el bucket sigue sirviendo los `.lrc` viejos (sin `[ti:]`, con el «N. » y sin los cortes) mientras el código ya espera los nuevos — el título saldría vacío y caería en el nombre del Misterio. Después, en dispositivo: que el karaoke de `audio` y `rezar` muestre **«Buena noticia»** y no «1. No fue fácil tu comienzo,»; que el popup «Canto» de `orar` abra con su título y **sus estrofas separadas**; y que al cerrar un bloque de cinco la tarjeta nueva de la galería salga con nombre y con la letra partida en cinco tramos. Ver § El canto se explica solo.
+
+5e. **La vuelta del Rosario** — prueba en dispositivo: rezar cinco decenas de un bloque **ya cerrado** y comprobar que el Rosario sale igual (y **sin cifra de metros**, porque el bonus ya se cobró); saltarse el rezo en el Libro y comprobar que **no** cuenta; y al cerrar los veinte por segunda vez, que salga el reconocimiento con su pregunta y que lo escrito aparezca en el Diario con el chip «Vuelta».
 
 **Tareas anotadas (aparte):**
 6. **Settings** de `index.html`/`crecer.html` — botón "Rehacer mi perfil de afinidad" → `sanar.html?rehacer=1` (sanar ya reconoce el parámetro).

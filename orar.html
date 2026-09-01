@@ -708,9 +708,12 @@ body.light .popup-close-bottom{border-color:var(--border);color:var(--text-dim)}
 <script src="bloques.js"></script>
 <script src="niveles.js"></script>
 <link rel="stylesheet" href="cierre.css">
+<link rel="stylesheet" href="vuelta.css">
 <script src="sarta.js"></script>
 <script src="cuentas.js"></script>
 <script src="cierre.js"></script>
+<script src="rosario.js"></script>
+<script src="vuelta.js"></script>
 <script src="racha.js"></script>
 <script src="racha-splash.js"></script>
 <script src="plan-utils.js"></script>
@@ -1135,8 +1138,12 @@ async function markMysteryComplete(block,idx){
   blk=prev;bIdx=prevIdx;
 }
 async function showAdvanceLevelPrompt(){
-  /* Aquí están los veinte: es el cuaderno cerrado. */
-  await mostrarRoseton();
+  /* Aquí están los veinte: es el cuaderno cerrado. El rosetón es el HITO y
+     manda: si sale, el reconocimiento de la vuelta se calla. No se comparte el
+     primer recorrido con el aviso de haberlo repetido. */
+  const _hubo = await mostrarRoseton();
+  if(_hubo) _vueltaPendiente = false;
+  await mostrarVuelta();
   let n=nivel,c=cua+1;
   if(c>4){c=1;n++;}
   const nId=String(n).padStart(2,'0')+String(c).padStart(2,'0');
@@ -1765,8 +1772,12 @@ function populatePopup(t){
         b.disabled=true;
         await markMysteryComplete(blk,bIdx);
         /* Aquí SÍ se espera: no hay nada sonando y el usuario pulsó para
-           avanzar, así que el decenario cierra antes de cargar el siguiente. */
+           avanzar, así que los cierres corren antes de cargar el siguiente.
+           El decenario marca la vuelta; si con esta decena se cerró el Rosario
+           del bloque, va detrás. El rosetón y el reconocimiento de la vuelta
+           esperan al final del cuaderno (showAdvanceLevelPrompt). */
         await mostrarDecenario();
+        await mostrarRosario();
         if(currentGlobalMystery<20){
           currentGlobalMystery++;
           const{block,idx}=getMysteryBlock(currentGlobalMystery);
@@ -1878,9 +1889,7 @@ async function completeMystery(){
     setTimeout(async()=>{
       if(window.CZSound)CZSound('blockClear');
       await addMeters(MR_BNS);
-      /* Los cinco Misterios del bloque son un Rosario: se cierra antes de la
-         pantalla de celebración, y los metros del bonus van dentro. */
-      await mostrarRosario(MR_BNS);
+      _rosarioMetros = MR_BNS;    // el bonus de primera vez, para el pie del Rosario
       showCelebration();
     },600);
     if(blk==='gloriosos'&&cua===4){
@@ -1916,6 +1925,48 @@ async function completeMystery(){
     );
   }
 }
+/* ── La vuelta del Rosario ───────────────────────────────────────────────────
+   Cinco decenas REZADAS de un bloque son un Rosario, y rezar el Rosario es una
+   costumbre que se repite. Antes la animación vivía dentro de
+   `if(dots.every(Boolean))`, que solo puede correr UNA VEZ en la vida —
+   completeMystery corta si el Misterio ya estaba marcado—, así que el Rosario
+   solo se veía la primerísima vez. */
+let _rosarioPendiente=false, _rosarioMetros=0, _vueltaPendiente=false;
+
+function marcarVuelta(bloque, idx){
+  if(!window.Rosario) return;
+  try{
+    const base = Rosario.fusionar(Rosario.leerLocal(nivelId), prog||{});
+    const r    = Rosario.marcar(base, bloque, idx);
+    Rosario.guardarLocal(nivelId, r.estado);          // local primero: no se pierde por red
+    if(prog){ prog.vuelta=r.estado.vuelta; prog.rosarios=r.estado.rosarios; }
+    if(usr) FS.collection('users').doc(usr.uid).collection('progress').doc(nivelId)
+      .set({vuelta:r.estado.vuelta, rosarios:r.estado.rosarios},{merge:true}).catch(()=>{});
+    if(r.rosario) _rosarioPendiente=true;
+    if(r.vuelta)  _vueltaPendiente=true;
+  }catch(e){ console.warn('[CruzAndo] vuelta:',e); }
+}
+
+/* El reconocimiento de la vuelta: no celebra, reconoce, y ofrece tomar
+   conciencia por escrito. Nunca se impone — "Ahora no" siempre está. */
+function mostrarVuelta(){
+  if(!_vueltaPendiente || !window.Vuelta) return Promise.resolve(false);
+  _vueltaPendiente = false;
+  try{
+    const nombre = window.Niveles ? Niveles.nombre(nivelId) : '';
+    return Vuelta.mostrar({
+      nivelNombre: nombre,
+      onGuardar: async (texto) => {
+        if(!usr) return;
+        await FS.collection('users').doc(usr.uid).collection('diario').add({
+          texto, pregunta: Vuelta.PREGUNTA, fecha: new Date(),
+          origen: 'vuelta', nivelId, nivelNombre: nombre
+        });
+      }
+    }).catch(()=>false);
+  }catch(e){ return Promise.resolve(false); }
+}
+
 /* ── El decenario ───────────────────────────────────────────────────────────
    orar ya usa cuentas.js, así que la instantánea sale de la misma instancia.
    Su columna NO se congela —la del tool de rezo sigue viva mientras se lee— de
@@ -1925,6 +1976,10 @@ function mostrarDecenario(){
   try{
     const foto=_cuentas.instantanea();
     if(!Cierre.decenaCompleta(foto)) return Promise.resolve(false);
+    /* La guarda ES la prueba de rezo: once cuentas y la Cruz encendida solo
+       ocurren si la última ventana de bead_sync pasó con el audio sonando. Por
+       eso pasar páginas sin escuchar el rezo no llena la vuelta. */
+    marcarVuelta(blk, bIdx);
     return Cierre.decenario({
       desde:  foto,
       color:  (BCL && BCL[blk]) || COLORES_BLOQUE.gozosos,
@@ -1947,12 +2002,18 @@ function mostrarRoseton(){
   }catch(e){ return Promise.resolve(false); }
 }
 
-function mostrarRosario(metros){
+function mostrarRosario(){
+  /* Ya no cuelga de `dots.every(Boolean)` —que solo corre una vez— sino de la
+     vuelta, que se cierra cada vez que se rezan las cinco decenas. */
+  if(!_rosarioPendiente) return Promise.resolve(false);
+  _rosarioPendiente = false;
+  const metros = _rosarioMetros; _rosarioMetros = 0;
   if(!window.Cierre || !window.Sarta) return Promise.resolve(false);
   try{
     return Cierre.rosario({
       color:  (BCL && BCL[blk]) || COLORES_BLOQUE.gozosos,
       titulo: 'Rosario recorrido',
+      nombre: (window.NOMBRES_BLOQUE || {})[blk] || '',
       metros: metros
     }).catch(()=>false);
   }catch(e){ return Promise.resolve(false); }

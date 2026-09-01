@@ -54,9 +54,12 @@ window._fbFirestore = {
 <script src="niveles.js"></script>
 <script src="bloques.js"></script>
 <link rel="stylesheet" href="cierre.css">
+<link rel="stylesheet" href="vuelta.css">
 <script src="sarta.js"></script>
 <script src="cuentas.js"></script>
 <script src="cierre.js"></script>
+<script src="rosario.js"></script>
+<script src="vuelta.js"></script>
 <script src="racha.js"></script>
 <script src="racha-splash.js"></script>
 <script src="plan-utils.js"></script>
@@ -2532,6 +2535,7 @@ async function completeMystery(){
     setTimeout(async()=>{
       if(window.CZSound)CZSound('blockClear');
       await addMeters(MR_BNS);
+      _rosarioMetros = MR_BNS;       // el bonus de primera vez, para el pie del Rosario
       showSlide(MR_BNS,'¡Bloque completo!');
     },600);
   }
@@ -2595,6 +2599,47 @@ async function onTrackEnded(){
   playNext();
 }
 
+/* ── La vuelta del Rosario ───────────────────────────────────────────────────
+   Cinco decenas REZADAS de un bloque son un Rosario, y rezar el Rosario es una
+   costumbre que se repite. Antes la animación colgaba de `dots.every(Boolean)`,
+   que solo puede correr UNA VEZ en la vida (completeMystery corta si el Misterio
+   ya estaba marcado): el Rosario solo se veía la primerísima vez. */
+let _rosarioPendiente=false, _rosarioMetros=0, _vueltaPendiente=false;
+
+function marcarVuelta(bloque, idx){
+  if(!window.Rosario) return;
+  try{
+    const base = Rosario.fusionar(Rosario.leerLocal(nivelId), prog||{});
+    const r    = Rosario.marcar(base, bloque, idx);
+    Rosario.guardarLocal(nivelId, r.estado);          // local primero: no se pierde por red
+    if(prog){ prog.vuelta=r.estado.vuelta; prog.rosarios=r.estado.rosarios; }
+    if(usr) FS.collection('users').doc(usr.uid).collection('progress').doc(nivelId)
+      .set({vuelta:r.estado.vuelta, rosarios:r.estado.rosarios},{merge:true}).catch(()=>{});
+    if(r.rosario) _rosarioPendiente=true;
+    if(r.vuelta)  _vueltaPendiente=true;
+  }catch(e){ console.warn('[CruzAndo] vuelta:',e); }
+}
+
+/* El reconocimiento de la vuelta: no celebra, reconoce, y ofrece tomar
+   conciencia por escrito. Nunca se impone — "Ahora no" siempre está. */
+function mostrarVuelta(){
+  if(!_vueltaPendiente || !window.Vuelta) return Promise.resolve(false);
+  _vueltaPendiente = false;
+  try{
+    return Vuelta.mostrar({
+      nivelNombre: (window.Niveles ? Niveles.nombre(nivelId) : ''),
+      onGuardar: async (texto) => {
+        if(!usr) return;
+        await FS.collection('users').doc(usr.uid).collection('diario').add({
+          texto, pregunta: Vuelta.PREGUNTA, fecha: new Date(),
+          origen: 'vuelta', nivelId,
+          nivelNombre: (window.Niveles ? Niveles.nombre(nivelId) : '')
+        });
+      }
+    }).catch(()=>false);
+  }catch(e){ return Promise.resolve(false); }
+}
+
 /* ── El decenario ───────────────────────────────────────────────────────────
    rezar conserva su motor de cuentas —son INTERACTIVAS, el usuario las toca al
    rezar— y esta instancia existe solo para LEER la columna con instantanea().
@@ -2606,6 +2651,12 @@ function mostrarDecenario(){
     if(!_cuentasLectura) _cuentasLectura=Cuentas.crear({});
     const foto=_cuentasLectura.instantanea();
     if(!Cierre.decenaCompleta(foto)) return Promise.resolve(false);
+    /* La guarda ES la prueba de rezo: once cuentas y la Cruz encendida solo
+       ocurren si la última ventana de bead_sync pasó con el audio sonando.
+       Se marca aquí, síncrono, y no al resolverse la animación: en rezar el
+       decenario no se espera, así que hacerlo después sería una carrera con
+       onSessionComplete. */
+    marcarVuelta(blk, bIdx);
     return Cierre.decenario({
       desde:  foto,
       color:  (BCL && BCL[blk]) || COLORES_BLOQUE.gozosos,
@@ -2615,11 +2666,22 @@ function mostrarDecenario(){
 }
 
 function mostrarRosario(){
+  /* Antes salía SIEMPRE al acabar la sesión, aunque se hubieran saltado las
+     cinco pistas. Ahora sale si se cerró la vuelta, que es lo mismo que decir
+     si se rezaron las cinco decenas. */
+  if(!_rosarioPendiente) return Promise.resolve(false);
+  _rosarioPendiente = false;
+  const metros = _rosarioMetros; _rosarioMetros = 0;
   if(!window.Cierre || !window.Sarta) return Promise.resolve(false);
   try{
     return Cierre.rosario({
       color:  (BCL && BCL[blk]) || COLORES_BLOQUE.gozosos,
-      titulo: 'Rosario recorrido'
+      titulo: 'Rosario recorrido',
+      nombre: (window.NOMBRES_BLOQUE || {})[blk] || '',
+      /* Los metros del bonus de primera vez, SI se otorgaron. Cuando la vuelta
+         se cierra por segunda vez no hay bonus y no se pinta cifra: el rito no
+         promete un premio que no hubo. */
+      metros: metros
     }).catch(()=>false);
   }catch(e){ return Promise.resolve(false); }
 }
@@ -2696,7 +2758,11 @@ async function onSessionComplete(){
   await mostrarRosario();
   /* Y si con este bloque se cerraron los veinte, el cuaderno se corona antes de
      las Letanías: los cierres van seguidos, y de ahí se pasa a lo que sigue. */
-  await mostrarRoseton();
+  const _hubo = await mostrarRoseton();
+  /* El rosetón es el HITO y manda: si sale, el reconocimiento de la vuelta se
+     calla. No se comparte el primer recorrido con el aviso de repetirlo. */
+  if(_hubo) _vueltaPendiente = false;
+  await mostrarVuelta();
   if(rezarPrefs().letanias && window.RosarioFinal){
     RosarioFinal.abrir({ onCerrar: celebrar });
     return;

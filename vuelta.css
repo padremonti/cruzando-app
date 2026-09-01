@@ -1,0 +1,150 @@
+/* CruzAndo — vuelta.css
+ * La pantalla de "has recorrido de nuevo este Nivel".
+ *
+ * DELIBERADAMENTE SIN GEOMETRÍA. El decenario es una sarta, el Rosario una
+ * camándula, el rosetón un vitral — objetos. Esto es una palabra y una pregunta,
+ * y darle un objeto propio lo pondría a competir con el rosetón o, peor, a
+ * imitarlo. Comparte el velo y la tipografía de la familia `cierre`, nada más.
+ *
+ * Y a diferencia de los tres cierres, ESTA ESPERA: hay algo que leer y algo que
+ * decidir. Por eso no se cierra sola ni salta al toque.
+ */
+
+.vuelta-velo{
+  position: fixed;
+  inset: 0;
+  z-index: 942;                   /* sobre los cierres (940); bajo el splash de racha (950) */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 32px 26px;
+  text-align: center;
+  background: var(--vu-velo-bg, radial-gradient(120% 90% at 50% 30%, #0d1224 0%, #05060c 70%));
+  opacity: 0;
+  transition: opacity .32s ease;
+  -webkit-tap-highlight-color: transparent;
+  overflow-y: auto;
+}
+.vuelta-velo.dentro{ opacity: 1 }
+.vuelta-velo.fuera{ opacity: 0 }
+
+/* Paleta propia y cerrada: esta pantalla sale en tres páginas distintas y no
+   puede depender de que ninguna defina --text o --orange. */
+.vuelta-velo{ --vu-tinta: #F3EAD8; --vu-suave: rgba(243,234,216,.62); }
+
+.vuelta-kicker{
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--vu-suave);
+}
+.vuelta-nombre{
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(30px, 8.5vw, 42px);
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--vu-tinta);
+  text-wrap: balance;
+}
+.vuelta-linea{
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1.05rem;
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--vu-suave);
+  max-width: 30ch;
+}
+.vuelta-pregunta{
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(20px, 5.4vw, 25px);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--vu-tinta);
+  max-width: 22ch;
+  margin-top: 6px;
+  text-wrap: balance;
+}
+
+/* La cruz de Lux, pequeña y quieta: firma la pantalla sin animarla. */
+.vuelta-lux{ opacity: .5 }
+.vuelta-lux svg{ width: 26px; height: 26px; display: block }
+
+/* ── Botones ── */
+.vuelta-acciones{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 320px;
+  margin-top: 10px;
+}
+.vuelta-btn{
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 26px;
+  border: 1px solid rgba(243,234,216,.28);
+  background: rgba(243,234,216,.10);
+  color: var(--vu-tinta);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: .92rem;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.vuelta-btn:active{ transform: scale(.97) }
+.vuelta-btn.primario{
+  background: rgba(243,234,216,.92);
+  border-color: transparent;
+  color: #14161f;
+  font-weight: 700;
+}
+/* "Ahora no" es secundario a propósito: se OFRECE, nunca se impone — la misma
+   regla que las Letanías. */
+.vuelta-btn.discreto{
+  background: none;
+  border-color: transparent;
+  color: var(--vu-suave);
+  font-weight: 500;
+  padding: 10px;
+}
+
+/* ── El escrito ── */
+.vuelta-escribir{ display: none; width: 100%; max-width: 340px; flex-direction: column; gap: 10px }
+.vuelta-velo.escribiendo .vuelta-escribir{ display: flex }
+.vuelta-velo.escribiendo .vuelta-acciones{ display: none }
+.vuelta-velo.escribiendo .vuelta-linea{ display: none }
+
+.vuelta-area{
+  width: 100%;
+  min-height: 128px;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(243,234,216,.24);
+  background: rgba(8,9,16,.5);
+  color: var(--vu-tinta);
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1.02rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+.vuelta-area::placeholder{ color: rgba(243,234,216,.34); font-style: italic }
+.vuelta-area:focus{ outline: none; border-color: rgba(243,234,216,.5) }
+
+.vuelta-fila{ display: flex; gap: 10px }
+.vuelta-fila .vuelta-btn{ flex: 1 }
+
+.vuelta-aviso{
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: .74rem;
+  color: var(--vu-suave);
+  min-height: 1em;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .vuelta-velo{ transition: none }
+}

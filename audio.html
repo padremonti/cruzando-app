@@ -1385,9 +1385,12 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 <script src="niveles.js"></script>
 <script src="bloques.js"></script>
 <link rel="stylesheet" href="cierre.css">
+<link rel="stylesheet" href="vuelta.css">
 <script src="sarta.js"></script>
 <script src="cuentas.js"></script>
 <script src="cierre.js"></script>
+<script src="rosario.js"></script>
+<script src="vuelta.js"></script>
 <script src="racha.js"></script>
 <script src="racha-splash.js"></script>
 <script src="plan-utils.js"></script>
@@ -1691,7 +1694,9 @@ import {
   setDoc,
   updateDoc,
   increment,
-  serverTimestamp
+  serverTimestamp,
+  collection,
+  addDoc
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 // ── FIREBASE CONFIG (pegar aquí tu config) ──
@@ -2530,6 +2535,11 @@ async function syncToOrarProgress(nivel, cuaderno, misterio) {
 
   try {
     const snap = await getDoc(ref);
+    // De paso, la vuelta del Rosario que haya en el servidor (ver marcarVuelta).
+    if (snap.exists()) {
+      const _d = snap.data();
+      _vueltaDoc = { vuelta: _d.vuelta || null, rosarios: _d.rosarios || null };
+    }
     const EMPTY_BLOCK = [null, null, null, null, null];
     const ALL_BLOCKS  = ['gozosos', 'luminosos', 'dolorosos', 'gloriosos'];
 
@@ -4035,7 +4045,7 @@ async function completeSession() {
     /* Los cinco Misterios del bloque son un Rosario. Sustituye al Mariano y al
        toast que antes se disparaban aquí y que el epílogo tapaba a los pocos
        cientos de milisegundos: ahora el cierre se ve, y los metros van dentro. */
-    _rosarioPendiente = METERS_BLOCK_BONUS;
+    _rosarioMetros = METERS_BLOCK_BONUS;   // solo los metros; el rito lo decide la vuelta
     if (cuadernoCompleto(nivel, cuaderno)) _rosetonPendiente = true;
   }
 
@@ -4129,8 +4139,14 @@ async function completeSession() {
      cuando termina sube el epílogo — encadenado, no apilado encima.
      mostrarDecenario() resuelve al instante si el módulo no está. */
   mostrarDecenario()
-    .then(mostrarRosario)      // si el bloque se cerró, el Rosario va después
-    .then(mostrarRoseton)      // y si con él se cerró el cuaderno, el rosetón
+    .then(mostrarRosario)      // si la vuelta del bloque se cerró, el Rosario va después
+    .then(mostrarRoseton)      // y si con él se cerró el cuaderno por primera vez, el rosetón
+    .then(hubo => {
+      /* El rosetón es el HITO y manda: si sale, el reconocimiento de la vuelta
+         se calla. No se comparte el primer recorrido con el aviso de repetirlo. */
+      if (hubo) _vueltaPendiente = false;
+      return mostrarVuelta();
+    })
     .then(() => {
       $('scr-complete').classList.add('open');
       $('fab-questions') && ($('fab-questions').style.display = 'none');
@@ -4157,6 +4173,9 @@ function mostrarDecenario() {
   try {
     const foto = _cuentas.instantanea();
     if (!Cierre.decenaCompleta(foto)) return Promise.resolve(false);
+    /* La guarda ES la prueba de rezo: once cuentas y la Cruz encendida solo
+       ocurren si la última ventana de bead_sync pasó con el audio sonando. */
+    marcarVuelta(currentSession.block, currentSession.blockIdx);
     const c = BLOCK_COLORS[currentSession.block];
     return Cierre.decenario({
       desde:  foto,
@@ -4167,11 +4186,63 @@ function mostrarDecenario() {
   } catch (e) { return Promise.resolve(false); }
 }
 
-/* ── El Rosario ─────────────────────────────────────────────────────────────
-   Los cinco decenarios del bloque se enlazan en la camándula. Lo marca el
-   bonus de bloque, que es el único sitio donde se sabe que los cinco Misterios
-   están rezados por primera vez. */
-let _rosarioPendiente = 0, _rosetonPendiente = false;
+/* ── La vuelta del Rosario ───────────────────────────────────────────────────
+   Cinco decenas REZADAS de un bloque son un Rosario, y rezar el Rosario es una
+   costumbre que se repite. Antes esto colgaba del BONUS de bloque, que se cobra
+   una sola vez y para siempre: quien ya lo tenía —o quien cerró el bloque
+   mezclando modos, porque el bonus contaba el historial privado de audio— no
+   veía la animación nunca. Ahora el premio y el rito van por su lado.
+
+   `_rosarioMetros` guarda los metros del bonus SI se otorgaron. Cuando la vuelta
+   se cierra de nuevo no hay bonus y el pie no pinta cifra: el rito no promete un
+   premio que no hubo. Por eso hacen falta dos variables y no una. */
+let _rosarioPendiente = false, _rosarioMetros = 0, _vueltaPendiente = false, _rosetonPendiente = false;
+/* El estado de la vuelta tal como está en Firestore. Lo siembra
+   syncToOrarProgress(), que ya lee ese documento y corre ANTES de la cadena de
+   cierres. Sin esto, un aparato nuevo empezaría a contar la vuelta desde cero
+   aunque el servidor tuviera Rosarios cerrados. */
+let _vueltaDoc = null;
+
+function marcarVuelta(bloque, idx) {
+  if (!window.Rosario) return;
+  try {
+    const nId  = String(currentSession.nivel).padStart(2,'0') +
+                 String(currentSession.cuaderno).padStart(2,'0');
+    const base = Rosario.fusionar(Rosario.leerLocal(nId), _vueltaDoc || {});
+    const r    = Rosario.marcar(base, bloque, idx);
+    Rosario.guardarLocal(nId, r.estado);          // local primero: no se pierde por red
+    _vueltaDoc = r.estado;
+    if (currentUser) {
+      setDoc(doc(db, 'users', currentUser.uid, 'progress', nId),
+             { vuelta: r.estado.vuelta, rosarios: r.estado.rosarios }, { merge: true })
+        .catch(() => {});
+    }
+    if (r.rosario) _rosarioPendiente = true;
+    if (r.vuelta)  _vueltaPendiente  = true;
+  } catch (e) { console.warn('[CruzAndo] vuelta:', e); }
+}
+
+/* El reconocimiento de la vuelta: no celebra, reconoce, y ofrece tomar
+   conciencia por escrito. Nunca se impone — "Ahora no" siempre está. */
+function mostrarVuelta() {
+  if (!_vueltaPendiente || !window.Vuelta) return Promise.resolve(false);
+  _vueltaPendiente = false;
+  try {
+    const nId = String(currentSession.nivel).padStart(2,'0') +
+                String(currentSession.cuaderno).padStart(2,'0');
+    const nombre = window.Niveles ? Niveles.nombre(nId) : '';
+    return Vuelta.mostrar({
+      nivelNombre: nombre,
+      onGuardar: async (texto) => {
+        if (!currentUser) return;
+        await addDoc(collection(db, 'users', currentUser.uid, 'diario'), {
+          texto, pregunta: Vuelta.PREGUNTA, fecha: new Date(),
+          origen: 'vuelta', nivelId: nId, nivelNombre: nombre
+        });
+      }
+    }).catch(() => false);
+  } catch (e) { return Promise.resolve(false); }
+}
 
 /* ¿Están los VEINTE de este cuaderno? No basta con cerrar el cuarto bloque: el
    usuario puede rezar los bloques en cualquier orden, así que el cuaderno se
@@ -4205,14 +4276,15 @@ function mostrarRoseton() {
 }
 function mostrarRosario() {
   if (!_rosarioPendiente) return Promise.resolve(false);
-  const metros = _rosarioPendiente;
-  _rosarioPendiente = 0;
+  _rosarioPendiente = false;
+  const metros = _rosarioMetros; _rosarioMetros = 0;
   if (!window.Cierre || !window.Sarta) return Promise.resolve(false);
   try {
     const c = BLOCK_COLORS[currentSession.block];
     return Cierre.rosario({
       color:  (c && c.bold) || COLORES_BLOQUE.gozosos,
       titulo: 'Rosario recorrido',
+      nombre: (window.NOMBRES_BLOQUE || {})[currentSession.block] || '',
       metros: metros
     }).catch(() => false);
   } catch (e) { return Promise.resolve(false); }
