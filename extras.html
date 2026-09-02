@@ -360,6 +360,7 @@ body.light .shop-hero-grad {
 .app-nav-label { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.3px; }
 </style>
 <script src="flags.js"></script>
+<script src="plan-utils.js"></script>
 <script src="utils.js"></script>
 </head>
 <body>
@@ -373,12 +374,20 @@ body.light .shop-hero-grad {
      construyendo la tienda con el flag apagado. ══════════════════════════ -->
 <script>
 (function () {
-  if (window.recompensasON()) return;
   var verComo = sessionStorage.getItem('cruzando_view_as');
   var soyDev  = !verComo && localStorage.getItem('cruzando_plan_cache') === 'developer';
   if (soyDev) return;
   var base = location.origin + location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1);
-  location.replace(base + 'crecer.html');
+
+  /* Puerta 1: el flag. La tienda esta a medias y no se ensena a nadie. */
+  if (!window.recompensasON()) { location.replace(base + 'index.html'); return; }
+
+  /* Puerta 2: el plan. Esta se queda cuando el flag se encienda; sin ella la
+     tienda quedaria abierta a cualquiera ese mismo dia. */
+  var plan = verComo || localStorage.getItem('cruzando_plan_cache') || 'free';
+  if (window.canAccessModo && !window.canAccessModo('extras', plan)) {
+    location.replace(base + 'index.html?premium=1');
+  }
 }());
 </script>
 

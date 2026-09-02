@@ -378,7 +378,7 @@
       var ud    = uSnap.exists ? uSnap.data() : {};
       var _plan = window.effectivePlan ? window.effectivePlan() : (window.resolvePlan ? window.resolvePlan(ud) : 'free');
       window._userPlan = _plan;
-      if (window.requirePremiumAccess && !window.requirePremiumAccess('sanar', _plan)) {
+      if (window.requirePremiumAccess && !window.requirePremiumAccess('retiros', _plan)) {
         return Promise.reject('blocked');
       }
       return fetch(_base() + 'data/santuario_index.json');

@@ -2043,7 +2043,7 @@ function renderHome(userData) {
   if (banner) banner.style.display = plan === 'free' ? '' : 'none';
   if (_blockedMode && banner && plan === 'free') {
     banner.style.display = '';
-    var _modoNombres = { libro:'Libro', rezar:'Orar', cantos:'Cantos', sanar:'Retiros', extras:'Extras' };
+    var _modoNombres = { libro:'Libro', rezar:'Orar', cantos:'Cantos', sanar:'Sanar', retiros:'Retiros', mapa:'el mapa', extras:'Extras' };
     var _bmsg = banner.querySelector('.blocked-redirect-msg');
     if (!_bmsg) {
       _bmsg = document.createElement('p');
@@ -2069,7 +2069,7 @@ function renderHome(userData) {
     btn.title = allowed ? '' : 'Disponible con plan Premium';
   }
   _applyNavAccess('nav-cantos-btn', 'cantos');
-  _applyNavAccess('nav-sanar-btn',  'sanar');
+  _applyNavAccess('nav-sanar-btn',  'retiros');   // el boton de Retiros, pese al id
   _applyNavAccess('nav-extras-btn', 'extras');
 
   // Extras — además verificar progreso suficiente

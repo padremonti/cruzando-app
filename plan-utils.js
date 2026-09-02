@@ -43,9 +43,23 @@
     if (plan === 'free' && nivelId === '0101') return true;
     if (modo === 'audio')   return true;
     if (modo === 'libro')   return isPrem;
+    /* rezar sigue siendo de pago AQUI. El Rosario diario del free se resuelve
+       aparte, en rezar.html, porque depende de que ESE Nivel ya este cruzado
+       y eso solo lo dice el documento de progreso. */
     if (modo === 'rezar')   return isPrem;
-    if (modo === 'cantos')  return isPrem;
-    if (modo === 'sanar')   return isPrem;
+    /* La biblioteca de cantos y el Diario son de todos: lo que el free canta y
+       lo que el free escribe es suyo. Cerrarlos seria un despojo, no un muro. */
+    if (modo === 'cantos')  return true;
+    if (modo === 'diario')  return true;
+    /* Sanar son primeros auxilios: entra cualquiera. Lo que limita al free es
+       el credito de un dolor al dia, no el plan. */
+    if (modo === 'sanar')   return true;
+    /* Retiros. Se llamaba 'sanar' por una colision de nombre —el boton es
+       nav-sanar-btn y lleva a retiros.html—, asi que 'sanar' gateaba esto y
+       Sanar de verdad no tenia puerta ninguna. */
+    if (modo === 'retiros') return isPrem;
+    /* El mapa: la libertad de moverse por lo ya cruzado es lo que se paga. */
+    if (modo === 'mapa')    return isPrem;
     if (modo === 'extras')  return isPrem;
     if (modo === 'badges')  return true;
     if (modo === 'logros')  return true;

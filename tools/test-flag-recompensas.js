@@ -297,7 +297,13 @@ const GUARDAS = [
   ['index.html',  'boton Extras del drawer oculto',    /drawer-extras-btn'\); if \(b\) b\.style\.display = 'none'/],
   ['crecer.html', 'goToExtras bloqueado',              /function goToExtras\(\) \{\s*\n\s*if \(!window\.recompensasON\(\)\) return;/],
   ['index.html',  'goToExtras bloqueado',              /function goToExtras\(\) \{\s*\n\s*if \(!window\.recompensasON\(\)\) return;/],
-  ['extras.html', 'velo contra la URL directa',        /if \(window\.recompensasON\(\)\) return;[\s\S]{0,400}location\.replace/],
+  /* extras tiene DOS puertas: el flag (la tienda esta a medias) y el plan (la
+     tienda es de Premium). La del flag desaparecera; la del plan se queda, y
+     sin ella la tienda quedaria abierta a cualquiera el dia que se encienda. */
+  ['extras.html', 'velo del flag contra la URL directa',
+     /if \(!window\.recompensasON\(\)\) \{ location\.replace/],
+  ['extras.html', 'y ademas puerta de plan, independiente del flag',
+     /canAccessModo\('extras', plan\)[\s\S]{0,90}index\.html\?premium=1/],
   ['cantos.html', 'filtro Extras oculto',              /filter-extras'\); if \(f\) f\.style\.display = 'none'/],
   ['audio.html',  'toast de medalla callado',          /if \(window\.recompensasON\(\)\) setTimeout\(\(\) => showToast\('🏅/],
   ['orar.html',   'toast de medalla callado',          /if\(window\.recompensasON\(\)\)setTimeout\(\(\)=>showSlide\(0,'🏅/],

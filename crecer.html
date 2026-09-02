@@ -2203,7 +2203,7 @@ function renderHome(userData) {
   if (banner) banner.style.display = plan === 'free' ? '' : 'none';
   if (_blockedMode && banner && plan === 'free') {
     banner.style.display = '';
-    var _modoNombres = { libro:'Libro', rezar:'Orar', cantos:'Cantos', sanar:'Retiros', extras:'Extras' };
+    var _modoNombres = { libro:'Libro', rezar:'Orar', cantos:'Cantos', sanar:'Sanar', retiros:'Retiros', mapa:'el mapa', extras:'Extras' };
     var _bmsg = banner.querySelector('.blocked-redirect-msg');
     if (!_bmsg) {
       _bmsg = document.createElement('p');
@@ -2229,7 +2229,7 @@ function renderHome(userData) {
     btn.title = allowed ? '' : 'Disponible con plan Premium';
   }
   _applyNavAccess('nav-cantos-btn', 'cantos');
-  _applyNavAccess('nav-sanar-btn',  'sanar');
+  _applyNavAccess('nav-sanar-btn',  'retiros');   // el boton de Retiros, pese al id
   _applyNavAccess('nav-extras-btn', 'extras');
 
   // Extras — además verificar progreso suficiente
@@ -2812,7 +2812,7 @@ onAuthStateChanged(auth, async function(user) {
      `?premium=1` abre la compra en el hub: cerrar el mapa no puede cerrarle la
      puerta a quien viene a pagar. Y el developer que usa "ver como free" NO se
      expulsa, o el panel desde el que cambia de plan quedaria fuera de alcance. */
-  if (realPlan === 'free') {
+  if (!canAccessModo('mapa', realPlan)) {
     location.replace('index.html?premium=1');
     return;
   }

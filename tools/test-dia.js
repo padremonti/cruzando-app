@@ -421,7 +421,7 @@ console.log('== El mapa es de Premium, y el camino no se salta ==');
 const CRE = norm(leer('crecer.html'));
 
 ok('crecer.html  . cierra la puerta al free', () => {
-  if (!CRE.includes("if (realPlan === 'free') {"))
+  if (!CRE.includes("if (!canAccessModo('mapa', realPlan)) {"))
     throw new Error('no hay puerta: el mapa seguiria abierto para el free');
   if (!CRE.includes("location.replace('index.html?premium=1')"))
     throw new Error('la puerta no lleva a la compra');
@@ -432,7 +432,7 @@ ok('crecer.html  . la puerta va tras el plan CONFIRMADO, no tras el cache', () =
      con el cache frio de su propia pagina: el fallo tiene que ser retrasar, */
   /* nunca expulsar. */
   const iF3 = CRE.indexOf('FASE 3');
-  const iPuerta = CRE.indexOf("if (realPlan === 'free') {");
+  const iPuerta = CRE.indexOf("if (!canAccessModo('mapa', realPlan)) {");
   if (iF3 < 0 || iPuerta < 0) throw new Error('no se encuentran las dos marcas');
   if (iPuerta < iF3)
     throw new Error('la puerta corre antes de confirmar el plan contra Firestore');
@@ -446,7 +446,7 @@ ok('el candado y la puerta se pusieron a la vez', () => {
   const pu = leer('plan-utils.js');
   if (!pu.includes('function marcarCrecerSiFree'))
     throw new Error('no existe el candado de la pestana');
-  if (!CRE.includes("if (realPlan === 'free') {"))
+  if (!CRE.includes("if (!canAccessModo('mapa', realPlan)) {"))
     throw new Error('hay candado pero no hay puerta');
 });
 
