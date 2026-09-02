@@ -51,8 +51,12 @@
        lo que el free escribe es suyo. Cerrarlos seria un despojo, no un muro. */
     if (modo === 'cantos')  return true;
     if (modo === 'diario')  return true;
-    /* Sanar son primeros auxilios: entra cualquiera. Lo que limita al free es
-       el credito de un dolor al dia, no el plan. */
+    /* Sanar se abre a cualquiera, y lo que se abre es de verdad: el elenco, el
+       velo de foco y TODA la acogida son libres para siempre. Lo que cuesta es
+       entrar al Misterio-puerta, y eso no lo decide esta tabla sino el saldo,
+       en entrarPain() del servidor.
+       Hubo un credito pastoral diario en diseno y se DESCARTO: el porque esta
+       en CLAUDE.md, seccion 'El credito pastoral que se descarto'. */
     if (modo === 'sanar')   return true;
     /* Retiros. Se llamaba 'sanar' por una colision de nombre —el boton es
        nav-sanar-btn y lleva a retiros.html—, asi que 'sanar' gateaba esto y

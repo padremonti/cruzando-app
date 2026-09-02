@@ -876,11 +876,68 @@ El kit estaba a medio construir y se apagó entero para el lanzamiento al grupo 
 
 **Otros pendientes del kit** (no bloqueantes, pero es lo que había "a medias"): los premios que anuncia el popup del cofre son texto fijo en `BLOQUES_MAP` y no existen en el catálogo; `openTreasure` no otorga nada y su estado `opened` no persiste; el cofre de `world.js` es placeholder puro; BGM y estampitas se compran pero nada las consume; `SKINS_CATALOG` de `utils.js` es un espejo manual del JSON que se desincroniza a la primera skin nueva.
 
-## Modelo económico (DISEÑADO, NO implementado — proyecto futuro)
+## Modelo económico — **DESPLEGADO Y VIVO** (auditado 2026-09-02)
 
-- **Híbrido**: suscripción (mensual/anual, todo incluido) **O** créditos (renta pain por pain). **Unidad = pain**; 1 crédito = 1 pain. **Cobro al ENTRAR**. Ventana de acceso **1 semana**. Paquetes vía **Stripe** + créditos de regalo al registrarse. El completado anotará vía `sub | credito` para analytics.
-- Arquitectura técnica (Stripe, shape Firestore, cobro atómico) **en inspección, sin implementar**.
-- **Crédito en mini**: comentario TODO reubicado al epílogo ("completó = pagó", con guardia por sesión) — documentado, **no construido**. No implementar por pedazos: espera el modelo completo.
+⚠ Esta sección decía «*DISEÑADO, NO implementado*» y «*en inspección, sin implementar*».
+**Era falso.** `firebase functions:list` devuelve **once funciones en producción**
+(us-central1, v1, nodejs22): `entrarPain` · `estadoCuenta` · `comprarCreditos` ·
+`createCheckoutSession` · `createPortalSession` · `stripeWebhook` · `reclamarCompra` ·
+`crearCuentaEconomica` · `canjearCodigo` · `aceptarTerminos` · `evaluarRetiro`.
+
+- **Híbrido**: suscripción (mensual $200 MXN / anual $2 000) **O** créditos (renta pain por pain).
+  **Unidad = pain**; 1 crédito = 1 pain. **Cobro al ENTRAR.** Ventana de acceso **7 días**.
+  Paquetes: 5/$50 · 15/$100 · 25/$150. **5 créditos de regalo** al registrarse
+  (`crearCuentaEconomica`, trigger de Auth).
+- **La cascada de `entrarPain`** (`functions/economia.js`): 1 developer · 2 beta vigente ·
+  3 premium/sub (+3 d de gracia) · 4 renta vigente de ESE pain · 5 sin-saldo ·
+  6 requiere-confirmación · 7 cobrar. **Los caminos 1-6 no escriben nada**; solo el 7 toca dinero.
+- **El servidor manda.** `billing/{doc}` y `rentals/{doc}` van con `write: false` en
+  `firestore.rules`: el cliente los lee y no los puede falsificar. `access.js` es solo
+  el cliente — su caché pinta las marcas del elenco y **no tiene autoridad sobre el dinero**.
+- **`mini.html` nunca cobra**: solo lee. El cobro ocurre en `sanar.html`, al pulsar
+  «Entrar al Misterio» — así el elenco, el velo de foco y **toda la acogida son libres**.
+- **Bancos**: `functions/test-economia.js` (81) + `test-pieza5.js` (39) + `test-terminos.js` (10).
+
+### El crédito pastoral que se descartó (2026-09-02) — no volver a intentarlo
+
+Se diseñó un **crédito pastoral diario**: un dolor al día gratis para el free, en un
+carril aparte que no tocara el dinero, con reinicio a las 00:00. Estaba listo para
+construirse — paso 0 bis en la cascada, marca de día en `users/{uid}/pastoral/dia`
+con las mismas reglas que `billing`— y **se descartó a propósito**. Las razones:
+
+- **Las cuentas no salen.** Un crédito al día son ~30 al mes. El paquete mayor son 25
+  por $150. Es decir: **se regalaría cada mes más de lo que se vende**, y ningún free
+  compraría un crédito jamás. No habría sido un plus para quien paga; habría vaciado
+  la única moneda de la app.
+- **Un don automático deja de leerse como don.** Lo que llega solo cada mañana se nota
+  cuando falta, no cuando está: se recibe como cuota, no como gracia.
+- **Lo pastoral ya estaba cubierto, y mejor.** El free tiene gratis y para siempre el
+  **Rosario del día completo** (Evangelio, contemplación, las tres preguntas, micro,
+  canto, Letanías, los cuatro cierres), su Diario, la biblioteca de cantos, la racha,
+  **toda la acogida de Sanar**, y 5 créditos de regalo. **Sanar es una puerta; el
+  Rosario diario es la casa** — y un plan gratuito que regala la casa no es tacano
+  porque cobre una puerta. El itinerario es sanador para quien ora cada día.
+
+**En su lugar: dinámicas de comunidad** — códigos, descuentos y créditos de regalo
+otorgados **con criterio**, a alguien y por un motivo. Son discrecionales (eso es
+atención pastoral, no un dispensador), construyen comunidad en vez de sustituirla,
+y se pueden parar; un derecho adquirido no se retira sin que se sienta despojo.
+
+⚠ **Y lo que hay NO es un sistema de códigos.** `canjearCodigo` compara contra **un
+solo código horneado** (`BETA_CODE = 'BETA2026'`, `functions/index.js:184`) y concede
+**plan beta 90 días**, no créditos; cambiarlo exige redesplegar. Para lo que se quiere
+hacen falta **dos mecanismos distintos**, de coste muy desigual:
+
+| | |
+|---|---|
+| **Descuentos de compra** | los hace **Stripe** con sus *promotion codes* sobre el Checkout: configuración de panel, cupos y caducidad incluidos, **cero código** |
+| **Créditos gratis por código** | eso sí es de CruzAndo: colección de códigos (tipo, cantidad, cupo, vencimiento, canjeados) + un callable que abone |
+
+**Y la pantalla sin créditos dejo de ser solo una tienda.** Quien llega ahí llegó por
+un dolor concreto: encontrarse únicamente con precios invita a cerrar la app. Ahora
+remata con «*El Rosario de hoy te espera — es tuyo cada día, sin créditos*» y un botón
+a `hoy.html`. No es una concesión comercial: es que la pantalla afirme lo mismo que
+afirma el producto.
 
 ## Consentimiento de términos + App Check (registro)
 

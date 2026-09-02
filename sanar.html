@@ -437,6 +437,19 @@ body {
 .acc-sub-opt .acc-p{ display:block; font-size:17px; font-weight:700; color:var(--text); }
 .acc-sub-opt .acc-c{ display:block; font-size:11px; color:var(--text-dim); margin-top:2px; }
 .acc-ahorro{ display:block; font-size:10px; color:var(--brand); margin-top:3px; }
+/* La salida al Rosario del dia. Quien llega aqui llego por un dolor concreto:
+   dejarle solo con precios le invita a cerrar la app. El itinerario diario es
+   suyo, gratis y para siempre, y este es el momento exacto de recordarlo. */
+.acc-diario{ margin-top:1.4rem; padding-top:1.2rem; border-top:0.5px solid var(--border); }
+.acc-diario-t{ margin:0 0 3px; font-size:14px; font-weight:600; color:var(--text); }
+.acc-diario-s{ margin:0 0 .85rem; font-size:12.5px; color:var(--text-soft); line-height:1.5; }
+.acc-diario-btn{
+  width:100%; background:none; border:0.5px solid var(--border); border-radius:12px;
+  padding:.72rem .9rem; color:var(--text); font-size:13.5px; font-weight:600;
+  cursor:pointer; font-family:inherit; transition:border-color .15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.acc-diario-btn:hover{ border-color:var(--brand); }
 .acc-cerrar{ text-align:center; margin-top:1.1rem; }
 /* Discreto pero legible: --text-dim daba 2.08:1 en oscuro y 2.93:1 en claro
    (AA pide 4.5:1 a este tamaño). --text-soft sube a 5.61:1 y 6.36:1 sin añadir
@@ -2278,10 +2291,17 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
             '<span class="acc-p">$2,000 MXN</span><span class="acc-c">al año</span>'+
             '<span class="acc-ahorro">2 meses gratis</span></button>'+
         '</div>'+
+        '<div class="acc-diario">'+
+          '<p class="acc-diario-t">El Rosario de hoy te espera</p>'+
+          '<p class="acc-diario-s">Es tuyo cada día, sin créditos.</p>'+
+          '<button class="acc-diario-btn" id="acc-ir-hoy">Ir al Rosario de hoy</button>'+
+        '</div>'+
         '<div class="acc-cerrar"><button id="acc-cancel">Ahora no</button></div>'+
       '</div>', 'Te quedaste sin créditos');
 
     $('acc-cancel').addEventListener('click', cerrarAcc);
+    var _irHoy = $('acc-ir-hoy');
+    if (_irHoy) _irHoy.addEventListener('click', function(){ navTo('hoy.html'); });
     _accEsc = function(e){ if (e.key === 'Escape') cerrarAcc(); };
     document.addEventListener('keydown', _accEsc);
   }
