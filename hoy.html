@@ -251,6 +251,18 @@ body.light .app-nav{background:var(--card)}
   gap:4px;padding:10px 4px 12px;background:none;border:none;color:var(--text-dim);
 }
 .app-nav-item.active{color:var(--brand-soft)}
+.app-nav-item[disabled]{cursor:default;opacity:1}
+.app-nav-icon{position:relative;display:flex;align-items:center;justify-content:center}
+.app-nav-item.active .app-nav-icon::before{
+  content:'';position:absolute;inset:-5px;
+  background:rgba(2,187,224,0.12);border-radius:10px;
+}
+@keyframes navSpring{
+  0%{transform:scale(1)} 35%{transform:scale(0.78)}
+  65%{transform:scale(1.18)} 100%{transform:scale(1)}
+}
+.app-nav-item.tapped .app-nav-icon{animation:navSpring .38s cubic-bezier(0.34,1.72,0.64,1) both}
+.app-nav-item.tapped{color:var(--brand-soft)}
 .app-nav-label{font-size:.63rem;font-weight:600;letter-spacing:.02em}
 </style>
 </head>
@@ -267,11 +279,30 @@ body.light .app-nav{background:var(--card)}
 </div>
 
 <nav class="app-nav">
-  <button class="app-nav-item active" type="button"><span class="app-nav-label">Hoy</span></button>
-  <button class="app-nav-item" type="button" onclick="location.href='crecer.html'"><span class="app-nav-label">Crecer</span></button>
-  <button class="app-nav-item" type="button" onclick="location.href='sanar.html'"><span class="app-nav-label">Sanar</span></button>
-  <button class="app-nav-item" type="button" onclick="location.href='diario.html'"><span class="app-nav-label">Diario</span></button>
-  <button class="app-nav-item" type="button" onclick="location.href='cantos.html'"><span class="app-nav-label">Cantos</span></button>
+  <button class="app-nav-item active" disabled>
+    <div class="app-nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/><circle cx="12" cy="15.5" r="2.2"/></svg></div>
+    <span class="app-nav-label">Hoy</span>
+  </button>
+  <button class="app-nav-item" type="button" onclick="navTap(this); goTo('crecer.html')">
+    <div class="app-nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="2.2"/><circle cx="18" cy="5" r="2.2"/><path d="M8 19h6a3.5 3.5 0 0 0 0-7H10a3.5 3.5 0 0 1 0-7h6"/></svg></div>
+    <span class="app-nav-label">Crecer</span>
+  </button>
+  <button class="app-nav-item" type="button" onclick="navTap(this); goTo('sanar.html')">
+    <div class="app-nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.8z"/></svg></div>
+    <span class="app-nav-label">Sanar</span>
+  </button>
+  <button class="app-nav-item" type="button" onclick="navTap(this); goTo('retiros.html')">
+    <div class="app-nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s-8-5.5-8-11a8 8 0 0116 0c0 5.5-8 11-8 11z"/><path d="M9 11h6M12 8v6"/></svg></div>
+    <span class="app-nav-label">Retiros</span>
+  </button>
+  <button class="app-nav-item" type="button" onclick="navTap(this); goTo('diario.html')">
+    <div class="app-nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></div>
+    <span class="app-nav-label">Diario</span>
+  </button>
+  <button class="app-nav-item" type="button" onclick="navTap(this); goTo('cantos.html')">
+    <div class="app-nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
+    <span class="app-nav-label">Cantos</span>
+  </button>
 </nav>
 
 <script>
@@ -304,6 +335,40 @@ body.light .app-nav{background:var(--card)}
     localStorage.setItem('cruzando_theme', t);
     aplicarTema(t);
   };
+
+  /* Navegación: el mismo gesto que el resto de la app —el muelle del icono y
+     el acorde de tres notas— para que Hoy no se sienta una pantalla aparte.
+     Van en window porque la barra los llama desde el onclick del HTML. */
+  window._navChord = 0;
+  function playNavChord(){
+    var CHORDS = [[523,659,784],[659,784,988],[784,988,1175],[587,740,880]];
+    try {
+      var ac = new (window.AudioContext || window.webkitAudioContext)();
+      var now = ac.currentTime;
+      var notes = CHORDS[window._navChord % 4]; window._navChord++;
+      var master = ac.createGain();
+      master.gain.setValueAtTime(0, now);
+      master.gain.linearRampToValueAtTime(0.07, now + 0.018);
+      master.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+      master.connect(ac.destination);
+      notes.forEach(function(freq, j){
+        var o = ac.createOscillator(), g = ac.createGain();
+        o.type = j === 0 ? 'sine' : 'triangle';
+        o.frequency.value = freq; g.gain.value = j === 0 ? 0.8 : 0.5;
+        o.connect(g); g.connect(master);
+        o.start(now + j * 0.012); o.stop(now + 0.45);
+      });
+    } catch(e) {}
+  }
+  window.navTap = function(el){
+    if (window.CZSound) CZSound('navTap');
+    playNavChord();
+    el.classList.remove('tapped');
+    void el.offsetWidth;
+    el.classList.add('tapped');
+    setTimeout(function(){ el.classList.remove('tapped'); }, 400);
+  };
+  window.goTo = function(pg){ location.href = base() + pg; };
 
   function base(){
     return location.origin + location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1);
@@ -603,5 +668,6 @@ body.light .app-nav{background:var(--card)}
   });
 }());
 </script>
+<script src="sounds.js"></script>
 </body>
 </html>

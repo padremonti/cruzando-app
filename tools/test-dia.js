@@ -350,6 +350,69 @@ ok('hoy.html · declara la clase de sesión en los dos traspasos', () => {
      'rezar y audio deben recibir la marca de sesión diaria');
 });
 
+console.log('\n' + String.fromCharCode(9472,9472) + ' La barra: Hoy es la pestana principal ' + String.fromCharCode(9472,9472));
+
+const HUB = ['index.html','crecer.html','sanar.html','diario.html',
+             'cantos.html','retiros.html','extras.html'];
+
+/* La primera etiqueta que aparece dentro de la barra */
+function primeraPestana(src) {
+  const i = src.search(/<nav class="app-nav[^>]*>/);
+  if (i < 0) return null;
+  const m = src.slice(i).match(/app-nav-label">([^<]*)</);
+  return m ? m[1] : null;
+}
+
+HUB.forEach(f => {
+  ok(f.padEnd(12) + ' · Hoy es la primera pestana de la barra', () => {
+    const src = norm(leer(f));
+    if (!/app-nav-label">Hoy</.test(src)) throw new Error('no lleva la pestana Hoy');
+    eq(primeraPestana(src), 'Hoy', 'Hoy tiene que ir la primera');
+  });
+});
+
+ok('el hub entero usa su propia funcion de navegacion', () => {
+  /* Cada pagina llama distinto —navigateTo, navTo, goTo, window.goTo— y el
+     item de Hoy tiene que hablar el idioma de su pagina, no traer el suyo. */
+  HUB.forEach(f => {
+    const src = norm(leer(f));
+    const i = src.indexOf('app-nav-label">Hoy<');
+    const boton = src.slice(src.lastIndexOf('<button', i), i);
+    if (!/navTap\(/.test(boton)) throw new Error(f + ': Hoy no usa navTap');
+    if (!/hoy\.html/.test(boton))  throw new Error(f + ': Hoy no apunta a hoy.html');
+    if (/location\.href/.test(boton))
+      throw new Error(f + ': Hoy navega a pelo en vez de con la funcion de la pagina');
+  });
+});
+
+ok('hoy.html    · su propia pestana no navega hacia si misma', () => {
+  const src = norm(HOY);
+  const i = src.indexOf('app-nav-label">Hoy<');
+  const boton = src.slice(src.lastIndexOf('<button', i), i);
+  if (!/disabled/.test(boton) || !/app-nav-item active/.test(boton))
+    throw new Error('la pestana activa deberia estar marcada y deshabilitada');
+  eq(primeraPestana(src), 'Hoy');
+});
+
+ok('hoy.html    · la barra lleva las seis, con icono y gesto', () => {
+  const src = norm(HOY);
+  const etqs = (src.match(/app-nav-label">([^<]*)</g) || [])
+    .map(x => x.replace('app-nav-label">','').replace('<',''));
+  eq(etqs, ['Hoy','Crecer','Sanar','Retiros','Diario','Cantos']);
+  eq((src.match(/app-nav-icon/g) || []).length >= 6, true, 'faltan iconos');
+  if (!/window\.navTap = function/.test(src)) throw new Error('navTap no esta cableada');
+});
+
+ok('la barra de los reproductores NO se toco', () => {
+  /* Es otra barra y otro propósito: cambia de modo DENTRO de una sesion.
+     Su salida etiquetada "Crecer" se revisa en el paso 3, cuando el mapa
+     deje de ser de todos: para un free llevaria a un sitio sin nada. */
+  ['audio.html','orar.html','rezar.html'].forEach(f => {
+    if (/app-nav-label">Hoy</.test(norm(leer(f))))
+      throw new Error(f + ' recibio la pestana Hoy, que no le corresponde todavia');
+  });
+});
+
 console.log('\n' + '─'.repeat(64));
 if (fallos) {
   console.log('  ✗ ' + fallos + ' fallo(s), ' + pasos + ' pasada(s)');
