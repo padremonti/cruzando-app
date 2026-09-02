@@ -82,6 +82,74 @@
     return null;
   }
 
+  /* ── La frontera: hasta dónde ha llegado ──────────────────────────────────
+     Vivía entera dentro de crecer.html. Cuando el free dejó de entrar allí,
+     hoy.html se hizo su propia copia —el mismo bucle, sin ninguna de las
+     defensas de abajo— y la única frontera que vería un free en su vida sería
+     esa. Es la deriva que este repo ya pagó con el color de bloque y con las
+     tablas del itinerario, así que la regla vive aquí y cada página pone su E/S.
+
+     Los cuatro bloques van repetidos a propósito: niveles.js se carga ANTES
+     que bloques.js en index y crecer, así que no puede pedirle su lista. Es el
+     mismo trato que ya tienen rosario.js y dia.js. */
+  var _BLOQUES = ['gozosos', 'luminosos', 'dolorosos', 'gloriosos'];
+
+  /* La clave va VERSIONADA por una razón concreta: la v1 quedó envenenada con
+     '0101' en los aparatos donde la frontera degradó en silencio, y la FASE 1
+     la prefería sobre todo lo demás. Cambiar de clave la jubila y fuerza UN
+     recálculo por dispositivo, sin tocar Firestore ni pedirle nada al usuario. */
+  var CLAVE_FRONTERA = 'cruzando_frontier_v2';
+
+  /* Un Nivel está entero cuando sus cuatro bloques tienen los cinco Misterios.
+     Tiene nombre propio porque es la línea que reventó, y porque estaba
+     escrita tres veces: aquí, en demoCompleto() de plan-utils y en hoy.html. */
+  function nivelCompleto(d) {
+    if (!d || !d.progress) return false;
+    return _BLOQUES.every(function (b) {
+      var a = d.progress[b];
+      return Array.isArray(a) && a.length === 5 &&
+             a.every(function (x) { return x !== null && x !== undefined; });
+    });
+  }
+
+  function fronteraCacheada() {
+    try {
+      var v = localStorage.getItem(CLAVE_FRONTERA);
+      return /^\d{4}$/.test(v || '') ? v : null;
+    } catch (e) { return null; }
+  }
+
+  /* El primer Nivel incompleto, con salida temprana: solo se lee hasta él.
+     `leerProgreso(id)` la pone la página —modular en crecer, compat en hoy— y
+     debe devolver el documento de progreso, o algo falsy si no existe.
+
+     Devuelve { frontera, degradado }:
+       degradado null    → calculada de verdad, y SE PERSISTE
+       degradado 'bug'   → error de CÓDIGO (ReferenceError/TypeError)
+       degradado 'red'   → no hubo red
+     Los dos fallos se distinguen —y ninguno persiste nada— porque degradar en
+     silencio y guardarlo es lo que hizo que la frontera se reescribiera a sí
+     misma durante semanas. Al degradar devuelve la cacheada, o null si no hay;
+     quién manda entre esa y el marcador lo decide cada página. */
+  async function calcularFrontera(leerProgreso) {
+    var frontera = ORDEN[0];
+    try {
+      for (var i = 0; i < ORDEN.length; i++) {
+        var d = await leerProgreso(ORDEN[i]);
+        if (!d || !d.progress) { frontera = ORDEN[i]; break; }
+        frontera = ORDEN[i];
+        if (!nivelCompleto(d)) break;
+      }
+    } catch (e) {
+      var esBug = (e instanceof ReferenceError) || (e instanceof TypeError);
+      if (esBug) console.error('[CruzAndo] frontera: error de CÓDIGO, no de red —', e);
+      else       console.warn ('[CruzAndo] frontera: sin red, se usa el último valor conocido —', e);
+      return { frontera: fronteraCacheada(), degradado: esBug ? 'bug' : 'red' };
+    }
+    try { localStorage.setItem(CLAVE_FRONTERA, frontera); } catch (e) {}
+    return { frontera: frontera, degradado: null };
+  }
+
   function nombre(id) { return NOMBRES[id] || ('Nivel ' + id); }
 
   window.NIVELES_ORDER = ORDEN;
@@ -93,6 +161,10 @@
     NOMBRES:            NOMBRES,
     publicado:          publicado,
     siguientePublicado: siguientePublicado,
-    nombre:             nombre
+    nombre:             nombre,
+    CLAVE_FRONTERA:     CLAVE_FRONTERA,
+    nivelCompleto:      nivelCompleto,
+    fronteraCacheada:   fronteraCacheada,
+    calcularFrontera:   calcularFrontera
   };
 }());

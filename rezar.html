@@ -1107,7 +1107,7 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
       <span class="app-nav-label">Audio</span>
     </button>
 
-    <button class="app-nav-item" onclick="window._safeGoTo('crecer.html');navTap(this)">
+    <button class="app-nav-item" id="nav-casa" onclick="window._safeGoTo(_casa());navTap(this)">
       <div class="app-nav-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
@@ -1269,6 +1269,28 @@ function toggleTheme(){applyTheme(localStorage.getItem('cruzando_theme')==='dark
 window.toggleTheme=toggleTheme;
 
 /* ─── NAV ─── */
+/* ── La casa: a dónde se sale al terminar ───────────────────────────────────
+   Para premium es el mapa; para el free, que no tiene mapa, es Hoy. Un solo
+   sitio lo decide en cada reproductor, como ya hacía _goHome en audio. */
+function _casa(){
+  var p = window.effectivePlan ? window.effectivePlan() : (window.currentPlan || 'free');
+  return (p === 'free') ? 'hoy.html' : 'crecer.html';
+}
+/* El splash de racha colgaba de "el destino es crecer.html". Con el free
+   saliendo a Hoy no lo vería NUNCA: la condición es llegar a casa, no al mapa. */
+function _esCasa(pg){
+  var d = String(pg || '');
+  return d.indexOf('crecer.html') === 0 || d.indexOf('hoy.html') === 0;
+}
+/* La pestaña de salida de la barra. Solo se toca para el free: para premium el
+   marcado del HTML ya dice lo correcto, y así el defecto nunca miente. */
+function _pintarCasa(){
+  var b = document.getElementById('nav-casa');
+  if (!b || _casa() !== 'hoy.html') return;
+  var l = b.querySelector('.app-nav-label'); if (l) l.textContent = 'Hoy';
+  var i = b.querySelector('.app-nav-icon');
+  if (i) i.innerHTML = "<svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3\" y=\"5\" width=\"18\" height=\"16\" rx=\"3\"/><path d=\"M8 3v4M16 3v4M3 10h18\"/><circle cx=\"12\" cy=\"15.5\" r=\"2.2\"/></svg>";
+}
 function goTo(pg){
   if(rezarAudio){rezarAudio.pause();rezarAudio.src='';}
   stopBgm();
@@ -1277,7 +1299,7 @@ function goTo(pg){
      hacia el mapa, y solo el día en que la racha subió de verdad (la marca la
      puso registrarRachaHoy). mostrarSiHay() resuelve al instante si no hay nada,
      así que ninguna otra navegación se retrasa. */
-  if(pg.indexOf('crecer.html')===0 && window.RachaSplash) RachaSplash.mostrarSiHay().then(ir, ir);
+  if(_esCasa(pg) && window.RachaSplash) RachaSplash.mostrarSiHay().then(ir, ir);
   else ir();
 }
 window.goTo=goTo;
@@ -2396,7 +2418,7 @@ function initNavSwipe(){
 function backDeRezar(){
   if($('exit-modal').classList.contains('open')){ window._exitCancel(); return true; }
   if($('tool-popup')?.classList.contains('open')){ closeToolPopup(); return true; }
-  safeGoTo('crecer.html');
+  safeGoTo(_casa());
   return $('exit-modal').classList.contains('open');
 }
 
@@ -2789,13 +2811,13 @@ function celebrar(){
     btnPrimary.onclick     = ()=>goTo(nextUrl);
   } else {
     btnPrimary.textContent = 'Volver al camino';
-    btnPrimary.onclick     = ()=>goTo('crecer.html');
+    btnPrimary.onclick     = ()=>goTo(_casa());
   }
 
   var btnSec = $('btn-celeb-index');
   if(btnSec){
     btnSec.style.display = nextUrl ? '' : 'none';
-    btnSec.onclick       = ()=>goTo('crecer.html');
+    btnSec.onclick       = ()=>goTo(_casa());
   }
 
   var grandImg = $('mariano-slide-img');
@@ -2906,6 +2928,7 @@ async function loadAndEnter(nId,block,idx){
     const snap=await FS.collection('users').doc(usr.uid).get();
     const ud=snap.exists?snap.data():{};
     _plan=window.effectivePlan?window.effectivePlan():(window.resolvePlan?window.resolvePlan(ud):'free');
+    window.currentPlan=_plan; _pintarCasa();
     totalM=ud.totalMeters||0;
   }catch(e){}
 
@@ -3015,6 +3038,7 @@ async function loadAndStart(){
     const snap=await FS.collection('users').doc(usr.uid).get();
     const ud=snap.exists?snap.data():{};
     _plan=window.effectivePlan?window.effectivePlan():(window.resolvePlan?window.resolvePlan(ud):'free');
+    window.currentPlan=_plan; _pintarCasa();
     totalM=ud.totalMeters||0;
   }catch(e){}
 

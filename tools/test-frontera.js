@@ -34,7 +34,16 @@ const leer = f => fs.readFileSync(path.join(RAIZ, f), 'utf8');
 
 const GEMELOS = ['crecer.html', 'index.html'];
 const MAPA    = 'crecer.html';        // el único con selector de niveles
-const ORDEN   = ['0101','0102','0103','0104','0201','0202','0203','0204'];
+/* La regla de la frontera se mudó a niveles.js —estaba escrita CUATRO veces—,
+   así que aquí se carga el módulo REAL y se prueba con el itinerario real: una
+   lista de mentira dejaría fuera justo el recorrido que se quiere probar. */
+function cargarNiveles() {
+  const c = { localStorage: { getItem: () => null, setItem() {} }, console };
+  c.window = c; vm.createContext(c);
+  vm.runInContext(leer('niveles.js'), c);
+  return c.window.Niveles;
+}
+const ORDEN   = cargarNiveles().ORDEN;
 const BLOQUES = ['gozosos','luminosos','dolorosos','gloriosos'];
 
 let fallos = 0, pasos = 0;
@@ -54,7 +63,7 @@ function igual(real, esperado, que) {
 function recortar(pagina) {
   const s   = leer(pagina);
   const iB  = s.indexOf('var BLOCKS =');
-  const iF  = s.indexOf('// La clave de la frontera va VERSIONADA');
+  const iF  = s.indexOf('/* La frontera —hasta dónde ha llegado— vive en niveles.js');
   const jF  = s.indexOf('// ── Mostrar pantalla', iF);
   if (iB < 0) throw new Error(pagina + ': no se encuentra la declaración de BLOCKS');
   if (iF < 0 || jF < 0) throw new Error(pagina + ': no se encuentra el bloque de la frontera');
@@ -89,7 +98,6 @@ function correr(pagina, op) {
   const store  = almacen(op.guardado);
   const dichos = [];
   const caja = {
-    window: { NIVELES_ORDER: ORDEN },
     NIVELES_ORDER: ORDEN,
     localStorage: store,
     console: { warn:  (...a) => dichos.push(['warn',  String(a[0])]),
@@ -105,7 +113,12 @@ function correr(pagina, op) {
       return { exists: () => !!d, data: () => d };
     },
   };
+  /* window ES el contexto: en el navegador `window.Niveles = X` deja `Niveles`
+     como global suelta, y la página la usa así. Con un window aparte llegaría
+     undefined y la prueba fallaría por el andamio, no por el código. */
+  caja.window = caja;
   vm.createContext(caja);
+  vm.runInContext(leer('niveles.js'), caja);
   vm.runInContext(recortar(pagina) + '\nglobalThis.__f = getCurrentNivelFromFirestore;', caja);
   return caja.__f({ uid: 'u1' }).then(nivel => ({
     nivel,
@@ -197,9 +210,14 @@ GEMELOS.forEach(p => {
        la única que escribe la clave es getCurrentNivelFromFirestore. */
     if (/setItem\(['"]cruzando_frontier_nivel['"]/.test(s))
       throw new Error('volvió a escribir la clave v1');
+    /* La escritura vive ahora en niveles.js, y en un solo sitio. La página no
+       debe volver a escribirla por su cuenta: ese era el eslabón del ciclo. */
     const escrituras = (s.match(/localStorage\.setItem\(FRONTIER_KEY/g) || []).length;
-    if (escrituras !== 1)
-      throw new Error('la frontera debe escribirse en un solo sitio, hay ' + escrituras);
+    if (escrituras !== 0)
+      throw new Error('la página volvió a escribir la frontera por su cuenta (' + escrituras + ')');
+    const enModulo = (leer('niveles.js').match(/localStorage\.setItem\(CLAVE_FRONTERA/g) || []).length;
+    if (enModulo !== 1)
+      throw new Error('niveles.js debe escribirla exactamente una vez, hay ' + enModulo);
   });
 
   ok(n + '· sin frontera guardada se recalcula aunque el caché esté fresco', () => {
@@ -254,6 +272,35 @@ ok(MAPA.padEnd(12) + '· el nodo "Siguiente" conserva su salida de emergencia', 
      frontera estaba rota. Vale la pena que siga ahí. */
   if (!/var _accessible {4}= _nextIdx2 <= _frontierIdx \|\| window\.DONE_COUNT >= 20;/.test(leer(MAPA)))
     throw new Error('el nodo Siguiente perdió su alternativa a la frontera');
+});
+
+console.log('');
+console.log('== Una sola frontera para toda la app ==');
+
+ok('niveles.js   . es la unica que sabe calcularla', () => {
+  const m = leer('niveles.js');
+  ['calcularFrontera', 'nivelCompleto', 'fronteraCacheada', 'CLAVE_FRONTERA']
+    .forEach(k => { if (!m.includes(k)) throw new Error('niveles.js no expone ' + k); });
+});
+
+ok('hoy.html     . usa la compartida, no una copia', () => {
+  /* Mi primera version se hizo su propio bucle, sin la clave versionada ni el
+     catch que distingue un fallo de codigo de una caida de red. Si el free deja
+     de entrar a crecer, esa seria la unica frontera que veria en su vida. */
+  const h = leer('hoy.html');
+  if (!h.includes('Niveles.calcularFrontera('))
+    throw new Error('no usa la frontera de niveles.js');
+  if (h.includes('var entero = '))
+    throw new Error('volvio a escribirse su propio calculo de Nivel completo');
+});
+
+ok('plan-utils   . demoCompleto no crece hacia la frontera', () => {
+  /* Es la tercera copia del predicado. Se conserva porque rezar.html la usa
+     para saber si un Nivel esta cruzado, pero no debe pasar a calcular nada. */
+  const u = leer('plan-utils.js');
+  ['calcularFrontera', 'cruzando_frontier', 'NIVELES_ORDER']
+    .forEach(k => { if (u.includes(k))
+      throw new Error('plan-utils empezo a calcular la frontera: ' + k); });
 });
 
 console.log('\n' + '─'.repeat(64));

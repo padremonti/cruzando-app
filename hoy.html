@@ -389,26 +389,18 @@ body.light .app-nav{background:var(--card)}
     if (btnTxt) document.getElementById('cbtn').onclick = btnFn;
   }
 
-  // ── frontera: el primer Nivel incompleto, con salida temprana ────
+  /* La frontera la calcula niveles.js —con su clave versionada y su catch que
+     distingue un fallo de código de una caída de red—. Aquí solo va la E/S,
+     que en esta página es el SDK compat. */
   async function calcularFrontera(uid){
-    var orden = (window.Niveles && Niveles.ORDEN) || [];
-    for (var i = 0; i < orden.length; i++) {
-      var snap;
-      try { snap = await _db.collection('users').doc(uid)
-                            .collection('progress').doc(orden[i]).get(); }
-      catch(e){ break; }
-      if (!snap.exists) return orden[i];
-      var d = snap.data() || {};
-      var p = d.progress || {};
-      var entero = Dia.BLOQUES.every(function(b){
-        return Array.isArray(p[b]) && p[b].length === 5 &&
-               p[b].every(function(x){ return x !== null && x !== undefined; });
-      });
-      if (!entero) return orden[i];
-    }
-    return orden[orden.length - 1] || null;
+    var r = await Niveles.calcularFrontera(async function(id){
+      var snap = await _db.collection('users').doc(uid)
+                          .collection('progress').doc(id).get();
+      return snap.exists ? snap.data() : null;
+    });
+    if (r.degradado) window._frontierDegradado = r.degradado;
+    return r.frontera || Niveles.ORDEN[0];
   }
-
   function marcador(){
     try {
       var b = localStorage.getItem('cruzando_current_nivel');

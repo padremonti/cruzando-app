@@ -2405,22 +2405,11 @@ function getMysteryName(misterio) {
   return OFFICIAL_NAMES[info.block][info.idx];
 }
 
-// La clave de la frontera va VERSIONADA, y por una razón concreta: entre c316f82
-// y este arreglo, `BLOCKS` estaba tragado por un comentario, el ReferenceError
-// caía en el catch de abajo y la frontera degradaba a '0101' — valor que la cola
-// de onAuthStateChanged persistía y que la FASE 1 volvía a preferir sobre el
-// bookmark en la carga siguiente. Se reescribía a sí mismo para siempre.
-// Cambiar de clave jubila la v1 envenenada y fuerza UN recálculo por dispositivo,
-// sin tocar Firestore ni pedirle nada al usuario.
-var FRONTIER_KEY = 'cruzando_frontier_v2';
-
-// Un nivel está entero cuando sus cuatro bloques tienen los cinco Misterios.
-// Vive aparte para poder nombrarlo y probarlo suelto: es la línea que reventó.
-function nivelCompleto(d) {
-  return BLOCKS.every(function(b) {
-    return d.progress[b] && d.progress[b].every(function(x) { return x !== null; });
-  });
-}
+/* La frontera —hasta dónde ha llegado— vive en niveles.js: estaba escrita
+   CUATRO veces (aquí, en el gemelo, y una copia sin defensas en hoy.html),
+   y es justo el cálculo que se rompió en silencio durante semanas. Aquí
+   queda solo la E/S y quién manda entre el marcador y ella. */
+var FRONTIER_KEY = Niveles.CLAVE_FRONTERA;
 
 async function getCurrentNivelFromFirestore(user) {
   // 1. Bookmark de localStorage — instantáneo
@@ -2430,42 +2419,19 @@ async function getCurrentNivelFromFirestore(user) {
     if (bk && /^\d{4}$/.test(bk)) bookmark = bk;
   } catch(e) {}
 
-  // 2. Frontier secuencial con early exit: solo lee hasta el primer nivel incompleto
-  var frontier = NIVELES_ORDER[0];
-  try {
-    for (var i = 0; i < NIVELES_ORDER.length; i++) {
-      var id   = NIVELES_ORDER[i];
-      var snap = await getDoc(doc(db, 'users', user.uid, 'progress', id));
+  // 2. La frontera, con su salida temprana y sus dos degradaciones
+  var r = await Niveles.calcularFrontera(async function(id) {
+    var snap = await getDoc(doc(db, 'users', user.uid, 'progress', id));
+    return snap.exists() ? snap.data() : null;
+  });
 
-      if (!snap.exists()) { frontier = id; break; }
-
-      var d = snap.data();
-      if (!d || !d.progress) { frontier = id; break; }
-
-      frontier = id;
-      if (!nivelCompleto(d)) break;
-    }
-  } catch(e) {
-    // Un fallo de código y una caída de red degradaban igual y en silencio: eso
-    // es lo que escondió el bug de BLOCKS. Ahora se distinguen — el de código
-    // grita con console.error — y NINGUNO de los dos persiste nada: una frontera
-    // degradada no se escribe, para que no se reescriba a sí misma nunca más.
-    var _esBug = (e instanceof ReferenceError) || (e instanceof TypeError);
-    window._frontierDegradado = _esBug ? 'bug' : 'red';
-    if (_esBug) console.error('[CruzAndo] frontera: error de CÓDIGO, no de red —', e);
-    else        console.warn ('[CruzAndo] frontera: sin red, se usa el último valor conocido —', e);
-
-    var cachedFrontier = null;
-    try { cachedFrontier = localStorage.getItem(FRONTIER_KEY); } catch(e2) {}
-    window.frontierNivelId = cachedFrontier || bookmark || NIVELES_ORDER[0];
-    return bookmark || cachedFrontier || getCurrentNivel();
+  window._frontierDegradado = r.degradado;
+  if (r.degradado) {
+    window.frontierNivelId = r.frontera || bookmark || NIVELES_ORDER[0];
+    return bookmark || r.frontera || getCurrentNivel();
   }
-
-  // Solo se persiste una frontera calculada de verdad contra Firestore.
-  window._frontierDegradado = null;
-  try { localStorage.setItem(FRONTIER_KEY, frontier); } catch(e) {}
-  window.frontierNivelId = frontier;
-  return bookmark || frontier;
+  window.frontierNivelId = r.frontera;
+  return bookmark || r.frontera;
 }
 
 // ── Mostrar pantalla ──────────────────────────────────────────────
