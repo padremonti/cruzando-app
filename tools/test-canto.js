@@ -175,6 +175,44 @@ ok('orar conserva su popup de texto plano (es el libro digital)', () => {
 });
 
 console.log('\n' + '─'.repeat(64));
+console.log('\n── La tinta va fija sobre fondo oscuro ──');
+
+ok('canto.css     · la letra no depende del tema', () => {
+  /* La pantalla de canto va SIEMPRE sobre el scrim oscuro, en tema claro y en
+     oscuro. Sus colores son fijos a propósito, y la hoja lo dice. */
+  const s = leer('canto.css');
+  if (/body\.light|prefers-color-scheme/.test(s))
+    throw new Error('canto.css empezó a cambiar con el tema');
+});
+
+ok('mini.html     · tampoco, y por la misma razón', () => {
+  /* Todas las superficies de mini son oscuras en los dos modos: la foto bajo el
+     .scrim, el .txt-pop, la tarjeta de salida y los chips. --bg solo se usa en
+     body y .screen, que la foto tapa por completo. Un `body.light` que volteara
+     --parch pondría tinta oscura sobre fondo oscuro: en modo día no se leía. */
+  /* Sin comentarios: el que explica por qué se quitó el volteo cita
+     `body.light{--parch:#0a2530}` y hacía fallar la prueba. */
+  const s = leer('mini.html').replace(/\/\*[\s\S]*?\*\//g, '');
+  if (/body\.light\s*\{/.test(s))
+    throw new Error('vuelve el volteo de paleta: la tinta se perderá en modo día');
+  if (/body\.light\s+\./.test(s))
+    throw new Error('vuelve un ajuste de tema suelto sobre fondo oscuro');
+  if (!/--parch:#F3EAD8/.test(s))
+    throw new Error('mini perdió su tinta de pergamino');
+});
+
+ok('mini.html     · sin botón de tema, como los otros cuatro', () => {
+  /* Era el único de los cinco reproductores que lo tenía, su icono no cambiaba
+     de estado, y con la paleta fija habría cambiado el tema de toda la app en
+     silencio. El tema se elige en Preferencias. */
+  if (/themeBtn|applyTheme/.test(leer('mini.html')))
+    throw new Error('mini recuperó el botón de tema');
+  ['audio.html', 'orar.html', 'rezar.html', 'cantos.html'].forEach(f => {
+    if (/id="themeBtn"/.test(leer(f)))
+      throw new Error(f + ' ganó un botón de tema: los reproductores no lo llevan');
+  });
+});
+
 if (fallos) {
   console.log('  ✗ ' + fallos + ' fallo(s), ' + pasos + ' pasada(s)');
   console.log('─'.repeat(64) + '\n');

@@ -21,7 +21,7 @@ PWA de formación espiritual católica. El usuario reza los 20 Misterios del Ros
 | `orar.html` | Rezo por bloques (gozosos/luminosos/dolorosos/gloriosos). |
 | `diario.html` | Diario de reflexiones. Lee `users/{uid}/reflections/*`. |
 | `sanar.html` | Entrada emocional al Rosario (pestaña "Sanar" del hub). Máquina de 4 fases: onboarding de afinidad → elenco de dolores → acogida interactiva → handoff. Navega a `mini.html?mid=…&pain=…`. |
-| `mini.html` | Mini sesión de UN Misterio (el "Misterio-puerta" que señaló Sanar). Reproductor cinematográfico a pantalla completa. Todo derivado del `mid`. Firebase compat cableado; marca el pain completado al epílogo. |
+| `mini.html` | Mini sesión de UN Misterio (el "Misterio-puerta" que señaló Sanar). Reproductor cinematográfico a pantalla completa. Todo derivado del `mid`. Firebase compat cableado; marca el pain completado al epílogo. **Paleta fija, sin botón de tema** — ver § La tinta de mini. |
 | `canto.js` / `canto.css` | Motor de karaoke de canto compartido (extraído de audio+rezar). `Canto.init({...})`; CSS por `<link>`, HTML del overlay inyectado por el módulo. `mini.html` NO lo usa (ancestro divergente). **Y el lector del `.lrc` para toda la app**: `parseLrc` (cantar) · `letraPlana` (leer) · `parseLrcMeta` · `fetchLrc` · `letraDeBloque`. Ver § El canto se explica solo. |
 | `utils.js` | `window.isPremium(userData)` y `window.resolvePlan(userData)`. Cargado en todas las páginas. |
 | `toast.js` | **El aviso breve.** `showToast(texto)` — autosuficiente: inyecta su CSS y monta su nodo bajo demanda. En index y crecer; audio conserva el suyo. Ver § El aviso breve. |
@@ -714,6 +714,16 @@ Buckets R2: `R2_ILU` (ilustraciones), `R2_MUS` (música/lrc), `R2_AUD` (audios).
 - **Barritas de progreso** movidas a la **topbar** (flotando centradas); botones agrupados a los lados. `audio` = 10 barritas de sección; `rezar` = 7 barritas (mapeo 11→7 por tipo, "Conclusión" al completar el Misterio 5); `orar` = 5 barritas (Misterios del set, no tocables).
 - **Barra de herramientas sin el hilo del rosario.** `audio` = 3 botones (−10s / play / preguntas) + saltos de sección solo developer; `rezar`/`orar` mantienen sus botones sin hilo.
 - Títulos a **1.65rem / 23px** en las tres. `audio`: imagen del hero a `object-fit:cover` (llena el hero como mini). Variable `--seg-idle` por tema (contraste de barritas apagadas en claro y oscuro).
+
+### La tinta de `mini` no cambia con el tema (y es deliberado)
+
+⚠️ **En modo día no se leía nada.** `mini.html` tenía `body.light{--parch:#0a2530}`, que ponía **tinta azul oscura** sobre superficies que son oscuras **en los dos modos**: la foto (`#stills`, fondo `#05060c`) bajo el `.scrim` en `rgba(6,7,14,…)`, el panel de textos `.txt-pop` a `rgba(5,7,14,.9)`, la tarjeta de salida a `rgba(12,14,22,.96)` y todos los chips a `rgba(8,9,16,.4)`. **`--bg` solo se usa en `body` y `.screen`, que la foto tapa por completo: no se ve nunca.**
+
+Es la misma regla que `canto.css` ya documentaba para la pantalla de canto: *«La letra va SIEMPRE sobre fondo oscuro, en tema claro y en oscuro: por eso los colores son fijos y no variables de tema.»* Ahora `mini` la comparte, con los dos ajustes de `body.light` que empujaban en la misma dirección equivocada (`.q-question`, `.q-textarea`) retirados.
+
+**Contraste medido con la paleta fija** (pergamino `#F3EAD8` sobre el velo): letra activa **14,8:1** · pregunta del diario **8,1:1** · letra próxima 4,6:1. La letra inactiva se queda en 2,8:1 **a propósito** — está atenuada para que destaque la que se canta, y son los mismos valores (.34 / .50) que usa `canto.css`.
+
+**Y se fue el botón de tema.** `mini` era el **único** de los cinco reproductores que lo llevaba (audio, orar, rezar y cantos no), su icono de sol no cambiaba nunca de estado, y con la paleta ya fija habría cambiado el tema de **toda la app** en silencio sin que allí se viera nada. El tema se elige en Preferencias, desde index o crecer. Tres pruebas en `tools/test-canto.js` lo vigilan.
 
 ## Karaoke de canto + `canto.js` (motor compartido)
 
