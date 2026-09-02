@@ -398,7 +398,9 @@ ok('hoy.html    · la barra lleva las seis, con icono y gesto', () => {
   const src = norm(HOY);
   const etqs = (src.match(/app-nav-label">([^<]*)</g) || [])
     .map(x => x.replace('app-nav-label">','').replace('<',''));
-  eq(etqs, ['Hoy','Crecer','Sanar','Retiros','Diario','Cantos']);
+  /* Hoy primero, y Sanar antes que Crecer: lo cotidiano y la puerta de
+     entrada por delante del mapa, que ademas pasa a ser de Premium. */
+  eq(etqs, ['Hoy','Sanar','Crecer','Retiros','Diario','Cantos']);
   eq((src.match(/app-nav-icon/g) || []).length >= 6, true, 'faltan iconos');
   if (!/window\.navTap = function/.test(src)) throw new Error('navTap no esta cableada');
 });
@@ -413,6 +415,63 @@ ok('la barra de los reproductores NO se toco', () => {
   });
 });
 
+console.log('');
+console.log('== El mapa es de Premium, y el camino no se salta ==');
+
+const CRE = norm(leer('crecer.html'));
+
+ok('crecer.html  . cierra la puerta al free', () => {
+  if (!CRE.includes("if (realPlan === 'free') {"))
+    throw new Error('no hay puerta: el mapa seguiria abierto para el free');
+  if (!CRE.includes("location.replace('index.html?premium=1')"))
+    throw new Error('la puerta no lleva a la compra');
+});
+
+ok('crecer.html  . la puerta va tras el plan CONFIRMADO, no tras el cache', () => {
+  /* La FASE 1 pinta con el plan cacheado. Cerrar alli expulsaria a un premium
+     con el cache frio de su propia pagina: el fallo tiene que ser retrasar, */
+  /* nunca expulsar. */
+  const iF3 = CRE.indexOf('FASE 3');
+  const iPuerta = CRE.indexOf("if (realPlan === 'free') {");
+  if (iF3 < 0 || iPuerta < 0) throw new Error('no se encuentran las dos marcas');
+  if (iPuerta < iF3)
+    throw new Error('la puerta corre antes de confirmar el plan contra Firestore');
+  if (!CRE.includes("if (_cPlan !== 'free') {"))
+    throw new Error('la FASE 1 pinta el mapa aunque el cache diga free');
+});
+
+ok('el candado y la puerta se pusieron a la vez', () => {
+  /* Un candado sin puerta detras es el defecto que el mapa ya arrastraba con
+     sus quince nodos decorativos. Si alguien quita una, esto salta. */
+  const pu = leer('plan-utils.js');
+  if (!pu.includes('function marcarCrecerSiFree'))
+    throw new Error('no existe el candado de la pestana');
+  if (!CRE.includes("if (realPlan === 'free') {"))
+    throw new Error('hay candado pero no hay puerta');
+});
+
+HUB.concat(['hoy.html']).forEach(f => {
+  ok(f.padEnd(12) + '. su pestana Crecer esta identificada para el candado', () => {
+    if (!norm(leer(f)).includes('id="nav-crecer"'))
+      throw new Error('sin id, el candado no la encuentra');
+  });
+});
+
+ok('crecer.html  . un Misterio pendiente no abre el popup de modos', () => {
+  /* El camino se VE, no se salta: lo pendiente pertenece a Hoy. En un Nivel ya
+     cruzado no hay pendientes, asi que solo alcanza al Nivel en curso. */
+  if (!CRE.includes('if (!hecho) { _pendienteEsDeHoy(); return; }'))
+    throw new Error('el nodo pendiente sigue abriendo el popup');
+  if (!CRE.includes('function _pendienteEsDeHoy()'))
+    throw new Error('falta el aviso que explica a donde va');
+});
+
+ok('rezar.html   . la puerta del dia ya cubre el Nivel en curso', () => {
+  /* Se pudo cerrar del todo cuando el mapa dejo de ofrecerlo: hasta entonces
+     habria hecho rebotar los nodos del mapa con los beta dentro. */
+  if (!REZ.includes('||!_nivelCruzado()'))
+    throw new Error('el enlace escrito a mano sigue saltandose el dia');
+});
 console.log('\n' + '─'.repeat(64));
 if (fallos) {
   console.log('  ✗ ' + fallos + ' fallo(s), ' + pasos + ' pasada(s)');

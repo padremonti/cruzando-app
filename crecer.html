@@ -1791,7 +1791,15 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
       </div>
       <span class="app-nav-label">Hoy</span>
     </button>
-    <button class="app-nav-item active" disabled>
+    <button class="app-nav-item" onclick="navTap(this); navigateTo('sanar.html')">
+      <div class="app-nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.8z"/>
+        </svg>
+      </div>
+      <span class="app-nav-label">Sanar</span>
+    </button>
+    <button id="nav-crecer" class="app-nav-item active" disabled>
       <div class="app-nav-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="6" cy="19" r="2.2"/>
@@ -1800,14 +1808,6 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
         </svg>
       </div>
       <span class="app-nav-label">Crecer</span>
-    </button>
-    <button class="app-nav-item" onclick="navTap(this); navigateTo('sanar.html')">
-      <div class="app-nav-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.8z"/>
-        </svg>
-      </div>
-      <span class="app-nav-label">Sanar</span>
     </button>
     <button class="app-nav-item" id="nav-sanar-btn" onclick="navTap(this); navigateTo('retiros.html')">
       <div class="app-nav-icon">
@@ -2725,7 +2725,12 @@ onAuthStateChanged(auth, async function(user) {
     renderHome({ displayName: user.displayName || '', email: user.email || '',
                  plan: _cPlan, totalMeters: _cMeters });
     showScreen('home');
-    requestAnimationFrame(function() { if (window.buildMap) window.buildMap(); });
+    /* Con el cache diciendo free no se pinta el mapa: si acierta, no hay
+       destello de una pantalla que no es suya; si se equivoca, la FASE 3 lo
+       pinta un instante despues. Falla retrasando, nunca expulsando. */
+    if (_cPlan !== 'free') {
+      requestAnimationFrame(function() { if (window.buildMap) window.buildMap(); });
+    }
   } else {
     showScreen('home');
     var mc = document.getElementById('map-canvas');
@@ -2800,6 +2805,17 @@ onAuthStateChanged(auth, async function(user) {
 
   // ══ FASE 3: re-render con datos reales ══
   renderHome(Object.assign({}, userData, { plan: realPlan }));
+
+  /* El mapa es de Premium: aqui se cierra la puerta. Va en la FASE 3 y no en
+     la 1 porque aquella pinta con el plan CACHEADO, y un premium con el cache
+     frio saldria expulsado de su propia pagina.
+     `?premium=1` abre la compra en el hub: cerrar el mapa no puede cerrarle la
+     puerta a quien viene a pagar. Y el developer que usa "ver como free" NO se
+     expulsa, o el panel desde el que cambia de plan quedaria fuera de alcance. */
+  if (realPlan === 'free') {
+    location.replace('index.html?premium=1');
+    return;
+  }
   if (window.repintarSelectorSiAbierto) window.repintarSelectorSiAbierto();
 
   try {
@@ -3845,7 +3861,17 @@ function buildMap() {
       '<div class="' + sphereClass + '" style="' + sphereStyle + '">' + iconHtml + '</div>' +
       '<div class="node-label"><div class="node-label-name" style="color:' + labelColor + '">' + nombre + '</div></div>';
 
-    (function(gi,bi,mi){ node.onclick = function(){ if(window.CZSound) CZSound('beadTap'); openMapPopup(gi,bi,mi); }; })(gi,bi,mi);
+    /* El camino se VE, no se salta. Un Misterio pendiente pertenece a Hoy,
+       que es donde manda el dia; en un Nivel ya cruzado no hay pendientes, asi
+       que esto solo alcanza al Nivel en curso. El mapa conserva el sentido de
+       peregrinacion -- se sigue viendo donde vas -- sin ser la puerta. */
+    (function(gi,bi,mi,hecho){
+      node.onclick = function(){
+        if (window.CZSound) CZSound('beadTap');
+        if (!hecho) { _pendienteEsDeHoy(); return; }
+        openMapPopup(gi,bi,mi);
+      };
+    })(gi,bi,mi,isDone);
     canvas.appendChild(node);
 
     if (isActive && !activeDrawn) {
@@ -4026,6 +4052,14 @@ function buildBioma(canvas, totalH, cuaderno, color) {
 
 /* ══ POPUP MISTERIO ══ */
 var IMG_BASE_IDX = 'https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev/';
+
+/* Lo que ve quien toca un Misterio que aun no ha rezado. Se explica y se le
+   lleva: quedarse callado dejaria el toque sin respuesta, y navegar sin decir
+   nada le haria aparecer en otra pantalla sin saber por que. */
+function _pendienteEsDeHoy() {
+  if (window.showToast) showToast('Los Misterios pendientes se rezan en Hoy.');
+  setTimeout(function(){ if (window.navigateTo) navigateTo('hoy.html'); }, 900);
+}
 
 function openMapPopup(gi, bi, mi) {
   var _plan = window.effectivePlan ? window.effectivePlan() : 'free';

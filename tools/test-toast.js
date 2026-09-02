@@ -165,9 +165,14 @@ console.log('\n── Cableado en las páginas ──');
     const s = leer(p);
     if (!/<script src="toast\.js"><\/script>/.test(s))
       throw new Error('no carga toast.js: los avisos volverían a no salir');
+    /* index lleva 3 (2 de checkout + tutoriales). crecer suma un cuarto: el
+       aviso de que un Misterio pendiente se reza en Hoy, porque el mapa dejo
+       de ser la puerta. El numero sigue siendo exacto a proposito, para que
+       un aviso colado siga saltando aqui. */
+    const esperadas = (p === 'crecer.html') ? 4 : 3;
     const llamadas = (s.match(/showToast\(/g) || []).length;
-    if (llamadas !== 3)
-      throw new Error('se esperaban 3 llamadas (2 de checkout + tutoriales), hay ' + llamadas);
+    if (llamadas !== esperadas)
+      throw new Error('se esperaban ' + esperadas + ' llamadas, hay ' + llamadas);
   });
 });
 

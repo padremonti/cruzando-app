@@ -258,6 +258,32 @@
   }
   window.demoCompleto = demoCompleto;
 
+  // ── marcarCrecerSiFree ─────────────────────────────────────────
+  // El mapa es de Premium. La pestana se marca con candado y su toque abre la
+  // compra, en vez de llevar a una puerta cerrada. El candado es solo la
+  // senal: quien cierra de verdad es la puerta de crecer.html, y las dos se
+  // pusieron a la vez a proposito -- un candado sin puerta detras es el
+  // defecto que el mapa ya arrastraba con sus quince nodos decorativos.
+  function marcarCrecerSiFree() {
+    var b = document.getElementById('nav-crecer');
+    if (!b || isPremiumOrAbove(window.effectivePlan())) return;
+    b.style.opacity = '0.45';
+    b.onclick = function () { location.href = 'index.html?premium=1'; };
+    var ico = b.querySelector('.app-nav-icon');
+    if (ico && !ico.querySelector('.nav-candado')) {
+      ico.style.position = 'relative';
+      var c = document.createElement('span');
+      c.className = 'nav-candado';
+      c.textContent = '\uD83D\uDD12';
+      c.style.cssText = 'position:absolute;top:-4px;right:-8px;font-size:9px;line-height:1';
+      ico.appendChild(c);
+    }
+  }
+  window.marcarCrecerSiFree = marcarCrecerSiFree;
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', marcarCrecerSiFree);
+  } else { marcarCrecerSiFree(); }
+
   // ── Expose ───────────────────────────────────────────────────────────────────
   window.resolvePlan            = resolvePlan;
   window.isPremiumOrAbove       = isPremiumOrAbove;

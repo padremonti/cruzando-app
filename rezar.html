@@ -2999,7 +2999,7 @@ function _puedeRezarAqui(plan){
    `!_nivelCruzado()` y quedará cerrado también para el enlace a mano. */
 function _diaPermite(plan,p){
   if(!window.Dia) return true;
-  if(!((p.get('hoy')==='1')||(plan==='free'&&_nivelCruzado()))) return true;
+  if(!((p.get('hoy')==='1')||(plan==='free'&&_nivelCruzado())||!_nivelCruzado())) return true;
   if(Dia.permitido(blk,prog,new Date())) return true;
   location.replace('hoy.html');
   return false;
