@@ -28,8 +28,8 @@ const CANON = {
   gloriosos: '#D4A017'    // oro
 };
 
-/* Páginas vivas que usan color de bloque. indexv2.html y reskin*.html son
-   prototipos huérfanos (ninguna página los enlaza) y quedan fuera a propósito. */
+/* Páginas vivas que usan color de bloque. Los prototipos huérfanos que antes
+   quedaban fuera (indexv2, reskin*, mockups) se borraron el 2026-09-01. */
 const PAGINAS = ['index.html','crecer.html','audio.html','orar.html',
                  'rezar.html','cantos.html','diario.html'];
 

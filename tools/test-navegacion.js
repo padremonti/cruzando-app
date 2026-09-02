@@ -125,7 +125,7 @@ ok('orar        · la etiqueta del botón principal ya no miente', () => {
   /* ambos finales fijan su propio texto */
   if (!/btn-celeb-home'\)\.textContent='Seguir rezando'/.test(s))
     throw new Error('el fin de bloque no fija su etiqueta');
-  if (!/btn-celeb-home'\)\.textContent='Siguiente cuaderno'/.test(s))
+  if (!/btn-celeb-home'\)\.textContent='Siguiente Nivel'/.test(s))
     throw new Error('el fin de los 20 no fija su etiqueta');
 });
 

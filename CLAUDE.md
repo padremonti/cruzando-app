@@ -490,6 +490,32 @@ Tres puertas, y las tres eximen al developer:
 
 **Banco de pruebas:** `tools/test-navegacion.js` (25 pruebas). Comprueba línea a línea que ninguna salida de sesión se escape al hub (con excepciones por **línea completa**, no por subcadena), que las tres barras lleven al mapa etiquetadas "Crecer", y que la salida de orar siga cableada en sus dos finales. Importa porque el splash de racha se engancha justo en estos puntos.
 
+## Vocabulario: qué es un «Nivel» y por qué el código dice «cuaderno»
+
+**Lo que el usuario ve** (revisado y unificado el 2026-09-01):
+
+| Unidad | Cómo se muestra | Cuántas |
+|---|---|---|
+| **Mundo** | «Mundo 1 · Cruz» · `tema.mundo_nombre` = "CruzAndo la Cruz" | 7 |
+| **Nivel** | «Nivel 1-3» · «Cruz 1-3: Conversión» (`Niveles.nombre`) | 28 |
+| **Bloque** | «Misterios Gozosos» (`NOMBRES_BLOQUE`) | 4 por Nivel |
+| **Misterio** | «Anunciación» | 20 por Nivel |
+
+**«Cuaderno» ya no aparece en pantalla.** Era un resto interno que se había escapado a cuatro cadenas —la celebración de bloque y la de los veinte en `orar`, su botón «Siguiente cuaderno», y el mensaje de carga «Abriendo el cuaderno…» de `audio`— más una pregunta de `data/0104-micro.json`. Las cinco corregidas. Un barrido que extrae **todos** los literales y nodos de texto de las páginas vivas confirma que no queda ninguna.
+
+⚠️ **En el código, `nivel` significa dos cosas distintas según el archivo.** Las dos convenciones producen la misma cadena correcta en pantalla, así que **no hay bug** — pero leer `nivel` sin saber en qué archivo estás lleva a conclusiones falsas:
+
+| Archivo | `nivel` es | El Nivel se llama |
+|---|---|---|
+| `index.html` · `crecer.html` | **el cuaderno** (`'Nivel ' + mundo + '-' + nivel`) | `nivel` |
+| `audio` · `orar` · `rezar` · `mini` · `cantos` | **el Mundo** | `cuaderno` / `cua` |
+
+Y `nivelId` —los cuatro dígitos, `'0103'`— es **el Nivel** en las dos convenciones: es el identificador canónico y el que no engaña.
+
+**Decisión (2026-09-01): NO se renombra el campo `cuaderno`.** Está persistido en Firestore (`audioProgress/current.cuaderno`), viaja en las URLs (`audio.html?nivel=1&cuaderno=3`) y estructura el nombre de **todos** los assets de R2 (`M_1_3_7.lrc`, `P_1_3_7a.webp`, `CANTO_1_3_2.m4a`). Renombrarlo exigiría migrar datos, romper los enlaces ya guardados y resincronizar los dos buckets — mucho riesgo para un cambio que el usuario no ve. Si una sesión futura lo ve y le parece deriva: no lo es, es esta decisión.
+
+**Las ocho maquetas huérfanas se borraron** en la misma pasada (`cruzando-demo`, `indexv2`, `mini-mock`, `mockup-beads`, `reskin`, `reskin-rezar`, `hero-preview`, `world_backup`). Ninguna página las enlazaba y varias llevaban nomenclatura vieja. Están en el historial de git por si hicieran falta.
+
 ## Modelo de datos Firestore
 
 ```

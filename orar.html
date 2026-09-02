@@ -1148,8 +1148,8 @@ async function showAdvanceLevelPrompt(){
   if(c>4){c=1;n++;}
   const nId=String(n).padStart(2,'0')+String(c).padStart(2,'0');
   $('celeb-title').textContent='¡Veinte Misterios completados!';
-  $('celeb-sub').textContent='Has rezado los 20 misterios de este cuaderno. ¡Magnífico camino!';
-  $('btn-celeb-home').textContent='Siguiente cuaderno';
+  $('celeb-sub').textContent='Has rezado los 20 Misterios de este Nivel. ¡Magnífico camino!';
+  $('btn-celeb-home').textContent='Siguiente Nivel';
   $('btn-celeb-home').onclick=()=>loadCuaderno(nId);
   $('btn-celeb-mapa').onclick=()=>salirConAviso('crecer.html');
   ofrecerLetanias();
@@ -2031,7 +2031,7 @@ function ofrecerLetanias(){
 
 function showCelebration(){
   $('celeb-title').textContent=`¡${BFN[blk]} completados!`;
-  $('celeb-sub').textContent=`Has rezado los 5 misterios ${BN[blk].toLowerCase()} de este cuaderno. ¡Bien hecho!`;
+  $('celeb-sub').textContent=`Has rezado los 5 Misterios ${BN[blk].toLowerCase()} de este Nivel. ¡Bien hecho!`;
   /* Dos salidas de verdad: seguir en el Libro (recarga orar en este nivel, que
      resuelve solo el siguiente bloque incompleto) o irse al camino. Antes había un
      único botón que decía "Regresar a inicio" y recargaba orar: la etiqueta mentía. */
