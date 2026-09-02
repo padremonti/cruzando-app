@@ -35,6 +35,7 @@ const PAGINAS = [
   'index.html', 'crecer.html', 'audio.html', 'orar.html', 'rezar.html',
   'diario.html', 'cantos.html', 'extras.html', 'sanar.html', 'mini.html',
   'world.html', 'retiros.html', 'soporte.html', 'terminos.html', 'privacidad.html',
+  'hoy.html',
 ];
 
 /* Lo que da el navegador. No es exhaustivo a propósito: si aparece un

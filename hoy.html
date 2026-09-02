@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Hoy · CruzAndo</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@600&family=Inter:wght@400;500;600;700&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+
+<script src="appcheck-key.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCYCZi1LmFuqIis9yx3QF3McvGHlAGKRKY",
+  authDomain: "cruzando-app.firebaseapp.com",
+  projectId: "cruzando-app",
+  storageBucket: "cruzando-app.firebasestorage.app",
+  messagingSenderId: "408196948528",
+  appId: "1:408196948528:web:de291e8afc969252e943f5"
+};
+firebase.initializeApp(firebaseConfig);
+try {
+  if (window.RECAPTCHA_SITE_KEY) firebase.appCheck().activate(window.RECAPTCHA_SITE_KEY, true);
+} catch(e) { console.warn('[AppCheck]', e); }
+const _db   = firebase.firestore();
+const _auth = firebase.auth();
+</script>
+
+<!-- bloques.js va en el <head>: estampa las variables de color antes del
+     primer pintado, o las franjas parpadean. -->
+<script src="bloques.js"></script>
+<script src="niveles.js"></script>
+<script src="dia.js"></script>
+<script src="rosario.js"></script>
+<script src="plan-utils.js"></script>
+<script src="flags.js"></script>
+<script src="utils.js"></script>
+<script src="toast.js"></script>
+
+<style>
+:root{
+  --bg:#002931; --bg2:#001E25; --card:#004C5B; --card2:#003845;
+  --border:rgba(67,221,248,0.15);
+  --text:#F0E6DA; --text-soft:#C4A882; --text-dim:#7A5C40;
+  --brand:#02BBE0; --brand-soft:#43DDF8;
+  --cuenta-apagada:rgba(243,234,216,0.13);
+  --cuenta-borde:rgba(243,234,216,0.26);
+  --scrim:0,41,49;
+  --verde:#3FE08A; --verde-rgb:63,224,138;
+}
+body.light{
+  --bg:#E6DED3; --bg2:#D9CFC4; --card:#FFFCF7; --card2:#F5EDE4;
+  --border:#D0C4B8;
+  --text:#2B1A0E; --text-soft:#6B5040; --text-dim:#9B8878;
+  --cuenta-apagada:rgba(43,26,14,0.09);
+  --cuenta-borde:rgba(43,26,14,0.22);
+  --scrim:230,222,211;
+  --verde:#0E9A5B; --verde-rgb:14,154,91;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  line-height:1.5;-webkit-font-smoothing:antialiased;
+  min-height:100dvh;
+}
+button{font:inherit;cursor:pointer}
+
+.shell{max-width:480px;margin:0 auto;padding:0 20px 108px;min-height:100dvh;display:flex;flex-direction:column}
+
+.topbar{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:calc(env(safe-area-inset-top) + 14px) 0 12px;
+}
+.marca{font-family:'Lora',Georgia,serif;font-weight:600;font-size:.9rem;color:var(--text-soft)}
+.tbtn{
+  background:transparent;border:1px solid var(--border);border-radius:999px;
+  padding:6px 12px;color:var(--text-soft);font-size:.75rem;
+}
+
+/* ── carga y avisos ── */
+.centro{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;gap:14px;padding:40px 10px;
+}
+.centro h2{font-family:'Crimson Pro',Georgia,serif;font-weight:600;font-size:1.5rem;margin:0;line-height:1.2}
+.centro p{margin:0;color:var(--text-soft);font-size:.92rem;max-width:30ch;line-height:1.55}
+.spinner{
+  width:30px;height:30px;border-radius:50%;
+  border:2px solid var(--border);border-top-color:var(--brand);
+  animation:spin .9s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── hero ── */
+.hero{position:relative;margin:0 -20px;height:190px;overflow:hidden;background:var(--bg2)}
+.hero img{width:100%;height:100%;object-fit:cover;display:block}
+.hero .fade{
+  position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to bottom,
+    rgba(var(--scrim),0) 34%, rgba(var(--scrim),.72) 78%, rgb(var(--scrim)) 100%);
+}
+
+.fecha{font-size:.72rem;letter-spacing:.11em;text-transform:uppercase;color:var(--text-dim);margin:2px 0 6px}
+.bloque-tit{
+  font-family:'Crimson Pro',Georgia,serif;font-weight:600;
+  font-size:1.68rem;line-height:1.12;margin:0 0 5px;letter-spacing:-.012em;color:var(--acento);
+}
+.bloque-sub{
+  font-family:'Crimson Pro',Georgia,serif;font-style:italic;
+  font-size:.98rem;color:var(--text-soft);margin:0;line-height:1.4;
+}
+
+.completo{
+  margin:18px 0 0;border-radius:18px;padding:22px 18px 20px;text-align:center;
+  background:radial-gradient(ellipse at 50% 0%, rgba(var(--verde-rgb),.20) 0%, transparent 72%),
+             rgba(var(--verde-rgb),.07);
+  border:1px solid rgba(var(--verde-rgb),.55);
+  box-shadow:0 0 26px rgba(var(--verde-rgb),.22), inset 0 0 32px rgba(var(--verde-rgb),.07);
+}
+.completo .tick{
+  width:34px;height:34px;border-radius:50%;margin:0 auto 11px;
+  background:var(--verde);color:#04140C;display:flex;align-items:center;justify-content:center;
+  font-size:1.05rem;font-weight:700;box-shadow:0 0 18px rgba(var(--verde-rgb),.6);
+}
+.completo .big{
+  font-family:'Crimson Pro',Georgia,serif;font-weight:600;font-size:1.72rem;
+  line-height:1.1;letter-spacing:-.015em;color:var(--verde);
+  text-shadow:0 0 22px rgba(var(--verde-rgb),.45);
+}
+
+.pill{
+  display:flex;align-items:center;gap:10px;margin:16px 0 0;border-radius:14px;padding:12px 15px;
+  background:rgba(var(--pc-rgb),.13);
+  border:1px solid rgba(var(--pc-rgb),.45);
+}
+.pill .tick{
+  width:22px;height:22px;border-radius:50%;flex:none;background:var(--pc);color:#12181A;
+  display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;
+}
+.pill .pt{font-size:.88rem;font-weight:600;color:var(--text);line-height:1.35}
+
+.aviso{
+  font-size:.82rem;color:var(--text-soft);margin:14px 0 0;line-height:1.5;
+  border-left:2px solid var(--acento);padding-left:11px;
+}
+.aviso b{color:var(--text);font-weight:600}
+
+.elige{margin:13px 0 0}
+.elige p{margin:0 0 8px;font-size:.8rem;color:var(--text-soft)}
+.chips{display:flex;gap:7px;flex-wrap:wrap}
+.chip{
+  border-radius:999px;padding:7px 15px;background:transparent;
+  border:1px solid var(--cc);color:var(--cc);font-size:.82rem;font-weight:600;
+  transition:background .15s,color .15s;
+}
+.chip[aria-pressed="true"]{background:var(--cc);color:#12181A}
+
+.cinco{list-style:none;margin:16px 0 0;padding:0}
+.cinco li{
+  display:grid;grid-template-columns:24px 1fr auto;gap:11px;align-items:center;
+  padding:9px 8px 9px 0;border-bottom:1px solid var(--border);border-radius:8px;
+}
+.cinco li:last-child{border-bottom:none}
+.cinco .n{font-size:.72rem;color:var(--text-dim);text-align:right;font-variant-numeric:tabular-nums}
+.cinco .t{font-size:.93rem;color:var(--text);line-height:1.35}
+.cinco li.done .t{color:var(--text-soft)}
+.cinco li.done .n{color:var(--acento)}
+.cinco .check{
+  width:19px;height:19px;border-radius:50%;flex:none;background:var(--acento);color:#12181A;
+  display:flex;align-items:center;justify-content:center;font-size:.66rem;font-weight:700;
+}
+.cinco li.next{background:rgba(var(--acento-rgb),.10);padding-left:8px;margin-left:-8px}
+.cinco li.next .n{color:var(--acento);font-weight:500}
+.cinco li.next .t{font-weight:600}
+.cinco .flecha{color:var(--acento);font-size:.8rem}
+
+.acciones{display:flex;flex-direction:column;gap:9px;margin-top:20px}
+.btn{
+  display:block;width:100%;text-align:center;border-radius:12px;padding:14px 16px;
+  font-size:.95rem;font-weight:600;border:1px solid transparent;transition:transform .12s;
+}
+.btn:active{transform:scale(.985)}
+.btn-1{background:var(--acento);color:#12181A;border-color:var(--acento)}
+.btn-2{background:transparent;color:var(--text);border-color:var(--border)}
+.btn-verde{background:var(--verde);color:#04140C;border-color:var(--verde)}
+
+.manana{
+  margin:16px 0 0;text-align:center;font-size:.85rem;color:var(--text-soft);
+  border:1px dashed var(--border);border-radius:12px;padding:14px 12px;line-height:1.5;
+}
+.manana b{display:block;color:var(--text);font-weight:600;margin-bottom:2px}
+
+/* ── la tira del Nivel ── */
+.nivel{margin-top:auto;padding-top:28px}
+.niv-cab{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:11px}
+.niv-nom{font-size:.8rem;color:var(--text-soft);font-weight:500}
+.niv-vuelta{font-size:.71rem;color:var(--text-dim);font-variant-numeric:tabular-nums}
+.tira{display:flex;gap:14px;justify-content:space-between}
+.grupo{display:flex;gap:5px}
+.bead{
+  width:11px;height:11px;border-radius:50%;padding:0;cursor:default;
+  background:var(--cuenta-apagada);border:1px solid var(--cuenta-borde);
+}
+.bead.rezado{background:var(--bc);border-color:var(--bc);box-shadow:inset 0 -1px 0 rgba(0,0,0,.28)}
+.bead.abierto{background:rgba(var(--bc-rgb),.26);border-color:var(--bc)}
+.bead.hoy{
+  background:rgba(var(--bc-rgb),.34);border-color:var(--bc);
+  animation:lat 2.1s ease-out infinite;
+}
+.bead.vueltahoy{background:var(--bc);border-color:var(--bc);box-shadow:0 0 9px var(--bc)}
+@keyframes lat{
+  0%{box-shadow:0 0 0 0 rgba(var(--bc-rgb),.55)}
+  70%{box-shadow:0 0 0 6px transparent}
+  100%{box-shadow:0 0 0 0 transparent}
+}
+@media (prefers-reduced-motion:reduce){
+  .bead.hoy{animation:none;box-shadow:0 0 0 2px rgba(var(--bc-rgb),.45)}
+  *{transition:none !important}
+}
+.pie-bead{margin:13px 0 0;font-size:.82rem;color:var(--text-soft);min-height:3em;line-height:1.45}
+.pie-bead .tt{
+  font-family:'Crimson Pro',Georgia,serif;font-style:italic;
+  color:var(--text);font-size:.94rem;display:block;
+}
+.pie-bead .est{display:inline-flex;align-items:center;gap:7px;margin-top:5px;font-size:.79rem}
+.pie-bead .sym{
+  width:16px;height:16px;border-radius:50%;flex:none;
+  display:inline-flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;
+}
+.pie-bead .sym.ok{background:var(--sc);color:#12181A}
+.pie-bead .sym.on{background:rgba(var(--sc-rgb),.34);border:1px solid var(--sc)}
+.pie-bead .sym.off{background:var(--cuenta-apagada);border:1px solid var(--cuenta-borde)}
+
+/* ── navegación ── */
+.app-nav{
+  position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;
+  background:var(--card2);border-top:1px solid var(--border);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+body.light .app-nav{background:var(--card)}
+.app-nav-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:4px;padding:10px 4px 12px;background:none;border:none;color:var(--text-dim);
+}
+.app-nav-item.active{color:var(--brand-soft)}
+.app-nav-label{font-size:.63rem;font-weight:600;letter-spacing:.02em}
+</style>
+</head>
+<body class="dark">
+
+<div class="shell">
+  <div class="topbar">
+    <span class="marca">CruzAndo</span>
+    <button class="tbtn" type="button" onclick="window._toggleTema()">Tema</button>
+  </div>
+  <div id="app">
+    <div class="centro"><div class="spinner"></div><p>Preparando el Rosario de hoy…</p></div>
+  </div>
+</div>
+
+<nav class="app-nav">
+  <button class="app-nav-item active" type="button"><span class="app-nav-label">Hoy</span></button>
+  <button class="app-nav-item" type="button" onclick="location.href='crecer.html'"><span class="app-nav-label">Crecer</span></button>
+  <button class="app-nav-item" type="button" onclick="location.href='sanar.html'"><span class="app-nav-label">Sanar</span></button>
+  <button class="app-nav-item" type="button" onclick="location.href='diario.html'"><span class="app-nav-label">Diario</span></button>
+  <button class="app-nav-item" type="button" onclick="location.href='cantos.html'"><span class="app-nav-label">Cantos</span></button>
+</nav>
+
+<script>
+(function () {
+  'use strict';
+
+  var IMG_BASE = 'https://pub-96c43f31e0da42dd950d4ac90328256e.r2.dev/';
+  var BASE_M   = { gozosos:1, luminosos:6, dolorosos:11, gloriosos:16 };
+  var CORTO    = { gozosos:'Gozosos', luminosos:'Luminosos',
+                   dolorosos:'Dolorosos', gloriosos:'Gloriosos' };
+  var DIAS  = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  var MESES = ['enero','febrero','marzo','abril','mayo','junio','julio',
+               'agosto','septiembre','octubre','noviembre','diciembre'];
+
+  var usr = null, plan = 'free';
+  var nivelId = null, nivel = 1, cuaderno = 1;
+  var prog = {}, data = null;
+  var seleccion = null;
+
+  var $app = document.getElementById('app');
+
+  // ── tema ────────────────────────────────────────────────────────
+  function aplicarTema(t){
+    document.body.classList.toggle('light', t === 'light');
+    document.body.classList.toggle('dark',  t !== 'light');
+  }
+  aplicarTema(localStorage.getItem('cruzando_theme') || 'dark');
+  window._toggleTema = function(){
+    var t = (localStorage.getItem('cruzando_theme') === 'light') ? 'dark' : 'light';
+    localStorage.setItem('cruzando_theme', t);
+    aplicarTema(t);
+  };
+
+  function base(){
+    return location.origin + location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1);
+  }
+  function fechaLarga(f){
+    return DIAS[f.getDay()] + ' ' + f.getDate() + ' de ' + MESES[f.getMonth()];
+  }
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
+    });
+  }
+  function pantalla(titulo, texto, btnTxt, btnFn){
+    $app.innerHTML =
+      '<div class="centro"><h2>' + esc(titulo) + '</h2><p>' + esc(texto) + '</p>' +
+      (btnTxt ? '<button class="btn btn-2" id="cbtn" style="max-width:260px">' + esc(btnTxt) + '</button>' : '') +
+      '</div>';
+    if (btnTxt) document.getElementById('cbtn').onclick = btnFn;
+  }
+
+  // ── frontera: el primer Nivel incompleto, con salida temprana ────
+  async function calcularFrontera(uid){
+    var orden = (window.Niveles && Niveles.ORDEN) || [];
+    for (var i = 0; i < orden.length; i++) {
+      var snap;
+      try { snap = await _db.collection('users').doc(uid)
+                            .collection('progress').doc(orden[i]).get(); }
+      catch(e){ break; }
+      if (!snap.exists) return orden[i];
+      var d = snap.data() || {};
+      var p = d.progress || {};
+      var entero = Dia.BLOQUES.every(function(b){
+        return Array.isArray(p[b]) && p[b].length === 5 &&
+               p[b].every(function(x){ return x !== null && x !== undefined; });
+      });
+      if (!entero) return orden[i];
+    }
+    return orden[orden.length - 1] || null;
+  }
+
+  function marcador(){
+    try {
+      var b = localStorage.getItem('cruzando_current_nivel');
+      return /^\d{4}$/.test(b || '') ? b : null;
+    } catch(e){ return null; }
+  }
+
+  /* Una vuelta nueva empieza cuando los cuatro bloques están a cero: es el
+     instante en que rosario.js acaba de cerrar el último. De esa fecha sale
+     qué días han pasado ya, y por tanto qué bloques siguen abiertos. */
+  async function asegurarVueltaDesde(){
+    var todosCero = Dia.BLOQUES.every(function(b){ return Dia.hechos(prog, b) === 0; });
+    var hoyK = Dia.clave();
+    if (todosCero && prog.vueltaDesde !== hoyK) {
+      prog.vueltaDesde = hoyK;
+      try {
+        await _db.collection('users').doc(usr.uid).collection('progress').doc(nivelId)
+                 .set({ vueltaDesde: hoyK }, { merge:true });
+      } catch(e){ console.warn('[hoy] vueltaDesde:', e); }
+    } else if (!prog.vueltaDesde) {
+      prog.vueltaDesde = hoyK;
+      try {
+        await _db.collection('users').doc(usr.uid).collection('progress').doc(nivelId)
+                 .set({ vueltaDesde: hoyK }, { merge:true });
+      } catch(e){}
+    }
+  }
+
+  /* El compromiso del día: elegido un bloque, ese es el Rosario de hoy. Se
+     escribe ANTES de navegar, para que volver a Hoy tras la sesión encuentre
+     el día ya decidido. Local primero: una elección no se pierde por red. */
+  async function fijarBloqueDelDia(bloque){
+    var d = { fecha: Dia.clave(), bloque: bloque };
+    prog.diaBloque = d;
+    try { localStorage.setItem('cruzando_dia_' + nivelId, JSON.stringify(d)); } catch(e){}
+    try {
+      await _db.collection('users').doc(usr.uid).collection('progress').doc(nivelId)
+               .set({ diaBloque: d }, { merge:true });
+    } catch(e){ console.warn('[hoy] diaBloque:', e); }
+  }
+
+  // ── render ──────────────────────────────────────────────────────
+  function render(){
+    var hoy = new Date();
+    var st  = Dia.estadoDelNivel(prog, hoy);
+    var disp = st.disponibles;
+
+    var foco = (seleccion && disp.indexOf(seleccion) >= 0) ? seleccion : disp[0];
+    if (!foco) foco = st.hoyBloque;
+
+    var acc     = COLORES_BLOQUE[foco];
+    var next    = Dia.primerPendiente(prog, foco);
+    var nMis    = BASE_M[foco] + next;
+    var hFoco   = Dia.hechos(prog, foco);
+    var hoyHecho= Dia.hechos(prog, st.hoyBloque) === 5 && !st.completo && !st.diaGastado;
+    var mis     = (data && data.misterios && data.misterios[foco]) || [];
+    var subt    = (data && data.subtitulos_bloque && data.subtitulos_bloque[foco]) || '';
+    var h = '';
+
+    h += '<div class="hero"><img src="' + IMG_BASE + 'P_' + nivel + '_' + cuaderno + '_' + nMis +
+         '.webp" alt="" onerror="this.style.display=\'none\'"><div class="fade"></div></div>';
+
+    h += '<p class="fecha">' + fechaLarga(hoy) + '</p>';
+    h += '<h1 class="bloque-tit">' + esc(NOMBRES_BLOQUE[foco]) + '</h1>';
+    h += '<p class="bloque-sub">' + esc(subt) + '</p>';
+
+    if (st.completo && !st.diaGastado) {
+      h += '<div class="completo"><div class="tick">&#10003;</div><div class="big">Nivel completo</div></div>';
+    } else if (hoyHecho) {
+      h += '<div class="pill" style="--pc:' + COLORES_BLOQUE[st.hoyBloque] +
+           ';--pc-rgb:' + rgbBloque(st.hoyBloque) + '">' +
+           '<span class="tick">&#10003;</span><span class="pt">' +
+           esc(NOMBRES_BLOQUE[st.hoyBloque]) + ' completados</span></div>';
+    } else if (hFoco > 0 && !st.completo) {
+      h += '<p class="aviso">Llevas <b>' + hFoco + ' de 5</b>.</p>';
+    } else if (st.diaGastado) {
+      h += '<p class="aviso">Es tu Rosario de hoy.</p>';
+    }
+
+    if (disp.length > 1 && !st.diaGastado) {
+      h += '<div class="elige"><p>' +
+           (hoyHecho ? 'Puedes rezar lo que quedó pendiente.' : 'Hoy puedes rezar:') +
+           '</p><div class="chips">';
+      disp.forEach(function(b){
+        h += '<button class="chip" type="button" data-sel="' + b + '" style="--cc:' +
+             COLORES_BLOQUE[b] + '" aria-pressed="' + (b === foco) + '">' + CORTO[b] + '</button>';
+      });
+      h += '</div></div>';
+    }
+
+    h += '<ul class="cinco">';
+    for (var i = 0; i < 5; i++) {
+      var done   = st.bloques[foco][i] === 'rezado' || st.bloques[foco][i] === 'vueltahoy';
+      var esNext = (i === next) && (!done || st.completo);
+      h += '<li class="' + (done ? 'done ' : '') + (esNext ? 'next' : '') + '">' +
+           '<span class="n">' + (BASE_M[foco] + i) + '</span>' +
+           '<span class="t">' + esc((mis[i] && mis[i].titulo) || ('Misterio ' + (BASE_M[foco]+i))) + '</span>' +
+           (done ? '<span class="check">&#10003;</span>'
+                 : (esNext ? '<span class="flecha">&#9654;</span>' : '<span></span>')) + '</li>';
+    }
+    h += '</ul>';
+
+    var lbl;
+    if (st.completo)            lbl = 'Rezar de nuevo';
+    else if (hFoco > 0)         lbl = 'Continuar &middot; Misterio ' + nMis;
+    else if (foco === st.hoyBloque) lbl = 'Rezar los Misterios de hoy';
+    else                        lbl = 'Rezar los Misterios ' + CORTO[foco];
+
+    h += '<div class="acciones">';
+    h += '<button class="btn btn-1" id="ir-rezar" type="button">' + lbl + '</button>';
+    h += '<button class="btn ' + (st.completo ? 'btn-verde' : 'btn-2') + '" id="ir-2" type="button">' +
+         (st.completo ? 'Ir al siguiente Nivel' : 'Orar, Misterio a Misterio') + '</button>';
+    h += '</div>';
+
+    if (st.diaGastado) {
+      var otros = Dia.BLOQUES.filter(function(b){
+        return b !== foco && Dia.hechos(prog, b) < 5;
+      }).map(function(b){ return CORTO[b]; });
+      if (otros.length) {
+        h += '<div class="manana"><b>' + otros.join(' &middot; ') +
+             '</b>Disponibles mañana. Un Rosario cada día.</div>';
+      }
+    }
+
+    // ── la tira ──
+    var vueltas = (window.Rosario ? Rosario.vueltas(prog) : 0);
+    h += '<div class="nivel"><div class="niv-cab">' +
+         '<span class="niv-nom">' + esc(Niveles.nombre(nivelId) || nivelId) + '</span>' +
+         '<span class="niv-vuelta">' + (vueltas > 0 ? (vueltas + 1) + 'ª vuelta' : '') + '</span></div>';
+    h += '<div class="tira">';
+    Dia.BLOQUES.forEach(function(b){
+      var titB = (data && data.misterios && data.misterios[b]) || [];
+      h += '<div class="grupo">';
+      for (var j = 0; j < 5; j++) {
+        h += '<button class="bead ' + st.bloques[b][j] + '" type="button" style="--bc:' +
+             COLORES_BLOQUE[b] + ';--bc-rgb:' + rgbBloque(b) + '" data-b="' + b + '" data-i="' + j + '" ' +
+             'aria-label="Misterio ' + (BASE_M[b]+j) + ', ' +
+             esc((titB[j] && titB[j].titulo) || '') + '"></button>';
+      }
+      h += '</div>';
+    });
+    h += '</div><p class="pie-bead" id="pie"><span class="tt">&nbsp;</span></p></div>';
+
+    $app.innerHTML = h;
+    $app.style.setProperty('--acento', acc);
+    $app.style.setProperty('--acento-rgb', rgbBloque(foco));
+
+    Array.prototype.forEach.call($app.querySelectorAll('.chip'), function(c){
+      c.onclick = function(){ seleccion = c.getAttribute('data-sel'); render(); };
+    });
+
+    document.getElementById('ir-rezar').onclick = async function(){
+      await fijarBloqueDelDia(foco);
+      location.href = 'rezar.html?c=' + nivelId + '&b=' + foco + '&m=' + nMis;
+    };
+
+    document.getElementById('ir-2').onclick = async function(){
+      if (st.completo) { irAlSiguienteNivel(); return; }
+      await fijarBloqueDelDia(foco);
+      location.href = 'audio.html?nivel=' + nivel + '&cuaderno=' + cuaderno + '&misterio=' + nMis;
+    };
+
+    Array.prototype.forEach.call($app.querySelectorAll('.bead'), function(bd){
+      bd.onclick = function(){
+        var b = bd.getAttribute('data-b'), i = +bd.getAttribute('data-i');
+        var e = st.bloques[b][i], cls, sym, txt;
+        var titB = (data && data.misterios && data.misterios[b]) || [];
+        if (e === 'rezado' || e === 'vueltahoy')      { cls='ok';  sym='&#10003;'; txt='Ya lo rezaste'; }
+        else if (e === 'espera')                      { cls='off'; sym='';         txt='Disponible ' + Dia.proximoDia(b, hoy); }
+        else if (st.diaGastado && b !== st.elegido)   { cls='off'; sym='';         txt='Disponible mañana'; }
+        else                                          { cls='on';  sym='';         txt='Disponible hoy'; }
+        document.getElementById('pie').innerHTML =
+          '<span class="tt">' + esc((titB[i] && titB[i].titulo) || ('Misterio ' + (BASE_M[b]+i))) + '</span>' +
+          '<span class="est" style="--sc:' + COLORES_BLOQUE[b] +
+          ';--sc-rgb:' + rgbBloque(b) + '">' +
+          '<span class="sym ' + cls + '">' + sym + '</span>' + txt + '</span>';
+      };
+    });
+  }
+
+  function irAlSiguienteNivel(){
+    var sig = Niveles.siguientePublicado(nivelId);
+    if (!sig) {
+      if (window.showToast) showToast('El siguiente Nivel está en preparación.');
+      return;
+    }
+    try { localStorage.setItem('cruzando_current_nivel', sig); } catch(e){}
+    location.reload();
+  }
+
+  // ── arranque ────────────────────────────────────────────────────
+  async function arrancar(){
+    var ud = {};
+    try {
+      var us = await _db.collection('users').doc(usr.uid).get();
+      ud = us.exists ? us.data() : {};
+    } catch(e){}
+    window.currentPlan = window.resolvePlan ? resolvePlan(ud) : 'free';
+    plan = window.effectivePlan ? effectivePlan() : window.currentPlan;
+
+    var frontera = await calcularFrontera(usr.uid);
+    var p = new URLSearchParams(location.search);
+    nivelId = p.get('c') || Dia.nivelDiario(plan, {
+      bookmark: marcador(), frontera: frontera, orden: Niveles.ORDEN
+    });
+
+    if (!nivelId) {
+      pantalla('El Rosario de hoy te espera',
+        'Se abre en cuanto cruces tu primer cuaderno. Sigue por el camino y vuelve.',
+        'Ir al camino', function(){ location.href = 'crecer.html'; });
+      return;
+    }
+    if (!Niveles.publicado(nivelId) && plan !== 'developer') {
+      var prev = Niveles.ORDEN[Math.max(0, Niveles.ORDEN.indexOf(nivelId) - 1)];
+      nivelId = Niveles.publicado(prev) ? prev : '0101';
+    }
+
+    nivel    = parseInt(nivelId.slice(0,2), 10) || 1;
+    cuaderno = parseInt(nivelId.slice(2,4), 10) || 1;
+
+    try {
+      var r = await fetch(base() + 'data/' + nivelId + '.json');
+      if (r.ok) data = await r.json();
+    } catch(e){}
+    if (!data) {
+      pantalla('No se pudo cargar el Nivel',
+        'Revisa tu conexión y vuelve a intentarlo.',
+        'Reintentar', function(){ location.reload(); });
+      return;
+    }
+
+    try {
+      var ps = await _db.collection('users').doc(usr.uid)
+                        .collection('progress').doc(nivelId).get();
+      prog = ps.exists ? ps.data() : {};
+    } catch(e){ prog = {}; }
+
+    // Espejo local de la elección del día, por si la red falló al fijarla.
+    try {
+      var loc = JSON.parse(localStorage.getItem('cruzando_dia_' + nivelId) || 'null');
+      if (loc && loc.fecha === Dia.clave() && !Dia.elegidoHoy(prog)) prog.diaBloque = loc;
+    } catch(e){}
+
+    await asegurarVueltaDesde();
+    render();
+  }
+
+  _auth.onAuthStateChanged(function(user){
+    if (!user) { location.replace('index.html'); return; }
+    usr = user;
+    window.currentUser = user;
+    arrancar().catch(function(e){
+      console.error('[hoy]', e);
+      pantalla('Algo salió mal', 'Vuelve a intentarlo en un momento.',
+               'Reintentar', function(){ location.reload(); });
+    });
+  });
+}());
+</script>
+</body>
+</html>
