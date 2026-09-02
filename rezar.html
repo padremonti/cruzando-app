@@ -53,6 +53,7 @@ window._fbFirestore = {
 </script>
 <script src="niveles.js"></script>
 <script src="bloques.js"></script>
+<script src="dia.js"></script>
 <link rel="stylesheet" href="cierre.css">
 <link rel="stylesheet" href="vuelta.css">
 <script src="sarta.js"></script>
@@ -2897,15 +2898,14 @@ async function loadAndEnter(nId,block,idx){
   nivelId=nId;
   nivel=parseInt(nivelId.slice(0,2))||1;
   cua=parseInt(nivelId.slice(2,4))||1;
-  recordarNivel(nivelId);
   blk=block;
   bIdx=idx;
 
+  let _plan='free';
   try{
     const snap=await FS.collection('users').doc(usr.uid).get();
     const ud=snap.exists?snap.data():{};
-    const _plan=window.effectivePlan?window.effectivePlan():(window.resolvePlan?window.resolvePlan(ud):'free');
-    if(window.requirePremiumAccess&&!window.requirePremiumAccess('rezar',_plan,nivelId))return;
+    _plan=window.effectivePlan?window.effectivePlan():(window.resolvePlan?window.resolvePlan(ud):'free');
     totalM=ud.totalMeters||0;
   }catch(e){}
 
@@ -2916,6 +2916,10 @@ async function loadAndEnter(nId,block,idx){
     const snap=await FS.collection('users').doc(usr.uid).collection('progress').doc(nivelId).get();
     prog=snap.exists?snap.data():{};
   }catch(e){prog={};}
+
+  if(!_puedeRezarAqui(_plan)){location.replace('index.html?blocked=rezar');return;}
+  if(!_nivelCruzado()) recordarNivel(nivelId);
+  if(!_diaPermite(_plan,new URLSearchParams(location.search)))return;
 
   decideEntry();
 }
@@ -2945,6 +2949,39 @@ function initAuth(){
   });
 }
 
+/* ── El día manda en el Nivel que se está cruzando ──────────────────────────
+   Tres preguntas que se responden SIEMPRE desde el progreso, nunca desde la
+   URL. La bandera `hoy` dice qué clase de sesión es; el permiso se deriva. */
+
+/* El Nivel está CRUZADO: los veinte de `progress` con marca. No es lo mismo
+   que la vuelta —`progress` es el avance temático, una sola vez— y de esa
+   distinción salen dos cosas: el derecho del free a rezar aquí, y que esta
+   sesión no progresa y por tanto no debe mover el marcador del mapa. */
+function _nivelCruzado(){
+  return !!(window.demoCompleto && window.demoCompleto(prog));
+}
+
+/* El free reza SU Nivel diario —uno ya cruzado— además del DEMO: es la regla
+   "lo que ya cruzaste es tuyo". Premium, beta y developer entran como antes. */
+function _puedeRezarAqui(plan){
+  if(plan!=='free') return window.canAccessModo?canAccessModo('rezar',plan,nivelId):true;
+  return nivelId==='0101'||_nivelCruzado();
+}
+
+/* La puerta del día. Se aplica a la sesión que viene de hoy.html y a todo free
+   en un Nivel ya cruzado —no tiene mapa, así que toda sesión suya es la de
+   hoy—. En el DEMO sin cruzar NO se aplica: allí el free sigue su itinerario
+   lineal, y Hoy solo se le abre al cerrar el primer cuaderno.
+   Cuando crecer deje de ofrecer el Nivel en curso, esto se extenderá a
+   `!_nivelCruzado()` y quedará cerrado también para el enlace a mano. */
+function _diaPermite(plan,p){
+  if(!window.Dia) return true;
+  if(!((p.get('hoy')==='1')||(plan==='free'&&_nivelCruzado()))) return true;
+  if(Dia.permitido(blk,prog,new Date())) return true;
+  location.replace('hoy.html');
+  return false;
+}
+
 /* ── Marcador de nivel entre modos ──────────────────────────────────────────
    crecer decide qué nivel enseñar con `bookmark || frontier`, y el bookmark es
    este `cruzando_current_nivel`. Lo escribían audio, crecer e index; orar y
@@ -2972,13 +3009,12 @@ async function loadAndStart(){
   nivelId=p.get('c')||nivelRecordado()||'0101';
   nivel=parseInt(nivelId.slice(0,2))||1;
   cua=parseInt(nivelId.slice(2,4))||1;
-  recordarNivel(nivelId);
 
+  let _plan='free';
   try{
     const snap=await FS.collection('users').doc(usr.uid).get();
     const ud=snap.exists?snap.data():{};
-    const _plan=window.effectivePlan?window.effectivePlan():(window.resolvePlan?window.resolvePlan(ud):'free');
-    if(window.requirePremiumAccess&&!window.requirePremiumAccess('rezar',_plan,nivelId))return;
+    _plan=window.effectivePlan?window.effectivePlan():(window.resolvePlan?window.resolvePlan(ud):'free');
     totalM=ud.totalMeters||0;
   }catch(e){}
 
@@ -2989,6 +3025,9 @@ async function loadAndStart(){
     const snap=await FS.collection('users').doc(usr.uid).collection('progress').doc(nivelId).get();
     prog=snap.exists?snap.data():{};
   }catch(e){prog={};}
+
+  if(!_puedeRezarAqui(_plan)){location.replace('index.html?blocked=rezar');return;}
+  if(!_nivelCruzado()) recordarNivel(nivelId);
 
   const bParam=p.get('b'),mParam=p.get('m');
   if(bParam&&BLOCKS.includes(bParam)){
@@ -3004,6 +3043,7 @@ async function loadAndStart(){
     if(!found){blk=BLOCKS[0];bIdx=0;}
   }
 
+  if(!_diaPermite(_plan,p))return;
   decideEntry();
 }
 

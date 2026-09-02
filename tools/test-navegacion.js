@@ -36,7 +36,15 @@ const EXCEPCIONES = {
     '\'<a href="index.html" style="color:inherit;text-decoration:underline">Créala desde el inicio</a>.\';'
   ],
   'orar.html':  ["else goTo('index.html');"],   // onAuthStateChanged sin usuario
-  'rezar.html': ["goTo('index.html');"],        // onAuthStateChanged sin usuario
+  'rezar.html': [
+    "goTo('index.html');",                      // onAuthStateChanged sin usuario
+    /* El muro de pago. Antes vivía dentro de requirePremiumAccess() —en
+       plan-utils.js, fuera de este barrido— pero la puerta pasó a derivarse
+       del progreso: el free reza SU Nivel diario, que es uno ya cruzado, y eso
+       requirePremiumAccess no sabe expresarlo. Sigue siendo una redirección de
+       ACCESO, no una salida de sesión. */
+    "if(!_puedeRezarAqui(_plan)){location.replace('index.html?blocked=rezar');return;}"
+  ],
 };
 
 const MODOS = ['audio.html', 'orar.html', 'rezar.html'];

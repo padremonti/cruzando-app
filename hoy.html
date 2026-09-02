@@ -497,13 +497,13 @@ body.light .app-nav{background:var(--card)}
 
     document.getElementById('ir-rezar').onclick = async function(){
       await fijarBloqueDelDia(foco);
-      location.href = 'rezar.html?c=' + nivelId + '&b=' + foco + '&m=' + nMis;
+      location.href = 'rezar.html?c=' + nivelId + '&b=' + foco + '&m=' + nMis + '&hoy=1';
     };
 
     document.getElementById('ir-2').onclick = async function(){
       if (st.completo) { irAlSiguienteNivel(); return; }
       await fijarBloqueDelDia(foco);
-      location.href = 'audio.html?nivel=' + nivel + '&cuaderno=' + cuaderno + '&misterio=' + nMis;
+      location.href = 'audio.html?nivel=' + nivel + '&cuaderno=' + cuaderno + '&misterio=' + nMis + '&hoy=1';
     };
 
     Array.prototype.forEach.call($app.querySelectorAll('.bead'), function(bd){

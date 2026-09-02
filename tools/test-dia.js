@@ -281,6 +281,75 @@ ok('audio.html · su DAY_BLOCKS no se ha desviado del canon', () => {
   for (let i = 0; i <= 6; i++) eq(copia[i], D.POR_DIA[i], 'día ' + i);
 });
 
+console.log('\n-- El seam: rezar y audio vuelven a derivar la regla --'.replace(/--/g,'\u2500\u2500'));
+
+/* Las páginas grandes van con CRLF; se normaliza para poder afirmar sobre
+   la forma exacta del código sin que un final de línea decida la prueba. */
+const norm = t => t.split(String.fromCharCode(13)).join('');
+const REZ = norm(leer('rezar.html'));
+const AUD = norm(leer('audio.html'));
+
+ok('rezar.html · carga dia.js', () => {
+  if (!REZ.includes('src="dia.js"')) throw new Error('no carga dia.js');
+});
+
+ok('rezar.html · la puerta se comprueba DESPUÉS de leer el progreso', () => {
+  /* El derecho del free a rezar aquí depende de que el Nivel esté cruzado, y
+     eso solo lo dice `progress`. requirePremiumAccess corría antes de leerlo,
+     así que no podía saberlo. */
+  const par = '}catch(e){prog={};}\n\n  if(!_puedeRezarAqui';
+  eq(REZ.split(par).length - 1, 2,
+     'loadAndStart y loadAndEnter deben comprobarla tras el progreso');
+});
+
+ok('rezar.html · ya no delega en requirePremiumAccess para el Rezo', () => {
+  if (/requirePremiumAccess\('rezar'/.test(REZ))
+    throw new Error('sigue la puerta vieja, que rebota al free siempre');
+  if (!/nivelId==='0101'\|\|_nivelCruzado\(\)/.test(REZ))
+    throw new Error('la puerta del free no deriva del progreso');
+});
+
+ok('rezar.html · el marcador solo se mueve si la sesión progresa', () => {
+  /* Escribirlo en un Nivel ya cruzado arrastraría el mapa hacia atrás. */
+  eq(REZ.split('if(!_nivelCruzado()) recordarNivel(nivelId);').length - 1, 2,
+     'las dos entradas deben proteger el marcador');
+  if (/\n  recordarNivel\(nivelId\);\n/.test(REZ))
+    throw new Error('queda una escritura del marcador sin proteger');
+});
+
+ok('rezar.html · el DEMO sin cruzar NO cae bajo la puerta del día', () => {
+  /* En 0101 el free sigue su itinerario lineal: Hoy se le abre al cerrar su
+     primer cuaderno. Sin el && le romperíamos el DEMO. */
+  if (!/plan==='free'&&_nivelCruzado\(\)/.test(REZ))
+    throw new Error('la puerta del día alcanzaría al free dentro del DEMO');
+});
+
+ok('rezar.html · la puerta del día se deriva, no se cree la bandera', () => {
+  const b = REZ.slice(REZ.indexOf('function _diaPermite'), REZ.indexOf('function _diaPermite') + 420);
+  if (!/Dia\.permitido\(blk,prog,new Date\(\)\)/.test(b))
+    throw new Error('no vuelve a derivar el permiso del progreso');
+});
+
+ok('audio.html · carga dia.js y protege las dos escrituras del marcador', () => {
+  if (!AUD.includes('src="dia.js"')) throw new Error('no carga dia.js');
+  eq(AUD.split('if (_mueveMarcador())').length - 1, 2);
+  const sueltas = AUD.split('\n')
+    .filter(l => /localStorage\.setItem\('cruzando_current_nivel'/.test(l))
+    .filter(l => !/^\s{6}try \{/.test(l));
+  eq(sueltas.length, 0, 'queda una escritura del marcador fuera de la guarda');
+});
+
+ok('audio.html · la bandera solo suprime, nunca concede', () => {
+  const b = AUD.slice(AUD.indexOf('function _mueveMarcador'), AUD.indexOf('function _mueveMarcador') + 260);
+  if (!/return !\(_hoy && userPlan === 'free'\);/.test(b))
+    throw new Error('_mueveMarcador cambió de forma');
+});
+
+ok('hoy.html · declara la clase de sesión en los dos traspasos', () => {
+  eq(HOY.split("'&hoy=1'").length - 1, 2,
+     'rezar y audio deben recibir la marca de sesión diaria');
+});
+
 console.log('\n' + '─'.repeat(64));
 if (fallos) {
   console.log('  ✗ ' + fallos + ' fallo(s), ' + pasos + ' pasada(s)');

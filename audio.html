@@ -1383,6 +1383,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 }
 </style>
 <script src="niveles.js"></script>
+<script src="dia.js"></script>
 <script src="bloques.js"></script>
 <link rel="stylesheet" href="cierre.css">
 <link rel="stylesheet" href="vuelta.css">
@@ -1943,6 +1944,20 @@ function getPrefs() {
 let currentUser      = null;
 let audioProgress    = null;  // { nivel:1, cuaderno:1, misterio:1, firstAnswered:[f,f,f] }
 let userPlan         = 'premium'; // default premium; free solo si explícitamente confirmado
+
+/* ── El marcador del mapa no se mueve si la sesión no progresa ──────────────
+   `cruzando_current_nivel` es el "dónde estoy" con el que crecer decide qué
+   Nivel enseñar. El Rosario diario del free ocurre en un Nivel YA CRUZADO —es
+   la regla "lo que ya cruzaste es tuyo"— así que escribirlo arrastraría el
+   mapa HACIA ATRÁS: rezabas tu Nivel de hoy, volvías a crecer y te enseñaba
+   uno anterior. Es el mismo defecto que documenta § Dónde estoy ≠ hasta dónde
+   he llegado, reintroducido por la puerta nueva.
+   La bandera `hoy` solo SUPRIME la escritura y nunca concede nada, así que
+   forjarla no da acceso a ningún sitio: no hace falta derivarla del progreso. */
+function _mueveMarcador() {
+  var _hoy = new URLSearchParams(location.search).get('hoy') === '1';
+  return !(_hoy && userPlan === 'free');
+}
 let currentData      = null;  // JSON del nivel/cuaderno
 let currentSession   = null;  // { nivel, cuaderno, misterio, block, mysteryData, playlist }
 let sessionMeters    = 0;
@@ -2296,7 +2311,9 @@ async function loadUserAndStart(skipProgressRead = false) {
       }
     }
     // Bookmark cross-modo: guardar en localStorage el nivel que el usuario está usando
-    try { localStorage.setItem('cruzando_current_nivel', urlParam); } catch(e) {}
+    if (_mueveMarcador()) {
+      try { localStorage.setItem('cruzando_current_nivel', urlParam); } catch(e) {}
+    }
   }
 
   // Si viene ?nivel=&cuaderno=&misterio= (desde index.html o orar.html), respetar posición exacta
@@ -2310,7 +2327,9 @@ async function loadUserAndStart(skipProgressRead = false) {
     audioProgress.nivel    = _pN;
     audioProgress.cuaderno = _pC;
     audioProgress.misterio = _pM;
-    try { localStorage.setItem('cruzando_current_nivel', String(_pN).padStart(2,'0') + String(_pC).padStart(2,'0')); } catch(e) {}
+    if (_mueveMarcador()) {
+      try { localStorage.setItem('cruzando_current_nivel', String(_pN).padStart(2,'0') + String(_pC).padStart(2,'0')); } catch(e) {}
+    }
     history.replaceState({}, '', 'audio.html');
     goDirectly = true;
   }
