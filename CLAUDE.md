@@ -15,7 +15,9 @@ PWA de formación espiritual católica. El usuario reza los 20 Misterios del Ros
 
 | Archivo | Rol |
 |---------|-----|
-| `index.html` | Home: métricas, bloques, acceso al resto. Modal de Preferencias (tema, BGM, micro). |
+| `index.html` | Home: métricas, bloques, acceso al resto. Modal de Preferencias (tema, BGM, micro). Puerta **Hoy** encima de Sanar, teñida con el color del bloque del día. |
+| `hoy.html` | **El Rosario del día.** Donde se AVANZA: el Nivel en curso, al ritmo de la devoción. Resuelve día → bloque y plan → Nivel, y entrega el mando a `rezar` o `audio`. No duplica ningún reproductor. Ver § El día manda. |
+| `dia.js` | **Origen único del día litúrgico**: `POR_DIA`, `bloqueDeHoy`, `proximoDia`, `disponibles`, `permitido`, `estadoDelNivel`, `nivelDiario`. Puro y con la fecha **inyectable**. Va en el `<head>` de index, hoy, audio y rezar. Ver § El día manda. |
 | `world.html` | Mapa de niveles. Navega a `audio.html?c=XXYY`. |
 | `audio.html` | Player de sesión diaria. Módulo principal. |
 | `orar.html` | Rezo por bloques (gozosos/luminosos/dolorosos/gloriosos). |
@@ -32,7 +34,7 @@ PWA de formación espiritual católica. El usuario reza los 20 Misterios del Ros
 | `sarta.js` | **Geometría del decenario y la camándula.** `Sarta.geometria(forma, {decenas})` — `decenas:1` da el decenario (16 cuentas), `decenas:5` la camándula (60). Pura, sin DOM. Ver § La sarta. |
 | `cuentas.js` | **Motor pasivo de la columna de cuentas del rezo** (1 Padrenuestro + 10 Ave Marías + Cruz Lux). `Cuentas.crear({audio: () => el})`. Lo usan audio y orar; rezar y mini conservan el suyo. Ver § Columna de cuentas. |
 | `bloques.js` | **Origen único de los cuatro bloques**: su color y su lista ordenada (`window.BLOQUES`). `window.COLORES_BLOQUE` + `window.rgbaBloque(bloque, alfa)`, y estampa 12 variables CSS (`--goz`, `--goz-color`, `--goz-rgb`, ×4). Va en el `<head>`. Ver § Colores de bloque. |
-| `niveles.js` | **Origen único del itinerario**: `NIVELES_ORDER`, `NIVEL_STATUS`, `NIVEL_NAMES` + `Niveles.publicado/siguientePublicado/nombre`. Va en el `<head>` de index, crecer, audio y diario. Ver § El itinerario. |
+| `niveles.js` | **Origen único del itinerario**: `NIVELES_ORDER`, `NIVEL_STATUS`, `NIVEL_NAMES` + `Niveles.publicado/siguientePublicado/nombre`. **Y de la frontera**: `nivelCompleto`, `calcularFrontera`, `fronteraCacheada`, `CLAVE_FRONTERA` — estaba escrita **cuatro veces**. Va en el `<head>` de index, crecer, hoy, audio y diario. Ver § El itinerario y § La frontera. |
 
 ## El cierre de una sesión (`cierre.js`)
 
@@ -335,11 +337,213 @@ Antes se ocultaba en el primer cambio de pista: al usuario se le quitaba de la v
 
 **`extras.html` conserva su propia tabla a propósito.** Usa otro formato (`'Cruz · Males'`) y tiene subtítulos para los Mundos 2-7 que la canónica no lleva: unificarlas es decisión de contenido, no de código. Hay una prueba que la vigila para que la diferencia siga siendo deliberada.
 
+## El día manda: `hoy.html`, `dia.js` y la Ruta C
+
+*Estado: implementado + banco de pruebas (`tools/test-dia.js`, 69). **PENDIENTE prueba en dispositivo** — ver Pendientes 0.*
+
+**El Nivel en curso se cruza al ritmo de la devoción, no al del usuario.**
+
+| | |
+|---|---|
+| lunes y sábado | gozosos |
+| martes y viernes | dolorosos |
+| miércoles y domingo | gloriosos |
+| **jueves** | **luminosos** |
+
+El mapeo llevaba meses escrito en `audio.html` como `DAY_BLOCKS`, dentro de
+`renderAudioHome()` — la función que no llama nadie. Era correcto y estaba muerto.
+
+### Dos cosas que NO hay que programar: salen del calendario
+
+⚠ **LA SEMANA.** Los Luminosos caen **solo en jueves**, así que una vuelta del Nivel
+solo puede cerrarse un jueves. En régimen, cada Nivel dura **de viernes a jueves:
+siete días exactos**, y basta con no auto-avanzar. La semana no la impone un
+temporizador — la impone la Iglesia. Si alguien le diera a los Luminosos un segundo
+día, la semana se rompería **sin que nada más fallara**; hay una prueba solo para eso.
+
+**EL DESCANSO.** Tres días de cada siete el bloque del día ya está rezado. No son días
+perdidos: son **la vuelta**, que es donde vive la costumbre (§ La vuelta del Rosario).
+La semana queda con forma de *avanzar y luego ahondar*.
+
+### Dos reglas que sí son decisión de producto
+
+- **EL DÍA ABRE, NUNCA CIERRA.** El bloque cuyo día pasó y quedó pendiente sigue
+  disponible. Sin esto, **quien solo reza en fin de semana nunca alcanzaría los
+  Luminosos y no cerraría un Nivel jamás**.
+- **UN ROSARIO AL DÍA.** Elegido un bloque, ese es el de hoy; los demás esperan a
+  mañana. Caduca a medianoche por comparación de FECHAS, no por temporizador.
+
+### La Ruta C: dos superficies, partidas por función
+
+| | | |
+|---|---|---|
+| `hoy.html` | **donde se avanza** | el día manda · dos modos · una decisión |
+| `crecer.html` | **donde se vuelve** | libre · tres modos · **Premium** |
+
+Se descartaron dos alternativas: `hoy.html` como mera antesala (dos puertas al mismo
+sitio) y filtrar por día **dentro** de `crecer` (obligaba a tres estados visuales en
+el mapa y rompía al free). La partición por función es la única que hace que **el
+mapa deje de necesitar candados**: si solo contiene lo ya cruzado, todo está abierto.
+
+### El plan free, decidido
+
+> **El free vive en el presente. El Premium tiene memoria.**
+
+| | free | premium |
+|---|---|---|
+| `hoy.html` · la sesión completa · los cuatro cierres · racha | ✅ | ✅ |
+| Diario · biblioteca de Cantos · Sanar (elenco + acogida) | ✅ | ✅ |
+| El **mapa**, el **Libro**, los **Retiros**, Extras | ⛔ | ✅ |
+
+El free **no progresa** en Hoy, y no por una condición sino **por construcción**: reza
+un Nivel ya cruzado, así que `completeMystery` corta sola en su `if(dots[bIdx])return`.
+Gana la racha y llena la **vuelta**; no gana `progress` ni metros. `Dia.nivelDiario`
+le da el último Nivel ENTERO, y **Hoy se le abre al cerrar su primer cuaderno**.
+
+### La tira del Nivel, y por qué no puede mentir
+
+Los veinte Misterios en cuatro grupos de cinco, al pie de `hoy.html`. Cinco estados:
+**rezado · de hoy · abierto · aún no · vuelta**. Es el único sitio donde la regla
+«el día abre y nunca cierra» **se ve** en vez de explicarse.
+
+⚠ **El dibujo y la puerta salen de la MISMA función** (`Dia.estadoDelNivel`). Una
+cuenta se pinta abierta si y solo si la sesión dejaría entrar. El mapa arrastraba
+justo el error contrario — quince nodos con candado que se abrían igual — y esto
+existe para no repetirlo.
+
+**Las cuentas NO navegan.** Tocar una escribe su nombre debajo y nada más; se entra
+solo por los botones. Si una cuenta llevara a rezar, la tira sería el mapa por accidente.
+
+### El seam: `rezar` y `audio` vuelven a derivar la regla
+
+La bandera `&hoy=1` dice **qué clase de sesión es**; el permiso **se deriva siempre**.
+
+| En `rezar.html` | |
+|---|---|
+| `_nivelCruzado()` | los veinte de `progress` con marca. **No es la vuelta** |
+| `_puedeRezarAqui(plan)` | el free entra en el DEMO **y en su Nivel diario**, que es uno ya cruzado |
+| `_diaPermite(plan,p)` | vuelve a derivar `Dia.permitido(blk, prog, hoy)`; si no, va a `hoy.html` |
+
+⚠ **`requirePremiumAccess('rezar')` corría ANTES de leer el progreso**, así que no
+podía saber lo que necesitaba: el derecho del free depende de que ESE Nivel esté
+cruzado. Ahora se lee el progreso primero y se decide después.
+
+⚠ **En el DEMO sin cruzar la puerta del día NO se aplica**: ahí el free sigue su
+itinerario lineal. Sin el `&& _nivelCruzado()` de la condición le romperíamos 0101.
+
+⚠ **El marcador no puede retroceder.** `recordarNivel()` corría al arrancar, antes
+de saber nada. Para un free el Nivel de hoy es uno **pasado**: rezaba su Rosario,
+volvía al mapa y lo encontraba en un Nivel anterior — el defecto de § Dónde estoy ≠
+hasta dónde he llegado, reintroducido por la puerta nueva. Ahora **el marcador solo
+se mueve si la sesión progresa**, en las cuatro escrituras (dos en `rezar`, dos en
+`audio` vía `_mueveMarcador()`). *La bandera solo SUPRIME la escritura y nunca
+concede nada: forjarla no abre ninguna puerta.*
+
+⚠ **La retoma sale de `vuelta[bloque]`, NUNCA de `progress`.** En la segunda vuelta
+`progress` está lleno y daría siempre «nada pendiente». No hace falta marcador nuevo:
+el punto de retoma es el primer hueco de la vuelta del bloque del día.
+
+### `crecer.html` es Premium, y el camino se ve pero no se salta
+
+- **La puerta va en la FASE 3**, con el plan confirmado contra Firestore. En la FASE 1
+  se pinta con el plan **cacheado**, y cerrar ahí expulsaría a un premium con el caché
+  frío de su propia página. La FASE 1 solo evita **pintar** el mapa si el caché dice
+  free: **falla retrasando, nunca expulsando**.
+- **El destino es `index.html?premium=1`.** `index` es el gemelo de `crecer` sin el
+  mapa, y es donde vive la compra: cerrar el mapa no puede cerrarle la puerta a quien
+  viene a pagar. El developer con «ver como free» **no** se expulsa.
+- **Un Misterio pendiente ya no abre el popup de modos**: avisa y lleva a Hoy. La
+  condición es solo `!isDone` — en un Nivel ya cruzado no hay pendientes, así que
+  alcanza exactamente al Nivel en curso. El mapa **conserva** sendero, Lux y CONTINUAR:
+  pierde ser la puerta, no el sentido de peregrinación.
+- **El candado de la pestaña y la puerta se pusieron A LA VEZ** (`marcarCrecerSiFree`
+  en `plan-utils.js`), con una prueba que salta si alguien quita una de las dos.
+
+### La barra y las salidas
+
+Orden en las ocho páginas del hub: **Hoy · Sanar · Crecer · Retiros · Diario · Cantos**.
+Cada página llama distinto (`navigateTo` · `navTo` · `goTo` · `window.goTo`) y el item
+de Hoy habla el idioma de la suya.
+
+**`_casa()`** en los tres reproductores: el mapa para premium, **Hoy para el free**.
+
+⚠ **El splash de racha colgaba de «el destino es crecer.html».** Con el free saliendo
+a Hoy **no lo habría visto nunca** — y la racha es justo lo que se le premia cuando no
+gana metros. La condición pasó a ser llegar a CASA (`_esCasa`), no al mapa.
+
+### La pregunta de «dónde empiezo» se hacía dos veces
+
+`crecer.irARezar()` la hace antes de navegar y `rezar.decideEntry()` la repetía, porque
+solo miraba `bIdx > 0` sin saber de dónde salía. **La regla: se pregunta solo cuando se
+ha adivinado** (`_posDicha`). Llegando del mapa o de Hoy la respuesta ya se dio; por la
+barra de navegación, sin parámetros, se sigue preguntando. *Defecto anterior a esta
+sesión: los dos modales nacieron por separado y ninguno sabía del otro.*
+
+### Datos nuevos
+
+Dos campos en `users/{uid}/progress/{nivelId}` — escritura libre al dueño, sin reglas:
+
+```
+  .vueltaDesde   'YYYY-MM-DD'          ← cuándo empezó la vuelta en curso
+  .diaBloque     { fecha, bloque }     ← el Rosario de hoy, ya elegido
+```
+
+De `vueltaDesde` sale qué días han pasado, y por tanto qué bloques siguen abiertos:
+**una sola fecha** en vez de una lista que habría que mantener a mano.
+
+### La frontera, por fin en un solo sitio
+
+⚠ Estaba escrita **CUATRO veces**: `crecer.html`, `index.html` (los gemelos), y una
+copia **sin defensas** que se hizo `hoy.html`. Como el free deja de entrar a `crecer`,
+esa copia ingenua habría sido **la única frontera que vería en su vida**.
+
+Vive en `niveles.js` con todo lo que la salvó: la clave versionada, la salida
+temprana, y el `catch` que distingue un fallo de CÓDIGO de una caída de red **sin
+persistir ninguno**. Cada página pone solo su E/S. `tools/test-frontera.js` corre
+ahora el módulo REAL dentro del `vm` y contra el itinerario real de 28 Niveles.
+
+### Las puertas dicen lo que se decidió
+
+⚠ **`canAccessModo('sanar')` no gateaba Sanar: gateaba RETIROS.** El botón se llama
+`nav-sanar-btn`, navega a `retiros.html`, y `retiros.js` pedía permiso con
+`requirePremiumAccess('sanar')`. **Sanar de verdad no tenía modo propio ni puerta.**
+Abrir `'sanar'` sin deshacer esto habría regalado los Retiros enteros.
+
+| modo | free | premium |
+|---|---|---|
+| `audio` · `cantos` · `diario` · `sanar` | ✅ | ✅ |
+| `libro` · `rezar` · `retiros` · `mapa` · `extras` | ⛔ | ✅ |
+
+`rezar` sigue en `isPrem` **a propósito**: el Rosario diario del free se resuelve
+aparte, en `rezar.html`, porque depende del progreso de ESE Nivel.
+
+⚠ **`extras.html` tenía una puerta y necesitaba dos**: la del **flag** (la tienda está
+a medias, y desaparecerá) y la del **plan** (la tienda es de Premium, y se queda). Sin
+la segunda, el día que se encienda `MOSTRAR_RECOMPENSAS` quedaría abierta a cualquiera.
+
+### Lo que NO se hizo, a propósito
+
+- **La rama `_isFree` de `crecer.html` sigue ahí, ahora muerta** (31 apariciones), y
+  con ella `getFreeProgress` / `advanceFreeMisterio` / `completedToday` de `plan-utils`
+  — el **segundo sistema de progreso** que la Ruta C viene a eliminar. Se limpia cuando
+  el ciclo pase la prueba en dispositivo: borrar eso en la misma pasada que otros tres
+  cambios es cómo se cuelan los errores.
+- **`mini.html` sigue volviendo a `sanar.html`**, no a Hoy. Es su propio bucle.
+- **`audio.html:4755`** enlaza a `crecer.html?premium=1` (la pantalla de compra). Con
+  `crecer` cerrada al free, ese enlace hay que revisarlo.
+
 ## Navegación: dónde termina una sesión
 
 **Hay dos hogares, y no son intercambiables:** `index.html` es la **pantalla de acceso y hub**; `crecer.html` es el **mapa** — el camino con nodos, y el único que tiene motor de mapa (`computeAllPositions`, `drawMapPath`, `BLOQUES_MAP`). Estructuralmente `crecer` es `index` **más** el mapa: las 18 secciones de primer nivel son idénticas, y por eso el bloque de acceso está duplicado (§ Consentimiento, "los gemelos"). `crecer.html` **no enlaza a `index.html` por ningún sitio**: el flujo es un embudo de un solo sentido.
 
-**Los cuatro modos de rezo vuelven al mapa (`crecer.html`).** Antes cada uno terminaba en un sitio distinto: audio y rezar en el hub, sanar en el mapa, y orar en sí mismo. Puntos de salida:
+⚠ **Esto cambió con la Ruta C** (§ El día manda): `crecer.html` es **de Premium**, y
+para el free la casa es **`hoy.html`**. Los reproductores ya no codifican el destino a
+mano — lo decide **`_casa()`**, que devuelve el mapa o Hoy según el plan. Lo de abajo
+describe dónde están esos puntos de salida, que siguen siendo los mismos; lo que
+cambió es que **el destino se deriva en vez de estar escrito**. Y el splash de racha
+pasó a colgar de `_esCasa()`, no de «el destino es crecer.html».
+
+**Los cuatro modos de rezo vuelven a casa.** Antes cada uno terminaba en un sitio distinto: audio y rezar en el hub, sanar en el mapa, y orar en sí mismo. Puntos de salida:
 
 | Modo | Sale por |
 |---|---|
@@ -360,7 +564,11 @@ Antes se ocultaba en el primer cambio de pista: al usuario se le quitaba de la v
 
 **Los tres modos progresan igual.** audio, orar y rezar escriben en `users/{uid}/progress/{nivelId}`, y la frontera del mapa se calcula **exactamente de ahí** — no del historial de audio. No es cierto que solo audio haga progresar.
 
-Lo que estaba descuadrado era el **marcador de nivel**, `localStorage.cruzando_current_nivel`. crecer decide qué nivel enseñar con:
+Lo que estaba descuadrado era el **marcador de nivel**, `localStorage.cruzando_current_nivel`. ⚠ **La frontera se mudó a `niveles.js`** (§ El día manda → La frontera): estaba escrita
+cuatro veces. Las páginas conservan solo su E/S y la decisión de quién manda entre el
+marcador y ella. Lo de abajo sigue describiendo esa decisión, que no cambió.
+
+crecer decide qué nivel enseñar con:
 
 ```js
 return bookmark || frontier;   // crecer.html · getCurrentNivelFromFirestore
@@ -534,6 +742,10 @@ users/{uid}/progress/{nivelId}   (nivelId = '0101', '0102', ...)
   .progress    { gozosos:[ts,ts,null,null,null], luminosos:..., ... }
   .microDone   { gozosos: true, luminosos: false, ... }
   .journal, .medConfirmed, .reflectionRewards, .audioRewards
+  .vuelta      { gozosos:[ts x5], ... }        ← decenas REZADAS de la vuelta en curso
+  .rosarios    { gozosos:3, luminosos:2, ... } ← Rosarios cerrados de cada bloque
+  .vueltaDesde '2026-09-04'                    ← cuándo empezó la vuelta en curso
+  .diaBloque   { fecha:'2026-09-06', bloque }  ← el Rosario de HOY, ya elegido
 
 users/{uid}/reflections/{nivelId}_{bloque}_{misterioIdx}_q{qi}
   .nivelId, .bloque, .misterioIdx, .questionIdx
@@ -972,6 +1184,7 @@ escribe `users/{uid}.terminos = { aceptado, fecha (serverTimestamp), version, me
 | Archivo | Nav bar | Tema unificado | Plan/beta | Micro | Metros |
 |---------|---------|---------------|-----------|-------|--------|
 | index.html | ✅ | ✅ `cruzando_theme` | ✅ `resolvePlan` | — | ✅ lee Firestore |
+| hoy.html | ✅ (Hoy activa) | ✅ `cruzando_theme` | ✅ Firebase compat + `dia.js` | — | — (los reparte quien reza) |
 | world.html | ✅ | ✅ | ✅ | — | — |
 | audio.html | ✅ | ✅ | ✅ | ✅ | ✅ progresivos |
 | orar.html | ✅ | ✅ (parcial) | ✅ | ✅ | ✅ |
@@ -985,6 +1198,12 @@ escribe `users/{uid}.terminos = { aceptado, fecha (serverTimestamp), version, me
 ## Pendientes conocidos
 
 **Pruebas en dispositivo pendientes (esta sesión):**
+0. **EL CICLO DE `hoy.html`** — lo que bloquea todo lo demás:
+   · Hoy → Rezar → volver y ver la tira llenarse · tocar un Misterio **pendiente** en el
+   mapa (debe avisar y llevar a Hoy) · con una cuenta **free**: que `crecer` la rebote a
+   `index?premium=1`, que la pestaña Crecer salga con candado, y que al terminar de rezar
+   salga a **Hoy** · la puerta Hoy del hub cambiando de color según el día · los dos temas.
+   **La limpieza de `_isFree` espera a que esto pase.**
 1. Reskins de players (audio/rezar/orar) — prueba **visual** en dispositivo.
 2. Karaoke / `canto.js` — prueba **visual** (harness + golden test ya pasados).
 3. `sanar.html` Fases B-C — que `_perfil` llegue del doc tras Auth y el elenco se repinte reordenado (Fase A ya probada).
