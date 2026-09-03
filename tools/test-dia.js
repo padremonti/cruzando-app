@@ -533,6 +533,38 @@ ok('index.html   . la puerta se tine con el bloque del dia, y degrada', () => {
   if (!TODO.includes('.hub-door-hoy       { background:rgba(2,187,224,0.07); }'))
     throw new Error('falta el color de respaldo de la puerta');
 });
+console.log('');
+console.log('== La pregunta de donde empezar se hace UNA vez ==');
+
+ok('rezar.html   . no repregunta si la posicion se la dijeron', () => {
+  /* crecer.irARezar() ya pregunta antes de navegar, nombrando el bloque y el
+     Misterio. rezar volvia a preguntar porque solo miraba bIdx > 0 sin saber
+     de donde salia: el usuario contestaba dos veces lo mismo antes de rezar.
+     La regla es: se pregunta SOLO cuando se ha adivinado. */
+  if (!REZ.includes('else if(bIdx>0 && !_posDicha){showModalInicio();}'))
+    throw new Error('decideEntry volvio a preguntar sin mirar quien fijo la posicion');
+  eq(REZ.split('_posDicha=true;').length - 1, 2,
+     'las dos entradas explicitas (loadAndStart con ?b= y loadAndEnter) deben marcarla');
+});
+
+ok('rezar.html   . pero SIGUE preguntando cuando la adivina', () => {
+  /* Entrando por la barra de navegacion no hay parametros y la posicion sale
+     del progreso. Ahi la pregunta es lo unico que evita reanudar a ciegas. */
+  if (!REZ.includes('function showModalInicio()'))
+    throw new Error('se perdio el modal de inicio');
+  const i = REZ.indexOf("const bParam=p.get('b')");
+  if (i < 0) throw new Error('no se encuentra la rama de parametros');
+  if (REZ.slice(i, i + 700).indexOf('found=true') < 0)
+    throw new Error('desaparecio la rama que infiere la posicion del progreso');
+});
+
+ok('crecer.html  . conserva su modal, que es el informativo', () => {
+  /* Nombra el bloque y el Misterio, y se hace ANTES de cargar la pagina. */
+  if (!CRE.includes('function esInicioDeBloqueRezo'))
+    throw new Error('crecer dejo de decidir si preguntar');
+  if (!CRE.includes('_rezarDestDesdeInicio'))
+    throw new Error('crecer perdio la opcion de empezar por el principio del bloque');
+});
 console.log('\n' + '─'.repeat(64));
 if (fallos) {
   console.log('  ✗ ' + fallos + ' fallo(s), ' + pasos + ' pasada(s)');

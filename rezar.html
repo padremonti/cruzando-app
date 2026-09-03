@@ -1177,6 +1177,10 @@ const MR_BNS  = 1000;
 let usr=null, data=null, prog={};
 let nivelId='0101', nivel=1, cua=1;
 let blk='gozosos', bIdx=0;
+/* La posicion la DIJO quien nos mando aqui (el mapa con su modal, o hoy.html)
+   en vez de inferirla del progreso. Si es asi no se vuelve a preguntar: la
+   respuesta ya se dio una vez. */
+let _posDicha=false;
 let _freeNoGana=false; // Política Free v2: true => suprime ganancia de metros (revisita en DEMO 0101)
 let totalM=0;
 let playlist=[], plIdx=0;
@@ -2909,7 +2913,10 @@ function decideEntry(){
   loadBeadSync().then(function(){
     const tienePrefs=rezarPrefs().idioma!==undefined;
     if(!tienePrefs){renderPrefs();show('scr-prefs');}
-    else if(bIdx>0){showModalInicio();}
+    /* Se pregunta SOLO si la posicion se adivino. Llegando del mapa la
+       pregunta ya se hizo alli, y repetirla obliga a contestar dos veces lo
+       mismo antes de poder rezar. */
+    else if(bIdx>0 && !_posDicha){showModalInicio();}
     else{initSession();}
   });
 }
@@ -2922,6 +2929,7 @@ async function loadAndEnter(nId,block,idx){
   cua=parseInt(nivelId.slice(2,4))||1;
   blk=block;
   bIdx=idx;
+  _posDicha=true;
 
   let _plan='free';
   try{
@@ -3057,6 +3065,7 @@ async function loadAndStart(){
   if(bParam&&BLOCKS.includes(bParam)){
     blk=bParam;
     bIdx=Math.max(0,Math.min(4,parseInt(mParam||'0')-BFM[bParam]));
+    _posDicha=true;
   } else {
     const pBlk=prog?.progress||{};let found=false;
     for(const b of BLOCKS){
