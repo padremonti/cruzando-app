@@ -958,6 +958,10 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 }
 .hub-door-icon svg { width:27px; height:27px; }
 /* Lavado de acento por puerta: fondo suave + disco de ícono */
+/* Hoy no tiene color fijo: se lo pone el bloque del dia (ver door-hoy).
+   Este es el respaldo, por si dia.js no cargara. */
+.hub-door-hoy       { background:rgba(2,187,224,0.07); }
+.hub-door-hoy       .hub-door-icon { background:rgba(2,187,224,0.18); }
 .hub-door-sanar     { background:rgba(47,169,138,0.07); }
 .hub-door-sanar     .hub-door-icon { background:rgba(47,169,138,0.18); }
 .hub-door-crecer    { background:rgba(201,154,46,0.07); }
@@ -1166,6 +1170,7 @@ body.hub-clean .hub-door-santuario { animation-delay:1.2s !important; }
 }
 </style>
 <script src="niveles.js"></script>
+<script src="dia.js"></script>
 <script src="bloques.js"></script>
 <script src="racha.js"></script>
 <script src="flags.js"></script>
@@ -1538,7 +1543,38 @@ body.hub-clean .hub-door-santuario { animation-delay:1.2s !important; }
     <!-- ═══ PUERTAS PRINCIPALES (Sanar · Crecer · El Santuario) ═══ -->
     <div class="hub-elige hub-an" style="animation-delay:.36s">Elige tu camino</div>
 
-    <button class="hub-door hub-door-sanar hub-an" style="animation-delay:.48s" onclick="navTap(this); navigateTo('sanar.html')">
+    <button class="hub-door hub-door-hoy hub-an" id="door-hoy" style="animation-delay:.48s" onclick="navTap(this); navigateTo('hoy.html')">
+      <div class="hub-door-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="5" width="18" height="16" rx="3"/>
+          <path d="M8 3v4M16 3v4M3 10h18"/>
+          <circle cx="12" cy="15.5" r="2.2"/>
+        </svg>
+      </div>
+      <div class="hub-door-texto">
+        <div class="hub-door-titulo">Hoy</div>
+        <div class="hub-door-sub">El Rosario de hoy</div>
+      </div>
+    </button>
+    <script>
+    /* La puerta se tiñe con el bloque que la Iglesia reza HOY y lo dice por su
+       nombre: el hub cambia de color cada dia. Va aqui, pegada al elemento, y
+       degrada sola: sin dia.js la puerta se queda con su texto y su cian. */
+    (function () {
+      var d = document.getElementById('door-hoy');
+      if (!d || !window.Dia || !window.rgbBloque) return;
+      var b = Dia.bloqueDeHoy(), rgb = rgbBloque(b);
+      if (!rgb) return;
+      d.style.background = 'rgba(' + rgb + ',0.07)';
+      var ic = d.querySelector('.hub-door-icon');
+      if (ic) ic.style.background = 'rgba(' + rgb + ',0.18)';
+      var sv = d.querySelector('.hub-door-icon svg');
+      if (sv) sv.setAttribute('stroke', COLORES_BLOQUE[b]);
+      var sub = d.querySelector('.hub-door-sub');
+      if (sub) sub.textContent = NOMBRES_BLOQUE[b];
+    }());
+    </script>
+    <button class="hub-door hub-door-sanar hub-an" style="animation-delay:.6s" onclick="navTap(this); navigateTo('sanar.html')">
       <div class="hub-door-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="#2FA98A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 20.5C12 20.5 3.5 15 3.5 8.7C3.5 6 5.6 4 8.2 4C10 4 11.4 5 12 6.4C12.6 5 14 4 15.8 4C18.4 4 20.5 6 20.5 8.7C20.5 12 18 15 12 20.5Z"/>
@@ -1551,7 +1587,7 @@ body.hub-clean .hub-door-santuario { animation-delay:1.2s !important; }
       </div>
     </button>
 
-    <button class="hub-door hub-door-crecer hub-an" style="animation-delay:.6s" id="door-crecer" onclick="navTap(this); revHub('crecer')">
+    <button class="hub-door hub-door-crecer hub-an" style="animation-delay:.72s" id="door-crecer" onclick="navTap(this); revHub('crecer')">
       <div class="hub-door-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="#C99A2E" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="6" cy="19" r="2.2"/>
@@ -1572,7 +1608,7 @@ body.hub-clean .hub-door-santuario { animation-delay:1.2s !important; }
       </div>
     </div>
 
-    <button class="hub-door hub-door-santuario hub-an" style="animation-delay:.72s" id="door-santuario" onclick="navTap(this); revHub('santuario')">
+    <button class="hub-door hub-door-santuario hub-an" style="animation-delay:.84s" id="door-santuario" onclick="navTap(this); revHub('santuario')">
       <div class="hub-door-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 2.5V6M10 4.2H14"/>

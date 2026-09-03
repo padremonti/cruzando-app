@@ -472,6 +472,67 @@ ok('rezar.html   . la puerta del dia ya cubre el Nivel en curso', () => {
   if (!REZ.includes('||!_nivelCruzado()'))
     throw new Error('el enlace escrito a mano sigue saltandose el dia');
 });
+console.log('');
+console.log('== La puerta Hoy del hub ==');
+
+/* Solo la region de las puertas: `.hub-door-sanar` esta declarado en el CSS
+   mucho antes que el boton, y buscar en todo el archivo encontraba la regla
+   de estilo en vez del elemento. */
+const IDX = (function () {
+  const t = norm(leer('index.html'));
+  const i = t.indexOf('PUERTAS PRINCIPALES');
+  return i < 0 ? t : t.slice(i);
+}());
+
+ok('index.html   . la puerta Hoy va ARRIBA de Sanar', () => {
+  const iHoy   = IDX.indexOf('id="door-hoy"');
+  const iSanar = IDX.indexOf('hub-door-sanar');
+  if (iHoy < 0)   throw new Error('no existe la puerta Hoy');
+  if (iSanar < 0) throw new Error('no se encuentra la puerta de Sanar');
+  if (iHoy > iSanar) throw new Error('la puerta Hoy quedo debajo de Sanar');
+});
+
+ok('index.html   . es un boton, no un acordeon', () => {
+  /* Hoy no tiene nada que desplegar: se entra y se reza. Un acordeon aqui
+     anadiria un toque entre el usuario y su Rosario del dia. */
+  const i = IDX.indexOf('id="door-hoy"');
+  const boton = IDX.slice(IDX.lastIndexOf('<button', i), IDX.indexOf('</button>', i));
+  if (!boton.includes("navigateTo('hoy.html')"))
+    throw new Error('no navega a hoy.html');
+  if (boton.includes('revHub('))
+    throw new Error('se convirtio en acordeon');
+  if (boton.includes('hub-door-arrow'))
+    throw new Error('lleva flecha de desplegar, y no despliega nada');
+});
+
+ok('index.html   . el escalonado de las puertas se lee en orden', () => {
+  const orden = ['hub-elige', 'door-hoy', 'hub-door-sanar', 'door-crecer', 'door-santuario'];
+  let prev = -1;
+  for (const marca of orden) {
+    const i = IDX.indexOf(marca);
+    const linea = IDX.slice(IDX.lastIndexOf('<', i), IDX.indexOf('>', i));
+    const m = linea.match(/animation-delay:\.(\d+)s/);
+    if (!m) throw new Error(marca + ': sin retardo de entrada');
+    /* .48s y .6s son DECIMALES: como enteros, 6 < 48 y el orden saldria al reves. */
+    const v = parseFloat('0.' + m[1]);
+    if (v <= prev) throw new Error(marca + ': entra antes que la anterior');
+    prev = v;
+  }
+});
+
+ok('index.html   . la puerta se tine con el bloque del dia, y degrada', () => {
+  /* Dice QUE se reza hoy antes de tocarla. Si dia.js no cargara, se queda con
+     su texto y su cian: la puerta nunca se rompe, solo dice menos. */
+  const TODO = norm(leer('index.html'));   // head y CSS quedan fuera de IDX
+  if (!TODO.includes('src="dia.js"'))
+    throw new Error('index no carga dia.js');
+  if (!IDX.includes('Dia.bloqueDeHoy()'))
+    throw new Error('la puerta no consulta el bloque del dia');
+  if (!IDX.includes('if (!d || !window.Dia || !window.rgbBloque) return;'))
+    throw new Error('sin guarda: sin dia.js la puerta reventaria');
+  if (!TODO.includes('.hub-door-hoy       { background:rgba(2,187,224,0.07); }'))
+    throw new Error('falta el color de respaldo de la puerta');
+});
 console.log('\n' + '─'.repeat(64));
 if (fallos) {
   console.log('  ✗ ' + fallos + ' fallo(s), ' + pasos + ' pasada(s)');
