@@ -1676,7 +1676,10 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
         <div class="premium-feature"><span class="premium-feature-icon">✦</span> El Libro y el Rezo, además del Audio</div>
         <div class="premium-feature"><span class="premium-feature-icon">✦</span> Vuelve a cualquier Misterio que ya recorriste</div>
         <div class="premium-feature"><span class="premium-feature-icon">✦</span> Escribe tus reflexiones en el Diario</div>
-        <div class="premium-feature"><span class="premium-feature-icon">✦</span> Sanar sin contar créditos, y los Retiros del Santuario</div>
+        <div class="premium-feature"><span class="premium-feature-icon">✦</span> Sanar sin contar créditos</div>
+        <!-- Los Retiros se venden aparte porque se pueden retirar aparte: mientras
+             El Santuario esté bajo desarrollo no se promete en un argumentario de PAGO. -->
+        <div class="premium-feature" id="premium-feature-retiros"><span class="premium-feature-icon">✦</span> Los Retiros del Santuario</div>
       </div>
 
       <!-- Código de descuento -->
@@ -2231,6 +2234,12 @@ function renderHome(userData) {
   _applyNavAccess('nav-cantos-btn', 'cantos');
   _applyNavAccess('nav-sanar-btn',  'retiros');   // el boton de Retiros, pese al id
   _applyNavAccess('nav-extras-btn', 'extras');
+  /* El Santuario esta bajo desarrollo y no se atenua: se retira. La pestana la
+     quita flags.js; aqui solo se repinta al resolver el plan, para que el "ver
+     como" del developer la devuelva sin recargar. */
+  if (window.aplicarNavRetiros) window.aplicarNavRetiros();
+  var _pfRet = document.getElementById('premium-feature-retiros');
+  if (_pfRet) _pfRet.style.display = (window.retirosON && window.retirosON()) ? '' : 'none';
 
   // Extras — además verificar progreso suficiente
   var extrasCard     = document.getElementById('extras-card');

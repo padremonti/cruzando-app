@@ -625,9 +625,24 @@ body.light .card-prog-wrap { background:rgba(0,0,0,0.08); }
   width:100%; max-width:260px;
 }
 </style>
+<script src="flags.js"></script>
 <script src="plan-utils.js"></script>
 </head>
 <body>
+
+<!-- ══ El Santuario, bajo desarrollo ══════════════════════════════
+     Los Retiros no entran en el MVP con el que se prueba con usuarios reales.
+     La UI ya no tiene entrada a esta página con el flag apagado; esta guarda
+     cubre la puerta trasera —URL directa, marcador, historial— y corre antes
+     de pintar nada. El developer entra: es quien lo está construyendo, y sin
+     esta salida no habría forma de seguir. ════════════════════════ -->
+<script>
+(function () {
+  if (window.retirosON && window.retirosON()) return;
+  var base = location.origin + location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1);
+  location.replace(base + 'index.html');
+}());
+</script>
 <!-- Aplicar tema antes de render para evitar flash -->
 <script>(function(){ if(localStorage.getItem('cruzando_theme')==='light') document.body.classList.add('light'); })();</script>
 

@@ -82,8 +82,14 @@
     if (modo === 'sanar')   return true;
     /* Retiros. Se llamaba 'sanar' por una colision de nombre —el boton es
        nav-sanar-btn y lleva a retiros.html—, asi que 'sanar' gateaba esto y
-       Sanar de verdad no tenia puerta ninguna. */
-    if (modo === 'retiros') return isPrem;
+       Sanar de verdad no tenia puerta ninguna.
+       Hoy El Santuario esta BAJO DESARROLLO y fuera del MVP: manda el flag
+       MOSTRAR_RETIROS de flags.js. El developer no llega hasta aqui —sale por
+       el return de arriba—, asi que esta linea decide solo para premium, beta
+       y free, y para los tres es que no. Se compara contra `true` exacto: una
+       pagina que no cargue flags.js deja los Retiros cerrados, nunca abiertos.
+       El dia que se enciendan, `isPrem` vuelve a mandar sin tocar nada mas. */
+    if (modo === 'retiros') return window.MOSTRAR_RETIROS === true && isPrem;
     /* El mapa lo ve TODO EL MUNDO: es el camino, y ver donde vas no se cobra.
        Lo que Premium abre es moverse por el —entrar a cualquier Misterio, en
        cualquier modo—, y de eso responden 'libro', 'rezar' y la rama free de

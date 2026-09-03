@@ -1468,7 +1468,10 @@ body.hub-clean .hub-door-santuario { animation-delay:1.2s !important; }
         <div class="premium-feature"><span class="premium-feature-icon">✦</span> El Libro y el Rezo, además del Audio</div>
         <div class="premium-feature"><span class="premium-feature-icon">✦</span> Vuelve a cualquier Misterio que ya recorriste</div>
         <div class="premium-feature"><span class="premium-feature-icon">✦</span> Escribe tus reflexiones en el Diario</div>
-        <div class="premium-feature"><span class="premium-feature-icon">✦</span> Sanar sin contar créditos, y los Retiros del Santuario</div>
+        <div class="premium-feature"><span class="premium-feature-icon">✦</span> Sanar sin contar créditos</div>
+        <!-- Los Retiros se venden aparte porque se pueden retirar aparte: mientras
+             El Santuario esté bajo desarrollo no se promete en un argumentario de PAGO. -->
+        <div class="premium-feature" id="premium-feature-retiros"><span class="premium-feature-icon">✦</span> Los Retiros del Santuario</div>
       </div>
 
       <!-- Código de descuento -->
@@ -2130,6 +2133,9 @@ function renderHome(userData) {
   _applyNavAccess('nav-cantos-btn', 'cantos');
   _applyNavAccess('nav-sanar-btn',  'retiros');   // el boton de Retiros, pese al id
   _applyNavAccess('nav-extras-btn', 'extras');
+  /* El Santuario no se atenua: se retira. _applyNavAccess de arriba solo baja la
+     opacidad, y con el flag apagado no hay nada detras que ensenar. */
+  if (window._pintarSantuario) window._pintarSantuario();
 
   // Extras — además verificar progreso suficiente
   var extrasCard     = document.getElementById('extras-card');
@@ -2764,7 +2770,10 @@ onAuthStateChanged(auth, async function(user) {
     renderTuCamino(bookmark, progreso, user);
   } catch(e) {}
 
-  if (user && user.uid) {
+  /* Con El Santuario apagado no se pregunta siquiera: sin banner, sin modal y
+     sin pulso en una pestana que ya no esta, la lectura de `talleres` no
+     tendria a quien informar. */
+  if (user && user.uid && window.retirosON && window.retirosON()) {
     verificarRetiroEnProgreso(user.uid);
   }
 });
@@ -2824,6 +2833,7 @@ function mostrarBannerRetiro(retiro) {
 }
 
 window.retomarRetiro = function(slug) {
+  if (window.retirosON && !window.retirosON()) return;
   location.href = 'retiros.html?retiro=' + slug + '&resume=true';
 };
 
@@ -2842,6 +2852,7 @@ function _resolverColorTaller(slug, mundoFallback) {
 }
 
 window.activarSenalTaller = function(retiro) {
+  if (window.retirosON && !window.retirosON()) { _limpiarSenalTaller(); return; }
   var slug = retiro.tallerSlug || '';
   var res = _resolverColorTaller(slug);
   var nombre = res.nombre || retiro.tallerNombre || 'tu taller';
@@ -2884,13 +2895,37 @@ function _limpiarSenalTaller() {
   _remedirSantuario();
 }
 
+/* ── El Santuario, bajo desarrollo ──────────────────────────────────
+   La puerta del hub, su panel y la linea del argumentario de Premium se
+   RETIRAN enteros mientras el flag este apagado; la pestana de la barra la
+   retira flags.js, que sirve a las ocho paginas del hub.
+   Se llama desde renderHome, asi que el "ver como" del panel de developer lo
+   repinta sin recargar: un developer mirando como free ve lo que vera un
+   usuario real, que es justo para lo que existe ese boton. */
+window._pintarSantuario = function() {
+  var on = !!(window.retirosON && window.retirosON());
+  ['door-santuario', 'rv-santuario', 'premium-feature-retiros'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.style.display = on ? '' : 'none';
+  });
+  if (!on) _limpiarSenalTaller();
+  if (window.aplicarNavRetiros) window.aplicarNavRetiros();
+};
+/* De una vez, sin esperar a renderHome: el modulo corre con el DOM ya
+   analizado, asi que la puerta no llega a verse ni un frame. */
+window._pintarSantuario();
+
 window.abrirSanar = function(btn) {
   navTap(btn);
+  /* Guarda de cinturon: la pestana esta oculta, pero si alguna ruta futura
+     volviera a llamar aqui no se abre un Santuario que no existe. */
+  if (window.retirosON && !window.retirosON()) return;
   if (window._tallerEnProgreso) abrirModalTaller();
   else navigateTo('retiros.html');
 };
 
 window.abrirModalTaller = function() {
+  if (window.retirosON && !window.retirosON()) return;
   if (!window._tallerEnProgreso) return;
   var nombreEl = document.getElementById('modal-taller-nombre');
   if (nombreEl) nombreEl.textContent = window._tallerEnProgreso.nombre;

@@ -1331,6 +1331,18 @@ function toggleSort() {
   applyFilters();
 }
 
+/* El filtro "Retiros" se retira con El Santuario: mientras esté bajo desarrollo
+   no hay retiros que hacer, así que la pastilla solo abriría una lista vacía.
+   Lo YA escrito no se toca — quien completó un retiro antes lo sigue viendo
+   bajo «Todas», con su chip. Un flag de presentación no borra un camino. */
+function _pintarFiltroRetiros() {
+  var pill = document.getElementById('filtro-retiro');
+  if (!pill) return;
+  var on = !!(window.retirosON && window.retirosON());
+  pill.style.display = on ? '' : 'none';
+  if (!on && filtroOrigen === 'retiro') setFiltro('todas');
+}
+
 function setFiltro(origen) {
   filtroOrigen = origen;
   ['todas','retiro','oracion','sanar'].forEach(function(f) {
@@ -1445,6 +1457,7 @@ auth.onAuthStateChanged(async (user) => {
 
     document.getElementById('countChip').classList.add('visible');
     document.getElementById('toolbar').style.display = 'flex';
+    _pintarFiltroRetiros();
     document.getElementById('loadingScreen').style.display = 'none';
     document.getElementById('listScreen').style.display = 'flex';
 

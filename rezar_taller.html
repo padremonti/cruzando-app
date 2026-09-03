@@ -27,6 +27,7 @@ firebase.initializeApp(firebaseConfig);
 const _db   = firebase.firestore();
 const _auth = firebase.auth();
 </script>
+<script src="flags.js"></script>
 <script src="plan-utils.js"></script>
 <script src="utils.js"></script>
 <style>
@@ -285,6 +286,20 @@ body.light .app-nav-item{color:rgba(0,41,49,0.45)}
 </style>
 </head>
 <body>
+<!-- ══ El Santuario, bajo desarrollo ══════════════════════════════
+     Los Retiros no entran en el MVP con el que se prueba con usuarios reales.
+     La UI ya no tiene entrada a esta página con el flag apagado; esta guarda
+     cubre la puerta trasera —URL directa, marcador, historial— y corre antes
+     de pintar nada. El developer entra: es quien lo está construyendo, y sin
+     esta salida no habría forma de seguir. ════════════════════════ -->
+<script>
+(function () {
+  if (window.retirosON && window.retirosON()) return;
+  var base = location.origin + location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1);
+  location.replace(base + 'index.html');
+}());
+</script>
+
 <div class="shell">
 
   <!-- PANTALLA 1: REZO -->

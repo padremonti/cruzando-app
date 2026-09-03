@@ -603,7 +603,10 @@ const _db   = getFirestore(_app);
         '</div>' +
       '</div>';
 
-    if (santuario) {
+    /* El cofre ya vive bajo MOSTRAR_RECOMPENSAS; esta segunda puerta es para el
+       dia que las recompensas se enciendan y El Santuario siga bajo desarrollo:
+       el cofre volveria con una entrada a un retiro que no existe. */
+    if (santuario && window.retirosON && window.retirosON()) {
       const slug = 's' + mundoId + '_' + nivelNum;
       html +=
         '<div class="cofre-recompensa cofre-recompensa-santuario"' +
@@ -642,6 +645,7 @@ const _db   = getFirestore(_app);
 
   // ── Tap en Santuario ─────────────────────────────────────────────
   window.tapSantuario = function(slug) {
+    if (window.retirosON && !window.retirosON()) return;
     location.href = 'retiros.html?retiro=' + slug;
   };
 

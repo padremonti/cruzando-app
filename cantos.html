@@ -2056,9 +2056,28 @@ function _shouldShowInterstitial(plan) {
   return ultimo !== hoy;
 }
 
+/* Tres de los diez interstitials (05 Duelo, 06 Perdón, 07 Enfermedad) anuncian
+   retiros por nombre y prometen entrar en ellos con Premium. Con El Santuario
+   bajo desarrollo eso sería vender lo que no se puede entregar, así que la
+   rotación los salta: no se borran, se dejan fuera del turno. El día que el
+   flag se encienda vuelven los diez sin tocar nada.
+   El .mp3 y el texto van pareados por índice, de modo que saltar el índice
+   salta los dos a la vez y no queda un audio hablando de otra cosa. */
+var _INTERSTITIAL_RETIROS = [4, 5, 6];
+
+function _interstitialVetado(idx) {
+  if (window.retirosON && window.retirosON()) return false;
+  return _INTERSTITIAL_RETIROS.indexOf(idx) >= 0;
+}
+
 function _getInterstitialIdx() {
   var last = parseInt(localStorage.getItem('cruzando_interstitial_idx') || '-1');
   var next = (last + 1) % INTERSTITIAL_TOTAL;
+  /* Como máximo una vuelta entera: si alguien vetara los diez, se devuelve el
+     siguiente en vez de girar para siempre. */
+  for (var i = 0; i < INTERSTITIAL_TOTAL && _interstitialVetado(next); i++) {
+    next = (next + 1) % INTERSTITIAL_TOTAL;
+  }
   localStorage.setItem('cruzando_interstitial_idx', String(next));
   return next;
 }

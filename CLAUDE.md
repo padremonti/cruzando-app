@@ -27,7 +27,9 @@ PWA de formación espiritual católica. El usuario reza los 20 Misterios del Ros
 | `canto.js` / `canto.css` | Motor de karaoke de canto compartido (extraído de audio+rezar). `Canto.init({...})`; CSS por `<link>`, HTML del overlay inyectado por el módulo. `mini.html` NO lo usa (ancestro divergente). **Y el lector del `.lrc` para toda la app**: `parseLrc` (cantar) · `letraPlana` (leer) · `parseLrcMeta` · `fetchLrc` · `letraDeBloque`. Ver § El canto se explica solo. |
 | `utils.js` | `window.isPremium(userData)` y `window.resolvePlan(userData)`. Cargado en todas las páginas. |
 | `toast.js` | **El aviso breve.** `showToast(texto)` — autosuficiente: inyecta su CSS y monta su nodo bajo demanda. En index y crecer; audio conserva el suyo. Ver § El aviso breve. |
-| `flags.js` | Interruptores de producto. Hoy: `MOSTRAR_RECOMPENSAS = false` + puerta `window.recompensasON()`. Ver § Kit de recompensas. |
+| `flags.js` | Interruptores de producto. `MOSTRAR_RECOMPENSAS = false` + `window.recompensasON()` (ver § Kit de recompensas) y `MOSTRAR_RETIROS = false` + `window.retirosON()` + `aplicarNavRetiros()` (ver § Retiros). El de Retiros **exime al developer**; el de recompensas no. |
+| `retiros.html` / `retiros.js` | El Santuario: catálogo de retiros. **Bajo desarrollo, oculto tras `MOSTRAR_RETIROS`** — solo entra el developer. Ver § Retiros. |
+| `rezar_taller.html` | Reproductor de un retiro. Misma puerta que `retiros.html`. |
 | `cierre.js` / `cierre.css` | **El cierre de una sesión de rezo.** `Cierre.decenario({desde, color, titulo, metros})` → promesa. La columna se cierra en decenario. CSS por `<link>`, trayectorias generadas por el módulo. Ver § El cierre. |
 | `rosario.js` | **La vuelta del Rosario**: cinco decenas REZADAS de un bloque son un Rosario, y se repite. Lógica pura, sin red ni DOM. Ver § La vuelta del Rosario. |
 | `vuelta.js` / `vuelta.css` | **El reconocimiento de haber recorrido otra vez el Nivel** + la entrada de diario. Autosuficiente, y **deriva por sí mismo** si al free se le omite la invitación a escribir (`canAccessModo('escribir')`). Ver § La vuelta del Rosario. |
@@ -428,7 +430,8 @@ dice «esta sesión cae bajo la regla del día», y la del free cae bajo su itin
 | El **Libro** y el **Rezo** | ⛔ | ✅ |
 | Entrar a **cualquier** Misterio ya recorrido | ⛔ | ✅ |
 | **Escribir** en el Diario durante la sesión | ⛔ | ✅ |
-| Los **Retiros**, Extras, Sanar sin contar créditos | ⛔ | ✅ |
+| Extras, y Sanar sin contar créditos | ⛔ | ✅ |
+| Los **Retiros** | ⛔ | ⛔ — **bajo desarrollo**, ver § Retiros |
 
 ⚠ **El DEMO se retiró.** `plan === 'free' && nivelId === '0101' → true` abría TODOS los
 modos en el primer cuaderno. El free no tiene un Nivel-regalo con todo abierto: tiene
@@ -633,10 +636,16 @@ comparten SDK: el modular y el compat.
 `requirePremiumAccess('sanar')`. **Sanar de verdad no tenía modo propio ni puerta.**
 Abrir `'sanar'` sin deshacer esto habría regalado los Retiros enteros.
 
-| modo | free | premium |
-|---|---|---|
-| `audio` · `cantos` · `diario` · `sanar` · `mapa` | ✅ | ✅ |
-| `libro` · `rezar` · `escribir` · `retiros` · `extras` | ⛔ | ✅ |
+| modo | free | premium | developer |
+|---|---|---|---|
+| `audio` · `cantos` · `diario` · `sanar` · `mapa` | ✅ | ✅ | ✅ |
+| `libro` · `rezar` · `escribir` · `extras` | ⛔ | ✅ | ✅ |
+| `retiros` | ⛔ | ⛔ **bajo desarrollo** | ✅ |
+
+⚠ **`retiros` ya no lo decide el plan, sino el flag.** El Santuario está a medias
+y queda fuera del MVP: `canAccessModo('retiros')` es
+`MOSTRAR_RETIROS === true && isPrem`, y el developer sale antes por el `return`
+de arriba. Ver § Retiros.
 
 ⚠ **`extras.html` tenía una puerta y necesitaba dos**: la del **flag** (la tienda está
 a medias, y desaparecerá) y la del **plan** (la tienda es de Premium, y se queda). Sin
@@ -1227,6 +1236,112 @@ El kit estaba a medio construir y se apagó entero para el lanzamiento al grupo 
 
 **Otros pendientes del kit** (no bloqueantes, pero es lo que había "a medias"): los premios que anuncia el popup del cofre son texto fijo en `BLOQUES_MAP` y no existen en el catálogo; `openTreasure` no otorga nada y su estado `opened` no persiste; el cofre de `world.js` es placeholder puro; BGM y estampitas se compran pero nada las consume; `SKINS_CATALOG` de `utils.js` es un espejo manual del JSON que se desincroniza a la primera skin nueva.
 
+## Retiros — El Santuario, bajo desarrollo (oculto tras flag)
+
+*Estado: implementado + banco de pruebas (`tools/test-flag-retiros.js`, 36). **PENDIENTE prueba visual en dispositivo** — ver Pendientes 17.*
+
+**El Santuario queda fuera del MVP.** Los Retiros están a medio construir y hay
+que concretar el producto mínimo viable antes de las pruebas con usuarios reales.
+Se apagan enteros para **premium, beta y free**; el **developer sigue entrando**,
+porque es quien los está construyendo.
+
+⚠️ **Esa excepción es lo que lo distingue de `MOSTRAR_RECOMPENSAS`.** Aquel flag
+no tiene salida para nadie —ni para el developer— porque la tienda arrastra una
+deuda de doble cobro y abrirla sería cobrar de más. Aquí no hay nada que cobrar:
+lo que falta es contenido y decisión de producto, así que la puerta trasera se
+deja abierta para poder seguir trabajando.
+
+**El interruptor** — `flags.js`: `window.MOSTRAR_RETIROS = false` + la puerta
+`window.retirosON()`. Se compara contra `true` **exacto**, igual que el otro: una
+página que olvide cargar `flags.js` deja los Retiros **ocultos**, nunca visibles.
+Encender en el futuro = `false` → `true`, una línea.
+
+⚠️ **`retirosON()` no depende de `plan-utils.js`.** `world.html` no lo carga, así
+que la salida del developer se resuelve leyendo directamente `cruzando_view_as`
+(sessionStorage) y `cruzando_plan_cache` (localStorage). Y **honra el "ver como"**:
+un developer mirando como free tampoco los ve — que es exactamente para lo que
+existe ese botón.
+
+⚠️ **Lee el plan CACHEADO, y ese es su límite conocido.** Un developer cuyo caché
+esté frío (primera carga tras cambiar de plan, o datos borrados) no verá los
+Retiros hasta pasar una vez por `index`/`crecer`, que son quienes escriben
+`cruzando_plan_cache`. Es el mismo comportamiento que ya tenía la guarda de
+`extras.html`, y se acepta por la misma razón: solo afecta al developer, y una
+recarga lo arregla.
+
+**Qué apaga:**
+
+| Pieza | Dónde |
+|---|---|
+| La pestaña **Retiros** de la barra | las **ocho** páginas del hub, por `aplicarNavRetiros()` |
+| La puerta **El Santuario** del hub y su panel | `index.html` — `door-santuario` + `rv-santuario` |
+| El catálogo y el reproductor | `retiros.html` · `rezar_taller.html` (guarda al tope del `<body>`) |
+| El banner y el modal de **retiro en curso**, y el pulso de la pestaña | `index.html` — no se consulta ni `talleres` |
+| El filtro **Retiros** del Diario | `diario.html` |
+| Los tres interstitials que anuncian retiros | `cantos.html` — 05 Duelo, 06 Perdón, 07 Enfermedad |
+| La entrada al Santuario desde el cofre del mapa | `world.js` |
+| La línea de los Retiros en el argumentario de **Premium** | `index.html` + `crecer.html` |
+| `canAccessModo('retiros')` | `plan-utils.js` — `MOSTRAR_RETIROS === true && isPrem` |
+
+### La pestaña se retira, no se atenúa
+
+`_applyNavAccess('nav-sanar-btn', 'retiros')` solo baja la opacidad al 35 %, y
+**un botón al 35 % sigue siendo un botón**: es el mismo defecto que las flechas
+del free en el hero de audio y que los quince nodos con candado que se abrían
+igual. Con el flag apagado no hay nada detrás que enseñar, así que el item
+desaparece de la barra.
+
+⚠️ **Y se retira desde `flags.js`, no con ocho parches en ocho HTML.** La pestaña
+está escrita de tres maneras distintas —`onclick` a `retiros.html` en cinco
+páginas, `abrirSanar(this)` + el id `nav-sanar-btn` en index y crecer, y
+`class="nav-item"` en world—, así que `aplicarNavRetiros()` la reconoce por lo
+que la identifica y la quita entera. Es autosuficiente como `toast.js`: se
+engancha sola al `DOMContentLoaded`, y una página que quiera la puerta solo
+necesita el `<script>`.
+
+**Es de dos sentidos e idempotente a propósito.** En el arranque el plan sale del
+caché y puede llegar corregido después: `index` y `crecer` la vuelven a llamar en
+`renderHome` (junto a `_pintarSantuario()`), así que el "ver como" del panel de
+developer repinta sin recargar.
+
+*Por eso `sanar.html` carga ahora `flags.js`: era la única de las ocho que no lo
+tenía, y su pestaña se le habría quedado visible.*
+
+### La puerta trasera, y por qué el developer conserva la suya
+
+`retiros.html` y `rezar_taller.html` llevan la guarda al tope del `<body>` —el
+patrón de `extras.html`—: quien llegue por URL directa, marcador o historial se
+va a `index.html` antes de que se pinte nada. `retiros.js` **conserva** su
+`requirePremiumAccess('retiros', …)`: hoy es redundante porque la guarda de
+arriba dispara primero, y el día que el flag se encienda vuelve a ser la única
+que decide.
+
+### El argumentario de Premium no promete lo que no hay
+
+La línea era **«Sanar sin contar créditos, y los Retiros del Santuario»**, una
+sola cadena en index y crecer. Partida en dos: Sanar se queda siempre y los
+Retiros van en su propio `div` con id, retirable. **Es un argumentario de PAGO**
+— prometer ahí un producto que no existe no es un detalle de UI.
+
+### Los interstitials van pareados por índice
+
+Tres de los diez (05, 06, 07) anuncian retiros **por nombre** y prometen entrar
+en ellos con Premium. La rotación los salta: no se borran, se dejan fuera del
+turno, y el día que el flag se encienda vuelven los diez. El `.mp3` y el texto
+van pareados por índice, así que saltar el índice salta los dos a la vez y no
+queda un audio hablando de otra cosa. El bucle de salto lleva cota de una vuelta
+entera: si algún día se vetaran los diez, devuelve uno en vez de colgarse. Hay
+una prueba que comprueba que los índices vetados son **exactamente** los tres
+textos que mencionan un retiro.
+
+### Apagar no es borrar
+
+Nada se borró y **ningún dato de Firestore se toca**: `users/{uid}/talleres`
+sigue con sus mismas reglas, la callable `evaluarRetiro` sigue desplegada, y las
+entradas de diario con `origen: 'taller'` **se siguen viendo bajo «Todas», con su
+chip**. Lo que se retira es el filtro, no el camino de nadie — la misma regla que
+el Diario ya aplica al free: un flag de presentación no borra lo escrito.
+
 ## Modelo económico — **DESPLEGADO Y VIVO** (auditado 2026-09-02)
 
 ⚠ Esta sección decía «*DISEÑADO, NO implementado*» y «*en inspección, sin implementar*».
@@ -1331,6 +1446,7 @@ escribe `users/{uid}.terminos = { aceptado, fecha (serverTimestamp), version, me
 | sanar.html | ✅ | ✅ `cruzando_theme` | ✅ Firebase+`plan-utils`, gate `developer` tras Auth | onboarding afinidad | ❌ (perfil + completados persisten; `guardarAfinidad` uso TODO) |
 | mini.html | — (pantalla completa) | ✅ `cruzando_theme` | ✅ Firebase compat (uid tras Auth, no bloquea) | — | ❌ marca completado ✅; diario/crédito TODO |
 | extras.html (tienda) | ✅ | ✅ | ✅ | — | 🔒 **oculta** tras `MOSTRAR_RECOMPENSAS` (standby) |
+| retiros.html · rezar_taller.html | ✅ | ✅ | ✅ | — | 🔒 **ocultos** tras `MOSTRAR_RETIROS` (bajo desarrollo; entra el developer) |
 
 *Reskins (audio/rezar/orar) y karaoke/`canto.js`: implementados + harness/golden test, **pendiente prueba visual en dispositivo**.*
 
@@ -1378,3 +1494,15 @@ escribe `users/{uid}.terminos = { aceptado, fecha (serverTimestamp), version, me
 14. `firebase-service.js` es código muerto (ninguna página lo carga) y todavía registra sin casilla: borrarlo o alinearlo si alguna vez se conecta.
 15. **Kit de recompensas en standby** — prueba **visual** en dispositivo con `MOSTRAR_RECOMPENSAS = false`: que el nodo cada-5 se vea como separador discreto (claro y oscuro), que el camino no se descuadre, que no quede ningún cofre/botón/filtro muerto, y que los metros se sigan acumulando y mostrando normal.
 16. **DEUDA BLOQUEANTE del kit** — el doble cobro de `extras.html` (`getProductState` compara objetos contra strings) debe arreglarse **o eliminarse en el rediseño de la tienda ANTES** de poner `MOSTRAR_RECOMPENSAS = true`. Ver § Kit de recompensas.
+
+17. **Retiros ocultos** — prueba **visual** en dispositivo con `MOSTRAR_RETIROS = false`,
+    en los dos temas. **Con cuenta free y con cuenta premium:** que la barra salga con
+    **cinco** pestañas (Hoy · Sanar · Crecer · Diario · Cantos) y no se descuadre en
+    ninguna de las ocho páginas del hub · que en el hub **no** esté la puerta «El
+    Santuario» · que el modal de Premium ya no prometa Retiros · que `retiros.html` y
+    `rezar_taller.html` por URL directa devuelvan a `index.html` sin llegar a pintarse ·
+    que el filtro «Retiros» del Diario no aparezca **y que una entrada de retiro ya
+    escrita se siga viendo bajo «Todas» con su chip**. **Con cuenta developer:** que
+    todo lo anterior siga en su sitio y `retiros.html` abra; y que el botón «ver como
+    free» del panel de developer **quite** la pestaña y la puerta sin recargar, y
+    «ver como developer» las devuelva.
