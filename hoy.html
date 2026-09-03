@@ -100,12 +100,22 @@ button{font:inherit;cursor:pointer}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* ── hero ── */
-.hero{position:relative;margin:0 -20px;height:190px;overflow:hidden;background:var(--bg2)}
-.hero img{width:100%;height:100%;object-fit:cover;display:block}
+/* Las ilustraciones P_*.webp son VERTICALES (3:4). A 190px de alto y ancho
+   completo la caja era 2:1, y `cover` dejaba ver solo el 36% central de la
+   escena: cabezas cortadas y, en Pentecostés, la paloma fuera del cuadro.
+   Con 38dvh (capado a 300px) se ve el ~58%, y la altura acompana a la
+   pantalla en vez de pesar el doble en un telefono corto. */
+.hero{position:relative;margin:0 -20px;height:min(38dvh,300px);overflow:hidden;background:var(--bg2)}
+/* El encuadre sube al 25%: estas escenas estan compuestas a cuerpo entero y
+   el centro geometrico cae por los torsos. */
+.hero img{width:100%;height:100%;object-fit:cover;object-position:center 25%;display:block}
+/* El velo arranca mas abajo que antes (34%): con el hero mas alto, ese 34% se
+   comia la mitad de la imagen. El remate opaco se conserva — es lo que funde
+   la ilustracion con el fondo de la pagina. */
 .hero .fade{
   position:absolute;inset:0;pointer-events:none;
   background:linear-gradient(to bottom,
-    rgba(var(--scrim),0) 34%, rgba(var(--scrim),.72) 78%, rgb(var(--scrim)) 100%);
+    rgba(var(--scrim),0) 56%, rgba(var(--scrim),.72) 84%, rgb(var(--scrim)) 100%);
 }
 
 .fecha{font-size:.72rem;letter-spacing:.11em;text-transform:uppercase;color:var(--text-dim);margin:2px 0 6px}
