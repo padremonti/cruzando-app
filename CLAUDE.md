@@ -406,6 +406,16 @@ del bloque y **la tira de veinte** (`tiraDe` + `cablearTira` — cambia el estad
 cuenta, no el dibujo). El free no pierde el color ni los bloques; cambia **qué** se le
 sirve, no cómo se le pinta.
 
+⚠ **El hero se encuadra contra el arte, no contra un número redondo.** Las `P_*.webp`
+son **verticales (3:4)**; a 190 px de alto y ancho completo la caja quedaba en 2:1 y
+`cover` enseñaba solo el **36 % central** de la escena — cabezas cortadas, y en
+Pentecostés la paloma fuera del cuadro. Ahora la caja es `min(38dvh, 300px)` (se ve
+el ~58 %, y la altura acompaña a la pantalla en vez de pesar el doble en un teléfono
+corto) y el encuadre sube a `object-position: center 25%`, porque estas escenas están
+compuestas **a cuerpo entero** y el centro geométrico cae por los torsos. El velo
+arranca al **56 %** en vez del 34 %: con el hero más alto, aquel 34 % se comía media
+imagen. El remate opaco se conserva — es lo que funde la ilustración con el fondo.
+
 ⚠ **El puntero del free ya viene adelantado.** `advanceFreeMisterio` escribe
 `{misterio: siguiente, completedToday: true}` en la MISMA operación: al volver de una
 sesión, `freeProgress` ya apunta a mañana. La pantalla no retrocede el puntero —sería
@@ -576,6 +586,13 @@ lee `hoy.html`.
 Orden en las ocho páginas del hub: **Hoy · Sanar · Crecer · Retiros · Diario · Cantos**.
 Cada página llama distinto (`navigateTo` · `navTo` · `goTo` · `window.goTo`) y el item
 de Hoy habla el idioma de la suya.
+
+⚠ **Ese es el orden del MARKUP; hoy se ven CINCO.** La pestaña de Retiros la retira
+`aplicarNavRetiros()` en tiempo de ejecución mientras `MOSTRAR_RETIROS` esté apagado
+—el developer sigue viéndola—, así que la barra real es **Hoy · Sanar · Crecer ·
+Diario · Cantos**. El markup no se tocó a propósito: el día que El Santuario se
+encienda la pestaña vuelve sola, y las pruebas que fijan el orden de las seis
+etiquetas (`tools/test-dia.js`) siguen valiendo. Ver § Retiros.
 
 **Todo el mundo vuelve al mapa.** La Ruta C hizo depender la casa del plan (`_casa()`,
 `_esCasa()`, `_pintarCasa()`) porque el free no tenía mapa. Ahora lo tiene, así que el
@@ -1202,7 +1219,7 @@ Así **un canto nuevo llega con su nombre puesto** y no hay tabla paralela que s
 
 El kit estaba a medio construir y se apagó entero para el lanzamiento al grupo de prueba. **Nada se borró y ningún dato de Firestore se toca**: la ocultación es 100 % de presentación.
 
-**El interruptor** — `flags.js` (patrón de `appcheck-key.js`): `window.MOSTRAR_RECOMPENSAS = false` + la puerta única `window.recompensasON()`. Se compara contra `true` **exacto**: una página que olvide cargar `flags.js` deja el kit **oculto**, no visible — falla del lado seguro. Cargado en 9 páginas (index, crecer, extras, cantos, world, audio, orar, rezar, diario), **siempre antes de `utils.js`**. Encender en el futuro = `false` → `true`, una línea.
+**El interruptor** — `flags.js` (patrón de `appcheck-key.js`): `window.MOSTRAR_RECOMPENSAS = false` + la puerta única `window.recompensasON()`. Se compara contra `true` **exacto**: una página que olvide cargar `flags.js` deja el kit **oculto**, no visible — falla del lado seguro. `flags.js` va hoy en **13 páginas**, **siempre antes de `utils.js`**: las 9 que pedía este flag (index, crecer, extras, cantos, world, audio, orar, rezar, diario) y las **4 que trajo el de Retiros** (sanar, hoy, retiros, rezar_taller). Un archivo, dos interruptores: quien añada una página solo tiene que acordarse una vez. Encender en el futuro = `false` → `true`, una línea.
 
 **Qué apaga** (10 guardas de una línea):
 
@@ -1306,6 +1323,11 @@ developer repinta sin recargar.
 
 *Por eso `sanar.html` carga ahora `flags.js`: era la única de las ocho que no lo
 tenía, y su pestaña se le habría quedado visible.*
+
+**`_applyNavAccess('nav-sanar-btn', 'retiros')` sigue en index y crecer, y no sobra.**
+Hoy atenúa un botón que ya está en `display:none` —inocuo—, pero es la línea que
+volverá a mandar el día que el flag se encienda y la pestaña sea otra vez cuestión
+de plan. Quitarla ahora sería dejar la pestaña abierta a los free ese mismo día.
 
 ### La puerta trasera, y por qué el developer conserva la suya
 
