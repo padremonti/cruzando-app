@@ -66,6 +66,13 @@
        lo que el free escribe es suyo. Cerrarlos seria un despojo, no un muro. */
     if (modo === 'cantos')  return true;
     if (modo === 'diario')  return true;
+    /* LEER el Diario es de todos; ESCRIBIR en la sesion diaria es de Premium.
+       La asimetria es deliberada: un downgrade de plan no puede borrarle a
+       nadie su camino, asi que lo escrito antes se sigue viendo y lo que se
+       retira es el campo de texto.
+       Sanar es la excepcion y NO pasa por aqui: alli se escribe con creditos,
+       y ese es justo el sitio donde escribir importa mas. */
+    if (modo === 'escribir') return isPrem;
     /* Sanar se abre a cualquiera, y lo que se abre es de verdad: el elenco, el
        velo de foco y TODA la acogida son libres para siempre. Lo que cuesta es
        entrar al Misterio-puerta, y eso no lo decide esta tabla sino el saldo,
@@ -225,10 +232,13 @@
       if (idx >= 0 && idx < PUB.length - 1) {
         nextNivelId = PUB[idx + 1];
       } else {
-        /* Se acabo lo publicado: se vuelve al primero. No es un tope, es la
-           vuelta — el free recorre el camino otra vez mientras llega el
-           Mundo siguiente, igual que Premium repite el suyo. */
-        nextNivelId = PUB[0];
+        /* Se acabo lo publicado: se QUEDA en el ultimo, dando vueltas ahi.
+           Volver al primero arrastraria `cruzando_current_nivel` hacia atras y
+           el mapa le ensenaria el Mundo 1 despues de haber cruzado cuatro
+           Niveles — el defecto de 'Donde estoy != hasta donde he llegado'.
+           Es lo mismo que hace Premium cuando siguientePublicado() da null, y
+           los dos avanzaran el dia que 0201 se publique. */
+        nextNivelId = currentNivelId;
       }
     }
 
@@ -269,21 +279,6 @@
     window.location.replace('index.html?blocked=' + encodeURIComponent(modo));
     return false;
   }
-
-  // ── yaGanado ─────────────────────────────────────────────────────────────────
-  // Devuelve true si este Misterio YA fue completado antes (tiene timestamp).
-  // progressDoc: el doc de progreso del nivel (objeto con .progress[blk][idx]).
-  // Regla de uso (la aplican las PÁGINAS, no esta función):
-  //   - premium/beta/developer: ignoran yaGanado (siempre ganan metros).
-  //   - free: si yaGanado(...) === true, NO se otorgan metros por ese Misterio
-  //     (ganancia "forward-only" dentro de 0101).
-  function yaGanado(progressDoc, blk, idx) {
-    try {
-      return !!(progressDoc && progressDoc.progress &&
-                progressDoc.progress[blk] && progressDoc.progress[blk][idx]);
-    } catch (e) { return false; }
-  }
-  window.yaGanado = yaGanado;
 
   // ── demoCompleto ─────────────────────────────────────────────────────────────
   // true si 0101 (el DEMO Free) está completo: 4 bloques × 5 misterios con valor.

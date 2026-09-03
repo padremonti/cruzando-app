@@ -1181,7 +1181,6 @@ let blk='gozosos', bIdx=0;
    en vez de inferirla del progreso. Si es asi no se vuelve a preguntar: la
    respuesta ya se dio una vez. */
 let _posDicha=false;
-let _freeNoGana=false; // Política Free v2: true => suprime ganancia de metros (revisita en DEMO 0101)
 let totalM=0;
 let playlist=[], plIdx=0;
 // El rezo ya concluyó (5º Misterio completado): enciende la barrita de Conclusión
@@ -2073,7 +2072,7 @@ function countBead(){
     if(el){
       if(isOnTime){
         el.classList.add('lit-correct','gold-flash');
-        if(!_freeNoGana){ _showBeadBonus(el); addMeters(25); }
+        _showBeadBonus(el); addMeters(25);
       } else {
         el.classList.add('lit-normal');
       }
@@ -2090,7 +2089,7 @@ function countBead(){
     if(lastBead){
       if(isOnTime){
         lastBead.classList.add('lit-correct','gold-flash');
-        if(!_freeNoGana){ _showBeadBonus(lastBead); addMeters(25); }
+        _showBeadBonus(lastBead); addMeters(25);
       } else {
         lastBead.classList.add('lit-normal');
       }
@@ -2148,9 +2147,7 @@ function updateToggleHref(){
 function updateMysteryContent(){
   // Política Free v2 (forward-only): captura AL EMPEZAR si este Misterio ya estaba
   // completado. Solo 'free' lo activa; premium/beta/developer siempre ganan.
-  // yaGanado tolera estados parciales (prog={}, blk null, bIdx undefined => false).
   var _plan=window.effectivePlan?window.effectivePlan():'free';
-  _freeNoGana=(_plan==='free')&&!!(window.yaGanado&&window.yaGanado(prog,blk,bIdx));
   setupMediaSession();
   const md=mData(blk,bIdx),m=mNum(blk,bIdx);
   const hi=$('hero-img');
@@ -2340,8 +2337,8 @@ function initEscrH(md){
 async function onWrite(qi,text,force=false){
   if(!text.trim())return;
   await saveRef(qi,text);
-  if(!firstAns[qi]){firstAns[qi]=true;if(window.CZSound)CZSound('reflectionSaved');if(!_freeNoGana){await addMeters(MR_QF);showSlide(MR_QF,'¡Primera respuesta!');}}
-  else if(force){if(window.CZSound)CZSound('reflectionSaved');if(!_freeNoGana){await addMeters(MR_QU);}}
+  if(!firstAns[qi]){firstAns[qi]=true;if(window.CZSound)CZSound('reflectionSaved');await addMeters(MR_QF);showSlide(MR_QF,'¡Primera respuesta!');}
+  else if(force){if(window.CZSound)CZSound('reflectionSaved');await addMeters(MR_QU);}
   const sv=$('qsv'+qi);
   if(sv){sv.textContent='✓ Guardado';setTimeout(()=>{if(sv)sv.textContent='';},2500);}
 }
@@ -2594,7 +2591,7 @@ async function onTrackEnded(){
   if(track.type==='misterio'){
     await completeMystery();
     if(track.mIdx===4) rezoConcluido=true;
-    if(!_freeNoGana){ await addMeters(MR_REZO); showSlide(MR_REZO); }
+    await addMeters(MR_REZO); showSlide(MR_REZO);
     /* La decena se cierra en decenario mientras la siguiente pista —el canto—
        ya arranca: sin await, para que no haya tiempo muerto. El velo (940) va
        por encima del karaoke (400), así que se ve sobre las imágenes. */

@@ -51,11 +51,24 @@
 
   var abierta = false;
 
+  /* Escribir en el Diario es de Premium, y la regla se DERIVA aqui: los tres
+     reproductores comparten esta pantalla, y una regla que hay que recordar en
+     tres sitios se olvida en uno. `opts.soloLectura` la fuerza si hiciera falta.
+     Sin plan-utils cargado se asume que se puede escribir, que es como se
+     comportaba antes: degradar no puede quitarle nada a quien ya lo tenia. */
+  function _soloLee(opts) {
+    if (opts.soloLectura != null) return !!opts.soloLectura;
+    if (typeof window === 'undefined' || !window.canAccessModo) return false;
+    var p = window.effectivePlan ? window.effectivePlan() : window.currentPlan;
+    return !window.canAccessModo('escribir', p);
+  }
+
   function mostrar(opts) {
     opts = opts || {};
     if (abierta || typeof document === 'undefined') return Promise.resolve(false);
     abierta = true;
     hoja();
+    var soloLee = _soloLee(opts);
 
     var velo = el('div', 'vuelta-velo');
     velo.setAttribute('role', 'dialog');
@@ -70,13 +83,20 @@
     velo.appendChild(el('div', 'vuelta-linea', 'Has recorrido de nuevo este Nivel.'));
     velo.appendChild(el('div', 'vuelta-pregunta', opts.pregunta || PREGUNTA));
 
+    /* Se omite la INVITACION a escribir, no la pregunta ni el reconocimiento:
+       la vuelta se reconoce igual, y la pregunta queda para llevarse. Con la
+       oferta retirada no hay nada que declinar, asi que 'Ahora no' —que es una
+       respuesta— pasa a 'Continuar', que es una salida. */
     var acciones = el('div', 'vuelta-acciones');
     var bEscribir = el('button', 'vuelta-btn primario', 'Escribir en mi diario');
-    var bLuego    = el('button', 'vuelta-btn discreto', 'Ahora no');
-    acciones.appendChild(bEscribir);
+    var bLuego    = el('button', 'vuelta-btn ' + (soloLee ? 'primario' : 'discreto'),
+                        soloLee ? 'Continuar' : 'Ahora no');
+    if (!soloLee) acciones.appendChild(bEscribir);
     acciones.appendChild(bLuego);
     velo.appendChild(acciones);
 
+    /* La caja tampoco se monta: dejarla escondida en el DOM la deja al alcance
+       de un `classList.add` de cualquiera. */
     var caja = el('div', 'vuelta-escribir');
     var area = el('textarea', 'vuelta-area');
     area.setAttribute('placeholder', 'Escribe lo que has descubierto…');
@@ -87,7 +107,7 @@
     var aviso = el('div', 'vuelta-aviso', '');
     fila.appendChild(bCancelar); fila.appendChild(bGuardar);
     caja.appendChild(area); caja.appendChild(fila); caja.appendChild(aviso);
-    velo.appendChild(caja);
+    if (!soloLee) velo.appendChild(caja);
 
     document.body.appendChild(velo);
     requestAnimationFrame(function () { velo.classList.add('dentro'); });

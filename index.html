@@ -1464,11 +1464,11 @@ body.hub-clean .hub-door-santuario { animation-delay:1.2s !important; }
 
       <!-- Beneficios -->
       <div class="premium-features">
-        <div class="premium-feature"><span class="premium-feature-icon">✦</span> El mapa: vuelve a cualquier Nivel que ya recorriste</div>
-        <div class="premium-feature"><span class="premium-feature-icon">✦</span> Cualquier Misterio, en el orden y el modo que quieras</div>
-        <div class="premium-feature"><span class="premium-feature-icon">✦</span> El Libro: los textos para leer, a tu ritmo</div>
+        <div class="premium-feature"><span class="premium-feature-icon">✦</span> Los Misterios del día completos: un Nivel cada semana</div>
+        <div class="premium-feature"><span class="premium-feature-icon">✦</span> El Libro y el Rezo, además del Audio</div>
+        <div class="premium-feature"><span class="premium-feature-icon">✦</span> Vuelve a cualquier Misterio que ya recorriste</div>
+        <div class="premium-feature"><span class="premium-feature-icon">✦</span> Escribe tus reflexiones en el Diario</div>
         <div class="premium-feature"><span class="premium-feature-icon">✦</span> Sanar sin contar créditos, y los Retiros del Santuario</div>
-        <div class="premium-feature"><span class="premium-feature-icon">✦</span> Metros cada vez que rezas, también al repetir</div>
       </div>
 
       <!-- Código de descuento -->
@@ -1557,13 +1557,21 @@ body.hub-clean .hub-door-santuario { animation-delay:1.2s !important; }
       </div>
     </button>
     <script>
-    /* La puerta se tiñe con el bloque que la Iglesia reza HOY y lo dice por su
-       nombre: el hub cambia de color cada dia. Va aqui, pegada al elemento, y
-       degrada sola: sin dia.js la puerta se queda con su texto y su cian. */
-    (function () {
+    /* La puerta se tiñe con el bloque de quien la mira y lo dice por su nombre.
+
+       Para premium ese bloque es el que la Iglesia reza HOY; para el free es el
+       de SU Misterio, que va por su propio itinerario. La puerta y la pantalla
+       tienen que decir lo mismo: si el hub promete un color y Hoy entrega otro,
+       el usuario no sabe cuál de los dos le miente.
+
+       Idempotente y llamable otra vez a propósito: aquí se pinta al instante con
+       el bloque del día —sin saber todavía de quién es la sesión— y las fases del
+       arranque repintan en cuanto se sabe. Falla pintando de más, nunca dejando
+       la puerta muda. Y degrada sola: sin dia.js se queda con su texto y su cian. */
+    window._tenirPuertaHoy = function (b) {
       var d = document.getElementById('door-hoy');
-      if (!d || !window.Dia || !window.rgbBloque) return;
-      var b = Dia.bloqueDeHoy(), rgb = rgbBloque(b);
+      if (!d || !b || !window.rgbBloque) return;
+      var rgb = rgbBloque(b);
       if (!rgb) return;
       d.style.background = 'rgba(' + rgb + ',0.07)';
       var ic = d.querySelector('.hub-door-icon');
@@ -1572,7 +1580,22 @@ body.hub-clean .hub-door-santuario { animation-delay:1.2s !important; }
       if (sv) sv.setAttribute('stroke', COLORES_BLOQUE[b]);
       var sub = d.querySelector('.hub-door-sub');
       if (sub) sub.textContent = NOMBRES_BLOQUE[b];
-    }());
+    };
+
+    /* De quién es el bloque. El free lo saca de su puntero —el MISMO documento
+       que lee hoy.html—, y por eso los dos no pueden discrepar. */
+    window._pintarPuertaHoy = function (plan) {
+      var p  = plan || (window.effectivePlan ? effectivePlan() : window.currentPlan);
+      var fp = window._freeProg;
+      if (p === 'free' && fp && fp.misterio) {
+        var n = Math.min(20, Math.max(1, fp.misterio));
+        _tenirPuertaHoy(['gozosos','luminosos','dolorosos','gloriosos'][Math.floor((n - 1) / 5)]);
+        return;
+      }
+      if (window.Dia) _tenirPuertaHoy(Dia.bloqueDeHoy());
+    };
+
+    if (window.Dia) _tenirPuertaHoy(Dia.bloqueDeHoy());
     </script>
     <button class="hub-door hub-door-sanar hub-an" style="animation-delay:.6s" onclick="navTap(this); navigateTo('sanar.html')">
       <div class="hub-door-icon">
@@ -1656,7 +1679,7 @@ body.hub-clean .hub-door-santuario { animation-delay:1.2s !important; }
     <div class="banner-premium anim-in" id="banner-premium" style="display:none" onclick="openModal('modal-premium')">
       <div class="banner-premium-text">
         <div class="banner-premium-title">¿Quieres ir más lejos?</div>
-        <div class="banner-premium-sub">Vuelve a los Niveles que ya recorriste, a tu ritmo.</div>
+        <div class="banner-premium-sub">Los Misterios del día completos, y todo el camino abierto.</div>
       </div>
       <button class="banner-premium-btn">Únete →</button>
     </div>
@@ -2585,6 +2608,9 @@ onAuthStateChanged(auth, async function(user) {
     var _fpCached = localStorage.getItem('cruzando_free_prog');
     window._freeProg = _fpCached ? JSON.parse(_fpCached) : null;
   } catch(e) { window._freeProg = null; }
+  /* Con el caché ya se puede pintar bien y sin red, que es el caso normal.
+     Si se equivoca, la FASE 3 repinta un instante después. */
+  if (window._pintarPuertaHoy) _pintarPuertaHoy(_cPlan);
 
   var _cProgress = getProgressCache(_cNivel);
   window._firestoreProgress = _cProgress;
@@ -2666,12 +2692,11 @@ onAuthStateChanged(auth, async function(user) {
       var fpSnap = await getDoc(doc(db, 'users', currentUser.uid, 'freeProgress', 'current'));
       var fpData = fpSnap.exists() ? fpSnap.data()
         : { nivelId:'0101', misterio:1, completedToday:false, fechaHoy:'' };
-      var hoy = window.getTodayKey ? window.getTodayKey() : new Date().toISOString().slice(0,10);
-      if (fpData.fechaHoy !== hoy) {
-        fpData.completedToday = false;
-        fpData.fechaHoy = hoy;
-      }
-      window._freeProg = fpData;
+      /* El reinicio de medianoche estaba escrito aquí OTRA vez. Es una sola
+         regla y vive en plan-utils, donde la leen los dos SDK. */
+      window._freeProg = window.normalizarFreeProgress
+        ? normalizarFreeProgress(fpData) : fpData;
+      fpData = window._freeProg;
       try { localStorage.setItem('cruzando_free_prog', JSON.stringify(fpData)); } catch(e) {}
     } catch(e) {
       var _cached = localStorage.getItem('cruzando_free_prog');
@@ -2684,6 +2709,7 @@ onAuthStateChanged(auth, async function(user) {
 
   // ══ FASE 3: re-render con datos reales ══
   renderHome(Object.assign({}, userData, { plan: realPlan }));
+  if (window._pintarPuertaHoy) _pintarPuertaHoy(realPlan);
 
   try {
     localStorage.setItem('cruzando_plan_cache',    realPlan);

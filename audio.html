@@ -753,6 +753,10 @@ body.light { --tb-circle-bg:var(--card); --tb-circle-border:var(--border); --tb-
 .q-question{font-family:'Crimson Pro',Georgia,serif;font-size:var(--popup-font);font-weight:500;line-height:1.7;color:var(--text-soft);font-style:italic;margin-bottom:12px}
 .q-textarea{width:100%;min-height:110px;max-height:35vh;resize:vertical;overflow-y:auto;padding:14px;background:var(--sec-bg);border:1.5px solid var(--border);border-radius:12px;color:var(--text);font-family:'Crimson Pro',Georgia,serif;font-size:calc(var(--popup-font) * 0.9);line-height:1.7}
 .q-textarea:focus{border-color:var(--lvl-soft);outline:none}
+/* Lo ya escrito, cuando el campo no esta: un downgrade no borra el camino. */
+.q-leida{padding:12px 14px;background:var(--sec-bg);border-left:2px solid var(--border);border-radius:0 10px 10px 0;color:var(--text-soft);font-family:'Crimson Pro',Georgia,serif;
+  font-size:calc(var(--popup-font) * 0.9);line-height:1.7;white-space:pre-wrap}
+.q-nota{margin:4px 0 16px;font-size:0.78rem;color:var(--text-dim);line-height:1.5;text-align:center}
 .q-saved{font-size:0.72rem;color:var(--green);margin-top:5px;min-height:26px}
 .amen-btn{display:block;width:100%;margin-top:24px;padding:18px;border-radius:16px;border:none;cursor:pointer;font-family:'Cormorant Garamond',Georgia,serif;font-size:1.6rem;font-weight:600;background:var(--lvl-bold);color:#fff;letter-spacing:1px;transition:all 0.2s;box-shadow:0 4px 16px rgba(0,0,0,0.12)}
 .amen-btn:active{transform:scale(0.96)}
@@ -1952,7 +1956,6 @@ let sectionRewards   = new Set(); // secciones que ya dieron metros esta sesión
 let microData        = null;  // {id}-micro.json del cuaderno actual
 let blockMicroDone   = false; // si el micro del bloque actual ya fue completado
 let sessionCompleted = false;
-let _freeNoGana      = false; // Política Free v2: true => suprime ganancia de metros (revisita en DEMO 0101)
 
 // Tema
 let isDark = true;
@@ -2636,7 +2639,19 @@ async function addMetersToFirestore(meters) {
 // Etiquetas de preguntas (igual que diario.html / orar.html)
 const Q_QUESTION_KEYS = ['Por María hacia Jesús:', 'Desde el Hijo hacia el Padre:', 'Hijos y hermanos en el Espíritu:'];
 
+/* La regla sale de la tabla de planes, con effectivePlan para que el developer
+   que mira "como free" vea exactamente lo que veria un free. */
+function _puedeEscribirDiario() {
+  if (!window.canAccessModo) return true;
+  return canAccessModo('escribir', window.effectivePlan ? effectivePlan() : userPlan);
+}
+
 async function saveReflection(qi, text) {
+  /* El unico punto por el que se escribe una reflexion. La guarda va AQUI y no
+     solo en el marcado: sin campo no hay como teclear, pero forceSaveAll corre
+     al cerrar el modal con lo que se hubiera leido de Firestore, y volveria a
+     escribirlo —y a cobrar metros por ello— sin que nadie hubiera escrito nada. */
+  if (!_puedeEscribirDiario()) return;
   if (!currentUser || !currentSession) return;
   const { nivel, cuaderno, block, blockIdx, mysteryData } = currentSession;
   const nivelId  = String(nivel).padStart(2,'0') + String(cuaderno).padStart(2,'0');
@@ -2782,19 +2797,13 @@ async function buildSession() {
   sectionRewards = new Set();
   sessionCompleted = false;
 
-  // ── Política Free v2 (forward-only): free no re-gana metros en un Misterio ya
-  //    completado. Captura el estado AL EMPEZAR la sesión, antes de que
-  //    syncToOrarProgress escriba el timestamp al completar. Solo 'free' lo activa;
-  //    premium/beta/developer => siempre false. yaGanado tolera doc vacío => false.
-  _freeNoGana = false;
-  try {
-    const _plan = window.effectivePlan ? window.effectivePlan() : 'free';
-    if (_plan === 'free' && currentUser) {
-      const _psnap = await getDoc(doc(db, 'users', currentUser.uid, 'progress', nivelId));
-      const _pdoc  = _psnap.exists() ? _psnap.data() : {};
-      _freeNoGana  = !!(window.yaGanado && window.yaGanado(_pdoc, block, blockIdx));
-    }
-  } catch(e) { _freeNoGana = false; }
+  /* Aqui vivia la "Politica Free v2, forward-only": el free ganaba metros la
+     primera vez en cada Misterio y nunca mas. Nacio cuando su mundo era el DEMO
+     0101 y podia repetirlo sin fin. Ahora avanza un Nivel cada veinte dias, y en
+     su segunda vuelta el odometro se le habria quedado clavado para siempre
+     aunque siguiera rezando cada dia. Lo que separa los planes es el RITMO
+     —veinte dias contra una semana—, no el premio. Con ella se fue una lectura
+     de Firestore por sesion. */
 
   // ── Micro-aprendizaje: solo en el primer misterio de cada bloque (1, 6, 11, 16)
   const isFirstOfBlock = (m === 1 || m === 6 || m === 11 || m === 16);
@@ -2944,11 +2953,9 @@ function renderMicroAudio(b, nivelId) {
       $('micro-btn-comenzar').onclick = async () => {
         blockMicroDone = true;
         await saveMicroDone(b, nivelId);
-        if (!_freeNoGana) {
-          await addMetersToFirestore(METERS_MICRO);
-          showSlide(METERS_MICRO, '¡Micro completado!');
-          sessionMeters += METERS_MICRO;
-        }
+        await addMetersToFirestore(METERS_MICRO);
+        showSlide(METERS_MICRO, '¡Micro completado!');
+        sessionMeters += METERS_MICRO;
         closeMicro();
         startPlayerSession(null);
       };
@@ -3243,12 +3250,10 @@ async function awardSectionMeters(track) {
   const def = METERS_SECTION[key];
   if (!def) return;
   sectionRewards.add(key);
-  if (!_freeNoGana) {
-    sessionMeters += def.meters;
-    await addMetersToFirestore(def.meters);
-    $('session-meters-display').textContent = `${sessionMeters.toLocaleString('es-MX')}m esta sesión`;
-    showToast(`+${def.meters}m · ${def.label}`);
-  }
+  sessionMeters += def.meters;
+  await addMetersToFirestore(def.meters);
+  $('session-meters-display').textContent = `${sessionMeters.toLocaleString('es-MX')}m esta sesión`;
+  showToast(`+${def.meters}m · ${def.label}`);
 }
 
 function isCanto(idx) {
@@ -3349,7 +3354,6 @@ function volverAlEpilogo() {
 function premiarCantoEpilogo() {
   if (sectionRewards.has('epilogo')) return;
   sectionRewards.add('epilogo');
-  if (_freeNoGana) return;
   sessionMeters += METERS_EPILOGO_CANTO;
   addMetersToFirestore(METERS_EPILOGO_CANTO);
   $('complete-meters').textContent = `+${sessionMeters.toLocaleString('es-MX')}m`;
@@ -3733,12 +3737,19 @@ function updateDevToolsBtns() {
   if (next) next.style.display = dev ? '' : 'none';
 }
 
+/* Las flechas de cambiar de Misterio son de quien puede cambiar de Misterio.
+   El free entra solo al suyo —audio ya lo redirige si los parametros de la URL
+   no coinciden con freeProgress—, asi que para el eran un control que se pulsaba
+   y devolvia al mismo sitio: la promesa incumplida de los quince nodos con
+   candado que se abrian igual. Se retiran, no se atenuan: un boton al 30% sigue
+   siendo un boton. */
 function updateMysteryNavBtns() {
   const m    = audioProgress?.misterio || 1;
+  const solo = (window.effectivePlan ? effectivePlan() : userPlan) === 'free';
   const prev = $('btn-prev-mystery');
   const next = $('btn-next-mystery');
-  if (prev) prev.style.opacity = m > 1  ? '1' : '0.3';
-  if (next) next.style.opacity = m < 20 ? '1' : '0.3';
+  if (prev) { prev.style.display = solo ? 'none' : ''; prev.style.opacity = m > 1  ? '1' : '0.3'; }
+  if (next) { next.style.display = solo ? 'none' : ''; next.style.opacity = m < 20 ? '1' : '0.3'; }
 }
 
 function updateBgmBtn() {
@@ -4330,15 +4341,22 @@ async function openModal() {
   const { mysteryData } = currentSession;
   const questions = parseQuestions(mysteryData?.meditacion || '');
 
+  /* El free LEE las tres preguntas y no tiene campo. Lo que ya escribiera antes
+     —si bajó de plan— sigue a la vista en solo lectura. */
+  const _escribe = _puedeEscribirDiario();
   const body = $('modal-body');
   body.innerHTML = Q_LABELS.map((label, i) => `
     <div class="q-block">
       <div class="q-label" style="color:${Q_COLORS[i]}">${label}</div>
       <div class="q-question">${escHTML(questions[i] || '')}</div>
-      <textarea class="q-textarea" id="q-ta-${i}" placeholder="Escribe tu respuesta…">${escHTML(localAnswers[i])}</textarea>
-      <div class="q-saved" id="q-meters-${i}"></div>
+      ${_escribe
+        ? `<textarea class="q-textarea" id="q-ta-${i}" placeholder="Escribe tu respuesta…">${escHTML(localAnswers[i])}</textarea>
+           <div class="q-saved" id="q-meters-${i}"></div>`
+        : (localAnswers[i] ? `<div class="q-leida">${escHTML(localAnswers[i])}</div>` : '')}
     </div>
-  `).join('') + '<button class="amen-btn" id="modal-amen">Amén</button>';
+  `).join('') +
+    (_escribe ? '' : '<div class="q-nota">Escribir tus respuestas en el Diario es de Premium.</div>') +
+    '<button class="amen-btn" id="modal-amen">Amén</button>';
 
   // Eventos con debounce
   [0,1,2].forEach(i => {
@@ -4347,7 +4365,11 @@ async function openModal() {
     ta.addEventListener('input', () => onAnswerInput(i, ta.value));
   });
   const amen = $('modal-amen');
-  if (amen) amen.onclick = () => { amen.textContent = '✓ Guardado'; amen.classList.add('done'); closeModal(); };
+  if (amen) amen.onclick = () => {
+    /* "Guardado" solo si de verdad se guarda algo. */
+    if (_escribe) { amen.textContent = '✓ Guardado'; amen.classList.add('done'); }
+    closeModal();
+  };
 
   $('modal-overlay').classList.add('open');
   updateFabBadge();
@@ -4392,6 +4414,7 @@ async function forceSaveAll() {
 }
 
 async function awardQuestionMeters(qi, value) {
+  if (!_puedeEscribirDiario()) return;
   if (!value.trim()) return;
   const wasFirst = !audioProgress.firstAnswered[qi];
   if (wasFirst) {
@@ -4400,26 +4423,22 @@ async function awardQuestionMeters(qi, value) {
     const earned = METERS_Q_FIRST;
     const el = $(`q-meters-${qi}`);
     if (el) el.classList.add('earned');
-    if (!_freeNoGana) {
-      sessionMeters += earned;
-      await addMetersToFirestore(earned);
-      showSlide(earned);
-      $('session-meters-display').textContent = `${sessionMeters.toLocaleString('es-MX')}m esta sesión`;
-      if (el) el.textContent = `+${earned}m ganados`;
-      showToast(`+${earned}m · ${Q_LABELS[qi].replace(':','')}`);
-    }
+    sessionMeters += earned;
+    await addMetersToFirestore(earned);
+    showSlide(earned);
+    $('session-meters-display').textContent = `${sessionMeters.toLocaleString('es-MX')}m esta sesión`;
+    if (el) el.textContent = `+${earned}m ganados`;
+    showToast(`+${earned}m · ${Q_LABELS[qi].replace(':','')}`);
   } else {
     // Actualización posterior
     const el = $(`q-meters-${qi}`);
     if (el && !el.classList.contains('earned')) {
       el.classList.add('earned');
-      if (!_freeNoGana) {
-        el.textContent = `+${METERS_Q_UPDATE}m`;
-        await addMetersToFirestore(METERS_Q_UPDATE);
-        showSlide(METERS_Q_UPDATE, '¡Primera respuesta!');
-        sessionMeters += METERS_Q_UPDATE;
-        $('session-meters-display').textContent = `${sessionMeters.toLocaleString('es-MX')}m esta sesión`;
-      }
+      el.textContent = `+${METERS_Q_UPDATE}m`;
+      await addMetersToFirestore(METERS_Q_UPDATE);
+      showSlide(METERS_Q_UPDATE, '¡Primera respuesta!');
+      sessionMeters += METERS_Q_UPDATE;
+      $('session-meters-display').textContent = `${sessionMeters.toLocaleString('es-MX')}m esta sesión`;
     }
   }
 }

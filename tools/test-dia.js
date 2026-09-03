@@ -512,6 +512,94 @@ ok('hoy.html · completado el día, la puerta lleva al mapa', () => {
   if (!/crecer\.html/.test(b))   throw new Error('la salida no lleva al mapa');
 });
 console.log('');
+console.log('== La politica de progreso: cambia el RITMO, no el premio ==');
+
+ok('el odómetro del free no se congela', () => {
+  /* `_freeNoGana` era la "Política Free v2, forward-only": metían metros la
+     primera vez en cada Misterio y nunca más. Nació cuando el mundo del free
+     era el DEMO 0101 y podía repetirlo sin fin. Ahora avanza un Nivel cada
+     veinte días, y en su segunda vuelta el odómetro se le habría quedado
+     clavado para siempre aunque siguiera rezando cada día. */
+  ['audio.html', 'orar.html', 'rezar.html', 'plan-utils.js'].forEach(f => {
+    const s = leer(f);
+    if (/_freeNoGana/.test(s)) throw new Error(f + ' conserva la bandera');
+    if (/yaGanado/.test(s))    throw new Error(f + ' conserva yaGanado');
+  });
+});
+
+ok('el free avanza de Nivel, y al final se QUEDA en el último', () => {
+  /* Volver al primero arrastraría `cruzando_current_nivel` hacia atrás: el mapa
+     le enseñaría el Mundo 1 después de haber cruzado cuatro Niveles. Es lo
+     mismo que hace Premium cuando siguientePublicado() devuelve null. */
+  const pu = leer('plan-utils.js');
+  if (!/nextNivelId = PUB\[idx \+ 1\];/.test(pu))
+    throw new Error('el free dejó de avanzar al Nivel siguiente');
+  if (/nextNivelId = PUB\[0\];/.test(pu))
+    throw new Error('al cerrar lo publicado el free vuelve al primero');
+  if (!/nextNivelId = currentNivelId;/.test(pu))
+    throw new Error('no se queda en el último publicado');
+});
+
+ok('audio.html · al free se le retiran las flechas de Misterio', () => {
+  /* Solo puede entrar al suyo —audio ya lo redirige si la URL no coincide con
+     freeProgress—, así que eran un control que se pulsaba y devolvía al mismo
+     sitio. Se RETIRAN, no se atenúan: un botón al 30% sigue siendo un botón. */
+  const b = AUD.slice(AUD.indexOf('function updateMysteryNavBtns'),
+                      AUD.indexOf('function updateMysteryNavBtns') + 800);
+  if (!/=== 'free'/.test(b))
+    throw new Error('las flechas no distinguen al free');
+  if (!/prev\.style\.display = solo \? 'none' : ''/.test(b))
+    throw new Error('la flecha de retroceso sigue visible para el free');
+  if (!/next\.style\.display = solo \? 'none' : ''/.test(b))
+    throw new Error('la flecha de avance sigue visible para el free');
+});
+console.log('');
+console.log('== El Diario: el free lee, y escribe en Sanar ==');
+
+ok('plan-utils · escribir es de Premium; LEER no', () => {
+  /* La asimetria es la decision: un downgrade de plan no puede borrarle a nadie
+     su camino, asi que la biblioteca del Diario sigue abierta y lo que se
+     retira es el campo de texto. */
+  const pu = leer('plan-utils.js');
+  if (!/if \(modo === 'escribir'\) return isPrem;/.test(pu))
+    throw new Error('escribir no está en la tabla de planes');
+  if (!/if \(modo === 'diario'\)  return true;/.test(pu))
+    throw new Error('leer el Diario dejó de ser de todos');
+});
+
+ok('audio.html · la guarda va en el punto por el que se escribe', () => {
+  /* Sin campo no hay como teclear, pero forceSaveAll corre al CERRAR el modal
+     con lo que se hubiera leido de Firestore: reescribiria las respuestas de un
+     ex-premium y cobraria metros por ellas sin que nadie hubiera escrito nada.
+     Por eso la guarda esta en saveReflection, no solo en el marcado. */
+  const b = AUD.slice(AUD.indexOf('async function saveReflection'),
+                      AUD.indexOf('async function saveReflection') + 600);
+  if (!/if \(!_puedeEscribirDiario\(\)\) return;/.test(b))
+    throw new Error('saveReflection escribe sin comprobar el plan');
+  if (!/function _puedeEscribirDiario/.test(AUD))
+    throw new Error('falta la función que deriva el permiso');
+  if (!/canAccessModo\('escribir'/.test(AUD))
+    throw new Error('audio no pregunta a la tabla de planes');
+});
+
+ok('audio.html · los metros de reflexión no se cobran sin escribir', () => {
+  const b = AUD.slice(AUD.indexOf('async function awardQuestionMeters'),
+                      AUD.indexOf('async function awardQuestionMeters') + 300);
+  if (!/if \(!_puedeEscribirDiario\(\)\) return;/.test(b))
+    throw new Error('un free podría ganar los 650 m sin campo donde escribir');
+});
+
+ok('audio.html · las preguntas se siguen VIENDO', () => {
+  /* Se omite la invitación a escribir, no la pregunta: lo que se medita es la
+     pregunta, y el campo es solo donde se guarda la respuesta. */
+  const b = AUD.slice(AUD.indexOf('const _escribe = _puedeEscribirDiario'),
+                      AUD.indexOf('// Eventos con debounce'));
+  if (!/q-question/.test(b))  throw new Error('la pregunta desapareció para el free');
+  if (!/q-leida/.test(b))     throw new Error('lo ya escrito no se conserva a la vista');
+  if (!/_escribe$/m.test(b) && !/\$\{_escribe/.test(b))
+    throw new Error('el campo no está condicionado al plan');
+});
+console.log('');
 console.log('== El mapa se ve entero; lo que se paga es moverse por él ==');
 
 const CRE = norm(leer('crecer.html'));
@@ -612,18 +700,46 @@ ok('index.html   . el escalonado de las puertas se lee en orden', () => {
   }
 });
 
-ok('index.html   . la puerta se tine con el bloque del dia, y degrada', () => {
-  /* Dice QUE se reza hoy antes de tocarla. Si dia.js no cargara, se queda con
-     su texto y su cian: la puerta nunca se rompe, solo dice menos. */
+ok('index.html   . la puerta se tine con el bloque de QUIEN LA MIRA', () => {
+  /* Para premium es el bloque que la Iglesia reza hoy; para el free, el de SU
+     Misterio. La puerta y la pantalla tienen que decir lo mismo: si el hub
+     promete un color y Hoy entrega otro, no se sabe cual de los dos miente.
+     Y degrada: sin dia.js se queda con su texto y su cian, nunca revienta. */
   const TODO = norm(leer('index.html'));   // head y CSS quedan fuera de IDX
   if (!TODO.includes('src="dia.js"'))
     throw new Error('index no carga dia.js');
   if (!IDX.includes('Dia.bloqueDeHoy()'))
     throw new Error('la puerta no consulta el bloque del dia');
-  if (!IDX.includes('if (!d || !window.Dia || !window.rgbBloque) return;'))
-    throw new Error('sin guarda: sin dia.js la puerta reventaria');
+  if (!IDX.includes('if (!d || !b || !window.rgbBloque) return;'))
+    throw new Error('sin guarda: sin bloque o sin bloques.js la puerta reventaria');
+  if (!IDX.includes('if (window.Dia) _tenirPuertaHoy(Dia.bloqueDeHoy());'))
+    throw new Error('la puerta no se pinta al cargar');
   if (!TODO.includes('.hub-door-hoy       { background:rgba(2,187,224,0.07); }'))
     throw new Error('falta el color de respaldo de la puerta');
+});
+
+ok('index.html   . y el free ve el bloque de SU Misterio, no el del dia', () => {
+  /* Sale de `_freeProg`, el MISMO puntero que lee hoy.html: por eso los dos no
+     pueden discrepar. Se repinta en las dos fases del arranque —con el cache
+     primero, sin red, y con el plan confirmado despues—. */
+  if (!IDX.includes("if (p === 'free' && fp && fp.misterio) {"))
+    throw new Error('la puerta no distingue al free');
+  if (!IDX.includes('window._freeProg'))
+    throw new Error('no lee el puntero del itinerario');
+  const TODO = norm(leer('index.html'));
+  if (!/window\._pintarPuertaHoy = function/.test(TODO))
+    throw new Error('no existe el repintado');
+  eq((TODO.match(/_pintarPuertaHoy\(/g) || []).length, 2,
+     'debe repintarse en las DOS fases del arranque: con cache y con el plan real');
+});
+
+ok('index.html   . el reinicio de medianoche no se copia aqui', () => {
+  /* Estaba escrito por SEXTA vez. Una sola regla, en plan-utils. */
+  const TODO = norm(leer('index.html'));
+  if (!/normalizarFreeProgress/.test(TODO))
+    throw new Error('index no usa la regla compartida');
+  if (/fpData\.completedToday = false/.test(TODO))
+    throw new Error('index se copio otra vez el reinicio diario');
 });
 console.log('');
 console.log('== La pregunta de donde empezar se hace UNA vez ==');

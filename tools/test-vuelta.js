@@ -280,6 +280,57 @@ ok('bloques.js   · es el origen único del nombre del bloque', () => {
   eq(Object.keys(c.window.NOMBRES_BLOQUE).length, 4);
 });
 
+
+// ══════════  La invitacion a escribir es de Premium  ══════════
+
+{
+  const VU = leer('vuelta.js');
+
+  ok('vuelta · la regla se deriva en el módulo, no en los tres llamadores', () => {
+    /* audio, orar y rezar comparten esta pantalla. Una regla que hay que
+       recordar en tres sitios se olvida en uno — y el que se olvida es el que
+       le regala a un free lo que no tiene, o se lo quita a quien sí. */
+    if (!/function _soloLee\(opts\)/.test(VU))
+      throw new Error('no hay derivación en el módulo');
+    if (!/canAccessModo\('escribir'/.test(VU))
+      throw new Error('no pregunta a la tabla de planes');
+    ['audio.html', 'orar.html', 'rezar.html'].forEach(f => {
+      const s = fs.readFileSync(path.join(RAIZ, f), 'utf8');
+      const i = s.indexOf('Vuelta.mostrar({');
+      if (i < 0) throw new Error(f + ' dejó de mostrar la vuelta');
+    });
+  });
+
+  ok('vuelta · sin plan-utils se puede escribir, como antes', () => {
+    /* Degradar no puede quitarle nada a quien ya lo tenía: si la tabla no está
+       cargada, la pantalla se comporta como se comportaba. */
+    if (!/if \(typeof window === 'undefined' \|\| !window\.canAccessModo\) return false;/.test(VU))
+      throw new Error('sin la tabla cargada la pantalla se cerraría de más');
+  });
+
+  ok('vuelta · se omite la invitación, NO el reconocimiento', () => {
+    /* Lo que el free conserva entero: el kicker, el nombre del Nivel, la línea
+       y la pregunta. Lo único que se va es el botón y la caja. */
+    if (!/if \(!soloLee\) acciones\.appendChild\(bEscribir\);/.test(VU))
+      throw new Error('el botón de escribir no está condicionado');
+    if (!/if \(!soloLee\) velo\.appendChild\(caja\);/.test(VU))
+      throw new Error('la caja de texto se sigue montando');
+    ['vuelta-kicker', 'vuelta-linea', 'vuelta-pregunta'].forEach(c => {
+      const re = new RegExp("appendChild\\(el\\('div', '" + c + "");
+      if (!re.test(VU)) throw new Error('se perdió ' + c + ' del reconocimiento');
+    });
+  });
+
+  ok('vuelta · sin oferta no hay nada que declinar', () => {
+    /* "Ahora no" es una RESPUESTA a una invitación. Retirada la invitación,
+       deja de tener sentido y el botón pasa a ser una salida: "Continuar". */
+    if (!/soloLee \? 'Continuar' : 'Ahora no'/.test(VU))
+      throw new Error("el botón sigue diciendo 'Ahora no' sin haber ofrecido nada");
+    if (!/'vuelta-btn ' \+ \(soloLee \? 'primario' : 'discreto'\)/.test(VU))
+      throw new Error('la única salida se quedó en discreta');
+  });
+}
+
 console.log('\n' + '─'.repeat(64));
 if (fallos) {
   console.log('  ✗ ' + fallos + ' fallo(s), ' + pasos + ' pasada(s)');

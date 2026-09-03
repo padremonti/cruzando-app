@@ -1101,7 +1101,6 @@ let ans={0:'',1:'',2:''}, ansT={}, firstAns={0:false,1:false,2:false};
 let awd=new Set();
 let currentGlobalMystery=1;
 let _prepHideTimer=null;
-let _freeNoGana=false; // Política Free v2: true => suprime ganancia de metros (revisita en DEMO 0101)
 
 /* ─── MYSTERY NAV HELPERS ─── */
 const BLOCK_START={gozosos:1,luminosos:6,dolorosos:11,gloriosos:16};
@@ -1566,7 +1565,7 @@ function renderMicro(){
         <div class="micro-final-sub">Reza sin prisa. Lo que necesitas ya lo traes contigo.</div>
         <div class="micro-metros-chip">🚶 +${MR_MICRO}m al peregrino</div></div>`;
       nav.innerHTML=`<button class="btn btn-primary btn-block" id="mgo">Comenzar →</button>`;
-      $('mgo').onclick=async()=>{microDone=true;await saveMicroDone();if(!_freeNoGana){await addMeters(MR_MICRO);showSlide(MR_MICRO);}renderSession();};
+      $('mgo').onclick=async()=>{microDone=true;await saveMicroDone();await addMeters(MR_MICRO);showSlide(MR_MICRO);renderSession();};
       return;
     }
     if(step<tarj.length){
@@ -1608,9 +1607,7 @@ async function saveMicroDone(){
 function renderSession(){
   // Política Free v2 (forward-only): captura AL LLEGAR si este Misterio ya estaba
   // completado. Solo 'free' lo activa; premium/beta/developer siempre ganan.
-  // yaGanado tolera estados parciales (prog={}, blk null, bIdx undefined => false).
   var _plan=window.effectivePlan?window.effectivePlan():'free';
-  _freeNoGana=(_plan==='free')&&!!(window.yaGanado&&window.yaGanado(prog,blk,bIdx));
   var walkImg = $('mariano-slide-img');
   if (walkImg) walkImg.src = MARIANO_WALK;
   $('main-header').style.display='none';
@@ -1826,8 +1823,8 @@ function initEscrH(md){
 async function onWrite(qi,text,force=false){
   if(!text.trim())return;
   await saveRef(qi,text);
-  if(!firstAns[qi]){firstAns[qi]=true;if(window.CZSound)CZSound('reflectionSaved');if(!_freeNoGana){await addMeters(MR_QF);showSlide(MR_QF,'¡Primera respuesta!');}}
-  else if(force){if(window.CZSound)CZSound('reflectionSaved');if(!_freeNoGana){await addMeters(MR_QU);}}
+  if(!firstAns[qi]){firstAns[qi]=true;if(window.CZSound)CZSound('reflectionSaved');await addMeters(MR_QF);showSlide(MR_QF,'¡Primera respuesta!');}
+  else if(force){if(window.CZSound)CZSound('reflectionSaved');await addMeters(MR_QU);}
   const sv=$('qsv'+qi);
   if(sv){sv.textContent='✓ Guardado';setTimeout(()=>{if(sv)sv.textContent='';},2500);}
 }
@@ -2228,7 +2225,7 @@ function premiar(t){
   if(!t||awd.has(t))return;
   awd.add(t);
   const tm={contemplar:MR_CONT,rezo:MR_REZO,canto:MR_CANTO}[t];
-  if(tm){if(!_freeNoGana){addMeters(tm);showSlide(tm,TN[t]);}}
+  if(tm){addMeters(tm);showSlide(tm,TN[t]);}
 }
 
 /* ─── BGM con Web Audio API (funciona en iOS standalone) ─── */
