@@ -521,13 +521,13 @@ await ok('orar        · el splash va por un solo camino', () => {
     .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
   if (/history\.back/.test(cuerpo))
     throw new Error('volvió la segunda rama: el splash se saltaría por ahí');
-  if (!/_esCasa\(pg\) && window\.RachaSplash/.test(s))
-    throw new Error('goTo dejó de pedir el splash camino a casa');
+  if (!/pg\.indexOf\('crecer\.html'\)===0 && window\.RachaSplash/.test(s))
+    throw new Error('goTo dejó de pedir el splash al salir al mapa');
 });
 
 await ok('audio       · _goHome pasa por el embudo con splash', () => {
   const s = leer('audio.html');
-  if (!/window\._goHome\s*=\s*\(\)\s*=>\s*\{\s*goTo\(_casa\(\)\);\s*\}/.test(s))
+  if (!/window\._goHome\s*=\s*\(\)\s*=>\s*\{\s*goTo\('crecer\.html'\);\s*\}/.test(s))
     throw new Error('_goHome vuelve a navegar a pelo y se salta el splash');
 });
 

@@ -8,7 +8,19 @@
   'use strict';
 
   // Niveles publicados en orden de itinerario (actualizar cuando se añada contenido).
+  /* Quinta copia del itinerario, y por eso solo es el RESPALDO: manda
+     niveles.js, que es el origen unico. plan-utils se carga en paginas que no
+     lo traen, asi que la lista literal no se puede borrar todavia —pero en
+     cuanto 0201 pase a 'published' el free lo notara sin tocar este archivo. */
   var PUBLISHED_NIVELES = ['0101', '0102', '0103', '0104'];
+  function publicados() {
+    var N = window.Niveles;
+    if (N && N.ORDEN && N.publicado) {
+      var l = N.ORDEN.filter(function (id) { return N.publicado(id); });
+      if (l.length) return l;
+    }
+    return PUBLISHED_NIVELES;
+  }
 
   // ── resolvePlan ──────────────────────────────────────────────────────────────
   // Devuelve 'free' | 'beta' | 'premium' | 'developer'
@@ -36,16 +48,19 @@
   // ── canAccessModo ────────────────────────────────────────────────────────────
   // modo: 'audio' | 'libro' | 'rezar' | 'cantos' | 'sanar' | 'extras'
   //       | 'badges' | 'logros' | 'metros'
-  // nivelId: opcional — en 0101 Free tiene acceso completo a todos los modos
+  // nivelId: opcional — ya no cambia nada aqui; se conserva porque lo pasan
+  //          varios llamadores y quitarlo tocaria mas de lo que arregla.
+  /* El DEMO se retiro: el free no tiene un Nivel-regalo con todo abierto, sino
+     el itinerario ENTERO en modo audio, un Misterio al dia. Lo que compra Premium
+     no es el acceso al camino sino la LIBERTAD de moverse por el. */
   function canAccessModo(modo, plan, nivelId) {
     if (plan === 'developer') return true;
     var isPrem = isPremiumOrAbove(plan);
-    if (plan === 'free' && nivelId === '0101') return true;
     if (modo === 'audio')   return true;
+    /* El free reza SOLO en audio, y es decision de producto, no un recorte:
+       una sesion guiada al dia es el ritmo del que empieza. El Libro y el Rezo
+       piden a quien los usa que lleve el paso, y eso es lo que Premium abre. */
     if (modo === 'libro')   return isPrem;
-    /* rezar sigue siendo de pago AQUI. El Rosario diario del free se resuelve
-       aparte, en rezar.html, porque depende de que ESE Nivel ya este cruzado
-       y eso solo lo dice el documento de progreso. */
     if (modo === 'rezar')   return isPrem;
     /* La biblioteca de cantos y el Diario son de todos: lo que el free canta y
        lo que el free escribe es suyo. Cerrarlos seria un despojo, no un muro. */
@@ -62,8 +77,11 @@
        nav-sanar-btn y lleva a retiros.html—, asi que 'sanar' gateaba esto y
        Sanar de verdad no tenia puerta ninguna. */
     if (modo === 'retiros') return isPrem;
-    /* El mapa: la libertad de moverse por lo ya cruzado es lo que se paga. */
-    if (modo === 'mapa')    return isPrem;
+    /* El mapa lo ve TODO EL MUNDO: es el camino, y ver donde vas no se cobra.
+       Lo que Premium abre es moverse por el —entrar a cualquier Misterio, en
+       cualquier modo—, y de eso responden 'libro', 'rezar' y la rama free de
+       openMapPopup, que ofrece Audio en SU Misterio y nada en los demas. */
+    if (modo === 'mapa')    return true;
     if (modo === 'extras')  return isPrem;
     if (modo === 'badges')  return true;
     if (modo === 'logros')  return true;
@@ -148,6 +166,20 @@
   }
   window.setLatin = setLatin;
 
+  // ── normalizarFreeProgress ─────────────────────────────────────
+  /* El dia se agota a MEDIANOCHE, por comparacion de fechas y no por un
+     temporizador de 24 horas. Es una sola regla y vive aqui porque la leen dos
+     mundos que no comparten SDK: getFreeProgress (modular) y hoy.html (compat).
+     Copiarla habria sido la quinta deriva de este repo. */
+  function normalizarFreeProgress(d) {
+    var out = d || { nivelId: '0101', misterio: 1, completedToday: false, fechaHoy: '' };
+    if (out.fechaHoy !== getTodayKey()) {
+      out.completedToday = false;
+      out.fechaHoy       = getTodayKey();
+    }
+    return out;
+  }
+
   // ── getFreeProgress ──────────────────────────────────────────────────────────
   // db, getDoc, doc: instancias de Firebase del archivo que llama.
   async function getFreeProgress(uid, db, getDoc, doc) {
@@ -158,25 +190,14 @@
       try {
         var cached = localStorage.getItem('cruzando_free_prog');
         if (!cached) return DEFAULT;
-        var local = JSON.parse(cached);
-        if (local.fechaHoy !== getTodayKey()) {
-          local.completedToday = false;
-          local.fechaHoy = getTodayKey();
-        }
-        return local;
+        return normalizarFreeProgress(JSON.parse(cached));
       } catch (e) { return DEFAULT; }
     }
 
     try {
       var snap = await getDoc(doc(db, 'users', uid, 'freeProgress', 'current'));
       if (!snap.exists()) return DEFAULT;
-      var d = snap.data();
-      // Reset diario si cambió el día
-      if (d.fechaHoy !== getTodayKey()) {
-        d.completedToday = false;
-        d.fechaHoy = getTodayKey();
-      }
-      return d;
+      return normalizarFreeProgress(snap.data());
     } catch (e) {
       // Intentar localStorage como segundo fallback
       try {
@@ -199,11 +220,15 @@
 
     if (nextMisterio > 20) {
       nextMisterio = 1;
-      var idx = PUBLISHED_NIVELES.indexOf(currentNivelId);
-      if (idx >= 0 && idx < PUBLISHED_NIVELES.length - 1) {
-        nextNivelId = PUBLISHED_NIVELES[idx + 1];
+      var PUB = publicados();
+      var idx = PUB.indexOf(currentNivelId);
+      if (idx >= 0 && idx < PUB.length - 1) {
+        nextNivelId = PUB[idx + 1];
       } else {
-        nextNivelId = PUBLISHED_NIVELES[0];
+        /* Se acabo lo publicado: se vuelve al primero. No es un tope, es la
+           vuelta — el free recorre el camino otra vez mientras llega el
+           Mundo siguiente, igual que Premium repite el suyo. */
+        nextNivelId = PUB[0];
       }
     }
 
@@ -276,31 +301,6 @@
   }
   window.demoCompleto = demoCompleto;
 
-  // ── marcarCrecerSiFree ─────────────────────────────────────────
-  // El mapa es de Premium. La pestana se marca con candado y su toque abre la
-  // compra, en vez de llevar a una puerta cerrada. El candado es solo la
-  // senal: quien cierra de verdad es la puerta de crecer.html, y las dos se
-  // pusieron a la vez a proposito -- un candado sin puerta detras es el
-  // defecto que el mapa ya arrastraba con sus quince nodos decorativos.
-  function marcarCrecerSiFree() {
-    var b = document.getElementById('nav-crecer');
-    if (!b || isPremiumOrAbove(window.effectivePlan())) return;
-    b.style.opacity = '0.45';
-    b.onclick = function () { location.href = 'index.html?premium=1'; };
-    var ico = b.querySelector('.app-nav-icon');
-    if (ico && !ico.querySelector('.nav-candado')) {
-      ico.style.position = 'relative';
-      var c = document.createElement('span');
-      c.className = 'nav-candado';
-      c.textContent = '\uD83D\uDD12';
-      c.style.cssText = 'position:absolute;top:-4px;right:-8px;font-size:9px;line-height:1';
-      ico.appendChild(c);
-    }
-  }
-  window.marcarCrecerSiFree = marcarCrecerSiFree;
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', marcarCrecerSiFree);
-  } else { marcarCrecerSiFree(); }
 
   // ── Expose ───────────────────────────────────────────────────────────────────
   window.resolvePlan            = resolvePlan;
@@ -308,6 +308,7 @@
   window.canAccessModo          = canAccessModo;
   window.nivelAccesible         = nivelAccesible;
   window.getTodayKey            = getTodayKey;
+  window.normalizarFreeProgress = normalizarFreeProgress;
   window.getFreeProgress        = getFreeProgress;
   window.advanceFreeMisterio    = advanceFreeMisterio;
   window.requirePremiumAccess   = requirePremiumAccess;

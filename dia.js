@@ -189,21 +189,21 @@
     };
   }
 
-  /* Qué Nivel se reza hoy.
-       premium · beta · developer → el que está cruzando (marcador, o frontera)
-       free                       → el último ENTERO; sin ninguno, todavía nada
-     El free no progresa aquí: reza un Nivel ya cerrado, así que completeMystery
-     corta sola y no escribe. La regla se cumple por construcción, no por una
-     condición que alguien pueda olvidar. */
+  /* Que Nivel se reza hoy — y solo lo sabe para quien sigue el dia.
+
+     premium · beta · developer → el que esta cruzando (marcador, o frontera)
+     free                       → null, A PROPOSITO
+
+     El free no sigue el calendario liturgico: recorre el itinerario de un
+     Misterio al dia, y su Nivel vive en freeProgress/current, no aqui. Devolver
+     null hace que un llamador que se olvide de esa rama falle a la vista, en
+     vez de servirle en silencio un Nivel que no es el suyo. */
   function nivelDiario(plan, opts) {
     opts = opts || {};
-    var orden = opts.orden || (window.Niveles && window.Niveles.ORDEN) || [];
+    var orden = opts.orden || (typeof window !== 'undefined' && window.Niveles && window.Niveles.ORDEN) || [];
     var prem  = (plan === 'premium' || plan === 'beta' || plan === 'developer');
-
-    if (prem) return opts.bookmark || opts.frontera || orden[0] || null;
-
-    var i = orden.indexOf(opts.frontera);
-    return (i > 0) ? orden[i - 1] : null;   // null = aún no ha cerrado ninguno
+    if (!prem) return null;
+    return opts.bookmark || opts.frontera || orden[0] || null;
   }
 
   window.Dia = {

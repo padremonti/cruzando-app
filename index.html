@@ -1464,11 +1464,11 @@ body.hub-clean .hub-door-santuario { animation-delay:1.2s !important; }
 
       <!-- Beneficios -->
       <div class="premium-features">
-        <div class="premium-feature"><span class="premium-feature-icon">✦</span> Acceso ilimitado a todos los niveles publicados</div>
-        <div class="premium-feature"><span class="premium-feature-icon">✦</span> Todos los modos: Audio, Libro y Rezo, sin límites diarios</div>
-        <div class="premium-feature"><span class="premium-feature-icon">✦</span> Acceso a todos los Talleres de Sanar</div>
-        <div class="premium-feature"><span class="premium-feature-icon">✦</span> Diario personal y Biblioteca de Cantos sin avisos</div>
-        <div class="premium-feature"><span class="premium-feature-icon">✦</span> Metros en todas tus interacciones</div>
+        <div class="premium-feature"><span class="premium-feature-icon">✦</span> El mapa: vuelve a cualquier Nivel que ya recorriste</div>
+        <div class="premium-feature"><span class="premium-feature-icon">✦</span> Cualquier Misterio, en el orden y el modo que quieras</div>
+        <div class="premium-feature"><span class="premium-feature-icon">✦</span> El Libro: los textos para leer, a tu ritmo</div>
+        <div class="premium-feature"><span class="premium-feature-icon">✦</span> Sanar sin contar créditos, y los Retiros del Santuario</div>
+        <div class="premium-feature"><span class="premium-feature-icon">✦</span> Metros cada vez que rezas, también al repetir</div>
       </div>
 
       <!-- Código de descuento -->
@@ -1656,7 +1656,7 @@ body.hub-clean .hub-door-santuario { animation-delay:1.2s !important; }
     <div class="banner-premium anim-in" id="banner-premium" style="display:none" onclick="openModal('modal-premium')">
       <div class="banner-premium-text">
         <div class="banner-premium-title">¿Quieres ir más lejos?</div>
-        <div class="banner-premium-sub">Desbloquea todos los Mundos y avanza a tu ritmo.</div>
+        <div class="banner-premium-sub">Vuelve a los Niveles que ya recorriste, a tu ritmo.</div>
       </div>
       <button class="banner-premium-btn">Únete →</button>
     </div>
@@ -3809,8 +3809,8 @@ function _obCerrarSplash() {
 window._obCerrarSplash = _obCerrarSplash;
 window.closePopup    = closePopup;
 
-function _showFree0102Info() {
-  var flag = 'cruzando_free_0102_shown';
+function _showFreeRitmoInfo() {
+  var flag = 'cruzando_free_ritmo_shown';
   if (localStorage.getItem(flag)) return;
   localStorage.setItem(flag, '1');
 
@@ -3820,7 +3820,7 @@ function _showFree0102Info() {
   var btn       = document.getElementById('ob-comenzar-btn');
   if (!wrap || !bocadillo || !texto) return;
 
-  texto.innerHTML = 'A partir de aquí, el modo Audio te da un Misterio cada día.<br>Con Premium, avanzas sin límites.';
+  texto.innerHTML = 'El modo Audio te da un Misterio cada día.<br>Con Premium, avanzas sin esperar al siguiente.';
   bocadillo.style.display = 'block';
   if (btn) btn.style.display = 'none';
 
@@ -3844,7 +3844,7 @@ function _showFree0102Info() {
     }, 500);
   }, 5000);
 }
-window._showFree0102Info = _showFree0102Info;
+window._showFreeRitmoInfo = _showFreeRitmoInfo;
 
 function _resetOnboarding() {
   localStorage.removeItem('cruzando_onboarding');

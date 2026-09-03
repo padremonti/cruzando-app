@@ -1672,11 +1672,11 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 
       <!-- Beneficios -->
       <div class="premium-features">
-        <div class="premium-feature"><span class="premium-feature-icon">✦</span> Acceso ilimitado a todos los niveles publicados</div>
-        <div class="premium-feature"><span class="premium-feature-icon">✦</span> Todos los modos: Audio, Libro y Rezo, sin límites diarios</div>
-        <div class="premium-feature"><span class="premium-feature-icon">✦</span> Acceso a todos los Talleres de Sanar</div>
-        <div class="premium-feature"><span class="premium-feature-icon">✦</span> Diario personal y Biblioteca de Cantos sin avisos</div>
-        <div class="premium-feature"><span class="premium-feature-icon">✦</span> Metros en todas tus interacciones</div>
+        <div class="premium-feature"><span class="premium-feature-icon">✦</span> El mapa: vuelve a cualquier Nivel que ya recorriste</div>
+        <div class="premium-feature"><span class="premium-feature-icon">✦</span> Cualquier Misterio, en el orden y el modo que quieras</div>
+        <div class="premium-feature"><span class="premium-feature-icon">✦</span> El Libro: los textos para leer, a tu ritmo</div>
+        <div class="premium-feature"><span class="premium-feature-icon">✦</span> Sanar sin contar créditos, y los Retiros del Santuario</div>
+        <div class="premium-feature"><span class="premium-feature-icon">✦</span> Metros cada vez que rezas, también al repetir</div>
       </div>
 
       <!-- Código de descuento -->
@@ -1764,7 +1764,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
       <div class="banner-premium anim-in" id="banner-premium" style="display:none" onclick="openModal('modal-premium')">
         <div class="banner-premium-text">
           <div class="banner-premium-title">¿Quieres ir más lejos?</div>
-          <div class="banner-premium-sub">Desbloquea todos los Mundos y avanza a tu ritmo.</div>
+          <div class="banner-premium-sub">Vuelve a los Niveles que ya recorriste, a tu ritmo.</div>
         </div>
         <button class="banner-premium-btn">Únete →</button>
       </div>
@@ -2725,12 +2725,7 @@ onAuthStateChanged(auth, async function(user) {
     renderHome({ displayName: user.displayName || '', email: user.email || '',
                  plan: _cPlan, totalMeters: _cMeters });
     showScreen('home');
-    /* Con el cache diciendo free no se pinta el mapa: si acierta, no hay
-       destello de una pantalla que no es suya; si se equivoca, la FASE 3 lo
-       pinta un instante despues. Falla retrasando, nunca expulsando. */
-    if (_cPlan !== 'free') {
-      requestAnimationFrame(function() { if (window.buildMap) window.buildMap(); });
-    }
+    requestAnimationFrame(function() { if (window.buildMap) window.buildMap(); });
   } else {
     showScreen('home');
     var mc = document.getElementById('map-canvas');
@@ -2806,16 +2801,6 @@ onAuthStateChanged(auth, async function(user) {
   // ══ FASE 3: re-render con datos reales ══
   renderHome(Object.assign({}, userData, { plan: realPlan }));
 
-  /* El mapa es de Premium: aqui se cierra la puerta. Va en la FASE 3 y no en
-     la 1 porque aquella pinta con el plan CACHEADO, y un premium con el cache
-     frio saldria expulsado de su propia pagina.
-     `?premium=1` abre la compra en el hub: cerrar el mapa no puede cerrarle la
-     puerta a quien viene a pagar. Y el developer que usa "ver como free" NO se
-     expulsa, o el panel desde el que cambia de plan quedaria fuera de alcance. */
-  if (!canAccessModo('mapa', realPlan)) {
-    location.replace('index.html?premium=1');
-    return;
-  }
   if (window.repintarSelectorSiAbierto) window.repintarSelectorSiAbierto();
 
   try {
@@ -3861,14 +3846,18 @@ function buildMap() {
       '<div class="' + sphereClass + '" style="' + sphereStyle + '">' + iconHtml + '</div>' +
       '<div class="node-label"><div class="node-label-name" style="color:' + labelColor + '">' + nombre + '</div></div>';
 
-    /* El camino se VE, no se salta. Un Misterio pendiente pertenece a Hoy,
-       que es donde manda el dia; en un Nivel ya cruzado no hay pendientes, asi
-       que esto solo alcanza al Nivel en curso. El mapa conserva el sentido de
-       peregrinacion -- se sigue viendo donde vas -- sin ser la puerta. */
+    /* Para PREMIUM el camino se VE, no se salta: en su Nivel en curso manda el
+       dia, asi que un Misterio pendiente pertenece a Hoy. En uno ya cruzado no
+       hay pendientes, de modo que esto solo alcanza al Nivel en curso.
+
+       Para el FREE no se aplica, y no por descuido: su Misterio activo TAMPOCO
+       esta hecho, asi que esta guarda se lo llevaria a Hoy y no veria nunca su
+       propio popup —el que le ofrece Audio en SU Misterio y le ensena el chip
+       Premium sobre Libro y Rezo—. Esa respuesta dice mas que un redirect. */
     (function(gi,bi,mi,hecho){
       node.onclick = function(){
         if (window.CZSound) CZSound('beadTap');
-        if (!hecho) { _pendienteEsDeHoy(); return; }
+        if (!hecho && !_isFree) { _pendienteEsDeHoy(); return; }
         openMapPopup(gi,bi,mi);
       };
     })(gi,bi,mi,isDone);
@@ -4075,7 +4064,10 @@ function openMapPopup(gi, bi, mi) {
     _isFreeActive = (_nId2 === _fpNId && (gi + 1) === _fpM);
   }
 
-  if (_isFree && (window.currentNivelId || '0101') === '0102') _showFree0102Info();
+  /* El ritmo del free —un Misterio al dia en audio— rige desde el primero, no
+     desde 0102: ahi terminaba el DEMO, y el DEMO se retiro. Se explica una vez,
+     la primera que abre un Misterio del mapa; la marca vive en localStorage. */
+  if (_isFree) _showFreeRitmoInfo();
 
   var b=BLOQUES_MAP[bi], c=b.color;
   document.getElementById('popup-bg').style.background='radial-gradient(ellipse at 30% 60%,' + c + '35 0%,transparent 60%)';
@@ -4206,7 +4198,6 @@ function openMapPopup(gi, bi, mi) {
   var _orarBtn     = document.getElementById('popup-orar');
   var _rezarBtn    = document.getElementById('popup-rezar');
   var _modasTitle  = document.getElementById('popup-modos-title');
-  var _nivelIdPopup = window.currentNivelId || '0101';
 
   // Limpiar chips Premium previos
   [_orarBtn, _rezarBtn].forEach(function(btn) {
@@ -4215,15 +4206,12 @@ function openMapPopup(gi, bi, mi) {
     btn.style.opacity = ''; btn.style.pointerEvents = '';
   });
 
-  if (_isFree && _nivelIdPopup === '0101') {
-    // Nivel 0101: Free tiene acceso completo
-    if (_audioBtn)   _audioBtn.style.display   = '';
-    if (_orarBtn)    _orarBtn.style.display     = '';
-    if (_rezarBtn)   _rezarBtn.style.display    = '';
-    if (_modasTitle) _modasTitle.style.display  = '';
-
-  } else if (_isFree && !_isFreeActive) {
-    // 0102+: no es su misterio del día — ocultar todo
+  /* 0101 tenia aqui su propia copia del DEMO: los tres botones encendidos.
+     Con la tabla ya cerrada, pulsar Libro o Rezo rebotaba con el upsell —un
+     boton que promete y no cumple, el defecto de los nodos con candado que se
+     abrian igual—. El primer Nivel se trata como todos los demas. */
+  if (_isFree && !_isFreeActive) {
+    // no es su Misterio de hoy — ocultar todo
     if (_audioBtn)   _audioBtn.style.display   = 'none';
     if (_orarBtn)    _orarBtn.style.display     = 'none';
     if (_rezarBtn)   _rezarBtn.style.display    = 'none';
@@ -4234,7 +4222,7 @@ function openMapPopup(gi, bi, mi) {
     );
 
   } else if (_isFree && _isFreeActive) {
-    // 0102+: es su misterio del día — audio libre, libro/rezar con chip Premium
+    // es su Misterio de hoy — audio libre, libro/rezar con chip Premium
     if (_audioBtn)   _audioBtn.style.display   = '';
     if (_modasTitle) _modasTitle.style.display  = '';
     if (_orarBtn) {
@@ -4514,8 +4502,8 @@ window._obCerrarSplash = _obCerrarSplash;
 window.closePopup    = closePopup;
 window.closeTreasure = closeTreasure;
 
-function _showFree0102Info() {
-  var flag = 'cruzando_free_0102_shown';
+function _showFreeRitmoInfo() {
+  var flag = 'cruzando_free_ritmo_shown';
   if (localStorage.getItem(flag)) return;
   localStorage.setItem(flag, '1');
 
@@ -4525,7 +4513,7 @@ function _showFree0102Info() {
   var btn       = document.getElementById('ob-comenzar-btn');
   if (!wrap || !bocadillo || !texto) return;
 
-  texto.innerHTML = 'A partir de aquí, el modo Audio te da un Misterio cada día.<br>Con Premium, avanzas sin límites.';
+  texto.innerHTML = 'El modo Audio te da un Misterio cada día.<br>Con Premium, avanzas sin esperar al siguiente.';
   bocadillo.style.display = 'block';
   if (btn) btn.style.display = 'none';
 
@@ -4549,7 +4537,7 @@ function _showFree0102Info() {
     }, 500);
   }, 5000);
 }
-window._showFree0102Info = _showFree0102Info;
+window._showFreeRitmoInfo = _showFreeRitmoInfo;
 
 function _resetOnboarding() {
   localStorage.removeItem('cruzando_onboarding');

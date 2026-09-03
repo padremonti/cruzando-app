@@ -163,6 +163,19 @@ button{font:inherit;cursor:pointer}
 }
 .chip[aria-pressed="true"]{background:var(--cc);color:#12181A}
 
+/* El free ve UN Misterio, no una lista de cinco: la tarjeta le da el peso que
+   en la vista del dia tiene el bloque entero. Mismo acento, misma tipografia. */
+.solo{
+  margin:18px 0 0;padding:18px 16px;border-radius:14px;
+  background:rgba(var(--acento-rgb),.09);
+  border:1px solid rgba(var(--acento-rgb),.28);
+}
+.solo .solo-n{
+  display:block;font-size:.7rem;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--acento);font-weight:600;margin-bottom:6px;
+  font-variant-numeric:tabular-nums;
+}
+.solo .solo-t{margin:0;font-size:1.32rem;line-height:1.25;color:var(--text);font-weight:500}
 .cinco{list-style:none;margin:16px 0 0;padding:0}
 .cinco li{
   display:grid;grid-template-columns:24px 1fr auto;gap:11px;align-items:center;
@@ -525,24 +538,7 @@ body.light .app-nav{background:var(--card)}
       }
     }
 
-    // ── la tira ──
-    var vueltas = (window.Rosario ? Rosario.vueltas(prog) : 0);
-    h += '<div class="nivel"><div class="niv-cab">' +
-         '<span class="niv-nom">' + esc(Niveles.nombre(nivelId) || nivelId) + '</span>' +
-         '<span class="niv-vuelta">' + (vueltas > 0 ? (vueltas + 1) + 'ª vuelta' : '') + '</span></div>';
-    h += '<div class="tira">';
-    Dia.BLOQUES.forEach(function(b){
-      var titB = (data && data.misterios && data.misterios[b]) || [];
-      h += '<div class="grupo">';
-      for (var j = 0; j < 5; j++) {
-        h += '<button class="bead ' + st.bloques[b][j] + '" type="button" style="--bc:' +
-             COLORES_BLOQUE[b] + ';--bc-rgb:' + rgbBloque(b) + '" data-b="' + b + '" data-i="' + j + '" ' +
-             'aria-label="Misterio ' + (BASE_M[b]+j) + ', ' +
-             esc((titB[j] && titB[j].titulo) || '') + '"></button>';
-      }
-      h += '</div>';
-    });
-    h += '</div><p class="pie-bead" id="pie"><span class="tt">&nbsp;</span></p></div>';
+    h += tiraDe(function(b, j){ return st.bloques[b][j]; });
 
     $app.innerHTML = h;
     $app.style.setProperty('--acento', acc);
@@ -563,20 +559,178 @@ body.light .app-nav{background:var(--card)}
       location.href = 'audio.html?nivel=' + nivel + '&cuaderno=' + cuaderno + '&misterio=' + nMis + '&hoy=1';
     };
 
+    cablearTira(function(b, j){
+      var e = st.bloques[b][j];
+      if (e === 'rezado' || e === 'vueltahoy')    return { cls:'ok',  sym:'&#10003;', txt:'Ya lo rezaste' };
+      if (e === 'espera')                         return { cls:'off', sym:'', txt:'Disponible ' + Dia.proximoDia(b, hoy) };
+      if (st.diaGastado && b !== st.elegido)      return { cls:'off', sym:'', txt:'Disponible mañana' };
+      return { cls:'on', sym:'', txt:'Disponible hoy' };
+    });
+  }
+
+  /* ══════════════════  EL CAMINO DEL FREE  ═════════════════════════
+     Un Misterio al dia, el suyo, en modo audio. No hay bloque del dia, no hay
+     eleccion y no hay Rosario que completar: hay un paso, y manana el siguiente.
+
+     La fuente es `freeProgress/current`, el MISMO documento que audio.html lee
+     al arrancar. Por eso Hoy no puede mandarle a un Misterio que audio le vaya
+     a rechazar: los dos leen el mismo sitio, y audio redirige si no coinciden.
+
+     Y no se pasa `hoy=1`: esa bandera existia para decir "esta sesion NO
+     progresa". La del free si progresa —es su camino—, asi que su marcador
+     tiene que moverse como el de cualquiera. */
+  var freeProg = null;
+
+  async function arrancarFree(){
+    var d = null;
+    try {
+      var fs = await _db.collection('users').doc(usr.uid)
+                        .collection('freeProgress').doc('current').get();
+      if (fs.exists) d = fs.data();
+    } catch(e){
+      /* Sin red se cae al espejo local, que audio tambien mantiene. */
+      try { d = JSON.parse(localStorage.getItem('cruzando_free_prog') || 'null'); } catch(_){}
+    }
+    /* El reinicio de medianoche es una sola regla y vive en plan-utils. */
+    freeProg = window.normalizarFreeProgress
+             ? normalizarFreeProgress(d)
+             : (d || { nivelId:'0101', misterio:1, completedToday:false, fechaHoy:'' });
+
+    nivelId = freeProg.nivelId || '0101';
+    if (!Niveles.publicado(nivelId)) nivelId = '0101';
+    nivel    = parseInt(nivelId.slice(0,2), 10) || 1;
+    cuaderno = parseInt(nivelId.slice(2,4), 10) || 1;
+
+    try {
+      var r = await fetch(base() + 'data/' + nivelId + '.json');
+      if (r.ok) data = await r.json();
+    } catch(e){}
+    if (!data) {
+      pantalla('No se pudo cargar el Nivel',
+        'Revisa tu conexión y vuelve a intentarlo.',
+        'Reintentar', function(){ location.reload(); });
+      return;
+    }
+
+    /* La tira se pinta con `progress`, que es lo que los reproductores escriben
+       de verdad —no con "todo lo anterior a mi posicion"—. Asi dice la verdad
+       tambien para quien fue premium y bajo de plan: lo que rezo sigue rezado. */
+    try {
+      var ps = await _db.collection('users').doc(usr.uid)
+                        .collection('progress').doc(nivelId).get();
+      prog = ps.exists ? ps.data() : {};
+    } catch(e){ prog = {}; }
+
+    renderFree();
+  }
+
+  function renderFree(){
+    var hoy   = new Date();
+    var nMis  = Math.min(20, Math.max(1, freeProg.misterio || 1));
+    var foco  = ['gozosos','luminosos','dolorosos','gloriosos'][Math.floor((nMis - 1) / 5)];
+    var i     = (nMis - 1) % 5;
+    var hecho = freeProg.completedToday;
+    var acc   = COLORES_BLOQUE[foco];
+    var mis   = (data && data.misterios && data.misterios[foco]) || [];
+    var subt  = (data && data.subtitulos_bloque && data.subtitulos_bloque[foco]) || '';
+    var tit   = (mis[i] && mis[i].titulo) || ('Misterio ' + nMis);
+    var h = '';
+
+    h += '<div class="hero"><img src="' + IMG_BASE + 'P_' + nivel + '_' + cuaderno + '_' + nMis +
+         '.webp" alt="" onerror="this.style.display=\'none\'"><div class="fade"></div></div>';
+
+    h += '<p class="fecha">' + fechaLarga(hoy) + '</p>';
+    h += '<h1 class="bloque-tit">' + esc(NOMBRES_BLOQUE[foco]) + '</h1>';
+    h += '<p class="bloque-sub">' + esc(subt) + '</p>';
+
+    /* El reconocimiento va ANTES de la tarjeta: lo primero que hay que saber al
+       volver es que el dia esta rezado. Despues, lo que viene. */
+    if (hecho) {
+      h += '<div class="pill" style="--pc:' + acc + ';--pc-rgb:' + rgbBloque(foco) + '">' +
+           '<span class="tick">&#10003;</span><span class="pt">Ya rezaste hoy</span></div>';
+    }
+
+    h += '<div class="solo"><span class="solo-n">' +
+         (hecho ? 'Mañana &middot; Misterio ' + nMis + ' de 20'
+                : 'Misterio ' + nMis + ' de 20') + '</span>' +
+         '<h2 class="solo-t">' + esc(tit) + '</h2></div>';
+
+    h += '<div class="acciones">';
+    h += hecho
+       ? '<button class="btn btn-2" id="ir-camino" type="button">Ver mi camino</button>'
+       : '<button class="btn btn-1" id="ir-audio" type="button">Orar este Misterio</button>';
+    h += '</div>';
+
+    /* La cuenta que apunta el puntero late si aun se puede rezar (`hoy`) y se
+       queda encendida en suave si el dia ya se cerro (`abierto`): late lo que
+       pide accion, no lo que solo espera. */
+    h += tiraDe(function(b, j){
+      if (hechoEn(b, j)) return 'rezado';
+      if (b === foco && j === i) return hecho ? 'abierto' : 'hoy';
+      return '';
+    });
+
+    $app.innerHTML = h;
+    $app.style.setProperty('--acento', acc);
+    $app.style.setProperty('--acento-rgb', rgbBloque(foco));
+
+    var bA = document.getElementById('ir-audio');
+    if (bA) bA.onclick = function(){
+      location.href = 'audio.html?nivel=' + nivel + '&cuaderno=' + cuaderno + '&misterio=' + nMis;
+    };
+    var bC = document.getElementById('ir-camino');
+    if (bC) bC.onclick = function(){ goTo('crecer.html'); };
+
+    cablearTira(function(b, j){
+      if (hechoEn(b, j))                  return { cls:'ok',  sym:'&#10003;', txt:'Ya lo rezaste' };
+      if (b === foco && j === i)          return hecho
+        ? { cls:'off', sym:'', txt:'Te espera mañana' }
+        : { cls:'on',  sym:'', txt:'Es tu Misterio de hoy' };
+      return { cls:'off', sym:'', txt:'Aún no' };
+    });
+  }
+
+  /* Lo REZADO de verdad, del documento que escriben los reproductores. */
+  function hechoEn(bloque, j){
+    var a = (prog && prog.progress && prog.progress[bloque]) || [];
+    return !!a[j];
+  }
+
+  /* La tira de veinte es la misma pieza en los dos modelos: cambia el estado de
+     cada cuenta, no el dibujo. Quien la pinta pasa la funcion que decide. */
+  function tiraDe(estadoDe){
+    var vueltas = (window.Rosario ? Rosario.vueltas(prog) : 0);
+    var h = '<div class="nivel"><div class="niv-cab">' +
+            '<span class="niv-nom">' + esc(Niveles.nombre(nivelId) || nivelId) + '</span>' +
+            '<span class="niv-vuelta">' + (vueltas > 0 ? (vueltas + 1) + 'ª vuelta' : '') + '</span></div>';
+    h += '<div class="tira">';
+    Dia.BLOQUES.forEach(function(b){
+      var titB = (data && data.misterios && data.misterios[b]) || [];
+      h += '<div class="grupo">';
+      for (var j = 0; j < 5; j++) {
+        h += '<button class="bead ' + estadoDe(b, j) + '" type="button" style="--bc:' +
+             COLORES_BLOQUE[b] + ';--bc-rgb:' + rgbBloque(b) + '" data-b="' + b + '" data-i="' + j + '" ' +
+             'aria-label="Misterio ' + (BASE_M[b]+j) + ', ' +
+             esc((titB[j] && titB[j].titulo) || '') + '"></button>';
+      }
+      h += '</div>';
+    });
+    return h + '</div><p class="pie-bead" id="pie"><span class="tt">&nbsp;</span></p></div>';
+  }
+
+  /* Las cuentas NO navegan: escriben su nombre debajo y nada mas. Si una llevara
+     a rezar, la tira seria el mapa por accidente. */
+  function cablearTira(leyendaDe){
     Array.prototype.forEach.call($app.querySelectorAll('.bead'), function(bd){
       bd.onclick = function(){
-        var b = bd.getAttribute('data-b'), i = +bd.getAttribute('data-i');
-        var e = st.bloques[b][i], cls, sym, txt;
+        var b = bd.getAttribute('data-b'), j = +bd.getAttribute('data-i');
         var titB = (data && data.misterios && data.misterios[b]) || [];
-        if (e === 'rezado' || e === 'vueltahoy')      { cls='ok';  sym='&#10003;'; txt='Ya lo rezaste'; }
-        else if (e === 'espera')                      { cls='off'; sym='';         txt='Disponible ' + Dia.proximoDia(b, hoy); }
-        else if (st.diaGastado && b !== st.elegido)   { cls='off'; sym='';         txt='Disponible mañana'; }
-        else                                          { cls='on';  sym='';         txt='Disponible hoy'; }
+        var e = leyendaDe(b, j);
         document.getElementById('pie').innerHTML =
-          '<span class="tt">' + esc((titB[i] && titB[i].titulo) || ('Misterio ' + (BASE_M[b]+i))) + '</span>' +
+          '<span class="tt">' + esc((titB[j] && titB[j].titulo) || ('Misterio ' + (BASE_M[b]+j))) + '</span>' +
           '<span class="est" style="--sc:' + COLORES_BLOQUE[b] +
           ';--sc-rgb:' + rgbBloque(b) + '">' +
-          '<span class="sym ' + cls + '">' + sym + '</span>' + txt + '</span>';
+          '<span class="sym ' + e.cls + '">' + e.sym + '</span>' + e.txt + '</span>';
       };
     });
   }
@@ -601,15 +755,23 @@ body.light .app-nav{background:var(--card)}
     window.currentPlan = window.resolvePlan ? resolvePlan(ud) : 'free';
     plan = window.effectivePlan ? effectivePlan() : window.currentPlan;
 
+    /* Aqui se parte en dos. El free no pasa de esta linea: su Nivel no sale de
+       la frontera ni del marcador, sino de freeProgress —y no hay nada que
+       elegir, asi que tampoco hay estado del dia que calcular. */
+    if (plan === 'free') { await arrancarFree(); return; }
+
     var frontera = await calcularFrontera(usr.uid);
     var p = new URLSearchParams(location.search);
     nivelId = p.get('c') || Dia.nivelDiario(plan, {
       bookmark: marcador(), frontera: frontera, orden: Niveles.ORDEN
     });
 
+    /* Red de seguridad: para premium nivelDiario devuelve siempre algo —marcador,
+       frontera o el primero del itinerario—, asi que esto solo salta si alguien
+       llega aqui con un plan que no tiene camino resuelto. */
     if (!nivelId) {
-      pantalla('El Rosario de hoy te espera',
-        'Se abre en cuanto cruces tu primer cuaderno. Sigue por el camino y vuelve.',
+      pantalla('Todavía no hay Nivel que rezar',
+        'Vuelve al camino y entra por el Misterio que estés cruzando.',
         'Ir al camino', function(){ location.href = 'crecer.html'; });
       return;
     }

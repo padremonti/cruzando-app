@@ -74,48 +74,16 @@ MODOS.forEach(f => {
 console.log('\n── Los cuatro modos vuelven al mismo sitio ──');
 
 MODOS.forEach(f => {
-  ok(f.padEnd(11) + ' · su barra de navegación lleva a casa', () => {
-    /* "Casa" dejó de ser un sitio fijo: para premium es el mapa, y para el
-       free —que ya no lo tiene— es Hoy. El marcado por defecto dice Crecer y
-       _pintarCasa() solo lo cambia en el caso del free: así el defecto nunca
-       miente, que es la lección del candado decorativo del mapa. */
+  ok(f.padEnd(11) + ' · su barra de navegación lleva al mapa', () => {
+    /* Casa vuelve a ser un solo sitio para todos. La Ruta C la hizo depender
+       del plan porque el free no tenía mapa; ahora lo tiene —lo ve entero y
+       entra solo a su Misterio de hoy— y el destino se escribe otra vez. */
     const s = leer(f);
     const nav = s.split('\n').filter(l => l.includes('app-nav-item') || l.includes('app-nav-label'));
     if (!/app-nav-label">Crecer</.test(nav.join('\n')))
-      throw new Error('la barra perdió su destino por defecto etiquetado "Crecer"');
-    if (!/id="nav-casa"/.test(s))
-      throw new Error('la pestaña de salida no está identificada como nav-casa');
-    if (!/function _pintarCasa\(\)/.test(s))
-      throw new Error('nadie convierte esa pestaña en Hoy para el free');
-  });
-});
-
-MODOS.forEach(f => {
-  ok(f.padEnd(11) + ' · ninguna salida codifica el mapa a mano', () => {
-    /* Un free que saliera a crecer.html llegaría a un sitio que no es suyo. */
-    const s = leer(f);
-    const sueltas = s.split('\n')
-      .map((l, i) => ({ n: i + 1, t: l.trim() }))
-      .filter(l => /['"]crecer\.html['"]/.test(l.t))
-      .filter(l => !/^(\/\/|\/\*|\*)/.test(l.t))
-      .filter(l => !/_casa|_esCasa|indexOf\(/.test(l.t))
-      .filter(l => !/hoy\.html/.test(l.t))   // la linea que DECIDE, no una salida
-      .filter(l => !/crecer\.html\?/.test(l.t));   // avisos y upsell: no son salidas
-    if (sueltas.length)
-      throw new Error('salidas con el mapa horneado:\n      ' +
-        sueltas.map(l => l.n + '| ' + l.t.slice(0, 80)).join('\n      '));
-  });
-});
-
-MODOS.forEach(f => {
-  ok(f.padEnd(11) + ' · el splash de racha sigue saliendo camino a casa', () => {
-    /* Colgaba de "el destino es crecer.html". Con el free saliendo a Hoy no lo
-       vería nunca — y la racha es justo lo que se le premia. */
-    const s = leer(f);
-    if (!/_esCasa\(/.test(s))
-      throw new Error('la puerta del splash no reconoce Hoy como casa');
-    if (/indexOf\(['"]crecer\.html['"]\) *=== *0 *&& *window\.RachaSplash/.test(s))
-      throw new Error('el splash sigue atado solo al mapa');
+      throw new Error('la barra no tiene el destino etiquetado "Crecer"');
+    if (/_casa\(|_pintarCasa/.test(s))
+      throw new Error('volvió la casa derivada por plan');
   });
 });
 

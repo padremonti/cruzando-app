@@ -1613,7 +1613,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     <span class="app-nav-label">Libro</span>
   </button>
 
-  <button class="app-nav-item" id="nav-casa" onclick="navTap(this); navGuard(_casa())">
+  <button class="app-nav-item" onclick="navTap(this); navGuard('crecer.html')">
     <div class="app-nav-icon">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
@@ -1945,19 +1945,6 @@ let currentUser      = null;
 let audioProgress    = null;  // { nivel:1, cuaderno:1, misterio:1, firstAnswered:[f,f,f] }
 let userPlan         = 'premium'; // default premium; free solo si explícitamente confirmado
 
-/* ── El marcador del mapa no se mueve si la sesión no progresa ──────────────
-   `cruzando_current_nivel` es el "dónde estoy" con el que crecer decide qué
-   Nivel enseñar. El Rosario diario del free ocurre en un Nivel YA CRUZADO —es
-   la regla "lo que ya cruzaste es tuyo"— así que escribirlo arrastraría el
-   mapa HACIA ATRÁS: rezabas tu Nivel de hoy, volvías a crecer y te enseñaba
-   uno anterior. Es el mismo defecto que documenta § Dónde estoy ≠ hasta dónde
-   he llegado, reintroducido por la puerta nueva.
-   La bandera `hoy` solo SUPRIME la escritura y nunca concede nada, así que
-   forjarla no da acceso a ningún sitio: no hace falta derivarla del progreso. */
-function _mueveMarcador() {
-  var _hoy = new URLSearchParams(location.search).get('hoy') === '1';
-  return !(_hoy && userPlan === 'free');
-}
 let currentData      = null;  // JSON del nivel/cuaderno
 let currentSession   = null;  // { nivel, cuaderno, misterio, block, mysteryData, playlist }
 let sessionMeters    = 0;
@@ -2051,29 +2038,7 @@ function applyBlockColor(block) {
 window._logout = () => {
   signOut(auth).then(() => { location.href = 'index.html'; }).catch(() => { location.href = 'index.html'; });
 };
-/* ── La casa: a dónde se sale al terminar ───────────────────────────────────
-   Para premium es el mapa; para el free, que no tiene mapa, es Hoy. Un solo
-   sitio lo decide en cada reproductor, como ya hacía _goHome en audio. */
-function _casa(){
-  var p = window.effectivePlan ? window.effectivePlan() : (window.currentPlan || 'free');
-  return (p === 'free') ? 'hoy.html' : 'crecer.html';
-}
-/* El splash de racha colgaba de "el destino es crecer.html". Con el free
-   saliendo a Hoy no lo vería NUNCA: la condición es llegar a casa, no al mapa. */
-function _esCasa(pg){
-  var d = String(pg || '');
-  return d.indexOf('crecer.html') === 0 || d.indexOf('hoy.html') === 0;
-}
-/* La pestaña de salida de la barra. Solo se toca para el free: para premium el
-   marcado del HTML ya dice lo correcto, y así el defecto nunca miente. */
-function _pintarCasa(){
-  var b = document.getElementById('nav-casa');
-  if (!b || _casa() !== 'hoy.html') return;
-  var l = b.querySelector('.app-nav-label'); if (l) l.textContent = 'Hoy';
-  var i = b.querySelector('.app-nav-icon');
-  if (i) i.innerHTML = "<svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3\" y=\"5\" width=\"18\" height=\"16\" rx=\"3\"/><path d=\"M8 3v4M16 3v4M3 10h18\"/><circle cx=\"12\" cy=\"15.5\" r=\"2.2\"/></svg>";
-}
-window._goHome = () => { goTo(_casa()); };
+window._goHome = () => { goTo('crecer.html'); };
 
 let _prevMysteryBusy = false;
 window._goToPrevMystery = async () => {
@@ -2295,7 +2260,6 @@ async function loadUserAndStart(skipProgressRead = false) {
   }
   // effectivePlan() lee window.currentPlan (respetando el "ver como" del developer)
   window.currentPlan = userPlan;
-  _pintarCasa();
   _obSync(db, uid).catch(function() {});
 
   // Leer audioProgress (omitir si ya está en memoria y skipProgressRead=true)
@@ -2334,9 +2298,7 @@ async function loadUserAndStart(skipProgressRead = false) {
       }
     }
     // Bookmark cross-modo: guardar en localStorage el nivel que el usuario está usando
-    if (_mueveMarcador()) {
-      try { localStorage.setItem('cruzando_current_nivel', urlParam); } catch(e) {}
-    }
+    try { localStorage.setItem('cruzando_current_nivel', urlParam); } catch(e) {}
   }
 
   // Si viene ?nivel=&cuaderno=&misterio= (desde index.html o orar.html), respetar posición exacta
@@ -2350,9 +2312,7 @@ async function loadUserAndStart(skipProgressRead = false) {
     audioProgress.nivel    = _pN;
     audioProgress.cuaderno = _pC;
     audioProgress.misterio = _pM;
-    if (_mueveMarcador()) {
-      try { localStorage.setItem('cruzando_current_nivel', String(_pN).padStart(2,'0') + String(_pC).padStart(2,'0')); } catch(e) {}
-    }
+    try { localStorage.setItem('cruzando_current_nivel', String(_pN).padStart(2,'0') + String(_pC).padStart(2,'0')); } catch(e) {}
     history.replaceState({}, '', 'audio.html');
     goDirectly = true;
   }
@@ -4512,7 +4472,7 @@ function goTo(page) {
      hacia el mapa, y solo el día en que la racha subió de verdad (la marca la
      puso registrarRachaHoy). mostrarSiHay() resuelve al instante si no hay nada,
      así que ninguna otra navegación se retrasa. */
-  if (_esCasa(page) && window.RachaSplash) RachaSplash.mostrarSiHay().then(ir, ir);
+  if (page.indexOf('crecer.html') === 0 && window.RachaSplash) RachaSplash.mostrarSiHay().then(ir, ir);
   else ir();
 }
 
@@ -4642,7 +4602,7 @@ window.navGuardSeamless  = navGuardSeamless;
     if (mnc && mnc.style.pointerEvents === 'auto') { hideNavConfirm(); return true; }
     const mo = $('modal-overlay');
     if (mo && mo.classList.contains('open')) { closeModal(); return true; }
-    navGuard(_casa());
+    navGuard('crecer.html');
     return !!(nc && nc.classList.contains('open'));   // true si navGuard pidió confirmación (nos quedamos)
   }
 

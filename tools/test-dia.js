@@ -215,15 +215,14 @@ ok('premium reza el que está cruzando', () => {
   eq(D.nivelDiario('developer',{ bookmark:'0104', frontera:'0101', orden:ORDEN }), '0104');
 });
 
-ok('el free reza el último ENTERO, nunca el que está en curso', () => {
-  eq(D.nivelDiario('free', { bookmark:'0103', frontera:'0103', orden:ORDEN }), '0102');
-  eq(D.nivelDiario('free', { bookmark:null,   frontera:'0104', orden:ORDEN }), '0103');
-});
-
-ok('el free sin ningún Nivel cerrado todavía no tiene Hoy', () => {
-  /* Se abre al cruzar el primer cuaderno: la regla "el free no progresa aquí"
-     se cumple por construcción, no por una condición que alguien pueda olvidar. */
-  eq(D.nivelDiario('free', { bookmark:null, frontera:'0101', orden:ORDEN }), null);
+ok('el Nivel del free NO sale de aquí, y por eso devuelve null', () => {
+  /* El free no sigue el calendario litúrgico: recorre el itinerario de un
+     Misterio al día, y su Nivel vive en freeProgress/current. Devolver null
+     hace que un llamador que se olvide de esa rama falle a la VISTA, en vez de
+     servirle en silencio un Nivel que no es el suyo. */
+  eq(D.nivelDiario('free', { bookmark:'0103', frontera:'0103', orden:ORDEN }), null);
+  eq(D.nivelDiario('free', { bookmark:null,   frontera:'0104', orden:ORDEN }), null);
+  eq(D.nivelDiario('free', { bookmark:null,   frontera:'0101', orden:ORDEN }), null);
 });
 
 console.log('\n── Las páginas ──');
@@ -302,11 +301,14 @@ ok('rezar.html · la puerta se comprueba DESPUÉS de leer el progreso', () => {
      'loadAndStart y loadAndEnter deben comprobarla tras el progreso');
 });
 
-ok('rezar.html · ya no delega en requirePremiumAccess para el Rezo', () => {
-  if (/requirePremiumAccess\('rezar'/.test(REZ))
-    throw new Error('sigue la puerta vieja, que rebota al free siempre');
-  if (!/nivelId==='0101'\|\|_nivelCruzado\(\)/.test(REZ))
-    throw new Error('la puerta del free no deriva del progreso');
+ok('rezar.html · el Rezo es de Premium, sin excepciones', () => {
+  /* Hubo aquí una rama para el free —su Nivel diario más el DEMO— y se fue con
+     el DEMO. El free ora en audio: una sesión guiada al día. El permiso vuelve
+     a salir de una sola tabla, que es donde se lee de un vistazo. */
+  if (/nivelId==='0101'\|\|_nivelCruzado\(\)/.test(REZ))
+    throw new Error('volvió la rama del free al Rezo');
+  if (!/return window\.canAccessModo\?canAccessModo\('rezar',plan,nivelId\):true;/.test(REZ))
+    throw new Error('_puedeRezarAqui dejó de delegar en la tabla');
 });
 
 ok('rezar.html · el marcador solo se mueve si la sesión progresa', () => {
@@ -317,11 +319,15 @@ ok('rezar.html · el marcador solo se mueve si la sesión progresa', () => {
     throw new Error('queda una escritura del marcador sin proteger');
 });
 
-ok('rezar.html · el DEMO sin cruzar NO cae bajo la puerta del día', () => {
-  /* En 0101 el free sigue su itinerario lineal: Hoy se le abre al cerrar su
-     primer cuaderno. Sin el && le romperíamos el DEMO. */
-  if (!/plan==='free'&&_nivelCruzado\(\)/.test(REZ))
-    throw new Error('la puerta del día alcanzaría al free dentro del DEMO');
+ok('el DEMO se retiró: 0101 ya no es un Nivel-regalo', () => {
+  /* `plan === 'free' && nivelId === '0101' -> return true` abría TODOS los
+     modos en el primer cuaderno. El free no tiene un Nivel con todo abierto:
+     tiene el itinerario entero en audio, de un Misterio al día. */
+  const pu = leer('plan-utils.js');
+  if (/plan === 'free' && nivelId === '0101'/.test(pu))
+    throw new Error('la cláusula del DEMO sigue abriendo 0101 entero');
+  if (/plan==='free'&&_nivelCruzado\(\)/.test(REZ))
+    throw new Error('rezar conserva su rama del DEMO');
 });
 
 ok('rezar.html · la puerta del día se deriva, no se cree la bandera', () => {
@@ -330,24 +336,27 @@ ok('rezar.html · la puerta del día se deriva, no se cree la bandera', () => {
     throw new Error('no vuelve a derivar el permiso del progreso');
 });
 
-ok('audio.html · carga dia.js y protege las dos escrituras del marcador', () => {
+ok('audio.html · el marcador del free vuelve a moverse', () => {
+  /* `_mueveMarcador` existia porque el Rosario diario del free ocurria en un
+     Nivel YA CRUZADO y escribir el marcador arrastraba el mapa hacia atras.
+     Ahora el free avanza por SU Nivel: su sesion progresa, y el marcador tiene
+     que seguirla como el de cualquiera. La guarda quedo muerta y se retiro. */
   if (!AUD.includes('src="dia.js"')) throw new Error('no carga dia.js');
-  eq(AUD.split('if (_mueveMarcador())').length - 1, 2);
-  const sueltas = AUD.split('\n')
-    .filter(l => /localStorage\.setItem\('cruzando_current_nivel'/.test(l))
-    .filter(l => !/^\s{6}try \{/.test(l));
-  eq(sueltas.length, 0, 'queda una escritura del marcador fuera de la guarda');
+  if (/_mueveMarcador/.test(AUD))
+    throw new Error('volvió la guarda que le congelaba el marcador al free');
 });
 
-ok('audio.html · la bandera solo suprime, nunca concede', () => {
-  const b = AUD.slice(AUD.indexOf('function _mueveMarcador'), AUD.indexOf('function _mueveMarcador') + 260);
-  if (!/return !\(_hoy && userPlan === 'free'\);/.test(b))
-    throw new Error('_mueveMarcador cambió de forma');
-});
-
-ok('hoy.html · declara la clase de sesión en los dos traspasos', () => {
+ok('hoy.html · declara la clase de sesión en los traspasos del día', () => {
+  /* Los DOS de la vista del día —rezar y audio— la llevan. El del free NO,
+     y es la diferencia entera: `hoy=1` dice "esta sesión cae bajo la regla del
+     día", y la del free cae bajo su itinerario. */
   eq(HOY.split("'&hoy=1'").length - 1, 2,
      'rezar y audio deben recibir la marca de sesión diaria');
+  const iF = HOY.indexOf('function renderFree');
+  const fin = HOY.indexOf('function hechoEn', iF);
+  if (iF < 0 || fin < 0) throw new Error('no se encuentra renderFree');
+  if (/hoy=1/.test(HOY.slice(iF, fin)))
+    throw new Error('el traspaso del free lleva la bandera del día');
 });
 
 console.log('\n' + String.fromCharCode(9472,9472) + ' La barra: Hoy es la pestana principal ' + String.fromCharCode(9472,9472));
@@ -416,52 +425,135 @@ ok('la barra de los reproductores NO se toco', () => {
 });
 
 console.log('');
-console.log('== El mapa es de Premium, y el camino no se salta ==');
+console.log('== El camino del free: un Misterio al dia, el suyo ==');
+
+ok('hoy.html · el free sale por su propia rama, no por condicionales sueltos', () => {
+  /* Dos modelos en un archivo es el riesgo real de esta pantalla. Se pagan por
+     adelantado: arrancar/render para el dia, arrancarFree/renderFree para el
+     itinerario, y el reparto en UNA linea. */
+  if (!/if \(plan === 'free'\) \{ await arrancarFree\(\); return; \}/.test(HOY))
+    throw new Error('el reparto no está en una sola línea');
+  if (!/function arrancarFree\(\)/.test(HOY)) throw new Error('falta arrancarFree');
+  if (!/function renderFree\(\)/.test(HOY))   throw new Error('falta renderFree');
+});
+
+ok('hoy.html · el Nivel del free sale de freeProgress, no de la frontera', () => {
+  /* Es el MISMO documento que audio lee al arrancar, y por eso Hoy no puede
+     mandarle a un Misterio que audio le vaya a rechazar. */
+  const b = HOY.slice(HOY.indexOf('async function arrancarFree'),
+                      HOY.indexOf('function renderFree'));
+  if (!/collection\('freeProgress'\)\.doc\('current'\)/.test(b))
+    throw new Error('no lee freeProgress/current');
+  if (/calcularFrontera|nivelDiario/.test(b))
+    throw new Error('el free vuelve a resolver su Nivel por la frontera');
+});
+
+ok('hoy.html · el reinicio de medianoche no se reescribe aquí', () => {
+  /* Una sola regla, en plan-utils, porque la leen dos mundos que no comparten
+     SDK: getFreeProgress (modular) y esta página (compat). */
+  if (!/normalizarFreeProgress/.test(HOY))
+    throw new Error('hoy.html no usa la regla compartida');
+  if (/completedToday\s*=\s*false/.test(HOY))
+    throw new Error('hoy.html se copió el reinicio diario');
+});
+
+ok('plan-utils · el reinicio diario vive en un solo sitio', () => {
+  const pu = leer('plan-utils.js');
+  if (!/function normalizarFreeProgress/.test(pu))
+    throw new Error('no existe la regla compartida');
+  eq((pu.match(/completedToday = false/g) || []).length, 1,
+     'el reinicio volvió a estar escrito más de una vez');
+});
+
+ok('plan-utils · el itinerario del free deriva de niveles.js', () => {
+  /* PUBLISHED_NIVELES era una QUINTA copia, literal y a mano: el día que 0201
+     pase a published, el free se habría quedado dando vueltas entre los cuatro
+     primeros sin que nada fallara. */
+  const pu = leer('plan-utils.js');
+  if (!/function publicados\(\)/.test(pu))
+    throw new Error('no hay derivación desde Niveles');
+  if (/PUBLISHED_NIVELES\[idx \+ 1\]/.test(pu))
+    throw new Error('el avance del free sigue leyendo la lista literal');
+});
+
+ok('hoy.html · la tira es una sola pieza para los dos modelos', () => {
+  /* Cambia el ESTADO de cada cuenta, no el dibujo. Dos copias de la tira
+     habrían divergido a la primera vez que se retocara una.  */
+  if (!/function tiraDe\(estadoDe\)/.test(HOY))  throw new Error('falta tiraDe');
+  if (!/function cablearTira\(leyendaDe\)/.test(HOY)) throw new Error('falta cablearTira');
+  eq((HOY.match(/h \+= tiraDe\(/g) || []).length, 2, 'los dos modelos deben usarla');
+  eq((HOY.match(/cablearTira\(function/g) || []).length, 2, 'y los dos deben cablearla');
+});
+
+ok('hoy.html · la tira del free dice lo REZADO, no lo supuesto', () => {
+  /* El mapa pinta el camino del free como prefijo lineal (gi < activo). Aquí se
+     lee `progress`, que es lo que los reproductores escriben de verdad: así
+     dice la verdad también para quien fue premium y bajó de plan. */
+  if (!/function hechoEn\(bloque, j\)/.test(HOY))
+    throw new Error('falta la lectura del progreso real');
+  if (!/prog\.progress\[bloque\]/.test(HOY))
+    throw new Error('la tira del free no lee progress');
+});
+
+ok('hoy.html · al free se le ofrece audio, y nada más', () => {
+  /* Rezar es de Premium y el Libro también: ofrecerlos aquí sería un botón que
+     promete y no cumple, el defecto de los nodos con candado que se abrían. */
+  const b = HOY.slice(HOY.indexOf('function renderFree'), HOY.indexOf('function hechoEn'));
+  if (/rezar\.html|orar\.html/.test(b))
+    throw new Error('la vista del free ofrece un modo que no puede usar');
+  if (!/id="ir-audio"/.test(b)) throw new Error('falta el botón de orar');
+});
+
+ok('hoy.html · completado el día, la puerta lleva al mapa', () => {
+  /* Y el mapa es suyo: la Ruta D se lo devolvió. Sin salida, la pantalla de
+     "vuelve mañana" sería un callejón. */
+  const b = HOY.slice(HOY.indexOf('function renderFree'), HOY.indexOf('function hechoEn'));
+  if (!/id="ir-camino"/.test(b)) throw new Error('sin salida al terminar el día');
+  if (!/crecer\.html/.test(b))   throw new Error('la salida no lleva al mapa');
+});
+console.log('');
+console.log('== El mapa se ve entero; lo que se paga es moverse por él ==');
 
 const CRE = norm(leer('crecer.html'));
 
-ok('crecer.html  . cierra la puerta al free', () => {
-  if (!CRE.includes("if (!canAccessModo('mapa', realPlan)) {"))
-    throw new Error('no hay puerta: el mapa seguiria abierto para el free');
-  if (!CRE.includes("location.replace('index.html?premium=1')"))
-    throw new Error('la puerta no lleva a la compra');
-});
-
-ok('crecer.html  . la puerta va tras el plan CONFIRMADO, no tras el cache', () => {
-  /* La FASE 1 pinta con el plan cacheado. Cerrar alli expulsaria a un premium
-     con el cache frio de su propia pagina: el fallo tiene que ser retrasar, */
-  /* nunca expulsar. */
-  const iF3 = CRE.indexOf('FASE 3');
-  const iPuerta = CRE.indexOf("if (!canAccessModo('mapa', realPlan)) {");
-  if (iF3 < 0 || iPuerta < 0) throw new Error('no se encuentran las dos marcas');
-  if (iPuerta < iF3)
-    throw new Error('la puerta corre antes de confirmar el plan contra Firestore');
-  if (!CRE.includes("if (_cPlan !== 'free') {"))
-    throw new Error('la FASE 1 pinta el mapa aunque el cache diga free');
-});
-
-ok('el candado y la puerta se pusieron a la vez', () => {
-  /* Un candado sin puerta detras es el defecto que el mapa ya arrastraba con
-     sus quince nodos decorativos. Si alguien quita una, esto salta. */
+ok('crecer.html  . el mapa esta abierto para todos', () => {
+  /* Ver donde vas no se cobra: el mapa ES el camino. Lo que Premium abre es
+     moverse por el, y de eso responden 'libro', 'rezar' y la rama free de
+     openMapPopup —que ofrece Audio en SU Misterio y nada en los demas—. */
+  if (CRE.includes("if (!canAccessModo('mapa', realPlan)) {"))
+    throw new Error('volvio la puerta que expulsaba al free de su camino');
   const pu = leer('plan-utils.js');
-  if (!pu.includes('function marcarCrecerSiFree'))
-    throw new Error('no existe el candado de la pestana');
-  if (!CRE.includes("if (!canAccessModo('mapa', realPlan)) {"))
-    throw new Error('hay candado pero no hay puerta');
+  if (!/if \(modo === 'mapa'\) *return true;/.test(pu))
+    throw new Error('la tabla sigue tratando el mapa como privilegio');
 });
 
-HUB.concat(['hoy.html']).forEach(f => {
-  ok(f.padEnd(12) + '. su pestana Crecer esta identificada para el candado', () => {
-    if (!norm(leer(f)).includes('id="nav-crecer"'))
-      throw new Error('sin id, el candado no la encuentra');
-  });
+ok('crecer.html  . la FASE 1 pinta el mapa sin mirar el plan', () => {
+  /* Llego a saltarselo si el cache decia free, para no ensenar una pantalla
+     que no era suya. Ahora es suya, y esperar a la FASE 3 solo seria un
+     destello de mapa vacio en el arranque de todo el mundo. */
+  if (CRE.includes("if (_cPlan !== 'free') {"))
+    throw new Error('la FASE 1 sigue condicionando el mapa al plan cacheado');
 });
 
-ok('crecer.html  . un Misterio pendiente no abre el popup de modos', () => {
-  /* El camino se VE, no se salta: lo pendiente pertenece a Hoy. En un Nivel ya
-     cruzado no hay pendientes, asi que solo alcanza al Nivel en curso. */
-  if (!CRE.includes('if (!hecho) { _pendienteEsDeHoy(); return; }'))
-    throw new Error('el nodo pendiente sigue abriendo el popup');
+ok('el candado se retiro con la puerta, y ninguno vuelve solo', () => {
+  /* Se pusieron a la vez y se quitan a la vez. Un candado sin puerta detras
+     es el defecto que el mapa arrastraba con sus quince nodos decorativos;
+     una puerta sin candado delante es peor: expulsa sin haber avisado. */
+  const pu = leer('plan-utils.js');
+  if (pu.includes('function marcarCrecerSiFree'))
+    throw new Error('el candado de Crecer volvio sin su puerta');
+  if (/cz-bloqueada/.test(pu))
+    throw new Error('queda el marcado del candado');
+});
+
+ok('crecer.html  . el nodo pendiente manda a Hoy, pero solo a Premium', () => {
+  /* Para Premium el camino se VE y no se salta: lo pendiente pertenece a Hoy,
+     que es donde manda el dia. Para el free NO se aplica, y no por descuido:
+     su Misterio activo tampoco esta hecho, asi que la guarda se lo llevaria a
+     Hoy y no veria nunca su propio popup —Audio en SU Misterio, chip Premium
+     sobre Libro y Rezo—. Esa respuesta dice mas que un redirect. */
+  if (!CRE.includes('if (!hecho && !_isFree) { _pendienteEsDeHoy(); return; }'))
+    throw new Error('la guarda no exime al free, que perderia su propio popup');
   if (!CRE.includes('function _pendienteEsDeHoy()'))
     throw new Error('falta el aviso que explica a donde va');
 });
