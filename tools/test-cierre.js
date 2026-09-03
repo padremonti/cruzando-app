@@ -605,21 +605,21 @@ await ok('rezar · onSessionComplete puede esperar', () => {
 });
 
 await ok('orar · la celebración ofrece las Letanías', () => {
+  /* El botón fijo lo sustituyó una ACCIÓN que monta el aviso: accionLetanias()
+     devuelve la entrada o null, y las dos celebraciones la incluyen en su lista. */
   const s = leer('orar.html');
-  if (!/id="btn-celeb-letanias"/.test(s)) throw new Error('falta el botón');
-  if (!/function ofrecerLetanias/.test(s)) throw new Error('falta el cableado');
-  /* En los DOS finales: el bloque de cinco y el cuaderno de veinte. */
-  eq((s.match(/\n\s*ofrecerLetanias\(\);/g) || []).length, 2);
+  if (!/function accionLetanias/.test(s)) throw new Error('falta el cableado');
+  eq((s.match(/accionLetanias\(\),/g) || []).length, 2,
+     'tiene que estar en los DOS finales: el bloque de cinco y los veinte');
 });
 
 await ok('orar · se ofrecen, no se imponen', () => {
   const s = leer('orar.html');
-  const boton = (s.match(/<button[^>]*id="btn-celeb-letanias"[^>]*>/) || [''])[0];
-  if (/btn-primary/.test(boton))
-    throw new Error('las Letanías no deben ser el botón primario: se ofrecen');
-  const cuerpo = (s.match(/function ofrecerLetanias[\s\S]*?\n\}/) || [''])[0];
-  if (!/window\.RosarioFinal/.test(cuerpo))
-    throw new Error('sin el módulo, el botón prometería algo que no puede cumplir');
+  const cuerpo = (s.match(/function accionLetanias[\s\S]*?\n\}/) || [''])[0];
+  if (!/tipo:'secundario'/.test(cuerpo))
+    throw new Error('las Letanías no deben ser la acción primaria: se ofrecen');
+  if (!/if\(!window\.RosarioFinal\) return null;/.test(cuerpo))
+    throw new Error('sin el módulo, la acción prometería algo que no puede cumplir');
   if (!/onCerrar/.test(cuerpo))
     throw new Error('al salir de las Letanías hay que volver a la celebración');
 });

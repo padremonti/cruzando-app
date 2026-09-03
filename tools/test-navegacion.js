@@ -99,17 +99,39 @@ ok('mini.html   · sigue devolviendo a sanar, no al mapa', () => {
 
 console.log('\n── orar tiene por fin una salida de verdad ──');
 
-ok('orar        · la celebración ofrece dos botones', () => {
+ok('orar        · la celebración se pinta con el aviso', () => {
+  /* Los tres botones fijos del markup (btn-celeb-home / -mapa / -letanias) los
+     monta ahora Aviso.pintar con sus acciones. Lo que se vigila es que el
+     contenedor exista y que la página traiga el módulo. */
   const s = leer('orar.html');
-  if (!/id="btn-celeb-home"/.test(s))  throw new Error('falta btn-celeb-home');
-  if (!/id="btn-celeb-mapa"/.test(s))  throw new Error('falta btn-celeb-mapa');
+  if (!/id="celeb-aviso"/.test(s)) throw new Error('falta el contenedor #celeb-aviso');
+  if (!/aviso\.js/.test(s) || !/aviso\.css/.test(s))
+    throw new Error('no carga el módulo del aviso');
+  if (/id="btn-celeb-/.test(s))
+    throw new Error('vuelven los botones fijos del molde viejo');
 });
 
-ok('orar        · el botón de salir está cableado en los dos finales', () => {
+ok('orar        · la salida al mapa sigue en los dos finales', () => {
+  /* Uno en showCelebration (bloque cerrado) y otro en showAdvanceLevelPrompt
+     (los veinte). Es el enganche del splash de racha: si una de las dos se
+     escapa, hay un día de racha que no se celebra. */
   const s = leer('orar.html');
-  /* uno en showCelebration (bloque completo) y otro en showAdvanceLevelPrompt (20) */
-  const n = (s.match(/btn-celeb-mapa'\)\.onclick/g) || []).length;
-  if (n !== 2) throw new Error('esperaba 2 cableados, encontré ' + n);
+  const n = (s.match(/onClick:\(\)=>salirConAviso\('crecer\.html'\)/g) || []).length;
+  if (n !== 2) throw new Error('esperaba 2 salidas al mapa, encontré ' + n);
+});
+
+ok('orar        · las dos celebraciones dicen a dónde sigue', () => {
+  const s = leer('orar.html');
+  const cel = (s.match(/function showCelebration\(\)[\s\S]*?\n\}/) || [''])[0];
+  const niv = (s.match(/async function showAdvanceLevelPrompt\(\)[\s\S]*?\n\}/) || [''])[0];
+  if (!/texto:'Seguir rezando'/.test(cel))
+    throw new Error('el fin de bloque perdió su acción principal');
+  if (!/kicker: 'Rosario recorrido'/.test(cel))
+    throw new Error('el fin de bloque no se anuncia como Rosario');
+  if (!/kicker: 'Nivel recorrido'/.test(niv))
+    throw new Error('el fin de los veinte no se anuncia como Nivel');
+  if (/Regresar a inicio/.test(s))
+    throw new Error('vuelve la etiqueta que mentía');
 });
 
 ok('orar        · salir SIEMPRE navega al destino', () => {
@@ -127,17 +149,6 @@ ok('orar        · salir SIEMPRE navega al destino', () => {
     throw new Error('vuelve el atajo: el botón puede acabar donde no dice');
   if (!/goTo\(dest\);/.test(cuerpo))
     throw new Error('salirDeOrar ya no navega al destino');
-});
-
-ok('orar        · la etiqueta del botón principal ya no miente', () => {
-  const s = leer('orar.html');
-  if (/id="btn-celeb-home"[^>]*>Regresar a inicio</.test(s))
-    throw new Error('vuelve a prometer "Regresar a inicio" sin ir al inicio');
-  /* ambos finales fijan su propio texto */
-  if (!/btn-celeb-home'\)\.textContent='Seguir rezando'/.test(s))
-    throw new Error('el fin de bloque no fija su etiqueta');
-  if (!/btn-celeb-home'\)\.textContent='Siguiente Nivel'/.test(s))
-    throw new Error('el fin de los 20 no fija su etiqueta');
 });
 
 ok('orar        · cancelar el aviso limpia el destino pendiente', () => {

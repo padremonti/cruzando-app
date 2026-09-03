@@ -223,7 +223,13 @@ body {
   margin-bottom: 8px;
 }
 .loading-msg { font-family: 'Crimson Pro', serif; font-size: 1.25rem; font-style: italic; color: var(--text-soft); max-width: 280px; margin-top: 12px; text-align: center; }
-.mariano-overlay{position:fixed;top:0;right:0;bottom:0;width:100%;pointer-events:none;z-index:300;display:flex;align-items:center;justify-content:flex-end;padding-right:20px}
+/* ⚠️ 510, no 300: en audio el aviso de metros sale SOBRE el epílogo (500), que
+   es el único momento en que Mariano aparece aquí. A 300 quedaba debajo y no se
+   veía — por eso se había retirado del cierre de bloque. Queda por debajo del
+   diálogo de las Letanías (520), del micro (600) y de los cierres (940), y como
+   es pointer-events:none no tapa ningún botón del epílogo.
+   orar y rezar conservan 300: allí el aviso sale durante la sesión. */
+.mariano-overlay{position:fixed;top:0;right:0;bottom:0;width:100%;pointer-events:none;z-index:510;display:flex;align-items:center;justify-content:flex-end;padding-right:20px}
 /* El ancho vive en el ID, NO en .mariano-slide. Esa clase se quita y se pone
    para reiniciar la animación, y mientras falta el <img> volvía a su tamaño
    intrínseco (960 px): con dos avisos seguidos —en orar llegan a 600 ms— se
@@ -4203,6 +4209,12 @@ async function completeSession() {
     .then(() => {
       $('scr-complete').classList.add('open');
       $('fab-questions') && ($('fab-questions').style.display = 'none');
+      /* Y aquí, por fin, Mariano con los metros de la sesión. Se había retirado
+         del cierre de bloque porque el epílogo lo tapaba a los pocos cientos de
+         milisegundos; ahora sale DESPUÉS —los cierres ya corrieron, no compite
+         con nada— y por encima de él. Un solo aviso por Misterio, no uno por
+         sección: los metros de sección siguen saliendo por el toast. */
+      if (sessionMeters > 0) setTimeout(() => showSlide(sessionMeters), 700);
     });
 
   /* El candado diario del free NO interrumpe el epílogo: aparece al pulsar

@@ -26,6 +26,7 @@ PWA de formación espiritual católica. El usuario reza los 20 Misterios del Ros
 | `mini.html` | Mini sesión de UN Misterio (el "Misterio-puerta" que señaló Sanar). Reproductor cinematográfico a pantalla completa. Todo derivado del `mid`. Firebase compat cableado; marca el pain completado al epílogo. **Paleta fija, sin botón de tema** — ver § La tinta de mini. |
 | `canto.js` / `canto.css` | Motor de karaoke de canto compartido (extraído de audio+rezar). `Canto.init({...})`; CSS por `<link>`, HTML del overlay inyectado por el módulo. `mini.html` NO lo usa (ancestro divergente). **Y el lector del `.lrc` para toda la app**: `parseLrc` (cantar) · `letraPlana` (leer) · `parseLrcMeta` · `fetchLrc` · `letraDeBloque`. Ver § El canto se explica solo. |
 | `utils.js` | `window.isPremium(userData)` y `window.resolvePlan(userData)`. Cargado en todas las páginas. |
+| `aviso.js` / `aviso.css` | **La pantalla que dice algo y ofrece qué hacer.** `Aviso.pintar(destino, {...})` — sustituye a las cinco pantallas de cierre viejas (celebraciones, candado diario, contenido en camino, error). No es un velo: se pinta dentro del contenedor de la página. Ver § El aviso. |
 | `toast.js` | **El aviso breve.** `showToast(texto)` — autosuficiente: inyecta su CSS y monta su nodo bajo demanda. En index y crecer; audio conserva el suyo. Ver § El aviso breve. |
 | `flags.js` | Interruptores de producto. `MOSTRAR_RECOMPENSAS = false` + `window.recompensasON()` (ver § Kit de recompensas) y `MOSTRAR_RETIROS = false` + `window.retirosON()` + `aplicarNavRetiros()` (ver § Retiros). El de Retiros **exime al developer**; el de recompensas no. |
 | `retiros.html` / `retiros.js` | El Santuario: catálogo de retiros. **Bajo desarrollo, oculto tras `MOSTRAR_RETIROS`** — solo entra el developer. Ver § Retiros. |
@@ -969,6 +970,41 @@ es el ritmo —veinte días contra una semana—, no el premio.
 **orar.html — por audio completado:**
 - `rezar`: +1200m / `contempl`: +800m / `canto`: +600m
 
+## El aviso (`aviso.js` · `aviso.css`)
+
+*Estado: las cinco pantallas sustituidas + banco (`tools/test-aviso.js`, 20) y 5 aserciones reescritas en `test-navegacion` y `test-cierre`. **PENDIENTE prueba visual en dispositivo.***
+
+**Cinco pantallas de cierre venían de otra época** y compartían el mismo molde: un emoji de 3rem, texto plano y botones con estilos escritos **en línea**, repetidos a mano en tres archivos. Ninguna hablaba el idioma que ya tienen el decenario, el Rosario, el rosetón y la vuelta.
+
+| Dónde | Era | Es |
+|---|---|---|
+| `rezar` · celebración | 🙏 en `.maria-placeholder` | «Rosario recorrido» + el bloque, o «Nivel recorrido» + el Nivel |
+| `orar` · celebración | título + párrafo + 3 botones iguales | lo mismo que rezar: **el mismo momento se dice igual en los dos modos** |
+| `audio` · candado diario | 🙏 + 4 párrafos + estilos en línea | «Vuelve mañana» + reloj vivo |
+| `audio` · contenido en camino | 🛤️ + estilos en línea | «Contenido en camino» + el Nivel en píldora |
+| `orar` · `rezar` · error | 📿 + enlace suelto | «Ese Nivel no está aquí» |
+
+**Anatomía**, y cada pieza es opcional salvo el título: la **Cruz de Lux** (sustituye al emoji: es el emblema de los cuatro cierres, quieta y del color del momento) · **kicker** en versalitas · **título** en Cormorant · **cuerpo** en Crimson Pro a 27 caracteres — *un* párrafo, no cuatro · **dato** en píldora del acento (las horas que faltan, el Nivel) · **nota** al pie · **acciones** con jerarquía real (primario / secundario / discreto), nunca dos primarios compitiendo. Entrada escalonada 60 ms con la curva de `cierre.css`, y `prefers-reduced-motion` la desactiva.
+
+⚠️ **NO es un velo.** Se pinta **dentro** del contenedor que la página ya controla (`#celeb-aviso`, `#daily-limit-body`, `#coming-soon-body`, `#error-aviso`), así que cada modo conserva su `show()`, su navegación y su z-index. Cambia la fachada, no la máquina. Por eso los contenedores llevan `position:relative`: el aviso es `absolute; inset:0` sobre ellos.
+
+**Las acciones nulas se descartan**, y de ahí sale el «ofrecido, nunca impuesto»: `accionLetanias()` devuelve `null` si `rosario-final.js` no cargó, y `sigNivel && {...}` desaparece si no hay Nivel siguiente. No se promete lo que no se puede cumplir.
+
+⚠️ **Con esto se fueron los ids fijos de la celebración de `orar`** (`btn-celeb-home`, `btn-celeb-mapa`, `btn-celeb-letanias`) y `ofrecerLetanias()`, que cableaba un botón. Cinco pruebas los fijaban y se reescribieron contra el mecanismo nuevo — la que importa es la que sigue contando **dos** salidas al mapa, porque ahí se engancha el splash de racha.
+
+### Cerrar el Nivel no es «tocar Gloriosos»
+
+Los bloques se rezan en cualquier orden: alguien puede empezar por los Gloriosos y alguien puede cerrar los veinte con los Gozosos. La celebración de Nivel la decide **`cuadernoCompleto()`** —si con este bloque quedaron los veinte—, no el nombre del bloque. Hay una prueba en los dos modos que salta si alguien vuelve a mirar `blk === 'gloriosos'`.
+
+*(La animación ya lo hacía bien: el rosetón y la vuelta cuelgan del progreso real. Lo que no se enteraba era la pantalla posterior, que seguía diciendo «¡Rosario completado!» al cerrar el Nivel.)*
+
+### Y Mariano vuelve al final del Misterio, en audio
+
+Se había retirado del cierre de bloque porque **el epílogo lo tapaba**: `.mariano-overlay` estaba en **z 300** y `#scr-complete` en 500. Ahora sale **después** de los cierres, al abrirse el epílogo, y **por encima de él** (z **510**, bajo el diálogo de las Letanías (520), el micro (600) y los cierres (940); `pointer-events:none`, así que no tapa ningún botón).
+
+**Un aviso por Misterio, no uno por sección.** `awardSectionMeters()` sigue premiando con el **toast**: si lanzara a Mariano saldrían cinco o seis por sesión. `orar` y `rezar` conservan su z 300, porque allí el aviso sale durante la sesión y no sobre un epílogo. Hay prueba de las tres capas.
+
+
 ## El aviso de metros (el "slide" de Mariano)
 
 *Estado: los dos glitches arreglados en las tres páginas + banco (`tools/test-mariano.js`, 15) + assets redimensionados. **PENDIENTE prueba visual en dispositivo** y el sync a R2.*
@@ -1501,6 +1537,8 @@ escribe `users/{uid}.terminos = { aceptado, fecha (serverTimestamp), version, me
 5d. **El canto sin su JSON** — primero **correr `tools\cruzando-sync-real.bat`**: hasta que suba, el bucket sigue sirviendo los `.lrc` viejos (sin `[ti:]`, con el «N. » y sin los cortes) mientras el código ya espera los nuevos — el título saldría vacío y caería en el nombre del Misterio. Después, en dispositivo: que el karaoke de `audio` y `rezar` muestre **«Buena noticia»** y no «1. No fue fácil tu comienzo,»; que el popup «Canto» de `orar` abra con su título y **sus estrofas separadas**; y que al cerrar un bloque de cinco la tarjeta nueva de la galería salga con nombre y con la letra partida en cinco tramos. Ver § El canto se explica solo.
 
 5e. **La vuelta del Rosario** — prueba en dispositivo: rezar cinco decenas de un bloque **ya cerrado** y comprobar que el Rosario sale igual (y **sin cifra de metros**, porque el bonus ya se cobró); saltarse el rezo en el Libro y comprobar que **no** cuenta; y al cerrar los veinte por segunda vez, que salga el reconocimiento con su pregunta y que lo escrito aparezca en el Diario con el chip «Vuelta».
+
+5f. **El aviso** — prueba **visual** en dispositivo de las cinco: la celebración de bloque y la de Nivel en los dos modos, el candado diario del free (que el reloj corra), el Nivel sin audio, y la pantalla de error. Y que **Mariano salga al abrirse el epílogo** en audio, encima de él.
 
 **Tareas anotadas (aparte):**
 6. **Settings** de `index.html`/`crecer.html` — botón "Rehacer mi perfil de afinidad" → `sanar.html?rehacer=1` (sanar ya reconoce el parámetro).
