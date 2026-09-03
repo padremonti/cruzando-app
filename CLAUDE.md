@@ -943,6 +943,20 @@ es el ritmo —veinte días contra una semana—, no el premio.
 **orar.html — por audio completado:**
 - `rezar`: +1200m / `contempl`: +800m / `canto`: +600m
 
+## El aviso de metros (el "slide" de Mariano)
+
+*Estado: los dos glitches arreglados en las tres páginas + banco (`tools/test-mariano.js`, 15) + assets redimensionados. **PENDIENTE prueba visual en dispositivo** y el sync a R2.*
+
+`showSlide(metros, extra)` es el aviso que desliza a Mariano por la derecha con los metros ganados. Vive **copiado en audio, orar y rezar**, y tenía **dos** defectos que se sumaban.
+
+⚠️ **La imagen entraba sin haberse descargado.** `marianoNext()` rota entre **diez** imágenes distintas de R2 y ninguna se precargaba: se asignaba el `src` y se arrancaba la animación en la misma línea, así que el overlay deslizaba con la **caja vacía** y el dibujo aparecía de golpe al llegar la descarga. Ahora la imagen se pide en un `Image()` aparte y solo cuando está lista se pinta en el `<img>`, que la toma de la caché sin un frame en blanco; al final se precarga la siguiente (`marianoPeek()`, que **no avanza el turno**). La red no secuestra el aviso: a los **500 ms** sale igual, con imagen o sin ella — los metros ganados importan más que el dibujo.
+
+⚠️ **`width:182px` vivía en `.mariano-slide`**, la misma clase que se quita y se pone para reiniciar la animación. Durante ese instante el `<img>` volvía a su tamaño intrínseco. No se veía la primera vez —el overlay estaba oculto— pero sí **con dos avisos seguidos**, y en `orar` llegan a **600 ms**: `premiar('rezo')` y, si con ese Misterio se cerró el bloque, `showSlide(MR_BNS)` en un `setTimeout` de 600, muy dentro de los 2600 ms que el overlay permanece visible. El ancho pasó a `#mariano-slide-img`.
+
+**Y los assets estaban sin redimensionar.** Los doce `mariano_*.webp` iban a 1536×2048 (dos a 2048²) y pesaban **1939 KB**, para pintarse a 182–320 px. Redimensionados a **960 px** de ancho (3× el uso mayor, la celebración de bloque a 320 px): **711 KB, 63 % menos**, con el canal alfa conservado y cada uno con su propia proporción. La herramienta es `tools/mariano-resize.py` — escribe **fuera de `C:\R2`** a propósito (rclone espeja) y respalda los originales antes de reemplazar.
+
+*Nota de inventario: `mariano_11.webp` existe en el bucket pero `MARIANO_TOTAL = 10`, así que la rotación nunca lo alcanza.*
+
 ## Racha de días consecutivos
 
 *Estado: marcador y splash implementados + banco de pruebas (`tools/test-racha.js`, 79). **PENDIENTE prueba visual en dispositivo.***

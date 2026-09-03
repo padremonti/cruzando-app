@@ -172,7 +172,12 @@ body{
   pointer-events:none;z-index:300;
   display:flex;align-items:center;justify-content:flex-end;padding-right:20px;
 }
-.mariano-slide{width:182px;height:auto;animation:marianoSlide 2.5s ease-in-out}
+/* El ancho vive en el ID, NO en .mariano-slide. Esa clase se quita y se pone
+   para reiniciar la animación, y mientras falta el <img> volvía a su tamaño
+   intrínseco (960 px): con dos avisos seguidos —en orar llegan a 600 ms— se
+   veía un fotograma de Mariano gigante. */
+#mariano-slide-img{width:182px;height:auto}
+.mariano-slide{animation:marianoSlide 2.5s ease-in-out}
 .meters-float{
   position:absolute;top:50%;right:220px;
   font-size:1rem;font-weight:800;color:var(--green);
@@ -1152,10 +1157,19 @@ const MARIANO_CELEB = IMGB + 'mariano_celeb.webp';
 const MARIANO_TOTAL = 10;
 var   _marianoIdx   = 0;
 
+function marianoUrl(i) {
+  var n = i < 10 ? '0' + i : '' + i;
+  return IMGB + 'mariano_' + n + '.webp';
+}
 function marianoNext() {
   _marianoIdx = (_marianoIdx % MARIANO_TOTAL) + 1;
-  var n = _marianoIdx < 10 ? '0' + _marianoIdx : '' + _marianoIdx;
-  return IMGB + 'mariano_' + n + '.webp';
+  return marianoUrl(_marianoIdx);
+}
+/* El SIGUIENTE, sin avanzar el turno: se precarga en cuanto se muestra el
+   actual, así que cuando le toque ya está en caché. Reparte los ~700 KB de
+   los diez en el tiempo, en vez de pedirlos de golpe al arrancar. */
+function marianoPeek() {
+  return marianoUrl((_marianoIdx % MARIANO_TOTAL) + 1);
 }
 
 const BLOCKS = ['gozosos','luminosos','dolorosos','gloriosos'];
@@ -1476,23 +1490,53 @@ async function addMeters(m){
 }
 
 /* ─── GAMIFICATION ─── */
-function showSlide(m,extra){
-  const ov=$('mariano-overlay'),img=$('mariano-slide-img'),fl=$('meters-float-text');
-  if(!ov||!img||!fl) return;
+/* ── El aviso de metros ───────────────────────────────────────────────────────
+   La imagen entra YA DESCARGADA. Antes se asignaba el src y se arrancaba la
+   animación en la misma línea: como marianoNext() rota entre diez imágenes
+   distintas de R2, el overlay deslizaba con la caja VACÍA y el dibujo aparecía
+   de golpe cuando llegaba la descarga. Eso era el parpadeo.
 
-  img.classList.remove('mariano-slide');
-  fl.classList.remove('meters-float');
-  void img.offsetWidth;
+   Se pide en un Image() aparte y solo cuando está lista se pinta en el <img>,
+   que entonces la toma de la caché sin un solo frame en blanco. Y al final se
+   precarga la siguiente, para que el próximo aviso ya no espere nada.
 
-  img.src = marianoNext();
-  fl.innerHTML = (extra?`<span class="extra-badge">${extra}</span>`:'')+`+${m}m`;
+   ⚠️ La red no puede secuestrar el aviso: a los 500 ms sale igual, con imagen o
+   sin ella. Los metros ganados importan más que el dibujo. */
+function showSlide(m, extra) {
+  const ov = $('mariano-overlay'), img = $('mariano-slide-img'), fl = $('meters-float-text');
+  if (!ov || !img || !fl) return;
 
-  img.classList.add('mariano-slide');
-  fl.classList.add('meters-float');
+  const url = marianoNext();
+  let lanzado = false;
 
-  ov.style.display = 'flex';
-  clearTimeout(ov._hideTimer);
-  ov._hideTimer = setTimeout(()=>{ ov.style.display='none'; }, 2600);
+  function lanzar() {
+    if (lanzado) return;
+    lanzado = true;
+    clearTimeout(guarda);
+    img.src = url;
+    fl.innerHTML = (extra ? `<span class="extra-badge">${extra}</span>` : '') + `+${m}m`;
+
+    /* Quitar y reponer las clases reinicia las dos animaciones. El reflow va
+       entre medias, y ya no cambia el tamaño del <img>: el ancho vive en el ID. */
+    img.classList.remove('mariano-slide');
+    fl.classList.remove('meters-float');
+    void img.offsetWidth;
+    img.classList.add('mariano-slide');
+    fl.classList.add('meters-float');
+
+    ov.style.display = 'flex';
+    clearTimeout(ov._hideTimer);
+    ov._hideTimer = setTimeout(() => { ov.style.display = 'none'; }, 2600);
+
+    try { new Image().src = marianoPeek(); } catch (e) {}
+  }
+
+  const guarda = setTimeout(lanzar, 500);
+  const pre = new Image();
+  pre.onload  = lanzar;
+  pre.onerror = lanzar;          // sin imagen el aviso sale igual: los metros mandan
+  pre.src = url;
+  if (pre.complete) lanzar();    // ya estaba en caché: sin esperar al bucle de eventos
 }
 
 /* ─── PREFS ─── */
