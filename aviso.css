@@ -1,0 +1,100 @@
+/* CruzAndo — aviso.css
+ * La pantalla que dice algo y ofrece qué hacer.
+ *
+ * Sustituye a cinco pantallas que venían de otra época: un emoji de 3rem, texto
+ * plano y botones con estilos escritos en línea, repetidos a mano en tres
+ * archivos. Ninguna hablaba el idioma que ya tienen el decenario, el Rosario,
+ * el rosetón y la vuelta.
+ *
+ * NO es un velo: se pinta DENTRO de la pantalla que la página ya controla
+ * (#scr-celebration, #scr-daily-limit, #scr-coming-soon, #scr-error), así que
+ * cada modo conserva su navegación y su z-index. Ver aviso.js.
+ *
+ * Paleta propia y cerrada: sale en tres páginas que no definen las mismas
+ * variables, y siempre sobre la noche del reproductor.
+ */
+
+.aviso{
+  --av-tinta:  #F3EAD8;
+  --av-mudo:   rgba(243,234,216,.60);
+  --av-tenue:  rgba(243,234,216,.34);
+  --av-acento: var(--av-color, #F3EAD8);
+
+  position:absolute; inset:0;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:15px; padding:38px 28px; text-align:center;
+  background:radial-gradient(122% 88% at 50% 26%, #0b0f1c 0%, #05060c 72%);
+  overflow-y:auto;
+}
+/* Cuando la página la monta en un contenedor que no está posicionado. */
+.aviso.en-flujo{position:relative; inset:auto; min-height:100dvh}
+
+/* La Cruz de Lux sustituye al emoji: el mismo emblema del decenario, del
+   rosetón y de la vuelta. Quieta y pequeña — firma, no ilustración. */
+.aviso-lux{width:26px;height:26px;color:var(--av-acento);opacity:.72;flex:none}
+.aviso-lux svg{display:block;width:100%;height:100%}
+
+.aviso-kicker{
+  font-family:'Inter',system-ui,sans-serif;
+  font-size:.63rem; font-weight:700;
+  letter-spacing:.22em; text-transform:uppercase;
+  color:var(--av-acento);
+}
+.aviso-titulo{
+  font-family:'Cormorant Garamond',Georgia,serif;
+  font-size:clamp(1.7rem,7vw,2rem); font-weight:600; line-height:1.12;
+  color:var(--av-tinta); text-wrap:balance; max-width:15ch;
+}
+.aviso-cuerpo{
+  font-family:'Crimson Pro',Georgia,serif;
+  font-size:1rem; line-height:1.62;
+  color:var(--av-mudo); max-width:27ch; margin:0;
+}
+/* El dato que el usuario venía a buscar: las horas que faltan, el Nivel.
+   En píldora, del color del acento — nunca dentro del párrafo. */
+.aviso-dato{
+  font-family:'Inter',system-ui,sans-serif;
+  font-size:.72rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--av-acento);
+  padding:6px 13px; border-radius:999px;
+  border:1px solid var(--av-acento); opacity:.9;
+  font-variant-numeric:tabular-nums;
+}
+.aviso-nota{
+  font-family:'Inter',system-ui,sans-serif;
+  font-size:.74rem; line-height:1.55; color:var(--av-tenue); max-width:32ch; margin:0;
+}
+
+.aviso-acciones{
+  display:flex; flex-direction:column; gap:9px;
+  width:100%; max-width:280px; margin-top:8px;
+}
+.aviso-btn{
+  width:100%; padding:13px 16px; border-radius:26px; cursor:pointer;
+  font-family:'Inter',system-ui,sans-serif; font-size:.88rem; font-weight:600;
+  border:1px solid rgba(243,234,216,.26);
+  background:rgba(243,234,216,.09); color:var(--av-tinta);
+  -webkit-tap-highlight-color:transparent;
+  transition:transform .12s ease;
+}
+.aviso-btn:active{transform:scale(.97)}
+.aviso-btn.primario{background:var(--av-tinta);border-color:transparent;color:#14161f;font-weight:700}
+.aviso-btn.discreto{background:none;border-color:transparent;color:var(--av-mudo);
+  font-weight:500;padding:10px}
+.aviso-btn:focus-visible{outline:2px solid var(--av-tinta);outline-offset:2px}
+
+/* La entrada, con la curva de cierre.css: los elementos suben escalonados. */
+.aviso > *{animation:avisoSube .5s cubic-bezier(.34,1.56,.64,1) both}
+.aviso > *:nth-child(1){animation-delay:.02s}
+.aviso > *:nth-child(2){animation-delay:.08s}
+.aviso > *:nth-child(3){animation-delay:.14s}
+.aviso > *:nth-child(4){animation-delay:.20s}
+.aviso > *:nth-child(5){animation-delay:.26s}
+.aviso > *:nth-child(6){animation-delay:.32s}
+.aviso > *:nth-child(7){animation-delay:.38s}
+@keyframes avisoSube{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+@media (prefers-reduced-motion:reduce){
+  .aviso > *{animation:none}
+}

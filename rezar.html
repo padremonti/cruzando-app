@@ -56,9 +56,11 @@ window._fbFirestore = {
 <script src="dia.js"></script>
 <link rel="stylesheet" href="cierre.css">
 <link rel="stylesheet" href="vuelta.css">
+<link rel="stylesheet" href="aviso.css">
 <script src="sarta.js"></script>
 <script src="cuentas.js"></script>
 <script src="cierre.js"></script>
+<script src="aviso.js"></script>
 <script src="rosario.js"></script>
 <script src="vuelta.js"></script>
 <script src="racha.js"></script>
@@ -863,13 +865,9 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
   </div>
 
   <!-- ═══ PANTALLA: ERROR ═══ -->
-  <div class="screen" id="scr-error">
-    <div class="error-screen">
-      <div style="font-size:3rem;margin-bottom:16px">📿</div>
-      <h2 style="font-size:1.1rem;margin-bottom:8px">No se encontró el nivel</h2>
-      <p id="error-msg" style="font-size:0.82rem;color:var(--text-dim);margin-bottom:20px"></p>
-      <a href="orar.html?c=0101" class="btn btn-primary">Volver a Orar</a>
-    </div>
+  <div class="screen" id="scr-error" style="position:relative;min-height:100dvh">
+    <div id="error-aviso" style="position:absolute;inset:0"></div>
+    <span id="error-msg" hidden></span>
   </div>
 
   <!-- ═══ PANTALLA: PREFERENCIAS ═══ -->
@@ -1068,14 +1066,8 @@ body.light{--tb-circle-bg:var(--card);--tb-circle-border:var(--border);--tb-icon
   </div><!-- /scr-rezar -->
 
   <!-- ═══ PANTALLA: CELEBRACIÓN ═══ -->
-  <div class="screen" id="scr-celebration">
-    <div class="celebration-screen fade-in">
-      <div class="maria-placeholder">🙏</div>
-      <h2 class="celebration-title" id="celeb-title"></h2>
-      <p class="celebration-sub" id="celeb-sub"></p>
-      <button class="btn btn-primary btn-block" id="btn-celeb-home" style="margin-bottom:12px">Siguiente</button>
-      <button class="btn btn-secondary btn-block" id="btn-celeb-index" style="opacity:0.7">Volver al camino</button>
-    </div>
+  <div class="screen" id="scr-celebration" style="position:relative;min-height:100dvh">
+    <div id="celeb-aviso" style="position:absolute;inset:0"></div>
   </div>
 
   <!-- ═══ APP NAV (swipe up) ═══ -->
@@ -1270,6 +1262,19 @@ function showError(msg){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const er=$('scr-error');
   if(er){er.classList.add('active');const em=$('error-msg');if(em&&msg)em.textContent=msg;}
+  /* El aviso, en vez del 📿 de 3rem y un enlace suelto. El mensaje técnico
+     (`msg`) se guarda en #error-msg, oculto: sirve para depurar, no para que
+     el usuario lo lea. */
+  if (window.Aviso) Aviso.pintar('error-aviso', {
+    acento: COLORES_BLOQUE.dolorosos,
+    kicker: 'No pudimos abrirlo',
+    titulo: 'Ese Nivel no está aquí',
+    cuerpo: 'Puede que el enlace esté incompleto. Tu peregrinación sigue donde la dejaste.',
+    acciones: [
+      { texto:'Volver a mi Nivel',  tipo:'primario', onClick:()=>{ location.href = 'rezar.html?c=0101'; } },
+      { texto:'Ir al camino',       tipo:'discreto', onClick:()=>{ location.href = 'crecer.html'; } }
+    ]
+  });
 }
 
 /* ─── THEME ─── */
@@ -2825,22 +2830,40 @@ function celebrar(){
     ? ('rezar.html?c=' + nivelId + '&b=' + nextBlk + '&m=' + (BFM[nextBlk] || 1))
     : null;
 
-  $('celeb-title').textContent = '¡Rosario completado!';
-  $('celeb-sub').textContent   = 'Has rezado los 5 Misterios ' + BN[blk].toLowerCase() + '. ¡Buen camino, peregrino!';
+  /* ⚠️ Cerrar el NIVEL no es "tocar Gloriosos": los bloques se rezan en
+     cualquier orden, así que alguien puede empezar por ahí y alguien puede
+     cerrar los veinte con los Gozosos. Lo que manda es si con este bloque se
+     completaron los veinte, que es lo que ya sabe cuadernoCompleto(). */
+  var cerroNivel = cuadernoCompleto();
+  var sigNivel   = window.Niveles ? Niveles.siguientePublicado(nivelId) : null;
 
-  var btnPrimary = $('btn-celeb-home');
-  if(nextUrl){
-    btnPrimary.textContent = 'Rezar ' + BN[nextBlk];
-    btnPrimary.onclick     = ()=>goTo(nextUrl);
+  if(cerroNivel){
+    Aviso.pintar('celeb-aviso', {
+      acento: COLORES_BLOQUE.gloriosos,
+      kicker: 'Nivel recorrido',
+      titulo: (window.Niveles ? Niveles.nombre(nivelId) : 'Nivel recorrido'),
+      cuerpo: 'Recorriste los veinte Misterios.' +
+              (sigNivel ? ' Tu peregrinación sigue en ' + Niveles.nombre(sigNivel) + '.' : ''),
+      acciones: [
+        sigNivel && { texto:'Empezar ' + Niveles.nombre(sigNivel), tipo:'primario',
+                      onClick:()=>goTo('rezar.html?c=' + sigNivel) },
+        { texto:'Volver al camino', tipo: sigNivel ? 'discreto' : 'primario',
+          onClick:()=>goTo('crecer.html') }
+      ]
+    });
   } else {
-    btnPrimary.textContent = 'Volver al camino';
-    btnPrimary.onclick     = ()=>goTo('crecer.html');
-  }
-
-  var btnSec = $('btn-celeb-index');
-  if(btnSec){
-    btnSec.style.display = nextUrl ? '' : 'none';
-    btnSec.onclick       = ()=>goTo('crecer.html');
+    Aviso.pintar('celeb-aviso', {
+      acento: (BCL && BCL[blk]) || COLORES_BLOQUE.gozosos,
+      kicker: 'Rosario recorrido',
+      titulo: (window.NOMBRES_BLOQUE || {})[blk] || BFN[blk] || '',
+      cuerpo: 'Recorriste cinco Misterios.' +
+              (nextBlk ? ' Tu peregrinación sigue en los ' + BFN[nextBlk] + '.' : ''),
+      acciones: [
+        nextUrl && { texto:'Rezar ' + BN[nextBlk], tipo:'primario', onClick:()=>goTo(nextUrl) },
+        { texto:'Volver al camino', tipo: nextUrl ? 'discreto' : 'primario',
+          onClick:()=>goTo('crecer.html') }
+      ]
+    });
   }
 
   var grandImg = $('mariano-slide-img');
@@ -3008,7 +3031,8 @@ function initAuth(){
    distinción salen dos cosas: el derecho del free a rezar aquí, y que esta
    sesión no progresa y por tanto no debe mover el marcador del mapa. */
 function _nivelCruzado(){
-  return !!(window.demoCompleto && window.demoCompleto(prog));
+  if (window.Niveles) return Niveles.nivelCompleto(prog);
+  return !!(window.nivelCompleto && window.nivelCompleto(prog));
 }
 
 /* El Rezo es de Premium, sin excepciones: el free ora en audio, una sesión

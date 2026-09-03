@@ -25,8 +25,8 @@
 (function () {
   'use strict';
 
-  var Z          = 950;    // sobre el epílogo (500) y las celebraciones (900);
-                           // bajo el overlay del DEMO completado (9999)
+  var Z          = 950;    // sobre el epílogo (500), las celebraciones (900) y
+                           // los cierres (940); bajo el aviso de salida (9999)
   var T_NUCLEO   = 2000;   // hasta el reposo
   var T_SALIDA   = 350;    // fundido final
   var ID_ESTILOS = 'racha-splash-estilos';

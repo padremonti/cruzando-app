@@ -1396,9 +1396,11 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 <script src="bloques.js"></script>
 <link rel="stylesheet" href="cierre.css">
 <link rel="stylesheet" href="vuelta.css">
+<link rel="stylesheet" href="aviso.css">
 <script src="sarta.js"></script>
 <script src="cuentas.js"></script>
 <script src="cierre.js"></script>
+<script src="aviso.js"></script>
 <script src="rosario.js"></script>
 <script src="vuelta.js"></script>
 <script src="racha.js"></script>
@@ -1562,13 +1564,13 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   </div>
 
   <!-- ═══ PANTALLA: CONTENIDO EN CAMINO ═══ -->
-  <div class="screen" id="scr-coming-soon">
-    <div id="coming-soon-body" style="text-align:center;padding:60px 28px 0;width:100%;"></div>
+  <div class="screen" id="scr-coming-soon" style="position:relative">
+    <div id="coming-soon-body" style="position:relative;flex:1;width:100%"></div>
   </div>
 
   <!-- ═══ PANTALLA: LÍMITE DIARIO ═══ -->
-  <div class="screen" id="scr-daily-limit">
-    <div id="daily-limit-body" style="text-align:center;padding:60px 28px 0;width:100%;"></div>
+  <div class="screen" id="scr-daily-limit" style="position:relative">
+    <div id="daily-limit-body" style="position:relative;flex:1;width:100%"></div>
   </div>
 
   <!-- ═══ OVERLAY: EPÍLOGO / COMPLETADO ═══ -->
@@ -2503,20 +2505,22 @@ function hasSessionToday() {
 }
 
 function showDailyLimit() {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  tomorrow.setHours(0, 0, 0, 0);
-  const hoursLeft = Math.ceil((tomorrow - Date.now()) / 3600000);
-  const s = 'padding:14px 0;border-radius:13px;font-family:Inter,sans-serif;font-size:1rem;font-weight:700;cursor:pointer;width:100%;max-width:280px;display:block;margin:0 auto 12px;';
-  $('daily-limit-body').innerHTML =
-    '<div style="font-size:2.8rem;margin-bottom:20px;">🙏</div>' +
-    '<div style="font-family:Cormorant Garamond,serif;font-size:1.9rem;font-weight:600;color:var(--text);margin-bottom:12px;line-height:1.3;">Sesión de hoy completada</div>' +
-    '<p style="font-size:1rem;color:var(--text-soft);line-height:1.75;margin-bottom:8px;max-width:300px;margin-left:auto;margin-right:auto;">Ya rezaste tu misterio de hoy.<br>El camino se recorre paso a paso.</p>' +
-    '<p style="font-size:1rem;color:var(--text-soft);line-height:1.75;margin-bottom:28px;max-width:300px;margin-left:auto;margin-right:auto;">Nueva sesión disponible en <strong style="color:var(--lvl-bold);">' + hoursLeft + 'h</strong>.</p>' +
-    '<p style="font-size:0.82rem;color:var(--text-dim);margin-bottom:24px;">Con membresía Beta o Premium puedes avanzar sin límite diario.</p>' +
-    '<button onclick="window._repeatSession()" style="' + s + 'background:var(--lvl-bold);color:#fff;border:none;">🔄 Repetir sesión</button>' +
-    '<button onclick="window._goHome()" style="' + s + 'background:var(--card);color:var(--text-soft);border:1.5px solid var(--border);">Ir al inicio</button>' +
-    '</div>';
+  /* El candado del día. Antes: un 🙏 de 2.8rem, cuatro párrafos y dos botones
+     con estilos en línea. Y "en 7h" a secas, que a las 23:05 era falso — ahora
+     el reloj corre hasta el segundo. */
+  Aviso.pintar('daily-limit-body', {
+    acento:  (BLOCK_COLORS[currentSession && currentSession.block] || {}).bold ||
+             COLORES_BLOQUE.luminosos,
+    kicker:  'Hoy, rezado',
+    titulo:  'Vuelve mañana',
+    cuerpo:  'El camino se recorre paso a paso.',
+    cuenta:  'medianoche',
+    nota:    'Con membresía Beta o Premium puedes avanzar sin límite diario.',
+    acciones: [
+      { texto:'Repetir la sesión',  tipo:'primario', onClick: () => window._repeatSession() },
+      { texto:'Volver al camino',   tipo:'discreto', onClick: () => window._goHome() }
+    ]
+  });
   _stopLoadingRotation();
   show('scr-daily-limit');
 }
@@ -2548,17 +2552,6 @@ function showFreeVuelveManana() {
 }
 window.showFreeVuelveManana = showFreeVuelveManana;
 
-// Celebración "DEMO completado" (0101 m20). No es un candado: no lleva cuenta regresiva.
-function showDemoCompleto() {
-  const overlay = document.getElementById('demo-completo-overlay');
-  if (!overlay) return;
-  overlay.style.display = 'flex';
-  if (audioEl) { audioEl.pause(); isPlaying = false; }
-  bgmStop();
-  if (typeof updatePlayUI === 'function') updatePlayUI();
-  if (window._obConfetti) window._obConfetti('demo-completo-confetti');
-}
-window.showDemoCompleto = showDemoCompleto;
 
 async function saveAudioProgress() {
   if (!currentUser) return;
@@ -3921,8 +3914,10 @@ function onPlaylistEnded() {
 
    Todos:                      Escuchar el canto · Repetir sesión · Salir
    premium / beta / developer: + Siguiente misterio
-   DEMO 0101 m1-19:            + Siguiente misterio (también para free)
-   free en 0101 m20:           solo "Continuar" (la celebración toma el control) */
+   Al cerrar un set de 5:      + Letanías
+
+   El free no avanza aquí: su Misterio del día ya se consumió, y el candado
+   lo ve al pulsar Salir. */
 
 const ICO_CANTO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
 const ICO_SALIR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>';
@@ -3954,17 +3949,13 @@ function renderEpilogoActions() {
   const actions = $('complete-actions');
   actions.innerHTML = '';
 
-  // 0101 m20 con free: el DEMO se ha cerrado, la celebración manda (como hasta ahora)
-  if (window._freeDemoJustCleared) {
-    actions.appendChild(epiBtn('Continuar', true, () => window.showDemoCompleto()));
-    return;
-  }
-
-  // El demo (0101 m1-19) deja avanzar a cualquiera; fuera de él, solo premium y superiores.
-  // effectivePlan() (no userPlan) para que el developer "viendo como free" vea lo que vería un free.
-  const esPremium  = window.isPremiumOrAbove ? window.isPremiumOrAbove(plan) : false;
-  const enDemo     = (nivelId === '0101' && misterio < 20);
-  const puedeAvanzar = esPremium || enDemo;
+  /* Avanzar de Misterio es de Premium. Aquí había una excepción —`enDemo`, que en
+     0101 m1-19 se lo abría a cualquiera— y era el Nivel-regalo que el itinerario
+     del free sustituyó: el free avanza un Misterio al día, en TODO el itinerario,
+     no de corrido en el primer Nivel. effectivePlan() (no userPlan) para que el
+     developer "viendo como free" vea lo que vería un free. */
+  const esPremium    = window.isPremiumOrAbove ? window.isPremiumOrAbove(plan) : false;
+  const puedeAvanzar = esPremium;
 
   // Al cerrar un set de 5 Misterios, la tradición reza las Letanías. Se ofrecen (nunca
   // se imponen) y llevan a la Salve y a la oración conclusiva. No otorgan metros.
@@ -4018,10 +4009,10 @@ async function completeSession() {
     const curNivelId  = String(audioProgress.nivel).padStart(2, '0') +
                         String(audioProgress.cuaderno).padStart(2, '0');
     const curMisterio = audioProgress.misterio;
-    // ── Ritmo libre en 0101: no consumir día hasta completar el m20 ──
-    const _esDemo      = (curNivelId === '0101');
-    const _demoCleared = _esDemo && curMisterio === 20;
-    const _lockHoy     = !_esDemo || curMisterio === 20;  // false solo en 0101 m1-19
+    /* El día SIEMPRE se consume. Aquí vivía el "ritmo libre" del DEMO: en 0101
+       m1-19 `_lockHoy` era false y el free podía recorrer el primer Nivel entero
+       de una sentada. Retirado con el DEMO — un Misterio al día, en todo el
+       itinerario. */
     let nextMisterio  = curMisterio + 1;
     let nextNivelId   = curNivelId;
     if (nextMisterio > 20) {
@@ -4043,18 +4034,19 @@ async function completeSession() {
       await setDoc(doc(db, 'users', currentUser.uid, 'freeProgress', 'current'), {
         nivelId:        nextNivelId,
         misterio:       nextMisterio,
-        completedToday: _lockHoy,
+        completedToday: true,
         fechaHoy:       hoy,
         completedAt:    serverTimestamp()
       });
-      window._freeProg = { nivelId: nextNivelId, misterio: nextMisterio, completedToday: _lockHoy, fechaHoy: hoy };
+      window._freeProg = { nivelId: nextNivelId, misterio: nextMisterio, completedToday: true, fechaHoy: hoy };
       try { localStorage.setItem('cruzando_free_prog', JSON.stringify(window._freeProg)); } catch(_) {}
     } catch(e) { console.warn('[CruzAndo] Error guardando freeProgress:', e); }
 
     try { localStorage.setItem('cruzando_progress_cache_dirty', 'true'); } catch(_) {}
-    window._freeShowMananaAfterCelebration = _lockHoy && !_demoCleared;
-    window._freeDemoJustCleared = _demoCleared;
-    window._freeRitmoLibre = _esDemo && !_demoCleared;   // true solo en 0101 m1-19
+    /* Al salir del epílogo se le muestra el candado del día. Antes esto se
+       apagaba en el m20 de 0101 para dejar sitio a la celebración del DEMO, y
+       `_freeRitmoLibre` ni siquiera lo leía nadie: se escribía y ya. */
+    window._freeShowMananaAfterCelebration = true;
     // Sin return: el flujo normal continúa para registrar metros y mostrar celebración
   }
 
@@ -4213,13 +4205,10 @@ async function completeSession() {
       $('fab-questions') && ($('fab-questions').style.display = 'none');
     });
 
-  // La celebración del DEMO (0101 m20) sigue tomando el control sola.
-  // El candado diario del free, en cambio, ya NO interrumpe el epílogo:
-  // aparece al pulsar "Salir" (ver salirDelEpilogo), para que pueda re-vivir su canto.
-  if (window._freeDemoJustCleared) {
-    window._freeDemoJustCleared = false;
-    setTimeout(window.showDemoCompleto, 2000);
-  }
+  /* El candado diario del free NO interrumpe el epílogo: aparece al pulsar
+     "Salir" (ver salirDelEpilogo), para que pueda re-vivir su canto. Aquí se
+     disparaba además la celebración del DEMO, que se retiró: competía con el
+     rosetón, que corre justo antes en ese mismo Misterio 20. */
 }
 
 /* ── El decenario ───────────────────────────────────────────────────────────
@@ -4359,15 +4348,17 @@ function showComingSoon() {
   stopAudio();
   bgmStop();
   const { nivel, cuaderno } = currentSession;
-  const s = 'padding:14px 0;border-radius:13px;font-family:Inter,sans-serif;font-size:1rem;font-weight:700;cursor:pointer;width:100%;max-width:280px;display:block;margin:0 auto 12px;';
-  $('coming-soon-body').innerHTML =
-    '<div style="font-size:3rem;margin-bottom:20px;">\u{1F6E4}\uFE0F</div>' +
-    '<div style="font-family:\'Cormorant Garamond\',serif;font-size:1.8rem;font-weight:600;color:var(--text);margin-bottom:14px;line-height:1.3;">Contenido en camino</div>' +
-    '<p style="font-size:1rem;color:var(--text-soft);line-height:1.75;margin-bottom:28px;max-width:300px;margin-left:auto;margin-right:auto;">' +
-    'El Nivel ' + nivel + '-' + cuaderno + ' sigue en desarrollo.<br>Se publicará pronto.<br><br>Mientras tanto, puedes rezar los misterios anteriores.</p>' +
-    '<button onclick="window._goToPrevMystery()" style="' + s + 'background:var(--lvl-bold);color:#fff;border:none;">← Misterio anterior</button>' +
-    '<button onclick="window._goHome()" style="' + s + 'background:var(--card);color:var(--text-soft);border:1.5px solid var(--border);">Ir al inicio</button>' +
-    '</div>';
+  Aviso.pintar('coming-soon-body', {
+    acento:  COLORES_BLOQUE.gloriosos,
+    kicker:  'Todavía no',
+    titulo:  'Contenido en camino',
+    cuerpo:  'Este Nivel sigue en preparación. Mientras tanto, los anteriores te esperan.',
+    dato:    'Nivel ' + nivel + '-' + cuaderno,
+    acciones: [
+      { texto:'Volver al Misterio anterior', tipo:'primario', onClick: () => window._goToPrevMystery() },
+      { texto:'Ir al camino',                tipo:'discreto', onClick: () => window._goHome() }
+    ]
+  });
   show('scr-coming-soon');
 }
 
@@ -4747,47 +4738,6 @@ initAuth();
     -webkit-tap-highlight-color:transparent;">
     🔄 Repetir sesión
   </button>
-</div>
-
-<!-- ── Overlay Free: DEMO completado (0101 m20) ── -->
-<div id="demo-completo-overlay" style="display:none;position:fixed;inset:0;
-  background:var(--bg);z-index:9999;flex-direction:column;align-items:center;
-  justify-content:center;padding:32px;text-align:center;overflow:hidden;">
-  <div id="demo-completo-confetti" style="position:absolute;inset:0;
-    pointer-events:none;overflow:hidden;"></div>
-  <div style="position:relative;z-index:1;display:flex;flex-direction:column;
-    align-items:center;max-width:360px;">
-    <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:2rem;
-      font-weight:600;color:var(--text);line-height:1.2;margin-bottom:14px">
-      ¡Completaste el DEMO!
-    </div>
-    <div style="font-family:'Crimson Pro',Georgia,serif;font-size:1.15rem;
-      color:var(--text-soft);line-height:1.7;margin-bottom:20px;max-width:330px">
-      Recorriste los 20 Misterios del primer Nivel. A partir de hoy puedes seguir
-      avanzando gratis en el modo audio: un Misterio nuevo cada día.
-    </div>
-    <div style="font-family:'Crimson Pro',Georgia,serif;font-size:1.02rem;
-      color:var(--text-dim);line-height:1.6;margin-bottom:34px;max-width:330px">
-      ¿Quieres los tres modos y todos los Niveles sin esperar?
-      Desbloquéalo con Premium.
-    </div>
-    <button onclick="window._goHome()"
-      style="padding:16px 40px;border-radius:28px;border:none;
-      background:var(--brand);color:#fff;
-      font-family:'Cormorant Garamond',Georgia,serif;
-      font-size:1.4rem;font-weight:600;cursor:pointer;
-      -webkit-tap-highlight-color:transparent;">
-      Volver al camino
-    </button>
-    <button onclick="window.location.href='crecer.html?premium=1'"
-      style="margin-top:14px;padding:13px 40px;border-radius:28px;
-      background:none;border:1.5px solid var(--border);color:var(--text-soft);
-      font-family:'Cormorant Garamond',Georgia,serif;
-      font-size:1.2rem;font-weight:600;cursor:pointer;
-      -webkit-tap-highlight-color:transparent;">
-      Conocer Premium
-    </button>
-  </div>
 </div>
 
 <!-- Mariano slide-in -->

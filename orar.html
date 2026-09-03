@@ -714,9 +714,11 @@ body.light .popup-close-bottom{border-color:var(--border);color:var(--text-dim)}
 <script src="niveles.js"></script>
 <link rel="stylesheet" href="cierre.css">
 <link rel="stylesheet" href="vuelta.css">
+<link rel="stylesheet" href="aviso.css">
 <script src="sarta.js"></script>
 <script src="cuentas.js"></script>
 <script src="cierre.js"></script>
+<script src="aviso.js"></script>
 <script src="rosario.js"></script>
 <script src="vuelta.js"></script>
 <script src="racha.js"></script>
@@ -733,11 +735,9 @@ body.light .popup-close-bottom{border-color:var(--border);color:var(--text-dim)}
   </div>
 
   <!-- Error -->
-  <div class="error-screen" id="scr-error" style="display:none">
-    <div style="font-size:3rem;margin-bottom:16px">📿</div>
-    <h2 style="font-size:1.1rem;margin-bottom:8px">No se encontró el nivel</h2>
-    <p id="error-msg" style="font-size:0.82rem;color:var(--text-dim);margin-bottom:20px"></p>
-    <a href="?c=0101" class="btn btn-primary">Ir a Nivel 1-1</a>
+  <div class="error-screen" id="scr-error" style="display:none;position:relative">
+    <div id="error-aviso" style="position:absolute;inset:0"></div>
+    <span id="error-msg" hidden></span>
   </div>
 
   <!-- Header (home + micro) -->
@@ -957,14 +957,8 @@ body.light .popup-close-bottom{border-color:var(--border);color:var(--text-dim)}
   </div><!-- /scr-orar -->
 
   <!-- ═══ CELEBRACIÓN ═══ -->
-  <div class="screen" id="scr-celebration">
-    <div class="celebration-screen fade-in">
-      <h2 class="celebration-title" id="celeb-title"></h2>
-      <p class="celebration-sub" id="celeb-sub"></p>
-      <button class="btn btn-outline btn-block" id="btn-celeb-letanias" style="margin-bottom:10px">Letanías</button>
-      <button class="btn btn-primary btn-block" id="btn-celeb-home" style="margin-bottom:10px">Continuar</button>
-      <button class="btn btn-outline btn-block" id="btn-celeb-mapa">Volver al camino</button>
-    </div>
+  <div class="screen" id="scr-celebration" style="position:relative;min-height:100dvh">
+    <div id="celeb-aviso" style="position:absolute;inset:0"></div>
   </div>
 
   <!-- Mariano slide-in -->
@@ -1160,12 +1154,20 @@ async function showAdvanceLevelPrompt(){
   let n=nivel,c=cua+1;
   if(c>4){c=1;n++;}
   const nId=String(n).padStart(2,'0')+String(c).padStart(2,'0');
-  $('celeb-title').textContent='¡Veinte Misterios completados!';
-  $('celeb-sub').textContent='Has rezado los 20 Misterios de este Nivel. ¡Magnífico camino!';
-  $('btn-celeb-home').textContent='Siguiente Nivel';
-  $('btn-celeb-home').onclick=()=>loadCuaderno(nId);
-  $('btn-celeb-mapa').onclick=()=>salirConAviso('crecer.html');
-  ofrecerLetanias();
+  const nom = window.Niveles ? Niveles.nombre(nId) : null;
+  Aviso.pintar('celeb-aviso', {
+    acento: COLORES_BLOQUE.gloriosos,
+    kicker: 'Nivel recorrido',
+    titulo: (window.Niveles ? Niveles.nombre(nivelId) : 'Nivel recorrido'),
+    cuerpo: 'Recorriste los veinte Misterios.' +
+            (nom ? ' Tu peregrinación sigue en ' + nom + '.' : ''),
+    acciones: [
+      { texto: nom ? 'Empezar ' + nom : 'Siguiente Nivel',
+        tipo:'primario', onClick:()=>loadCuaderno(nId) },
+      accionLetanias(),
+      { texto:'Volver al camino', tipo:'discreto', onClick:()=>salirConAviso('crecer.html') }
+    ]
+  });
   show('scr-celebration');
 }
 /* ── Marcador de nivel entre modos ──────────────────────────────────────────
@@ -1238,6 +1240,19 @@ function showError(msg){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const ld=$('scr-loading'); if(ld) ld.style.display='none';
   const er=$('scr-error'); if(er){er.style.display='flex'; const em=$('error-msg'); if(em&&msg) em.textContent=msg;}
+  /* El aviso, en vez del 📿 de 3rem y un enlace suelto. El mensaje técnico
+     (`msg`) se guarda en #error-msg, oculto: sirve para depurar, no para que
+     el usuario lo lea. */
+  if (window.Aviso) Aviso.pintar('error-aviso', {
+    acento: COLORES_BLOQUE.dolorosos,
+    kicker: 'No pudimos abrirlo',
+    titulo: 'Ese Nivel no está aquí',
+    cuerpo: 'Puede que el enlace esté incompleto. Tu peregrinación sigue donde la dejaste.',
+    acciones: [
+      { texto:'Volver a mi Nivel',  tipo:'primario', onClick:()=>{ location.href = '?c=0101'; } },
+      { texto:'Ir al camino',       tipo:'discreto', onClick:()=>{ location.href = 'crecer.html'; } }
+    ]
+  });
 }
 
 /* ─── THEME ─── */
@@ -2063,25 +2078,41 @@ function mostrarRosario(){
 /* Al cerrar un set de cinco, la tradición reza las Letanías. Se OFRECEN, nunca
    se imponen: por eso no son el botón primario. Al terminar —o al salir— se
    vuelve a esta misma pantalla. Si el módulo no está, el botón no aparece. */
-function ofrecerLetanias(){
-  const b=$('btn-celeb-letanias'); if(!b) return;
-  if(!window.RosarioFinal){ b.style.display='none'; return; }
-  b.style.display='';
-  b.onclick=()=>{ pausarTodo(); RosarioFinal.abrir({ onCerrar:()=>show('scr-celebration') }); };
+/* Las Letanías se OFRECEN, nunca se imponen: si rosario-final.js no cargó, la
+   acción no existe y el aviso se pinta sin ella — no se promete lo que no se
+   puede cumplir. Devuelve la acción en vez de cablear un botón fijo, porque
+   ahora los botones los monta el aviso. */
+function accionLetanias(){
+  if(!window.RosarioFinal) return null;
+  return { texto:'Rezar las Letanías', tipo:'secundario', onClick:()=>{
+    pausarTodo();
+    RosarioFinal.abrir({ onCerrar:()=>show('scr-celebration') });
+  }};
 }
 
 function showCelebration(){
-  $('celeb-title').textContent=`¡${BFN[blk]} completados!`;
-  $('celeb-sub').textContent=`Has rezado los 5 Misterios ${BN[blk].toLowerCase()} de este Nivel. ¡Bien hecho!`;
-  /* Dos salidas de verdad: seguir en el Libro (recarga orar en este nivel, que
-     resuelve solo el siguiente bloque incompleto) o irse al camino. Antes había un
-     único botón que decía "Regresar a inicio" y recargaba orar: la etiqueta mentía. */
-  $('btn-celeb-home').textContent='Seguir rezando';
-  $('btn-celeb-home').onclick=()=>{
-    location.href=location.origin+location.pathname.substring(0,location.pathname.lastIndexOf('/')+1)+'orar.html?c='+nivelId;
-  };
-  $('btn-celeb-mapa').onclick=()=>salirConAviso('crecer.html');
-  ofrecerLetanias();
+  /* Mismo texto que la celebración del Rezo: es el mismo momento, y decirlo de
+     dos maneras distintas según el modo solo confunde. */
+  const sig = BLOCKS[BLOCKS.indexOf(blk) + 1] || null;
+  Aviso.pintar('celeb-aviso', {
+    acento: (BCL && BCL[blk]) || COLORES_BLOQUE.gozosos,
+    kicker: 'Rosario recorrido',
+    titulo: (window.NOMBRES_BLOQUE || {})[blk] || BFN[blk] || '',
+    cuerpo: 'Recorriste cinco Misterios.' +
+            (sig ? ' Tu peregrinación sigue en los ' + BFN[sig] + '.' : ''),
+    acciones: [
+      /* Seguir en el Libro recarga orar en este Nivel, que resuelve solo el
+         siguiente bloque incompleto. Antes un único botón decía "Regresar a
+         inicio" y hacía esto: la etiqueta mentía. */
+      { texto:'Seguir rezando', tipo:'primario', onClick:()=>{
+          location.href = location.origin +
+            location.pathname.substring(0, location.pathname.lastIndexOf('/')+1) +
+            'orar.html?c=' + nivelId;
+        } },
+      accionLetanias(),
+      { texto:'Volver al camino', tipo:'discreto', onClick:()=>salirConAviso('crecer.html') }
+    ]
+  });
   show('scr-celebration');
 }
 

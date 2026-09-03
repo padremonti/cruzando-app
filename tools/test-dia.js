@@ -330,6 +330,61 @@ ok('el DEMO se retiró: 0101 ya no es un Nivel-regalo', () => {
     throw new Error('rezar conserva su rama del DEMO');
 });
 
+ok('el DEMO se retiró TAMBIÉN de audio: nada quedó vivo', () => {
+  /* Auditoría del 2026-09-02. La celebración del DEMO seguía disparándose en
+     0101 m20 —competía con el rosetón, que corre justo antes en ese mismo
+     Misterio— y con ella seguían vivos el overlay, sus banderas y, lo que de
+     verdad importaba, el privilegio de avanzar de corrido por el primer Nivel. */
+  const a = leer('audio.html');
+  const codigo = a.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/[^\n]*/gm, '');
+  [['showDemoCompleto',      'la función de la celebración'],
+   ['demo-completo-overlay', 'el overlay a pantalla completa'],
+   ['demo-completo-confetti','la lluvia de cruces del overlay'],
+   ['_freeDemoJustCleared',  'la bandera que la disparaba'],
+   ['_demoCleared',          'la bandera del cierre del DEMO'],
+   ['_esDemo',               'la bandera de "estoy en el DEMO"'],
+   ['_freeRitmoLibre',       'la bandera que nadie leía'],
+   ['_lockHoy',              'el día que no se consumía en 0101'],
+   ['enDemo',                'el privilegio de avanzar en 0101']
+  ].forEach(([t, que]) => {
+    if (codigo.includes(t)) throw new Error('sigue vivo: ' + que + ' (' + t + ')');
+  });
+});
+
+ok('el free consume su día SIEMPRE, también en 0101', () => {
+  /* Era la consecuencia real del DEMO: `completedToday: _lockHoy` valía false
+     en 0101 m1-19, así que el primer Nivel se podía recorrer entero de una
+     sentada. Un Misterio al día, en todo el itinerario. */
+  const a = leer('audio.html').replace(/\s/g, '');
+  if (!/completedToday:true,/.test(a))
+    throw new Error('el día vuelve a depender de una condición');
+  if (!/_freeShowMananaAfterCelebration=true;/.test(a))
+    throw new Error('el candado del día vuelve a apagarse en algún caso');
+});
+
+ok('avanzar de Misterio en el epílogo es solo de Premium', () => {
+  const a = leer('audio.html');
+  const c = (a.match(/function renderEpilogoActions\(\)[\s\S]*?\n\}/) || [''])[0];
+  if (!c) throw new Error('no encontré renderEpilogoActions');
+  if (/nivelId === '0101'/.test(c))
+    throw new Error('vuelve la excepción del primer Nivel');
+  if (!/const puedeAvanzar = esPremium;/.test(c))
+    throw new Error('el permiso de avanzar dejó de salir del plan a secas');
+});
+
+ok('plan-utils · el predicado ya no se llama como el DEMO', () => {
+  /* Se llamaba demoCompleto y comprobaba los VEINTE: no tenía nada que ver con
+     el DEMO, y era la cuarta copia de la línea que vive en niveles.js. */
+  /* Sin comentarios: el que explica el renombrado cita el nombre viejo. */
+  const pu = leer('plan-utils.js');
+  const cod = pu.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/[^\n]*/gm, '');
+  if (/demoCompleto/.test(cod)) throw new Error('sigue el nombre viejo en plan-utils');
+  if (!/window\.nivelCompleto/.test(pu)) throw new Error('no expone nivelCompleto');
+  if (!/window\.Niveles\.nivelCompleto/.test(pu))
+    throw new Error('no delega en el origen único cuando niveles.js está cargado');
+  if (/demoCompleto/.test(REZ)) throw new Error('rezar sigue llamando al nombre viejo');
+});
+
 ok('rezar.html · la puerta del día se deriva, no se cree la bandera', () => {
   const b = REZ.slice(REZ.indexOf('function _diaPermite'), REZ.indexOf('function _diaPermite') + 420);
   if (!/Dia\.permitido\(blk,prog,new Date\(\)\)/.test(b))

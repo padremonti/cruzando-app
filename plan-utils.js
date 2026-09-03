@@ -277,21 +277,28 @@
   // ── requirePremiumAccess ─────────────────────────────────────────────────────
   // Redirige a index.html?blocked=modo si el plan no permite acceso.
   // Devuelve true si el acceso está permitido, false si redirigió.
-  // nivelId: opcional — se reenvía a canAccessModo para que en 0101 (DEMO Free)
-  //   el plan free acceda a todos los modos. Si no se pasa (llamadas de 2 args),
-  //   nivelId queda undefined y el comportamiento es idéntico al anterior.
+  // nivelId: opcional — se reenvía a canAccessModo. Existía para la cláusula del
+  //   DEMO, que abría 0101 entero al free; retirada esa cláusula, canAccessModo
+  //   ya no lo mira, pero el parámetro se conserva por si una regla futura
+  //   vuelve a depender del Nivel. Sin él, el comportamiento es el mismo.
   function requirePremiumAccess(modo, plan, nivelId) {
     if (canAccessModo(modo, plan, nivelId)) return true;
     window.location.replace('index.html?blocked=' + encodeURIComponent(modo));
     return false;
   }
 
-  // ── demoCompleto ─────────────────────────────────────────────────────────────
-  // true si 0101 (el DEMO Free) está completo: 4 bloques × 5 misterios con valor.
-  // Misma definición de "nivel completo" que badge-check.js (v !== null).
-  // Las páginas lo llaman al completar un Misterio de 0101 para cerrar el DEMO;
-  // aquí NO se dispara ninguna celebración ni navegación.
-  function demoCompleto(progressDoc) {
+  // ── nivelCompleto ────────────────────────────────────────────────────────────
+  // true si el Nivel está entero: 4 bloques x 5 Misterios con marca.
+  //
+  // ⚠️ Se llamaba `demoCompleto` y NO tenía nada que ver con el DEMO: comprobaba
+  // los veinte. Con el DEMO retirado el nombre solo confundía. Es además la
+  // CUARTA copia de la misma línea —niveles.js la tiene con este nombre, y su
+  // propio comentario lo decía—, así que aquí queda solo como respaldo para las
+  // páginas que cargan plan-utils sin niveles.js.
+  function nivelCompleto(progressDoc) {
+    if (window.Niveles && window.Niveles.nivelCompleto) {
+      return window.Niveles.nivelCompleto(progressDoc);
+    }
     var BLOQUES = ['gozosos', 'luminosos', 'dolorosos', 'gloriosos'];
     var prog = (progressDoc && progressDoc.progress) || {};
     return BLOQUES.every(function (b) {
@@ -300,7 +307,7 @@
              arr.every(function (v) { return v !== null; });
     });
   }
-  window.demoCompleto = demoCompleto;
+  window.nivelCompleto = nivelCompleto;
 
 
   // ── Expose ───────────────────────────────────────────────────────────────────
