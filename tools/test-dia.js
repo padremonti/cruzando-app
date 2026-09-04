@@ -829,6 +829,81 @@ ok('crecer.html  . conserva su modal, que es el informativo', () => {
     throw new Error('crecer perdio la opcion de empezar por el principio del bloque');
 });
 console.log('\n' + '─'.repeat(64));
+console.log('\n── La puerta del free vive en el embudo ──');
+
+ok('audio · buildSession pregunta ANTES de construir', () => {
+  /* Todas las puertas del free vivían en loadUserAndStart(), que solo corre al
+     cargar. Dentro, advanceAndRestart() y _goToPrevMystery() cambiaban de
+     Misterio sin preguntar nada, y las dos son globales. */
+  const s = AUD;
+  const c = (s.match(/async function buildSession\(\)[\s\S]{0,200}/) || [''])[0];
+  if (!/if \(_guardaDelFree\(\)\) return;/.test(c))
+    throw new Error('el embudo no consulta la guarda antes de construir');
+});
+
+ok('audio · la guarda lee freeProgress, no la URL ni la memoria', () => {
+  const c = (AUD.match(/function _puestoDelFree\(\)[\s\S]*?\n\}/) || [''])[0];
+  if (!c) throw new Error('no existe _puestoDelFree');
+  if (!/window\._freeProg/.test(c))
+    throw new Error('el puesto del free tiene que salir de freeProgress');
+  if (/location\.search|URLSearchParams/.test(c))
+    throw new Error('la URL no puede ser la fuente de verdad del puesto');
+});
+
+ok('audio · consumido el día, no se abre la sesión de mañana', () => {
+  /* El puntero de freeProgress ya apunta a MAÑANA —lo adelanta
+     advanceFreeMisterio en la misma operación—, así que "construir lo suyo"
+     sería justo el salto que se quiere impedir. Solo se permite repetir. */
+  const c = (AUD.match(/function _guardaDelFree\(\)[\s\S]*?\n\}/) || [''])[0];
+  if (!c) throw new Error('no existe _guardaDelFree');
+  if (!/suyo\.hecho/.test(c))
+    throw new Error('la guarda no mira completedToday');
+  if (!/showFreeVuelveManana\(\)/.test(c))
+    throw new Error('no muestra el candado del día');
+  if (!/return true;/.test(c))
+    throw new Error('la guarda tiene que poder abortar la construcción');
+});
+
+ok('audio · corrige en memoria, no recarga', () => {
+  /* location.replace perdería el estado y haría parpadear la pantalla. */
+  const c = (AUD.match(/function _guardaDelFree\(\)[\s\S]*?\n\}/) || [''])[0];
+  if (/location\.replace|location\.href/.test(c))
+    throw new Error('la corrección no puede ser una recarga');
+  if (!/audioProgress\.misterio\s*=\s*suyo\.misterio;/.test(c))
+    throw new Error('no corrige la posición en memoria');
+});
+
+ok('audio · las dos rutas de cambio de Misterio se niegan al free', () => {
+  /* Un botón invisible que responde es el defecto de los quince nodos con
+     candado que se abrían igual: las funciones son globales. */
+  const s = AUD;
+  [['window._goToPrevMystery = async () => {', '_goToPrevMystery'],
+   ['window.advanceAndRestart = async () => {', 'advanceAndRestart']
+  ].forEach(([abre, nombre]) => {
+    const i = s.indexOf(abre);
+    if (i === -1) throw new Error('no encontré ' + nombre);
+    const cabeza = s.slice(i, i + 260).replace(/\s/g, '');
+    if (!/if\(_esFree\(\)\)return;/.test(cabeza))
+      throw new Error(nombre + ' sigue avanzando para el free');
+  });
+});
+
+ok('audio · un solo candado diario, no dos', () => {
+  /* Había DOS pantallas para el mismo momento con dos contadores distintos:
+     #free-manana-overlay (la que se usa) y #scr-daily-limit, que solo se
+     llamaba como respaldo por si la primera no existiera. */
+  const s = AUD;
+  if (/showDailyLimit/.test(s.replace(/\/\*[\s\S]*?\*\//g, '')))
+    throw new Error('vuelve la segunda pantalla de candado');
+  if (/id="scr-daily-limit"/.test(s))
+    throw new Error('vuelve el markup de la pantalla duplicada');
+  if (!/Aviso\.pintar\(overlay,/.test(s))
+    throw new Error('el candado que queda no usa el aviso');
+  const c = (s.match(/function showFreeVuelveManana\(\)[\s\S]*?\n\}/) || [''])[0];
+  if (!/alLlegar: \(\) => window\.location\.reload\(\)/.test(c))
+    throw new Error('a medianoche debe recargar: es un día nuevo y otro Misterio');
+});
+
 if (fallos) {
   console.log('  ✗ ' + fallos + ' fallo(s), ' + pasos + ' pasada(s)');
   console.log('─'.repeat(64) + '\n');

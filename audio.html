@@ -1575,10 +1575,6 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   </div>
 
   <!-- ═══ PANTALLA: LÍMITE DIARIO ═══ -->
-  <div class="screen" id="scr-daily-limit" style="position:relative">
-    <div id="daily-limit-body" style="position:relative;flex:1;width:100%"></div>
-  </div>
-
   <!-- ═══ OVERLAY: EPÍLOGO / COMPLETADO ═══ -->
   <div id="scr-complete">
     <div class="epilogo-handle"></div>
@@ -2100,7 +2096,12 @@ window._logout = () => {
 window._goHome = () => { goTo('crecer.html'); };
 
 let _prevMysteryBusy = false;
+/* Se NIEGAN, no solo se esconden. updateMysteryNavBtns() les pone display:none
+   al free, pero el onclick seguía cableado y estas funciones son globales: un
+   botón invisible que responde es el defecto de los quince nodos con candado
+   que se abrían igual. */
 window._goToPrevMystery = async () => {
+  if (_esFree()) return;
   if (_prevMysteryBusy) return;
   _prevMysteryBusy = true;
   show('scr-loading'); setMsg('Cargando misterio anterior…');
@@ -2156,6 +2157,7 @@ window._repeatSession = async () => {
 };
 
 window.advanceAndRestart = async () => {
+  if (_esFree()) return;      // el free avanza un Misterio al día, no a golpe de botón
   closeEpilogo();
   Canto.close(); cantoEpilogo = false;
   let { nivel, cuaderno, misterio } = audioProgress;
@@ -2172,7 +2174,6 @@ window.advanceAndRestart = async () => {
   await buildSession();
 };
 
-window.showDailyLimit = () => showDailyLimit();
 
 // ════════════════════════════════════════════
 // POPUP — CONFIRMAR CAMBIO DE MISTERIO
@@ -2418,7 +2419,6 @@ async function loadUserAndStart(skipProgressRead = false) {
         await buildSession();
         setTimeout(function() {
           if (window.showFreeVuelveManana) window.showFreeVuelveManana();
-          else if (window.showDailyLimit)  window.showDailyLimit();
         }, 400);
         return;
       }
@@ -2510,51 +2510,38 @@ function hasSessionToday() {
          lastDate.getDate()     === today.getDate();
 }
 
-function showDailyLimit() {
-  /* El candado del día. Antes: un 🙏 de 2.8rem, cuatro párrafos y dos botones
-     con estilos en línea. Y "en 7h" a secas, que a las 23:05 era falso — ahora
-     el reloj corre hasta el segundo. */
-  Aviso.pintar('daily-limit-body', {
-    acento:  (BLOCK_COLORS[currentSession && currentSession.block] || {}).bold ||
-             COLORES_BLOQUE.luminosos,
-    kicker:  'Hoy, rezado',
-    titulo:  'Vuelve mañana',
-    cuerpo:  'El camino se recorre paso a paso.',
-    cuenta:  'medianoche',
-    nota:    'Con membresía Beta o Premium puedes avanzar sin límite diario.',
-    acciones: [
-      { texto:'Repetir la sesión',  tipo:'primario', onClick: () => window._repeatSession() },
-      { texto:'Volver al camino',   tipo:'discreto', onClick: () => window._goHome() }
-    ]
-  });
-  _stopLoadingRotation();
-  show('scr-daily-limit');
-}
+/* ── El candado del día ──────────────────────────────────────────────────────
+   ⚠️ Había DOS: esta y showDailyLimit()/#scr-daily-limit, que solo se llamaba
+   como respaldo por si esta no existiera. Dos pantallas para el mismo momento,
+   con dos contadores distintos. Se quedó la que de verdad sale.
 
+   El reloj lo lleva el aviso, y al llegar a medianoche recarga: es un día nuevo
+   y su Misterio ya es otro. */
 function showFreeVuelveManana() {
   const overlay = document.getElementById('free-manana-overlay');
   if (!overlay) return;
-  overlay.style.display = 'flex';
+  overlay.style.display = 'block';
 
   if (audioEl) { audioEl.pause(); isPlaying = false; }
   bgmStop();
   if (typeof updatePlayUI === 'function') updatePlayUI();
 
-  function tick() {
-    const now      = new Date();
-    const midnight = new Date(now);
-    midnight.setHours(24, 0, 0, 0);
-    const diff = Math.max(0, midnight - now);
-    const hh   = Math.floor(diff / 3600000);
-    const mm   = Math.floor((diff % 3600000) / 60000);
-    const ss   = Math.floor((diff % 60000) / 1000);
-    const pad  = n => String(n).padStart(2, '0');
-    const el   = document.getElementById('free-countdown');
-    if (el) el.textContent = pad(hh) + ':' + pad(mm) + ':' + pad(ss);
-    if (diff > 0) setTimeout(tick, 1000);
-    else window.location.reload(); // Medianoche — recargar para el nuevo día
-  }
-  tick();
+  Aviso.pintar(overlay, {
+    acento:  COLORES_BLOQUE.luminosos,
+    kicker:  'Hoy, rezado',
+    titulo:  'Vuelve mañana',
+    cuerpo:  'El camino se recorre paso a paso.',
+    cuenta:  'medianoche',
+    alLlegar: () => window.location.reload(),
+    nota:    'Con membresía Beta o Premium puedes avanzar sin límite diario.',
+    acciones: [
+      { texto:'Repetir la sesión', tipo:'primario', onClick: () => {
+          overlay.style.display = 'none';
+          window._repeatSession();
+        } },
+      { texto:'Volver al camino',  tipo:'discreto', onClick: () => window._goHome() }
+    ]
+  });
 }
 window.showFreeVuelveManana = showFreeVuelveManana;
 
@@ -2758,7 +2745,75 @@ async function loadReflections() {
 // CONSTRUIR SESIÓN
 // ════════════════════════════════════════════
 
+/* ── La puerta del free vive en el EMBUDO, no en cada botón ──────────────────
+   Todas las puertas del free estaban en loadUserAndStart(), que solo corre al
+   CARGAR la página. Una vez dentro, advanceAndRestart(), _goToPrevMystery() y
+   las flechas del hero cambiaban de Misterio sin preguntar nada — y las tres
+   son globales, así que bastaba con pulsar "Siguiente misterio" para saltarse
+   el ritmo del día. El permiso se comprobaba en la entrada, no en la acción.
+
+   buildSession() es el embudo: los siete caminos que construyen una sesión
+   pasan por aquí. Se corrige EN MEMORIA, no con location.replace: recargar
+   perdería el estado y haría parpadear la pantalla.
+
+   ⚠️ Esto es integridad de producto, no seguridad. Los .m4a viven en un bucket
+   público con URLs predecibles y progress/{doc} permite escritura al dueño:
+   quien abra la consola pasa igual. Lo que se cierra es que la app no se
+   contradiga a sí misma ni invite a saltarse su propio ritmo. */
+function _esFree() {
+  return (window.effectivePlan ? effectivePlan() : userPlan) === 'free';
+}
+
+/* El puesto que le toca hoy, leído de freeProgress — nunca de la URL ni de lo
+   que haya quedado en audioProgress. */
+function _puestoDelFree() {
+  const fp = window._freeProg;
+  if (!fp) return null;
+  const id = String(fp.nivelId || '0101');
+  return {
+    nivel:    parseInt(id.slice(0, 2), 10) || 1,
+    cuaderno: parseInt(id.slice(2, 4), 10) || 1,
+    misterio: fp.misterio || 1,
+    hecho:    !!fp.completedToday
+  };
+}
+
+/* Devuelve true si NO hay que construir nada: el día ya se consumió y esto no
+   es repetir la sesión de hoy, sino empezar otra. */
+function _guardaDelFree() {
+  if (!_esFree()) return false;
+  const suyo = _puestoDelFree();
+  if (!suyo || !audioProgress) return false;
+
+  const pedido = audioProgress.nivel + '-' + audioProgress.cuaderno + '-' + audioProgress.misterio;
+
+  /* Día consumido: el puntero de freeProgress ya apunta a MAÑANA (lo adelanta
+     advanceFreeMisterio en la misma operación), así que construir "lo suyo"
+     sería justo el salto que se quiere impedir. Solo se permite repetir la que
+     acaba de rezar, que es la que audioProgress conserva. */
+  if (suyo.hecho) {
+    const deHoy = suyo.nivel + '-' + suyo.cuaderno + '-' + suyo.misterio;
+    if (pedido === deHoy) {
+      console.warn('[CruzAndo] El free ya rezó hoy: no se abre la sesión de mañana.');
+      _stopLoadingRotation();
+      showFreeVuelveManana();
+      return true;
+    }
+    return false;   // repetir la de hoy: adelante
+  }
+
+  if (pedido !== (suyo.nivel + '-' + suyo.cuaderno + '-' + suyo.misterio)) {
+    console.warn('[CruzAndo] El free solo entra a su Misterio del día; corrigiendo.');
+    audioProgress.nivel         = suyo.nivel;
+    audioProgress.cuaderno      = suyo.cuaderno;
+    audioProgress.misterio      = suyo.misterio;
+    audioProgress.firstAnswered = [false, false, false];
+  }
+  return false;
+}
+
 async function buildSession() {
+  if (_guardaDelFree()) return;
   const { nivel, cuaderno, misterio } = audioProgress;
   setMsg(`Preparando Nivel ${nivel}-${cuaderno}, Misterio ${misterio}…`);
 
@@ -4712,45 +4767,9 @@ initAuth();
 </div>
 
 <!-- ── Overlay Free: Vuelve mañana ── -->
-<div id="free-manana-overlay" style="display:none;position:fixed;inset:0;
-  background:var(--bg);z-index:9999;flex-direction:column;align-items:center;
-  justify-content:center;padding:32px;text-align:center;">
-  <div style="font-size:3.5rem;margin-bottom:20px">🌙</div>
-  <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:2rem;
-    font-weight:600;color:var(--text);line-height:1.2;margin-bottom:14px">
-    ¡Buen camino, peregrino!
-  </div>
-  <div style="font-family:'Crimson Pro',Georgia,serif;font-size:1.2rem;
-    color:var(--text-soft);line-height:1.7;margin-bottom:32px;max-width:320px">
-    Has completado tu Misterio del día.<br>
-    Mañana podrás continuar con el siguiente.
-  </div>
-  <div style="font-size:0.7rem;font-weight:700;letter-spacing:2px;
-    text-transform:uppercase;color:var(--text-dim);margin-bottom:8px">
-    Próximo Misterio en
-  </div>
-  <div id="free-countdown" style="font-family:'Cormorant Garamond',Georgia,serif;
-    font-size:3.2rem;font-weight:600;color:var(--brand);margin-bottom:40px;
-    letter-spacing:2px">
-    00:00:00
-  </div>
-  <button onclick="window._goHome()"
-    style="padding:16px 40px;border-radius:28px;border:none;
-    background:var(--brand);color:#fff;
-    font-family:'Cormorant Garamond',Georgia,serif;
-    font-size:1.4rem;font-weight:600;cursor:pointer;
-    -webkit-tap-highlight-color:transparent;">
-    Volver al camino
-  </button>
-  <button onclick="document.getElementById('free-manana-overlay').style.display='none'; window._repeatSession();"
-    style="margin-top:14px;padding:13px 40px;border-radius:28px;
-    background:none;border:1.5px solid var(--border);color:var(--text-soft);
-    font-family:'Cormorant Garamond',Georgia,serif;
-    font-size:1.2rem;font-weight:600;cursor:pointer;
-    -webkit-tap-highlight-color:transparent;">
-    🔄 Repetir sesión
-  </button>
-</div>
+<!-- ── Candado diario del free. z 9999 a propósito: se muestra al SALIR del
+     epílogo, por encima de todo, y es lo último que ve hoy. ── -->
+<div id="free-manana-overlay" style="display:none;position:fixed;inset:0;z-index:9999"></div>
 
 <!-- Mariano slide-in -->
 <div class="mariano-overlay" id="mariano-overlay" style="display:none">

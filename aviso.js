@@ -69,6 +69,13 @@
 
   /* Cuánto falta para mañana, hasta el SEGUNDO. Antes se decía "en 7h" a secas,
      y a las 23:05 eso era falso: faltaba menos de una hora. */
+  function faltaSegundos() {
+    var m = new Date();
+    m.setDate(m.getDate() + 1);
+    m.setHours(0, 0, 0, 0);
+    return Math.max(0, Math.floor((m - Date.now()) / 1000));
+  }
+
   function faltaParaManana() {
     var m = new Date();
     m.setDate(m.getDate() + 1);
@@ -132,6 +139,9 @@
       relojes[id] = setInterval(function () {
         if (!reloj.isConnected) { pararReloj(id); return; }
         reloj.textContent = faltaParaManana();
+        /* Al llegar a cero, quien pintó decide. El candado del free recarga:
+           es un día nuevo y su Misterio ya es otro. */
+        if (opts.alLlegar && faltaSegundos() <= 0) { pararReloj(id); opts.alLlegar(); }
       }, 1000);
     }
     return caja;

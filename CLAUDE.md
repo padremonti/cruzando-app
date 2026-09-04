@@ -521,6 +521,31 @@ premium y bajó de plan: lo que rezó sigue rezado.
 **Las cuentas NO navegan.** Tocar una escribe su nombre debajo y nada más; se entra
 solo por los botones. Si una cuenta llevara a rezar, la tira sería el mapa por accidente.
 
+### La puerta del free vive en el EMBUDO, no en cada botón
+
+*Estado: implementado + 6 pruebas en `tools/test-dia.js`. **PENDIENTE prueba en dispositivo.***
+
+⚠️ **Todas las puertas del free vivían en `loadUserAndStart()`, que solo corre al CARGAR la página.** Una vez dentro, tres caminos cambiaban de Misterio sin preguntar nada — y los tres son globales:
+
+| Camino | Comprobaba |
+|---|---|
+| `window.advanceAndRestart()` | **nada** — subía `misterio`, guardaba y reconstruía |
+| `window._goToPrevMystery()` | **nada** |
+| Flechas del hero | ocultas con `display:none`, pero el `onclick` seguía cableado |
+
+Bastaba con pulsar «Siguiente misterio» en el epílogo para saltarse el ritmo del día. *(Ese botón ya no sale al free desde que se retiró `enDemo`, pero el agujero seguía detrás.)*
+
+**`buildSession()` es el embudo**: los siete caminos que construyen una sesión pasan por ahí, así que ahí va la guarda (`_guardaDelFree()`). Es el mismo patrón que ya funcionó con el splash de racha: engancharse al embudo, no a cada botón.
+
+- **La verdad sale de `freeProgress`**, nunca de la URL ni de lo que quedara en `audioProgress`.
+- **Se corrige en memoria**, no con `location.replace`: recargar perdería el estado y haría parpadear la pantalla.
+- ⚠️ **Consumido el día, no se abre «lo suyo»**: el puntero de `freeProgress` ya apunta a **mañana** —lo adelanta `advanceFreeMisterio` en la misma operación—, así que construir su puesto sería justo el salto que se quiere impedir. Solo se permite **repetir** la de hoy, que es la que `audioProgress` conserva.
+- **Las dos funciones globales se niegan** (`if (_esFree()) return;`), no solo se esconde el botón: un control invisible que responde es el defecto de los quince nodos con candado que se abrían igual.
+
+⚠️ **Esto es integridad de producto, no seguridad.** Los `.m4a` viven en un bucket público con URLs predecibles y `progress/{doc}` permite escritura al dueño: quien abra la consola pasa igual. Lo que se cierra es que la app no se contradiga a sí misma ni invite a saltarse su propio ritmo — y lo que el free obtendría saltándoselo no es contenido de pago, es el mismo itinerario más deprisa, que es justo lo que Premium compra.
+
+⚠️ **Y había DOS pantallas de candado diario.** `showFreeVuelveManana()` / `#free-manana-overlay` (🌙 de 3,5 rem, contador propio, z 9999) es la que de verdad sale; `showDailyLimit()` / `#scr-daily-limit` solo se llamaba como respaldo por si la primera no existiera. Dos pantallas para el mismo momento con dos contadores distintos. Se quedó la que se usa, rehecha con el aviso, y su reloj **recarga a medianoche** (`alLlegar`): es un día nuevo y su Misterio ya es otro.
+
 ### El seam: `rezar` y `audio` derivan la regla del día
 
 La bandera `&hoy=1` dice **qué clase de sesión es**; el permiso **se deriva siempre**.

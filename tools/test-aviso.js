@@ -142,7 +142,7 @@ ok('el reloj solo se monta si se pide', () => {
 
 console.log('\n── Las cinco pantallas usan la pieza ──');
 
-[['audio.html', ['daily-limit-body', 'coming-soon-body']],
+[['audio.html', ['coming-soon-body']],
  ['orar.html',  ['celeb-aviso', 'error-aviso']],
  ['rezar.html', ['celeb-aviso', 'error-aviso']]].forEach(([f, destinos]) => {
   ok(f.padEnd(13) + '· carga el módulo y pinta en sus contenedores', () => {
@@ -190,6 +190,18 @@ ok('rezar        · la decide cuadernoCompleto()', () => {
 });
 
 console.log('\n── Mariano vuelve al final del Misterio (audio) ──');
+
+ok('audio        · el candado diario también usa la pieza', () => {
+  /* Pinta sobre el nodo del overlay (#free-manana-overlay), no por id: es un
+     velo a z 9999 que se muestra al SALIR del epílogo. */
+  const s = leer('audio.html');
+  if (!/Aviso\.pintar\(overlay,/.test(s))
+    throw new Error('el candado del free no usa el aviso');
+  if (!/id="free-manana-overlay"/.test(s))
+    throw new Error('falta el contenedor del candado');
+  if (/font-size:3\.5rem;margin-bottom:20px/.test(s))
+    throw new Error('vuelve el 🌙 gigante con estilo en línea');
+});
 
 ok('audio        · el aviso de metros sale SOBRE el epílogo', () => {
   /* A z-index 300 quedaba debajo del epílogo (500) y no se veía: por eso se
