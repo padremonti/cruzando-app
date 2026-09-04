@@ -933,8 +933,9 @@ users/{uid}/profile/afinidad          (onboarding de sanar.html)
 
 users/{uid}/profile/onboarding        (flags de tutorial — plan-utils.js, NO confundir con afinidad)
 
-users/{uid}/progress/sanar            (pains completados en mini.html — ciclo "completado")
+users/{uid}/progress/sanar            (pains completados en mini.html + señales del elenco)
   .pains       { '010101a': { firstCompletedAt, lastCompletedAt, count }, ... }  (clave = pain id)
+  .senalados   { '010101a': { at: 1757000000000 }, ... }   ← el listón (ver § Las señales)
   .updatedAt   Timestamp
 ```
 
@@ -1129,6 +1130,113 @@ Máquina de 4 fases (`estado.fase`): `onboarding` → `elenco` → `acogida` →
 - **Fase A** (cimientos: `plan-utils.js` + Firebase compat + uid tras Auth + gate developer robusto + `ordenElenco` centralizado) — **PROBADA en navegador** ("Cargando…" fugaz, developer OK, "ver como free" oculta el modo Misterio).
 - **Fase B** (onboarding de afinidad) y **Fase C** (reordenamiento) — **implementadas + lógica probada en node** (sort de afinidad y 4 grupos), **PENDIENTE prueba en dispositivo** (que `_perfil` llegue del doc tras Auth y el elenco se repinte).
 - **Pendiente:** `guardarAfinidad(pain,senales)` (señal implícita de uso, post-acogida) sigue como `TODO` — separado del perfil del test.
+
+## Las señales · el listón (sanar.html)
+
+*Estado: implementado + banco de pruebas (`tools/test-senalados.js`, 33). **PENDIENTE prueba visual en dispositivo** — ver Pendientes 18.*
+
+**Apartar un pain para volver a él.** Un cuarto modo del elenco, «Señalados», y un
+botón en el velo de foco. La biblioteca va a crecer, y lo que llamó la atención un día
+no puede perderse de vista.
+
+⚠ **No se llama «bookmark» ni «favorito», y las dos cosas importan.** `bookmark` ya
+significa *dónde me quedé* en `users/{uid}/bookmark/current` (audio) y
+`bookmark/currentCanto` (cantos) — reusarlo repetía la colisión de `canjearCodigo` y
+`checkMetaStreak`. Y «favorito» miente: **nadie tiene un dolor favorito**. Una señal es
+la que se pone en un libro para volver, y el glifo es el marcador estándar.
+
+### Es de TODOS los planes, y no por generosidad
+
+Se diseñó como función Premium y **se abrió a todos a propósito**. El cobro vive **solo**
+en `entrarMisterio()` —el botón «Entrar al Misterio» del handoff—, así que el velo de
+foco, que es donde se señala, ya era gratis para todos: cerrarlo habría sido la primera
+excepción a *«el elenco, el velo de foco y toda la acogida son libres para siempre»*
+(`plan-utils.js`).
+
+Y comercialmente es la decisión más fuerte, no la más blanda: **una lista de lo que uno
+quiere convierte mejor que un candado**, y no resiente. Para quien todavía no puede
+entrar, sus señales son su propia espera.
+
+Consecuencias que el código fija:
+- **No hay entrada nueva en `canAccessModo`**: no hay puerta que poner, ni botón
+  atenuado, ni repintado del «ver como free».
+- **No puede ir al argumentario de Premium** — y este documento ya advierte que ahí no
+  se promete lo que no existe.
+- ⚠ **Nunca un banner de compra dentro de «Señalados».** El flujo de créditos ya salta
+  en su momento; convertir la lista de las propias heridas en un escaparate de precios
+  sería lo contrario del criterio de la pantalla sin créditos, la que remata con *«El
+  Rosario de hoy te espera — es tuyo cada día, sin créditos»*.
+
+### La tarjeta NO se marca: el estado se lee en el velo
+
+La `.pain-card` ya lleva encima cuatro cosas —barra del eje, pastilla de acceso, check
+de rezado, etiqueta del eje— y una quinta la habría saturado. Además `.pain-card` **es un
+`<button>`**, y `onWheelTap` ya le da dos significados al mismo toque (centrar / abrir el
+velo): un botón anidado habría sido HTML inválido y un tercer significado.
+
+Así que **el estado vive en el botón del velo**, que dice «Señalar» o «Señalado» según
+esté. Es el mismo sitio donde se pone y donde se quita.
+
+⚠ **Ese botón alterna EN SITIO y no cierra el velo.** Si lo cerrara, señalar costaría
+perder la opción de entrar y habría que centrar la tarjeta otra vez. Es terciario a
+propósito —ni el naranja de *Continuar* ni el mutis de *Cancelar*—: es un apunte al
+margen de la decisión, no una tercera decisión.
+
+### La fila de modos pasó a icono-arriba-palabra-abajo
+
+El patrón de la barra inferior (`.app-nav-item`). En fila no cabían cuatro: `.shell` deja
+**350 px** útiles en un teléfono de 390, y `flex:1` reparte **a partes iguales sin mirar
+el contenido**, así que cada botón se quedaba en 81 px cuando «Escríbelo» y «Señalados»
+pedían ~97.
+
+⚠ **Quitarle la palabra a un botón no le habría dado ni un píxel a los otros** — eso es lo
+que hace `flex: 1 1 0%`. Por eso la salida fue apilar, no enmudecer. **Ninguno pierde su
+palabra**: los cuatro cuadrados de «Ejes» no dicen nada por sí solos a quien llega nuevo,
+y a esta biblioteca va a llegar gente nueva continuamente. Sin versalitas, a diferencia
+de `.app-nav-label`: sus palabras son cortas (Hoy, Diario) y «ESCRÍBELO» se sale del
+botón cuando el developer tiene cinco.
+
+### El dato: en `progress/sanar`, y sale gratis
+
+`senalados` va en el documento que **ya se leía** en el `Promise.all` del arranque para
+los completados: `_cargarCompletados` pasó a **`_cargarSanar`** y devuelve los dos
+conjuntos del mismo snapshot. **Cero lecturas extra, cero reglas** — `progress/{doc}` ya
+permite lectura y escritura al dueño.
+
+⚠ **La escritura va POR CLAVE con `merge:true`, nunca el mapa entero.** `mini.html` escribe
+`pains` en ESE mismo documento al llegar al epílogo; mandar el objeto completo podría
+pisarle una marca de rezado hecha en el mismo instante.
+
+⚠ **Quitar BORRA la clave (`deleteField`), no deja un `null`.** Una lápida por cada señal
+retirada convertiría el documento en un cementerio que crece y no se limpia. Por eso el
+shim `_fbFirestore` de sanar expone ahora `deleteField` — no lo tenía.
+
+**Espejo en `localStorage` (`cruzando_senalados`)** con la forma `{items, pend}`, donde
+`pend` es la cola de lo que Firestore aún no confirmó (1 = puesta, 0 = quitada). Se
+reintenta en el arranque, como `_retryPendingSync` con el perfil de afinidad.
+⚠ **La fusión da prioridad a la cola local**: es lo último que hizo el usuario. Sin eso,
+abrir sanar antes de que suba la cola desharía la señal recién puesta.
+
+`at` va con **`Date.now()` del cliente**, no `serverTimestamp()`: el orden de la lista es
+una comodidad personal, no una auditoría, y un `serverTimestamp` no se puede leer de
+vuelta hasta que el servidor confirma.
+
+### Orden, y lo que NO se tocó
+
+**Por recencia de la señal**, no por afinidad: la afinidad es una conjetura del perfil, la
+señal es un acto del usuario, y lo último que le llamó la atención es lo que espera
+arriba.
+
+⚠ **`ordenarPorAfinidad` no se tocó: un señalado NO sube en «Navegar».** La renta sí sube,
+y su propio comentario dice por qué — *«le quedan días para volver»*, **caduca**. Una
+señal no caduca, así que no hay urgencia que la haga subir, y además ya tiene modo propio.
+
+⚠ **Señalar NO llama a `render()`.** `renderElenco` remonta el wheel con `innerHTML` y el
+scroll volvería al principio — el mismo problema que obligó a escribir
+`_recentrarElenco()`. Se actualiza solo la cifra del contador (`_pintarContadorSenal()`),
+que nace en el DOM aunque valga 0 (oculta) porque no se puede pintar un nodo que no
+existe. Y **quitar una señal desde dentro del modo no retira la tarjeta en caliente**: la
+lista se desplazaría bajo el dedo. Desaparece a la siguiente entrada al modo.
 
 ## Mini sesión (mini.html) — Misterio-puerta
 
@@ -1579,6 +1687,14 @@ escribe `users/{uid}.terminos = { aceptado, fecha (serverTimestamp), version, me
 14. `firebase-service.js` es código muerto (ninguna página lo carga) y todavía registra sin casilla: borrarlo o alinearlo si alguna vez se conecta.
 15. **Kit de recompensas en standby** — prueba **visual** en dispositivo con `MOSTRAR_RECOMPENSAS = false`: que el nodo cada-5 se vea como separador discreto (claro y oscuro), que el camino no se descuadre, que no quede ningún cofre/botón/filtro muerto, y que los metros se sigan acumulando y mostrando normal.
 16. **DEUDA BLOQUEANTE del kit** — el doble cobro de `extras.html` (`getProductState` compara objetos contra strings) debe arreglarse **o eliminarse en el rediseño de la tienda ANTES** de poner `MOSTRAR_RECOMPENSAS = true`. Ver § Kit de recompensas.
+
+18. **Las señales · el listón** — prueba **visual** en dispositivo, en los dos temas y
+    con cuenta **free** y **premium**: que los cuatro modos quepan sin romperse (y los
+    **cinco** del developer) con el icono arriba y la palabra abajo · que «Señalar»
+    alterne a «Señalado» **sin cerrar el velo** · que el contador de la pestaña suba y
+    baje **sin que el wheel pierda el scroll** · que «Señalados» ordene por lo último
+    señalado y que su vacío se lea bien · que una señal puesta **en modo avión** siga
+    ahí al reabrir la app con red. Ver § Las señales.
 
 17. **Retiros ocultos** — prueba **visual** en dispositivo con `MOSTRAR_RETIROS = false`,
     en los dos temas. **Con cuenta free y con cuenta premium:** que la barra salga con

@@ -54,7 +54,11 @@ window._fbFirestore = {
   },
   getDoc: function(ref){ return ref.get(); },
   setDoc: function(ref, data, opts){ return opts && opts.merge ? ref.set(data, { merge:true }) : ref.set(data); },
-  serverTimestamp: function(){ return firebase.firestore.FieldValue.serverTimestamp(); }
+  serverTimestamp: function(){ return firebase.firestore.FieldValue.serverTimestamp(); },
+  // Quitar una señal es BORRAR su clave del mapa, no dejarla en null: este
+  // documento lo comparte mini.html (escribe `pains`), y una lápida por cada
+  // señal retirada lo convertiría en un cementerio que crece y no se limpia.
+  deleteField: function(){ return firebase.firestore.FieldValue.delete(); }
 };
 </script>
 <script src="flags.js"></script>
@@ -138,15 +142,40 @@ body {
 
 /* ── Selector de modo ── */
 .modes { display:flex; gap:8px; margin-bottom:14px; }
+/* Icono arriba, palabra abajo — el patrón de la barra inferior (.app-nav-item).
+   Con la etiqueta en su propia línea los CUATRO modos caben en un teléfono de
+   390 px (350 px útiles dentro de .shell, que es max-width:480px con 20 de
+   padding), y siguen cabiendo los CINCO del developer. En fila no cabían:
+   flex:1 reparte a partes iguales sin mirar el contenido, así que cada botón
+   se quedaba en 81 px cuando "Escríbelo" y "Señalados" pedían ~97 — y quitarle
+   la palabra a uno no le habría dado ni un píxel a los otros.
+   Ninguno pierde su palabra a propósito: los cuatro cuadrados de "Ejes" no
+   dicen nada por sí solos a quien llega nuevo, y a esta biblioteca va a llegar
+   gente nueva continuamente. */
 .mode-btn {
-  flex:1; display:flex; align-items:center; justify-content:center; gap:6px;
-  padding:10px 6px; min-height:44px; border-radius:13px; cursor:pointer;
+  position:relative;
+  flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px;
+  padding:9px 4px; min-height:56px; border-radius:13px; cursor:pointer;
   background:var(--card2); border:1px solid var(--border); color:var(--text-soft);
-  font-family:inherit; font-size:0.8rem; font-weight:600;
+  font-family:inherit; font-weight:600;
   transition:background .2s, color .2s, border-color .2s;
 }
-.mode-btn svg { width:16px; height:16px; }
+.mode-btn svg { width:19px; height:19px; }
+/* Sin versalitas: .app-nav-label las usa porque sus palabras son cortas (Hoy,
+   Diario…). "Escríbelo" en mayúsculas se sale del botón del developer. */
+.mode-lbl { font-size:0.66rem; letter-spacing:0.2px; line-height:1; white-space:nowrap; }
 .mode-btn.active { background:var(--brand-ultra); border-color:var(--brand); color:var(--brand-soft); }
+/* Contador de señales. Sin marca en la tarjeta del pain —decisión de producto:
+   el estado se lee en el velo— esta cifra es la ÚNICA presencia de las señales
+   en el elenco, así que importa que esté y que sea exacta. Nace en el DOM
+   aunque valga 0 (oculta): _pintarContadorSenal() actualiza sin re-render, y
+   no puede pintar un elemento que no existe. Tinta fija sobre el cian: el
+   --bg claro sobre --brand daría 1,9:1. */
+.mode-badge {
+  position:absolute; top:5px; right:7px; min-width:16px; height:16px; padding:0 4px;
+  border-radius:8px; background:var(--brand); color:#00232B;
+  font-size:0.58rem; font-weight:800; line-height:16px; text-align:center;
+}
 
 /* ── Buscador ── */
 .search-wrap { position:relative; margin-bottom:16px; }
@@ -356,6 +385,16 @@ body {
 .foco-btn{ width:100%; padding:14px; border-radius:14px; border:none; font-family:inherit; font-size:1rem; font-weight:700; cursor:pointer; -webkit-tap-highlight-color:transparent; }
 .foco-btn-go{ background:var(--orange); color:#fff; }
 .foco-btn-cancel{ background:transparent; color:var(--text-soft); font-weight:600; }
+/* El listón del velo. Terciario a propósito: ni el naranja de Continuar ni el
+   mutis de Cancelar — es un apunte al margen de la decisión, no una tercera
+   decisión. Alterna en sitio y NO cierra el velo. */
+.foco-btn-sen{
+  background:transparent; color:var(--text-soft);
+  border:1px solid var(--border); font-weight:600; font-size:.94rem;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.foco-btn-sen svg{ width:17px; height:17px; }
+.foco-btn-sen.on{ background:var(--brand-ultra); border-color:var(--brand); color:var(--brand); }
 
 /* ═══ PIEZA 2 · Pantallas del sistema económico ═══════════════════════════
    Los mockups venían con su propio vocabulario de tokens (--surface-0,
@@ -861,6 +900,12 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     social:      '<path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="2.4"/>',
     actitud:     '<path d="M12 21v-8"/><path d="M12 13c0-3 2.6-5.2 6-5 .2 3.2-2.6 5.4-6 5z"/><path d="M12 14c0-2.6-2.2-4.6-5.2-4.4-.2 2.8 2.2 4.6 5.2 4.4z"/>'
   };
+  // Listón de "señalar" — el glifo estándar de guardar contenido (el marcador
+  // de libro que usan hoy casi todas las apps). Mismo trazado en sus dos
+  // apariciones —fila de modos y botón del velo—: lo que distingue señalado de
+  // no señalado es el RELLENO, nunca la forma.
+  var GLIFO_SENAL = '<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>';
+
   function ejeSVG(k, cls){
     var inner = EJE_GLIFO[k] || '<circle cx="12" cy="12" r="8"/>';
     return '<svg class="'+(cls||'')+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+inner+'</svg>';
@@ -1016,18 +1061,114 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
       }).catch(function(){ return _localPerfil(); });
     } catch(e){ return Promise.resolve(_localPerfil()); }
   }
-  // Pieza 2: lee users/{uid}/progress/sanar → Set de painIds completados (los que
-  // mini marcó al llegar al epílogo). Fallback Set vacío si no hay doc o falla la red.
-  function _cargarCompletados(user){
+  // ── Señales · el listón ─────────────────────────────────────────
+  // Apartar un pain para volver a él. NO es "favorito" —nadie tiene un dolor
+  // favorito— ni "bookmark": esa palabra ya significa "dónde me quedé" en
+  // users/{uid}/bookmark/current (audio) y bookmark/currentCanto (cantos).
+  //
+  // Es de TODOS los planes, y no por generosidad: señalar ocurre en el velo de
+  // foco, que ya es gratis para todos —el cobro vive SOLO en entrarMisterio()—,
+  // así que cerrarlo habría sido la primera excepción a "el elenco, el velo de
+  // foco y toda la acogida son libres para siempre" (plan-utils.js). Para quien
+  // aún no puede entrar, la lista de señales es su propia espera: una lista de
+  // lo que uno quiere convierte mejor que un candado, y no resiente.
+  // Por eso NO hay entrada nueva en canAccessModo: no hay puerta que poner.
+  var _SEN_KEY  = 'cruzando_senalados';
+  var _senales  = {};      // { painId: {at:ms} } — en memoria, ya fusionado
+
+  // Espejo local: { items:{id:{at}}, pend:{id:1|0} }. `pend` es la cola de lo
+  // que Firestore aún no confirmó — 1 = puesta, 0 = quitada. Se reintenta en el
+  // arranque, igual que _retryPendingSync hace con el perfil de afinidad: una
+  // señal puesta sin cobertura no se pierde.
+  function _localSenales(){
+    try {
+      var raw = JSON.parse(localStorage.getItem(_SEN_KEY) || '{}');
+      return { items: raw.items || {}, pend: raw.pend || {} };
+    } catch(e){ return { items:{}, pend:{} }; }
+  }
+  function _guardarLocalSenales(loc){
+    try { localStorage.setItem(_SEN_KEY, JSON.stringify(loc)); } catch(e){}
+  }
+  // Firestore manda, SALVO en lo que este aparato tiene pendiente de subir: eso
+  // es lo último que hizo el usuario y todavía no ha llegado al servidor. Sin
+  // esto, abrir sanar antes de que suba la cola desharía la señal recién puesta.
+  function _fusionarSenales(remoto, loc){
+    var out = {};
+    for (var k in remoto) if (remoto[k]) out[k] = remoto[k];
+    for (var id in loc.pend) {
+      if (loc.pend[id] === 1) out[id] = loc.items[id] || { at: Date.now() };
+      else delete out[id];
+    }
+    return out;
+  }
+  function _estaSenalado(id){ return !!_senales[id]; }
+  function _numSenales(){ return Object.keys(_senales).length; }
+
+  // Alterna la señal. Local primero y SÍNCRONO —la UI responde al instante y la
+  // señal sobrevive a la falta de red—, Firestore después.
+  function _senalar(id, on){
+    var loc = _localSenales();
+    if (on) { _senales[id] = { at: Date.now() }; loc.items[id] = _senales[id]; }
+    else    { delete _senales[id]; delete loc.items[id]; }
+    loc.pend[id] = on ? 1 : 0;
+    _guardarLocalSenales(loc);
+    _escribirSenal(id, on);
+    _pintarContadorSenal();
+  }
+  // Escritura por CLAVE con merge, nunca el mapa entero: mini.html escribe
+  // `pains` en ESTE mismo documento al llegar al epílogo, y mandar el objeto
+  // completo podría pisarle una marca de rezado hecha en el mismo instante.
+  // `at` va con Date.now() del cliente, no serverTimestamp(): el orden de la
+  // lista es una comodidad personal, no una auditoría, y un serverTimestamp no
+  // se puede leer de vuelta hasta que el servidor confirma.
+  function _escribirSenal(id, on){
+    var FS = window._fbFirestore, uid = window._obUID;
+    if (!FS || !FS.setDoc || !uid || !_db) return;   // sin canal → se queda en la cola
+    var ref;
+    try { ref = FS.doc(_db, 'users', uid, 'progress', 'sanar'); } catch(e){ return; }
+    var payload = { senalados: {} };
+    payload.senalados[id] = on ? { at: Date.now() }
+                               : (FS.deleteField ? FS.deleteField() : null);
+    FS.setDoc(ref, payload, { merge:true }).then(function(){
+      var l = _localSenales(); delete l.pend[id]; _guardarLocalSenales(l);
+    }).catch(function(){ /* sigue en la cola → se reintenta en el próximo arranque */ });
+  }
+  function _retrySenales(){
+    var loc = _localSenales();
+    for (var id in loc.pend) _escribirSenal(id, loc.pend[id] === 1);
+  }
+  // Quirúrgico a propósito: señalar NO puede llamar a render(). renderElenco
+  // remonta el wheel con innerHTML y el scroll volvería al principio — el mismo
+  // problema que obligó a escribir _recentrarElenco(). Aquí solo la cifra.
+  function _pintarContadorSenal(){
+    var b = document.getElementById('mode-badge-senalados');
+    if (!b) return;
+    var n = _numSenales();
+    b.textContent = n;
+    b.hidden = !n;
+  }
+
+  // Pieza 2 + señales: UNA sola lectura de users/{uid}/progress/sanar sirve a
+  // las dos. `pains` son los completados (los que mini marca al llegar al
+  // epílogo) y `senalados` las señales puestas en el velo. Alojar las señales
+  // en este documento no cuesta ni una lectura ni una regla: progress/{doc} ya
+  // permite lectura y escritura al dueño. Fallback: el espejo local, para no
+  // perder señales cuando falla la red.
+  function _cargarSanar(user){
     var FS = window._fbFirestore;
-    if (!FS || !FS.getDoc) return Promise.resolve(new Set());
+    var loc = _localSenales();
+    function vacio(){ return { completados:new Set(), senalados:_fusionarSenales({}, loc) }; }
+    if (!FS || !FS.getDoc) return Promise.resolve(vacio());
     try {
       var ref = FS.doc(_db, 'users', user.uid, 'progress', 'sanar');
       return FS.getDoc(ref).then(function(snap){
-        var pains = (snap && snap.exists && snap.data().pains) || {};
-        return new Set(Object.keys(pains));
-      }).catch(function(){ return new Set(); });
-    } catch(e){ return Promise.resolve(new Set()); }
+        var d = (snap && snap.exists) ? snap.data() : {};
+        return {
+          completados: new Set(Object.keys(d.pains || {})),
+          senalados:   _fusionarSenales(d.senalados || {}, loc)
+        };
+      }).catch(vacio);
+    } catch(e){ return Promise.resolve(vacio()); }
   }
   // Escritura: localStorage primero (síncrono, marca pendingSync), luego Firestore
   // vía el shim; si Firestore confirma, se limpia pendingSync.
@@ -1322,6 +1463,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
         modeBtn('navegar','Navegar','<path d="M4 6h16M4 12h16M4 18h10"/>')+
         modeBtn('buscar','Escríbelo','<circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/>')+
         modeBtn('ejes','Ejes','<circle cx="7" cy="7" r="3"/><circle cx="17" cy="7" r="3"/><circle cx="7" cy="17" r="3"/><circle cx="17" cy="17" r="3"/>')+
+        modeBtn('senalados','Señalados', GLIFO_SENAL, _numSenales())+   // todos los planes
         (DEV ? modeBtn('misterio','Misterio','<path d="M12 4v16M7 9h10"/>') : '')+   // solo developer
       '</div>'+
       '<div id="elenco-controls" class="san-an" style="animation-delay:.28s"></div>'+
@@ -1379,10 +1521,17 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     });
   }
 
-  function modeBtn(id, label, glifo){
+  // `badge` (opcional) → contador en la esquina. Nace en el DOM aunque valga 0,
+  // oculto: _pintarContadorSenal() actualiza sin re-render y no puede pintar un
+  // nodo que no exista.
+  function modeBtn(id, label, glifo, badge){
     var on = estado.modo === id;
+    var b  = (typeof badge === 'number')
+      ? '<span class="mode-badge" id="mode-badge-'+id+'"'+(badge?'':' hidden')+'>'+badge+'</span>'
+      : '';
     return '<button class="mode-btn'+(on?' active':'')+'" aria-pressed="'+(on?'true':'false')+'" onclick="setModo(\''+id+'\')">'+
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+glifo+'</svg>'+label+'</button>';
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+glifo+'</svg>'+
+      '<span class="mode-lbl">'+label+'</span>'+b+'</button>';
   }
 
   // ── Modo Misterio (developer) — numberpad tipo PIN para cargar un mid ────────
@@ -1427,6 +1576,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   var _perfil = null;              // Fase B/C: pesos por eje del perfil (poblado tras Auth / al completar el test)
   var _completados = new Set();    // Pieza 2: painIds rezados en mini (progress/sanar); consulta O(1)
   function ordenElenco(list, modo, perfil){
+    if (modo === 'senalados')      return _ordenPorSenal(list);
     if (modo === 'navegar' && DEV) return _ordenItinerario(list);
     if (modo === 'navegar')        return ordenarPorAfinidad(list, perfil, _completados);   // user
     return list;
@@ -1434,6 +1584,21 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
   // Itinerario (developer): por mid canónico ascendente. El mid es zero-padded
   // (mundo·nivel·número, 2+2+2), así que el orden lexicográfico del string ya
   // equivale a 1_1_1→1_1_20→1_2_1→… No muta la lista original (slice antes de sort).
+  // Señalados: por recencia de la SEÑAL, no por afinidad. La afinidad es una
+  // conjetura del perfil; la señal es un acto del usuario, y lo último que le
+  // llamó la atención es lo que espera arriba.
+  //
+  // ordenarPorAfinidad NO se toca: un señalado no sube en "Navegar". La renta
+  // sube porque CADUCA —"le quedan días para volver", dice su comentario—; una
+  // señal no caduca, así que no hay urgencia que la haga subir, y además ya
+  // tiene modo propio.
+  function _ordenPorSenal(list){
+    return list.slice().sort(function(a, b){
+      var A = (_senales[a.id] && _senales[a.id].at) || 0;
+      var B = (_senales[b.id] && _senales[b.id].at) || 0;
+      return B - A;
+    });
+  }
   function _ordenItinerario(list){
     return list.slice().sort(function(a,b){
       var A = String(a.mid || ''), B = String(b.mid || '');
@@ -1514,6 +1679,18 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
       var mps = pains.filter(function(p){ return p.mid === pin; });
       if (!mps.length) { box.innerHTML = '<div class="empty">Sin pains en este Misterio.</div>'; return; }
       renderWheel(mps, m.titulo);   // título del Misterio como encabezado (confirma cuál cargó)
+      return;
+    }
+
+    if (estado.modo === 'senalados') {
+      var sp = pains.filter(function(p){ return _estaSenalado(p.id); });
+      if (!sp.length) {
+        box.innerHTML = '<div class="empty">Todavía no has señalado nada.<br><br>'+
+          'Cuando algo te llame la atención, ábrelo y toca <b>Señalar</b>:<br>'+
+          'aquí te espera para cuando quieras volver.</div>';
+        return;
+      }
+      renderWheel(ordenElenco(sp, 'senalados'), 'Lo que apartaste');
       return;
     }
 
@@ -1599,6 +1776,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
         '<div class="foco-card-wrap">'+painCard(p)+'</div>'+
         '<div class="foco-actions">'+
           '<button class="foco-btn foco-btn-go" id="foco-go">Continuar</button>'+
+          '<button class="foco-btn foco-btn-sen" id="foco-sen" aria-pressed="false"></button>'+
           '<button class="foco-btn foco-btn-cancel" id="foco-cancel">Cancelar</button>'+
         '</div>'+
       '</div>');
@@ -1611,6 +1789,25 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     $('foco-go').addEventListener('click', function(){ cerrarFoco(true); pickPain(painId); });
     // Cancelar / tap-fuera / Esc → salida coreografiada (reverso de la entrada).
     $('foco-cancel').addEventListener('click', function(){ cerrarFoco(); });
+    // El listón. Alterna EN SITIO y NO cierra el velo: si lo cerrara, señalar
+    // costaría perder la opción de entrar y habría que centrar la tarjeta otra
+    // vez. Y es aquí donde se LEE el estado — la tarjeta del elenco no se marca
+    // (decisión de producto: ya lleva encima la barra del eje, la pastilla de
+    // acceso, el check de rezado y la etiqueta del eje).
+    var sen = $('foco-sen');
+    function pintarSen(){
+      var on = _estaSenalado(painId);
+      sen.classList.toggle('on', on);
+      sen.setAttribute('aria-pressed', on ? 'true' : 'false');
+      sen.innerHTML = '<svg viewBox="0 0 24 24" fill="'+(on?'currentColor':'none')+'" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+GLIFO_SENAL+'</svg>'+
+        (on ? 'Señalado' : 'Señalar');
+    }
+    pintarSen();
+    sen.addEventListener('click', function(){
+      _senalar(painId, !_estaSenalado(painId));
+      pintarSen();
+    });
+
     _focoEsc = function(e){ if (e.key === 'Escape') cerrarFoco(); };
     document.addEventListener('keydown', _focoEsc);
     // Un frame después → .on dispara la entrada coordinada (tarjeta + botones).
@@ -2622,7 +2819,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
     Promise.all([
       _db.collection('users').doc(user.uid).get().catch(function(){ return null; }),
       _cargarPerfil(user),
-      _cargarCompletados(user),
+      _cargarSanar(user),
       // 4ª lectura (Pieza 2): billing/state. Va DENTRO del Promise.all para que
       // no cueste latencia — se resuelve en paralelo con las otras tres.
       _db.collection('users').doc(user.uid)
@@ -2632,13 +2829,16 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
       window.currentPlan = window.resolvePlan ? window.resolvePlan(userData) : 'free';
       DEV = _plan() === 'developer';        // gate resuelto de verdad, antes del primer render
       var perfil = res[1];
-      _completados = res[2] || new Set();   // Pieza 2: pains rezados en mini (check + orden)
+      var _san = res[2] || { completados:new Set(), senalados:{} };
+      _completados = _san.completados;      // Pieza 2: pains rezados en mini (check + orden)
+      _senales     = _san.senalados;        // señales del listón (modo "Señalados")
       // Hidratación síncrona del módulo de acceso: 0 lecturas extra, 0 espera.
       if (window.CZAccess) {
         window.CZAccess.conectar(_db, user.uid);
         window.CZAccess.hidratar(res[3]);
       }
       _retryPendingSync();                  // reintenta subir un perfil que quedó pendiente
+      _retrySenales();                      // y las señales que no llegaron a Firestore
       if (perfil && perfil.ejes) _perfil = perfil.ejes;   // Fase C leerá esto
 
       // Regreso de Stripe (Pieza 5). Va ANTES que el onboarding: quien acaba de
