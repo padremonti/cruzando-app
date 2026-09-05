@@ -904,6 +904,161 @@ ok('audio · un solo candado diario, no dos', () => {
     throw new Error('a medianoche debe recargar: es un día nuevo y otro Misterio');
 });
 
+console.log('');
+console.log('== Hoy es la pantalla del AVANCE, y pinta antes de la red ==');
+
+/* El cuerpo de arrancar(), que es donde se decide el Nivel del dia. */
+const HOY_ARR = HOY.slice(HOY.indexOf('async function arrancar()'),
+                          HOY.indexOf('_auth.onAuthStateChanged'));
+
+ok('hoy.html · el marcador NO elige el Rosario del día', () => {
+  /* `cruzando_current_nivel` es «dónde estoy MIRANDO»: el selector de esferas
+     lo escribe por el mero hecho de hojear (crecer.html, selectNivel). Hoy es
+     el AVANCE —repasar es lo que hace el mapa—, así que manda la frontera.
+     Con el marcador de por medio, hojear el mapa y pulsar Hoy servía el
+     Rosario de un Nivel que no tocaba. */
+  if (/function marcador\(/.test(HOY))
+    throw new Error('vuelve el lector del marcador');
+  if (/bookmark\s*:/.test(HOY_ARR))
+    throw new Error('arrancar() vuelve a pasarle el marcador a nivelDiario');
+  if (!/frontera:\s*await fronteraDelDia\(\)/.test(HOY_ARR))
+    throw new Error('el Nivel del día ya no sale de la frontera');
+});
+
+ok('hoy.html · Hoy no TOCA el marcador: ni lo lee ni lo escribe', () => {
+  /* Quien lo mueve es el reproductor al que se entrega la sesión —audio y rezar
+     lo escriben al fijar Nivel—, así que el mapa sigue el paso de lo que se
+     REZA y no de lo que se mira. Mirar Hoy no puede mover a nadie de sitio. */
+  const codigo = HOY.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  if (/cruzando_current_nivel/.test(codigo))
+    throw new Error('Hoy vuelve a tocar el marcador del mapa');
+  if (!/setItem\('cruzando_current_nivel'/.test(AUD))
+    throw new Error('audio dejó de mover el marcador, y ahora nadie lo mueve');
+});
+
+ok('hoy.html · no acepta `?c=`: el Nivel se DERIVA siempre', () => {
+  /* Era la otra puerta a lo mismo que el marcador: decirle a Hoy por dónde ir.
+     Para entrar a un Nivel concreto está el mapa, que es donde se repasa.
+     Ojo: Hoy sí GENERA urls con ?c= hacia rezar, que es otra cosa. */
+  const codigo = HOY.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  if (/URLSearchParams|location\.search/.test(codigo))
+    throw new Error('Hoy vuelve a leer parámetros de su propia URL');
+});
+
+ok('hoy.html · no hay botón que salte de Nivel', () => {
+  /* «Ir al siguiente Nivel» ponía al usuario por delante de su progreso
+     escribiendo el marcador. La frontera ya avanza sola al cerrar los veinte:
+     no hay nada que pedir a mano. */
+  const codigo = HOY.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  if (/irAlSiguienteNivel|siguientePublicado/.test(codigo))
+    throw new Error('vuelve el salto de Nivel a mano');
+  if (/btn-verde/.test(codigo))
+    throw new Error('vuelve el botón primario que saltaba de Nivel');
+});
+
+ok('dia.js + rosario.js · `hechos()` no puede llegar a 5, y por eso `nivelCompleto` es inalcanzable', () => {
+  /* Hallazgo que dejó sin efecto al botón: rosario.js pone `vuelta[bloque]` a
+     ceros EN EL MISMO INSTANTE en que la quinta decena cierra el Rosario
+     (marcar(), «empieza otra vuelta»), y `Dia.hechos` cuenta justo ese array.
+     Se reza con los dos motores de verdad, tres vueltas enteras.
+
+     ⚠ De aquí se sigue que `st.completo` y `hoyHecho` de hoy.html están muertos.
+        Es el modelo de la pantalla y pide decisión aparte; esta prueba existe
+        para que la decisión no se tome sin saberlo. */
+  const c2 = {}; c2.window = c2; vm.createContext(c2);
+  vm.runInContext(leer('rosario.js'), c2);
+  vm.runInContext(leer('dia.js'), c2);
+  const Ros = c2.window.Rosario, Di = c2.window.Dia;
+
+  let dc = {}, maxHechos = 0, completo = 0, t = 0;
+  for (let v = 0; v < 3; v++)
+    for (const b of Ros.BLOQUES)
+      for (let i = 0; i < 5; i++) {
+        const r = Ros.marcar(dc, b, i, ++t);
+        dc = { vuelta: r.estado.vuelta, rosarios: r.estado.rosarios };
+        for (const bb of Ros.BLOQUES) maxHechos = Math.max(maxHechos, Di.hechos(dc, bb));
+        if (Di.nivelCompleto(dc)) completo++;
+      }
+
+  if (Ros.vueltas(dc) !== 3) throw new Error('no se cerraron las tres vueltas');
+  if (maxHechos !== 4)
+    throw new Error('hechos() llegó a ' + maxHechos + ': el modelo de la vuelta cambió, revisa st.completo en hoy.html');
+  if (completo !== 0)
+    throw new Error('nivelCompleto() ya es alcanzable: hoy.html tiene ramas que vuelven a la vida');
+});
+
+ok('dia.js · el contrato de nivelDiario no cambió: el marcador sigue ganando', () => {
+  /* Lo que cambió es que Hoy ya no se lo pasa. La preferencia se conserva
+     porque describe «dónde estoy», que es la pregunta del mapa. */
+  if (D.nivelDiario('premium', { bookmark:'0103', frontera:'0101', orden:ORDEN }) !== '0103')
+    throw new Error('nivelDiario dejó de preferir el marcador');
+  if (D.nivelDiario('premium', { frontera:'0104', orden:ORDEN }) !== '0104')
+    throw new Error('sin marcador debe mandar la frontera');
+});
+
+ok('hoy.html · hay FASE 1 y pinta SIN tocar Firestore', () => {
+  /* Sin ella la cadena entera corre en serie con el spinner en pantalla, y en
+     WebKit cada lectura de Firestore cuesta un viaje completo: ahí salían los
+     30-45 s del iPhone que en Chrome no se ven. */
+  const f1 = HOY.slice(HOY.indexOf('async function fase1('),
+                        HOY.indexOf('async function arrancar()'));
+  if (!f1) throw new Error('falta la FASE 1');
+  if (/_db\./.test(f1))
+    throw new Error('la FASE 1 toca Firestore: entonces no es un pintado sin red');
+  if (!/Niveles\.fronteraCacheada\(\)/.test(f1))
+    throw new Error('la FASE 1 no usa la frontera cacheada');
+  if (!/progresoCacheado\(/.test(f1))
+    throw new Error('la FASE 1 no usa el progreso cacheado');
+  if (!/await fase1\(\)/.test(HOY_ARR))
+    throw new Error('arrancar() no arranca por la FASE 1');
+});
+
+ok('hoy.html · la FASE 1 no le pinta al free el modelo de premium', () => {
+  /* Son dos modelos de pantalla distintos. Pintarle uno para corregirlo un
+     segundo después sería peor que el spinner. */
+  const f1 = HOY.slice(HOY.indexOf('async function fase1('),
+                        HOY.indexOf('async function arrancar()'));
+  if (!/pl === 'free'\) return false/.test(f1))
+    throw new Error('la FASE 1 se pinta también con el plan free cacheado');
+});
+
+ok('hoy.html · la frontera solo se recalcula si el caché puede estar viejo', () => {
+  /* Son hasta 28 lecturas EN SERIE. Es la misma puerta que la FASE 2 de crecer:
+     sin copia en el aparato, o con el caché sucio tras una sesión. */
+  const fd = HOY.slice(HOY.indexOf('async function fronteraDelDia()'),
+                        HOY.indexOf('async function fase1('));
+  if (!/if \(cache && !sucio\) return cache/.test(fd))
+    throw new Error('la frontera vuelve a recalcularse en cada carga');
+  if (!/cruzando_progress_cache_dirty/.test(fd))
+    throw new Error('la puerta no mira el caché sucio');
+});
+
+ok('hoy.html · el `dirty` se LEE y no se limpia', () => {
+  /* Quien lo consume es crecer. Limpiarlo aquí le dejaría el mapa pintado con
+     el progreso viejo justo al volver de una sesión. */
+  if (/removeItem\('cruzando_progress_cache_dirty'\)/.test(HOY))
+    throw new Error('Hoy le está limpiando el dirty a crecer');
+});
+
+ok('hoy.html · la escritura de vueltaDesde no bloquea el primer pintado', () => {
+  /* Su parte síncrona —dejar la fecha en `prog`— corre antes del primer await
+     de la función, así que render() ve el estado bueno. Un `set()` solo
+     resuelve con el acuse del servidor: esperarlo dejaba el spinner puesto. */
+  if (/await asegurarVueltaDesde\(\)/.test(HOY))
+    throw new Error('la escritura vuelve a bloquear el render');
+  if (!/asegurarVueltaDesde\(\);\s*\n\s*pintar\(\);/.test(HOY))
+    throw new Error('la escritura debe lanzarse justo antes de pintar');
+});
+
+ok('hoy.html · la FASE 2 no repinta si confirma lo mismo', () => {
+  /* Repintar borraría el chip que el usuario acaba de tocar y el nombre del
+     Misterio que está leyendo al pie de la tira. */
+  const pt = HOY.slice(HOY.indexOf('function pintar()'),
+                        HOY.indexOf('async function fronteraDelDia()'));
+  if (!/if \(huella === _pintado\) return false/.test(pt))
+    throw new Error('pintar() perdió la huella y repinta siempre');
+});
+
 if (fallos) {
   console.log('  ✗ ' + fallos + ' fallo(s), ' + pasos + ' pasada(s)');
   console.log('─'.repeat(64) + '\n');

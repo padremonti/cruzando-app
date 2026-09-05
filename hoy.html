@@ -213,7 +213,6 @@ button{font:inherit;cursor:pointer}
 .btn:active{transform:scale(.985)}
 .btn-1{background:var(--acento);color:#12181A;border-color:var(--acento)}
 .btn-2{background:transparent;color:var(--text);border-color:var(--border)}
-.btn-verde{background:var(--verde);color:#04140C;border-color:var(--verde)}
 
 .manana{
   margin:16px 0 0;text-align:center;font-size:.85rem;color:var(--text-soft);
@@ -424,12 +423,11 @@ body.light .app-nav{background:var(--card)}
     if (r.degradado) window._frontierDegradado = r.degradado;
     return r.frontera || Niveles.ORDEN[0];
   }
-  function marcador(){
-    try {
-      var b = localStorage.getItem('cruzando_current_nivel');
-      return /^\d{4}$/.test(b || '') ? b : null;
-    } catch(e){ return null; }
-  }
+  /* Aqui vivia marcador(), que leia `cruzando_current_nivel`. Se retiro: ver
+     el aviso de arrancar(). Hoy ya no LEE ni ESCRIBE el marcador — quien lo
+     mueve es el reproductor al que se entrega la sesion (audio y rezar lo
+     escriben al fijar Nivel), asi que el mapa sigue el paso de lo que se reza
+     y no de lo que se mira. */
 
   /* Una vuelta nueva empieza cuando los cuatro bloques están a cero: es el
      instante en que rosario.js acaba de cerrar el último. De esa fecha sale
@@ -534,8 +532,7 @@ body.light .app-nav{background:var(--card)}
 
     h += '<div class="acciones">';
     h += '<button class="btn btn-1" id="ir-rezar" type="button">' + lbl + '</button>';
-    h += '<button class="btn ' + (st.completo ? 'btn-verde' : 'btn-2') + '" id="ir-2" type="button">' +
-         (st.completo ? 'Ir al siguiente Nivel' : 'Orar, Misterio a Misterio') + '</button>';
+    h += '<button class="btn btn-2" id="ir-2" type="button">Orar, Misterio a Misterio</button>';
     h += '</div>';
 
     if (st.diaGastado) {
@@ -564,7 +561,6 @@ body.light .app-nav{background:var(--card)}
     };
 
     document.getElementById('ir-2').onclick = async function(){
-      if (st.completo) { irAlSiguienteNivel(); return; }
       await fijarBloqueDelDia(foco);
       location.href = 'audio.html?nivel=' + nivel + '&cuaderno=' + cuaderno + '&misterio=' + nMis + '&hoy=1';
     };
@@ -745,18 +741,130 @@ body.light .app-nav{background:var(--card)}
     });
   }
 
-  function irAlSiguienteNivel(){
-    var sig = Niveles.siguientePublicado(nivelId);
-    if (!sig) {
-      if (window.showToast) showToast('El siguiente Nivel está en preparación.');
-      return;
-    }
-    try { localStorage.setItem('cruzando_current_nivel', sig); } catch(e){}
-    location.reload();
+  /* Aqui vivia irAlSiguienteNivel(), detras del boton «Ir al siguiente Nivel».
+     Se retiro por DOS motivos independientes, y cualquiera de los dos bastaba:
+
+     · Era una puerta trasera. Saltaba de Nivel escribiendo el marcador, es decir
+       ponia al usuario por delante de su propio progreso. En esta pantalla el
+       Nivel se DERIVA de la frontera, que ya avanza sola en cuanto se cierran
+       los veinte: no hay nada que pedir a mano.
+     · Y era codigo muerto. Solo salia con `st.completo`, que es
+       `Dia.nivelCompleto` leyendo `vuelta` —los cuatro bloques con sus cinco a
+       la vez—; pero `rosario.js` pone `vuelta[bloque]` a ceros en el mismo
+       instante en que la quinta decena cierra el Rosario (marcar(), «empieza
+       otra vuelta»). Rezando tres vueltas enteras con el motor real, `hechos()`
+       nunca pasa de 4 y `nivelCompleto()` no es cierto ni una sola vez.
+
+     ⚠ Lo segundo alcanza tambien a `hoyHecho` y al aviso «Nivel completo» de
+        render(), que quedan igual de inalcanzables. No se tocaron aqui porque
+        eso es el modelo de la pantalla, no una puerta: pide decision aparte. */
+
+  /* ══════════════  EL ARRANQUE, EN DOS FASES  ═══════════════
+     La FASE 1 pinta desde localStorage, sin tocar la red —lo que index y crecer
+     hacen desde siempre y lo que a esta pantalla le faltaba—. Sin ella la cadena
+     entera (doc de usuario → frontera → JSON → progreso → escritura) corre EN
+     SERIE con el spinner en pantalla; y en WebKit, donde Firestore degrada a
+     peticiones sueltas en vez de un canal multiplexado, cada eslabón cuesta un
+     viaje entero. De ahí salían los 30-45 s del iPhone que en Chrome no se ven.
+
+     La FASE 2 confirma contra Firestore y solo repinta si algo cambió. */
+
+  function progresoCacheado(id){
+    try { return JSON.parse(localStorage.getItem('cruzando_progress_' + id) || 'null'); }
+    catch(e){ return null; }
+  }
+  function guardarProgresoCache(id, d){
+    try { localStorage.setItem('cruzando_progress_' + id, JSON.stringify(d || {})); }
+    catch(e){}
   }
 
-  // ── arranque ────────────────────────────────────────────────────
+  /* Un Nivel sin publicar no se le sirve a nadie salvo al developer, que es
+     quien los está construyendo. Se aplica igual en las dos fases. */
+  function ajustarPublicado(id, pl){
+    if (!id) return id;
+    if (Niveles.publicado(id) || pl === 'developer') return id;
+    var prev = Niveles.ORDEN[Math.max(0, Niveles.ORDEN.indexOf(id) - 1)];
+    return Niveles.publicado(prev) ? prev : '0101';
+  }
+
+  function fijarNivel(id){
+    nivelId  = id;
+    nivel    = parseInt(id.slice(0,2), 10) || 1;
+    cuaderno = parseInt(id.slice(2,4), 10) || 1;
+  }
+
+  async function cargarData(id){
+    try {
+      var r = await fetch(base() + 'data/' + id + '.json');
+      if (r.ok) return await r.json();
+    } catch(e){}
+    return null;
+  }
+
+  // Espejo local de la elección del día, por si la red falló al fijarla.
+  function aplicarDiaLocal(){
+    try {
+      var loc = JSON.parse(localStorage.getItem('cruzando_dia_' + nivelId) || 'null');
+      if (loc && loc.fecha === Dia.clave() && !Dia.elegidoHoy(prog)) prog.diaBloque = loc;
+    } catch(e){}
+  }
+
+  /* La huella de lo último pintado. La FASE 2 casi siempre confirma lo que la
+     FASE 1 ya enseñó: repintar entonces solo borraría el chip que el usuario
+     acaba de tocar y el nombre del Misterio que está leyendo al pie. */
+  var _pintado = null;
+
+  function pintar(){
+    var huella = nivelId + '|' + JSON.stringify(prog || {});
+    if (huella === _pintado) return false;
+    _pintado = huella;
+    render();
+    return true;
+  }
+
+  /* La frontera solo se recalcula cuando puede haber cambiado: cuando no hay
+     copia en este aparato, o cuando una sesión dejó el caché sucio. Es la misma
+     puerta que la FASE 2 de crecer. Son hasta 28 lecturas EN SERIE.
+
+     ⚠ El `dirty` se LEE y no se limpia. Quien lo consume es crecer, y limpiarlo
+     aquí le dejaría el mapa pintado con el progreso viejo. */
+  async function fronteraDelDia(){
+    var cache = Niveles.fronteraCacheada();
+    var sucio = false;
+    try { sucio = localStorage.getItem('cruzando_progress_cache_dirty') === 'true'; }
+    catch(e){}
+    if (cache && !sucio) return cache;
+    return await calcularFrontera(usr.uid);
+  }
+
+  /* ── FASE 1: pintar sin red ────────────────────────────────
+     Solo si están las tres piezas y el plan cacheado NO es free: el free tiene
+     OTRO modelo de pantalla, y pintarle el de premium para corregirlo un segundo
+     después sería peor que el spinner. El único `await` es el JSON del Nivel, que
+     es un fichero estático del propio origen, no una lectura de Firestore. */
+  async function fase1(){
+    var pl = window.effectivePlan ? effectivePlan() : null;
+    if (!pl || pl === 'free') return false;
+    var id = ajustarPublicado(Niveles.fronteraCacheada(), pl);
+    if (!id) return false;
+    var pc = progresoCacheado(id);
+    if (!pc) return false;
+    var d = await cargarData(id);
+    if (!d) return false;
+    plan = pl;
+    data = d;
+    prog = pc;
+    fijarNivel(id);
+    aplicarDiaLocal();
+    pintar();
+    return true;
+  }
+
+  // ── FASE 2: confirmar contra Firestore ─────────────────────
   async function arrancar(){
+    var yaPintado = await fase1();
+    var idPintado = yaPintado ? nivelId : null;
+
     var ud = {};
     try {
       var us = await _db.collection('users').doc(usr.uid).get();
@@ -770,54 +878,60 @@ body.light .app-nav{background:var(--card)}
        elegir, asi que tampoco hay estado del dia que calcular. */
     if (plan === 'free') { await arrancarFree(); return; }
 
-    var frontera = await calcularFrontera(usr.uid);
-    var p = new URLSearchParams(location.search);
-    nivelId = p.get('c') || Dia.nivelDiario(plan, {
-      bookmark: marcador(), frontera: frontera, orden: Niveles.ORDEN
+    /* ⚠ EL MARCADOR NO MANDA AQUÍ, y esa es la diferencia con crecer.
+       `cruzando_current_nivel` significa «dónde estoy MIRANDO»: el selector de
+       esferas lo escribe por el mero hecho de hojear (crecer.html, selectNivel).
+       Hoy es la pantalla del AVANCE —repasar lo ya recorrido es lo que hace el
+       mapa—, y el avance es exactamente lo que dice la frontera: el primer Nivel
+       cuyo `progress` no está completo. Con el marcador de por medio, hojear el
+       mapa y pulsar Hoy servía el Rosario de un Nivel que no tocaba. */
+    /* Y tampoco se acepta un `?c=` en la URL. Era la otra puerta a lo mismo:
+       decirle a Hoy por dónde ir. El Nivel de esta pantalla se DERIVA, siempre;
+       para entrar a un Nivel concreto está el mapa, que es donde se repasa. */
+    var id = Dia.nivelDiario(plan, {
+      frontera: await fronteraDelDia(), orden: Niveles.ORDEN
     });
 
-    /* Red de seguridad: para premium nivelDiario devuelve siempre algo —marcador,
-       frontera o el primero del itinerario—, asi que esto solo salta si alguien
-       llega aqui con un plan que no tiene camino resuelto. */
-    if (!nivelId) {
+    /* Red de seguridad: para premium nivelDiario devuelve siempre algo —frontera
+       o el primero del itinerario—, asi que esto solo salta si alguien llega
+       aqui con un plan que no tiene camino resuelto. */
+    if (!id) {
       pantalla('Todavía no hay Nivel que rezar',
         'Vuelve al camino y entra por el Misterio que estés cruzando.',
         'Ir al camino', function(){ location.href = 'crecer.html'; });
       return;
     }
-    if (!Niveles.publicado(nivelId) && plan !== 'developer') {
-      var prev = Niveles.ORDEN[Math.max(0, Niveles.ORDEN.indexOf(nivelId) - 1)];
-      nivelId = Niveles.publicado(prev) ? prev : '0101';
-    }
+    id = ajustarPublicado(id, plan);
 
-    nivel    = parseInt(nivelId.slice(0,2), 10) || 1;
-    cuaderno = parseInt(nivelId.slice(2,4), 10) || 1;
-
-    try {
-      var r = await fetch(base() + 'data/' + nivelId + '.json');
-      if (r.ok) data = await r.json();
-    } catch(e){}
-    if (!data) {
-      pantalla('No se pudo cargar el Nivel',
-        'Revisa tu conexión y vuelve a intentarlo.',
-        'Reintentar', function(){ location.reload(); });
-      return;
+    if (id !== idPintado) {
+      var d2 = await cargarData(id);
+      if (d2) { data = d2; fijarNivel(id); }
+      else if (!yaPintado) {
+        pantalla('No se pudo cargar el Nivel',
+          'Revisa tu conexión y vuelve a intentarlo.',
+          'Reintentar', function(){ location.reload(); });
+        return;
+      }
+      /* Si ya hay algo en pantalla y el JSON del Nivel nuevo no baja, se
+         conserva lo pintado: cambiarlo por un error sería un retroceso. */
     }
 
     try {
       var ps = await _db.collection('users').doc(usr.uid)
                         .collection('progress').doc(nivelId).get();
       prog = ps.exists ? ps.data() : {};
-    } catch(e){ prog = {}; }
+      guardarProgresoCache(nivelId, prog);
+    } catch(e){ if (!yaPintado) prog = {}; }
 
-    // Espejo local de la elección del día, por si la red falló al fijarla.
-    try {
-      var loc = JSON.parse(localStorage.getItem('cruzando_dia_' + nivelId) || 'null');
-      if (loc && loc.fecha === Dia.clave() && !Dia.elegidoHoy(prog)) prog.diaBloque = loc;
-    } catch(e){}
+    aplicarDiaLocal();
 
-    await asegurarVueltaDesde();
-    render();
+    /* La escritura de `vueltaDesde` ya NO bloquea el pintado. Su única parte
+       síncrona —dejar la fecha en `prog`— corre antes del primer `await` de la
+       función, así que render() ve el estado bueno y el `set()` viaja por detrás.
+       Un `set()` de Firestore solo resuelve con el acuse del servidor: con la red
+       floja, esperarlo dejaba la pantalla en el spinner sin necesidad. */
+    asegurarVueltaDesde();
+    pintar();
   }
 
   _auth.onAuthStateChanged(function(user){
