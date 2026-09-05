@@ -49,8 +49,18 @@ MODOS.forEach(f => {
     if (!/animation:marianoSlide/.test(clase[1]))
       throw new Error('la clase perdió su animación');
     const id = s.match(/#mariano-slide-img\{([^}]*)\}/);
-    if (!id || !/width:182px/.test(id[1]))
+    if (!id || !/width:\d+px/.test(id[1]))
       throw new Error('el <img> se quedó sin ancho propio');
+    /* 91 px: la mitad de los 182 originales. El aviso es una nota al margen,
+       no una ilustración. Los metros flotantes van calzados contra ese ancho,
+       así que si uno cambia el otro también. */
+    const w = +id[1].match(/width:(\d+)px/)[1];
+    const fl = s.match(/\.meters-float\{[^}]*right:(\d+)px/);
+    if (!fl) throw new Error('no encontré la posición de los metros');
+    const hueco = +fl[1] - w;
+    if (hueco < 20 || hueco > 60)
+      throw new Error('los metros quedan a ' + hueco + 'px del borde de Mariano: ' +
+                      'el ancho cambió y su posición no');
   });
 });
 

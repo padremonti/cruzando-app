@@ -178,10 +178,13 @@ body{
    para reiniciar la animación, y mientras falta el <img> volvía a su tamaño
    intrínseco (960 px): con dos avisos seguidos —en orar llegan a 600 ms— se
    veía un fotograma de Mariano gigante. */
-#mariano-slide-img{width:182px;height:auto}
+/* La mitad de los 182 px que tenía: el aviso de metros es una nota al margen,
+   no una ilustración. Los assets están a 960 px, así que a 91 se ven nítidos
+   incluso a 3x. */
+#mariano-slide-img{width:91px;height:auto}
 .mariano-slide{animation:marianoSlide 2.5s ease-in-out}
 .meters-float{
-  position:absolute;top:50%;right:220px;
+  position:absolute;top:50%;right:129px;
   font-size:1rem;font-weight:800;color:var(--green);
   text-shadow:0 2px 8px rgba(52,168,83,0.4);
   animation:metersFloat 2.5s ease-out;

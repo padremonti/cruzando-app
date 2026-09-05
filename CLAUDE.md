@@ -1041,6 +1041,8 @@ Se había retirado del cierre de bloque porque **el epílogo lo tapaba**: `.mari
 
 ⚠️ **`width:182px` vivía en `.mariano-slide`**, la misma clase que se quita y se pone para reiniciar la animación. Durante ese instante el `<img>` volvía a su tamaño intrínseco. No se veía la primera vez —el overlay estaba oculto— pero sí **con dos avisos seguidos**, y en `orar` llegan a **600 ms**: `premiar('rezo')` y, si con ese Misterio se cerró el bloque, `showSlide(MR_BNS)` en un `setTimeout` de 600, muy dentro de los 2600 ms que el overlay permanece visible. El ancho pasó a `#mariano-slide-img`.
 
+**Y ahora mide 91 px, la mitad.** El aviso es una nota al margen, no una ilustración. ⚠️ Los metros flotantes iban calzados contra el ancho anterior (`right:220px`), así que se movieron con él a `129px`: si uno cambia, el otro también. Hay una prueba que mide **el hueco** entre ambos en vez de fijar los números, para que un ajuste futuro no los descuadre en silencio.
+
 **Y los assets estaban sin redimensionar.** Los doce `mariano_*.webp` iban a 1536×2048 (dos a 2048²) y pesaban **1939 KB**, para pintarse a 182–320 px. Redimensionados a **960 px** de ancho (3× el uso mayor, la celebración de bloque a 320 px): **711 KB, 63 % menos**, con el canal alfa conservado y cada uno con su propia proporción. La herramienta es `tools/mariano-resize.py` — escribe **fuera de `C:\R2`** a propósito (rclone espeja) y respalda los originales antes de reemplazar.
 
 *Nota de inventario: `mariano_11.webp` existe en el bucket pero `MARIANO_TOTAL = 10`, así que la rotación nunca lo alcanza.*
