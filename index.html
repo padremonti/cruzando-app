@@ -1176,6 +1176,7 @@ body.hub-clean .hub-door-santuario { animation-delay:1.2s !important; }
 <script src="flags.js"></script>
 <script src="plan-utils.js"></script>
 <script src="toast.js"></script>
+<script src="beta-gate.js"></script>
 </head>
 <body>
 <!-- DRAWER OVERLAY -->
@@ -2581,9 +2582,19 @@ onAuthStateChanged(auth, async function(user) {
 
   // _avisoAlta: al deshacer un alta accidental esto se dispara con user=null
   // y reiniciaría la pantalla encima del aviso que hay que leer.
-  if (!user) { currentUser = null; window.currentUser = null; if (!_avisoAlta) mostrarCaminos(); showScreen('login'); return; }
+  // Al cerrar sesión el velo del acuerdo no puede quedarse flotando sobre la
+  // pantalla de acceso.
+  if (!user) { if (window.BetaGate) BetaGate.cerrar();
+               currentUser = null; window.currentUser = null; if (!_avisoAlta) mostrarCaminos(); showScreen('login'); return; }
   currentUser = user;
   window.currentUser = user;   // el <script> clásico lo necesita (ver window.db)
+
+  // ⚠️ La puerta del piloto va AQUÍ, antes de la FASE 1, y no más abajo. Con
+  // caché, la FASE 1 llama a renderHome y showScreen('home') sin tocar la red:
+  // el hub se pinta entero antes de que Firestore conteste. Puesta después,
+  // la puerta llegaría tarde y el material del piloto se vería un instante.
+  // Se llama y no se espera — ver _puertaBeta.
+  _puertaBeta(user);
 
   // ══ FASE 1: pintar todo desde localStorage — sin red ══════════════
   metaMetros      = parseInt(localStorage.getItem(META_KEY)) || META_DEFAULT;
@@ -2657,6 +2668,13 @@ onAuthStateChanged(auth, async function(user) {
   var userData = await ensureUserDoc(user);
   flushConsentimiento();   // cola de consentimiento pendiente (no bloquea)
   window._lastUserData = userData;
+
+  // El nombre para la puerta del piloto, ya con el doc en mano. Si la puerta
+  // no llegó a montarse (esta persona ya firmó) esto no hace nada.
+  if (_resolverNombreBeta) {
+    _resolverNombreBeta((userData && userData.displayName) || user.displayName || '');
+    _resolverNombreBeta = null;
+  }
 
   var realPlan = resolvePlan(userData);
 
@@ -3096,6 +3114,53 @@ function flushConsentimiento() {
   })();
 
   return _consentEnVuelo;
+}
+
+// ── La puerta del grupo piloto ────────────────────────────────
+// El Acuerdo de Confidencialidad y Uso Beta. NO es el consentimiento de
+// arriba: aquel es de los Términos y la Privacidad, se da UNA vez en el alta
+// y vive en un campo de users/{uid}. Este se pide también a cuentas ya
+// existentes, se vuelve a pedir si el documento cambia de versión, y vive en
+// su propia colección para poder listar quién firmó.
+//
+// ⚠️ Se llama y NO se espera. El velo se monta encima y este
+// onAuthStateChanged sigue corriendo por debajo: un `return` aquí se saltaría
+// las FASES 2 y 3 —plan real, frontera, freeProgress, los siete localStorage
+// del final— que es exactamente el mecanismo que envenenó la frontera.
+// Al firmar, la app ya está lista debajo y no hace falta recargar.
+//
+// El nombre va como PROMESA a propósito: `updateProfile` no se llama en el
+// alta, así que user.displayName viene vacío en las cuentas de correo y el
+// nombre real solo aparece en la FASE 2, con ensureUserDoc. La puerta se
+// monta antes —es lo que evita el destello del hub— y el campo se rellena
+// cuando el dato llega.
+var _resolverNombreBeta = null;
+
+function _puertaBeta(user) {
+  if (!window.BetaGate) return;
+  var nombre = new Promise(function(r) { _resolverNombreBeta = r; });
+  BetaGate.puerta({
+    uid:    user.uid,
+    nombre: nombre,
+    leer:   function(uid) {
+      return getDoc(doc(db, 'aceptaciones_beta', uid))
+        .then(function(s) { return s.exists() ? s.data() : null; });
+    },
+    firmar: async function(datos) {
+      var mod = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-functions.js');
+      var fn  = mod.httpsCallable(mod.getFunctions(fbApp, 'us-central1'), 'aceptarAcuerdoBeta');
+      var r   = await fn(datos);
+      // Si el servidor registró OTRA versión, la próxima carga volvería a
+      // pedir la firma: bucle. tools/test-beta-gate.js lo impide antes de
+      // desplegar, pero si llegara a pasar tiene que verse en la consola.
+      if (r && r.data && r.data.version && r.data.version !== BetaGate.VERSION) {
+        console.error('[beta-gate] el servidor registra la versión', r.data.version,
+                      'y el cliente exige', BetaGate.VERSION, '— revisa las constantes.');
+      }
+      return r;
+    },
+    onSalir: function() { return signOut(auth); }
+  });
 }
 
 // ── Pantalla de acceso: dos caminos ───────────────────────────

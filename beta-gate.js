@@ -284,7 +284,7 @@
     inp.id = 'bg-nombre';
     inp.setAttribute('autocomplete', 'name');
     inp.setAttribute('placeholder', 'Nombre y apellidos');
-    inp.value = (opts.nombre || '').trim();
+    inp.value = (typeof opts.nombre === 'string' ? opts.nombre : '').trim();
     campo.appendChild(lbl);
     campo.appendChild(inp);
     caja.appendChild(campo);
@@ -324,6 +324,24 @@
     }
 
     inp.addEventListener('input', repintarPuerta);
+
+    // ⚠️ El nombre puede llegar TARDE, y por eso se admite una promesa.
+    // `updateProfile` no se llama nunca en el alta, así que en las cuentas
+    // creadas por correo `user.displayName` de Auth viene VACÍO: el nombre
+    // vive solo en users/{uid}, que la página lee en su FASE 2. La puerta se
+    // monta antes —es lo que evita el destello del hub— así que el campo se
+    // rellena cuando el dato aparece.
+    //
+    // Solo si el campo sigue vacío: un nombre que llega tarde no puede pisar
+    // lo que la persona esté escribiendo en ese momento.
+    if (opts.nombre && typeof opts.nombre.then === 'function') {
+      opts.nombre.then(function (n) {
+        if (inp.value.trim()) return;
+        inp.value = String(n || '').trim();
+        repintarPuerta();
+      }).catch(function () {});
+    }
+
     abrir.onclick = function () { abrirDocumento(v, marcarLeido); };
 
     noPuedo.onclick = function () { pintarSalida(v, opts, function () {
