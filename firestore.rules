@@ -86,6 +86,26 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // ── La firma del Acuerdo de Confidencialidad y Uso Beta ────────────────
+    // El grupo piloto firma antes de ver contenido. beta-gate.js LEE lo suyo
+    // —es lo que decide si la puerta se abre— y no puede escribir nada: la
+    // firma la pone la callable aceptarAcuerdoBeta con Admin SDK.
+    //
+    // Un acuerdo de confidencialidad que el firmante puede borrar o editar no
+    // prueba nada, así que aquí vale lo mismo que para el campo 'terminos':
+    // la constancia no la escribe quien la otorga. Con 'write: false' el
+    // cliente no puede inventarse una fecha, cambiarse la versión ni borrar
+    // su firma abriendo la consola.
+    //
+    // Es colección de primer nivel —y no un campo de users/{uid}— porque hay
+    // que poder LISTAR quién ha firmado y cuándo, sin recorrer cuenta por
+    // cuenta. El id del documento es el uid, así que hay una firma por
+    // persona y su historial de versiones va dentro.
+    match /aceptaciones_beta/{uid} {
+      allow read:  if isOwner(uid);
+      allow write: if false;
+    }
+
     // ── Infraestructura server-only ────────────────────────────────────────
     // stripeEvents:    recibos de idempotencia del webhook.
     // stripeCustomers: mapa customerId → uid (3ª vía de resolución del uid).

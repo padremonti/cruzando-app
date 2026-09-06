@@ -1,0 +1,287 @@
+/* CruzAndo — beta-gate.css
+ * La puerta del grupo piloto: el Acuerdo de Confidencialidad y Uso Beta.
+ *
+ * Comparte el velo y la tipografía de la familia `cierre`, como vuelta.css, y
+ * por la misma razón NO tiene geometría propia: es un documento que leer y una
+ * decisión que tomar, no un objeto. Darle una sarta o un vitral la pondría a
+ * competir con los cierres del rezo, que es justo lo contrario de lo que hace:
+ * esto ocurre ANTES de rezar, y una sola vez.
+ *
+ * PALETA PROPIA Y CERRADA. Sale en DOCE páginas que no definen las mismas
+ * variables — mini no tiene ni --text, y --orange solo existe en index y
+ * crecer. Sobre un velo hondo se lee igual en tema claro y oscuro.
+ */
+
+.bg-velo{
+  position: fixed;
+  inset: 0;
+  /* Por encima de TODO: el splash de onboarding (900), el splash de racha
+     (950) y el candado diario del free (9999). Es la puerta exterior — si
+     algo pudiera pintarse encima, se podría usar la app sin firmar. */
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 22px;
+  text-align: center;
+  background: radial-gradient(120% 90% at 50% 30%, #0d1224 0%, #05060c 70%);
+  opacity: 0;
+  transition: opacity .32s ease;
+  -webkit-tap-highlight-color: transparent;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  --bgt-tinta:  #F3EAD8;
+  --bgt-suave:  rgba(243,234,216,.62);
+  --bgt-tenue:  rgba(243,234,216,.34);
+  --bgt-linea:  rgba(243,234,216,.24);
+  --bgt-cian:   #02BBE0;
+}
+.bg-velo.dentro{ opacity: 1 }
+.bg-velo.fuera{  opacity: 0 }
+
+/* ── El estado callado del arranque ──
+   Sabemos que hay sesión pero todavía no si esta persona firmó. No se le
+   enseña un acuerdo que quizá ya aceptó: se expande o se retira. */
+.bg-esperando{
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: .82rem;
+  color: var(--bgt-suave);
+  margin-top: 14px;
+}
+.bg-velo:not(.comprobando) .bg-esperando{ display: none }
+
+/* ── La caja ── */
+.bg-caja{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  max-width: 360px;
+  margin: auto;
+}
+
+.bg-lux{ opacity: .5 }
+.bg-lux svg{ width: 26px; height: 26px; display: block }
+
+.bg-kicker{
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--bgt-suave);
+}
+
+.bg-titulo{
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(27px, 7.6vw, 36px);
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--bgt-tinta);
+  margin: 0;
+  text-wrap: balance;
+}
+
+.bg-resumen{
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1.02rem;
+  line-height: 1.55;
+  color: var(--bgt-suave);
+  max-width: 30ch;
+  margin: 0;
+}
+
+.bg-version{
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: .72rem;
+  color: var(--bgt-suave);
+  border: 1px solid var(--bgt-linea);
+  border-radius: 999px;
+  padding: 5px 13px;
+}
+
+/* El enlace al documento es un ENLACE, no un botón: si fuera un tercer botón
+   competiría con el de aceptar, y no es una decisión — es el paso previo. */
+.bg-enlace{
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: .88rem;
+  font-weight: 600;
+  color: var(--bgt-cian);
+  background: none;
+  border: none;
+  padding: 6px 2px;
+  cursor: pointer;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(2,187,224,.4);
+  -webkit-tap-highlight-color: transparent;
+}
+.bg-enlace:active{ opacity: .7 }
+
+.bg-leido{
+  display: none;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: .76rem;
+  font-weight: 600;
+  color: #6FCF97;
+}
+.bg-caja.ya-leido .bg-leido{ display: block }
+
+/* ── El nombre, obligatorio ──
+   El acuerdo identifica al Participante; una firma sin nombre no identifica
+   a nadie. Se precarga con el que ya consta y se puede corregir. */
+.bg-campo{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+  margin-top: 2px;
+}
+.bg-label{
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  color: var(--bgt-suave);
+}
+.bg-input{
+  width: 100%;
+  padding: 13px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--bgt-linea);
+  background: rgba(8,9,16,.5);
+  color: var(--bgt-tinta);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 1rem;
+}
+.bg-input::placeholder{ color: var(--bgt-tenue) }
+.bg-input:focus{ outline: none; border-color: rgba(243,234,216,.5) }
+
+/* ── Botones ── */
+.bg-btn{
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 26px;
+  border: 1px solid var(--bgt-linea);
+  background: rgba(243,234,216,.10);
+  color: var(--bgt-tinta);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: .92rem;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.bg-btn:active{ transform: scale(.97) }
+
+/* UN SOLO primario: es bloqueante, no hay dos caminos que ofrecer. */
+.bg-btn.primario{
+  background: rgba(243,234,216,.92);
+  border-color: transparent;
+  color: #14161f;
+  font-weight: 700;
+}
+.bg-btn.primario:disabled{
+  background: rgba(243,234,216,.16);
+  color: var(--bgt-tenue);
+  cursor: default;
+}
+.bg-btn.primario:disabled:active{ transform: none }
+
+/* "No puedo aceptar" es la salida, y va en discreto: se ofrece, no se
+   propone. Pero está SIEMPRE — sin ella, no firmar sería quedar encerrado. */
+.bg-btn.discreto{
+  background: none;
+  border-color: transparent;
+  color: var(--bgt-suave);
+  font-weight: 500;
+  padding: 10px;
+}
+
+.bg-pista{
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: .74rem;
+  color: var(--bgt-suave);
+  min-height: 1em;
+  max-width: 30ch;
+}
+
+/* ── El documento, dentro del velo ──
+   En iframe y no en pestaña nueva: en la PWA instalada, _blank saca a la
+   persona del contenedor de la app y volver es torpe. */
+.bg-doc{
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: #05060c;
+  opacity: 0;
+  transition: opacity .26s ease;
+}
+.bg-doc.dentro{ opacity: 1 }
+
+.bg-doc-barra{
+  height: 3px;
+  background: rgba(243,234,216,.12);
+  flex: 0 0 auto;
+}
+.bg-doc-progreso{
+  height: 100%;
+  width: 0;
+  background: var(--bgt-cian);
+  transition: width .2s linear;
+}
+
+.bg-doc-cab{
+  flex: 0 0 auto;
+  padding: 12px 18px 10px;
+  border-bottom: 1px solid rgba(243,234,216,.1);
+}
+.bg-doc-titulo{
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--bgt-tinta);
+  text-align: center;
+}
+
+/* El documento es papel: conserva su propio fondo claro y se lee como lo que
+   es, un texto legal, no una pantalla más de la app. */
+.bg-doc-marco{
+  flex: 1 1 auto;
+  width: 100%;
+  border: 0;
+  background: #FDFCFA;
+  min-height: 0;
+}
+.bg-doc.sin-marco .bg-doc-marco{ display: none }
+
+.bg-doc-pie{
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 20px calc(14px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid rgba(243,234,216,.1);
+}
+.bg-doc-pie .bg-btn{ max-width: 320px }
+
+.bg-doc-nota{
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: .74rem;
+  color: var(--bgt-suave);
+  text-align: center;
+}
+.bg-doc-nota.ok{ color: #6FCF97 }
+
+/* ── Quien no puede aceptar ── */
+.bg-salida .bg-enlace{ font-size: .95rem }
+
+@media (prefers-reduced-motion: reduce){
+  .bg-velo, .bg-doc{ transition: none }
+  .bg-doc-progreso{ transition: none }
+  .bg-btn:active{ transform: none }
+}

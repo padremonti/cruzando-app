@@ -774,3 +774,141 @@ exports.aceptarTerminos = functions
 
     return { ok: true, version: TERMINOS_VERSION, yaEstaba: yaEstaba };
   });
+
+// ── 10. aceptarAcuerdoBeta ───────────────────────────────
+// La firma del Acuerdo de Confidencialidad y Uso Beta del grupo piloto.
+//
+// ⚠️ NO es aceptarTerminos, y no se mezclan. Aquel registra el consentimiento
+// de los Términos y la Política de Privacidad EN EL ALTA, es write-once para
+// siempre y vive en un campo de users/{uid}. Este es un acuerdo de
+// confidencialidad que:
+//
+//   · se pide a cuentas YA EXISTENTES, no solo a las nuevas;
+//   · se vuelve a pedir cuando el documento cambia de versión;
+//   · tiene que poder LISTARSE —quién firmó y cuándo— sin recorrer cuenta por
+//     cuenta, que es para lo que existe una colección de primer nivel.
+//
+// Por eso es un documento propio en `aceptaciones_beta/{uid}` y no un campo.
+//
+// La escribe el servidor y no el cliente por lo mismo que aceptarTerminos: un
+// acuerdo de confidencialidad que el firmante puede borrar o editar no prueba
+// nada. `firestore.rules` le da `write: false` — el cliente LEE lo suyo (es lo
+// que consulta beta-gate.js) y no lo puede fabricar, alterar ni borrar.
+//
+//   · la fecha la pone el servidor (serverTimestamp), no el reloj del móvil;
+//   · la versión la fija ESTA constante, no lo que mande el cliente;
+//   · el CORREO sale de la sesión verificada (context.auth.token), nunca del
+//     cuerpo de la llamada: si lo eligiera el cliente, se podría firmar a
+//     nombre de otra dirección;
+//   · el NOMBRE sí lo escribe la persona —es lo único que no sabemos con
+//     certeza— y por eso se exige, se sanea y se guarda tal cual lo dio.
+//
+// WRITE-ONCE POR VERSIÓN, no para siempre: repetir la llamada con la MISMA
+// versión conserva la primera fecha (es lo que permite reintentar sin miedo),
+// pero una versión nueva del documento SÍ se vuelve a firmar. La firma
+// anterior no se pierde: pasa a `historial`, porque haber firmado la 1.0 es un
+// hecho que ocurrió y no deja de ser cierto cuando llega la 1.1.
+//
+// ⚠️ Esta constante tiene que coincidir con la de beta-gate.js y con la que
+// muestra acuerdo-beta.html. Si divergieran, la puerta entraría en bucle: la
+// persona firmaría y en la siguiente carga se le volvería a pedir. No se
+// confía a la disciplina — tools/test-beta-gate.js compara las tres y falla.
+const VERSION_ACUERDO_BETA = '1.0';
+
+exports.aceptarAcuerdoBeta = functions
+  .region('us-central1')
+  .https.onCall(async (data, context) => {
+
+    if (!context.auth) {
+      throw new functions.https.HttpsError('unauthenticated', 'Debes iniciar sesión.');
+    }
+
+    const uid = context.auth.uid;
+
+    // El nombre es obligatorio: el acuerdo identifica al Participante, y una
+    // firma sin nombre no identifica a nadie. Se sanea aquí y no solo en el
+    // cliente — el cliente es una comodidad, la puerta es esta.
+    const nombre = String((data && data.nombre) || '')
+      .replace(/[\u0000-\u001F\u007F]/g, '')   // caracteres de control
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 120);
+
+    if (nombre.length < 3) {
+      throw new functions.https.HttpsError(
+        'invalid-argument', 'Escribe tu nombre completo para firmar el acuerdo.');
+    }
+
+    const vista = String((data && data.version) || '').trim();
+    if (vista && vista !== VERSION_ACUERDO_BETA) {
+      console.warn('[acuerdo-beta] el cliente vio', vista, 'y el servidor registra',
+                   VERSION_ACUERDO_BETA, '·', uid);
+    }
+
+    const firmaRef = db.collection('aceptaciones_beta').doc(uid);
+    const userRef  = db.collection('users').doc(uid);
+
+    let yaEstaba = false;
+
+    await db.runTransaction(async (tx) => {
+      // Las DOS lecturas antes de cualquier escritura: una transacción de
+      // Firestore no admite leer después de escribir.
+      const firmaSnap = await tx.get(firmaRef);
+      const userSnap  = await tx.get(userRef);
+
+      const prev = (firmaSnap.exists && firmaSnap.data()) || null;
+      const userData = (userSnap.exists && userSnap.data()) || {};
+
+      // Misma versión ya firmada → no se toca. Reintentar es inofensivo, que
+      // es lo que permite volver a llamar sin mover la fecha original.
+      if (prev && prev.aceptado === true &&
+          String(prev.version_acuerdo || '') === VERSION_ACUERDO_BETA) {
+        yaEstaba = true;
+        return;
+      }
+
+      // El correo sale de la sesión verificada. El doc de usuario es el
+      // respaldo para los proveedores que no traen email en el token.
+      const correo = (context.auth.token && context.auth.token.email) ||
+                     userData.email || '';
+
+      const firma = {
+        uid:              uid,
+        nombre:           nombre,
+        correo:           correo,
+        version_acuerdo:  VERSION_ACUERDO_BETA,
+        fecha_aceptacion: admin.firestore.FieldValue.serverTimestamp(),
+        aceptado:         true
+      };
+
+      // ⚠️ La firma anterior se conserva, no se pisa. `fecha_aceptacion` de la
+      // vieja ya es un Timestamp real —no el sentinela— así que sí se puede
+      // meter en un array; un serverTimestamp() no se podría.
+      if (prev && prev.version_acuerdo) {
+        // 19 + la que entra = 20. Un historial sin tope crecería con cada
+        // versión nueva hasta topar con el límite de tamaño del documento.
+        const historial = Array.isArray(prev.historial) ? prev.historial.slice(0, 19) : [];
+        historial.unshift({
+          version_acuerdo:  prev.version_acuerdo,
+          nombre:           prev.nombre || '',
+          fecha_aceptacion: prev.fecha_aceptacion || null
+        });
+        firma.historial = historial;
+      }
+
+      tx.set(firmaRef, firma);
+
+      // De paso, si la cuenta no tenía nombre, se le pone el que acaba de
+      // escribir: el alta por correo lo pide, pero las cuentas beta antiguas
+      // pueden tener displayName vacío y el hub las saluda como "Peregrino".
+      // ⚠️ Solo si estaba vacío — nunca se le cambia el nombre a nadie.
+      if (!String(userData.displayName || '').trim()) {
+        tx.set(userRef, { displayName: nombre }, { merge: true });
+      }
+    });
+
+    console.log('[acuerdo-beta]', yaEstaba ? 'ya constaba' : 'firmado',
+                '·', uid, '·', VERSION_ACUERDO_BETA);
+
+    return { ok: true, version: VERSION_ACUERDO_BETA, yaEstaba: yaEstaba };
+  });
