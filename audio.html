@@ -1415,6 +1415,7 @@ body.light .app-nav-item { color:rgba(0,41,49,0.45); }
 <script src="racha.js"></script>
 <script src="racha-splash.js"></script>
 <script src="plan-utils.js"></script>
+<script src="beta-gate.js"></script>
 </head>
 <body>
 <div class="shell">
@@ -1741,6 +1742,40 @@ try {
     });
   }
 } catch(e) { console.warn('[AppCheck]', e); }
+
+// ── La puerta del grupo piloto ────────────────────────────────
+// El Acuerdo de Confidencialidad y Uso Beta. Esta página es MODULAR, así que
+// el enganche automático de beta-gate.js —que vive del `firebase` global del
+// SDK compat— aquí no entra: hay que darle su E/S, igual que en index/crecer.
+//
+// ⚠️ Se llama y NO se espera. El velo se monta encima y el arranque sigue
+// corriendo por debajo: cortarlo dejaría la página a medio construir detrás
+// del acuerdo, y al firmar habría que recargar.
+function _puertaBeta(user) {
+  if (!window.BetaGate) return;
+  BetaGate.puerta({
+    uid:    user.uid,
+    // Perezoso: solo se lee si la pantalla llega a pintarse. `updateProfile`
+    // no se llama en el alta, así que user.displayName viene vacío en las
+    // cuentas de correo y el nombre real vive en users/{uid}.
+    nombre: function() {
+      return getDoc(doc(db, "users", user.uid))
+        .then(function(s) { return (s.exists() && s.data().displayName) || ""; })
+        .catch(function() { return ""; });
+    },
+    leer:   function(uid) {
+      return getDoc(doc(db, "aceptaciones_beta", uid))
+        .then(function(s) { return s.exists() ? s.data() : null; });
+    },
+    firmar: async function(datos) {
+      var mod = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-functions.js");
+      var fn  = mod.httpsCallable(mod.getFunctions(app, "us-central1"), "aceptarAcuerdoBeta");
+      return fn(datos);
+    },
+    onSalir: function() { return signOut(auth); }
+  });
+}
+
 const auth = getAuth(app);
 const db   = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
@@ -2231,9 +2266,11 @@ function initAuth() {
   onAuthStateChanged(auth, async user => {
     if (user) {
       currentUser = user;
+      _puertaBeta(user);          // la puerta del piloto: se monta encima, no corta
       await loadUserAndStart();
     } else {
       currentUser = null;
+      if (window.BetaGate) BetaGate.cerrar();
       show('scr-login');
     }
   });

@@ -737,6 +737,7 @@ body.light .tool-btn svg { background: rgba(0,0,0,0.04); }
 <script src="bloques.js"></script>
 <script src="flags.js"></script>
 <script src="plan-utils.js"></script>
+<script src="beta-gate.js"></script>
 <script src="utils.js"></script>
 <script src="gestures.js"></script>
 <script src="canto.js"></script>
@@ -966,7 +967,7 @@ body.light .tool-btn svg { background: rgba(0,0,0,0.04); }
 import { initializeApp }    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { initializeAppCheck, ReCaptchaV3Provider }
                                   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js';
-import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import { getFirestore, collection, getDocs, getDoc, doc, setDoc, updateDoc }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
@@ -992,6 +993,40 @@ try {
     });
   }
 } catch(e) { console.warn('[AppCheck]', e); }
+
+// ── La puerta del grupo piloto ────────────────────────────────
+// El Acuerdo de Confidencialidad y Uso Beta. Esta página es MODULAR, así que
+// el enganche automático de beta-gate.js —que vive del `firebase` global del
+// SDK compat— aquí no entra: hay que darle su E/S, igual que en index/crecer.
+//
+// ⚠️ Se llama y NO se espera. El velo se monta encima y el arranque sigue
+// corriendo por debajo: cortarlo dejaría la página a medio construir detrás
+// del acuerdo, y al firmar habría que recargar.
+function _puertaBeta(user) {
+  if (!window.BetaGate) return;
+  BetaGate.puerta({
+    uid:    user.uid,
+    // Perezoso: solo se lee si la pantalla llega a pintarse. `updateProfile`
+    // no se llama en el alta, así que user.displayName viene vacío en las
+    // cuentas de correo y el nombre real vive en users/{uid}.
+    nombre: function() {
+      return getDoc(doc(db, 'users', user.uid))
+        .then(function(s) { return (s.exists() && s.data().displayName) || ''; })
+        .catch(function() { return ''; });
+    },
+    leer:   function(uid) {
+      return getDoc(doc(db, 'aceptaciones_beta', uid))
+        .then(function(s) { return s.exists() ? s.data() : null; });
+    },
+    firmar: async function(datos) {
+      var mod = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-functions.js');
+      var fn  = mod.httpsCallable(mod.getFunctions(app, 'us-central1'), 'aceptarAcuerdoBeta');
+      return fn(datos);
+    },
+    onSalir: function() { return signOut(auth); }
+  });
+}
+
 const auth = getAuth(app);
 const db   = getFirestore(app);
 
@@ -2155,7 +2190,8 @@ function _showInterstitial(onClose, markAsShownToday) {
 
 // Auth + carga
 onAuthStateChanged(auth, async user => {
-  if (!user) { goTo('index.html'); return; }
+  if (!user) { if (window.BetaGate) BetaGate.cerrar(); goTo('index.html'); return; }
+  _puertaBeta(user);            // la puerta del piloto: se monta encima, no corta
 
   // Resolver plan real desde Firestore
   var _basePlan = 'free';

@@ -334,8 +334,14 @@
     //
     // Solo si el campo sigue vacío: un nombre que llega tarde no puede pisar
     // lo que la persona esté escribiendo en ese momento.
-    if (opts.nombre && typeof opts.nombre.then === 'function') {
-      opts.nombre.then(function (n) {
+    //
+    // Y puede ser una FUNCIÓN, que solo se llama aquí: en las páginas compat
+    // el nombre sale de users/{uid}, y esa lectura no debe pagarse en cada
+    // carga de cada página por alguien que ya firmó hace meses. Perezosa, se
+    // hace únicamente cuando esta pantalla llega a pintarse.
+    var tardio = (typeof opts.nombre === 'function') ? opts.nombre() : opts.nombre;
+    if (tardio && typeof tardio.then === 'function') {
+      tardio.then(function (n) {
         if (inp.value.trim()) return;
         inp.value = String(n || '').trim();
         repintarPuerta();
@@ -452,6 +458,12 @@
     // encerrada sin salida posible. Es la misma regla que ya gobierna a
     // Cierre: ante la duda, degradar — nunca encerrar.
     function vigilar() {
+      // ⚠️ Un intervalo huérfano no puede quedar latiendo contra un nodo
+      // muerto: si el velo entero se retira con el documento abierto —lo hace
+      // BetaGate.cerrar() al cerrar sesión— esta capa se va con él y nadie
+      // habría llamado a cerrarCapa(). Mismo cuidado que el reloj de aviso.js.
+      if (!capa.parentNode) { clearInterval(_mirando); _mirando = null; return; }
+
       var doc, sc;
       try {
         doc = marco.contentDocument;
@@ -550,9 +562,12 @@
 
   // ── La puerta ────────────────────────────────────────────────────
 
-  function puerta(opts) {
+  function puerta(opts, _interno) {
     opts = opts || {};
     if (typeof document === 'undefined') return Promise.resolve(true);
+    // Una página que se cablea a mano manda sobre el enganche automático:
+    // si alguna llegara a tener las dos cosas, no habría puerta doble.
+    if (!_interno) _autoDesactivado = true;
     if (_enVuelo) return _enVuelo;
 
     var uid = opts.uid;
@@ -645,9 +660,65 @@
     retirar();
   }
 
+  // ── El enganche automático de las páginas compat ─────────────────
+  //
+  // Ocho de las doce páginas usan el SDK compat, que es global: ahí el módulo
+  // se basta solo y el cableado es UNA línea de <script>. Es el mismo patrón
+  // de aplicarNavRetiros() en flags.js — engancharse por lo que identifica a
+  // la página, en vez de ocho parches en ocho HTML.
+  //
+  // Las cuatro modulares (index, crecer, audio, cantos) no tienen `firebase`
+  // global, así que aquí nunca entra y no puede haber puerta doble: ellas
+  // llaman a puerta() con su propia E/S.
+  var _autoEnganchado = false;
+  var _autoDesactivado = false;
+
+  function nombreCompat(uid) {
+    return window.firebase.firestore().collection('users').doc(uid).get()
+      .then(function (s) { return (s.exists && s.data().displayName) || ''; })
+      .catch(function () { return ''; });
+  }
+
+  function auto() {
+    if (_autoEnganchado || _autoDesactivado) return false;
+    if (!hayCompat() || typeof window.firebase.auth !== 'function') return false;
+    _autoEnganchado = true;
+    window.firebase.auth().onAuthStateChanged(function (user) {
+      if (_autoDesactivado) return;
+      if (!user) { cerrar(); return; }
+      puerta({
+        uid:     user.uid,
+        nombre:  function () { return nombreCompat(user.uid); },
+        onSalir: function () { return window.firebase.auth().signOut(); }
+      }, true);
+    });
+    return true;
+  }
+
+  // ⚠️ No basta con DOMContentLoaded. Seis páginas arrancan Firebase en un
+  // <script> en línea del <head>, pero retiros.js lo hace DENTRO de una
+  // función que corre más tarde: al enganchar, `firebase.apps` todavía está
+  // vacío. Se reintenta con espera creciente y se para — un sondeo sin tope
+  // quedaría latiendo para siempre en una página que no use sesión.
+  function intentarAuto(restantes, espera) {
+    if (auto()) return;
+    if (restantes <= 0) return;
+    setTimeout(function () { intentarAuto(restantes - 1, espera * 2); }, espera);
+  }
+
+  if (typeof document !== 'undefined') {
+    var arrancar = function () { intentarAuto(6, 250); };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', arrancar);
+    } else {
+      arrancar();
+    }
+  }
+
   window.BetaGate = {
     puerta: puerta,
     cerrar: cerrar,
+    auto: auto,
     VERSION: VERSION_ACUERDO,
     DOC: DOC_ACUERDO,
     montado: function () { return !!_velo; }
