@@ -41,7 +41,7 @@
 
 <main>
   <h1>Términos de Servicio</h1>
-  <p class="updated">Última actualización: agosto de 2026</p>
+  <p class="updated">Última actualización: septiembre de 2026</p>
 
   <h2>1. Aceptación de los términos</h2>
   <p>Al acceder o usar CruzAndo ("la App"), aceptas quedar vinculado por estos Términos de Servicio. Si no estás de acuerdo, no uses la App.</p>
@@ -52,7 +52,7 @@
   <ul>
     <li>Itinerario guiado de oración en modos Audio, Libro y Rezo</li>
     <li>Diario personal de reflexiones espirituales</li>
-    <li>Talleres de sanación basados en el Rosario (acceso mediante suscripción o créditos)</li>
+    <li><strong>Sanar</strong>: sesiones de oración a partir de un dolor concreto (acceso mediante suscripción o créditos)</li>
     <li>Biblioteca de cantos</li>
     <li>Sistema de progreso (metros del peregrino)</li>
   </ul>
@@ -61,18 +61,18 @@
   <p>Para usar CruzAndo necesitas crear una cuenta. Eres responsable de mantener la confidencialidad de tus credenciales y de notificarnos de inmediato ante cualquier acceso no autorizado. Debes tener al menos <strong>18 años</strong> para registrarte.</p>
 
   <h2>4. Planes y suscripciones</h2>
-  <p><strong>Gratuito (Free):</strong> Acceso completo al Nivel 1-1 en todos los modos; a partir del Nivel 1-2, un Misterio por día en modo Audio; Diario personal; acceso a la Biblioteca de Cantos con avisos promocionales de la propia App CruzAndo.</p>
-  <p><strong>Premium:</strong> Acceso ilimitado a todos los niveles publicados, modos y talleres, sin límites diarios. Acceso a Diario personal y Biblioteca de Cantos sin avisos promocionales.</p>
+  <p><strong>Gratuito (Free):</strong> Acceso al itinerario completo en modo Audio, a razón de <strong>un Misterio por día</strong>, con su progreso, su racha y sus metros; lectura de tu Diario personal; acceso a la Biblioteca de Cantos con avisos promocionales de la propia App CruzAndo; y la <strong>Acogida</strong> de Sanar, que es siempre gratuita. No incluye los modos Libro y Rezo, ni entrar a un Misterio distinto del que te corresponde ese día, ni escribir en el Diario durante la sesión.</p>
+  <p><strong>Premium:</strong> Acceso ilimitado a todos los Niveles publicados y a todos los modos, sin límites diarios; las sesiones de Sanar sin consumir créditos; escritura en tu Diario personal durante la sesión; y Biblioteca de Cantos sin avisos promocionales.</p>
   <p><strong>Beta:</strong> Acceso Premium durante el período de prueba definido.</p>
   <p>Nos reservamos el derecho de modificar los precios con previo aviso de 30 días.</p>
 
   <h2>5. Créditos</h2>
-  <p>Además de la suscripción, CruzAndo ofrece <strong>créditos</strong> como forma de acceso puntual a los talleres de sanación:</p>
+  <p>Además de la suscripción, CruzAndo ofrece <strong>créditos</strong> como forma de acceso puntual a las sesiones de <strong>Sanar</strong>:</p>
   <ul>
-    <li>Un crédito habilita el acceso a un taller de sanación específico durante <strong>una semana</strong> a partir de su activación.</li>
+    <li>Un crédito habilita el acceso a la <strong>sesión de oración correspondiente a un dolor concreto</strong>, el que hayas elegido, durante <strong>una semana</strong> a partir de su activación. El crédito se consume al entrar a esa sesión por primera vez; dentro de esa semana puedes volver a ella cuantas veces quieras sin consumir otro.</li>
     <li>Los créditos se adquieren en paquetes (por ejemplo, 5, 15 o 25 créditos), con precios expresados en pesos mexicanos (MXN) e impuestos incluidos.</li>
     <li>Al crear tu cuenta, recibes una cantidad de créditos de cortesía como bienvenida. Estos créditos de regalo son una liberalidad de CruzAndo y no constituyen un derecho permanente.</li>
-    <li>La <strong>Acogida</strong> —la fase inicial de discernimiento de cada taller— es siempre gratuita. Los créditos se aplican únicamente al acceso al Misterio de oración correspondiente.</li>
+    <li>La <strong>Acogida</strong> —la fase inicial de discernimiento de cada dolor— es <strong>siempre gratuita, en todos los planes</strong>. Los créditos se aplican únicamente al acceso a la sesión de oración que viene después.</li>
     <li>Los créditos <strong>no son reembolsables</strong> una vez adquiridos o consumidos, salvo que la ley aplicable lo requiera.</li>
     <li>Los créditos no tienen valor monetario fuera de la App, no son transferibles y no pueden canjearse por dinero.</li>
   </ul>
@@ -92,7 +92,13 @@
 
   <h2>8. Contenido del usuario</h2>
   <p>Las reflexiones de tu Diario son tuyas. Al guardarlas en CruzAndo, nos otorgas una licencia limitada para almacenarlas y mostrártelas a ti. No compartimos tu diario con terceros ni lo utilizamos con fines publicitarios.</p>
-  <p>La única excepción es la que se detalla en la <a href="/privacidad.html" style="color:var(--brand2)">Política de Privacidad</a>: al completar un <strong>taller de sanación</strong>, lo que hayas escrito en él se envía —sin tu nombre ni ningún identificador de tu cuenta— a un servicio de inteligencia artificial para redactar la retroalimentación que recibes de vuelta. Tus reflexiones de los Misterios no salen de CruzAndo.</p>
+  <!-- ⚠️ ATADO A window.MOSTRAR_RETIROS (flags.js). Mientras El Santuario esté
+       apagado, NINGÚN texto del usuario sale hacia una IA: la callable
+       evaluarRetiro es la única que usa OpenAI y solo la llama retiros.js, que
+       está detrás de ese interruptor. El día que se encienda hay que devolver
+       aquí —y en la Política de Privacidad— la salvedad de la retroalimentación
+       ANTES de publicarlo. tools/test-flag-retiros.js lo comprueba. -->
+  <p><strong>Nada de lo que escribas se envía a servicios de inteligencia artificial.</strong> Ni tus reflexiones de los Misterios ni lo que escribas en Sanar salen de CruzAndo. Si esto llegara a cambiar, te lo diremos con antelación y quedará detallado en la <a href="/privacidad.html" style="color:var(--brand2)">Política de Privacidad</a> antes de que ocurra.</p>
 
   <h2>9. Conducta del usuario</h2>
   <p>Al usar CruzAndo te comprometes a utilizarla únicamente para fines personales y espirituales lícitos, y a no intentar acceder a cuentas ajenas ni a sistemas internos de la App.</p>

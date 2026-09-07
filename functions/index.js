@@ -724,7 +724,7 @@ exports.reclamarCompra = functions
 //
 // No toca crearCuentaEconomica: aquel siembra billing/state, este escribe un
 // campo de users/{uid}. Distinto documento, sin carrera.
-const TERMINOS_VERSION = '2026-08';
+const TERMINOS_VERSION = '2026-09';
 
 exports.aceptarTerminos = functions
   .region('us-central1')

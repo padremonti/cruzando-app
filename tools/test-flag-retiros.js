@@ -377,6 +377,46 @@ ok('los datos de Firestore no se tocaron', () => {
     throw new Error('cambiaron las reglas de talleres');
 });
 
+console.log('\n' + String.fromCharCode(9472, 9472) + ' Los documentos legales dicen la verdad ' + String.fromCharCode(9472, 9472));
+
+// evaluarRetiro es la UNICA funcion de la App que manda texto del usuario a un
+// modelo de IA, y solo la llama retiros.js. Con el flag apagado no sale nada, y
+// por eso los Terminos y la Politica afirman que nada sale.
+//
+// El dia que MOSTRAR_RETIROS se ponga en true eso deja de ser cierto: la App
+// empezaria a enviar a OpenAI lo que la persona escribio, mientras su Politica
+// de Privacidad promete lo contrario. Es la clase de divergencia que no falla a
+// la vista, asi que esta prueba la ata al interruptor.
+ok('la promesa de "nada se envia a una IA" va atada al flag', () => {
+  const encendido = /window\.MOSTRAR_RETIROS\s*=\s*true/.test(leer('flags.js'));
+  const terminos  = leer('terminos.html');
+  const privacid  = leer('privacidad.html');
+
+  // Lo que dicen HOY los documentos, sin contar los comentarios HTML que
+  // explican que hay que restaurar.
+  const sinComentarios = s => s.replace(/<!--[\s\S]*?-->/g, '');
+  const tNiega = /Nada de lo que escribas se env(i|í)a a servicios de inteligencia artificial/
+                   .test(sinComentarios(terminos));
+  const pNiega = /Ning(u|ú)n texto tuyo se env(i|í)a a un modelo de inteligencia artificial/
+                   .test(sinComentarios(privacid));
+  const pDeclara = /OpenAI/.test(sinComentarios(privacid));
+
+  if (!encendido) {
+    if (!tNiega) throw new Error('terminos.html ya no afirma que nada se envia a una IA, pero el flag sigue apagado');
+    if (!pNiega) throw new Error('privacidad.html ya no afirma que nada se envia a una IA, pero el flag sigue apagado');
+    if (pDeclara) throw new Error('privacidad.html declara OpenAI como encargado y no se le transfiere nada');
+    return;
+  }
+
+  // Flag encendido: la App SI envia, asi que los documentos tienen que decirlo.
+  if (tNiega)
+    throw new Error('MOSTRAR_RETIROS esta en true y terminos.html sigue prometiendo que nada se envia a una IA');
+  if (pNiega)
+    throw new Error('MOSTRAR_RETIROS esta en true y privacidad.html sigue prometiendo que nada se envia a una IA');
+  if (!pDeclara)
+    throw new Error('MOSTRAR_RETIROS esta en true y privacidad.html no declara a OpenAI como encargado');
+});
+
 console.log('\n' + String.fromCharCode(9472).repeat(64));
 console.log(fallos === 0
   ? '  TODO VERDE — ' + pasos + ' pruebas'

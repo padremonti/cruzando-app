@@ -202,7 +202,7 @@ function crearEntorno(opts) {
     const s = crearEntorno();
     s.marcarConsentimientoPendiente('google', 'u1');
     const p = JSON.parse(s.localStorage.getItem('cruzando_consent_pending'));
-    eq(p.uid, 'u1'); eq(p.metodo, 'google'); eq(p.version, '2026-08');
+    eq(p.uid, 'u1'); eq(p.metodo, 'google'); eq(p.version, '2026-09');
   });
 
   await ta('flush: doc de usuario ANTES que la callable', async () => {
@@ -211,7 +211,7 @@ function crearEntorno(opts) {
     await s.flushConsentimiento();
     eq(s._llamadas.map(l => l.tipo), ['ensureUserDoc', 'callable']);
     eq(s._llamadas[1].nombre, 'aceptarTerminos');
-    eq(s._llamadas[1].payload, { version: '2026-08', metodo: 'email' });
+    eq(s._llamadas[1].payload, { version: '2026-09', metodo: 'email' });
   });
 
   await ta('flush exitoso vacía la cola', async () => {

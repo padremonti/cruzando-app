@@ -117,23 +117,23 @@ function terminosDe(uid) { return (store.get('users/' + (uid || 'u1')) || {}).te
 
   await ta('alta por email: deja constancia completa', async () => {
     store = new Map();
-    const r = await aceptar({ version: '2026-08', metodo: 'email' }, AUTH);
+    const r = await aceptar({ version: '2026-09', metodo: 'email' }, AUTH);
     eq(r.ok, true);
     eq(r.yaEstaba, false);
-    eq(terminosDe(), { aceptado: true, fecha: TS, version: '2026-08', metodo: 'email' });
+    eq(terminosDe(), { aceptado: true, fecha: TS, version: '2026-09', metodo: 'email' });
   });
 
   await ta('la fecha la pone el SERVIDOR, no el cliente', async () => {
     store = new Map();
-    await aceptar({ version: '2026-08', metodo: 'email', fecha: 'ayer' }, AUTH);
+    await aceptar({ version: '2026-09', metodo: 'email', fecha: 'ayer' }, AUTH);
     eq(terminosDe().fecha, TS, 'la fecha debe ser el serverTimestamp:');
   });
 
   await ta('la versión la fija el servidor aunque el cliente mienta', async () => {
     store = new Map();
     const r = await aceptar({ version: '1999-01', metodo: 'email' }, AUTH);
-    eq(terminosDe().version, '2026-08');
-    eq(r.version, '2026-08');
+    eq(terminosDe().version, '2026-09');
+    eq(r.version, '2026-09');
   });
 
   await ta('el método se sanea: cualquier cosa que no sea google es email', async () => {
@@ -150,7 +150,7 @@ function terminosDe(uid) { return (store.get('users/' + (uid || 'u1')) || {}).te
     store = new Map();
     await aceptar({ metodo: 'email' }, AUTH);
     store.set('users/u1', Object.assign({}, store.get('users/u1'), {
-      terminos: { aceptado: true, fecha: 'FECHA-ORIGINAL', version: '2026-08', metodo: 'email' }
+      terminos: { aceptado: true, fecha: 'FECHA-ORIGINAL', version: '2026-09', metodo: 'email' }
     }));
 
     const r = await aceptar({ metodo: 'google' }, AUTH);

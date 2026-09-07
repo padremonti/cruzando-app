@@ -148,7 +148,7 @@
 
 <main>
   <h1>Política de Privacidad</h1>
-  <p class="updated">Última actualización: agosto de 2026</p>
+  <p class="updated">Última actualización: septiembre de 2026</p>
 
   <h2>1. Responsable del tratamiento</h2>
   <p>CruzAndo es un servicio operado por su Titular, con domicilio en México.</p>
@@ -198,14 +198,25 @@
     <tr><td><strong>Cloudflare R2</strong></td><td>Almacenamiento de audios e imágenes</td><td>EUA</td></tr>
     <tr><td><strong>Google Analytics</strong></td><td>Analítica de uso</td><td>EUA</td></tr>
     <tr><td><strong>Google reCAPTCHA</strong></td><td>Prevención de registros automatizados y abuso</td><td>EUA</td></tr>
-    <tr><td><strong>OpenAI</strong></td><td>Generación de la retroalimentación de los talleres de sanación</td><td>EUA</td></tr>
+    <!-- ⚠️ La fila de OpenAI se retiró porque HOY no le llega ningún dato tuyo:
+         la única función que lo usaba está apagada tras window.MOSTRAR_RETIROS
+         (ver flags.js). Declarar un encargado al que no se le transfiere nada
+         confunde más que informa. Cuando El Santuario se encienda hay que
+         devolver esta fila y el párrafo del §5 ANTES de publicarlo. -->
   </table>
 
   <h2>5. Uso de inteligencia artificial</h2>
   <p>En CruzAndo, la Palabra, la guía espiritual y la metodología Peregrinar la Vida son de <strong>autoría original</strong>, con acompañamiento eclesial. Para dar vida a algunas voces narrativas, ilustraciones y composiciones musicales originales de la app, utilizamos herramientas de inteligencia artificial bajo <strong>curaduría y revisión humana directa</strong>.</p>
   <p>Ninguna voz o imagen de una persona real es replicada o utilizada <strong>sin su consentimiento</strong>.</p>
   <p><strong>Producción de contenido y tratamiento de tus datos son cosas distintas.</strong> Las voces, ilustraciones y música se producen una sola vez, antes de publicarse en la app, y en ese proceso <strong>no interviene ningún dato tuyo</strong>.</p>
-  <p>Hay una única función en la que un texto tuyo se envía a un modelo de inteligencia artificial: la <strong>retroalimentación de los talleres de sanación</strong>. Al completar un taller, las respuestas y reflexiones que hayas escrito en él se envían a <strong>OpenAI</strong> para redactar el texto de acompañamiento que recibes de vuelta, y que queda identificado en tu Diario con la etiqueta “Evaluación IA”. En ese envío <strong>no se incluye tu nombre, tu correo ni ningún identificador de tu cuenta</strong>, y el contenido <strong>no se utiliza para entrenar modelos</strong>. Las reflexiones de tu Diario ordinario —las de los Misterios— <strong>nunca</strong> se envían a este ni a ningún otro servicio de inteligencia artificial.</p>
+  <!-- ⚠️ ATADO A window.MOSTRAR_RETIROS (flags.js). Este párrafo describía el
+       envío a OpenAI de la retroalimentación de El Santuario. Esa función es la
+       ÚNICA de la App que usa un modelo de IA con texto del usuario, y hoy está
+       apagada: la callable evaluarRetiro solo la llama retiros.js, que está tras
+       ese interruptor. Cuando se encienda hay que devolver el párrafo original
+       —y la fila de OpenAI en la tabla del §4— ANTES de publicarlo, con el
+       aviso previo del §11. tools/test-flag-retiros.js lo comprueba. -->
+  <p><strong>Ningún texto tuyo se envía a un modelo de inteligencia artificial.</strong> Tus reflexiones de los Misterios, lo que escribas en Sanar y todo tu Diario se guardan en tu cuenta y <strong>no salen de CruzAndo</strong>. Si alguna vez incorporáramos una función que lo hiciera, te lo avisaríamos con antelación y quedaría detallado aquí antes de activarla.</p>
 
   <h2>6. Derechos ARCO</h2>
   <p>Conforme a la <strong>LFPDPPP</strong> de México, tienes derecho de Acceso, Rectificación, Cancelación y Oposición sobre tus datos personales.</p>
